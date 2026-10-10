@@ -150,11 +150,11 @@ async function writeAddress(
   data: ResidenceAddressData,
   useConceptId: string,
 ): Promise<boolean> {
-  const coordenadas = coordinatesOf(data);
+  const coordinates = coordinatesOf(data);
 
   // Sin municipio, sin calle y sin coordenadas no hay dirección: una fila con
   // país y nada más no es un dato, es una fila.
-  if (!data.municipalityConceptId && !data.lines && !coordenadas) {
+  if (!data.municipalityConceptId && !data.lines && !coordinates) {
     return false;
   }
 
@@ -184,8 +184,8 @@ async function writeAddress(
     // export, un sobre— tenga algo legible.
     city: municipality?.display,
     lines: data.lines,
-    latitude: coordenadas?.latitude,
-    longitude: coordenadas?.longitude,
+    latitude: coordinates?.latitude,
+    longitude: coordinates?.longitude,
     useConceptId,
     typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
     actorUserId: data.actorUserId,
@@ -259,8 +259,8 @@ export interface ReplaceResidenceAddressData {
  * `Number(undefined)` es `NaN`, y un `NaN !== NaN` rompería la comparación
  * de "sin cambios" de más abajo aunque nada haya cambiado.
  */
-function numeroDeColumna(valor: string | undefined): number | undefined {
-  return valor === undefined ? undefined : Number(valor);
+function columnNumber(value: string | undefined): number | undefined {
+  return value === undefined ? undefined : Number(value);
 }
 
 /**
@@ -275,58 +275,58 @@ function numeroDeColumna(valor: string | undefined): number | undefined {
  * @param concepts - Repositorio de `terminology.catalog_concepts`, para
  *   validar el municipio. Ver {@link createResidenceAddress}.
  * @param data - Persona, uso, lo que trae el cuerpo y el actor.
- * @param ahora - Instante de la edición, fin de vigencia de la anterior.
+ * @param now - Instante de la edición, fin de vigencia de la anterior.
  */
 export async function replaceResidenceAddress(
   repo: AddressesRepository,
   tx: EntityManager,
   concepts: CatalogConceptsRepository,
   data: ReplaceResidenceAddressData,
-  ahora: Date,
+  now: Date,
 ): Promise<void> {
-  const vigente = await repo.findVigenteByOwnerAndUse(
+  const current = await repo.findCurrentByOwnerAndUse(
     tx,
     data.personId,
     data.useConceptId,
   );
 
   const municipalityConceptId =
-    data.municipalityConceptId ?? vigente?.municipalityConceptId;
+    data.municipalityConceptId ?? current?.municipalityConceptId;
   const lines =
     data.lines === undefined
-      ? vigente?.lines
+      ? current?.lines
       : data.lines.trim() === ''
         ? undefined
         : data.lines.trim();
   // Quitar el punto: los dos extremos en `null` (ver `latitude` en la interfaz).
-  const quitaGps = data.latitude === null && data.longitude === null;
-  const tieneGps =
-    !quitaGps && data.latitude !== undefined && data.longitude !== undefined;
-  const latitude = quitaGps
+  const removesGps = data.latitude === null && data.longitude === null;
+  const hasGps =
+    !removesGps && data.latitude !== undefined && data.longitude !== undefined;
+  const latitude = removesGps
     ? undefined
-    : tieneGps
+    : hasGps
       ? (data.latitude ?? undefined)
-      : numeroDeColumna(vigente?.latitude);
-  const longitude = quitaGps
+      : columnNumber(current?.latitude);
+  const longitude = removesGps
     ? undefined
-    : tieneGps
+    : hasGps
       ? (data.longitude ?? undefined)
-      : numeroDeColumna(vigente?.longitude);
+      : columnNumber(current?.longitude);
 
-  const sinCambios =
-    (vigente?.municipalityConceptId ?? undefined) === municipalityConceptId &&
-    (vigente?.lines ?? undefined) === lines &&
-    numeroDeColumna(vigente?.latitude) === latitude &&
-    numeroDeColumna(vigente?.longitude) === longitude;
-  if (sinCambios) return;
+  const withoutChanges =
+    (current?.municipalityConceptId ?? undefined) === municipalityConceptId &&
+    (current?.lines ?? undefined) === lines &&
+    columnNumber(current?.latitude) === latitude &&
+    columnNumber(current?.longitude) === longitude;
+  if (withoutChanges) return;
 
-  if (vigente) repo.closeVigente(vigente, ahora, data.actorUserId);
+  if (current) repo.closeCurrent(current, now, data.actorUserId);
 
-  const escribir =
+  const write =
     data.useConceptId === CONCEPTS.ADDR_USE_WORK
       ? createWorkAddress
       : createResidenceAddress;
-  await escribir(repo, tx, concepts, {
+  await write(repo, tx, concepts, {
     personId: data.personId,
     municipalityConceptId,
     lines,
@@ -352,21 +352,21 @@ export interface AddressSummary {
  * distingue «no lo declaró» de «lo declaró sin datos».
  */
 export function summarizeAddress(
-  fila?: Addresses | null,
+  row?: Addresses | null,
 ): AddressSummary | undefined {
-  if (!fila) return undefined;
+  if (!row) return undefined;
   return {
-    ...(fila.lines === undefined ? {} : { lines: fila.lines }),
-    ...(fila.city === undefined ? {} : { city: fila.city }),
-    ...(fila.municipalityConceptId === undefined
+    ...(row.lines === undefined ? {} : { lines: row.lines }),
+    ...(row.city === undefined ? {} : { city: row.city }),
+    ...(row.municipalityConceptId === undefined
       ? {}
-      : { municipalityConceptId: fila.municipalityConceptId }),
+      : { municipalityConceptId: row.municipalityConceptId }),
     // Las coordenadas viajan juntas o no viajan: media coordenada no ubica
     // nada. Se compara con `== null` y no `=== undefined`: la columna es
     // nullable y la base devuelve `null`, no `undefined` — con la
     // comparación estricta `Number(null)` (que es 0) se cuela.
-    ...(fila.latitude == null || fila.longitude == null
+    ...(row.latitude == null || row.longitude == null
       ? {}
-      : { latitude: Number(fila.latitude), longitude: Number(fila.longitude) }),
+      : { latitude: Number(row.latitude), longitude: Number(row.longitude) }),
   };
 }

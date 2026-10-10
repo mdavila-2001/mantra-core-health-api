@@ -482,22 +482,22 @@ export class ProfilesPatientsService {
       tutores,
     ] = await Promise.all([
       findCurrentIdentityAssertionForPerson(em, person.id),
-      this.contactPointsRepo.findVigenteByOwnerAndSystem(
+      this.contactPointsRepo.findCurrentByOwnerAndSystem(
         em,
         person.id,
         CONCEPTS.CONTACT_PHONE,
       ),
-      this.addressesRepo.findVigenteByOwnerAndUse(
+      this.addressesRepo.findCurrentByOwnerAndUse(
         em,
         person.id,
         CONCEPTS.ADDR_USE_HOME,
       ),
-      this.addressesRepo.findVigenteByOwnerAndUse(
+      this.addressesRepo.findCurrentByOwnerAndUse(
         em,
         person.id,
         CONCEPTS.ADDR_USE_WORK,
       ),
-      this.contactPointsRepo.findVigenteByOwnerAndSystem(
+      this.contactPointsRepo.findCurrentByOwnerAndSystem(
         em,
         person.id,
         CONCEPTS.CONTACT_EMAIL,
@@ -1325,7 +1325,7 @@ export class ProfilesPatientsService {
     ahora: Date,
   ): Promise<void> {
     const fresh = optionalText(phone);
-    const current = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
+    const current = await this.contactPointsRepo.findCurrentByOwnerAndSystem(
       tx,
       personId,
       CONCEPTS.CONTACT_PHONE,
@@ -1333,14 +1333,14 @@ export class ProfilesPatientsService {
 
     if (fresh === undefined) {
       if (current) {
-        this.contactPointsRepo.closeVigente(current, ahora, actorUserId);
+        this.contactPointsRepo.closeCurrent(current, ahora, actorUserId);
       }
       return;
     }
     if (current?.value === fresh) return;
 
     if (current) {
-      this.contactPointsRepo.closeVigente(current, ahora, actorUserId);
+      this.contactPointsRepo.closeCurrent(current, ahora, actorUserId);
     }
     // Mismo dueño, mismo sistema y mismo uso que escribe el alta: el número
     // cambió, no la clase de contacto que es.
@@ -1435,7 +1435,7 @@ export class ProfilesPatientsService {
     actorUserId: string,
     ahora: Date,
   ): Promise<void> {
-    const current = await this.addressesRepo.findVigenteByOwnerAndUse(
+    const current = await this.addressesRepo.findCurrentByOwnerAndUse(
       tx,
       personId,
       usageConceptId,
@@ -1475,7 +1475,7 @@ export class ProfilesPatientsService {
     if (withoutChanges) return;
 
     if (current) {
-      this.addressesRepo.closeVigente(current, ahora, actorUserId);
+      this.addressesRepo.closeCurrent(current, ahora, actorUserId);
     }
 
     const write =
@@ -1652,14 +1652,14 @@ export class ProfilesPatientsService {
     }
 
     if (dto.guardianPhone) {
-      const current = await this.contactPointsRepo.findVigenteByOwnerAndSystem(
+      const current = await this.contactPointsRepo.findCurrentByOwnerAndSystem(
         tx,
         declared.personId,
         CONCEPTS.CONTACT_PHONE,
       );
       if (current?.value !== dto.guardianPhone) {
         if (current) {
-          this.contactPointsRepo.closeVigente(current, new Date(), actorUserId);
+          this.contactPointsRepo.closeCurrent(current, new Date(), actorUserId);
         }
         this.contactPointsRepo.create(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PERSON,

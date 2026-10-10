@@ -173,18 +173,18 @@ function build() {
 
   // El contacto del profesional (`common.contact_points`). Vacío por defecto.
   const contactPointsRepo = {
-    findVigentesByOwner: mockFn(() => Promise.resolve([])),
-    findVigenteByOwnerAndSystem: mockFn(() => Promise.resolve(null)),
-    findVigenteByOwnerSystemAndUse: mockFn(() => Promise.resolve(null)),
-    closeVigente: mockFn(),
+    findAllCurrentByOwner: mockFn(() => Promise.resolve([])),
+    findCurrentByOwnerAndSystem: mockFn(() => Promise.resolve(null)),
+    findCurrentByOwnerSystemAndUse: mockFn(() => Promise.resolve(null)),
+    closeCurrent: mockFn(),
     create: mockFn(),
   };
 
   // El domicilio del profesional. Sin dirección por defecto: es el caso de casi
   // todo perfil sembrado, y quien la afirme la declara en su prueba.
   const addressesRepo = {
-    findVigenteByOwnerAndUse: mockFn(() => Promise.resolve(null)),
-    closeVigente: mockFn(),
+    findCurrentByOwnerAndUse: mockFn(() => Promise.resolve(null)),
+    closeCurrent: mockFn(),
     create: mockFn(),
   };
 
@@ -1412,7 +1412,7 @@ describe('ProfilesPractitionersService', () => {
     it('la lectura propia trae correo y teléfono', async () => {
       const d = build();
       withProfile(d);
-      d.contactPointsRepo.findVigentesByOwner.mockResolvedValue(CONTACTS);
+      d.contactPointsRepo.findAllCurrentByOwner.mockResolvedValue(CONTACTS);
 
       const profile = await d.service.getOwnPractitionerProfile({
         id: 'u-1',
@@ -1423,7 +1423,7 @@ describe('ProfilesPractitionersService', () => {
       expect(profile.phone).toBe('+591 700 12345');
       // Se pregunta por la PERSONA, que es el dueño con el que el registro
       // escribió la fila — no por el perfil ni por la cuenta.
-      expect(d.contactPointsRepo.findVigentesByOwner).toHaveBeenCalledWith(
+      expect(d.contactPointsRepo.findAllCurrentByOwner).toHaveBeenCalledWith(
         expect.anything(),
         'per-1',
       );
@@ -1432,7 +1432,7 @@ describe('ProfilesPractitionersService', () => {
     it('la lectura propia conserva los correos personal y laboral por uso', async () => {
       const d = build();
       withProfile(d);
-      d.contactPointsRepo.findVigentesByOwner.mockResolvedValue([
+      d.contactPointsRepo.findAllCurrentByOwner.mockResolvedValue([
         {
           systemConceptId: CONCEPTS.CONTACT_EMAIL,
           useConceptId: CONCEPTS.CONTACT_USE_HOME,
@@ -1460,7 +1460,7 @@ describe('ProfilesPractitionersService', () => {
       // entero para filtrarlos. No leerlos es lo que lo hace imposible.
       const d = build();
       withProfile(d);
-      d.contactPointsRepo.findVigentesByOwner.mockResolvedValue(CONTACTS);
+      d.contactPointsRepo.findAllCurrentByOwner.mockResolvedValue(CONTACTS);
 
       const record = await d.service.getPractitionerSummary('per-1');
 
@@ -1468,14 +1468,14 @@ describe('ProfilesPractitionersService', () => {
       expect(record.phone).toBeUndefined();
       expect(record.taxId).toBeUndefined();
       expect(record.taxHolderName).toBeUndefined();
-      expect(d.contactPointsRepo.findVigentesByOwner).not.toHaveBeenCalled();
+      expect(d.contactPointsRepo.findAllCurrentByOwner).not.toHaveBeenCalled();
       expect(d.em.find).not.toHaveBeenCalled();
     });
 
     it('sin contactos cargados el perfil sale igual, sin correo', async () => {
       const d = build();
       withProfile(d);
-      d.contactPointsRepo.findVigentesByOwner.mockResolvedValue([]);
+      d.contactPointsRepo.findAllCurrentByOwner.mockResolvedValue([]);
 
       const profile = await d.service.getOwnPractitionerProfile({
         id: 'u-1',
@@ -1491,7 +1491,7 @@ describe('ProfilesPractitionersService', () => {
       // muestra incompleto, no con un 500 en la cara.
       const d = build();
       withProfile(d);
-      d.contactPointsRepo.findVigentesByOwner.mockRejectedValue(
+      d.contactPointsRepo.findAllCurrentByOwner.mockRejectedValue(
         new Error('la tabla no responde'),
       );
 
@@ -1640,7 +1640,7 @@ describe('ProfilesPractitionersService', () => {
         practiceStatusConceptId: PROF.PRACTICE_ONBOARDING,
         createdAt: new Date('2024-02-01T00:00:00.000Z'),
       });
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Brasil 1234',
         city: 'La Paz',
         municipalityConceptId: 'mun-lp',
@@ -1689,7 +1689,7 @@ describe('ProfilesPractitionersService', () => {
         latitude: '-17.78',
         longitude: '-63.18',
       };
-      d.addressesRepo.findVigenteByOwnerAndUse.mockImplementation(
+      d.addressesRepo.findCurrentByOwnerAndUse.mockImplementation(
         (_em: unknown, _ownerId: string, useConceptId: string) =>
           Promise.resolve(
             useConceptId === CONCEPTS.ADDR_USE_WORK ? work : homeAddress,
@@ -2215,14 +2215,14 @@ describe('ProfilesPractitionersService', () => {
         id: 'addr-1',
         lines: 'Calle vieja 1',
       };
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(current);
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(current);
 
       await d.service.updateOwnPractitionerProfile(
         { homeAddressLines: 'Av. Brasil 1234' },
         { id: 'u-1' } as any,
       );
 
-      expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
+      expect(d.addressesRepo.closeCurrent).toHaveBeenCalledWith(
         current,
         expect.any(Date),
         'u-1',
@@ -2238,14 +2238,14 @@ describe('ProfilesPractitionersService', () => {
       const d = build();
       const practitioner = practitionerBase();
       prepareForEdit(d, practitioner);
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(null);
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(null);
 
       await d.service.updateOwnPractitionerProfile(
         { homeAddressLines: 'Av. Brasil 1234' },
         { id: 'u-1' } as any,
       );
 
-      expect(d.addressesRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.addressesRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.addressesRepo.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ lines: 'Av. Brasil 1234' }),
@@ -2256,7 +2256,7 @@ describe('ProfilesPractitionersService', () => {
       const d = build();
       prepareForEdit(d, practitionerBase());
       const current = { id: 'addr-work-1', lines: 'Calle vieja 8' };
-      d.addressesRepo.findVigenteByOwnerAndUse.mockImplementation(
+      d.addressesRepo.findCurrentByOwnerAndUse.mockImplementation(
         (_em: unknown, _ownerId: string, useConceptId: string) =>
           Promise.resolve(
             useConceptId === CONCEPTS.ADDR_USE_WORK ? current : null,
@@ -2272,12 +2272,12 @@ describe('ProfilesPractitionersService', () => {
         { id: 'u-1' } as any,
       );
 
-      expect(d.addressesRepo.findVigenteByOwnerAndUse).toHaveBeenCalledWith(
+      expect(d.addressesRepo.findCurrentByOwnerAndUse).toHaveBeenCalledWith(
         expect.anything(),
         'per-1',
         CONCEPTS.ADDR_USE_WORK,
       );
-      expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
+      expect(d.addressesRepo.closeCurrent).toHaveBeenCalledWith(
         current,
         expect.any(Date),
         'u-1',
@@ -2302,7 +2302,7 @@ describe('ProfilesPractitionersService', () => {
       const d = build();
       prepareForEdit(d, practitionerBase());
       const current = { id: 'cp-1', value: 'viejo@alovida.mock' };
-      d.contactPointsRepo.findVigenteByOwnerSystemAndUse.mockResolvedValue(
+      d.contactPointsRepo.findCurrentByOwnerSystemAndUse.mockResolvedValue(
         current,
       );
 
@@ -2312,17 +2312,17 @@ describe('ProfilesPractitionersService', () => {
       );
 
       expect(
-        d.contactPointsRepo.findVigenteByOwnerSystemAndUse,
+        d.contactPointsRepo.findCurrentByOwnerSystemAndUse,
       ).toHaveBeenCalledTimes(1);
       expect(
-        d.contactPointsRepo.findVigenteByOwnerSystemAndUse,
+        d.contactPointsRepo.findCurrentByOwnerSystemAndUse,
       ).toHaveBeenCalledWith(
         expect.anything(),
         'per-1',
         CONCEPTS.CONTACT_EMAIL,
         CONCEPTS.CONTACT_USE_WORK,
       );
-      expect(d.contactPointsRepo.closeVigente).toHaveBeenCalledWith(
+      expect(d.contactPointsRepo.closeCurrent).toHaveBeenCalledWith(
         current,
         expect.any(Date),
         'u-1',

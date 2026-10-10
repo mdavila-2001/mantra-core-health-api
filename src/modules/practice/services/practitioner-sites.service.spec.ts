@@ -34,7 +34,7 @@ function build() {
   };
   const addressesRepo = {
     create: mockFn().mockReturnValue({ id: 'addr-nueva' }),
-    closeVigente: mockFn(),
+    closeCurrent: mockFn(),
   };
   const accountLinksRepo = {
     findActiveByPerson: mockFn().mockResolvedValue(null),
@@ -459,7 +459,7 @@ describe('PractitionerSitesService', () => {
         } as any),
       );
 
-      expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
+      expect(d.addressesRepo.closeCurrent).toHaveBeenCalledWith(
         current,
         expect.any(Date),
         actor.id,

@@ -767,7 +767,7 @@ export class ProfilesPractitionersService {
     par: { systemConceptId: string; useConceptId: string },
   ): Promise<void> {
     const fresh = valor.trim() === '' ? undefined : valor.trim();
-    const current = await this.contactPointsRepo.findVigenteByOwnerSystemAndUse(
+    const current = await this.contactPointsRepo.findCurrentByOwnerSystemAndUse(
       tx,
       personId,
       par.systemConceptId,
@@ -776,12 +776,12 @@ export class ProfilesPractitionersService {
 
     if (fresh === undefined) {
       if (current)
-        this.contactPointsRepo.closeVigente(current, ahora, actorUserId);
+        this.contactPointsRepo.closeCurrent(current, ahora, actorUserId);
       return;
     }
     if (current?.value === fresh) return;
     if (current)
-      this.contactPointsRepo.closeVigente(current, ahora, actorUserId);
+      this.contactPointsRepo.closeCurrent(current, ahora, actorUserId);
 
     this.contactPointsRepo.create(tx, {
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
@@ -856,12 +856,12 @@ export class ProfilesPractitionersService {
   }> {
     const [documentos, domicilio, trabajo] = await Promise.all([
       em.find(Identifiers, { ownerId: personId, validTo: null }),
-      this.addressesRepo.findVigenteByOwnerAndUse(
+      this.addressesRepo.findCurrentByOwnerAndUse(
         em,
         personId,
         CONCEPTS.ADDR_USE_HOME,
       ),
-      this.addressesRepo.findVigenteByOwnerAndUse(
+      this.addressesRepo.findCurrentByOwnerAndUse(
         em,
         personId,
         CONCEPTS.ADDR_USE_WORK,
@@ -1008,7 +1008,7 @@ export class ProfilesPractitionersService {
       // sin perfil.
       includesContact
         ? this.withoutBreakingRecord(
-            () => this.contactPointsRepo.findVigentesByOwner(em, person.id),
+            () => this.contactPointsRepo.findAllCurrentByOwner(em, person.id),
             [],
             { profileId, pieza: 'contacto', section: 'contact', unavailable },
           )

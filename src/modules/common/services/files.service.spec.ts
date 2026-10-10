@@ -408,7 +408,7 @@ describe('FilesService', () => {
       ],
     ])(
       'la URL no revela la ubicación interna del adaptador %s',
-      async (_adaptador, storageUri) => {
+      async (_adapter, storageUri) => {
         const { service, filesRepo, fileVersionsRepo } = build();
         filesRepo.findById.mockResolvedValue({
           id: 'file-1',
@@ -508,7 +508,7 @@ describe('FilesService', () => {
         return Promise.resolve(null);
       });
 
-      const pagina = await service.listLinkedFiles(
+      const page = await service.listLinkedFiles(
         {
           ownerType: OwnerType.PATIENT,
           ownerId: 'p-1',
@@ -516,9 +516,9 @@ describe('FilesService', () => {
         reviewer,
       );
 
-      expect(pagina.count).toBe(1);
-      expect(pagina.items[0]!.file.id).toBe('f-vivo');
-      expect(pagina.items[0]!.linkId).toBe('l-1');
+      expect(page.count).toBe(1);
+      expect(page.items[0]!.file.id).toBe('f-vivo');
+      expect(page.items[0]!.linkId).toBe('l-1');
     });
 
     /**
@@ -539,7 +539,7 @@ describe('FilesService', () => {
         createdAt: new Date(),
       });
 
-      const pagina = await service.listLinkedFiles(
+      const page = await service.listLinkedFiles(
         {
           ownerType: OwnerType.PATIENT,
           ownerId: 'p-1',
@@ -547,9 +547,9 @@ describe('FilesService', () => {
         reviewer,
       );
 
-      expect(pagina.items[0]!.file.category).toBe(FileCategory.IMAGE);
-      expect(pagina.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
-      expect(pagina.items[0]!.ownerType).toBe(OwnerType.PATIENT);
+      expect(page.items[0]!.file.category).toBe(FileCategory.IMAGE);
+      expect(page.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
+      expect(page.items[0]!.ownerType).toBe(OwnerType.PATIENT);
     });
 
     /**
@@ -569,7 +569,7 @@ describe('FilesService', () => {
         createdAt: new Date(),
       });
 
-      const pagina = await service.listLinkedFiles(
+      const page = await service.listLinkedFiles(
         {
           ownerType: OwnerType.PATIENT,
           ownerId: 'p-1',
@@ -577,8 +577,8 @@ describe('FilesService', () => {
         reviewer,
       );
 
-      expect(pagina.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
-      expect(pagina.items[0]!.file.category).toBe(FileCategory.DOCUMENT);
+      expect(page.items[0]!.file.sensitivity).toBe(FileSensitivity.PHI);
+      expect(page.items[0]!.file.category).toBe(FileCategory.DOCUMENT);
     });
 
     it('acota siempre por propietario y con tope', async () => {
@@ -634,7 +634,7 @@ describe('FilesService', () => {
         },
       ]);
 
-      const pagina = await service.listLinkedFiles(
+      const page = await service.listLinkedFiles(
         {
           ownerType: OwnerType.PATIENT,
           ownerId: 'p-1',
@@ -642,16 +642,16 @@ describe('FilesService', () => {
         reviewer,
       );
 
-      const archivo = pagina.items[0]!.file;
-      expect(archivo).toMatchObject({
+      const file = page.items[0]!.file;
+      expect(file).toMatchObject({
         originalName: 'análisis.pdf',
         mimeType: 'application/pdf',
         sizeBytes: 20480,
       });
       // El bigint de la versión llega como número, no como texto.
-      expect(typeof archivo.sizeBytes).toBe('number');
-      const serializado = JSON.stringify(pagina);
-      for (const interno of [
+      expect(typeof file.sizeBytes).toBe('number');
+      const serialized = JSON.stringify(page);
+      for (const internal of [
         's3://',
         'bucket-clinico',
         'pacientes/estudio.pdf',
@@ -660,7 +660,7 @@ describe('FilesService', () => {
         'objectKey',
         'contentHash',
       ]) {
-        expect(serializado).not.toContain(interno);
+        expect(serialized).not.toContain(internal);
       }
     });
 
@@ -691,9 +691,9 @@ describe('FilesService', () => {
         }),
       );
       fileVersionsRepo.findByIds.mockImplementation(
-        (_em: unknown, pedidos: string[]) =>
+        (_em: unknown, orders: string[]) =>
           Promise.resolve(
-            pedidos.map((vid) => ({
+            orders.map((vid) => ({
               id: vid,
               fileId: vid.replace(/^v-/, ''),
               mimeType: 'image/png',
@@ -702,7 +702,7 @@ describe('FilesService', () => {
           ),
       );
 
-      const pagina = await service.listLinkedFiles(
+      const page = await service.listLinkedFiles(
         {
           ownerType: OwnerType.PATIENT,
           ownerId: 'p-1',
@@ -717,7 +717,7 @@ describe('FilesService', () => {
         'v-f-3',
       ]);
       expect(fileVersionsRepo.findById).not.toHaveBeenCalled();
-      expect(pagina.items.map((i) => i.file.mimeType)).toEqual([
+      expect(page.items.map((i) => i.file.mimeType)).toEqual([
         'image/png',
         'image/png',
         'image/png',
@@ -752,7 +752,7 @@ describe('FilesService', () => {
       );
       fileVersionsRepo.findByIds.mockResolvedValue([]);
 
-      const pagina = await service.listLinkedFiles(
+      const page = await service.listLinkedFiles(
         {
           ownerType: OwnerType.PATIENT,
           ownerId: 'p-1',
@@ -760,7 +760,7 @@ describe('FilesService', () => {
         reviewer,
       );
 
-      for (const item of pagina.items) {
+      for (const item of page.items) {
         expect(item.file).not.toHaveProperty('mimeType');
         expect(item.file).not.toHaveProperty('sizeBytes');
       }
@@ -797,7 +797,7 @@ describe('FilesService', () => {
         },
       ]);
 
-      const pagina = await service.listLinkedFiles(
+      const page = await service.listLinkedFiles(
         {
           ownerType: OwnerType.PATIENT,
           ownerId: 'p-1',
@@ -805,8 +805,8 @@ describe('FilesService', () => {
         reviewer,
       );
 
-      expect(pagina.items[0]!.file).not.toHaveProperty('mimeType');
-      expect(pagina.items[0]!.file).not.toHaveProperty('sizeBytes');
+      expect(page.items[0]!.file).not.toHaveProperty('mimeType');
+      expect(page.items[0]!.file).not.toHaveProperty('sizeBytes');
     });
 
     it('5.2: una página sin archivos vivos no consulta versiones', async () => {
@@ -846,12 +846,12 @@ describe('FilesService', () => {
         createdAt: new Date(),
       });
 
-      const pagina = await service.listLinkedFiles(
+      const page = await service.listLinkedFiles(
         { ownerType: OwnerType.PATIENT, ownerId: 'p-1' },
         actor,
       );
 
-      expect(pagina.count).toBe(1);
+      expect(page.count).toBe(1);
     });
 
     it('un actor sin rol de revisión y ajeno a los archivos recibe 403, no una lista vacía', async () => {
@@ -890,24 +890,24 @@ describe('FilesService', () => {
         createdAt: new Date(),
       });
 
-      const pagina = await service.listLinkedFiles(
+      const page = await service.listLinkedFiles(
         { ownerType: OwnerType.PATIENT, ownerId: 'p-1' },
         reviewer,
       );
 
-      expect(pagina.count).toBe(1);
+      expect(page.count).toBe(1);
     });
 
     it('un recurso sin adjuntos responde 200 vacío, no 403', async () => {
       const { service, fileLinksRepo } = build();
       fileLinksRepo.findByOwner.mockResolvedValue([]);
 
-      const pagina = await service.listLinkedFiles(
+      const page = await service.listLinkedFiles(
         { ownerType: OwnerType.PATIENT, ownerId: 'p-sin-adjuntos' },
         actor,
       );
 
-      expect(pagina).toEqual({ items: [], count: 0 });
+      expect(page).toEqual({ items: [], count: 0 });
     });
   });
 
