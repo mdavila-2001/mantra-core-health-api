@@ -5,7 +5,7 @@ import type { FormatoDeArchivo, PerfilDeImportacion } from '../import';
 import { ImportFileRejectedException } from './concept-file-import.service';
 import {
   IMPORT_PARSERS,
-  type LectorImportFiles,
+  type ReaderImportFiles,
 } from './import-parsers.provider';
 
 /** Un archivo listo para descargar. */
@@ -22,7 +22,7 @@ export interface ImportTemplate {
 interface TemplateGenerator {
   readonly extension: string;
   readonly tipo: string;
-  armar: (perfil: PerfilDeImportacion) => Buffer;
+  armar: (profile: PerfilDeImportacion) => Buffer;
 }
 
 /**
@@ -62,11 +62,11 @@ export class ImportTemplateService {
   /**
    * Inicializa el servicio.
    *
-   * @param lector - De dónde salen los perfiles y qué formatos se reconocen.
+   * @param reader - De dónde salen los perfiles y qué formatos se reconocen.
    */
   constructor(
     @Inject(IMPORT_PARSERS)
-    private readonly lector: LectorImportFiles,
+    private readonly reader: ReaderImportFiles,
   ) {}
 
   /**
@@ -77,7 +77,7 @@ export class ImportTemplateService {
    * @returns El archivo, con su tipo y su nombre.
    */
   generate(profile: string, format: string): ImportTemplate {
-    const perfil = this.lector.perfil(profile);
+    const perfil = this.reader.perfil(profile);
     if (perfil === undefined) {
       throw new ImportFileRejectedException(
         ErrorCode.IMPORT_PROFILE_UNKNOWN,
@@ -114,9 +114,9 @@ export class ImportTemplateService {
  */
 function buildCsv(profile: PerfilDeImportacion): Buffer {
   const names = profile.columnas.map((column) => column.nombre);
-  const example = names.map((nombre) => profile.ejemplo[nombre] ?? '');
+  const example = names.map((name) => profile.ejemplo[name] ?? '');
 
-  const rows = [names.map(escapar).join(','), example.map(escapar).join(',')];
+  const rows = [names.map(escape).join(','), example.map(escape).join(',')];
   return Buffer.from(rows.join('\n') + '\n', 'utf8');
 }
 
@@ -127,10 +127,10 @@ function buildCsv(profile: PerfilDeImportacion): Buffer {
  * adentro se escriben dobles: es la misma regla con la que el parseador las
  * vuelve a leer.
  *
- * @param valor - El contenido de la celda.
+ * @param value - El contenido de la celda.
  * @returns La celda lista para escribir.
  */
-function escapar(valor: string): string {
-  if (!/[",\n\r]/.test(valor)) return valor;
-  return `"${valor.replace(/"/g, '""')}"`;
+function escape(value: string): string {
+  if (!/[",\n\r]/.test(value)) return value;
+  return `"${value.replace(/"/g, '""')}"`;
 }

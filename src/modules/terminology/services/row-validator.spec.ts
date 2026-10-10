@@ -5,8 +5,8 @@ const CONCEPTS = PERFILES_DE_IMPORTACION.conceptos;
 
 /** Lee un CSV escrito como texto y valida sus filas, como hace el servicio. */
 function readAndValidate(csv: string) {
-  const { filas } = new CsvParser().parse(Buffer.from(csv, 'utf8'), CONCEPTS);
-  return validateRows(filas, CONCEPTS);
+  const { filas: rows } = new CsvParser().parse(Buffer.from(csv, 'utf8'), CONCEPTS);
+  return validateRows(rows, CONCEPTS);
 }
 
 /**
@@ -16,7 +16,7 @@ function readAndValidate(csv: string) {
  * quien lo abre: el encabezado es la 1, así que la fila 5 es la cuarta de datos.
  */
 function withErrors(): string {
-  const largo256 = 'x'.repeat(256);
+  const length256 = 'x'.repeat(256);
   const rows = Array.from({ length: 50 }, (_, index) => {
     const fileRow = index + 2;
     const numero = String(index + 1).padStart(3, '0');
@@ -28,11 +28,11 @@ function withErrors(): string {
       case 9:
         return `,Ejemplo ${numero},Definición ${numero}`;
       case 14:
-        return `${largo256},Ejemplo ${numero},Definición ${numero}`;
+        return `${length256},Ejemplo ${numero},Definición ${numero}`;
       case 20:
         return `ZZ-003,Ejemplo ${numero},Definición ${numero}`;
       case 33:
-        return `ZZ-${numero},${largo256},Definición ${numero}`;
+        return `ZZ-${numero},${length256},Definición ${numero}`;
       default:
         return byDefault;
     }
@@ -42,9 +42,9 @@ function withErrors(): string {
 
 describe('validarFilas', () => {
   it('señala exactamente las cinco filas malas, con su columna', () => {
-    const { validas, problemas } = readAndValidate(withErrors());
+    const { validas: valid, problemas: problems } = readAndValidate(withErrors());
 
-    expect(problemas.map((problem) => [problem.fila, problem.columna])).toEqual(
+    expect(problems.map((problem) => [problem.fila, problem.columna])).toEqual(
       [
         [5, 'display'],
         [9, 'code'],
@@ -53,7 +53,7 @@ describe('validarFilas', () => {
         [33, 'display'],
       ],
     );
-    expect(validas).toHaveLength(45);
+    expect(valid).toHaveLength(45);
   });
 
   it('el código repetido se señala en la segunda aparición y nombra la primera', () => {
@@ -73,23 +73,23 @@ describe('validarFilas', () => {
 
   describe('los motivos se entienden sin saber cómo está hecho el importador', () => {
     it('dice que la celda está vacía', () => {
-      const { problemas } = readAndValidate('code,display\n,Uno\n');
+      const { problemas: problems } = readAndValidate('code,display\n,Uno\n');
 
-      expect(problemas[0]?.motivo).toBe('«code» está vacía');
+      expect(problems[0]?.motivo).toBe('«code» está vacía');
     });
 
     it('dice cuántos caracteres se pasó', () => {
-      const { problemas } = readAndValidate(
+      const { problemas: problems } = readAndValidate(
         `code,display\nZZ-001,${'x'.repeat(256)}\n`,
       );
 
-      expect(problemas[0]?.motivo).toBe('«display» supera 255 caracteres');
+      expect(problems[0]?.motivo).toBe('«display» supera 255 caracteres');
     });
 
     it('ningún motivo usa jerga técnica', () => {
-      const { problemas } = readAndValidate(withErrors());
+      const { problemas: problems } = readAndValidate(withErrors());
 
-      for (const problem of problemas) {
+      for (const problem of problems) {
         expect(problem.motivo).not.toMatch(
           /null|undefined|NaN|constraint|entity|buffer/i,
         );
@@ -99,36 +99,36 @@ describe('validarFilas', () => {
 
   describe('lo que no es un problema', () => {
     it('una definición ausente, porque la columna es opcional', () => {
-      const { validas, problemas } = readAndValidate(
+      const { validas: valid, problemas: problems } = readAndValidate(
         'code,display,definition\nZZ-001,Uno,\n',
       );
 
-      expect(problemas).toHaveLength(0);
-      expect(validas[0]?.valores.definition).toBe('');
+      expect(problems).toHaveLength(0);
+      expect(valid[0]?.valores.definition).toBe('');
     });
 
     it('un código con espacios al costado: se recortan antes de decidir', () => {
-      const { validas, problemas } = readAndValidate(
+      const { validas: valid, problemas: problems } = readAndValidate(
         'code,display\n"  ZZ-001  ","  Uno  "\n',
       );
 
-      expect(problemas).toHaveLength(0);
-      expect(validas[0]?.valores).toEqual({ code: 'ZZ-001', display: 'Uno' });
+      expect(problems).toHaveLength(0);
+      expect(valid[0]?.valores).toEqual({ code: 'ZZ-001', display: 'Uno' });
     });
 
     it('un texto de exactamente 255 caracteres, que es el límite', () => {
-      const { problemas } = readAndValidate(
+      const { problemas: problems } = readAndValidate(
         `code,display\nZZ-001,${'x'.repeat(255)}\n`,
       );
 
-      expect(problemas).toHaveLength(0);
+      expect(problems).toHaveLength(0);
     });
   });
 
   it('una celda con espacios no cuenta como celda con contenido', () => {
-    const { problemas } = readAndValidate('code,display\n"   ",Uno\n');
+    const { problemas: problems } = readAndValidate('code,display\n"   ",Uno\n');
 
-    expect(problemas).toEqual([
+    expect(problems).toEqual([
       { fila: 2, columna: 'code', motivo: '«code» está vacía' },
     ]);
   });
