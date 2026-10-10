@@ -139,7 +139,7 @@ describe('DirectoryReadService — alcance por organización', () => {
       (s: any) => s.listBranchAssignments(TENANT, 'm1', actor),
     ],
     ['getTenantById', (s: any) => s.getTenantById(TENANT, actor)],
-  ])('%s exige poder leer la organización', async (_nombre, invoke) => {
+  ])('%s exige poder leer la organización', async (_name, invoke) => {
     // Un listado es justo la forma en que un fallo de alcance se vuelve una fuga
     // masiva entre organizaciones.
     const d = build();

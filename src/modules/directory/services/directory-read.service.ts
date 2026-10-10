@@ -589,7 +589,7 @@ export class DirectoryReadService {
       .map((v) => v.ciIdentifierId)
       .filter((id): id is string => Boolean(id));
 
-    const personas = await this.legalRepo.findPersonsByIds(em, personIds);
+    const persons = await this.legalRepo.findPersonsByIds(em, personIds);
     const documents = await this.identifiersRepo.findByIds(em, ciIds);
     const contacts = await this.contactPointsRepo.findAllCurrentByOwners(
       em,
@@ -606,7 +606,7 @@ export class DirectoryReadService {
       )?.value;
 
     const record = (link: (typeof links)[number], role: RepresentativeRole) => {
-      const persona = personas.get(link.personId);
+      const persona = persons.get(link.personId);
       if (!persona) return undefined;
       return {
         role: role,
@@ -656,7 +656,7 @@ export class DirectoryReadService {
       const role = EXECUTIVE_ROLE_BY_DTO_KEY[key];
       const link = byRole.get(role);
       return link ? record(link, role) : undefined;
-    }).filter((ficha): ficha is NonNullable<typeof ficha> => Boolean(ficha));
+    }).filter((sheet): sheet is NonNullable<typeof sheet> => Boolean(sheet));
 
     return {
       ...(legalRepresentative ? { legalRepresentative } : {}),
