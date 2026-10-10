@@ -422,7 +422,7 @@ export class ClaimReadRepository {
     encounterIds: readonly string[],
   ): Promise<EncounterClaimSummary[]> {
     if (encounterIds.length === 0) return [];
-    const solicitudes = await em.find(
+    const requests = await em.find(
       InsuranceClaims,
       { encounterId: { $in: [...new Set(encounterIds)] } },
       {
@@ -433,17 +433,17 @@ export class ClaimReadRepository {
         ],
       },
     );
-    if (solicitudes.length === 0) return [];
+    if (requests.length === 0) return [];
 
     const concepts = await em.find(CatalogConcepts, {
-      id: { $in: [...new Set(solicitudes.map((s) => s.statusConceptId))] },
+      id: { $in: [...new Set(requests.map((s) => s.statusConceptId))] },
     });
     const conceptById = new Map(concepts.map((c) => [c.id, c]));
 
     const summaries: EncounterClaimSummary[] = [];
-    for (const request of solicitudes) {
+    for (const request of requests) {
       if (request.encounterId == null) continue;
-      const estado = conceptById.get(request.statusConceptId);
+      const status = conceptById.get(request.statusConceptId);
       summaries.push({
         id: request.id,
         encounterId: request.encounterId,
@@ -451,8 +451,8 @@ export class ClaimReadRepository {
         // La columna es FK a `catalog_concepts`, así que el concepto existe;
         // el `?? ''` es sólo para no romper la página entera si una siembra
         // quedara a medias.
-        statusCode: estado?.code ?? '',
-        statusDisplay: estado?.display ?? '',
+        statusCode: status?.code ?? '',
+        statusDisplay: status?.display ?? '',
         submittedAt: request.submittedAt ?? null,
         createdAt: request.createdAt,
       });

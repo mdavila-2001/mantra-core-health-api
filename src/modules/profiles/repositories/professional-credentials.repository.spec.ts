@@ -43,26 +43,26 @@ describe('ProfessionalCredentialsRepository', () => {
   };
 
   it('el archivo del diploma llega a la fila', () => {
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
 
     new ProfessionalCredentialsRepository().create(em, {
       ...base,
       fileId: 'file-1',
     });
 
-    expect(llamadas[0].fileId).toBe('file-1');
+    expect(calls[0].fileId).toBe('file-1');
   });
 
   it('sin archivo la fila no lo inventa', () => {
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
 
     new ProfessionalCredentialsRepository().create(em, base);
 
-    expect(llamadas[0].fileId).toBeUndefined();
+    expect(calls[0].fileId).toBeUndefined();
   });
 
   it('los campos que ya existían siguen llegando', () => {
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
     const issuance = new Date('2024-03-15');
 
     new ProfessionalCredentialsRepository().create(em, {
@@ -72,7 +72,7 @@ describe('ProfessionalCredentialsRepository', () => {
       verificationSourceUri: 'https://registro.test/dip/17',
     });
 
-    const row = llamadas[0];
+    const row = calls[0];
     expect(row.practitionerProfileId).toBe('pp-1');
     expect(row.credentialTypeConceptId).toBe('cred-type-diploma');
     expect(row.number).toBe('DIP-2024-17');

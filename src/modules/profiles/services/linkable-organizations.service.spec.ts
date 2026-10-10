@@ -82,9 +82,9 @@ describe('LinkableOrganizationsService', () => {
 
     await d.service.search({ query: 'clinica' });
 
-    const [, filtros] = d.conceptsRepo.search.mock.calls[0];
-    expect(filtros.ids).toEqual([FOIANINI, SAN_LUIS_TORNO, SAN_LUIS_URUBICHA]);
-    expect(filtros.query).toBe('clinica');
+    const [, filters] = d.conceptsRepo.search.mock.calls[0];
+    expect(filters.ids).toEqual([FOIANINI, SAN_LUIS_TORNO, SAN_LUIS_URUBICHA]);
+    expect(filters.query).toBe('clinica');
   });
 
   it('acompaña cada resultado con municipio, tipo y direccion', async () => {
@@ -172,8 +172,8 @@ describe('LinkableOrganizationsService', () => {
 
     await d.service.search({ query: 'san luis', municipality: 'el torno' });
 
-    const [, filtros] = d.conceptsRepo.search.mock.calls[0];
-    expect(filtros.ids).toEqual([SAN_LUIS_TORNO]);
+    const [, filters] = d.conceptsRepo.search.mock.calls[0];
+    expect(filters.ids).toEqual([SAN_LUIS_TORNO]);
   });
 
   it('no busca si el municipio pedido no tiene establecimientos', async () => {
@@ -209,8 +209,8 @@ describe('LinkableOrganizationsService', () => {
 
     await d.service.search({});
 
-    const [, filtros] = d.conceptsRepo.search.mock.calls[0];
-    expect(filtros.query).toBeUndefined();
-    expect('query' in filtros).toBe(false);
+    const [, filters] = d.conceptsRepo.search.mock.calls[0];
+    expect(filters.query).toBeUndefined();
+    expect('query' in filters).toBe(false);
   });
 });

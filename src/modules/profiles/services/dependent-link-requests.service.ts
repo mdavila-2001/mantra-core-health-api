@@ -120,7 +120,7 @@ export class DependentLinkRequestsService {
       // Una sola vía por pedido (el DTO lo exige): el documento escrito o el
       // perfil elegido de la búsqueda por nombre. Las dos terminan en la misma
       // regla de «cuenta de paciente activa» y en las mismas reglas de abajo.
-      const { cuenta, paciente } =
+      const { cuenta: account, paciente: patient } =
         dto.patientProfileId === undefined
           ? await this.recipientByDocument(
               tx,
@@ -135,31 +135,31 @@ export class DependentLinkRequestsService {
               actor,
             );
 
-      const ahora = new Date();
+      const now = new Date();
       const current =
         await this.portalProxiesRepo.findActiveByProxyUserAndPatient(
           tx,
           actor.id,
-          paciente.profileId,
-          ahora,
+          patient.profileId,
+          now,
         );
       if (current) {
         throw new ConflictException('Esa persona ya es su dependiente.');
       }
-      const pendiente =
+      const pending =
         await this.portalProxiesRepo.findPendingByProxyUserAndPatient(
           tx,
           actor.id,
-          paciente.profileId,
+          patient.profileId,
         );
-      if (pendiente) {
+      if (pending) {
         throw new ConflictException(
           'Ya le envió una solicitud a esa persona. Falta que la acepte.',
         );
       }
 
       const request = this.portalProxiesRepo.create(tx, {
-        patientProfileId: paciente.profileId,
+        patientProfileId: patient.profileId,
         proxyUserId: actor.id,
         scopeValueSetId: SEED.patientPortalProxyScopeValueSetId,
         // La única base legal de representación sembrada. Ver «No cubierto»
@@ -175,8 +175,8 @@ export class DependentLinkRequestsService {
 
       return {
         id: request.id,
-        destinatario: cuenta.userId,
-        quienPide: nombreDe(titular.person),
+        destinatario: account.userId,
+        quienPide: nameOf(titular.person),
       };
     });
 
@@ -279,60 +279,66 @@ export class DependentLinkRequestsService {
     requestId: string,
     actor: AuthenticatedUser,
   ): Promise<DependentLinkRequestDecisionDto> {
-    const { solicitante, yo } = await this.em.transactional(async (tx) => {
-      const { solicitud, yo } = await this.pendingRequest(tx, requestId, actor);
-      const ahora = new Date();
-
-      const alreadyRepresentsIt =
-        await this.portalProxiesRepo.findActiveByProxyUserAndPatient(
+    const { solicitante: requester, yo } = await this.em.transactional(
+      async (tx) => {
+        const { solicitud: request, yo } = await this.pendingRequest(
           tx,
-          solicitud.proxyUserId,
-          yo.patientProfileId,
-          ahora,
+          requestId,
+          actor,
         );
-      if (alreadyRepresentsIt) {
-        throw new ConflictException(
-          'Esa persona ya le representa. Puede rechazar esta solicitud.',
+        const now = new Date();
+
+        const alreadyRepresentsIt =
+          await this.portalProxiesRepo.findActiveByProxyUserAndPatient(
+            tx,
+            request.proxyUserId,
+            yo.patientProfileId,
+            now,
+          );
+        if (alreadyRepresentsIt) {
+          throw new ConflictException(
+            'Esa persona ya le representa. Puede rechazar esta solicitud.',
+          );
+        }
+
+        const link = await this.accountLinksRepo.findActiveByUser(
+          tx,
+          request.proxyUserId,
         );
-      }
+        if (!link) {
+          throw new ConflictException(
+            'La cuenta que lo pidió ya no está activa. Puede rechazar esta solicitud.',
+          );
+        }
 
-      const link = await this.accountLinksRepo.findActiveByUser(
-        tx,
-        solicitud.proxyUserId,
-      );
-      if (!link) {
-        throw new ConflictException(
-          'La cuenta que lo pidió ya no está activa. Puede rechazar esta solicitud.',
-        );
-      }
+        // Cuelga de quien acepta y nombra a quien pidió, como toda fila de esta
+        // tabla: «la persona relacionada con este paciente es fulano».
+        const kinship = this.relatedPersonsRepo.create(tx, {
+          patientProfileId: yo.patientProfileId,
+          personId: link.personId,
+          relationshipConceptId: PROF.RELATIONSHIP_OTHER,
+          isEmergencyContact: false,
+          isLegalGuardian: false,
+          statusConceptId: PROF.RELATED_ACTIVE,
+          actorUserId: actor.id,
+        });
+        await tx.flush();
 
-      // Cuelga de quien acepta y nombra a quien pidió, como toda fila de esta
-      // tabla: «la persona relacionada con este paciente es fulano».
-      const kinship = this.relatedPersonsRepo.create(tx, {
-        patientProfileId: yo.patientProfileId,
-        personId: link.personId,
-        relationshipConceptId: PROF.RELATIONSHIP_OTHER,
-        isEmergencyContact: false,
-        isLegalGuardian: false,
-        statusConceptId: PROF.RELATED_ACTIVE,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
+        request.relatedPersonId = kinship.id;
+        request.statusConceptId = PROF.PROXY_ACTIVE;
+        request.validFrom = now;
+        touch(request, actor.id, now);
+        await tx.flush();
 
-      solicitud.relatedPersonId = kinship.id;
-      solicitud.statusConceptId = PROF.PROXY_ACTIVE;
-      solicitud.validFrom = ahora;
-      touch(solicitud, actor.id, ahora);
-      await tx.flush();
-
-      return { solicitante: solicitud.proxyUserId, yo };
-    });
+        return { solicitante: request.proxyUserId, yo };
+      },
+    );
 
     this.logger.info(
       { operation: 'profiles.dependent-link.accept', requestId },
       'Dependent link accepted',
     );
-    await this.notifyResponse(requestId, solicitante, yo, 'ACCEPTED');
+    await this.notifyResponse(requestId, requester, yo, 'ACCEPTED');
     return { id: requestId, status: 'ACCEPTED' };
   }
 
@@ -349,22 +355,28 @@ export class DependentLinkRequestsService {
     requestId: string,
     actor: AuthenticatedUser,
   ): Promise<DependentLinkRequestDecisionDto> {
-    const { solicitante, yo } = await this.em.transactional(async (tx) => {
-      const { solicitud, yo } = await this.pendingRequest(tx, requestId, actor);
-      const ahora = new Date();
-      solicitud.statusConceptId = PROF.PROXY_REJECTED;
-      // Cerrada la ventana: una fila rechazada no tiene vigencia que abrir.
-      solicitud.validTo = ahora;
-      touch(solicitud, actor.id, ahora);
-      await tx.flush();
-      return { solicitante: solicitud.proxyUserId, yo };
-    });
+    const { solicitante: requester, yo } = await this.em.transactional(
+      async (tx) => {
+        const { solicitud: request, yo } = await this.pendingRequest(
+          tx,
+          requestId,
+          actor,
+        );
+        const now = new Date();
+        request.statusConceptId = PROF.PROXY_REJECTED;
+        // Cerrada la ventana: una fila rechazada no tiene vigencia que abrir.
+        request.validTo = now;
+        touch(request, actor.id, now);
+        await tx.flush();
+        return { solicitante: request.proxyUserId, yo };
+      },
+    );
 
     this.logger.info(
       { operation: 'profiles.dependent-link.reject', requestId },
       'Dependent link rejected',
     );
-    await this.notifyResponse(requestId, solicitante, yo, 'REJECTED');
+    await this.notifyResponse(requestId, requester, yo, 'REJECTED');
     return { id: requestId, status: 'REJECTED' };
   }
 
@@ -372,7 +384,7 @@ export class DependentLinkRequestsService {
    * La cuenta de paciente que tiene ese documento.
    *
    * @param em - Transacción activa.
-   * @param documento - El CI ya sin espacios.
+   * @param document - El CI ya sin espacios.
    * @param titular - Quien pide.
    * @param actor - La cuenta que pide.
    * @returns La cuenta y el perfil de paciente del destinatario.
@@ -381,13 +393,13 @@ export class DependentLinkRequestsService {
    */
   private async recipientByDocument(
     em: EntityManager,
-    documento: string,
+    document: string,
     titular: OwnPatient,
     actor: AuthenticatedUser,
   ) {
     const identifier = await this.identifiersRepo.findActiveDuplicate(em, {
       typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-      value: documento,
+      value: document,
     });
     // El documento propio se contesta antes que «no existe»: quien escribe
     // su CI por error merece saber qué hizo, y no hay nada que ocultarle.
@@ -539,7 +551,7 @@ export class DependentLinkRequestsService {
     yo: OwnPatient,
     decision: 'ACCEPTED' | 'REJECTED',
   ): Promise<void> {
-    const who = nombreDe(yo.person);
+    const who = nameOf(yo.person);
     const accepted = decision === 'ACCEPTED';
     await this.notifications.emitInApp({
       recipientUserId: recipient,
@@ -578,11 +590,11 @@ function searchTokens(text: string): string[] {
 /**
  * El documento con sólo las últimas cifras a la vista.
  *
- * @param documento - El documento completo.
+ * @param document - El documento completo.
  * @returns `••••` más las últimas tres, o `•••` si es demasiado corto.
  */
-function maskNationalId(documento: string): string {
-  return documento.length <= 3 ? '•••' : `••••${documento.slice(-3)}`;
+function maskNationalId(document: string): string {
+  return document.length <= 3 ? '•••' : `••••${document.slice(-3)}`;
 }
 
 /**
@@ -615,7 +627,7 @@ function toCandidate(row: RepresentableCandidateRow): DependentCandidateDto {
  * @param person - La persona.
  * @returns Su nombre, o «Alguien» si no tiene ninguna parte cargada.
  */
-function nombreDe(person: Persons): string {
+function nameOf(person: Persons): string {
   return person.displayName ?? composePersonDisplayName(person) ?? 'Alguien';
 }
 

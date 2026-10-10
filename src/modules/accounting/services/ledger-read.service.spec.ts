@@ -60,7 +60,7 @@ function account(id: string, code: string, debtor = true) {
  * corriente. El doble lo refleja a propósito: mientras llenaba `amountBase`,
  * escondía el defecto que los datos reales destaparon.
  */
-function linea(accountId: string, must: boolean, amount: string) {
+function line(accountId: string, must: boolean, amount: string) {
   return {
     id: `l-${accountId}-${amount}`,
     transactionId: 't-1',
@@ -142,8 +142,8 @@ describe('LedgerReadService', () => {
         account('pagar', '2.1.01', false),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
-        linea('gasto', true, '100.00'),
-        linea('pagar', false, '100.00'),
+        line('gasto', true, '100.00'),
+        line('pagar', false, '100.00'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
@@ -165,8 +165,8 @@ describe('LedgerReadService', () => {
         account('pagar', '2.1.01', false),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
-        linea('gasto', true, '100.00'),
-        linea('pagar', false, '90.00'),
+        line('gasto', true, '100.00'),
+        line('pagar', false, '90.00'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
@@ -185,15 +185,15 @@ describe('LedgerReadService', () => {
         account('pagar', '2.1.01', false),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
-        linea('banco', true, '250.00'),
-        linea('pagar', false, '250.00'),
+        line('banco', true, '250.00'),
+        line('pagar', false, '250.00'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
-      const banco = res.items.find((i) => i.accountId === 'banco');
+      const bank = res.items.find((i) => i.accountId === 'banco');
       const pay = res.items.find((i) => i.accountId === 'pagar');
 
-      expect(banco?.balance).toBe('250.00');
+      expect(bank?.balance).toBe('250.00');
       // Acreedora: haber − debe. Si se calculara siempre debe − haber, saldría
       // «-250.00» y un pasivo correcto parecería un error.
       expect(pay?.balance).toBe('250.00');
@@ -211,9 +211,9 @@ describe('LedgerReadService', () => {
         account('b', '2.1.01', false),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
-        linea('a', true, '0.10'),
-        linea('a', true, '0.20'),
-        linea('b', false, '0.30'),
+        line('a', true, '0.10'),
+        line('a', true, '0.20'),
+        line('b', false, '0.30'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
@@ -264,8 +264,8 @@ describe('LedgerReadService', () => {
         account('pagar', '2.1.01', false),
       ]);
       d.journalRepo.findEntriesByTransactions.mockResolvedValue([
-        linea('gasto', true, '12000.00'),
-        linea('pagar', false, '12000.00'),
+        line('gasto', true, '12000.00'),
+        line('pagar', false, '12000.00'),
       ]);
 
       const res = await d.service.trialBalance({ practiceId: PRACTICE });
@@ -316,9 +316,9 @@ describe('LedgerReadService', () => {
         to: '2026-01-31',
       });
 
-      const filtros = d.journalRepo.findTransactions.mock.calls[0][1];
-      expect(filtros.from).toBeInstanceOf(Date);
-      expect(filtros.to).toBeInstanceOf(Date);
+      const filters = d.journalRepo.findTransactions.mock.calls[0][1];
+      expect(filters.from).toBeInstanceOf(Date);
+      expect(filters.to).toBeInstanceOf(Date);
     });
   });
 
@@ -338,8 +338,8 @@ describe('LedgerReadService', () => {
         statusConceptId: ACCT.TXN_POSTED,
       });
       d.journalRepo.findEntriesByTransaction.mockResolvedValue([
-        linea('gasto', true, '100.00'),
-        linea('pagar', false, '100.00'),
+        line('gasto', true, '100.00'),
+        line('pagar', false, '100.00'),
       ]);
 
       const res = await d.service.getJournalTransaction('t-1');

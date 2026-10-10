@@ -240,13 +240,13 @@ export class JournalRepository {
    * enseña el diario no es contabilidad, es un buzón.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Práctica (obligatoria), ventana y período.
+   * @param filters - Práctica (obligatoria), ventana y período.
    * @param limit - Tope de filas.
    * @returns Los asientos, del más reciente al más antiguo.
    */
   findTransactions(
     em: EntityManager,
-    filtros: {
+    filters: {
       practiceId: string;
       fiscalPeriodId?: string;
       statusConceptId?: string;
@@ -255,14 +255,14 @@ export class JournalRepository {
     },
     limit: number,
   ): Promise<JournalTransactions[]> {
-    const where: Record<string, unknown> = { practiceId: filtros.practiceId };
-    if (filtros.fiscalPeriodId) where.fiscalPeriodId = filtros.fiscalPeriodId;
-    if (filtros.statusConceptId)
-      where.statusConceptId = filtros.statusConceptId;
-    if (filtros.from || filtros.to) {
+    const where: Record<string, unknown> = { practiceId: filters.practiceId };
+    if (filters.fiscalPeriodId) where.fiscalPeriodId = filters.fiscalPeriodId;
+    if (filters.statusConceptId)
+      where.statusConceptId = filters.statusConceptId;
+    if (filters.from || filters.to) {
       where.transactionDate = {
-        ...(filtros.from ? { $gte: filtros.from } : {}),
-        ...(filtros.to ? { $lte: filtros.to } : {}),
+        ...(filters.from ? { $gte: filters.from } : {}),
+        ...(filters.to ? { $lte: filters.to } : {}),
       };
     }
 
@@ -549,15 +549,15 @@ export class JournalRepository {
       segmentId: string | null;
     }>
   > {
-    const asientos = await em.find(
+    const journalEntries = await em.find(
       JournalTransactions,
       { practiceId, statusConceptId: postedStatusConceptId },
       { limit },
     );
-    if (asientos.length === 0) return [];
+    if (journalEntries.length === 0) return [];
 
     const entries = await em.find(LedgerEntries, {
-      transactionId: { $in: asientos.map((a) => a.id) },
+      transactionId: { $in: journalEntries.map((a) => a.id) },
     });
     if (entries.length === 0) return [];
 

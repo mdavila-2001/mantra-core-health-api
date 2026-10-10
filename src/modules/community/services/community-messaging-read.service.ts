@@ -331,10 +331,12 @@ export class CommunityMessagingReadService {
           ),
         ]);
         return {
-          peers: other.map((otro) => ({
-            profileId: otro.participantProfileId,
-            displayName: nameByProfile.get(otro.participantProfileId) ?? null,
-            avatarUrl: avatarByProfile.get(otro.participantProfileId) ?? null,
+          peers: other.map((otherSide) => ({
+            profileId: otherSide.participantProfileId,
+            displayName:
+              nameByProfile.get(otherSide.participantProfileId) ?? null,
+            avatarUrl:
+              avatarByProfile.get(otherSide.participantProfileId) ?? null,
           })),
           id: conversation.id,
           conversationTypeConceptId: conversation.conversationTypeConceptId,
@@ -546,8 +548,8 @@ export class CommunityMessagingReadService {
       conversationId,
     );
     const other = participants
-      .map((participante) => participante.participantProfileId)
-      .filter((otro) => otro !== profileId);
+      .map((participantRow) => participantRow.participantProfileId)
+      .filter((otherSide) => otherSide !== profileId);
 
     return {
       conversationId,

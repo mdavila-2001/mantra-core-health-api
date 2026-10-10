@@ -152,10 +152,10 @@ describe('SubledgerService', () => {
     });
 
     describe('organización del documento (informe B, C9)', () => {
-      const { tenantId: _omitido, ...sinTenant } = dto;
+      const { tenantId: _skipped, ...withoutTenant } = dto;
 
       /** Deja una partida y su subledger listos para compensar. */
-      function listo(d: ReturnType<typeof build>) {
+      function ready(d: ReturnType<typeof build>) {
         d.subledgerRepo.findOpenItemById.mockResolvedValue({
           id: 'oi1',
           statusConceptId: ACCT.OPEN_ITEM_OPEN,
@@ -171,10 +171,10 @@ describe('SubledgerService', () => {
 
       it('sin tenantId en el cuerpo, la deriva de la práctica', async () => {
         const d = build();
-        listo(d);
+        ready(d);
         d.tx.findOne.mockResolvedValue({ id: 'p1', tenantId: 't-practica' });
 
-        await d.service.clearOpenItems(sinTenant, actor);
+        await d.service.clearOpenItems(withoutTenant, actor);
 
         expect(d.subledgerRepo.findClearingByNumber).toHaveBeenCalledWith(
           d.tx,
@@ -189,7 +189,7 @@ describe('SubledgerService', () => {
 
       it('un tenantId declarado distinto del de la práctica es 403 y no asienta', async () => {
         const d = build();
-        listo(d);
+        ready(d);
         d.tx.findOne.mockResolvedValue({ id: 'p1', tenantId: 't-practica' });
 
         await expect(
@@ -200,11 +200,11 @@ describe('SubledgerService', () => {
 
       it('una práctica inexistente es 404 y no asienta', async () => {
         const d = build();
-        listo(d);
+        ready(d);
         d.tx.findOne.mockResolvedValue(null);
 
         await expect(
-          d.service.clearOpenItems(sinTenant, actor),
+          d.service.clearOpenItems(withoutTenant, actor),
         ).rejects.toBeInstanceOf(ResourceNotFoundException);
         expect(d.posting.post).not.toHaveBeenCalled();
       });

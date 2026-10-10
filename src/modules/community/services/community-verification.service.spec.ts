@@ -30,7 +30,7 @@ function stamp(over: Record<string, unknown> = {}): any {
 }
 
 /** Un perfil público de profesional. */
-const perfil: any = {
+const publicProfile: any = {
   id: 'perfil-1',
   targetId: 'sujeto-1',
   targetTypeConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
@@ -54,7 +54,7 @@ function build(options?: { profile?: any; badges?: any[]; existente?: any }) {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const repo = {
     findProfileByTarget: mockFn().mockResolvedValue(
-      options?.profile === undefined ? { ...perfil } : options.profile,
+      options?.profile === undefined ? { ...publicProfile } : options.profile,
     ),
     findActive: mockFn().mockResolvedValue(options?.existente ?? null),
     findAllBySubject: mockFn().mockResolvedValue(options?.badges ?? []),
@@ -83,7 +83,7 @@ describe('CommunityVerificationService', () => {
   describe('el sello sólo nace de una verificación real', () => {
     it('emite el sello y deja el perfil verificado', async () => {
       const d = build();
-      const profile = { ...perfil };
+      const profile = { ...publicProfile };
       d.repo.findProfileByTarget.mockResolvedValue(profile);
 
       const res = await d.service.applyVerified(d.tx as any, {
@@ -145,7 +145,7 @@ describe('CommunityVerificationService', () => {
   describe('revocación', () => {
     it('baja los sellos vigentes y deja el perfil en VENCIDO, no en PENDIENTE', async () => {
       const profile = {
-        ...perfil,
+        ...publicProfile,
         verificationStatusConceptId: CONCEPTS.STATE_ACTIVE,
       };
       const active = stamp();
@@ -165,7 +165,7 @@ describe('CommunityVerificationService', () => {
 
     it('el resumen cae aunque no hubiera sello que bajar', async () => {
       const profile = {
-        ...perfil,
+        ...publicProfile,
         verificationStatusConceptId: CONCEPTS.STATE_ACTIVE,
       };
       const d = build({ profile, badges: [] });
@@ -182,7 +182,7 @@ describe('CommunityVerificationService', () => {
     it('un sello vigente es VERIFIED con su procedencia', () => {
       const d = build();
 
-      const badge = d.service.readBadge(perfil, [stamp()]);
+      const badge = d.service.readBadge(publicProfile, [stamp()]);
 
       expect(badge.status).toBe('VERIFIED');
       expect(badge.badgeTypeConceptId).toBe(COMM.BADGE_TYPE_LICENSE_VERIFIED);
@@ -194,7 +194,7 @@ describe('CommunityVerificationService', () => {
     it('un sello cuya ventana ya pasó NO es VERIFIED aunque siga marcado activo', () => {
       const d = build();
 
-      const badge = d.service.readBadge(perfil, [
+      const badge = d.service.readBadge(publicProfile, [
         stamp({ validTo: YESTERDAY }),
       ]);
 
@@ -207,7 +207,7 @@ describe('CommunityVerificationService', () => {
     it('un sello que todavía no empezó tampoco es VERIFIED', () => {
       const d = build();
 
-      const badge = d.service.readBadge(perfil, [
+      const badge = d.service.readBadge(publicProfile, [
         stamp({ validFrom: TOMORROW, validTo: null }),
       ]);
 
@@ -217,7 +217,7 @@ describe('CommunityVerificationService', () => {
     it('sin ningún sello es NONE, no EXPIRED', () => {
       const d = build();
 
-      const badge = d.service.readBadge(perfil, []);
+      const badge = d.service.readBadge(publicProfile, []);
 
       // «Nunca se verificó» y «se le venció» son cosas distintas para quien
       // elige un médico, y por eso no comparten estado.
@@ -228,7 +228,7 @@ describe('CommunityVerificationService', () => {
     it('un sello revocado deja EXPIRED con la fecha en que dejó de valer', () => {
       const d = build();
 
-      const badge = d.service.readBadge(perfil, [
+      const badge = d.service.readBadge(publicProfile, [
         stamp({ statusConceptId: CONCEPTS.STATE_REVOKED, validTo: YESTERDAY }),
       ]);
 
@@ -239,7 +239,7 @@ describe('CommunityVerificationService', () => {
     it('con dos sellos gana el vigente', () => {
       const d = build();
 
-      const badge = d.service.readBadge(perfil, [
+      const badge = d.service.readBadge(publicProfile, [
         stamp({
           id: 'viejo',
           statusConceptId: CONCEPTS.STATE_REVOKED,
@@ -255,20 +255,22 @@ describe('CommunityVerificationService', () => {
   describe('el término de prestigio sale del sello, no de la columna resumen', () => {
     it('suma con sello vigente', () => {
       const d = build();
-      expect(d.service.verificationTerm(perfil, [stamp()])).toBe(1);
+      expect(d.service.verificationTerm(publicProfile, [stamp()])).toBe(1);
     });
 
     it('no resta con sello vencido: renovar la matrícula no es un castigo', () => {
       const d = build();
       expect(
-        d.service.verificationTerm(perfil, [stamp({ validTo: YESTERDAY })]),
+        d.service.verificationTerm(publicProfile, [
+          stamp({ validTo: YESTERDAY }),
+        ]),
       ).toBe(0);
     });
 
     it('un perfil marcado como verificado sin sello detrás NO suma', () => {
       const d = build();
       const lying = {
-        ...perfil,
+        ...publicProfile,
         verificationStatusConceptId: CONCEPTS.STATE_ACTIVE,
       };
 

@@ -782,7 +782,7 @@ export class ObjectStorageService {
     versionId: string,
     actor: AuthenticatedUser,
     purposeOfUseCode: string | undefined,
-    evento: string,
+    event: string,
     operation: () => Promise<T>,
   ): Promise<T> {
     try {
@@ -791,7 +791,7 @@ export class ObjectStorageService {
       try {
         await this.em.transactional((tx) =>
           this.auditTrail.record(tx, actor, {
-            action: evento,
+            action: event,
             entity: OBJECT_ACCESS_ENTITY,
             entityId: versionId,
             tenantId: actor.tenantIds?.[0],
@@ -805,7 +805,7 @@ export class ObjectStorageService {
             versionId,
             actorUserId: actor.id,
             purposeOfUseCode,
-            event: evento,
+            event: event,
             error: (auditError as Error).message,
           },
           'Access audit could not be recorded for a denied object access',
@@ -1290,9 +1290,9 @@ function signAccessToken(claims: SignedAccessClaims): string {
 function verifyAccessToken(token: string): SignedAccessClaims | null {
   const parts = token.split('.');
   if (parts.length !== 2 || !parts[0] || !parts[1]) return null;
-  const [payload, firma] = parts;
+  const [payload, signature] = parts;
   const expected = Buffer.from(accessSignature(payload));
-  const received = Buffer.from(firma);
+  const received = Buffer.from(signature);
   if (
     expected.byteLength !== received.byteLength ||
     !timingSafeEqual(expected, received)

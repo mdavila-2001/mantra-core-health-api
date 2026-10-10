@@ -17,7 +17,7 @@ import { INS } from '../insurance.concepts';
 function withoutAbsentFields<T extends object>(response: T): T {
   return Object.fromEntries(
     Object.entries(response).filter(
-      ([, valor]) => valor !== null && valor !== undefined,
+      ([, value]) => value !== null && value !== undefined,
     ),
   ) as T;
 }

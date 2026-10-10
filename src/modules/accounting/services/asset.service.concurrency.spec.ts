@@ -76,9 +76,9 @@ class FakeDb {
       findOne: async (entity: unknown, where: any) => {
         if (entity !== AssetDepreciations)
           throw new Error('findOne inesperado');
-        const visibles = [...this.committed, ...tx.staged];
+        const visible = [...this.committed, ...tx.staged];
         return (
-          visibles.find(
+          visible.find(
             (d) =>
               d.assetId === where.assetId &&
               d.fiscalPeriodId === where.fiscalPeriodId,

@@ -78,10 +78,10 @@ const LINKED_FILES_PAGE_SIZE = 100;
  * qué es esto», y ninguna pantalla decide nada grave a partir de la categoría.
  */
 function categoryFromConcept(conceptId: string): FileCategory {
-  const encontrada = Object.values(FileCategory).find(
-    (valor) => CONCEPTS[`FILE_CATEGORY_${valor}`] === conceptId,
+  const found = Object.values(FileCategory).find(
+    (value) => CONCEPTS[`FILE_CATEGORY_${value}`] === conceptId,
   );
-  return encontrada ?? FileCategory.DOCUMENT;
+  return found ?? FileCategory.DOCUMENT;
 }
 
 /**
@@ -93,10 +93,10 @@ function categoryFromConcept(conceptId: string): FileCategory {
  * Entre equivocarse de más y equivocarse de menos, acá se elige de más.
  */
 function sensitivityFromConcept(conceptId: string): FileSensitivity {
-  const encontrada = Object.values(FileSensitivity).find(
-    (valor) => CONCEPTS[`SENSITIVITY_${valor}`] === conceptId,
+  const found = Object.values(FileSensitivity).find(
+    (value) => CONCEPTS[`SENSITIVITY_${value}`] === conceptId,
   );
-  return encontrada ?? FileSensitivity.PHI;
+  return found ?? FileSensitivity.PHI;
 }
 
 /**
@@ -796,7 +796,7 @@ export class FilesService {
       LINKED_FILES_PAGE_SIZE,
     );
 
-    const vivos: { link: (typeof links)[number]; file: Files }[] = [];
+    const live: { link: (typeof links)[number]; file: Files }[] = [];
     for (const link of links) {
       const file = await this.filesRepo.findById(forked, link.fileId);
       if (
@@ -806,17 +806,17 @@ export class FilesService {
       ) {
         continue;
       }
-      vivos.push({ link, file });
+      live.push({ link, file });
     }
 
     // N-01: con `actor` (el listado genérico) se exige propiedad o rol de
     // revisión por archivo. Sin él, lo llama una ruta que ya autorizó por el
     // contexto (p. ej. la historia del paciente): ahí «puede verlo» no significa
     // «lo subió».
-    const visibles = actor
-      ? vivos.filter(({ file }) => canActorReadOwnFile(file, actor))
-      : vivos;
-    if (vivos.length > 0 && visibles.length === 0) {
+    const visible = actor
+      ? live.filter(({ file }) => canActorReadOwnFile(file, actor))
+      : live;
+    if (live.length > 0 && visible.length === 0) {
       throw new ForbiddenException(
         'No tiene acceso a los adjuntos de este recurso',
       );
@@ -825,15 +825,15 @@ export class FilesService {
     // 5.2 · AC-5.2-2: el tipo y el tamaño viven en la versión vigente. Se
     // resuelven **todas juntas, en una consulta**, y no una por adjunto: diez
     // adjuntos no pueden costar diez lecturas más de las que ya costaban.
-    const versiones = await this.fileVersionsRepo.findByIds(
+    const versions = await this.fileVersionsRepo.findByIds(
       forked,
-      visibles
+      visible
         .map(({ file }) => file.currentVersionId)
         .filter((id): id is string => typeof id === 'string'),
     );
-    const versionPorId = new Map(versiones.map((v) => [v.id, v]));
+    const versionById = new Map(versions.map((v) => [v.id, v]));
 
-    const items: LinkedFileResponseDto[] = visibles.map(({ link, file }) => ({
+    const items: LinkedFileResponseDto[] = visible.map(({ link, file }) => ({
       linkId: link.id,
       ownerId: link.ownerId,
       ownerType,
@@ -843,7 +843,7 @@ export class FilesService {
         categoryFromConcept(file.categoryConceptId),
         sensitivityFromConcept(file.sensitivityConceptId),
         file.currentVersionId
-          ? versionPorId.get(file.currentVersionId)
+          ? versionById.get(file.currentVersionId)
           : undefined,
       ),
     }));
@@ -882,15 +882,15 @@ export class FilesService {
     sensitivity: FileSensitivity,
     version?: Pick<FileVersions, 'fileId' | 'mimeType' | 'sizeBytes'>,
   ): FileResponseDto {
-    const vigente = version?.fileId === file.id ? version : undefined;
+    const current = version?.fileId === file.id ? version : undefined;
     return {
       id: file.id,
       currentVersionId: file.currentVersionId,
       originalName: file.originalName,
-      ...(vigente
+      ...(current
         ? {
-            mimeType: vigente.mimeType,
-            sizeBytes: Number(vigente.sizeBytes),
+            mimeType: current.mimeType,
+            sizeBytes: Number(current.sizeBytes),
           }
         : {}),
       category,

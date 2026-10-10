@@ -62,8 +62,8 @@ export function departmentSiglaOfMunicipalityCode(
 /** Los prefijos de código de los municipios de un departamento, en las dos formas. */
 function municipalityCodePrefixesOf(sigla: string): string[] {
   const prefixes = [`${sigla}-`];
-  for (const [ine, candidata] of BO_DEPARTMENT_BY_INE_PREFIX) {
-    if (candidata === sigla)
+  for (const [ine, candidate] of BO_DEPARTMENT_BY_INE_PREFIX) {
+    if (candidate === sigla)
       prefixes.push(`${MUNICIPALITY_INE_CODE_PREFIX}${ine}`);
   }
   return prefixes;

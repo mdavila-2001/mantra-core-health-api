@@ -54,21 +54,21 @@ describe('CodeSystemsReadService', () => {
     // no fijan estado, y son ~450 000 conceptos ya cargados.
     const { service } = build([version(CONCEPTS.TERM_DRAFT), version(null)]);
 
-    const [borrador, sinEstado] = await service.listVersions('cs-1');
+    const [draft, withoutStatus] = await service.listVersions('cs-1');
 
-    expect(borrador.state).toBe('DRAFT');
-    expect(borrador.acceptsConcepts).toBe(true);
-    expect(sinEstado.state).toBe('UNKNOWN');
-    expect(sinEstado.acceptsConcepts).toBe(true);
+    expect(draft.state).toBe('DRAFT');
+    expect(draft.acceptsConcepts).toBe(true);
+    expect(withoutStatus.state).toBe('UNKNOWN');
+    expect(withoutStatus.acceptsConcepts).toBe(true);
   });
 
   it('una versión publicada no admite conceptos', async () => {
     const { service } = build([version(CONCEPTS.TERM_ACTIVE)]);
 
-    const [publicada] = await service.listVersions('cs-1');
+    const [published] = await service.listVersions('cs-1');
 
-    expect(publicada.state).toBe('ACTIVE');
-    expect(publicada.acceptsConcepts).toBe(false);
+    expect(published.state).toBe('ACTIVE');
+    expect(published.acceptsConcepts).toBe(false);
   });
 
   it('una versión retirada u obsoleta tampoco los admite, y se nombra', async () => {
@@ -81,12 +81,12 @@ describe('CodeSystemsReadService', () => {
       version(CONCEPTS.TERM_DEPRECATED),
     ]);
 
-    const [retirada, obsoleta] = await service.listVersions('cs-1');
+    const [withdrawn, obsolete] = await service.listVersions('cs-1');
 
-    expect(retirada.state).toBe('RETIRED');
-    expect(retirada.acceptsConcepts).toBe(false);
-    expect(obsoleta.state).toBe('DEPRECATED');
-    expect(obsoleta.acceptsConcepts).toBe(false);
+    expect(withdrawn.state).toBe('RETIRED');
+    expect(withdrawn.acceptsConcepts).toBe(false);
+    expect(obsolete.state).toBe('DEPRECATED');
+    expect(obsolete.acceptsConcepts).toBe(false);
   });
   it('ordena por fecha de alta y no alfabéticamente por versión', async () => {
     // `version` es texto libre: ordenarlo alfabéticamente pone «10» antes que

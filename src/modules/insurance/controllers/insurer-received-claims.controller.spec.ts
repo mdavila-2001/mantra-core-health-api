@@ -10,10 +10,10 @@ const actor = { id: 'u-1', roles: ['USER'] } as any;
 const ID = '11111111-1111-4111-8111-111111111111';
 
 /** El descriptor del método: lo que Nest inspecciona, sin separar el método de su objeto. */
-function handler(nombre: string): object {
+function handler(name: string): object {
   return Object.getOwnPropertyDescriptor(
     InsurerReceivedClaimsController.prototype,
-    nombre,
+    name,
   )?.value as object;
 }
 
@@ -107,11 +107,11 @@ describe('InsurerReceivedClaimsController', () => {
     });
 
     it('no expone las rutas de factura: el modelo no declara dónde vive esa factura', () => {
-      const rutas = Object.getOwnPropertyNames(
+      const routes = Object.getOwnPropertyNames(
         InsurerReceivedClaimsController.prototype,
-      ).filter((nombre) => nombre !== 'constructor');
+      ).filter((name) => name !== 'constructor');
 
-      expect(rutas.sort()).toEqual([
+      expect(routes.sort()).toEqual([
         'decideReceivedClaim',
         'listReceivedClaims',
       ]);

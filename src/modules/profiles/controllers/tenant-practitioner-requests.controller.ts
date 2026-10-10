@@ -62,7 +62,7 @@ export class TenantPractitionerRequestsController {
     @Param('tenantId', ParseUUIDPipe) tenantId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<AffiliationRequestListDto> {
-    return this.affiliations.listSolicitudes(tenantId, actor);
+    return this.affiliations.listRequests(tenantId, actor);
   }
 
   /** La organización acepta el vínculo. */

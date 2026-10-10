@@ -69,9 +69,9 @@ export interface DeclaredPersonName extends PersonNameParts {
  * mandó. Devuelve vacío sólo si el cuerpo no traía nombre alguno, cosa que los
  * DTO impiden exigiendo `name` y `lastName` cuando no viene `displayName`.
  *
- * @param nombre - El nombre declarado en el cuerpo del alta.
+ * @param name - El nombre declarado en el cuerpo del alta.
  * @returns El nombre para mostrar de la cuenta.
  */
-export function composeAccountDisplayName(nombre: DeclaredPersonName): string {
-  return nombre.displayName ?? composePersonDisplayName(nombre) ?? '';
+export function composeAccountDisplayName(name: DeclaredPersonName): string {
+  return name.displayName ?? composePersonDisplayName(name) ?? '';
 }

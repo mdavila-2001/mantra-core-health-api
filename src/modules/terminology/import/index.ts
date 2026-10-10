@@ -42,7 +42,7 @@ export { XlsxParser } from './xlsx-parser';
  * eso el formato `xlsx` quedó cubierto sin tocar ni el servicio ni el detector:
  * ésa es toda la razón de que esta lista exista.
  */
-export const PARSEADORES_DE_IMPORTACION: readonly FileParser[] = [
+export const IMPORT_FILE_PARSERS: readonly FileParser[] = [
   new NdjsonParser(),
   new CsvParser(),
   new XlsxParser(),

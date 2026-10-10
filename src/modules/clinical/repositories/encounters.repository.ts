@@ -313,10 +313,10 @@ export class EncountersRepository {
       { appointmentId: { $in: [...appointmentIds] } },
       { orderBy: { createdAt: 'DESC' } },
     );
-    for (const encuentro of encounters) {
-      if (encuentro.appointmentId == null) continue;
-      if (!map.has(encuentro.appointmentId)) {
-        map.set(encuentro.appointmentId, encuentro.id);
+    for (const encounter of encounters) {
+      if (encounter.appointmentId == null) continue;
+      if (!map.has(encounter.appointmentId)) {
+        map.set(encounter.appointmentId, encounter.id);
       }
     }
     return map;
@@ -346,11 +346,11 @@ export class EncountersRepository {
       { appointmentId: { $in: [...appointmentIds] } },
       { orderBy: { createdAt: 'DESC' } },
     );
-    for (const encuentro of encounters) {
-      if (encuentro.appointmentId == null) continue;
-      const ids = map.get(encuentro.appointmentId) ?? [];
-      ids.push(encuentro.id);
-      map.set(encuentro.appointmentId, ids);
+    for (const encounter of encounters) {
+      if (encounter.appointmentId == null) continue;
+      const ids = map.get(encounter.appointmentId) ?? [];
+      ids.push(encounter.id);
+      map.set(encounter.appointmentId, ids);
     }
     return map;
   }

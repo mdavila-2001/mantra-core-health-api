@@ -33,7 +33,7 @@ import { CLIN } from '../../clinical/clinical.concepts';
 const USER = { id: 'u1' } as any;
 const PERSONA = 'per-1';
 const PATIENT = 'p1';
-const CONCEPT_HEMOGRAMA = 'code-hemograma';
+const CONCEPT_BLOODCOUNT = 'code-hemograma';
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -91,7 +91,7 @@ function order(id: string) {
     id,
     patientProfileId: PATIENT,
     encounterId: 'e1',
-    codeConceptId: CONCEPT_HEMOGRAMA,
+    codeConceptId: CONCEPT_BLOODCOUNT,
     categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_LAB,
     statusConceptId: 'st-1',
     priorityConceptId: 'prio-1',
@@ -152,7 +152,7 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
       {
         id: 'rep-1',
         serviceRequestId: 'o1',
-        codeConceptId: CONCEPT_HEMOGRAMA,
+        codeConceptId: CONCEPT_BLOODCOUNT,
       },
     ]);
     // …pero no tiene ninguna versión liberada.
@@ -171,7 +171,7 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
       {
         id: 'rep-1',
         serviceRequestId: 'o1',
-        codeConceptId: CONCEPT_HEMOGRAMA,
+        codeConceptId: CONCEPT_BLOODCOUNT,
         custodianTenantId: 't1',
       },
     ]);
@@ -199,12 +199,12 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
       {
         id: 'rep-viejo',
         serviceRequestId: 'o1',
-        codeConceptId: CONCEPT_HEMOGRAMA,
+        codeConceptId: CONCEPT_BLOODCOUNT,
       },
       {
         id: 'rep-nuevo',
         serviceRequestId: 'o1',
-        codeConceptId: CONCEPT_HEMOGRAMA,
+        codeConceptId: CONCEPT_BLOODCOUNT,
       },
     ]);
     reportsRepo.findVersionsByReports.mockResolvedValue([
@@ -236,7 +236,7 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
     ordersRepo.findOrdersForPatientPortal.mockResolvedValue([order('o1')]);
     ordersRepo.findPreparationByStudyConcepts.mockResolvedValue([
       {
-        studyConceptId: CONCEPT_HEMOGRAMA,
+        studyConceptId: CONCEPT_BLOODCOUNT,
         preparationInstructions: 'Ayuno de 8 horas.',
       },
     ]);

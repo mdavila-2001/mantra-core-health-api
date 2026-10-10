@@ -797,12 +797,12 @@ describe('ObjectStorageService', () => {
       it('caps the lifetime the client asks for', async () => {
         const d = build();
         wire(d);
-        const antes = Date.now();
+        const before = Date.now();
 
         const { res } = await issue(d, { ...dto, expiresInSeconds: 86400 });
 
         expect(new Date(res.expiresAt).getTime()).toBeLessThanOrEqual(
-          antes + 900 * 1000 + 1000,
+          before + 900 * 1000 + 1000,
         );
       });
 
@@ -862,14 +862,14 @@ describe('ObjectStorageService', () => {
         const d = build();
         wire(d);
         const { token } = await issue(d);
-        const [payload, firma] = token.split('.');
-        const otherSignature = `${payload}.${firma.slice(0, -2)}${firma.endsWith('AA') ? 'BB' : 'AA'}`;
+        const [payload, signature] = token.split('.');
+        const otherSignature = `${payload}.${signature.slice(0, -2)}${signature.endsWith('AA') ? 'BB' : 'AA'}`;
         const claims = JSON.parse(
           Buffer.from(payload, 'base64url').toString('utf8'),
         );
         const otherPayload = `${Buffer.from(
           JSON.stringify({ ...claims, exp: claims.exp + 3600 }),
-        ).toString('base64url')}.${firma}`;
+        ).toString('base64url')}.${signature}`;
 
         for (const fake of [otherSignature, otherPayload, 'basura', '']) {
           await expect(

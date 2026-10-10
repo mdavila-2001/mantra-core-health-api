@@ -20,7 +20,7 @@ import {
   SubledgerRepository,
 } from '../repositories';
 import {
-  toCentimos,
+  toBigIntCents,
   toText,
   amountInBase,
   sumCents,
@@ -82,15 +82,15 @@ function formatDate(date: Date): string {
 
 /** Hoy, sin la hora, para comparar contra columnas `date`. */
 function todayMidnight(): Date {
-  const hoy = new Date();
-  hoy.setUTCHours(0, 0, 0, 0);
-  return hoy;
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  return today;
 }
 
 /** Días de atraso sobre un vencimiento, nunca negativos. */
-function delayDays(dueDate: Date, hoy: Date): number {
+function delayDays(dueDate: Date, today: Date): number {
   const day = 24 * 60 * 60 * 1000;
-  return Math.max(0, Math.floor((hoy.getTime() - dueDate.getTime()) / day));
+  return Math.max(0, Math.floor((today.getTime() - dueDate.getTime()) / day));
 }
 
 /** El tramo de antigüedad de una cantidad de días de atraso. */
@@ -238,9 +238,9 @@ export class AccountingReadService {
       );
     }
 
-    const hoy = todayMidnight();
+    const today = todayMidnight();
     const year: FiscalYears =
-      years.find((a) => a.startDate <= hoy && a.endDate >= hoy) ?? years[0];
+      years.find((a) => a.startDate <= today && a.endDate >= today) ?? years[0];
 
     const periods = await this.fiscalRepo.findPeriodsByYear(em, year.id);
     const periodDtos: CockpitFiscalPeriodDto[] = periods.map(
@@ -257,8 +257,8 @@ export class AccountingReadService {
     const openCurrent = periods.find(
       (p) =>
         p.statusConceptId === ACCT.PERIOD_OPEN &&
-        p.startDate <= hoy &&
-        p.endDate >= hoy,
+        p.startDate <= today &&
+        p.endDate >= today,
     );
     const currentPeriodId = openCurrent?.id ?? periods.at(-1)?.id ?? '';
 
@@ -335,18 +335,18 @@ export class AccountingReadService {
           });
     const partnerById = new Map(partners.map((s) => [s.id, s]));
 
-    const hoy = todayMidnight();
+    const today = todayMidnight();
 
     const items: CockpitOpenItemDto[] = [];
     for (const { openItem, subledger } of rows) {
-      const outstandingCents = toCentimos(openItem.outstandingAmount);
+      const outstandingCents = toBigIntCents(openItem.outstandingAmount);
       if (outstandingCents <= 0n) continue; // saldada de hecho, aunque el estado no lo diga
 
       const account = accountById.get(subledger.reconciliationAccountId);
       const documentDate = openItem.baselineDate ?? openItem.createdAt;
       const dueDate = openItem.dueDate ?? documentDate;
       const overdueDays = openItem.dueDate
-        ? delayDays(openItem.dueDate, hoy)
+        ? delayDays(openItem.dueDate, today)
         : 0;
 
       items.push({
@@ -365,7 +365,7 @@ export class AccountingReadService {
         dueDate: formatDate(dueDate),
         amount: openItem.originalAmount ?? '0.00',
         clearedAmount: toText(
-          toCentimos(openItem.originalAmount) - outstandingCents,
+          toBigIntCents(openItem.originalAmount) - outstandingCents,
         ),
         openAmount: toText(outstandingCents),
         overdueDays,
@@ -383,10 +383,10 @@ export class AccountingReadService {
         const ofBracket = filtered.filter((i) => i.agingBucket === bucket);
         const receivable = ofBracket
           .filter((i) => i.side === 'RECEIVABLE')
-          .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
+          .reduce((acc, i) => acc + toBigIntCents(i.openAmount), 0n);
         const payable = ofBracket
           .filter((i) => i.side === 'PAYABLE')
-          .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
+          .reduce((acc, i) => acc + toBigIntCents(i.openAmount), 0n);
         return {
           bucket,
           label,
@@ -399,10 +399,10 @@ export class AccountingReadService {
 
     const totalReceivable = filtered
       .filter((i) => i.side === 'RECEIVABLE')
-      .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
+      .reduce((acc, i) => acc + toBigIntCents(i.openAmount), 0n);
     const totalPayable = filtered
       .filter((i) => i.side === 'PAYABLE')
-      .reduce((acc, i) => acc + toCentimos(i.openAmount), 0n);
+      .reduce((acc, i) => acc + toBigIntCents(i.openAmount), 0n);
 
     return {
       items: filtered,
@@ -426,7 +426,7 @@ export class AccountingReadService {
     await this.assertPractitionerOwnsPractice(actor, practiceId);
 
     const em = this.em.fork();
-    const lineas = await this.journalRepo.findPostedEntriesWithAssignments(
+    const lines = await this.journalRepo.findPostedEntriesWithAssignments(
       em,
       practiceId,
       ACCT.TXN_POSTED,
@@ -441,11 +441,11 @@ export class AccountingReadService {
     ): void => {
       if (!id) return;
       const actual = map.get(id) ?? { debit: 0n, credit: 0n };
-      const centimos = toCentimos(amount);
+      const cents = toBigIntCents(amount);
       if (address === ACCT.DIRECTION_DEBIT) {
-        actual.debit += centimos;
+        actual.debit += cents;
       } else {
-        actual.credit += centimos;
+        actual.credit += cents;
       }
       map.set(id, actual);
     };
@@ -454,24 +454,24 @@ export class AccountingReadService {
     const byProfitCenter = new Map<string, { debit: bigint; credit: bigint }>();
     const bySegment = new Map<string, { debit: bigint; credit: bigint }>();
 
-    for (const linea of lineas) {
+    for (const line of lines) {
       const amount = amountInBase({
-        amount: linea.amount,
-        amountBase: linea.amountBase,
+        amount: line.amount,
+        amountBase: line.amountBase,
       });
       accumulate(
         byCostCenter,
-        linea.costCenterId,
-        linea.directionConceptId,
+        line.costCenterId,
+        line.directionConceptId,
         amount,
       );
       accumulate(
         byProfitCenter,
-        linea.profitCenterId,
-        linea.directionConceptId,
+        line.profitCenterId,
+        line.directionConceptId,
         amount,
       );
-      accumulate(bySegment, linea.segmentId, linea.directionConceptId, amount);
+      accumulate(bySegment, line.segmentId, line.directionConceptId, amount);
     }
 
     const [costCenters, profitCenters, segments] = await Promise.all([
@@ -547,16 +547,13 @@ export class AccountingReadService {
    */
   async documentFlow(transactionId: string): Promise<CockpitDocumentFlowDto> {
     const em = this.em.fork();
-    const asiento = await this.journalRepo.findTransactionById(
-      em,
-      transactionId,
-    );
-    if (!asiento) {
+    const entry = await this.journalRepo.findTransactionById(em, transactionId);
+    if (!entry) {
       throw new ResourceNotFoundException('Asiento no encontrado', {
         transactionId,
       });
     }
-    await this.resolverPracticeTenant(asiento.practiceId);
+    await this.resolverPracticeTenant(entry.practiceId);
 
     const links = await this.journalRepo.findReversalLinksForTransaction(
       em,
@@ -580,7 +577,7 @@ export class AccountingReadService {
       id: string,
       role: 'ORIGEN' | 'ACTUAL' | 'REVERSION',
     ): CockpitDocumentFlowNodeDto | null => {
-      const tx = id === asiento.id ? asiento : byId.get(id);
+      const tx = id === entry.id ? entry : byId.get(id);
       if (!tx) return null;
       return {
         id: tx.id,
@@ -594,7 +591,7 @@ export class AccountingReadService {
 
     const items = [
       ...originIds.map((id) => toNode(id, 'ORIGEN')),
-      toNode(asiento.id, 'ACTUAL'),
+      toNode(entry.id, 'ACTUAL'),
       ...reversionIds.map((id) => toNode(id, 'REVERSION')),
     ].filter((n): n is CockpitDocumentFlowNodeDto => n !== null);
 
@@ -627,28 +624,28 @@ export class AccountingReadService {
     let totalNetBookValue = 0;
     let monthlyCharge = 0;
 
-    const items: CockpitFixedAssetDto[] = sorted.map((activo: Assets) => {
-      const cost = toCents(activo.acquisitionCost ?? '0');
-      const salvage = toCents(activo.salvageValue ?? '0');
+    const items: CockpitFixedAssetDto[] = sorted.map((asset: Assets) => {
+      const cost = toCents(asset.acquisitionCost ?? '0');
+      const salvage = toCents(asset.salvageValue ?? '0');
       const bookValueCents = toCents(
-        activo.bookValue ?? activo.acquisitionCost ?? '0',
+        asset.bookValue ?? asset.acquisitionCost ?? '0',
       );
       const depreciableCents = bookValueCents - salvage;
       const monthly =
-        activo.usefulLifeMonths && activo.usefulLifeMonths > 0
-          ? Math.round((cost - salvage) / activo.usefulLifeMonths)
+        asset.usefulLifeMonths && asset.usefulLifeMonths > 0
+          ? Math.round((cost - salvage) / asset.usefulLifeMonths)
           : 0;
       const installment = Math.min(monthly, depreciableCents);
 
-      const activa = activo.statusConceptId === ACCT.ASSET_ACTIVE;
+      const isActive = asset.statusConceptId === ACCT.ASSET_ACTIVE;
       const depreciable =
-        activa &&
-        !!activo.usefulLifeMonths &&
-        activo.usefulLifeMonths > 0 &&
+        isActive &&
+        !!asset.usefulLifeMonths &&
+        asset.usefulLifeMonths > 0 &&
         depreciableCents > 0 &&
         installment > 0;
 
-      const accumulatedCents = toCents(activo.accumulatedDepreciation ?? '0');
+      const accumulatedCents = toCents(asset.accumulatedDepreciation ?? '0');
 
       totalAcquisition += cost;
       totalAccumulated += accumulatedCents;
@@ -656,18 +653,18 @@ export class AccountingReadService {
       if (depreciable) monthlyCharge += installment;
 
       return {
-        id: activo.id,
-        code: activo.code,
-        name: activo.name,
-        className: resolver.display(activo.assetTypeConceptId) ?? '',
-        classCode: resolver.code(activo.assetTypeConceptId) ?? '',
-        usefulLifeMonths: activo.usefulLifeMonths ?? 0,
+        id: asset.id,
+        code: asset.code,
+        name: asset.name,
+        className: resolver.display(asset.assetTypeConceptId) ?? '',
+        classCode: resolver.code(asset.assetTypeConceptId) ?? '',
+        usefulLifeMonths: asset.usefulLifeMonths ?? 0,
         acquisitionCost: fromCents(cost),
         accumulatedDepreciation: fromCents(accumulatedCents),
         netBookValue: fromCents(bookValueCents),
         monthlyDepreciation: depreciable ? fromCents(installment) : '0.00',
         depreciable,
-        status: activa ? 'ACTIVE' : 'RETIRED',
+        status: isActive ? 'ACTIVE' : 'RETIRED',
       };
     });
 
@@ -700,20 +697,20 @@ export class AccountingReadService {
     );
     const accountIds = practiceAccounts.map((c) => c.id);
 
-    const objetos = await this.accrualRepo.findObjectsByPractice(
+    const objects = await this.accrualRepo.findObjectsByPractice(
       em,
       practice.tenantId,
       accountIds,
     );
-    const sorted = [...objetos].sort((a, b) =>
+    const sorted = [...objects].sort((a, b) =>
       a.objectNumber.localeCompare(b.objectNumber),
     );
 
-    const lineas = await this.accrualRepo.findScheduleLinesByObjectIds(
+    const lines = await this.accrualRepo.findScheduleLinesByObjectIds(
       em,
       sorted.map((o) => o.id),
     );
-    const periodIds = [...new Set(lineas.map((l) => l.fiscalPeriodId))];
+    const periodIds = [...new Set(lines.map((l) => l.fiscalPeriodId))];
     const periods = await this.fiscalRepo.findPeriodsByIds(em, periodIds);
     const periodById = new Map(periods.map((p) => [p.id, p]));
 
@@ -731,11 +728,11 @@ export class AccountingReadService {
 
     const items: CockpitAccrualObjectDto[] = sorted.map(
       (obj: AccrualObjects) => {
-        const own = lineas.filter((l) => l.accrualObjectId === obj.id);
+        const own = lines.filter((l) => l.accrualObjectId === obj.id);
         const posted = own.filter(
           (l) => l.statusConceptId === ACCT.SCHEDULE_POSTED,
         );
-        const pendientes = own.filter(
+        const pending = own.filter(
           (l) => l.statusConceptId !== ACCT.SCHEDULE_POSTED,
         );
 
@@ -743,10 +740,10 @@ export class AccountingReadService {
           posted.map((l) => l.postedAmount ?? '0'),
         );
         const pendingAmount = sumCents(
-          pendientes.map((l) => l.plannedAmount ?? '0'),
+          pending.map((l) => l.plannedAmount ?? '0'),
         );
 
-        const nextPending = [...pendientes].sort(
+        const nextPending = [...pending].sort(
           (a: AccrualScheduleLines, b: AccrualScheduleLines) => {
             const periodA = periodById.get(a.fiscalPeriodId);
             const periodB = periodById.get(b.fiscalPeriodId);
@@ -762,7 +759,7 @@ export class AccountingReadService {
           ? toCents(nextPending.plannedAmount ?? '0')
           : 0;
 
-        const completed = pendientes.length === 0;
+        const completed = pending.length === 0;
         pendingTotal += pendingAmount;
         if (!completed) periodCharge += periodAmount;
 
@@ -795,7 +792,7 @@ export class AccountingReadService {
           totalAmount: obj.totalAmount ?? '0.00',
           periods: own.length,
           postedPeriods: posted.length,
-          remainingPeriods: pendientes.length,
+          remainingPeriods: pending.length,
           periodAmount: fromCents(periodAmount),
           recognizedAmount: fromCents(recognizedAmount),
           pendingAmount: fromCents(pendingAmount),

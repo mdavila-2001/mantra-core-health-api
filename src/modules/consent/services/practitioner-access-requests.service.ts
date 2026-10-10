@@ -178,7 +178,7 @@ export class PractitionerAccessRequestsService {
     const profile = await this.patientProfilesRepo.findById(em, link.personId);
     if (!profile) return [];
 
-    const pendientes = await this.consentsRepo.findPendingForPatient(
+    const pending = await this.consentsRepo.findPendingForPatient(
       em,
       profile.profileId,
       CONS.CATEGORY_PRACTITIONER_ACCESS,
@@ -186,7 +186,7 @@ export class PractitionerAccessRequestsService {
     );
 
     const results: PractitionerAccessRequestResponseDto[] = [];
-    for (const consent of pendientes) {
+    for (const consent of pending) {
       const provisions = await this.provisionsRepo.findOpenByConsent(
         em,
         consent.id,
@@ -314,9 +314,9 @@ export class PractitionerAccessRequestsService {
         );
       }
 
-      const meses = dto.validityMonths ?? DEFAULT_VALIDITY_MONTHS;
+      const months = dto.validityMonths ?? DEFAULT_VALIDITY_MONTHS;
       const validTo = new Date(now);
-      validTo.setMonth(validTo.getMonth() + meses);
+      validTo.setMonth(validTo.getMonth() + months);
 
       consent.statusConceptId = CONS.CONSENT_ACTIVE;
       consent.grantedByUserId = actor.id;

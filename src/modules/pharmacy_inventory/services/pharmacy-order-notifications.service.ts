@@ -197,7 +197,7 @@ export class PharmacyOrderNotificationsService {
    */
   private async emitToPatient(
     patientProfileId: string,
-    aviso: {
+    notice: {
       /** Título corto del aviso. */
       subject: string;
       /** Cuerpo de una línea. */
@@ -211,14 +211,14 @@ export class PharmacyOrderNotificationsService {
     },
   ): Promise<EmitInAppResult> {
     return this.emitToPerson(patientProfileId, {
-      subject: aviso.subject,
-      bodyText: aviso.bodyText,
-      destination: { type: 'PHARMACY_ORDER', id: aviso.orderId },
+      subject: notice.subject,
+      bodyText: notice.bodyText,
+      destination: { type: 'PHARMACY_ORDER', id: notice.orderId },
       // Estado en la clave: cada transición avisa una vez; el reintento de
       // la misma transición no duplica el campanazo.
-      debounceKey: `pharmacy:PHARMACY_ORDER:${aviso.orderId}:${aviso.statusCode}`,
-      logContext: { orderId: aviso.orderId, statusCode: aviso.statusCode },
-      actorUserId: aviso.actorUserId,
+      debounceKey: `pharmacy:PHARMACY_ORDER:${notice.orderId}:${notice.statusCode}`,
+      logContext: { orderId: notice.orderId, statusCode: notice.statusCode },
+      actorUserId: notice.actorUserId,
     });
   }
 
@@ -230,7 +230,7 @@ export class PharmacyOrderNotificationsService {
    */
   private async emitToPerson(
     profileId: string,
-    aviso: {
+    notice: {
       /** Título corto del aviso. */
       subject: string;
       /** Cuerpo de una línea. */
@@ -252,7 +252,7 @@ export class PharmacyOrderNotificationsService {
         this.logger.info(
           {
             operation: 'pharmacy_inventory.order.notification',
-            ...aviso.logContext,
+            ...notice.logContext,
           },
           'La persona no tiene cuenta activa: no hay bandeja donde avisar',
         );
@@ -262,17 +262,17 @@ export class PharmacyOrderNotificationsService {
       return await this.notifications.emitInApp({
         recipientUserId: link.userId,
         category: 'CLINICAL',
-        subject: aviso.subject,
-        bodyText: aviso.bodyText,
-        destination: aviso.destination,
-        debounceKey: aviso.debounceKey,
-        actorUserId: aviso.actorUserId,
+        subject: notice.subject,
+        bodyText: notice.bodyText,
+        destination: notice.destination,
+        debounceKey: notice.debounceKey,
+        actorUserId: notice.actorUserId,
       });
     } catch (error) {
       this.logger.error(
         {
           operation: 'pharmacy_inventory.order.notification',
-          ...aviso.logContext,
+          ...notice.logContext,
           err: error,
         },
         'No se pudo avisar; la transición ya quedó asentada',

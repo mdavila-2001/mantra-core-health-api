@@ -42,7 +42,7 @@ const dto: RegisterPractitionerDto = {
  * (`geo:bo:department:TJ`), no Santa Cruz — inocuo a nivel unitario porque el
  * doble de `administrativeAreas` no mira el uuid, pero el nombre mentía.
  */
-const DEPARTAMENTO_SANTA_CRUZ = boDepartmentConceptId('SC');
+const DEPARTMENT_SANTA_CRUZ = boDepartmentConceptId('SC');
 
 describe('IamPractitionerSelfRegistrationService', () => {
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
@@ -971,7 +971,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
       ...dto,
       phone: '+591 70012345',
       nationalId: '4821993',
-      issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+      issuerAdministrativeAreaConceptId: DEPARTMENT_SANTA_CRUZ,
     });
 
     expect(d.contactPointsRepo.create).toHaveBeenCalledWith(
@@ -1062,10 +1062,10 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
     const emails = d.contactPointsRepo.create.mock.calls
       .map(
-        ([, fila]: [
+        ([, row]: [
           unknown,
           { systemConceptId: string; useConceptId: string },
-        ]) => fila,
+        ]) => row,
       )
       .filter(
         (row: { systemConceptId: string }) =>
@@ -1103,8 +1103,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
     const mobiles = d.contactPointsRepo.create.mock.calls
       .map(
-        ([, fila]: [unknown, { systemConceptId: string; value: string }]) =>
-          fila,
+        ([, row]: [unknown, { systemConceptId: string; value: string }]) => row,
       )
       .filter(
         (row: { systemConceptId: string }) =>
@@ -1143,8 +1142,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
     const landline = d.contactPointsRepo.create.mock.calls
       .map(
-        ([, fila]: [unknown, { systemConceptId: string; value: string }]) =>
-          fila,
+        ([, row]: [unknown, { systemConceptId: string; value: string }]) => row,
       )
       .filter(
         (row: { systemConceptId: string }) =>
@@ -1161,14 +1159,14 @@ describe('IamPractitionerSelfRegistrationService', () => {
     await d.service.registerPractitioner({
       ...dto,
       nationalId: '4821993',
-      issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+      issuerAdministrativeAreaConceptId: DEPARTMENT_SANTA_CRUZ,
     });
 
     expect(d.identifiersRepo.create).toHaveBeenCalledWith(
       d.tx,
       expect.objectContaining({
         value: '4821993',
-        issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+        issuerAdministrativeAreaConceptId: DEPARTMENT_SANTA_CRUZ,
       }),
     );
   });
@@ -1407,7 +1405,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
       expect(
         d.administrativeAreas.assertIsAdministrativeArea,
-      ).toHaveBeenCalledWith(d.tx, DEPARTAMENTO_SANTA_CRUZ);
+      ).toHaveBeenCalledWith(d.tx, DEPARTMENT_SANTA_CRUZ);
     });
 
     it('si falta el departamento, rechaza antes de escribir', async () => {
@@ -1434,7 +1432,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
         d.service.registerPractitioner({
           ...dto,
           nationalId: '4821993',
-          issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+          issuerAdministrativeAreaConceptId: DEPARTMENT_SANTA_CRUZ,
         }),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
 

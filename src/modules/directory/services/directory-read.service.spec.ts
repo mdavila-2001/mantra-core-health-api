@@ -45,7 +45,7 @@ function build() {
   };
   // Por defecto no hay casa matriz georreferenciada (subtarea 1.3).
   const addressesRepo = {
-    findVigenteByOwnerAndUse: mockFn(() => Promise.resolve(null)),
+    findCurrentByOwnerAndUse: mockFn(() => Promise.resolve(null)),
   };
   // Por defecto la organización no declaró representante ni gerencias
   // (subtarea 1.4); los tests que las ejercen sobrescriben estos dobles.
@@ -57,7 +57,7 @@ function build() {
     findByIds: mockFn(() => Promise.resolve(new Map())),
   };
   const contactPointsRepo = {
-    findVigentesByOwners: mockFn(() => Promise.resolve([])),
+    findAllCurrentByOwners: mockFn(() => Promise.resolve([])),
   };
   // El mapa va al revés que en el servicio (código -> concepto), como el real.
   const concepts = {
@@ -139,7 +139,7 @@ describe('DirectoryReadService — alcance por organización', () => {
       (s: any) => s.listBranchAssignments(TENANT, 'm1', actor),
     ],
     ['getTenantById', (s: any) => s.getTenantById(TENANT, actor)],
-  ])('%s exige poder leer la organización', async (_nombre, invoke) => {
+  ])('%s exige poder leer la organización', async (_name, invoke) => {
     // Un listado es justo la forma en que un fallo de alcance se vuelve una fuga
     // masiva entre organizaciones.
     const d = build();
@@ -440,7 +440,7 @@ describe('DirectoryReadService.listMemberships', () => {
       });
       // Tal como vuelve MikroORM: `numeric` como string, `null` (no
       // `undefined`) para lo que no aplicara — acá sí aplica.
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         latitude: '-17.7833',
         longitude: '-63.1821',
       });
@@ -590,7 +590,7 @@ describe('DirectoryReadService.listMemberships', () => {
       d.identifiersRepo.findByIds.mockResolvedValue(
         new Map([['ci-1', { id: 'ci-1', value: '4872190 SC' }]]),
       );
-      d.contactPointsRepo.findVigentesByOwners.mockResolvedValue([
+      d.contactPointsRepo.findAllCurrentByOwners.mockResolvedValue([
         {
           ownerId: 'person-rep',
           systemConceptId: CONCEPTS.CONTACT_EMAIL,
@@ -707,7 +707,7 @@ describe('DirectoryReadService.listMemberships', () => {
         ]),
       );
       d.identifiersRepo.findByIds.mockResolvedValue(new Map());
-      d.contactPointsRepo.findVigentesByOwners.mockResolvedValue([
+      d.contactPointsRepo.findAllCurrentByOwners.mockResolvedValue([
         {
           ownerId: 'person-rep2',
           systemConceptId: CONCEPTS.CONTACT_EMAIL,

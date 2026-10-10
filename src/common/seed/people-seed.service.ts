@@ -23,9 +23,9 @@ import {
 } from './synthetic-person';
 
 /** Santa Cruz (`geo:bo:department:SC`) — el padrón entero es de esa plaza. */
-const DEPARTAMENTO_SANTA_CRUZ = '16fe92e8-bec7-577d-9e63-4a0d8ff3b0e4';
+const DEPARTMENT_SANTA_CRUZ = '16fe92e8-bec7-577d-9e63-4a0d8ff3b0e4';
 /** Santa Cruz de la Sierra (`geo:bo:municipality:070101`). */
-const MUNICIPIO_SANTA_CRUZ_DE_LA_SIERRA =
+const MUNICIPALITY_SANTA_CRUZ_DE_LA_SIERRA =
   '97d3017f-3df3-540d-9f5c-da9a4f259611';
 
 const DOCTORS_FILE = 'USUARIO_MEDICOS_1.md';
@@ -124,7 +124,7 @@ export class PeopleSeedService {
     // — cuatro sólo llegan a la raíz del propio repo. `SEED_PEOPLE_SOURCE_DIR`
     // existe justamente para no depender de esta cuenta en un entorno con otro
     // layout (bajo Jest en ESM `__dirname` no está definido).
-    const origen =
+    const origin =
       sourceDir ??
       (typeof __dirname === 'string'
         ? join(
@@ -138,18 +138,18 @@ export class PeopleSeedService {
             'markdown_convertidos',
           )
         : undefined);
-    if (!origen) {
+    if (!origin) {
       return { ...empty, reason: 'source-not-found' };
     }
 
     let textDoctors: string;
     let textPatients: string;
     try {
-      textDoctors = readFileSync(join(origen, DOCTORS_FILE), 'utf-8');
-      textPatients = readFileSync(join(origen, PATIENTS_FILE), 'utf-8');
+      textDoctors = readFileSync(join(origin, DOCTORS_FILE), 'utf-8');
+      textPatients = readFileSync(join(origin, PATIENTS_FILE), 'utf-8');
     } catch (error) {
       this.logger.warn(
-        { operation: 'seed.people', sourceDir: origen, err: error },
+        { operation: 'seed.people', sourceDir: origin, err: error },
         'No se encontró el padrón; SEED_PEOPLE_ENABLED no tiene efecto sin él',
       );
       return { ...empty, reason: 'source-not-found' };
@@ -157,23 +157,23 @@ export class PeopleSeedService {
 
     const result: PeopleSeedResult = { ...empty };
 
-    for (const [i, fila] of tableRows(textDoctors).entries()) {
-      const candidate = this.commonCandidate(fila, DOCTORS_FILE, i);
+    for (const [i, row] of tableRows(textDoctors).entries()) {
+      const candidate = this.commonCandidate(row, DOCTORS_FILE, i);
       if (!candidate) continue;
 
-      const matricula = column(
-        fila,
+      const registration = column(
+        row,
         'MATRICULA MINISTERIO DE SALUD Y DEPORTES',
       );
-      if (!matricula) {
+      if (!registration) {
         result.skipped.push(
           `${DOCTORS_FILE}#${i}: sin matrícula del Ministerio, no se inventa una credencial profesional`,
         );
         continue;
       }
-      const sites = column(fila, 'SEDES GOBERNACION SANTA CRUZ');
-      const college = column(fila, 'REGISTRO COLEGIO ODONTOLOGOS');
-      const occupation = column(fila, 'OCUPACION');
+      const sites = column(row, 'SEDES GOBERNACION SANTA CRUZ');
+      const college = column(row, 'REGISTRO COLEGIO ODONTOLOGOS');
+      const occupation = column(row, 'OCUPACION');
 
       const dto: RegisterPractitionerDto = {
         email: candidate.email,
@@ -183,9 +183,9 @@ export class PeopleSeedService {
         lastName: candidate.lastName,
         motherLastName: candidate.motherLastName,
         nationalId: syntheticNationalId(candidate.key),
-        issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
-        licenseNumber: matricula,
-        credentialNumber: sites || college || matricula,
+        issuerAdministrativeAreaConceptId: DEPARTMENT_SANTA_CRUZ,
+        licenseNumber: registration,
+        credentialNumber: sites || college || registration,
         professionalTitle: occupation ? occupation.slice(0, 120) : undefined,
       };
 
@@ -195,11 +195,11 @@ export class PeopleSeedService {
       else result.skipped.push(`${DOCTORS_FILE}#${i}: ${created}`);
     }
 
-    for (const [i, fila] of tableRows(textPatients).entries()) {
-      const candidate = this.commonCandidate(fila, PATIENTS_FILE, i);
+    for (const [i, row] of tableRows(textPatients).entries()) {
+      const candidate = this.commonCandidate(row, PATIENTS_FILE, i);
       if (!candidate) continue;
 
-      const occupation = column(fila, 'OCUPACION');
+      const occupation = column(row, 'OCUPACION');
       const dto: RegisterPatientDto = {
         email: candidate.email,
         password,
@@ -208,8 +208,8 @@ export class PeopleSeedService {
         lastName: candidate.lastName,
         motherLastName: candidate.motherLastName,
         nationalId: syntheticNationalId(candidate.key),
-        issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
-        residenceMunicipalityConceptId: MUNICIPIO_SANTA_CRUZ_DE_LA_SIERRA,
+        issuerAdministrativeAreaConceptId: DEPARTMENT_SANTA_CRUZ,
+        residenceMunicipalityConceptId: MUNICIPALITY_SANTA_CRUZ_DE_LA_SIERRA,
         birthDate: syntheticBirthDate(candidate.key),
         phone: syntheticMobilePhone(candidate.key),
         // No se adivina: el padrón no declara sexo asignado al nacer para

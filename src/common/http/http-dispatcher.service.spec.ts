@@ -162,14 +162,14 @@ describe('HttpDispatcherService · destino resuelto (MCH-006)', () => {
  * devuelve el despacho, no la configuración pasada a axios.
  */
 describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => {
-  const abiertos: http.Server[] = [];
+  const open: http.Server[] = [];
 
   /** Levanta un servidor local con el manejador dado y devuelve su URL. */
-  async function servidor(
+  async function localServer(
     handler: http.RequestListener,
   ): Promise<{ url: string; server: http.Server }> {
     const server = http.createServer(handler);
-    abiertos.push(server);
+    open.push(server);
     await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
     const { port } = server.address() as AddressInfo;
     return { url: `http://127.0.0.1:${port}/hook`, server };
@@ -177,7 +177,7 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
 
   afterEach(async () => {
     await Promise.all(
-      abiertos.splice(0).map(
+      open.splice(0).map(
         (s) =>
           new Promise<void>((r) => {
             s.closeAllConnections();
@@ -189,7 +189,7 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
 
   it('AC01 · una respuesta que excede el límite se aborta y no se devuelve', async () => {
     const chunk = Buffer.alloc(64 * 1024, 'a');
-    const { url } = await servidor((_req, res) => {
+    const { url } = await localServer((_req, res) => {
       // Chunked, sin content-length: el límite no puede decidirse por cabecera.
       res.writeHead(200, { 'content-type': 'text/plain' });
       let sent = 0;
@@ -216,7 +216,7 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
 
   it('AC01 · el límite cuenta los bytes descomprimidos (gzip expansivo)', async () => {
     const bomb = gzipSync(Buffer.alloc(MAX_DISPATCH_RESPONSE_BYTES * 8, 0));
-    const { url } = await servidor((_req, res) => {
+    const { url } = await localServer((_req, res) => {
       res.writeHead(200, {
         'content-type': 'application/json',
         'content-encoding': 'gzip',
@@ -238,7 +238,7 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
   });
 
   it('AC02 · un proveedor que gotea bytes no evita el plazo total', async () => {
-    const { url } = await servidor((_req, res) => {
+    const { url } = await localServer((_req, res) => {
       res.writeHead(200, { 'content-type': 'text/plain' });
       // Un byte cada 100 ms: el timeout por inactividad del socket nunca vence.
       const t = setInterval(() => res.write('.'), 100);
@@ -259,7 +259,7 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
   });
 
   it('AC02 · timeout 0 no deshabilita el plazo: se usa el de seguridad', async () => {
-    const { url } = await servidor(() => {
+    const { url } = await localServer(() => {
       // Nunca responde.
     });
 
@@ -296,7 +296,7 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
 
   it('un cuerpo saliente que excede el límite se rechaza sin conectar', async () => {
     const received: string[] = [];
-    const { url } = await servidor((req, res) => {
+    const { url } = await localServer((req, res) => {
       received.push(req.url ?? '');
       res.end('{}');
     });
@@ -312,9 +312,9 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
   });
 
   it('las cabeceras del llamador no pisan la firma ni las de transporte', async () => {
-    let vistas: http.IncomingHttpHeaders = {};
-    const { url } = await servidor((req, res) => {
-      vistas = req.headers;
+    let views: http.IncomingHttpHeaders = {};
+    const { url } = await localServer((req, res) => {
+      views = req.headers;
       req.resume();
       req.on('end', () => res.end('{}'));
     });
@@ -333,10 +333,10 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
     });
 
     expect(res.ok).toBe(true);
-    expect(vistas['x-signature']).toBe(`sha256=${res.signature}`);
-    expect(vistas['x-signature-algorithm']).toBe('HMAC-SHA256');
-    expect(vistas['content-type']).toBe('application/json');
-    expect(vistas.host).toMatch(/^127\.0\.0\.1:/);
-    expect(vistas['x-proveedor']).toBe('se-conserva');
+    expect(views['x-signature']).toBe(`sha256=${res.signature}`);
+    expect(views['x-signature-algorithm']).toBe('HMAC-SHA256');
+    expect(views['content-type']).toBe('application/json');
+    expect(views.host).toMatch(/^127\.0\.0\.1:/);
+    expect(views['x-proveedor']).toBe('se-conserva');
   });
 });

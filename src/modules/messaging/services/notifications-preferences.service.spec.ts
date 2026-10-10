@@ -195,19 +195,19 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
 
     it('`null` quita la ventana; ausente no la toca', async () => {
       const d = build();
-      const canal = preference({
+      const channel = preference({
         quietHoursJson: { start: '22:00', end: '07:00' },
       });
-      d.notificationsRepo.findPreferences.mockResolvedValue([canal]);
+      d.notificationsRepo.findPreferences.mockResolvedValue([channel]);
 
       await d.service.updateMyPreferences(actor as any, { quietHours: null });
-      expect(canal.quietHoursJson).toBeUndefined();
+      expect(channel.quietHoursJson).toBeUndefined();
 
-      canal.quietHoursJson = { start: '23:00', end: '06:00' };
+      channel.quietHoursJson = { start: '23:00', end: '06:00' };
       await d.service.updateMyPreferences(actor as any, {
         categories: [{ category: 'SOCIAL', optedIn: false }],
       });
-      expect(canal.quietHoursJson).toEqual({ start: '23:00', end: '06:00' });
+      expect(channel.quietHoursJson).toEqual({ start: '23:00', end: '06:00' });
     });
   });
 
@@ -272,10 +272,10 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
       // `available_at` al final de la ventana y aparece a la mañana.
       expect(res.suppressed).toBe(false);
       expect(d.notificationsRepo.createInAppNotification).toHaveBeenCalled();
-      const [, fila] = d.notificationsRepo.createInAppNotification.mock
+      const [, row] = d.notificationsRepo.createInAppNotification.mock
         .calls[0] as any[];
-      expect(fila.availableAt.getUTCHours()).toBe(23);
-      expect(fila.availableAt.getUTCMinutes()).toBe(59);
+      expect(row.availableAt.getUTCHours()).toBe(23);
+      expect(row.availableAt.getUTCMinutes()).toBe(59);
     });
 
     it('fuera de la ventana la deja disponible en el acto', async () => {
@@ -290,11 +290,11 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
         subject: 'Mensaje nuevo',
       });
 
-      const [, fila] = d.notificationsRepo.createInAppNotification.mock
+      const [, row] = d.notificationsRepo.createInAppNotification.mock
         .calls[0] as any[];
       // Sin aplazamiento el instante es «ahora»: no cae en la ventana de un
       // minuto salvo que la prueba corra justo dentro de ella.
-      expect(fila.availableAt).toBeInstanceOf(Date);
+      expect(row.availableAt).toBeInstanceOf(Date);
     });
   });
 });

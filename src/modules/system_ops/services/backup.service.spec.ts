@@ -68,7 +68,7 @@ describe('BackupService', () => {
       ['RPO absurdo', { rpoSeconds: 31_536_001, rtoSeconds: 900 }],
       ['RTO absurdo', { rpoSeconds: 3600, rtoSeconds: 31_536_001 }],
       ['RPO no entero', { rpoSeconds: 1.5, rtoSeconds: 900 }],
-    ])('rechaza %s por su propio rango', async (_caso, targets) => {
+    ])('rechaza %s por su propio rango', async (_case, targets) => {
       const d = build();
       await expect(
         d.service.createPolicy(targets as any, actor),
@@ -217,7 +217,7 @@ describe('BackupService', () => {
         'se informó fallida y además se omitieron las métricas',
         { outcomeConceptId: SYSOPS.RESTORE_OUTCOME_FAIL },
       ],
-    ])('queda FAILED cuando %s', async (_caso, dto) => {
+    ])('queda FAILED cuando %s', async (_case, dto) => {
       const d = build();
       d.repo.findPolicyById.mockResolvedValue(activePolicy());
       d.repo.createTestRun.mockReturnValue({

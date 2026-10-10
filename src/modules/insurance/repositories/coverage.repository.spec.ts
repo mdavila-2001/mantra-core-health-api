@@ -29,7 +29,7 @@ describe('CoverageRepository.findActiveCarriersByPatients', () => {
   const INSURER = { id: 'carrier-1', legalName: 'Seguros Illimani' };
 
   /** Un `EntityManager` que responde por tipo de entidad, en el orden real. */
-  function emWithTables(tablas: {
+  function emWithTables(tables: {
     coberturas?: readonly unknown[];
     planes?: readonly unknown[];
     productos?: readonly unknown[];
@@ -38,13 +38,13 @@ describe('CoverageRepository.findActiveCarriersByPatients', () => {
     return {
       find: (entity: unknown) => {
         if (entity === PatientCoverages)
-          return Promise.resolve(tablas.coberturas ?? []);
+          return Promise.resolve(tables.coberturas ?? []);
         if (entity === InsurancePlans)
-          return Promise.resolve(tablas.planes ?? []);
+          return Promise.resolve(tables.planes ?? []);
         if (entity === InsuranceProducts)
-          return Promise.resolve(tablas.productos ?? []);
+          return Promise.resolve(tables.productos ?? []);
         if (entity === InsuranceCarriers)
-          return Promise.resolve(tablas.aseguradoras ?? []);
+          return Promise.resolve(tables.aseguradoras ?? []);
         throw new Error('Entidad inesperada en el spec');
       },
     } as never;

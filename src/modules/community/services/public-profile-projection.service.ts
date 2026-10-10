@@ -37,7 +37,7 @@ export interface OrganizationPublicProfileProjection {
  * sólo cambia la portada no borre la biografía sin quererlo. `null` explícito
  * sí quita el valor.
  */
-export interface OrganizationVitrinaUpdate {
+export interface OrganizationShowcaseUpdate {
   /** Sujeto del perfil. Para una organización es su propio `tenantId`. */
   targetId: string;
   /** Nombre visible; omitido conserva el que proyectó la verificación. */
@@ -185,9 +185,9 @@ export class PublicProfileProjectionService {
    * @returns Identificador del perfil actualizado.
    * @throws ResourceNotFoundException si el sujeto no tiene vitrina proyectada.
    */
-  async updateOrganizationVitrina(
+  async updateOrganizationShowcase(
     em: EntityManager,
-    data: OrganizationVitrinaUpdate,
+    data: OrganizationShowcaseUpdate,
   ): Promise<string> {
     const profile = await this.profilesRepo.findByTarget(em, data.targetId);
     // Sin vitrina no hay nada que editar, y crearla acá saltearía la

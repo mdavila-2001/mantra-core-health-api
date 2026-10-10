@@ -254,9 +254,9 @@ export class DirectoryReadService {
         if (carrier) {
           // La casa matriz georreferenciada (subtarea 1.3) vive en
           // `common.addresses`, no en el carrier: `owner_id` es el tenant y
-          // `findVigenteByOwnerAndUse` no distingue por `owner_type`, pero
+          // `findCurrentByOwnerAndUse` no distingue por `owner_type`, pero
           // un uuid de tenant no colisiona con uno de persona o de usuario.
-          const parentHome = await this.addressesRepo.findVigenteByOwnerAndUse(
+          const parentHome = await this.addressesRepo.findCurrentByOwnerAndUse(
             em,
             tenant.id,
             CONCEPTS.ADDR_USE_WORK,
@@ -279,7 +279,7 @@ export class DirectoryReadService {
         }
       }
 
-      const representation = await this.leerRepresentacion(em, tenant.id);
+      const representation = await this.loadRepresentation(em, tenant.id);
 
       items.push({
         id: tenant.id,
@@ -545,7 +545,7 @@ export class DirectoryReadService {
   async readRepresentation(
     tenantId: string,
   ): Promise<Pick<MyOrganizationDto, 'legalRepresentative' | 'executives'>> {
-    return this.leerRepresentacion(this.em.fork(), tenantId);
+    return this.loadRepresentation(this.em.fork(), tenantId);
   }
 
   /**
@@ -566,7 +566,7 @@ export class DirectoryReadService {
    * @param tenantId - La organización.
    * @returns Las claves a mezclar en la ficha; vacío si no hay vínculos.
    */
-  private async leerRepresentacion(
+  private async loadRepresentation(
     em: EntityManager,
     tenantId: string,
   ): Promise<
@@ -589,14 +589,14 @@ export class DirectoryReadService {
       .map((v) => v.ciIdentifierId)
       .filter((id): id is string => Boolean(id));
 
-    const personas = await this.legalRepo.findPersonsByIds(em, personIds);
+    const persons = await this.legalRepo.findPersonsByIds(em, personIds);
     const documents = await this.identifiersRepo.findByIds(em, ciIds);
-    const contacts = await this.contactPointsRepo.findVigentesByOwners(
+    const contacts = await this.contactPointsRepo.findAllCurrentByOwners(
       em,
       personIds,
     );
 
-    // `findVigentesByOwners` ya viene ordenado por preferencia: el primero de
+    // `findAllCurrentByOwners` ya viene ordenado por preferencia: el primero de
     // cada sistema es el que la organización quiere que se use.
     const contact = (personId: string, systemConceptIds: string[]) =>
       contacts.find(
@@ -606,7 +606,7 @@ export class DirectoryReadService {
       )?.value;
 
     const record = (link: (typeof links)[number], role: RepresentativeRole) => {
-      const persona = personas.get(link.personId);
+      const persona = persons.get(link.personId);
       if (!persona) return undefined;
       return {
         role: role,
@@ -656,7 +656,7 @@ export class DirectoryReadService {
       const role = EXECUTIVE_ROLE_BY_DTO_KEY[key];
       const link = byRole.get(role);
       return link ? record(link, role) : undefined;
-    }).filter((ficha): ficha is NonNullable<typeof ficha> => Boolean(ficha));
+    }).filter((sheet): sheet is NonNullable<typeof sheet> => Boolean(sheet));
 
     return {
       ...(legalRepresentative ? { legalRepresentative } : {}),

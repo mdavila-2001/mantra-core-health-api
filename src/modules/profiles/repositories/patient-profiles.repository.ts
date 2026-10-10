@@ -148,7 +148,7 @@ export class PatientProfilesRepository {
     }
 
     if (criteria.query) {
-      const patron = `%${criteria.query}%`;
+      const pattern = `%${criteria.query}%`;
       conditions.push(
         `(pp.patient_code ilike ?
           or exists (select 1
@@ -156,25 +156,25 @@ export class PatientProfilesRepository {
                       where p.id = pp.profile_id
                         and p.display_name ilike ?))`,
       );
-      params.push(patron, patron);
+      params.push(pattern, pattern);
     }
 
     if (criteria.nationalId) {
       // Igualdad y no `ilike`: un carnet se busca entero. El `ilike` con
       // comodines no usaría el índice y además haría que «123» trajera a todos
       // los que lo contienen, que no es buscar a una persona.
-      let documento = `exists (select 1
+      let document = `exists (select 1
                                  from common.identifiers i
                                 where i.owner_id = pp.profile_id
                                   and i.type_concept_id = ?
                                   and i.value = ?`;
       params.push(CONCEPTS.ID_TYPE_NATIONAL, criteria.nationalId);
       if (criteria.issuerAdministrativeAreaConceptId) {
-        documento += `
+        document += `
                                   and i.issuer_administrative_area_concept_id = ?`;
         params.push(criteria.issuerAdministrativeAreaConceptId);
       }
-      conditions.push(`${documento})`);
+      conditions.push(`${document})`);
     }
 
     // El separador es un salto real dentro de un template: las condiciones

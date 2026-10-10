@@ -405,7 +405,7 @@ export class TerminologySeedService {
     let inserted = 0;
     const orphaned: string[] = [];
 
-    for (const [conceptId, traduccion] of SPANISH_DESIGNATIONS) {
+    for (const [conceptId, translation] of SPANISH_DESIGNATIONS) {
       if (!seededConcept.has(conceptId)) {
         orphaned.push(conceptId);
         continue;
@@ -418,7 +418,7 @@ export class TerminologySeedService {
           {
             id: designationId,
             conceptId,
-            value: traduccion.display,
+            value: translation.display,
             languageConceptId: CONCEPTS.LANG_ES,
             designationTypeConceptId: CONCEPTS.DESIG_PREFERRED,
             preferred: true,
@@ -439,7 +439,7 @@ export class TerminologySeedService {
             conceptId,
             propertyCode: SPANISH_DEFINITION_PROPERTY_CODE,
             dataType: SPANISH_DEFINITION_DATA_TYPE,
-            valueJson: traduccion.definition,
+            valueJson: translation.definition,
             createdAt: now,
             updatedAt: now,
           },

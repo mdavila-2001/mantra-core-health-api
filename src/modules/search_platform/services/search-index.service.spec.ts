@@ -228,8 +228,8 @@ describe('SearchIndexService · P10', () => {
 
       await service.ensureIndex(PUBLIC);
 
-      const [[llamada]] = client.indices.create.mock.calls;
-      const analysis = llamada.body.settings.analysis;
+      const [[call]] = client.indices.create.mock.calls;
+      const analysis = call.body.settings.analysis;
       expect(analysis.analyzer.es_text.filter).toContain('asciifolding');
       expect(analysis.analyzer.es_text.filter).toContain('spanish_stemmer');
       // Sin esto, «cardiologo» no encuentra «Cardiología» y el buscador
@@ -242,8 +242,8 @@ describe('SearchIndexService · P10', () => {
 
       await service.ensureIndex(PUBLIC);
 
-      const [[llamada]] = client.indices.create.mock.calls;
-      expect(llamada.body.mappings.properties.location).toEqual({
+      const [[call]] = client.indices.create.mock.calls;
+      expect(call.body.mappings.properties.location).toEqual({
         type: 'geo_point',
       });
     });
@@ -280,15 +280,15 @@ describe('SearchIndexService · P10', () => {
         },
       });
 
-      const [[llamada]] = client.search.mock.calls;
-      const filtros = llamada.body.query.bool.filter;
-      expect(filtros).toContainEqual({
+      const [[call]] = client.search.mock.calls;
+      const filters = call.body.query.bool.filter;
+      expect(filters).toContainEqual({
         geo_distance: {
           distance: '5km',
           location: { lat: -16.5, lon: -68.15 },
         },
       });
-      expect(llamada.body.sort[0]._geo_distance.unit).toBe('km');
+      expect(call.body.sort[0]._geo_distance.unit).toBe('km');
       // La distancia sale de OpenSearch, no de un recálculo en memoria sobre
       // una página ya recortada — que era justo el defecto que P10 cierra.
       expect(res.hits[0].distanceKm).toBe(1.2);

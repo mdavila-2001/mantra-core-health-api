@@ -44,50 +44,53 @@ export class NdjsonParser implements FileParser {
     buffer
       .toString('utf8')
       .split(/\r?\n/)
-      .forEach((linea, index) => {
-        const text = linea.trim();
+      .forEach((line, index) => {
+        const text = line.trim();
         // Las líneas vacías no son un error: separan bloques y terminan el
         // archivo. No se cuentan como leídas.
         if (text === '') return;
 
-        const numero = index + 1;
+        const lineNumber = index + 1;
 
         let raw: unknown;
         try {
           raw = JSON.parse(text);
         } catch {
           problems.push({
-            fila: numero,
+            fila: lineNumber,
             motivo: 'la línea no es un JSON válido',
           });
           return;
         }
         if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
-          problems.push({ fila: numero, motivo: 'la línea no es un objeto' });
+          problems.push({
+            fila: lineNumber,
+            motivo: 'la línea no es un objeto',
+          });
           return;
         }
 
         const values: Record<string, string> = {};
         let serves = true;
-        for (const [clave, valor] of Object.entries(raw)) {
+        for (const [key, value] of Object.entries(raw)) {
           // Una clave que el perfil no espera se ignora en silencio: en un
           // archivo por líneas es habitual que vengan campos de más, y
           // rechazarlos obligaría a recortar el archivo antes de cargarlo.
-          if (!expected.has(clave)) continue;
-          if (valor === undefined || valor === null) continue;
-          if (typeof valor !== 'string') {
+          if (!expected.has(key)) continue;
+          if (value === undefined || value === null) continue;
+          if (typeof value !== 'string') {
             problems.push({
-              fila: numero,
-              columna: clave,
-              motivo: `«${clave}» no es texto`,
+              fila: lineNumber,
+              columna: key,
+              motivo: `«${key}» no es texto`,
             });
             serves = false;
             break;
           }
-          values[clave] = valor;
+          values[key] = value;
         }
 
-        if (serves) rows.push({ numero, valores: values });
+        if (serves) rows.push({ numero: lineNumber, valores: values });
       });
 
     return { filas: rows, problemas: problems };

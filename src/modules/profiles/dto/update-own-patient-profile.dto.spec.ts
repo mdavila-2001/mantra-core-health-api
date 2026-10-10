@@ -15,19 +15,19 @@ import { UpdateOwnPatientProfileDto } from './update-own-patient-profile.dto';
  * @param prefix - La ruta acumulada hasta este nivel.
  * @returns Las rutas de las propiedades con error, ordenadas y sin repetidos.
  */
-function rutasWithError(
+function routesWithError(
   errors: readonly ValidationError[],
   prefix = '',
 ): string[] {
-  const rutas: string[] = [];
+  const routes: string[] = [];
   for (const error of errors) {
-    const ruta = prefix ? `${prefix}.${error.property}` : error.property;
-    if (error.constraints) rutas.push(ruta);
+    const route = prefix ? `${prefix}.${error.property}` : error.property;
+    if (error.constraints) routes.push(route);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasWithError(error.children, ruta));
+      routes.push(...routesWithError(error.children, route));
     }
   }
-  return [...new Set(rutas)].sort();
+  return [...new Set(routes)].sort();
 }
 
 /**
@@ -52,7 +52,7 @@ async function propertiesWithError(
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasWithError(errors);
+  return routesWithError(errors);
 }
 
 /**
@@ -117,11 +117,11 @@ describe('UpdateOwnPatientProfileDto · coordenadas de domicilio y trabajo', () 
     });
 
     it('null en uno solo es un par incoherente: rechazado', async () => {
-      const rutas = await propertiesWithError({
+      const routes = await propertiesWithError({
         [latKey]: null,
         [lngKey]: -63.1821,
       });
-      expect(rutas.length).toBeGreaterThan(0);
+      expect(routes.length).toBeGreaterThan(0);
     });
   });
 

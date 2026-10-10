@@ -132,16 +132,16 @@ function build() {
   // el vigente ni que evite crear una fila idéntica.
   const contactPointsRepo = {
     findById: mockFn(),
-    findVigentesByOwner: mockFn().mockResolvedValue([]),
-    findVigentesByOwners: mockFn().mockResolvedValue([]),
-    findVigenteByOwnerAndSystem: mockFn().mockResolvedValue(null),
-    findVigenteByOwnerSystemAndUse: mockFn().mockResolvedValue(null),
-    closeVigente: mockFn(),
+    findAllCurrentByOwner: mockFn().mockResolvedValue([]),
+    findAllCurrentByOwners: mockFn().mockResolvedValue([]),
+    findCurrentByOwnerAndSystem: mockFn().mockResolvedValue(null),
+    findCurrentByOwnerSystemAndUse: mockFn().mockResolvedValue(null),
+    closeCurrent: mockFn(),
     create: mockFn(),
   };
   const addressesRepo = {
-    findVigenteByOwnerAndUse: mockFn().mockResolvedValue(null),
-    closeVigente: mockFn(),
+    findCurrentByOwnerAndUse: mockFn().mockResolvedValue(null),
+    closeCurrent: mockFn(),
     create: mockFn(),
   };
   // El NIT vive en `common.identifiers` como un tipo más, igual que el CI.
@@ -786,8 +786,8 @@ describe('ProfilesPatientsService', () => {
 
       await d.service.getOwnSummary(titular);
 
-      const [, filtro] = d.tx.findOne.mock.calls[0];
-      expect(filtro).toMatchObject({
+      const [, filter] = d.tx.findOne.mock.calls[0];
+      expect(filter).toMatchObject({
         subjectEntityId: 'per-1',
         revokedAt: null,
       });
@@ -842,10 +842,10 @@ describe('ProfilesPatientsService', () => {
 
     it('trae el teléfono vigente y el municipio del domicilio vigente', async () => {
       const d = withPatient();
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue({
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue({
         value: '+591 700 12345',
       });
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         municipalityConceptId: 'mun-1',
       });
 
@@ -888,7 +888,7 @@ describe('ProfilesPatientsService', () => {
     it('devuelve las dos direcciones, y las coordenadas viajan juntas', async () => {
       // Media coordenada no ubica nada: si falta una, no viaja ninguna.
       const d = withPatient();
-      d.addressesRepo.findVigenteByOwnerAndUse
+      d.addressesRepo.findCurrentByOwnerAndUse
         .mockResolvedValueOnce({
           lines: 'Av. Banzer #1234',
           city: 'Santa Cruz',
@@ -1192,14 +1192,14 @@ describe('ProfilesPatientsService', () => {
 
     it('un cuerpo vacío no toca la auditoría de la persona', async () => {
       const d = withPatient();
-      const antes = d.person.updatedAt;
+      const before = d.person.updatedAt;
 
       const res = await d.service.updateOwnProfile({}, titular);
 
       // «Sin cambios» incluye la fila: mover `updated_at`, `updated_by_user_id` y
       // `row_version` sin haber escrito una sola columna convierte la auditoría
       // en ruido y hace fallar por conflicto de versión a quien la tuviera leída.
-      expect(d.person.updatedAt).toBe(antes);
+      expect(d.person.updatedAt).toBe(before);
       expect(d.person.updatedByUserId).toBeUndefined();
       // Y sigue devolviendo el perfil, que es lo que el contrato promete.
       expect(res).toMatchObject({ personId: 'per-1', name: 'Ada' });
@@ -1207,13 +1207,13 @@ describe('ProfilesPatientsService', () => {
 
     it('un PATCH que sólo trae el teléfono no toca la persona', async () => {
       const d = withPatient();
-      const antes = d.person.updatedAt;
+      const before = d.person.updatedAt;
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
 
       // El teléfono no vive en `profiles.persons`, y su propia fila ya nace con
       // su auditoría: marcar la persona diría que cambió algo suyo que no cambió.
-      expect(d.person.updatedAt).toBe(antes);
+      expect(d.person.updatedAt).toBe(before);
       expect(d.person.updatedByUserId).toBeUndefined();
       expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(1);
     });
@@ -1262,7 +1262,7 @@ describe('ProfilesPatientsService', () => {
     it('vaciar el teléfono cierra el vigente y no crea ninguno', async () => {
       const d = withPatient();
       const current = { id: 'cp-1', value: '+591 700 12345' };
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue(
         current,
       );
 
@@ -1270,7 +1270,7 @@ describe('ProfilesPatientsService', () => {
 
       // Quedarse sin teléfono es un dato; una fila con el valor vacío lo
       // contaría como si todavía tuviera uno.
-      expect(d.contactPointsRepo.closeVigente).toHaveBeenCalledWith(
+      expect(d.contactPointsRepo.closeCurrent).toHaveBeenCalledWith(
         current,
         expect.any(Date),
         'user-1',
@@ -1280,11 +1280,11 @@ describe('ProfilesPatientsService', () => {
 
     it('vaciar el teléfono sin tener ninguno no escribe nada', async () => {
       const d = withPatient();
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(null);
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue(null);
 
       await d.service.updateOwnProfile({ phone: '' }, titular);
 
-      expect(d.contactPointsRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.contactPointsRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
     });
 
@@ -1299,13 +1299,13 @@ describe('ProfilesPatientsService', () => {
     it('al cambiar el teléfono cierra el vigente y crea el nuevo', async () => {
       const d = withPatient();
       const current = { id: 'cp-1', value: '+591 700 00000' };
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue(
         current,
       );
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
 
-      expect(d.contactPointsRepo.closeVigente).toHaveBeenCalledWith(
+      expect(d.contactPointsRepo.closeCurrent).toHaveBeenCalledWith(
         current,
         expect.any(Date),
         'user-1',
@@ -1318,38 +1318,38 @@ describe('ProfilesPatientsService', () => {
 
     it('el mismo teléfono no cierra nada ni crea una fila', async () => {
       const d = withPatient();
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue({
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue({
         id: 'cp-1',
         value: '+591 700 12345',
       });
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
 
-      expect(d.contactPointsRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.contactPointsRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
     });
 
     it('sin teléfono vigente crea el primero sin cerrar nada', async () => {
       const d = withPatient();
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(null);
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue(null);
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
 
-      expect(d.contactPointsRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.contactPointsRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(1);
     });
 
     it('al cambiar el municipio cierra el domicilio vigente y crea el nuevo', async () => {
       const d = withPatient();
       const current = { id: 'ad-1', municipalityConceptId: 'mun-vieja' };
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(current);
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(current);
 
       await d.service.updateOwnProfile(
         { residenceMunicipalityConceptId: BO_MUNICIPALITY_CONCEPT_ID },
         titular,
       );
 
-      expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
+      expect(d.addressesRepo.closeCurrent).toHaveBeenCalledWith(
         current,
         expect.any(Date),
         'user-1',
@@ -1367,7 +1367,7 @@ describe('ProfilesPatientsService', () => {
 
     it('el mismo municipio no cierra el domicilio ni crea otro', async () => {
       const d = withPatient();
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         id: 'ad-1',
         municipalityConceptId: BO_MUNICIPALITY_CONCEPT_ID,
       });
@@ -1377,7 +1377,7 @@ describe('ProfilesPatientsService', () => {
         titular,
       );
 
-      expect(d.addressesRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.addressesRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.addressesRepo.create).not.toHaveBeenCalled();
     });
 
@@ -1473,7 +1473,7 @@ describe('ProfilesPatientsService', () => {
 
       it('un PATCH que sólo trae la del catálogo marca la fila como modificada', async () => {
         const d = withPatient();
-        const antes = d.person.updatedAt;
+        const before = d.person.updatedAt;
 
         await d.service.updateOwnProfile(
           { occupationConceptId: BO_OCCUPATION_CONCEPT_ID },
@@ -1483,7 +1483,7 @@ describe('ProfilesPatientsService', () => {
         // La ocupación vive en `profiles.persons`: escribirla es cambiar la fila,
         // y la auditoría tiene que decirlo igual que con el resto de sus campos.
         expect(d.person.updatedByUserId).toBe('user-1');
-        expect(d.person.updatedAt).not.toBe(antes);
+        expect(d.person.updatedAt).not.toBe(before);
       });
     });
 
@@ -1613,29 +1613,29 @@ describe('ProfilesPatientsService', () => {
      */
     it('cambiarlo cierra el anterior en vez de pisarlo', async () => {
       const d = withPatient();
-      const anterior = {
+      const previous = {
         typeConceptId: CONCEPTS.ID_TYPE_TAX,
         value: '111',
         validTo: null,
       } as any;
-      d.tx.find.mockResolvedValue([anterior]);
+      d.tx.find.mockResolvedValue([previous]);
 
       await d.service.updateOwnProfile({ taxId: '222' } as any, titular);
 
-      expect(anterior.validTo).toBeInstanceOf(Date);
+      expect(previous.validTo).toBeInstanceOf(Date);
     });
 
     it('vaciarlo cierra el anterior y no abre otro', async () => {
       const d = withPatient();
-      const anterior = {
+      const previous = {
         typeConceptId: CONCEPTS.ID_TYPE_TAX,
         value: '111',
         validTo: null,
       } as any;
-      d.tx.find.mockResolvedValue([anterior]);
+      d.tx.find.mockResolvedValue([previous]);
       await d.service.updateOwnProfile({ taxId: '' } as any, titular);
 
-      expect(anterior.validTo).toBeInstanceOf(Date);
+      expect(previous.validTo).toBeInstanceOf(Date);
       expect(d.identifiersRepo.create).not.toHaveBeenCalled();
     });
 
@@ -1646,7 +1646,7 @@ describe('ProfilesPatientsService', () => {
     it('mudarse conserva el municipio y las coordenadas', async () => {
       const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Calle vieja 1',
         municipalityConceptId: sacaba,
         latitude: '-17.78',
@@ -1663,12 +1663,12 @@ describe('ProfilesPatientsService', () => {
       expect(data.lines).toBe('Av. Nueva 200');
       expect(data.municipalityConceptId).toBe(sacaba);
       expect(data.latitude).toBe('-17.78');
-      expect(d.addressesRepo.closeVigente).toHaveBeenCalled();
+      expect(d.addressesRepo.closeCurrent).toHaveBeenCalled();
     });
 
     it('el mismo texto no abre una dirección nueva', async () => {
       const d = withPatient();
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Nueva 200',
       });
 
@@ -1692,7 +1692,7 @@ describe('ProfilesPatientsService', () => {
       const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
       const trinidad = boMunicipalityConceptId('030301');
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Blanco Galindo km 5',
         municipalityConceptId: sacaba,
         latitude: '-17.40',
@@ -1710,13 +1710,13 @@ describe('ProfilesPatientsService', () => {
       expect(data.lines).toBe('Av. Blanco Galindo km 5');
       expect(data.latitude).toBe('-17.4');
       expect(data.longitude).toBe('-66.03');
-      expect(d.addressesRepo.closeVigente).toHaveBeenCalled();
+      expect(d.addressesRepo.closeCurrent).toHaveBeenCalled();
     });
 
     it('cambiar sólo el GPS conserva la calle y el municipio', async () => {
       const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Blanco Galindo km 5',
         municipalityConceptId: sacaba,
         latitude: '-17.40',
@@ -1739,7 +1739,7 @@ describe('ProfilesPatientsService', () => {
     it('los mismos tres valores no cierran ni abren ninguna fila', async () => {
       const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Blanco Galindo km 5',
         municipalityConceptId: sacaba,
         latitude: '-17.40',
@@ -1757,7 +1757,7 @@ describe('ProfilesPatientsService', () => {
         titular,
       );
 
-      expect(d.addressesRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.addressesRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.addressesRepo.create).not.toHaveBeenCalled();
     });
 
@@ -1773,7 +1773,7 @@ describe('ProfilesPatientsService', () => {
      */
     it('sin dirección de trabajo previa, el país es el de Bolivia', async () => {
       const d = withPatient();
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(null);
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(null);
 
       await d.service.updateOwnProfile(
         { workAddressLines: 'Av. América esq. Beijing' } as any,
@@ -1834,14 +1834,14 @@ describe('ProfilesPatientsService', () => {
     it('el municipio de trabajo se guarda como una dirección de uso WORK', async () => {
       const d = withPatient();
       const trinidad = boMunicipalityConceptId('030301');
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(null);
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(null);
 
       await d.service.updateOwnProfile(
         { workMunicipalityConceptId: trinidad } as any,
         titular,
       );
 
-      expect(d.addressesRepo.findVigenteByOwnerAndUse).toHaveBeenCalledWith(
+      expect(d.addressesRepo.findCurrentByOwnerAndUse).toHaveBeenCalledWith(
         d.tx,
         'per-1',
         CONCEPTS.ADDR_USE_WORK,
@@ -1914,22 +1914,22 @@ describe('ProfilesPatientsService', () => {
 
     it('corrige el departamento de emisión sin tocar el número del documento', async () => {
       const d = withPatient();
-      const documento = {
+      const document = {
         typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
         value: '4821993',
         issuerAdministrativeAreaConceptId: 'dep-lp',
         validTo: null,
       } as any;
-      d.tx.find.mockResolvedValue([documento]);
+      d.tx.find.mockResolvedValue([document]);
 
       await d.service.updateOwnProfile(
         { issuerAdministrativeAreaConceptId: 'dep-sc' } as any,
         titular,
       );
 
-      expect(documento.issuerAdministrativeAreaConceptId).toBe('dep-sc');
-      expect(documento.value).toBe('4821993');
-      expect(documento.validTo).toBeNull();
+      expect(document.issuerAdministrativeAreaConceptId).toBe('dep-sc');
+      expect(document.value).toBe('4821993');
+      expect(document.validTo).toBeNull();
       expect(d.identifiersRepo.create).not.toHaveBeenCalled();
     });
 
@@ -2119,7 +2119,7 @@ describe('ProfilesPatientsService', () => {
         profileId: 'pp-1',
         patientCode: 'PC-1',
       });
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(address);
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(address);
       return d;
     }
 
@@ -2237,9 +2237,9 @@ describe('ProfilesPatientsService', () => {
 
       await b.service.registerOwnDependent(child as never, actor);
 
-      const [, datos] = b.portalProxiesRepo.create.mock.calls[0];
-      expect(datos.validFrom).toBeInstanceOf(Date);
-      expect(datos.validTo).toBeUndefined();
+      const [, data] = b.portalProxiesRepo.create.mock.calls[0];
+      expect(data.validFrom).toBeInstanceOf(Date);
+      expect(data.validTo).toBeUndefined();
     });
 
     it('sin documento no escribe identificador: un recién nacido no tiene cédula', async () => {
@@ -2343,9 +2343,9 @@ describe('ProfilesPatientsService', () => {
         },
       ]);
 
-      const [dependiente] = await b.service.getOwnDependents(actor);
+      const [dependent] = await b.service.getOwnDependents(actor);
 
-      expect(dependiente).toMatchObject({
+      expect(dependent).toMatchObject({
         id: 'proxy-1',
         patientProfileId: 'person-hijo',
         fullName: 'Mateo Quispe',
@@ -2355,7 +2355,7 @@ describe('ProfilesPatientsService', () => {
       });
       // La edad la calcula el servidor: dejarla al navegador daría edades
       // distintas según la hora del aparato.
-      expect(dependiente.ageYears).toBe(
+      expect(dependent.ageYears).toBe(
         new Date().getUTCFullYear() -
           2018 -
           (new Date() < new Date(Date.UTC(new Date().getUTCFullYear(), 2, 14))
@@ -2363,7 +2363,7 @@ describe('ProfilesPatientsService', () => {
             : 0),
       );
       // Lo que no hay no viaja vacío.
-      expect(dependiente).not.toHaveProperty('nationalId');
+      expect(dependent).not.toHaveProperty('nationalId');
     });
 
     it('sin dependientes devuelve una lista vacía, no un error', async () => {

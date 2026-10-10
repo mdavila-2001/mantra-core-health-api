@@ -278,7 +278,7 @@ describe('CommunityMessagingReadService', () => {
       ['inexistente', []],
       ['huérfano', []],
       ['mensaje removido', []],
-    ])('uniforma el 404 para %s', async (_caso, messages) => {
+    ])('uniforma el 404 para %s', async (_case, messages) => {
       const d = build();
       d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue(
         messages,
