@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "id": "new_required_request_field:POST /profiles/practitioners/me/affiliations:organizationName",
+    "reason": "Corrección del contrato, no del comportamiento: el contrato anterior documentaba esta ruta con el CreateAffiliationDto homónimo de otro módulo. El DTO real de profiles ya valida el campo como obligatorio (@IsString sin @IsOptional) y el servidor ya respondía 400 sin él.",
+    "migrationNote": "Ninguna para clientes que ya funcionaban: una petición sin este campo ya era rechazada. Los clientes generados desde el contrato deben regenerarse para tomar el esquema ProfilesCreateAffiliationDto."
+  },
+  {
+    "id": "new_required_request_field:POST /profiles/practitioners/me/affiliations:startDate",
+    "reason": "Corrección del contrato, no del comportamiento: el contrato anterior documentaba esta ruta con el CreateAffiliationDto homónimo de otro módulo. El DTO real de profiles ya valida el campo como obligatorio (@IsDateString sin @IsOptional) y el servidor ya respondía 400 sin él.",
+    "migrationNote": "Ninguna para clientes que ya funcionaban: una petición sin este campo ya era rechazada. Los clientes generados desde el contrato deben regenerarse para tomar el esquema ProfilesCreateAffiliationDto."
+  },
+  {
+    "id": "new_required_request_field:POST /profiles/practitioners/{profileId}/affiliations:organizationName",
+    "reason": "Corrección del contrato, no del comportamiento: el contrato anterior documentaba esta ruta con el CreateAffiliationDto homónimo de otro módulo. El DTO real de profiles ya valida el campo como obligatorio (@IsString sin @IsOptional) y el servidor ya respondía 400 sin él.",
+    "migrationNote": "Ninguna para clientes que ya funcionaban: una petición sin este campo ya era rechazada. Los clientes generados desde el contrato deben regenerarse para tomar el esquema ProfilesCreateAffiliationDto."
+  },
+  {
+    "id": "new_required_request_field:POST /profiles/practitioners/{profileId}/affiliations:startDate",
+    "reason": "Corrección del contrato, no del comportamiento: el contrato anterior documentaba esta ruta con el CreateAffiliationDto homónimo de otro módulo. El DTO real de profiles ya valida el campo como obligatorio (@IsDateString sin @IsOptional) y el servidor ya respondía 400 sin él.",
+    "migrationNote": "Ninguna para clientes que ya funcionaban: una petición sin este campo ya era rechazada. Los clientes generados desde el contrato deben regenerarse para tomar el esquema ProfilesCreateAffiliationDto."
+  },
+  {
+    "id": "new_required_request_field:POST /surveys/assignments:surveyVersionId",
+    "reason": "Corrección del contrato, no del comportamiento: el contrato anterior documentaba esta ruta con el CreateAssignmentDto homónimo de otro módulo. El DTO real de surveys ya valida el campo como obligatorio (@IsUUID sin @IsOptional) y el servidor ya respondía 400 sin él.",
+    "migrationNote": "Ninguna para clientes que ya funcionaban: una petición sin este campo ya era rechazada. Los clientes generados desde el contrato deben regenerarse para tomar el esquema SurveysCreateAssignmentDto."
+  },
+  {
+    "id": "new_required_request_field:POST /surveys/assignments:targetType",
+    "reason": "Corrección del contrato, no del comportamiento: el contrato anterior documentaba esta ruta con el CreateAssignmentDto homónimo de otro módulo. El DTO real de surveys ya valida el campo como obligatorio (@IsIn sin @IsOptional) y el servidor ya respondía 400 sin él.",
+    "migrationNote": "Ninguna para clientes que ya funcionaban: una petición sin este campo ya era rechazada. Los clientes generados desde el contrato deben regenerarse para tomar el esquema SurveysCreateAssignmentDto."
+  },
+  {
+    "id": "new_required_request_field:POST /surveys/assignments:targetId",
+    "reason": "Corrección del contrato, no del comportamiento: el contrato anterior documentaba esta ruta con el CreateAssignmentDto homónimo de otro módulo. El DTO real de surveys ya valida el campo como obligatorio (@IsUUID sin @IsOptional) y el servidor ya respondía 400 sin él.",
+    "migrationNote": "Ninguna para clientes que ya funcionaban: una petición sin este campo ya era rechazada. Los clientes generados desde el contrato deben regenerarse para tomar el esquema SurveysCreateAssignmentDto."
+  }
+]
