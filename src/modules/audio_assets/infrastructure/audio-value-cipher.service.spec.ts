@@ -14,7 +14,7 @@ describe('AudioValueCipherService', () => {
     process.env.AUDIO_TTS_DATA_KEY =
       'test-audio-data-key-012345678901234567890123';
     const cipher = new AudioValueCipherService();
-    const encrypted = manipular(cipher.encrypt('Hola'));
+    const encrypted = manipulate(cipher.encrypt('Hola'));
     expect(() => cipher.decrypt(encrypted)).toThrow();
   });
 });
@@ -41,7 +41,7 @@ describe('AudioValueCipherService', () => {
  * Eso sí cambia el texto cifrado siempre, y es lo que la etiqueta GCM tiene que
  * rechazar.
  */
-function manipular(payload: string): string {
+function manipulate(payload: string): string {
   const [version, iv, tag, data] = payload.split('.');
   const bytes = Buffer.from(data ?? '', 'base64url');
   bytes[0] ^= 0xff;
