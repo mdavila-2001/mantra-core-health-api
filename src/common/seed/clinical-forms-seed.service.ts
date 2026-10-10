@@ -334,14 +334,14 @@ export class ClinicalFormsSeedService {
 
     // Los miembros: los conceptos de este mismo seed, en el orden del catálogo
     // y sin repetir —varias formas estándar comparten especialidad—.
-    const vistas = new Set<string>();
+    const views = new Set<string>();
     let ordinal = 0;
     for (const form of STANDARD_FORMS) {
       const specialty = form.specialty;
       if (specialty.code === CODE_TRANSVERSAL) continue;
-      const conceptId = this.specialtyConceptIdAcunado(specialty);
-      if (vistas.has(conceptId)) continue;
-      vistas.add(conceptId);
+      const conceptId = this.specialtyConceptIdMinted(specialty);
+      if (views.has(conceptId)) continue;
+      views.add(conceptId);
       em.create(
         ValueSetMembers,
         {
@@ -361,7 +361,7 @@ export class ClinicalFormsSeedService {
     await em.flush();
 
     this.logger.info(
-      { valueSet: VALUE_SET_SPECIALTIES, especialidades: vistas.size },
+      { valueSet: VALUE_SET_SPECIALTIES, especialidades: views.size },
       'El paquete del modelo no trajo el catálogo de especialidades: se publicó el de este seed',
     );
     return created;
@@ -377,12 +377,12 @@ export class ClinicalFormsSeedService {
     ofModel: ReadonlyMap<string, string>,
   ): string {
     return (
-      ofModel.get(specialty.code) ?? this.specialtyConceptIdAcunado(specialty)
+      ofModel.get(specialty.code) ?? this.specialtyConceptIdMinted(specialty)
     );
   }
 
   /** El concept id acuñado por este seed, derivado del código. */
-  private specialtyConceptIdAcunado(specialty: StandardFormSpecialty): string {
+  private specialtyConceptIdMinted(specialty: StandardFormSpecialty): string {
     return deterministicId(`${ORIGIN}:specialty:${specialty.code}`);
   }
 
@@ -405,22 +405,22 @@ export class ClinicalFormsSeedService {
   ): Promise<number> {
     if (ofModel.size === 0) return 0;
 
-    const vistas = new Set<string>();
+    const views = new Set<string>();
     let reassigned = 0;
     for (const form of STANDARD_FORMS) {
       const code = form.specialty.code;
-      if (vistas.has(code)) continue;
-      vistas.add(code);
+      if (views.has(code)) continue;
+      views.add(code);
 
       const ofModelId = ofModel.get(code);
       if (ofModelId === undefined) continue;
 
-      const acunado = this.specialtyConceptIdAcunado(form.specialty);
-      if (acunado === ofModelId) continue;
+      const minted = this.specialtyConceptIdMinted(form.specialty);
+      if (minted === ofModelId) continue;
 
       reassigned += await em.nativeUpdate(
         SpecialtyChartTemplates,
-        { specialtyConceptId: acunado },
+        { specialtyConceptId: minted },
         { specialtyConceptId: ofModelId },
       );
     }
@@ -517,7 +517,7 @@ export class ClinicalFormsSeedService {
     for (const form of STANDARD_FORMS) {
       // Las que el modelo ya declara no se acuñan: se usan las suyas.
       if (ofModel.has(form.specialty.code)) continue;
-      byId.set(this.specialtyConceptIdAcunado(form.specialty), form.specialty);
+      byId.set(this.specialtyConceptIdMinted(form.specialty), form.specialty);
     }
 
     const ids = [...byId.keys()];
@@ -676,7 +676,7 @@ export class ClinicalFormsSeedService {
     // y la presentación de cada campo, sus opciones y condiciones.
     await em.nativeUpdate(
       DynamicFieldDefinitions,
-      { id: fieldIdDe(form, CHART_TEMPLATE_PROVENANCE_FIELD_CODE) },
+      { id: fieldIdOf(form, CHART_TEMPLATE_PROVENANCE_FIELD_CODE) },
       { defaultValueJson: catalogRecord(form), updatedAt: now },
     );
 
@@ -701,7 +701,7 @@ export class ClinicalFormsSeedService {
       // (lo garantiza `tools/clinical-forms/build-forms.mjs`).
       await em.nativeUpdate(
         DynamicFieldDefinitions,
-        { id: fieldIdDe(form, field.code) },
+        { id: fieldIdOf(form, field.code) },
         { name: field.name, updatedAt: now },
       );
     }
@@ -712,7 +712,7 @@ export class ClinicalFormsSeedService {
       [
         CHART_TEMPLATE_PROVENANCE_FIELD_CODE,
         ...form.fields.map((f) => f.code),
-      ].map((code) => fieldIdDe(form, code)),
+      ].map((code) => fieldIdOf(form, code)),
     );
     await em.nativeUpdate(
       FieldAssignments,
@@ -765,7 +765,7 @@ export class ClinicalFormsSeedService {
     // con un `motivo_consulta` cada uno chocarían entre sí. El prefijo no se ve
     // en ningún lado —lo que se dibuja es `name`— pero garantiza unicidad.
     const fieldCode = `${form.code}.${field.code}`;
-    const fieldId = fieldIdDe(form, field.code);
+    const fieldId = fieldIdOf(form, field.code);
 
     if (!(await em.findOne(DynamicFieldDefinitions, { id: fieldId }))) {
       em.create(
@@ -811,7 +811,7 @@ export class ClinicalFormsSeedService {
 }
 
 /** El id determinista de un campo del catálogo. */
-function fieldIdDe(form: StandardFormDefinition, code: string): string {
+function fieldIdOf(form: StandardFormDefinition, code: string): string {
   return deterministicId(`${ORIGIN}:field:${form.code}.${code}`);
 }
 
@@ -835,7 +835,7 @@ export function catalogRecord(
         allowOther,
         description,
         showWhen,
-      }).filter(([, valor]) => valor !== undefined),
+      }).filter(([, value]) => value !== undefined),
     );
     if (Object.keys(presentation).length > 0)
       fieldPresentation[field.code] = presentation;

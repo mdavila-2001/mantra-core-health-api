@@ -35,7 +35,7 @@ import {
 import networksDataset from './data/bolivia/provider-networks.dataset.json';
 
 /** Santa Cruz (`geo:bo:department:SC`): las dos redes son de esa plaza. */
-const DEPARTAMENTO_SANTA_CRUZ = '16fe92e8-bec7-577d-9e63-4a0d8ff3b0e4';
+const DEPARTMENT_SANTA_CRUZ = '16fe92e8-bec7-577d-9e63-4a0d8ff3b0e4';
 const SEED_ACTOR_ID = deterministicId('seed:user:bootstrap-actor');
 const SOURCE_NAME = 'red de aseguradora';
 
@@ -59,7 +59,7 @@ interface Site {
   source_row: number;
 }
 
-interface Ficha {
+interface Sheet {
   key: string;
   nombre: string;
   especialidades: string[];
@@ -171,18 +171,18 @@ export class DirectoryNetworksSeedService {
           if (!link) throw new Error('la cuenta no tiene persona vinculada');
           profileId = link.personId;
         } else {
-          const [primera] = record.sedes;
+          const [first] = record.sedes;
           const registration = await this.registrationWithNationalId(
             record,
             email,
             password,
             {
               specialtyConceptIds: concepts.length ? concepts : undefined,
-              ownSite: primera ? this.siteOf(primera) : undefined,
+              ownSite: first ? this.siteOf(first) : undefined,
             },
           );
           result.practitionersCreated++;
-          if (primera) result.sitesCreated++;
+          if (first) result.sitesCreated++;
           userId = registration.userId;
           profileId = registration.practitionerProfileId;
           practiceId = registration.ownPracticeId;
@@ -283,19 +283,19 @@ export class DirectoryNetworksSeedService {
   }
 
   /** Una ficha por persona: pliega las filas repetidas y las dos redes. */
-  private records(): Ficha[] {
-    const byKey = new Map<string, Ficha>();
+  private records(): Sheet[] {
+    const byKey = new Map<string, Sheet>();
     for (const red of networksDataset.datos.redes) {
       for (const p of red.profesionales) {
-        const clave = normalize(p.nombre);
-        const record = byKey.get(clave) ?? {
-          key: clave,
+        const key = normalize(p.nombre);
+        const record = byKey.get(key) ?? {
+          key: key,
           nombre: p.nombre,
           especialidades: [],
           sedes: [],
           carriers: [],
         };
-        byKey.set(clave, record);
+        byKey.set(key, record);
         if (!record.carriers.includes(red.carrierCode)) {
           record.carriers.push(red.carrierCode);
         }
@@ -313,7 +313,7 @@ export class DirectoryNetworksSeedService {
     return [...byKey.values()];
   }
 
-  private email(record: Ficha): string {
+  private email(record: Sheet): string {
     const parts = record.nombre.replace(',', ' ').split(/\s+/).filter(Boolean);
     const suffix = deterministicId(`seed:directory:${record.key}`).slice(0, 6);
     return syntheticEmail(parts[1] ?? parts[0] ?? '', parts[0] ?? '', suffix);
@@ -343,13 +343,13 @@ export class DirectoryNetworksSeedService {
    * chocar con otra ya dada; se reintenta con otra sal en vez de fallar.
    */
   private async registrationWithNationalId(
-    record: Ficha,
+    record: Sheet,
     email: string,
     password: string,
     extra: Partial<RegisterPractitionerDto>,
   ) {
-    const coma = record.nombre.includes(',');
-    const [apellidos, nombres] = coma
+    const comma = record.nombre.includes(',');
+    const [surnames, names] = comma
       ? record.nombre.split(',').map((x) => x.trim())
       : [undefined, undefined];
     for (let sal = 0; sal < 5; sal++) {
@@ -357,11 +357,11 @@ export class DirectoryNetworksSeedService {
       const dto: RegisterPractitionerDto = {
         email,
         password,
-        ...(coma
-          ? { name: nombres, lastName: apellidos }
+        ...(comma
+          ? { name: names, lastName: surnames }
           : { displayName: record.nombre }),
         nationalId: syntheticNationalId(key),
-        issuerAdministrativeAreaConceptId: DEPARTAMENTO_SANTA_CRUZ,
+        issuerAdministrativeAreaConceptId: DEPARTMENT_SANTA_CRUZ,
         birthDate: syntheticBirthDate(key),
         mobilePhone: syntheticMobilePhone(key),
         licenseNumber: `SINT-${syntheticNationalId(`license:${key}`)}`,

@@ -25,9 +25,9 @@ import { MODULE_CONCEPT_SEEDS } from './module-concepts';
 
 /** Códigos tal como quedan almacenados, en el orden en que los siembra el seed. */
 function storedCodes(): { code: string; origen: string }[] {
-  const stored = Object.entries(CONCEPT_DEFS).map(([nombre, def]) => ({
+  const stored = Object.entries(CONCEPT_DEFS).map(([name, def]) => ({
     code: def.code,
-    origen: `CONCEPT_DEFS.${nombre} (${def.key})`,
+    origen: `CONCEPT_DEFS.${name} (${def.key})`,
   }));
 
   for (const seed of MODULE_CONCEPT_SEEDS) {
@@ -56,7 +56,7 @@ function duplicates(
   }
 
   return Object.fromEntries(
-    [...byCode.entries()].filter(([, origenes]) => origenes.length > 1),
+    [...byCode.entries()].filter(([, origins]) => origins.length > 1),
   );
 }
 
@@ -71,11 +71,11 @@ describe('catálogo de conceptos internos', () => {
     // La clave es la semilla del UUIDv5: repetirla es darle a dos conceptos
     // distintos el mismo id, que es peor que la colisión de código porque no
     // falla —uno pisa al otro en silencio—.
-    const claves = [
+    const keys = [
       ...Object.values(CONCEPT_DEFS).map((def) => def.key),
       ...MODULE_CONCEPT_SEEDS.map((seed) => seed.key),
     ];
-    expect(claves.length).toBe(new Set(claves).size);
+    expect(keys.length).toBe(new Set(keys).size);
   });
 
   it('guarda de los conceptos de módulo la clave, no su código humano', () => {

@@ -54,18 +54,18 @@ function loggerFake() {
 /**
  * Arma el orquestador con todos los seeds mockeados.
  *
- * @param fallan - Nombres de los seeds que deben lanzar en esta corrida.
+ * @param fail - Nombres de los seeds que deben lanzar en esta corrida.
  */
-function build(fallan: Step[] = []) {
+function build(fail: Step[] = []) {
   const logger = loggerFake();
   const double = Object.fromEntries(
-    STEPS.map((nombre) => [
-      nombre,
+    STEPS.map((name) => [
+      name,
       {
-        run: fallan.includes(nombre)
+        run: fail.includes(name)
           ? jest
               .fn<() => Promise<unknown>>()
-              .mockRejectedValue(new Error(`explotó ${nombre}`))
+              .mockRejectedValue(new Error(`explotó ${name}`))
           : jest
               .fn<() => Promise<unknown>>()
               .mockResolvedValue({ inserted: 0 }),
@@ -123,7 +123,7 @@ const CONTENT: readonly Step[] = [
 
 /** Los pasos de núcleo, que corren siempre que la cadena corra. */
 const CORE: readonly Step[] = STEPS.filter(
-  (nombre) => !CONTENT.includes(nombre),
+  (name) => !CONTENT.includes(name),
 );
 
 describe('SeedBootstrapService', () => {
@@ -141,12 +141,12 @@ describe('SeedBootstrapService', () => {
   describe('interruptor de arranque', () => {
     it('con SEED_ON_BOOT=false no toca la base, y lo dice', async () => {
       process.env.SEED_ON_BOOT = 'false';
-      const { service, dobles, logger } = build();
+      const { service, dobles: doubles, logger } = build();
 
       await service.onApplicationBootstrap();
 
-      for (const nombre of STEPS) {
-        expect(dobles[nombre].run).not.toHaveBeenCalled();
+      for (const name of STEPS) {
+        expect(doubles[name].run).not.toHaveBeenCalled();
       }
       // El aviso importa tanto como no sembrar: una base sin catálogo deja la
       // aplicación en pie e incapaz de persistir, y ese silencio ya costó caro.
@@ -158,27 +158,27 @@ describe('SeedBootstrapService', () => {
 
     it('sin la variable declarada siembra igual que antes del flag', async () => {
       delete process.env.SEED_ON_BOOT;
-      const { service, dobles } = build();
+      const { service, dobles: doubles } = build();
 
       await service.onApplicationBootstrap();
 
-      expect(dobles.terminology.run).toHaveBeenCalledTimes(1);
-      expect(dobles.clinicalForms.run).toHaveBeenCalledTimes(1);
+      expect(doubles.terminology.run).toHaveBeenCalledTimes(1);
+      expect(doubles.clinicalForms.run).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('interruptor de contenido', () => {
     it('con SEED_CONTENT_ON_BOOT=false corre el núcleo y saltea el contenido', async () => {
       process.env.SEED_CONTENT_ON_BOOT = 'false';
-      const { service, dobles } = build();
+      const { service, dobles: doubles } = build();
 
       const summary = await service.run();
 
-      for (const nombre of CORE) {
-        expect(dobles[nombre].run).toHaveBeenCalledTimes(1);
+      for (const name of CORE) {
+        expect(doubles[name].run).toHaveBeenCalledTimes(1);
       }
-      for (const nombre of CONTENT) {
-        expect(dobles[nombre].run).not.toHaveBeenCalled();
+      for (const name of CONTENT) {
+        expect(doubles[name].run).not.toHaveBeenCalled();
       }
       expect(summary.ok).toBe(CORE.length);
       expect(summary.steps).toHaveLength(CORE.length);
@@ -206,21 +206,21 @@ describe('SeedBootstrapService', () => {
       // Es el punto del modo: una instalación sin catálogos de negocio pero con
       // alguien que pueda entrar a cargarlos.
       process.env.SEED_CONTENT_ON_BOOT = 'false';
-      const { service, dobles } = build();
+      const { service, dobles: doubles } = build();
 
       await service.run();
 
-      expect(dobles.bootstrapAdmin.run).toHaveBeenCalledTimes(1);
+      expect(doubles.bootstrapAdmin.run).toHaveBeenCalledTimes(1);
     });
 
     it('sin la variable declarada corre la cadena entera', async () => {
       delete process.env.SEED_CONTENT_ON_BOOT;
-      const { service, dobles } = build();
+      const { service, dobles: doubles } = build();
 
       const summary = await service.run();
 
-      for (const nombre of STEPS) {
-        expect(dobles[nombre].run).toHaveBeenCalledTimes(1);
+      for (const name of STEPS) {
+        expect(doubles[name].run).toHaveBeenCalledTimes(1);
       }
       // Sin salteados el resumen conserva la forma que tenía antes del flag.
       expect(summary.skippedContent).toBeUndefined();
@@ -247,23 +247,23 @@ describe('SeedBootstrapService', () => {
       await service.run();
 
       const loggedInSteps = logger.info.mock.calls.filter(
-        ([contexto]) => (contexto as { event?: string }).event === 'seed.step',
+        ([context]) => (context as { event?: string }).event === 'seed.step',
       );
       expect(loggedInSteps).toHaveLength(STEPS.length);
-      for (const [contexto] of loggedInSteps) {
-        expect(contexto).toMatchObject({ inserted: 0, failed: false });
-        expect((contexto as { tookMs: number }).tookMs).toBeGreaterThanOrEqual(
+      for (const [context] of loggedInSteps) {
+        expect(context).toMatchObject({ inserted: 0, failed: false });
+        expect((context as { tookMs: number }).tookMs).toBeGreaterThanOrEqual(
           0,
         );
       }
     });
 
     it('un seed dependiente que falla no corta la cadena, pero se cuenta', async () => {
-      const { service, dobles } = build(['glossary']);
+      const { service, dobles: doubles } = build(['glossary']);
 
       const summary = await service.run();
 
-      expect(dobles.clinicalForms.run).toHaveBeenCalledTimes(1);
+      expect(doubles.clinicalForms.run).toHaveBeenCalledTimes(1);
       expect(summary.failed).toBe(1);
       expect(summary.ok).toBe(STEPS.length - 1);
       expect(summary.steps.find((step) => step.failed)?.name).toBe(
@@ -272,11 +272,11 @@ describe('SeedBootstrapService', () => {
     });
 
     it('si falla el catálogo de conceptos, los once dependientes ni se intentan', async () => {
-      const { service, dobles, logger } = build(['terminology']);
+      const { service, dobles: doubles, logger } = build(['terminology']);
 
       const summary = await service.run();
 
-      expect(dobles.dynamicEnums.run).not.toHaveBeenCalled();
+      expect(doubles.dynamicEnums.run).not.toHaveBeenCalled();
       expect(summary.steps).toHaveLength(1);
       expect(summary.failed).toBe(1);
       expect(logger.error).toHaveBeenCalledWith(
@@ -299,12 +299,12 @@ describe('SeedBootstrapService', () => {
     it('suma las filas de seeds que reportan con formas distintas', async () => {
       // Cada servicio devuelve su propia forma: `{ inserted }`, `{ templates,
       // specialties }`, contadores por nivel. El resumen suma los numéricos.
-      const { service, dobles } = build();
-      dobles.clinicalForms.run.mockResolvedValue({
+      const { service, dobles: doubles } = build();
+      doubles.clinicalForms.run.mockResolvedValue({
         templates: 15,
         specialties: 10,
       });
-      dobles.dynamicEnums.run.mockResolvedValue({
+      doubles.dynamicEnums.run.mockResolvedValue({
         valueSets: 52,
         options: 314,
       });
@@ -318,8 +318,8 @@ describe('SeedBootstrapService', () => {
       // Caso real: el glosario devuelve `orphanRelationships`, relaciones cuyo
       // destino no existe y que por eso NO se insertan. Sumarlas hacía que una
       // corrida sin trabajo informara «1 filas».
-      const { service, dobles } = build();
-      dobles.glossary.run.mockResolvedValue({
+      const { service, dobles: doubles } = build();
+      doubles.glossary.run.mockResolvedValue({
         valueSets: 0,
         terms: 0,
         relationships: 0,
@@ -336,8 +336,8 @@ describe('SeedBootstrapService', () => {
     });
 
     it('un seed que no devuelve contadores se registra sin inventar un número', async () => {
-      const { service, dobles } = build();
-      dobles.bootstrapAdmin.run.mockResolvedValue(undefined);
+      const { service, dobles: doubles } = build();
+      doubles.bootstrapAdmin.run.mockResolvedValue(undefined);
 
       const summary = await service.run();
 

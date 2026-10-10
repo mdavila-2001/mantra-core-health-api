@@ -220,7 +220,7 @@ export class BoGeographySeedService {
     counters.memberships += municipalities.memberships;
 
     const total = Object.values(counters).reduce(
-      (sum, valor) => sum + valor,
+      (sum, value) => sum + value,
       0,
     );
     if (total > 0) {
@@ -241,17 +241,17 @@ export class BoGeographySeedService {
    * glosario.
    */
   private assertUniqueCodes(): void {
-    const vistas = new Set<string>();
+    const views = new Set<string>();
     for (const department of BO_DEPARTMENTS) {
-      if (vistas.has(department.code)) {
+      if (views.has(department.code)) {
         throw new Error(
           `El catálogo geográfico declara la sigla "${department.code}" más de una vez`,
         );
       }
-      vistas.add(department.code);
+      views.add(department.code);
     }
 
-    const siglas = new Set(BO_DEPARTMENTS.map((department) => department.code));
+    const acronyms = new Set(BO_DEPARTMENTS.map((department) => department.code));
     const codes = new Set<string>();
     for (const municipality of BO_MUNICIPALITIES) {
       if (codes.has(municipality.ine)) {
@@ -264,7 +264,7 @@ export class BoGeographySeedService {
       // Un municipio cuyo departamento no está en el catálogo dejaría una FK
       // apuntando a un concepto que nadie siembra: la fila entra y la lectura
       // revienta después, lejos de acá. Mejor no arrancar.
-      if (!siglas.has(municipality.department)) {
+      if (!acronyms.has(municipality.department)) {
         throw new Error(
           `El municipio "${municipality.name}" (${municipality.ine}) cuelga del ` +
             `departamento "${municipality.department}", que no está en el catálogo`,

@@ -251,7 +251,7 @@ export function validate(form: RawForm): StandardFormDefinition {
 /** El tipo tiene que ser uno que el motor sepa dibujar. */
 function validateType(
   field: RawForm['fields'][number],
-  failure: (motivo: string) => never,
+  failure: (reason: string) => never,
 ): void {
   const withControl =
     field.dataType === 'json' &&
@@ -278,7 +278,7 @@ function validateType(
  */
 function validateOptions(
   field: RawForm['fields'][number],
-  failure: (motivo: string) => never,
+  failure: (reason: string) => never,
 ): void {
   if (field.options === undefined) {
     if (field.multiple === true)
@@ -306,31 +306,31 @@ function validateOptions(
 function validateCondition(
   showWhen: { field: string; equals: unknown },
   previous: ReadonlyMap<string, RawForm['fields'][number]>,
-  failure: (motivo: string) => never,
+  failure: (reason: string) => never,
 ): void {
-  const padre = previous.get(showWhen.field);
-  if (padre === undefined) {
+  const parent = previous.get(showWhen.field);
+  if (parent === undefined) {
     failure(`depende de "${showWhen.field}", que no está antes en la ficha`);
   }
   const values = Array.isArray(showWhen.equals)
     ? (showWhen.equals as unknown[])
     : [showWhen.equals];
   if (values.length === 0) failure('tiene una condición sin valores');
-  for (const valor of values) {
-    if (padre.dataType === 'boolean') {
-      if (typeof valor !== 'boolean') {
+  for (const value of values) {
+    if (parent.dataType === 'boolean') {
+      if (typeof value !== 'boolean') {
         failure(
-          `depende del sí/no "${padre.code}" con un valor que no es sí/no`,
+          `depende del sí/no "${parent.code}" con un valor que no es sí/no`,
         );
       }
-    } else if (padre.options !== undefined) {
-      if (typeof valor !== 'string' || !padre.options.includes(valor)) {
+    } else if (parent.options !== undefined) {
+      if (typeof value !== 'string' || !parent.options.includes(value)) {
         failure(
-          `depende de "${padre.code}" con «${String(valor)}», que no es una de sus opciones`,
+          `depende de "${parent.code}" con «${String(value)}», que no es una de sus opciones`,
         );
       }
     } else {
-      failure(`depende de "${padre.code}", que no es sí/no ni de lista`);
+      failure(`depende de "${parent.code}", que no es sí/no ni de lista`);
     }
   }
 }

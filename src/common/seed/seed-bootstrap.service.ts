@@ -95,7 +95,7 @@ interface SeedStepDescriptor {
  */
 export function countInserted(result: unknown): number | null {
   if (typeof result !== 'object' || result === null) return null;
-  const numeros = Object.entries(result as Record<string, unknown>)
+  const numbers = Object.entries(result as Record<string, unknown>)
     // No todo contador numérico cuenta filas escritas: el glosario devuelve
     // `orphanRelationships`, que son relaciones declaradas cuyo destino no
     // existe y por eso NO se insertan. Sumarlas hacía que una corrida sin
@@ -104,13 +104,13 @@ export function countInserted(result: unknown): number | null {
     // reporta `...Existing` — filas que ya estaban, no filas nuevas de esta
     // pasada — y tampoco cuentan.
     .filter(
-      ([nombre]) =>
-        !nombre.startsWith('orphan') && !nombre.endsWith('Existing'),
+      ([name]) =>
+        !name.startsWith('orphan') && !name.endsWith('Existing'),
     )
-    .map(([, valor]) => valor)
-    .filter((valor): valor is number => typeof valor === 'number');
-  if (numeros.length === 0) return null;
-  return numeros.reduce((total, valor) => total + valor, 0);
+    .map(([, value]) => value)
+    .filter((value): value is number => typeof value === 'number');
+  if (numbers.length === 0) return null;
+  return numbers.reduce((total, value) => total + value, 0);
 }
 
 /** Ejecuta los seeds estructurales en un orden explícito y determinista. */
@@ -558,7 +558,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       ...(skippedContent > 0 ? { skippedContent } : {}),
     };
 
-    const linea =
+    const line =
       'Seeds: ' +
       summary.ok +
       '/' +
@@ -575,9 +575,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       ' ms';
 
     if (failed > 0) {
-      this.logger.error({ event: 'seed.summary', ...summary }, linea);
+      this.logger.error({ event: 'seed.summary', ...summary }, line);
     } else {
-      this.logger.info({ event: 'seed.summary', ...summary }, linea);
+      this.logger.info({ event: 'seed.summary', ...summary }, line);
     }
 
     return summary;
