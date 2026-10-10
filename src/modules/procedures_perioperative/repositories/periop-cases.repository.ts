@@ -224,13 +224,13 @@ export class PeriopCasesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param custodianTenantId - Tenant custodio, obligatorio.
-   * @param filtros - Acotaciones opcionales y paginación.
+   * @param filters - Acotaciones opcionales y paginación.
    * @returns Los casos que cumplen el filtro.
    */
   async findCases(
     em: EntityManager,
     custodianTenantId: string,
-    filtros: {
+    filters: {
       /** Paciente del caso. */
       patientProfileId?: string;
       /** Quirófano reservado. */
@@ -250,24 +250,24 @@ export class PeriopCasesRepository {
     },
   ): Promise<ProcedureCases[]> {
     const where: Record<string, unknown> = { custodianTenantId };
-    if (filtros.patientProfileId)
-      where.patientProfileId = filtros.patientProfileId;
-    if (filtros.operatingRoomId)
-      where.operatingRoomId = filtros.operatingRoomId;
-    if (filtros.primarySurgeonProfileId)
-      where.primarySurgeonProfileId = filtros.primarySurgeonProfileId;
-    if (filtros.statusConceptId)
-      where.statusConceptId = filtros.statusConceptId;
-    if (filtros.from || filtros.to) {
+    if (filters.patientProfileId)
+      where.patientProfileId = filters.patientProfileId;
+    if (filters.operatingRoomId)
+      where.operatingRoomId = filters.operatingRoomId;
+    if (filters.primarySurgeonProfileId)
+      where.primarySurgeonProfileId = filters.primarySurgeonProfileId;
+    if (filters.statusConceptId)
+      where.statusConceptId = filters.statusConceptId;
+    if (filters.from || filters.to) {
       where.scheduledStartAt = {
-        ...(filtros.from ? { $gte: filtros.from } : {}),
-        ...(filtros.to ? { $lt: filtros.to } : {}),
+        ...(filters.from ? { $gte: filters.from } : {}),
+        ...(filters.to ? { $lt: filters.to } : {}),
       };
     }
     return em.find(ProcedureCases, where, {
       orderBy: { scheduledStartAt: 'ASC', id: 'ASC' },
-      limit: filtros.limit,
-      offset: filtros.offset,
+      limit: filters.limit,
+      offset: filters.offset,
     });
   }
 
@@ -277,13 +277,13 @@ export class PeriopCasesRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param custodianTenantId - Tenant custodio, obligatorio.
-   * @param filtros - Las mismas acotaciones, sin paginación.
+   * @param filters - Las mismas acotaciones, sin paginación.
    * @returns Cuántos casos cumplen el filtro.
    */
   countCasesMatching(
     em: EntityManager,
     custodianTenantId: string,
-    filtros: {
+    filters: {
       /** Paciente del caso. */
       patientProfileId?: string;
       /** Quirófano reservado. */
@@ -299,18 +299,18 @@ export class PeriopCasesRepository {
     },
   ): Promise<number> {
     const where: Record<string, unknown> = { custodianTenantId };
-    if (filtros.patientProfileId)
-      where.patientProfileId = filtros.patientProfileId;
-    if (filtros.operatingRoomId)
-      where.operatingRoomId = filtros.operatingRoomId;
-    if (filtros.primarySurgeonProfileId)
-      where.primarySurgeonProfileId = filtros.primarySurgeonProfileId;
-    if (filtros.statusConceptId)
-      where.statusConceptId = filtros.statusConceptId;
-    if (filtros.from || filtros.to) {
+    if (filters.patientProfileId)
+      where.patientProfileId = filters.patientProfileId;
+    if (filters.operatingRoomId)
+      where.operatingRoomId = filters.operatingRoomId;
+    if (filters.primarySurgeonProfileId)
+      where.primarySurgeonProfileId = filters.primarySurgeonProfileId;
+    if (filters.statusConceptId)
+      where.statusConceptId = filters.statusConceptId;
+    if (filters.from || filters.to) {
       where.scheduledStartAt = {
-        ...(filtros.from ? { $gte: filtros.from } : {}),
-        ...(filtros.to ? { $lt: filtros.to } : {}),
+        ...(filters.from ? { $gte: filters.from } : {}),
+        ...(filters.to ? { $lt: filters.to } : {}),
       };
     }
     return em.count(ProcedureCases, where);
