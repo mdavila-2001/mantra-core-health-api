@@ -9,7 +9,7 @@ import {
 } from '../dto';
 
 /** Rutas con error, aplanando `@ValidateNested` (p. ej. `partners[0].role`). */
-function rutasWithError(
+function routesWithError(
   errors: readonly ValidationError[],
   prefix = '',
 ): string[] {
@@ -18,7 +18,7 @@ function rutasWithError(
     const ruta = prefix ? `${prefix}.${error.property}` : error.property;
     if (error.constraints) rutas.push(ruta);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasWithError(error.children, ruta));
+      rutas.push(...routesWithError(error.children, ruta));
     }
   }
   return [...new Set(rutas)].sort();
@@ -33,7 +33,7 @@ async function errors<T extends object>(
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasWithError(errores);
+  return routesWithError(errores);
 }
 
 const VALID_PARTNER = {
