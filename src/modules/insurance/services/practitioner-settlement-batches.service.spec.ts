@@ -359,6 +359,16 @@ describe('PractitionerSettlementBatchesService.getById', () => {
     expect(result.id).toBe('batch-1');
   });
 
+  it('P-13: un fallo de la base al comprobar la aseguradora no se disfraza de 403', async () => {
+    const caida = new Error('connection terminated unexpectedly');
+    const { svc } = service({
+      repo: { findBatch: fn().mockResolvedValue(batch) },
+      emDouble: em(() => []),
+      linkedAccess: { assertInsurer: fn().mockRejectedValue(caida) },
+    });
+    await expect(svc.getById('batch-1', actor)).rejects.toBe(caida);
+  });
+
   it('un prestador ajeno al lote recibe el mismo 403 que un id inexistente', async () => {
     const { svc } = await runWithTenant(TENANT, async () => {
       return service({

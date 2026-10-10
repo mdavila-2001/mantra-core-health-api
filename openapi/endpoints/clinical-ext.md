@@ -802,6 +802,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | El código de regla ya existe | Excepción explícita en src/modules/clinical_ext/services/cds.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La lógica de la regla no se puede interpretar | Excepción explícita en src/modules/clinical_ext/services/cds.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -937,6 +938,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Regla CDS no encontrada | Excepción explícita en src/modules/clinical_ext/services/cds.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La lógica de la regla no se puede interpretar | Excepción explícita en src/modules/clinical_ext/services/cds.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1177,7 +1179,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "ruleId": "00000000-0000-4000-8000-000000000001"
     }
   ],
-  "count": 1
+  "count": 1,
+  "unevaluatedRuleIds": [
+    "valor-ejemplo"
+  ]
 }
 ```
 
@@ -1191,6 +1196,7 @@ Campos de la respuesta:
 | `alerts[].severityConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a severity concept. | `00000000-0000-4000-8000-000000000001` |
 | `alerts[].ruleId` | No | `string` | formato `uuid` | Identificador asociado a rule. | `00000000-0000-4000-8000-000000000001` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Nº de alertas generadas | `1` |
+| `unevaluatedRuleIds` | No | `array<string>` | formato `uuid` | Reglas activas que no se pudieron evaluar porque su lógica no se entiende. Ausente cuando todas se evaluaron: una alerta que no se disparó por eso no puede confundirse con una que no aplica. | `["valor-ejemplo"]` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1331,7 +1337,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "ruleId": "00000000-0000-4000-8000-000000000001"
     }
   ],
-  "count": 1
+  "count": 1,
+  "unevaluatedRuleIds": [
+    "valor-ejemplo"
+  ]
 }
 ```
 
@@ -1345,6 +1354,7 @@ Campos de la respuesta:
 | `alerts[].severityConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a severity concept. | `00000000-0000-4000-8000-000000000001` |
 | `alerts[].ruleId` | No | `string` | formato `uuid` | Identificador asociado a rule. | `00000000-0000-4000-8000-000000000001` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Nº de alertas generadas | `1` |
+| `unevaluatedRuleIds` | No | `array<string>` | formato `uuid` | Reglas activas que no se pudieron evaluar porque su lógica no se entiende. Ausente cuando todas se evaluaron: una alerta que no se disparó por eso no puede confundirse con una que no aplica. | `["valor-ejemplo"]` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

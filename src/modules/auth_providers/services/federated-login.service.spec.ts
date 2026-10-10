@@ -56,7 +56,7 @@ function build() {
     providersRepo as any,
     logger as any,
   );
-  return { service, tx, providersRepo, logger };
+  return { service, em, tx, providersRepo, logger };
 }
 
 /**
@@ -833,7 +833,7 @@ describe('FederatedLoginService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
-    it('marks an expired request as expired', async () => {
+    it('marks an expired request as expired in a transaction that commits', async () => {
       const d = build();
       const request = pendingRequest({
         expiresAt: new Date(Date.now() - 1000),
@@ -841,6 +841,14 @@ describe('FederatedLoginService', () => {
       d.providersRepo.findLinkRequestByTokenHashForUpdate.mockResolvedValue(
         request,
       );
+      // `em.transactional` rolls back on any exception thrown by the callback:
+      // only the state present when the transaction committed was saved.
+      const committedStatuses: string[] = [];
+      d.em.transactional.mockImplementation(async (cb: any) => {
+        const result = await cb(d.tx);
+        committedStatuses.push(request.statusConceptId);
+        return result;
+      });
 
       await expect(
         d.service.completeAccountLink(
@@ -848,7 +856,8 @@ describe('FederatedLoginService', () => {
           actor as any,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(request.statusConceptId).toBe(CONCEPTS.LINK_REQUEST_EXPIRED);
+      expect(committedStatuses).toEqual([CONCEPTS.LINK_REQUEST_EXPIRED]);
+      expect(d.providersRepo.createLoginAttempt).not.toHaveBeenCalled();
     });
   });
 

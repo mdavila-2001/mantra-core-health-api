@@ -12,6 +12,7 @@ import {
   InsurerReceivedClaimsService,
   MAX_RECEIVED_CLAIMS,
 } from './insurer-received-claims.service';
+import { CorruptStoredAmountError } from './received-claim-settlement';
 import { InsurerContextService } from './insurer-context.service';
 
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.
@@ -460,6 +461,19 @@ describe('InsurerReceivedClaimsService.list', () => {
       expect(item.service).toBeNull();
       expect(item.lines[0]).toMatchObject({ code: '', display: 'Ítem 1' });
     });
+
+    it('un importe guardado ilegible no se muestra como cero: falla nombrando el renglón', async () => {
+      const corrupto = { ...renglones()[1], billedAmount: 'abc' } as any;
+      const d = build({ administra: true, lines: [corrupto] });
+
+      const intento = inTenant(() => d.service.list(owner));
+
+      await expect(intento).rejects.toBeInstanceOf(CorruptStoredAmountError);
+      await expect(intento).rejects.toMatchObject({
+        lineId: corrupto.id,
+        amount: 'abc',
+      });
+    });
   });
 
   describe('inválido / no autorizado', () => {
@@ -501,10 +515,7 @@ describe('InsurerReceivedClaimsService.list', () => {
 
     it('los dos rechazos dicen lo mismo: no revelan qué organización es aseguradora', async () => {
       const messages: string[] = [];
-      for (const options of [
-        { sinAseguradora: true },
-        { administra: false },
-      ]) {
+      for (const options of [{ sinAseguradora: true }, { administra: false }]) {
         const d = build(options);
         const error = await inTenant(() => d.service.list(strange)).catch(
           (e: unknown) => e as Error,
@@ -828,9 +839,9 @@ describe('InsurerReceivedClaimsService.decide', () => {
           claim: request({ statusConceptId: estado }),
         });
 
-        await expect(
-          decide(d, { outcome: 'APPROVED' }),
-        ).rejects.toBeInstanceOf(ConflictException);
+        await expect(decide(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
+          ConflictException,
+        );
       }
     });
 

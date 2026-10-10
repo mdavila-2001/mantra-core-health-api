@@ -1800,9 +1800,7 @@ Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
-{
-  "signerProfileId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 ### Restricciones a considerar
@@ -1816,7 +1814,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `signerProfileId` | Sí | `string` | formato `uuid` | Perfil del cofirmante / supervisor | `00000000-0000-4000-8000-000000000001` |
+| `signerProfileId` | No | `string` | formato `uuid` | Perfil del cofirmante / supervisor. Si se omite, es el perfil profesional de la sesión. | `00000000-0000-4000-8000-000000000001` |
 | `certificateThumbprint` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `signatureValueEncrypted` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 
@@ -1883,6 +1881,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Una firma clínica necesita un perfil profesional firmante. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que firmar. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | Una nota la firma su profesional: no se puede firmar en nombre de otro perfil. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
@@ -1944,9 +1943,7 @@ Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
-{
-  "signerProfileId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 ### Restricciones a considerar
@@ -1960,7 +1957,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `signerProfileId` | Sí | `string` | formato `uuid` | Perfil del firmante (autor o delegado) | `00000000-0000-4000-8000-000000000001` |
+| `signerProfileId` | No | `string` | formato `uuid` | Perfil del firmante. Si se omite, es el perfil profesional de la sesión. | `00000000-0000-4000-8000-000000000001` |
 | `certificateThumbprint` | No | `string` | longitud máxima 255 | Huella del certificado usado en la firma | `valor-ejemplo` |
 | `signatureValueEncrypted` | No | `string` | Sin restricción adicional declarada | Valor de firma cifrado (opaco al backend) | `valor-ejemplo` |
 
@@ -2027,6 +2024,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Una firma clínica necesita un perfil profesional firmante. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que firmar. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | Una nota la firma su profesional: no se puede firmar en nombre de otro perfil. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |

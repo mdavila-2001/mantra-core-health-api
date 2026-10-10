@@ -80,6 +80,7 @@ export class CdsService {
       { operation: 'clinical_ext.cds_rule.create', code: dto.code },
       'Creating CDS rule',
     );
+    if (dto.logicJson !== undefined) this.assertLogicReadable(dto.logicJson);
     return this.em.transactional(async (tx) => {
       const clash = await this.rulesRepo.findByCode(tx, dto.code);
       if (clash)
@@ -128,6 +129,9 @@ export class CdsService {
         rule.messageTemplate = dto.messageTemplate;
       if (dto.severityConceptId !== undefined)
         rule.severityConceptId = dto.severityConceptId;
+      // Una regla activa que no se puede leer nunca dispara, y eso no se
+      // distingue de una que no aplica: no se publica.
+      this.assertLogicReadable(rule.logicJson);
       rule.isActive = true;
       rule.statusConceptId = CEXT.CDS_RULE_ACTIVE;
       touch(rule, actor.id);
@@ -197,7 +201,10 @@ export class CdsService {
         dto.tenantId,
       );
       const context = this.buildContext(dto);
-      const matched = rules.filter((rule) => this.ruleMatches(rule, context));
+      const unevaluatedRuleIds: string[] = [];
+      const matched = rules.filter((rule) =>
+        this.ruleMatches(rule, context, unevaluatedRuleIds),
+      );
 
       const now = new Date();
       const alerts = matched.map((rule) =>
@@ -223,10 +230,12 @@ export class CdsService {
           operation: 'clinical_ext.cds.evaluate',
           evaluated: rules.length,
           generated: alerts.length,
+          unevaluated: unevaluatedRuleIds.length,
         },
         'CDS evaluation completed',
       );
       return {
+        ...(unevaluatedRuleIds.length > 0 ? { unevaluatedRuleIds } : {}),
         alerts: alerts.map((a) => ({
           id: a.id,
           alertTypeConceptId: a.alertTypeConceptId,
@@ -343,11 +352,14 @@ export class CdsService {
       logicJson?: unknown;
     },
     context: CdsEvalContext,
+    unevaluatedRuleIds: string[],
   ): boolean {
     try {
       return this.evaluateLogic(rule.logicJson, context);
     } catch (err) {
-      this.logger.warn(
+      if (!(err instanceof UnparseableCdsRuleError)) throw err;
+      unevaluatedRuleIds.push(rule.id);
+      this.logger.error(
         {
           operation: 'clinical_ext.cds.evaluate',
           ruleId: rule.id,
@@ -371,6 +383,51 @@ export class CdsService {
    * Cualquier nodo que no encaje en esta gramática lanza
    * {@link UnparseableCdsRuleError} para que la regla falle cerrado.
    */
+  /**
+   * Comprueba que `logic_json` respete la gramática de {@link evaluateLogic},
+   * recorriendo TODOS los nodos (la evaluación corta en el primer `all`/`any`
+   * resuelto y podría no ver un nodo roto).
+   *
+   * @throws PreconditionFailedException (422, `field: logicJson`) si no se entiende.
+   */
+  private assertLogicReadable(logic: unknown): void {
+    try {
+      this.walkLogic(logic);
+    } catch (err) {
+      if (!(err instanceof UnparseableCdsRuleError)) throw err;
+      throw new PreconditionFailedException(
+        'La lógica de la regla no se puede interpretar',
+        { field: 'logicJson', reason: err.message },
+      );
+    }
+  }
+
+  private walkLogic(logic: unknown): void {
+    if (logic === null || typeof logic !== 'object') {
+      throw new UnparseableCdsRuleError('logic_json no es un objeto');
+    }
+    const node = logic as Record<string, unknown>;
+    if (Array.isArray(node.all) || Array.isArray(node.any)) {
+      const children = (node.all ?? node.any) as unknown[];
+      for (const child of children) this.walkLogic(child);
+      return;
+    }
+    if ('not' in node) {
+      this.walkLogic(node.not);
+      return;
+    }
+    if (typeof node.field === 'string' && typeof node.op === 'string') {
+      // Los chequeos de forma de una hoja no dependen del dato: se evalúa
+      // contra un contexto vacío sólo para que lance si está mal declarada.
+      this.evaluateLeaf(node.field, node.op, node.value, {
+        medications: [],
+        observations: {},
+      });
+      return;
+    }
+    throw new UnparseableCdsRuleError('nodo de lógica no reconocido');
+  }
+
   private evaluateLogic(logic: unknown, context: CdsEvalContext): boolean {
     if (logic === null || typeof logic !== 'object') {
       throw new UnparseableCdsRuleError('logic_json no es un objeto');
