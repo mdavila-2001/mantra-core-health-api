@@ -18,17 +18,17 @@ describe('markdown-table', () => {
   });
 
   it('resuelve una columna por su título, sin importar mayúsculas ni tildes', () => {
-    const [fila] = tableRows(EXAMPLE);
-    expect(column(fila!, 'nombre')).toBe('XIOMARA');
-    expect(column(fila!, 'Matrícula Ministerio de Salud y Deportes')).toBe(
+    const [row] = tableRows(EXAMPLE);
+    expect(column(row!, 'nombre')).toBe('XIOMARA');
+    expect(column(row!, 'Matrícula Ministerio de Salud y Deportes')).toBe(
       'C-1894',
     );
   });
 
   it('prueba varios alias de columna en orden hasta encontrar uno', () => {
-    const [fila] = tableRows(EXAMPLE);
-    expect(column(fila!, 'no existe', 'nombre 2', 'nombre')).toBe('');
-    expect(column(fila!, 'apellido paterno')).toBe('CUELLAR');
+    const [row] = tableRows(EXAMPLE);
+    expect(column(row!, 'no existe', 'nombre 2', 'nombre')).toBe('');
+    expect(column(row!, 'apellido paterno')).toBe('CUELLAR');
   });
 
   it('una fila vacía da celdas vacías, no undefined', () => {

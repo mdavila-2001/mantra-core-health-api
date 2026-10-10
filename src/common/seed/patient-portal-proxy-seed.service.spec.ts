@@ -35,12 +35,12 @@ function build(existing: string[] = []) {
 
 describe('PatientPortalProxySeedService', () => {
   it('siembra el conjunto, su versión vigente y la base legal', async () => {
-    const { service, creados } = build();
+    const { service, creados: created } = build();
 
     const counters = await service.run();
 
     expect(counters).toEqual({ valueSets: 1, versions: 1, legalBases: 1 });
-    expect(creados.map((c) => c.entidad)).toEqual([
+    expect(created.map((c) => c.entidad)).toEqual([
       'ValueSets',
       'ValueSetVersions',
       'ProcessingLegalBases',
@@ -49,11 +49,11 @@ describe('PatientPortalProxySeedService', () => {
 
   it('la versión queda marcada vigente', async () => {
     // Sin `isDefault` la expansión del conjunto responde 404 aunque exista.
-    const { service, creados } = build();
+    const { service, creados: created } = build();
 
     await service.run();
 
-    const version = creados.find((c) => c.entidad === 'ValueSetVersions')!;
+    const version = created.find((c) => c.entidad === 'ValueSetVersions')!;
     expect(version.datos).toMatchObject({
       id: SEED.patientPortalProxyScopeVersionId,
       valueSetId: SEED.patientPortalProxyScopeValueSetId,
@@ -64,11 +64,11 @@ describe('PatientPortalProxySeedService', () => {
   it('la base legal es representación legal, nunca consentimiento', async () => {
     // Un menor de tres años no consiente que su madre vea sus estudios.
     // Anotarlo como consentimiento sería dejar una afirmación falsa en la base.
-    const { service, creados } = build();
+    const { service, creados: created } = build();
 
     await service.run();
 
-    const base = creados.find((c) => c.entidad === 'ProcessingLegalBases')!;
+    const base = created.find((c) => c.entidad === 'ProcessingLegalBases')!;
     expect(base.datos).toMatchObject({
       id: SEED.guardianProxyLegalBasisId,
       tenantId: SEED.tenantId,
@@ -83,15 +83,15 @@ describe('PatientPortalProxySeedService', () => {
   });
 
   it('el conjunto va sin miembros: el alcance no está decidido', async () => {
-    const { service, creados } = build();
+    const { service, creados: created } = build();
 
     await service.run();
 
-    expect(creados.some((c) => c.entidad === 'ValueSetMembers')).toBe(false);
+    expect(created.some((c) => c.entidad === 'ValueSetMembers')).toBe(false);
   });
 
   it('una segunda corrida no inserta nada', async () => {
-    const { service, creados } = build([
+    const { service, creados: created } = build([
       SEED.patientPortalProxyScopeValueSetId,
       SEED.patientPortalProxyScopeVersionId,
       SEED.guardianProxyLegalBasisId,
@@ -100,18 +100,18 @@ describe('PatientPortalProxySeedService', () => {
     const counters = await service.run();
 
     expect(counters).toEqual({ valueSets: 0, versions: 0, legalBases: 0 });
-    expect(creados).toEqual([]);
+    expect(created).toEqual([]);
   });
 
   it('completa sólo lo que falta si una corrida anterior quedó a medias', async () => {
-    const { service, creados } = build([
+    const { service, creados: created } = build([
       SEED.patientPortalProxyScopeValueSetId,
     ]);
 
     const counters = await service.run();
 
     expect(counters).toEqual({ valueSets: 0, versions: 1, legalBases: 1 });
-    expect(creados.map((c) => c.entidad)).toEqual([
+    expect(created.map((c) => c.entidad)).toEqual([
       'ValueSetVersions',
       'ProcessingLegalBases',
     ]);

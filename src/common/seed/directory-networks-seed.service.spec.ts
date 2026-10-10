@@ -77,8 +77,8 @@ describe('DirectoryNetworksSeedService', () => {
       carriers: string[];
       sedes: { direccion: string }[];
     }[];
-    const inDos = records.filter((f) => f.carriers.length === 2);
-    expect(inDos.length).toBeGreaterThan(0);
+    const inTwo = records.filter((f) => f.carriers.length === 2);
+    expect(inTwo.length).toBeGreaterThan(0);
     for (const f of records) {
       expect(new Set(f.sedes.map((s) => s.direccion)).size).toBe(
         f.sedes.length,
