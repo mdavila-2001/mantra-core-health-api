@@ -511,45 +511,6 @@ paths:
       description: >-
         UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta. Requiere JWT y los roles o
         alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-  /terminology/concepts/glossary-graph:
-    get:
-      operationId: TerminologyConceptsController_readGlossaryGraph
-      parameters:
-        - name: lang
-          required: false
-          in: query
-          schema:
-            enum:
-              - ES
-              - EN
-            type: string
-        - name: limit
-          required: false
-          in: query
-          description: Máximo de nodos devueltos; por defecto 500
-          schema:
-            type: number
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Lee el grafo de términos publicados del glosario médico
-      tags:
-        - terminology
-      description: >-
-        Lee el grafo de términos publicados del glosario médico. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /terminology/concepts/{conceptId}/glossary-neighborhood:
     get:
       description: >-
@@ -1923,47 +1884,6 @@ paths:
       description: >-
         Registrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de
         error usan el envelope ErrorResponse.
-  /iam/auth/upload-registration-signature-image:
-    post:
-      operationId: IamAuthController_uploadRegistrationSignatureImage
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - file
-              properties:
-                file:
-                  type: string
-                  format: binary
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      summary: Pre-cargar una imagen de firma o sello para el registro
-      tags:
-        - iam-auth
-      description: >-
-        Pre-cargar una imagen de firma o sello para el registro. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /iam/auth/upload-registration-document:
     post:
       operationId: IamAuthController_uploadRegistrationDocument
@@ -2443,75 +2363,6 @@ paths:
       description: >-
         Cerrar una de mis sesiones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
-  /profiles/practitioners/me/signature-assets:
-    get:
-      operationId: PractitionerSignatureAssetsController_getOwn
-      parameters: []
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PractitionerSignatureAssetsDto'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Consultar las imágenes de firma y sello propias
-      tags:
-        - profiles-practitioners
-      description: >-
-        Consultar las imágenes de firma y sello propias. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
-    put:
-      operationId: PractitionerSignatureAssetsController_setOwn
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SetPractitionerSignatureAssetsDto'
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PractitionerSignatureAssetsDto'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Guardar o quitar las imágenes de firma y sello propias
-      tags:
-        - profiles-practitioners
-      description: >-
-        Guardar o quitar las imágenes de firma y sello propias. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /profiles/patients/me/summary:
     get:
       operationId: ProfilesPatientsController_getOwnSummary
@@ -3373,12 +3224,6 @@ paths:
           in: path
           schema:
             type: string
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AcceptDependentLinkRequestDto'
       responses:
         '200':
           description: ''
@@ -3396,8 +3241,6 @@ paths:
           description: No existe o no es de esta cuenta
         '409':
           description: Ya fue respondida
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
         '422':
           $ref: '#/components/responses/PreconditionFailed'
         '429':
@@ -13917,40 +13760,6 @@ paths:
       summary: Aseguradoras con las que trabaja el profesional
       tags:
         - insurance
-  /insurance/my-claims:
-    get:
-      operationId: MyClaimsController_listMyClaims
-      parameters:
-        - name: x-tenant-id
-          required: true
-          in: header
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MyClaimListDto'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          description: Sin sesión válida.
-        '403':
-          description: El tenant seleccionado no es una membresía de la sesión.
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Solicitudes de seguro propias, con su dictamen vigente
-      tags:
-        - my-insurance-claims
-      description: >-
-        Solicitudes de seguro propias, con su dictamen vigente. Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /insurance-carriers:
     post:
       operationId: InsuranceBackboneController_createCarrier
@@ -22061,9 +21870,6 @@ paths:
         Listar el catálogo de servicios de la práctica. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
     post:
-      description: >-
-        La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio
-        propio.
       operationId: BillingServiceCatalogController_create
       parameters: []
       requestBody:
@@ -22096,6 +21902,9 @@ paths:
       summary: Dar de alta un servicio en el catálogo maestro
       tags:
         - billing-service-catalog
+      description: >-
+        Dar de alta un servicio en el catálogo maestro. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /billing/service-catalog/{id}:
     patch:
       operationId: BillingServiceCatalogController_update
@@ -51716,208 +51525,6 @@ paths:
       summary: La agenda de la organización
       tags:
         - scheduling-tenant-agenda
-  /scheduling/service-offerings:
-    get:
-      description: Un paciente ve sólo lo activo y reservable. El profesional dueño ve todo lo suyo.
-      operationId: SchedulingServiceOfferingsController_list
-      parameters:
-        - name: practitionerProfileId
-          required: false
-          in: query
-          description: Profesional cuyas ofertas se listan. Un profesional que no la manda ve las suyas.
-          schema:
-            format: uuid
-            type: string
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Los servicios que ofrece un profesional
-      tags:
-        - scheduling
-    post:
-      description: Duración mínima y máxima, preparación, limpieza, si el paciente puede pedirlo y si requiere aprobación.
-      operationId: SchedulingServiceOfferingsController_create
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateServiceOfferingDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Declarar cómo ofrezco un servicio
-      tags:
-        - scheduling
-  /scheduling/service-offerings/{id}:
-    patch:
-      operationId: SchedulingServiceOfferingsController_update
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateServiceOfferingDto'
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Editar o apagar la oferta de un servicio
-      tags:
-        - scheduling
-      description: >-
-        Editar o apagar la oferta de un servicio. Requiere JWT y los roles o alcances declarados por el controlador.
-        Todas las respuestas de error usan el envelope ErrorResponse.
-  /scheduling/service-availability:
-    get:
-      description: >-
-        Se calculan en lectura a partir de las franjas que admiten servicios y del tiempo ocupado del profesional en
-        todas sus sedes. No reserva nada.
-      operationId: SchedulingServiceOfferingsController_availability
-      parameters:
-        - name: offeringId
-          required: true
-          in: query
-          schema:
-            format: uuid
-            type: string
-        - name: resourceId
-          required: false
-          in: query
-          description: Una sede en particular; sin ella se buscan en todas las del profesional
-          schema:
-            format: uuid
-            type: string
-        - name: from
-          required: true
-          in: query
-          schema:
-            format: date-time
-            type: string
-        - name: to
-          required: true
-          in: query
-          schema:
-            format: date-time
-            type: string
-      responses:
-        '200':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Horarios donde cabe un servicio
-      tags:
-        - scheduling
-  /scheduling/service-offerings/{id}/holds:
-    post:
-      description: >-
-        Crea el cupo del turno con la duración máxima de la oferta y lo retiene bajo el candado del profesional. Se
-        confirma con POST /scheduling/holds/{token}/confirm o /request.
-      operationId: SchedulingServiceOfferingsController_placeHold
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateServiceHoldDto'
-      responses:
-        '201':
-          description: ''
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        '413':
-          $ref: '#/components/responses/PayloadTooLarge'
-        '422':
-          $ref: '#/components/responses/PreconditionFailed'
-        '429':
-          $ref: '#/components/responses/RateLimited'
-        '500':
-          $ref: '#/components/responses/InternalError'
-      security:
-        - bearer: []
-      summary: Retener el turno de un servicio
-      tags:
-        - scheduling
   /system-context/dynamic-enums/bindings:
     get:
       description: Permite descubrir qué campos `*_concept_id` son de catálogo sin conocer ningún uuid.
@@ -57955,7 +57562,9 @@ paths:
         - name: sortBy
           required: false
           in: query
-          description: Campo de ordenamiento
+          description: >-
+            Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio
+            aplica además su propia allowlist de columnas ordenables
           schema:
             default: createdAt
             type: string
@@ -58805,10 +58414,6 @@ tags:
   - name: messaging-webhooks
     description: >-
       Operaciones del dominio funcional messaging webhooks. Consulte el catálogo Markdown de endpoints para payloads
-      mínimos, restricciones, ejemplos completos y semántica de negocio.
-  - name: my-insurance-claims
-    description: >-
-      Operaciones del dominio funcional my insurance claims. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: object-storage
     description: >-
@@ -59844,12 +59449,7 @@ components:
         profilePhotoBase64:
           type: string
           description: Foto de perfil en formato Base64 (Data URI o base64 plano)
-        signatureFileId:
-          type: string
-          format: uuid
-        sealFileId:
-          type: string
-          format: uuid
+          maxLength: 2800000
         ownSite:
           description: >-
             Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST
@@ -60756,12 +60356,7 @@ components:
         profilePhotoBase64:
           type: string
           description: Foto de perfil en formato Base64 (Data URI o base64 plano)
-        signatureFileId:
-          type: string
-          format: uuid
-        sealFileId:
-          type: string
-          format: uuid
+          maxLength: 2800000
         ownSite:
           description: >-
             Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST
@@ -60881,32 +60476,6 @@ components:
       required:
         - currentPassword
         - newPassword
-      additionalProperties: false
-    PractitionerSignatureAssetsDto:
-      type: object
-      properties:
-        signatureFileId:
-          type: object
-          format: uuid
-          nullable: true
-        sealFileId:
-          type: object
-          format: uuid
-          nullable: true
-      required:
-        - signatureFileId
-        - sealFileId
-    SetPractitionerSignatureAssetsDto:
-      type: object
-      properties:
-        signatureFileId:
-          type: object
-          format: uuid
-          nullable: true
-        sealFileId:
-          type: object
-          format: uuid
-          nullable: true
       additionalProperties: false
     OwnAddressDto:
       type: object
@@ -61045,24 +60614,6 @@ components:
         - referenceDate
         - benefits
         - coverageOrder
-    OwnEmergencyContactDto:
-      type: object
-      properties:
-        displayName:
-          type: string
-          description: Cómo se llama
-        relationshipConceptId:
-          type: string
-          format: uuid
-          description: Parentesco (concept id)
-        relationshipDisplay:
-          type: string
-          description: Parentesco en palabras
-        phone:
-          type: string
-          description: Su teléfono
-      required:
-        - relationshipDisplay
     OwnGuardianDto:
       type: object
       properties:
@@ -61073,9 +60624,9 @@ components:
           type: string
           format: uuid
           description: Parentesco (concept id)
-        relationshipDisplay:
-          type: string
-          description: Parentesco en palabras
+        isEmergencyContact:
+          type: boolean
+          description: Es a quien llamar en una urgencia
         isLegalGuardian:
           type: boolean
           description: Es su representante legal
@@ -61083,7 +60634,7 @@ components:
           type: string
           description: Su teléfono
       required:
-        - relationshipDisplay
+        - isEmergencyContact
         - isLegalGuardian
     OwnPatientProfileResponseDto:
       type: object
@@ -61182,13 +60733,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OwnCoverageDto'
-        emergencyContacts:
-          description: Contactos de emergencia activos.
-          type: array
-          items:
-            $ref: '#/components/schemas/OwnEmergencyContactDto'
         guardians:
-          description: Representantes con apoderamiento activo, con su parentesco.
+          description: Tutores y personas autorizadas, con su teléfono.
           type: array
           items:
             $ref: '#/components/schemas/OwnGuardianDto'
@@ -61197,7 +60743,6 @@ components:
         - patientProfileId
         - identityVerified
         - coverages
-        - emergencyContacts
         - guardians
     UpdateOwnPatientProfileDto:
       type: object
@@ -61732,14 +61277,6 @@ components:
         - id
         - requesterDisplayName
         - createdAt
-    AcceptDependentLinkRequestDto:
-      type: object
-      properties:
-        relationshipConceptId:
-          type: string
-          format: uuid
-          description: Parentesco de quien representará al paciente
-      additionalProperties: false
     DependentLinkRequestDecisionDto:
       type: object
       properties:
@@ -61956,6 +61493,10 @@ components:
     PractitionerProfileSummaryDto:
       type: object
       properties:
+        unavailableSections:
+          type: array
+          items:
+            type: string
         profileId:
           type: string
           format: uuid
@@ -62101,6 +61642,21 @@ components:
         - affiliations
         - activity
         - createdAt
+    PractitionerLanguageInputDto:
+      type: object
+      properties:
+        languageConceptId:
+          type: string
+          format: uuid
+        proficiencyConceptId:
+          type: string
+          format: uuid
+        clinicalInterpretationAllowed:
+          type: boolean
+      required:
+        - languageConceptId
+        - clinicalInterpretationAllowed
+      additionalProperties: false
     UpdateOwnPractitionerProfileDto:
       type: object
       properties:
@@ -62220,6 +61776,12 @@ components:
           type: string
           maxLength: 200
           description: Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto.
+        languages:
+          maxItems: 20
+          description: Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse.
+          type: array
+          items:
+            $ref: '#/components/schemas/PractitionerLanguageInputDto'
       additionalProperties: false
     SetPractitionerPhotoDto:
       type: object
@@ -65448,6 +65010,7 @@ components:
         reasonText:
           type: string
           description: Motivo de consulta
+          maxLength: 1000
         participants:
           type: array
           items:
@@ -65515,6 +65078,7 @@ components:
         valueText:
           type: string
           description: Valor de texto
+          maxLength: 1000
         valueConceptId:
           type: string
           description: Valor codificado (concept id)
@@ -65572,6 +65136,7 @@ components:
         text:
           type: string
           description: Texto libre del rango
+          maxLength: 300
       additionalProperties: false
     CreateObservationDto:
       type: object
@@ -65589,6 +65154,7 @@ components:
         valueText:
           type: string
           description: Valor de texto
+          maxLength: 1000
         valueConceptId:
           type: string
           description: Valor codificado (concept id)
@@ -65686,6 +65252,7 @@ components:
         valueText:
           type: string
           description: Valor de texto
+          maxLength: 1000
         valueConceptId:
           type: string
           description: Valor codificado (concept id)
@@ -65700,6 +65267,7 @@ components:
         note:
           type: string
           description: Nota que justifica la enmienda
+          maxLength: 1000
         expectedRowVersion:
           type: number
           description: row_version esperado (bloqueo optimista)
@@ -66023,6 +65591,7 @@ components:
         description:
           type: string
           description: Descripción libre
+          maxLength: 1000
       required:
         - manifestationConceptId
       additionalProperties: false
@@ -66112,6 +65681,7 @@ components:
         doseText:
           type: string
           description: Dosis en texto libre
+          maxLength: 500
         routeConceptId:
           type: string
           description: Vía de administración (concept id)
@@ -66119,6 +65689,7 @@ components:
         frequencyText:
           type: string
           description: Frecuencia en texto libre
+          maxLength: 500
         quantityDecimal:
           type: number
           description: Cantidad prescrita
@@ -66137,6 +65708,7 @@ components:
         patientInstructionsText:
           type: string
           description: Indicaciones al paciente impresas en la receta, separadas de la posología (Patch v4.1.3)
+          maxLength: 2000
         indicationConditionId:
           type: string
           description: >-
@@ -66223,6 +65795,7 @@ components:
         doseText:
           type: string
           description: Dosis en texto libre
+          maxLength: 500
         routeConceptId:
           type: string
           description: Vía de administración (concept id)
@@ -66230,6 +65803,7 @@ components:
         frequencyText:
           type: string
           description: Frecuencia en texto libre
+          maxLength: 500
         quantityDecimal:
           type: number
           description: Cantidad prescrita
@@ -66256,6 +65830,7 @@ components:
         patientInstructionsText:
           type: string
           description: Indicaciones al paciente impresas en la receta (Patch v4.1.3)
+          maxLength: 2000
       additionalProperties: false
     InvalidateMedicationRequestDto:
       type: object
@@ -66263,6 +65838,7 @@ components:
         reasonText:
           type: string
           description: Motivo de la invalidación (obligatorio)
+          maxLength: 1000
       required:
         - reasonText
       additionalProperties: false
@@ -66272,6 +65848,7 @@ components:
         reasonText:
           type: string
           description: Motivo de la corrección/reemplazo (obligatorio)
+          maxLength: 1000
         medicationConceptId:
           type: string
           description: Medicamento (concept id)
@@ -66283,6 +65860,7 @@ components:
         doseText:
           type: string
           description: Dosis en texto libre
+          maxLength: 500
         routeConceptId:
           type: string
           description: Vía de administración (concept id)
@@ -66290,6 +65868,7 @@ components:
         frequencyText:
           type: string
           description: Frecuencia en texto libre
+          maxLength: 500
         quantityDecimal:
           type: number
           description: Cantidad prescrita
@@ -66314,9 +65893,11 @@ components:
         doseText:
           type: string
           description: Dosis en texto libre
+          maxLength: 500
         frequencyText:
           type: string
           description: Frecuencia en texto libre
+          maxLength: 500
         quantityDecimal:
           type: number
           description: Cantidad prescrita
@@ -66391,6 +65972,7 @@ components:
         followUpText:
           type: string
           description: Seguimiento en texto libre
+          maxLength: 2000
       required:
         - custodianTenantId
         - patientProfileId
@@ -66583,154 +66165,6 @@ components:
         - key
         - ttlSec
       additionalProperties: false
-    MyClaimPractitionerDto:
-      type: object
-      properties:
-        displayName:
-          type: string
-        specialty:
-          type: string
-          nullable: true
-      required:
-        - displayName
-        - specialty
-    InsuranceConceptDto:
-      type: object
-      properties:
-        code:
-          type: string
-          example: CARRIER_ACTIVE
-        display:
-          type: string
-          example: Aseguradora activa
-      required:
-        - code
-        - display
-    MoneyDto:
-      type: object
-      properties:
-        amount:
-          type: string
-          example: '1250.00'
-        currency:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/InsuranceConceptDto'
-      required:
-        - amount
-        - currency
-    MyClaimDecisionDto:
-      type: object
-      properties:
-        outcome:
-          type: string
-          enum:
-            - APPROVED
-            - PARTIAL
-            - REJECTED
-        decidedAt:
-          type: string
-          format: date-time
-        reason:
-          type: string
-          nullable: true
-      required:
-        - outcome
-        - decidedAt
-        - reason
-    MyClaimDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        claimIdentifier:
-          type: string
-        patientName:
-          type: string
-          nullable: true
-        practitioner:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/MyClaimPractitionerDto'
-        providerName:
-          type: string
-        service:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/InsuranceConceptDto'
-        additionalServiceCount:
-          type: number
-        billedTotal:
-          $ref: '#/components/schemas/MoneyDto'
-        approvedTotal:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/MoneyDto'
-        submittedAt:
-          type: string
-          nullable: true
-          format: date-time
-        serviceDate:
-          type: string
-          nullable: true
-          format: date
-        insurerName:
-          type: string
-        planName:
-          type: string
-          nullable: true
-        status:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/InsuranceConceptDto'
-        decision:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/MyClaimDecisionDto'
-      required:
-        - id
-        - claimIdentifier
-        - patientName
-        - practitioner
-        - providerName
-        - service
-        - additionalServiceCount
-        - billedTotal
-        - approvedTotal
-        - submittedAt
-        - serviceDate
-        - insurerName
-        - planName
-        - status
-        - decision
-    MyClaimListDto:
-      type: object
-      properties:
-        view:
-          type: string
-          enum:
-            - PATIENT
-            - PRACTITIONER
-            - LABORATORY
-            - IMAGING
-            - NONE
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/MyClaimDto'
-        truncated:
-          type: boolean
-      required:
-        - view
-        - items
-        - truncated
     CreateCarrierDto:
       type: object
       properties:
@@ -67703,6 +67137,32 @@ components:
         - displayName
         - patientCode
         - memberIdentifier
+    InsuranceConceptDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: CARRIER_ACTIVE
+        display:
+          type: string
+          example: Aseguradora activa
+      required:
+        - code
+        - display
+    MoneyDto:
+      type: object
+      properties:
+        amount:
+          type: string
+          example: '1250.00'
+        currency:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/InsuranceConceptDto'
+      required:
+        - amount
+        - currency
     ClaimListItemDto:
       type: object
       properties:
@@ -71470,6 +70930,7 @@ components:
         provisionTypeConceptId:
           type: string
           description: Tipo de provisión (concept id); por defecto la base
+          format: uuid
       required:
         - action
       additionalProperties: false
@@ -72243,6 +71704,7 @@ components:
         tenantId:
           type: string
           format: uuid
+          description: Organización del documento. Si se omite, es la de la práctica; si viene, debe coincidir.
         clearingNumber:
           type: string
           description: Número de clearing (único por tenant); autogenerado si se omite
@@ -72267,7 +71729,6 @@ components:
           items:
             $ref: '#/components/schemas/ClearingItemInputDto'
       required:
-        - tenantId
         - practiceId
         - bankAccountId
         - clearingDate
@@ -75869,15 +75330,13 @@ components:
         signerProfileId:
           type: string
           format: uuid
-          description: Perfil del firmante (autor o delegado)
+          description: Perfil del firmante. Si se omite, es el perfil profesional de la sesión.
         certificateThumbprint:
           type: string
           description: Huella del certificado usado en la firma
         signatureValueEncrypted:
           type: string
           description: Valor de firma cifrado (opaco al backend)
-      required:
-        - signerProfileId
       additionalProperties: false
     CosignVersionDto:
       type: object
@@ -75885,13 +75344,11 @@ components:
         signerProfileId:
           type: string
           format: uuid
-          description: Perfil del cofirmante / supervisor
+          description: Perfil del cofirmante / supervisor. Si se omite, es el perfil profesional de la sesión.
         certificateThumbprint:
           type: string
         signatureValueEncrypted:
           type: string
-      required:
-        - signerProfileId
       additionalProperties: false
     AmendNoteDto:
       type: object
@@ -76165,6 +75622,27 @@ components:
           type: string
           format: uuid
           description: Value set de valores permitidos (campos de selección)
+        options:
+          description: Opciones propias de un campo de elección (dataType "code" sin valueSetId)
+          type: array
+          items:
+            type: string
+        multiple:
+          type: boolean
+          description: Admite varias respuestas en vez de una sola
+        allowOther:
+          type: boolean
+          description: Ofrece «Otro», con texto libre
+        description:
+          type: string
+          description: Ayuda que se lee bajo la pregunta (se sirve como "hint")
+          maxLength: 1000
+        cardinalityMin:
+          type: number
+          description: Cardinalidad mínima (sólo con multiple)
+        cardinalityMax:
+          type: number
+          description: Cardinalidad máxima (sólo con multiple)
         required:
           type: boolean
           default: false
@@ -76289,6 +75767,7 @@ components:
         messageTemplate:
           type: string
           description: Plantilla del mensaje de alerta
+          maxLength: 2000
       required:
         - code
         - name
@@ -76390,8 +75869,10 @@ components:
           description: Severidad (concept id)
         mechanismText:
           type: string
+          maxLength: 2000
         managementText:
           type: string
+          maxLength: 2000
       required:
         - substanceAConceptId
         - substanceBConceptId
@@ -76663,6 +76144,7 @@ components:
         doseText:
           type: string
           description: Posología por defecto
+          maxLength: 500
         routeConceptId:
           type: string
           description: Vía de administración por defecto
@@ -76670,6 +76152,7 @@ components:
         frequencyText:
           type: string
           description: Frecuencia por defecto
+          maxLength: 500
         quantityDecimal:
           type: number
           description: Cantidad por defecto
@@ -76680,6 +76163,7 @@ components:
         patientInstructionsText:
           type: string
           description: Indicaciones al paciente por defecto, separadas de la posología
+          maxLength: 2000
       required:
         - name
         - medicationConceptId
@@ -79653,6 +79137,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ValidationRuleInputDto'
+        options:
+          description: Opciones propias de un campo de elección (dataType "code" sin valueSetId)
+          type: array
+          items:
+            type: string
+        multiple:
+          type: boolean
+          description: Admite varias respuestas en vez de una sola
+          default: false
+        allowOther:
+          type: boolean
+          description: Ofrece «Otro», con texto libre
+          default: false
+        description:
+          type: string
+          description: Ayuda que se lee bajo la pregunta (se sirve como "hint")
+          maxLength: 1000
       required:
         - code
         - name
@@ -79682,6 +79183,22 @@ components:
             - reference
             - code
           description: Tipo de dato técnico; con valores capturados no se cambia (409)
+        options:
+          description: Opciones, reemplazadas enteras
+          type: array
+          items:
+            type: string
+        multiple:
+          type: boolean
+          description: Admite varias respuestas
+        allowOther:
+          type: boolean
+          description: Ofrece «Otro», con texto libre
+        description:
+          type: object
+          description: Ayuda bajo la pregunta; null la quita
+          maxLength: 1000
+          nullable: true
       additionalProperties: false
     CreateFieldDependencyDto:
       type: object
@@ -79865,10 +79382,6 @@ components:
         tenantContextId:
           type: string
           description: Contexto de tenant
-          format: uuid
-        definitionSetVersionId:
-          type: string
-          description: Versión publicada del set cuyo schema se congela
           format: uuid
         schemaVersion:
           type: number
@@ -81377,6 +80890,7 @@ components:
           maxLength: 500
         diagnosticsText:
           type: string
+          maxLength: 2000
         locationJson:
           type: object
       required:
@@ -81476,6 +80990,7 @@ components:
         reasonText:
           type: string
           description: Por qué se decide así
+          maxLength: 1000
         evidenceJson:
           type: object
           description: Evidencia en la que se apoya la decisión
@@ -81523,6 +81038,7 @@ components:
         summaryRedacted:
           type: string
           description: Resumen ya redactado según el consentimiento; nunca el dato clínico en claro
+          maxLength: 2000
         clinicalPriorityConceptId:
           type: string
           format: uuid
@@ -81597,6 +81113,7 @@ components:
         reason:
           type: string
           description: Por qué se retira
+          maxLength: 1000
       required:
         - reason
       additionalProperties: false
@@ -86909,6 +86426,7 @@ components:
         expiresAt:
           type: string
           description: Fecha de expiración del lote (ISO)
+          format: date
       required:
         - pharmacyPurchaseOrderLineId
         - pharmacyProductId
@@ -92088,13 +91606,6 @@ components:
           type: number
           description: Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0
           minimum: 0
-        bookingMode:
-          type: string
-          enum:
-            - CONSULTATIONS
-            - SERVICES
-            - MIXED
-          description: 'Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS'
       required:
         - dayOfWeek
         - startTime
@@ -92755,110 +92266,6 @@ components:
       required:
         - tenantId
         - requestData
-      additionalProperties: false
-    CreateServiceOfferingDto:
-      type: object
-      properties:
-        serviceCatalogId:
-          type: string
-          format: uuid
-          description: Servicio del catálogo de la práctica que se ofrece
-        minDurationMinutes:
-          type: number
-          minimum: 1
-          maximum: 720
-          description: Lo mínimo que puede tardar, en minutos
-        maxDurationMinutes:
-          type: number
-          minimum: 1
-          maximum: 720
-          description: Lo máximo que puede tardar. Es el tiempo que se reserva en la agenda
-        prepMinutes:
-          type: number
-          minimum: 0
-          maximum: 240
-          description: Preparación antes de atender; el paciente no la ve
-        cleanupMinutes:
-          type: number
-          minimum: 0
-          maximum: 240
-          description: Limpieza o cierre después de atender; el paciente no la ve
-        isPatientBookable:
-          type: boolean
-          default: true
-          description: Si el paciente puede pedirlo por su cuenta desde el portal
-        requiresApproval:
-          type: boolean
-          default: false
-          description: Si cada pedido espera la aceptación del profesional en vez de confirmarse solo
-        channel:
-          type: string
-          enum:
-            - PRESENCIAL
-            - TELECONSULTA
-            - DOMICILIO
-        practitionerProfileId:
-          type: string
-          format: uuid
-          description: >-
-            Sólo para quien administra agendas: el profesional dueño de la oferta. Un profesional siempre la crea para
-            sí mismo.
-      required:
-        - serviceCatalogId
-        - minDurationMinutes
-        - maxDurationMinutes
-      additionalProperties: false
-    UpdateServiceOfferingDto:
-      type: object
-      properties:
-        minDurationMinutes:
-          type: number
-          minimum: 1
-          maximum: 720
-        maxDurationMinutes:
-          type: number
-          minimum: 1
-          maximum: 720
-        prepMinutes:
-          type: number
-          minimum: 0
-          maximum: 240
-        cleanupMinutes:
-          type: number
-          minimum: 0
-          maximum: 240
-        isPatientBookable:
-          type: boolean
-        requiresApproval:
-          type: boolean
-        channel:
-          type: string
-          enum:
-            - PRESENCIAL
-            - TELECONSULTA
-            - DOMICILIO
-        isActive:
-          type: boolean
-          description: Falso para dejar de ofrecerlo sin borrarlo
-      additionalProperties: false
-    CreateServiceHoldDto:
-      type: object
-      properties:
-        resourceId:
-          type: string
-          format: uuid
-          description: Sede donde se atiende
-        startAt:
-          type: string
-          format: date-time
-          description: Cuándo empieza la atención
-        patientProfileId:
-          type: string
-          format: uuid
-          description: Paciente para el que se reserva
-      required:
-        - resourceId
-        - startAt
       additionalProperties: false
     CreateEnumDefinitionDto:
       type: object
