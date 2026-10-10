@@ -76,14 +76,14 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
 
     try {
       const clave = `${KEY_PREFIX}${key}`;
-      const [[, totalCrudo], [, restanteCrudo]] = (await this.redis
+      const [[, totalRaw], [, remainingRaw]] = (await this.redis
         .multi()
         .incr(clave)
         .pttl(clave)
         .exec()) as [[Error | null, number], [Error | null, number]];
 
-      const total = Number(totalCrudo);
-      let remaining = Number(restanteCrudo);
+      const total = Number(totalRaw);
+      let remaining = Number(remainingRaw);
 
       // `pttl` devuelve -1 cuando la clave existe sin vencimiento: pasa si el
       // INCR corrió y el PEXPIRE no llegó a aplicarse. Se repone la ventana en
@@ -125,11 +125,11 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
     limit: number,
     blockDuration: number,
   ): ThrottlerStorageRecord {
-    const ahora = Date.now();
+    const now = Date.now();
     const actual = this.local.get(key);
 
-    if (!actual || actual.expiresAt <= ahora) {
-      this.local.set(key, { count: 1, expiresAt: ahora + ttl });
+    if (!actual || actual.expiresAt <= now) {
+      this.local.set(key, { count: 1, expiresAt: now + ttl });
       return {
         totalHits: 1,
         timeToExpire: Math.ceil(ttl / 1000),
@@ -141,9 +141,9 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
     actual.count += 1;
     const exceeded = actual.count > limit;
     if (exceeded)
-      actual.expiresAt = Math.max(actual.expiresAt, ahora + blockDuration);
+      actual.expiresAt = Math.max(actual.expiresAt, now + blockDuration);
 
-    const remaining = Math.max(actual.expiresAt - ahora, 0);
+    const remaining = Math.max(actual.expiresAt - now, 0);
     return {
       totalHits: actual.count,
       timeToExpire: Math.ceil(remaining / 1000),
