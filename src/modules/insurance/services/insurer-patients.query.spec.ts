@@ -9,14 +9,14 @@ import {
 } from './insurer-patients.query';
 
 const CARRIER = 'carrier-1';
-const HOY = '2026-10-04';
+const TODAY = '2026-10-04';
 
 function criteria(
   overrides: Partial<InsurerPatientCriteria> = {},
 ): InsurerPatientCriteria {
   return {
     carrierId: CARRIER,
-    referenceDate: HOY,
+    referenceDate: TODAY,
     limit: 10,
     insuranceStatus: 'ALL',
     sortBy: 'fullName',
@@ -82,10 +82,10 @@ describe('buildInsurerPatientPageQuery', () => {
       INS.CARRIER_ACTIVE,
       INS.COVERAGE_ACTIVE,
       INS.PLAN_ACTIVE,
-      HOY,
-      HOY,
-      HOY,
-      HOY,
+      TODAY,
+      TODAY,
+      TODAY,
+      TODAY,
     ]);
   });
 

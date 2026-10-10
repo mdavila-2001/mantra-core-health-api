@@ -13,15 +13,15 @@ function routesWithError(
   errors: readonly ValidationError[],
   prefix = '',
 ): string[] {
-  const rutas: string[] = [];
+  const routes: string[] = [];
   for (const error of errors) {
-    const ruta = prefix ? `${prefix}.${error.property}` : error.property;
-    if (error.constraints) rutas.push(ruta);
+    const route = prefix ? `${prefix}.${error.property}` : error.property;
+    if (error.constraints) routes.push(route);
     if (error.children && error.children.length > 0) {
-      rutas.push(...routesWithError(error.children, ruta));
+      routes.push(...routesWithError(error.children, route));
     }
   }
-  return [...new Set(rutas)].sort();
+  return [...new Set(routes)].sort();
 }
 
 async function errors<T extends object>(
@@ -73,12 +73,12 @@ describe('Validación de los DTO de campañas preventivas (ValidationPipe)', () 
     ['tenantId', 'tenant-ajeno'],
     ['status', 'ACTIVE'],
     ['createdByUserId', 'user-x'],
-  ])('rechaza el campo no autorizado `%s`', async (campo, valor) => {
+  ])('rechaza el campo no autorizado `%s`', async (field, value) => {
     const errores = await errors(CreateInsuranceCampaignDto, {
       ...validCreate(),
-      [campo]: valor,
+      [field]: value,
     });
-    expect(errores).toContain(campo);
+    expect(errores).toContain(field);
   });
 
   it('rechaza copayBonusPercentage mayor a 100', async () => {

@@ -391,18 +391,18 @@ describe('InsurerReceivedClaimsService.list', () => {
     });
 
     it('pagada y revertida conservan su estado, sea cual sea el dictamen', async () => {
-      for (const [concepto, codigo] of [
+      for (const [concept, code] of [
         [INS.CLAIM_PAID, 'PAID'],
         [INS.CLAIM_REVERSED, 'REVERSED'],
       ]) {
         const d = build({
           administra: true,
-          claim: request({ statusConceptId: concepto }),
+          claim: request({ statusConceptId: concept }),
         });
 
         const [item] = (await inTenant(() => d.service.list(owner))).items;
 
-        expect(item.status?.code).toBe(codigo);
+        expect(item.status?.code).toBe(code);
       }
     });
 
@@ -463,14 +463,14 @@ describe('InsurerReceivedClaimsService.list', () => {
     });
 
     it('un importe guardado ilegible no se muestra como cero: falla nombrando el renglón', async () => {
-      const corrupto = { ...renglones()[1], billedAmount: 'abc' } as any;
-      const d = build({ administra: true, lines: [corrupto] });
+      const corrupt = { ...renglones()[1], billedAmount: 'abc' } as any;
+      const d = build({ administra: true, lines: [corrupt] });
 
-      const intento = inTenant(() => d.service.list(owner));
+      const attempt = inTenant(() => d.service.list(owner));
 
-      await expect(intento).rejects.toBeInstanceOf(CorruptStoredAmountError);
-      await expect(intento).rejects.toMatchObject({
-        lineId: corrupto.id,
+      await expect(attempt).rejects.toBeInstanceOf(CorruptStoredAmountError);
+      await expect(attempt).rejects.toMatchObject({
+        lineId: corrupt.id,
         amount: 'abc',
       });
     });
@@ -638,8 +638,8 @@ describe('InsurerReceivedClaimsService.decide', () => {
         totalApprovedAmount: '0.00',
         totalDeniedAmount: '400.00',
       });
-      for (const linea of written(d).values()) {
-        expect(linea).toMatchObject({
+      for (const line of written(d).values()) {
+        expect(line).toMatchObject({
           decisionConceptId: INS.LINE_DECISION_DENIED,
           approvedAmount: '0.00',
           denialRationale: 'Servicio no cubierto',
@@ -654,8 +654,8 @@ describe('InsurerReceivedClaimsService.decide', () => {
 
       await decide(d, { outcome: 'APPROVED' });
 
-      const evento = d.outbox.publishDomainEvent.mock.calls[0][1];
-      expect(evento.payloadJson).toEqual({
+      const event = d.outbox.publishDomainEvent.mock.calls[0][1];
+      expect(event.payloadJson).toEqual({
         claimId: CLAIM_ID,
         insuranceCarrierId: CARRIER,
         billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PRACTICE,
@@ -666,7 +666,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
         currencyConceptId: 'cur-bob',
         decidedByUserId: 'u-owner',
       });
-      expect(JSON.stringify(evento)).not.toMatch(/Ana|Pérez|PAT-0001|AF-0001/);
+      expect(JSON.stringify(event)).not.toMatch(/Ana|Pérez|PAT-0001|AF-0001/);
     });
 
     it('el dictamen se escribe con la solicitud ya bloqueada', async () => {
@@ -833,10 +833,10 @@ describe('InsurerReceivedClaimsService.decide', () => {
     });
 
     it('una solicitud pagada o revertida tampoco se dictamina: 409', async () => {
-      for (const estado of [INS.CLAIM_PAID, INS.CLAIM_REVERSED]) {
+      for (const status of [INS.CLAIM_PAID, INS.CLAIM_REVERSED]) {
         const d = build({
           administra: true,
-          claim: request({ statusConceptId: estado }),
+          claim: request({ statusConceptId: status }),
         });
 
         await expect(decide(d, { outcome: 'APPROVED' })).rejects.toBeInstanceOf(
@@ -878,7 +878,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
         'REJECTED con monto',
         { outcome: 'REJECTED', approvedAmount: '0.00', reason: 'No cubierto' },
       ],
-    ])('%s es 422 y no escribe nada', async (_caso, dto) => {
+    ])('%s es 422 y no escribe nada', async (_case, dto) => {
       const d = build({ administra: true });
 
       await expect(decide(d, dto)).rejects.toBeInstanceOf(
