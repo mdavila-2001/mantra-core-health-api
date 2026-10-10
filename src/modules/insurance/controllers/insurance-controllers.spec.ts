@@ -264,10 +264,10 @@ describe('Insurance controllers (delegación)', () => {
 
   /** Las membresías se resuelven por origen; las disputas conservan su política. */
   it('delega las seis escrituras en la autorización de servicio y conserva disputas', () => {
-    const method = (nombre: string): string[] | undefined =>
+    const method = (name: string): string[] | undefined =>
       Reflect.getMetadata(
         'requiredRoles',
-        (ClaimsController.prototype as never as Record<string, object>)[nombre],
+        (ClaimsController.prototype as never as Record<string, object>)[name],
       );
 
     expect(method('openDispute')).toEqual([
@@ -310,21 +310,21 @@ describe('Insurance controllers (delegación)', () => {
     const methodsHttp = Object.getOwnPropertyNames(
       ClaimsController.prototype,
     ).filter(
-      (nombre) =>
-        nombre !== 'constructor' &&
+      (name) =>
+        name !== 'constructor' &&
         Reflect.hasMetadata(
           PATH_METADATA,
           (ClaimsController.prototype as unknown as Record<string, object>)[
-            nombre
+            name
           ],
         ),
     );
     expect(methodsHttp.length).toBeGreaterThan(0);
-    for (const nombre of methodsHttp) {
+    for (const name of methodsHttp) {
       const method = Reflect.getMetadata(
         METHOD_METADATA,
         (ClaimsController.prototype as unknown as Record<string, object>)[
-          nombre
+          name
         ],
       );
       expect(method).toBe(RequestMethod.POST);
@@ -475,31 +475,31 @@ describe('Insurance controllers (delegación)', () => {
       string,
       object
     >;
-    const ruta = (method: string) => ({
+    const route = (method: string) => ({
       path: Reflect.getMetadata(PATH_METADATA, proto[method]),
       method: Reflect.getMetadata(METHOD_METADATA, proto[method]),
     });
 
-    expect(ruta('create')).toEqual({ path: '/', method: RequestMethod.POST });
-    expect(ruta('list')).toEqual({ path: '/', method: RequestMethod.GET });
-    expect(ruta('listActive')).toEqual({
+    expect(route('create')).toEqual({ path: '/', method: RequestMethod.POST });
+    expect(route('list')).toEqual({ path: '/', method: RequestMethod.GET });
+    expect(route('listActive')).toEqual({
       path: 'active',
       method: RequestMethod.GET,
     });
-    expect(ruta('myBenefits')).toEqual({
+    expect(route('myBenefits')).toEqual({
       path: 'my-benefits',
       method: RequestMethod.GET,
     });
-    expect(ruta('listForPatient')).toEqual({
+    expect(route('listForPatient')).toEqual({
       path: 'patient/:patientProfileId',
       method: RequestMethod.GET,
     });
-    expect(ruta('getById')).toEqual({ path: ':id', method: RequestMethod.GET });
-    expect(ruta('changeStatus')).toEqual({
+    expect(route('getById')).toEqual({ path: ':id', method: RequestMethod.GET });
+    expect(route('changeStatus')).toEqual({
       path: ':id/status',
       method: RequestMethod.PATCH,
     });
-    expect(ruta('update')).toEqual({
+    expect(route('update')).toEqual({
       path: ':id',
       method: RequestMethod.PATCH,
     });
@@ -521,7 +521,7 @@ describe('Insurance controllers (delegación)', () => {
       (
         Reflect.getMetadata('swagger/apiModelPropertiesArray', dto.prototype) ??
         []
-      ).map((clave: string) => clave.replace(/^:/, ''));
+      ).map((key: string) => key.replace(/^:/, ''));
 
     expect(allowed(PatientCampaignDto).sort()).toEqual(
       [
@@ -555,11 +555,11 @@ describe('Insurance controllers (delegación)', () => {
     ];
     const forbidden = /paid|payment|receipt|voucher|qr/i;
     for (const dto of dtos) {
-      const propiedades: string[] =
+      const properties: string[] =
         Reflect.getMetadata('swagger/apiModelPropertiesArray', dto.prototype) ??
         [];
-      expect(propiedades.length).toBeGreaterThan(0);
-      for (const property of propiedades) {
+      expect(properties.length).toBeGreaterThan(0);
+      for (const property of properties) {
         expect(property.replace(/^:/, '')).not.toMatch(forbidden);
       }
     }

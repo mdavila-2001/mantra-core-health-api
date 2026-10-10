@@ -369,7 +369,7 @@ describe('PriorAuthService linked orders', () => {
           },
         ],
       ],
-    ])('rechaza con 422 si %s, sin escribir nada', async (_caso, items) => {
+    ])('rechaza con 422 si %s, sin escribir nada', async (_case, items) => {
       const f = fixture();
       await expect(
         f.service.issueDetermination('prior', { items: items as never }, actor),

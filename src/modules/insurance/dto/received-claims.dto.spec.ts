@@ -65,7 +65,7 @@ describe('ReceivedClaimDecisionDto', () => {
       ['un resultado fuera del set', { outcome: 'DENIED' }],
       ['un resultado ausente', {}],
       ['un resultado en minúsculas', { outcome: 'approved' }],
-    ])('rechaza %s', async (_caso, body) => {
+    ])('rechaza %s', async (_case, body) => {
       expect(await errors(body)).toEqual(['outcome']);
     });
 

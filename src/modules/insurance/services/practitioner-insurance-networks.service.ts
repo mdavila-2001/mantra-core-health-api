@@ -83,9 +83,9 @@ export class PractitionerInsuranceNetworksService {
 }
 
 /** `YYYY-MM-DD` de una columna `date`, o `null`. */
-function onlyDate(valor: Date | string | null): string | null {
-  if (valor === null) return null;
-  return typeof valor === 'string'
-    ? valor.slice(0, 10)
-    : valor.toISOString().slice(0, 10);
+function onlyDate(value: Date | string | null): string | null {
+  if (value === null) return null;
+  return typeof value === 'string'
+    ? value.slice(0, 10)
+    : value.toISOString().slice(0, 10);
 }
