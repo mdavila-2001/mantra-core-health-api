@@ -612,7 +612,7 @@ export class PractitionerAccountingService {
         liabilityId,
       });
     }
-    const [monedas, filas] = await Promise.all([
+    const [currencies, rows] = await Promise.all([
       this.currencyByAccount(em, [liability.accountId]),
       this.liabilityRepo.listSchedules(em, liabilityId),
     ]);
@@ -622,9 +622,9 @@ export class PractitionerAccountingService {
       principalAmount: liability.principalAmount ?? null,
       outstandingAmount: liability.outstandingAmount ?? null,
       currencyConceptId: liability.accountId
-        ? (monedas.get(liability.accountId) ?? null)
+        ? (currencies.get(liability.accountId) ?? null)
         : null,
-      schedule: filas.map((row) => ({
+      schedule: rows.map((row) => ({
         id: row.id,
         installmentNumber: row.installmentNumber,
         dueDate: toIsoDate(row.dueDate) ?? undefined,
