@@ -120,14 +120,14 @@ export class PharmacyMarketplaceService {
     // calcularlos sobre el catálogo entero ofrecería grupos que esa búsqueda
     // no puede llenar, y elegirlos daría una vitrina vacía.
     const groups = [
-      ...new Set(offers.map((offer) => grupoDe(offer.atcCode))),
+      ...new Set(offers.map((offer) => groupOf(offer.atcCode))),
     ].sort((a, b) => a.localeCompare(b, 'es'));
 
     const filtered =
       consultation.group === undefined || consultation.group === ''
         ? cards
         : cards.filter(
-            (tarjeta) => tarjeta.therapeuticGroup === consultation.group,
+            (card) => card.therapeuticGroup === consultation.group,
           );
 
     const tope = Math.min(
@@ -174,7 +174,7 @@ export class PharmacyMarketplaceService {
       consultation.origin,
       consultation.radiusKm,
     );
-    const [ficha] = this.group(offers, consultation.origin);
+    const [sheet] = this.group(offers, consultation.origin);
 
     const withDistance = inScope.map((offer) => ({
       oferta: offer,
@@ -198,9 +198,9 @@ export class PharmacyMarketplaceService {
     });
 
     return {
-      medication: ficha,
-      offers: withDistance.map(({ oferta, distancia }) =>
-        this.toOffer(oferta, distancia),
+      medication: sheet,
+      offers: withDistance.map(({ oferta: offer, distancia: distance }) =>
+        this.toOffer(offer, distance),
       ),
       generatedAt: new Date().toISOString(),
     };
@@ -211,12 +211,12 @@ export class PharmacyMarketplaceService {
   /** Las ofertas dentro del radio; sin origen o sin radio, todas. */
   private narrowByRadius(
     offers: readonly PublishedOffer[],
-    origen: Origin | undefined,
+    origin: Origin | undefined,
     radiusKm: number | undefined,
   ): PublishedOffer[] {
-    if (origen === undefined || radiusKm === undefined) return [...offers];
+    if (origin === undefined || radiusKm === undefined) return [...offers];
     return offers.filter((offer) => {
-      const distance = this.distance(offer, origen);
+      const distance = this.distance(offer, origin);
       return distance !== null && distance <= radiusKm;
     });
   }
@@ -224,11 +224,11 @@ export class PharmacyMarketplaceService {
   /** Distancia en línea recta al origen, redondeada a un decimal. */
   private distance(
     offer: PublishedOffer,
-    origen: Origin | undefined,
+    origin: Origin | undefined,
   ): number | null {
-    if (origen === undefined) return null;
+    if (origin === undefined) return null;
     return Number(
-      haversineKm(origen, {
+      haversineKm(origin, {
         lat: offer.latitude,
         lng: offer.longitude,
       }).toFixed(1),
@@ -244,7 +244,7 @@ export class PharmacyMarketplaceService {
    */
   private group(
     offers: readonly PublishedOffer[],
-    origen: Origin | undefined,
+    origin: Origin | undefined,
   ): PublicMedicationCardDto[] {
     const byConcept = new Map<string, PublishedOffer[]>();
     for (const offer of offers) {
@@ -256,7 +256,7 @@ export class PharmacyMarketplaceService {
     const cards = [...byConcept.values()].map((group) => {
       const prices = group.map((offer) => Number(offer.price));
       const distances = group
-        .map((offer) => this.distance(offer, origen))
+        .map((offer) => this.distance(offer, origin))
         .filter((distance): distance is number => distance !== null);
 
       // El rango se toma del texto original y no del número: reformatear
@@ -268,7 +268,7 @@ export class PharmacyMarketplaceService {
         conceptId: group[0].conceptId,
         atcCode: group[0].atcCode,
         genericName: group[0].genericName,
-        therapeuticGroup: grupoDe(group[0].atcCode),
+        therapeuticGroup: groupOf(group[0].atcCode),
         brands: unique(group.map((offer) => offer.brandName)),
         presentations: unique(group.map((offer) => presentation(offer))),
         requiresPrescription: group.some((offer) => offer.requiresPrescription),
@@ -326,7 +326,7 @@ export class PharmacyMarketplaceService {
 /* ---- funciones puras ------------------------------------------------------ */
 
 /** El grupo terapéutico de un código ATC, o «Varios» si la letra no está. */
-function grupoDe(atcCode: string): string {
+function groupOf(atcCode: string): string {
   return GROUPS_ATC[atcCode.charAt(0).toUpperCase()] ?? 'Varios';
 }
 
@@ -343,21 +343,21 @@ function unique(values: readonly (string | null)[]): string[] {
   return [
     ...new Set(
       values.filter(
-        (valor): valor is string => typeof valor === 'string' && valor !== '',
+        (value): value is string => typeof value === 'string' && value !== '',
       ),
     ),
   ];
 }
 
 /** Distancia en línea recta entre dos puntos, en km. */
-function haversineKm(from: Origin, hasta: Origin): number {
+function haversineKm(from: Origin, until: Origin): number {
   const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
-  const deltaLat = toRadians(hasta.lat - from.lat);
-  const deltaLng = toRadians(hasta.lng - from.lng);
+  const deltaLat = toRadians(until.lat - from.lat);
+  const deltaLng = toRadians(until.lng - from.lng);
   const cuerda =
     Math.sin(deltaLat / 2) ** 2 +
     Math.cos(toRadians(from.lat)) *
-      Math.cos(toRadians(hasta.lat)) *
+      Math.cos(toRadians(until.lat)) *
       Math.sin(deltaLng / 2) ** 2;
   return 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(cuerda));
 }
