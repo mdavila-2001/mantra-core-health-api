@@ -53,9 +53,7 @@ async function validar(
 
 describe('CreateMedicationRequestDto — motivo escrito a mano (CL-03 / P24)', () => {
   it('acepta el cuerpo del front con indicationText y sin prescriptor', async () => {
-    expect(await validar(CreateMedicationRequestDto, bodyFront())).toEqual(
-      [],
-    );
+    expect(await validar(CreateMedicationRequestDto, bodyFront())).toEqual([]);
   });
 
   it(`acepta exactamente ${INDICATION_TEXT_MAX_LENGTH} caracteres`, async () => {
@@ -121,9 +119,7 @@ describe('CreateMedicationRequestDto — formInstanceId (P43)', () => {
   });
 
   it('sigue siendo opcional: sin formInstanceId también valida', async () => {
-    expect(await validar(CreateMedicationRequestDto, bodyFront())).toEqual(
-      [],
-    );
+    expect(await validar(CreateMedicationRequestDto, bodyFront())).toEqual([]);
   });
 
   it('rechaza un formInstanceId que no es uuid', async () => {

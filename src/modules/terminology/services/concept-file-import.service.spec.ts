@@ -331,10 +331,7 @@ describe('ConceptFileImportService', () => {
       expect(result.aborted).toBe(true);
       expect(result.errors).toBe(3);
       expect(
-        result.errorSamples.map((problem) => [
-          problem.line,
-          problem.column,
-        ]),
+        result.errorSamples.map((problem) => [problem.line, problem.column]),
       ).toEqual([
         [1, 'code'],
         [2, 'display'],

@@ -64,9 +64,7 @@ export function buildAmortizationSchedule(params: {
 
   for (let n = 1; n <= installments; n++) {
     const isLast = n === installments;
-    const principalDueCents = isLast
-      ? outstandingCents
-      : baseInstallmentCents;
+    const principalDueCents = isLast ? outstandingCents : baseInstallmentCents;
     const interestDueCents = Math.round(outstandingCents * monthlyRate);
 
     const dueDate = new Date(startDate);

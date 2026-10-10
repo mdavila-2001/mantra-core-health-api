@@ -359,18 +359,13 @@ export class BoliviaFeeScheduleSeedService {
    * «false» en cuatro mil filas es ruido, y la ausencia ya significa «no se
    * detectó daño» — que no es lo mismo que «está bien», pero es lo que se sabe.
    */
-  private propertiesOf(
-    procedure: BoliviaProcedureSeed,
-  ): [string, string][] {
+  private propertiesOf(procedure: BoliviaProcedureSeed): [string, string][] {
     const pares: [string, string | null][] = [
       [BO_FEE_PROPERTY_CODES.especialidad, procedure.especialidad],
       [BO_FEE_PROPERTY_CODES.grupo, procedure.grupo],
       [BO_FEE_PROPERTY_CODES.precio, String(procedure.precio)],
       [BO_FEE_PROPERTY_CODES.unidad, procedure.unidad],
-      [
-        BO_FEE_PROPERTY_CODES.revision,
-        procedure.ocrSospechoso ? 'true' : null,
-      ],
+      [BO_FEE_PROPERTY_CODES.revision, procedure.ocrSospechoso ? 'true' : null],
     ];
     return pares.filter((par): par is [string, string] => Boolean(par[1]));
   }

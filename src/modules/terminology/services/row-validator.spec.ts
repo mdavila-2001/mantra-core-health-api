@@ -5,10 +5,7 @@ const CONCEPTS = PERFILES_DE_IMPORTACION.conceptos;
 
 /** Lee un CSV escrito como texto y valida sus filas, como hace el servicio. */
 function readAndValidate(csv: string) {
-  const { filas } = new CsvParser().parse(
-    Buffer.from(csv, 'utf8'),
-    CONCEPTS,
-  );
+  const { filas } = new CsvParser().parse(Buffer.from(csv, 'utf8'), CONCEPTS);
   return validateRows(filas, CONCEPTS);
 }
 
@@ -47,15 +44,15 @@ describe('validarFilas', () => {
   it('señala exactamente las cinco filas malas, con su columna', () => {
     const { validas, problemas } = readAndValidate(withErrors());
 
-    expect(
-      problemas.map((problem) => [problem.fila, problem.columna]),
-    ).toEqual([
-      [5, 'display'],
-      [9, 'code'],
-      [14, 'code'],
-      [20, 'code'],
-      [33, 'display'],
-    ]);
+    expect(problemas.map((problem) => [problem.fila, problem.columna])).toEqual(
+      [
+        [5, 'display'],
+        [9, 'code'],
+        [14, 'code'],
+        [20, 'code'],
+        [33, 'display'],
+      ],
+    );
     expect(validas).toHaveLength(45);
   });
 

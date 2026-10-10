@@ -169,11 +169,7 @@ function chunk(text: string, separator: string): string[][] {
   const records: string[][] = [];
   let from = 0;
   while (from < text.length) {
-    const { celdas, siguiente, crudo } = chunkRecord(
-      text,
-      from,
-      separator,
-    );
+    const { celdas, siguiente, crudo } = chunkRecord(text, from, separator);
     // El último renglón de un archivo que termina en salto de línea es vacío y
     // no es un registro: sin esto, todo archivo bien formado traería una fila
     // fantasma al final.

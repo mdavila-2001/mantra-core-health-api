@@ -164,8 +164,7 @@ export class CommunityMessagingService {
       const eligibleRecipient =
         recipient?.statusConceptId === CONCEPTS.STATE_ACTIVE &&
         (!requirePublicRecipient ||
-          recipient.visibilityConceptId ===
-            COMM.PROFILE_VISIBILITY_PUBLIC) &&
+          recipient.visibilityConceptId === COMM.PROFILE_VISIBILITY_PUBLIC) &&
         [COMM.PROFILE_TARGET_USER, COMM.PROFILE_TARGET_PRACTITIONER].includes(
           recipient.targetTypeConceptId,
         );
@@ -769,11 +768,7 @@ export class CommunityMessagingService {
   ): Promise<DeletedMessageResponseDto> {
     const result = await this.em.transactional(async (tx) => {
       await this.visibility.assertActsAsProfile(tx, profileId, actor);
-      await this.activeOrNotFoundParticipant(
-        tx,
-        conversationId,
-        profileId,
-      );
+      await this.activeOrNotFoundParticipant(tx, conversationId, profileId);
       const message = await this.ownLiveMessage(
         tx,
         conversationId,
@@ -835,11 +830,7 @@ export class CommunityMessagingService {
   ): Promise<PinnedMessageResponseDto> {
     const recipients = await this.em.transactional(async (tx) => {
       await this.visibility.assertActsAsProfile(tx, dto.profileId, actor);
-      await this.activeOrNotFoundParticipant(
-        tx,
-        conversationId,
-        dto.profileId,
-      );
+      await this.activeOrNotFoundParticipant(tx, conversationId, dto.profileId);
       const conversation = await this.conversationsRepo.findConversationById(
         tx,
         conversationId,
@@ -880,11 +871,7 @@ export class CommunityMessagingService {
   ): Promise<PinnedMessageResponseDto> {
     const recipients = await this.em.transactional(async (tx) => {
       await this.visibility.assertActsAsProfile(tx, profileId, actor);
-      await this.activeOrNotFoundParticipant(
-        tx,
-        conversationId,
-        profileId,
-      );
+      await this.activeOrNotFoundParticipant(tx, conversationId, profileId);
       const conversation = await this.conversationsRepo.findConversationById(
         tx,
         conversationId,

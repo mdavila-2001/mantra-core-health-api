@@ -93,9 +93,7 @@ export class ClamdClient {
     const found = /^stream:\s+(.*)\s+FOUND$/.exec(response);
     if (found) return { clean: false, signature: found[1] };
 
-    throw new Error(
-      `clamd respondió algo que no es un veredicto: ${response}`,
-    );
+    throw new Error(`clamd respondió algo que no es un veredicto: ${response}`);
   }
 
   /**
@@ -122,9 +120,7 @@ export class ClamdClient {
       };
 
       socket.setTimeout(this.options.timeoutMs, () =>
-        finish(
-          new Error(`clamd no respondió en ${this.options.timeoutMs} ms`),
-        ),
+        finish(new Error(`clamd no respondió en ${this.options.timeoutMs} ms`)),
       );
       socket.on('error', (error) => finish(error));
       socket.on('data', (part) => parts.push(part));

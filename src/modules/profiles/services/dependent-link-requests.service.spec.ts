@@ -103,9 +103,7 @@ function build(
     ),
     findById: fn().mockResolvedValue(options.solicitud ?? null),
     listPendingForPatient: fn().mockResolvedValue([]),
-    searchRepresentableByName: fn().mockResolvedValue(
-      options.candidatas ?? [],
-    ),
+    searchRepresentableByName: fn().mockResolvedValue(options.candidatas ?? []),
   };
   const notifications = {
     emitInApp: fn().mockResolvedValue({ suppressed: false }),
@@ -480,7 +478,10 @@ describe('DependentLinkRequestsService', () => {
       it('si ya la representa, 409; si ya hay una pendiente, 409 y no se duplica el aviso', async () => {
         const current = build({ vigente: { id: 'proxy-viejo' } });
         await expect(
-          current.service.request({ patientProfileId: 'person-abuelo' }, mother),
+          current.service.request(
+            { patientProfileId: 'person-abuelo' },
+            mother,
+          ),
         ).rejects.toBeInstanceOf(ConflictException);
         expect(current.portalProxiesRepo.create).not.toHaveBeenCalled();
 
@@ -744,9 +745,9 @@ describe('DependentLinkRequestsService', () => {
         solicitud: grandparentPending({ statusConceptId: PROF.PROXY_ACTIVE }),
       });
 
-      await expect(service.reject(REQUEST_ID, grandparent)).rejects.toBeInstanceOf(
-        ConflictException,
-      );
+      await expect(
+        service.reject(REQUEST_ID, grandparent),
+      ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('una cuenta sin perfil de paciente no puede rechazar nada: 404', async () => {
@@ -755,9 +756,9 @@ describe('DependentLinkRequestsService', () => {
         sinPaciente: ['person-abuelo'],
       });
 
-      await expect(service.reject(REQUEST_ID, grandparent)).rejects.toBeInstanceOf(
-        ResourceNotFoundException,
-      );
+      await expect(
+        service.reject(REQUEST_ID, grandparent),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

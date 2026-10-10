@@ -467,11 +467,7 @@ export class CommunitySocialReadService {
     );
     // Mismo 404 que «no existe»: a quien enumera fileIds ajenos no se le
     // confirma si el archivo existe pero el post es privado.
-    await this.assertPostVisible(
-      em,
-      comment.commentableRefId,
-      actorProfileId,
-    );
+    await this.assertPostVisible(em, comment.commentableRefId, actorProfileId);
 
     return this.files.downloadPublicMedia(fileId);
   }

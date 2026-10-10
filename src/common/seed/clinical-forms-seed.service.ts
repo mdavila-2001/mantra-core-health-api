@@ -164,11 +164,7 @@ export class ClinicalFormsSeedService {
     const ofModel = await this.resolverSpecialties(em);
     const specialties = await this.seedSpecialties(em, ofModel, now);
     const reassigned = await this.repointToModel(em, ofModel);
-    const catalog = await this.specialtiesMaterializeValueSet(
-      em,
-      ofModel,
-      now,
-    );
+    const catalog = await this.specialtiesMaterializeValueSet(em, ofModel, now);
 
     const policy = await this.seedExtensionPolicy(em, now);
 

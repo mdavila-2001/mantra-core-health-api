@@ -900,9 +900,7 @@ export class DiagnosticsPatientResultsService {
       const link = await this.accountLinksRepo.findActiveByUser(em, userId);
       if (link) personIdByUser.set(userId, link.personId);
     }
-    const names = await findPractitionerNames(em, [
-      ...personIdByUser.values(),
-    ]);
+    const names = await findPractitionerNames(em, [...personIdByUser.values()]);
     const result = new Map<string, string>();
     for (const [userId, personId] of personIdByUser) {
       const nombre = names.get(personId);

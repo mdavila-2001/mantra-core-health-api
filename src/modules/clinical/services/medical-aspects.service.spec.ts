@@ -65,7 +65,15 @@ function build() {
     patientProfilesRepo as any,
     logger as any,
   );
-  return { service, tx, filas: rows, vinculos: links, perfiles: profiles, statementsRepo, logger };
+  return {
+    service,
+    tx,
+    filas: rows,
+    vinculos: links,
+    perfiles: profiles,
+    statementsRepo,
+    logger,
+  };
 }
 
 describe('MedicalAspectsService (FT-22 / D-B)', () => {

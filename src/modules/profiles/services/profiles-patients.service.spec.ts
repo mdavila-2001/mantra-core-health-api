@@ -1137,7 +1137,10 @@ describe('ProfilesPatientsService', () => {
       const d = build();
       const person = withPatient(d);
 
-      const profile = await d.service.setOwnPhoto({ fileId: 'file-1' }, titular);
+      const profile = await d.service.setOwnPhoto(
+        { fileId: 'file-1' },
+        titular,
+      );
 
       expect(person.photoFileId).toBe('file-1');
       expect(profile.photoFileId).toBe('file-1');

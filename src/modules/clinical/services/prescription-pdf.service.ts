@@ -80,9 +80,7 @@ export interface PrescriptionRole {
 /** Fecha en formato es-BO, o un guion si no se conoce. */
 function formatDate(date: Date | null | undefined): string {
   if (!date) return NO_DATA_POINT;
-  return new Intl.DateTimeFormat('es-BO', { dateStyle: 'medium' }).format(
-    date,
-  );
+  return new Intl.DateTimeFormat('es-BO', { dateStyle: 'medium' }).format(date);
 }
 
 /** Resuelve un `*_concept_id` a «CÓDIGO — display», o un guion si no está. */

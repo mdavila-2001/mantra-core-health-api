@@ -6,12 +6,12 @@ describe('payment-callback-machine (MCH-011)', () => {
     expect(
       decideCallback(CONCEPTS.TXN_PROCESSING, CONCEPTS.TXN_AUTHORIZED),
     ).toBe('aplicar');
-    expect(
-      decideCallback(CONCEPTS.TXN_PROCESSING, CONCEPTS.TXN_CAPTURED),
-    ).toBe('aplicar');
-    expect(
-      decideCallback(CONCEPTS.TXN_AUTHORIZED, CONCEPTS.TXN_CAPTURED),
-    ).toBe('aplicar');
+    expect(decideCallback(CONCEPTS.TXN_PROCESSING, CONCEPTS.TXN_CAPTURED)).toBe(
+      'aplicar',
+    );
+    expect(decideCallback(CONCEPTS.TXN_AUTHORIZED, CONCEPTS.TXN_CAPTURED)).toBe(
+      'aplicar',
+    );
     expect(decideCallback(CONCEPTS.TXN_AUTHORIZED, CONCEPTS.TXN_FAILED)).toBe(
       'aplicar',
     );
@@ -27,9 +27,9 @@ describe('payment-callback-machine (MCH-011)', () => {
   });
 
   it('trata como obsoleta la entrega atrasada de un hecho ya superado', () => {
-    expect(
-      decideCallback(CONCEPTS.TXN_CAPTURED, CONCEPTS.TXN_AUTHORIZED),
-    ).toBe('obsoleto');
+    expect(decideCallback(CONCEPTS.TXN_CAPTURED, CONCEPTS.TXN_AUTHORIZED)).toBe(
+      'obsoleto',
+    );
     expect(decideCallback(CONCEPTS.TXN_SETTLED, CONCEPTS.TXN_CAPTURED)).toBe(
       'obsoleto',
     );

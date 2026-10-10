@@ -114,9 +114,7 @@ describe('BoOccupationsSeedService', () => {
       // por versión del sistema de códigos, y todo el catálogo interno comparte
       // una sola.
       expect(
-        concepts.every((row) =>
-          String(row.code).startsWith('occupation:bo:'),
-        ),
+        concepts.every((row) => String(row.code).startsWith('occupation:bo:')),
       ).toBe(true);
     });
 

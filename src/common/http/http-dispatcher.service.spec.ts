@@ -273,9 +273,7 @@ describe('HttpDispatcherService · límites de cuerpo y plazo (MCH-035)', () => 
 
     expect(res.ok).toBe(false);
     expect(res.httpStatus).toBe(0);
-    expect(Date.now() - start).toBeLessThan(
-      DEFAULT_DISPATCH_TIMEOUT_MS + 3000,
-    );
+    expect(Date.now() - start).toBeLessThan(DEFAULT_DISPATCH_TIMEOUT_MS + 3000);
   }, 20000);
 
   it('AC02 · el plazo configurable queda acotado', () => {

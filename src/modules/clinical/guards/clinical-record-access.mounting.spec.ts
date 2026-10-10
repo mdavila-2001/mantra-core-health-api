@@ -127,7 +127,9 @@ const HANDLERS_BOOTSTRAP_WITHOUT_GUARD: ReadonlyArray<
  * prueba que sin permiso no escriben. `checkDuplicateStudy` es otro motivo distinto — no persiste y ya pasa
  * por la misma política dentro de su servicio.
  */
-const HANDLERS_WITHOUT_GUARD: ReadonlyArray<readonly [unknown, string, string]> = [
+const HANDLERS_WITHOUT_GUARD: ReadonlyArray<
+  readonly [unknown, string, string]
+> = [
   [
     ClinicalRecordsController,
     'changeConditionStatus',
@@ -207,9 +209,7 @@ describe('SEC-01 · montaje de ClinicalRecordAccessGuard', () => {
   it.each(HANDLERS_PROTECTED)(
     'protege %p.%s (%s)',
     (controller, handler, _ruta) => {
-      expect(guards(controller, handler)).toContain(
-        ClinicalRecordAccessGuard,
-      );
+      expect(guards(controller, handler)).toContain(ClinicalRecordAccessGuard);
     },
   );
 
@@ -247,9 +247,7 @@ describe('SEC-01 · montaje de ClinicalRecordAccessGuard', () => {
       ChartCarePlansController,
       ChartDocumentsController,
     ]) {
-      expect(guardsClass(controller)).not.toContain(
-        ClinicalRecordAccessGuard,
-      );
+      expect(guardsClass(controller)).not.toContain(ClinicalRecordAccessGuard);
     }
   });
 

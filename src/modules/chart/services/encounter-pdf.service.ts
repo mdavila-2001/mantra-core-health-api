@@ -170,17 +170,14 @@ export function buildRole(data: RoleData): EncounterRole {
     const lineas: string[] = [];
     if (plan.goalText) lineas.push(`Meta: ${plan.goalText}`);
     for (const activity of plan.activities) {
-      lineas.push(
-        `- ${label(data.conceptsById, activity.activityConceptId)}`,
-      );
+      lineas.push(`- ${label(data.conceptsById, activity.activityConceptId)}`);
     }
     return lineas;
   });
 
   const documentsLines = data.documents.flatMap((documento) =>
     documento.files.map(
-      (file) =>
-        `- ${data.fileNamesById.get(file.fileId) ?? 'archivo adjunto'}`,
+      (file) => `- ${data.fileNamesById.get(file.fileId) ?? 'archivo adjunto'}`,
     ),
   );
 
@@ -191,15 +188,12 @@ export function buildRole(data: RoleData): EncounterRole {
     },
     {
       titulo: 'Diagnósticos',
-      lineas:
-        diagnosesLines.length > 0 ? diagnosesLines : [WITHOUT_DATA],
+      lineas: diagnosesLines.length > 0 ? diagnosesLines : [WITHOUT_DATA],
     },
     {
       titulo: 'Prescripciones',
       lineas:
-        prescriptionsLines.length > 0
-          ? prescriptionsLines
-          : [WITHOUT_DATA],
+        prescriptionsLines.length > 0 ? prescriptionsLines : [WITHOUT_DATA],
     },
     {
       titulo: 'Plan de cuidados',

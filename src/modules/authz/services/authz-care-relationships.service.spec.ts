@@ -303,8 +303,9 @@ describe('AuthzCareRelationshipsService', () => {
       const d = build();
       const accountWithoutProfile = { id: 'u-x', roles: ['PATIENT'] } as any;
 
-      const res =
-        await d.service.listMyPendingCareRelationshipRequests(accountWithoutProfile);
+      const res = await d.service.listMyPendingCareRelationshipRequests(
+        accountWithoutProfile,
+      );
 
       expect(res).toEqual([]);
       expect(d.careRepo.findPendingByPatient).not.toHaveBeenCalled();

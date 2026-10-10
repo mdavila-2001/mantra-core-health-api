@@ -417,9 +417,7 @@ export class CommunityMessagingGateway
    * que participa el perfil: es donde se mira («en línea» bajo el nombre).
    * A quien no tiene ese hilo abierto no le sirve de nada.
    */
-  private async issuePresence(
-    payload: GatewayPresencePayload,
-  ): Promise<void> {
+  private async issuePresence(payload: GatewayPresencePayload): Promise<void> {
     try {
       const em = this.em.fork();
       const participations =

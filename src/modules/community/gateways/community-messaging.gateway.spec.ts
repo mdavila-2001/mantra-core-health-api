@@ -245,13 +245,13 @@ describe('CommunityMessagingGateway', () => {
         'conversation:c-1',
         'profile:p-2',
       ]);
-      expect(
-        d.serverEmit.mock.calls.map((call: unknown[]) => call[0]),
-      ).toEqual([
-        'conversation:message:updated',
-        'conversation:message:deleted',
-        'conversation:pinned',
-      ]);
+      expect(d.serverEmit.mock.calls.map((call: unknown[]) => call[0])).toEqual(
+        [
+          'conversation:message:updated',
+          'conversation:message:deleted',
+          'conversation:pinned',
+        ],
+      );
     });
 
     it('un fallo de socket.io no lanza hacia el servicio', () => {

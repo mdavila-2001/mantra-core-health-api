@@ -136,9 +136,7 @@ describe('ProfilesDependentRequestsController', () => {
 
     it('rechaza un texto de más de 100 caracteres y las claves que el contrato no declara', async () => {
       expect(await errorsQuery({ q: 'a'.repeat(101) })).toEqual(['q']);
-      expect(await errorsQuery({ q: 'luis', limit: '500' })).toEqual([
-        'limit',
-      ]);
+      expect(await errorsQuery({ q: 'luis', limit: '500' })).toEqual(['limit']);
     });
 
     it('la búsqueda tiene su propio freno de frecuencia', () => {
@@ -177,16 +175,14 @@ describe('ProfilesDependentRequestsController', () => {
       expect(await errors({ nationalId: 'A'.repeat(41) })).toEqual([
         'nationalId',
       ]);
-      expect(await errors({ nationalId: "1'; drop" })).toEqual([
-        'nationalId',
-      ]);
+      expect(await errors({ nationalId: "1'; drop" })).toEqual(['nationalId']);
       expect(await errors({})).toEqual(['nationalId']);
     });
 
     it('rechaza claves que el contrato no declara', async () => {
-      expect(await errors({ nationalId: '7654321', role: 'ADMIN' })).toEqual(
-        ['role'],
-      );
+      expect(await errors({ nationalId: '7654321', role: 'ADMIN' })).toEqual([
+        'role',
+      ]);
       expect(await errors({ patientProfileId: ID, tenantId: ID })).toEqual([
         'tenantId',
       ]);

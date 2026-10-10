@@ -41,14 +41,11 @@ const TWINS = [
 ];
 
 describe('XlsxParser · igualdad contra el CsvParser sobre los gemelos', () => {
-  it.each(TWINS)(
-    '%s.xlsx produce el mismo resultado que %s.csv',
-    (nombre) => {
-      const resultCsv = csv.parse(leer(`${nombre}.csv`), profile);
-      const resultXlsx = xlsx.parse(leer(`${nombre}.xlsx`), profile);
-      expect(resultXlsx).toEqual(resultCsv);
-    },
-  );
+  it.each(TWINS)('%s.xlsx produce el mismo resultado que %s.csv', (nombre) => {
+    const resultCsv = csv.parse(leer(`${nombre}.csv`), profile);
+    const resultXlsx = xlsx.parse(leer(`${nombre}.xlsx`), profile);
+    expect(resultXlsx).toEqual(resultCsv);
+  });
 });
 
 describe('XlsxParser · celda-numerica (sólo XLSX, sin gemelo CSV)', () => {

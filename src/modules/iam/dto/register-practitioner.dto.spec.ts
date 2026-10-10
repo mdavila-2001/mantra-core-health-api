@@ -527,19 +527,28 @@ describe('RegisterPractitionerDto · domicilio (P19)', () => {
 
   it('rechaza latitud sin longitud', async () => {
     expect(
-      await propertiesWithError({ ...MINIMAL_REGISTRATION, homeLatitude: -17.7689 }),
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        homeLatitude: -17.7689,
+      }),
     ).toEqual(['homeLongitude']);
   });
 
   it('rechaza longitud sin latitud', async () => {
     expect(
-      await propertiesWithError({ ...MINIMAL_REGISTRATION, homeLongitude: -63.1956 }),
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        homeLongitude: -63.1956,
+      }),
     ).toEqual(['homeLatitude']);
   });
 
   it('rechaza la calle vacía: ausente y vacía no son lo mismo', async () => {
     expect(
-      await propertiesWithError({ ...MINIMAL_REGISTRATION, homeAddressLines: '' }),
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        homeAddressLines: '',
+      }),
     ).toEqual(['homeAddressLines']);
   });
 
@@ -589,7 +598,10 @@ describe('RegisterPractitionerDto · dirección laboral (MED-03)', () => {
 
   it('rechaza coordenadas laborales incompletas', async () => {
     expect(
-      await propertiesWithError({ ...MINIMAL_REGISTRATION, workLatitude: -17.78 }),
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        workLatitude: -17.78,
+      }),
     ).toEqual(['workLongitude']);
   });
 
@@ -619,7 +631,10 @@ describe('RegisterPractitionerDto · firma y sello reales', () => {
     'rechaza %s inválido',
     async (campo) => {
       expect(
-        await propertiesWithError({ ...MINIMAL_REGISTRATION, [campo]: 'no-es-uuid' }),
+        await propertiesWithError({
+          ...MINIMAL_REGISTRATION,
+          [campo]: 'no-es-uuid',
+        }),
       ).toContain(campo);
     },
   );

@@ -258,7 +258,9 @@ describe('catálogo v2 — validación de carga', () => {
  * ese filtro no puede dejar pasar.
  */
 describe('fichas de las NNAC de Bolivia', () => {
-  const nnac = STANDARD_FORMS.filter((record) => record.code.startsWith('NNAC'));
+  const nnac = STANDARD_FORMS.filter((record) =>
+    record.code.startsWith('NNAC'),
+  );
   const DOSIS =
     /\b\d+(?:[.,]\d+)?\s?(?:mg|mcg|µg|ml|mL|UI|mEq|gotas?|comprimidos?|tabletas?|ampollas?)\b|\b(?:IV|VO|IM|SC)\b|\bdosis\b/u;
 

@@ -79,7 +79,10 @@ describe('RegisterOrganizationDto · alta mínima', () => {
     expect(
       await propertiesWithError({
         ...MINIMAL_REGISTRATION,
-        organization: { ...MINIMAL_REGISTRATION.organization, tenantType: 'HOSPITAL' },
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          tenantType: 'HOSPITAL',
+        },
       }),
     ).toEqual([]);
   });
@@ -174,7 +177,10 @@ describe('RegisterOrganizationDto · legalEntityType (1.1)', () => {
     expect(
       await propertiesWithError({
         ...MINIMAL_REGISTRATION,
-        organization: { ...MINIMAL_REGISTRATION.organization, legalEntityType: 'SRL' },
+        organization: {
+          ...MINIMAL_REGISTRATION.organization,
+          legalEntityType: 'SRL',
+        },
       }),
     ).toEqual([]);
   });
@@ -314,7 +320,10 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
         ...PAYER_REGISTRATION,
         organization: {
           ...PAYER_REGISTRATION.organization,
-          payer: { ...PAYER_REGISTRATION.organization.payer, latitude: -17.7833 },
+          payer: {
+            ...PAYER_REGISTRATION.organization.payer,
+            latitude: -17.7833,
+          },
         },
       }),
     ).toEqual(['organization.payer.longitude']);
@@ -326,7 +335,10 @@ describe('RegisterOrganizationDto · coordenadas de la casa matriz (1.3)', () =>
         ...PAYER_REGISTRATION,
         organization: {
           ...PAYER_REGISTRATION.organization,
-          payer: { ...PAYER_REGISTRATION.organization.payer, longitude: -63.1821 },
+          payer: {
+            ...PAYER_REGISTRATION.organization.payer,
+            longitude: -63.1821,
+          },
         },
       }),
     ).toEqual(['organization.payer.latitude']);
@@ -414,7 +426,11 @@ describe('RegisterOrganizationDto · representante legal y gerencias · nombre e
   it('acepta las partes (name/lastName), sin fullName', async () => {
     expect(
       await propertiesWithError(
-        registrationWith({ ...BASE_REPRESENTATIVE, name: 'Mariana', lastName: 'Siles' }),
+        registrationWith({
+          ...BASE_REPRESENTATIVE,
+          name: 'Mariana',
+          lastName: 'Siles',
+        }),
       ),
     ).toEqual([]);
   });

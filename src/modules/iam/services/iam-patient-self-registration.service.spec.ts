@@ -452,7 +452,10 @@ describe('IamPatientSelfRegistrationService', () => {
       );
       expect(d.coverageRepo.createCoverage).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ insurancePlanId: isPublic, coverageOrder: 2 }),
+        expect.objectContaining({
+          insurancePlanId: isPublic,
+          coverageOrder: 2,
+        }),
       );
     });
 

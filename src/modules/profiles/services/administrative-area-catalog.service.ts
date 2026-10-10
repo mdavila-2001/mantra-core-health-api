@@ -70,10 +70,7 @@ export class AdministrativeAreaCatalogService {
     const members =
       set === null
         ? null
-        : await this.valueSets.findIncludedConceptIdsByValueSet(
-            em,
-            set.id,
-          );
+        : await this.valueSets.findIncludedConceptIdsByValueSet(em, set.id);
     if (members === null) {
       throw new PreconditionFailedException(
         'El catálogo de departamentos no está disponible',

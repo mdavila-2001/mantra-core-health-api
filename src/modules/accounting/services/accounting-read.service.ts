@@ -316,14 +316,13 @@ export class AccountingReadService {
     );
     const accountById = new Map(accounts.map((c) => [c.id, c]));
 
-    const rows =
-      await this.subledgerRepo.findOpenItemsByReconciliationAccounts(
-        em,
-        practice.tenantId,
-        accounts.map((c) => c.id),
-        ACCT.OPEN_ITEM_CLEARED,
-        OPEN_ITEMS_MAX,
-      );
+    const rows = await this.subledgerRepo.findOpenItemsByReconciliationAccounts(
+      em,
+      practice.tenantId,
+      accounts.map((c) => c.id),
+      ACCT.OPEN_ITEM_CLEARED,
+      OPEN_ITEMS_MAX,
+    );
 
     const businessPartnerIds = [
       ...new Set(rows.map((f) => f.subledger.businessPartnerId)),
@@ -452,10 +451,7 @@ export class AccountingReadService {
     };
 
     const byCostCenter = new Map<string, { debit: bigint; credit: bigint }>();
-    const byProfitCenter = new Map<
-      string,
-      { debit: bigint; credit: bigint }
-    >();
+    const byProfitCenter = new Map<string, { debit: bigint; credit: bigint }>();
     const bySegment = new Map<string, { debit: bigint; credit: bigint }>();
 
     for (const linea of lineas) {
