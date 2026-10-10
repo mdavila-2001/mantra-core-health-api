@@ -59,11 +59,11 @@ export class CodeSystemsReadService {
       .fork()
       .find(CodeSystems, {}, { orderBy: { internalCode: 'asc' }, limit: TOPE });
 
-    return rows.map((sistema) => ({
-      id: sistema.id,
-      internalCode: sistema.internalCode,
-      name: sistema.name,
-      canonicalUrl: sistema.canonicalUrl,
+    return rows.map((system) => ({
+      id: system.id,
+      internalCode: system.internalCode,
+      name: system.name,
+      canonicalUrl: system.canonicalUrl,
     }));
   }
 
