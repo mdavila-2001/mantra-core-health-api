@@ -63,14 +63,14 @@ export class ContactPointsRepository {
    * @param ownerId - El dueño (para un profesional, su `personId`).
    * @returns Sus contactos vigentes; lista vacía si no tiene.
    */
-  async findVigentesByOwner(
+  async findAllCurrentByOwner(
     em: EntityManager,
     ownerId: string,
   ): Promise<ContactPoints[]> {
-    const ahora = new Date();
+    const now = new Date();
     return em.find(
       ContactPoints,
-      { ownerId, $or: [{ validTo: null }, { validTo: { $gt: ahora } }] },
+      { ownerId, $or: [{ validTo: null }, { validTo: { $gt: now } }] },
       { orderBy: { rank: 'asc nulls last', createdAt: 'asc' } },
     );
   }
@@ -79,7 +79,7 @@ export class ContactPointsRepository {
    * Los puntos de contacto vigentes de VARIOS dueños, en una sola consulta.
    *
    * Mismo criterio de vigencia y mismo orden que
-   * {@link ContactPointsRepository.findVigentesByOwner}; existe porque la ficha
+   * {@link ContactPointsRepository.findAllCurrentByOwner}; existe porque la ficha
    * de una organización nombra hasta cuatro personas a la vez (subtarea 1.4) y
    * recorrerlas de a una sería N+1.
    *
@@ -87,17 +87,17 @@ export class ContactPointsRepository {
    * @param ownerIds - Los dueños; lista vacía devuelve lista vacía.
    * @returns Sus contactos vigentes, mezclados y ordenados por preferencia.
    */
-  async findVigentesByOwners(
+  async findAllCurrentByOwners(
     em: EntityManager,
     ownerIds: readonly string[],
   ): Promise<ContactPoints[]> {
     if (ownerIds.length === 0) return [];
-    const ahora = new Date();
+    const now = new Date();
     return em.find(
       ContactPoints,
       {
         ownerId: { $in: [...ownerIds] },
-        $or: [{ validTo: null }, { validTo: { $gt: ahora } }],
+        $or: [{ validTo: null }, { validTo: { $gt: now } }],
       },
       { orderBy: { rank: 'asc nulls last', createdAt: 'asc' } },
     );
@@ -107,7 +107,7 @@ export class ContactPointsRepository {
    * El punto de contacto vigente y preferente de un dueño para un sistema
    * (teléfono, correo).
    *
-   * Es {@link findVigentesByOwner} acotado a un sistema y quedándose con el
+   * Es {@link findAllCurrentByOwner} acotado a un sistema y quedándose con el
    * primero: el mismo criterio de vigencia y el mismo orden por `rank`, para que
    * «el teléfono de esta persona» signifique lo mismo al leerlo que al
    * reemplazarlo.
@@ -117,18 +117,18 @@ export class ContactPointsRepository {
    * @param systemConceptId - Sistema del contacto (`CONCEPTS.CONTACT_PHONE`…).
    * @returns El contacto vigente preferente, o `null` si no tiene ninguno.
    */
-  async findVigenteByOwnerAndSystem(
+  async findCurrentByOwnerAndSystem(
     em: EntityManager,
     ownerId: string,
     systemConceptId: string,
   ): Promise<ContactPoints | null> {
-    const ahora = new Date();
+    const now = new Date();
     return em.findOne(
       ContactPoints,
       {
         ownerId,
         systemConceptId,
-        $or: [{ validTo: null }, { validTo: { $gt: ahora } }],
+        $or: [{ validTo: null }, { validTo: { $gt: now } }],
       },
       { orderBy: { rank: 'asc nulls last', createdAt: 'asc' } },
     );
@@ -137,7 +137,7 @@ export class ContactPointsRepository {
   /**
    * El punto de contacto vigente de un dueño para un sistema **y un uso**.
    *
-   * Es {@link findVigenteByOwnerAndSystem} con una condición más, y existe
+   * Es {@link findCurrentByOwnerAndSystem} con una condición más, y existe
    * porque desde que el registro del profesional pide correo y celular
    * personales además de los del trabajo, el sistema dejó de alcanzar para
    * identificar un contacto: hay dos correos y dos celulares por persona, y lo
@@ -150,20 +150,20 @@ export class ContactPointsRepository {
    * @param useConceptId - Uso del contacto (`CONCEPTS.CONTACT_USE_WORK`…).
    * @returns El contacto vigente preferente de ese par, o `null`.
    */
-  async findVigenteByOwnerSystemAndUse(
+  async findCurrentByOwnerSystemAndUse(
     em: EntityManager,
     ownerId: string,
     systemConceptId: string,
     useConceptId: string,
   ): Promise<ContactPoints | null> {
-    const ahora = new Date();
+    const now = new Date();
     return em.findOne(
       ContactPoints,
       {
         ownerId,
         systemConceptId,
         useConceptId,
-        $or: [{ validTo: null }, { validTo: { $gt: ahora } }],
+        $or: [{ validTo: null }, { validTo: { $gt: now } }],
       },
       { orderBy: { rank: 'asc nulls last', createdAt: 'asc' } },
     );
@@ -177,14 +177,14 @@ export class ContactPointsRepository {
    * existió. Quien cambia de número cierra el vigente y crea el nuevo.
    *
    * `valid_to` es una columna `date`: con la fecha de hoy el contacto deja de
-   * ser vigente para {@link findVigentesByOwner} en la misma petición.
+   * ser vigente para {@link findAllCurrentByOwner} en la misma petición.
    *
    * @param punto - El contacto a cerrar.
    * @param validTo - Fecha de fin de vigencia (normalmente hoy).
    * @param actorUserId - Quién lo cierra, para la auditoría.
    * @returns El mismo contacto, ya cerrado.
    */
-  closeVigente(
+  closeCurrent(
     punto: ContactPoints,
     validTo: Date,
     actorUserId?: string,

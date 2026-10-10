@@ -581,7 +581,7 @@ export class PractitionerSitesService {
     if (site.addressId) {
       const current = await em.findOne(Addresses, { id: site.addressId });
       if (current) {
-        this.addressesRepo.closeVigente(current, new Date(), actorUserId);
+        this.addressesRepo.closeCurrent(current, new Date(), actorUserId);
       }
     }
 

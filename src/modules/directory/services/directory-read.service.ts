@@ -254,9 +254,9 @@ export class DirectoryReadService {
         if (carrier) {
           // La casa matriz georreferenciada (subtarea 1.3) vive en
           // `common.addresses`, no en el carrier: `owner_id` es el tenant y
-          // `findVigenteByOwnerAndUse` no distingue por `owner_type`, pero
+          // `findCurrentByOwnerAndUse` no distingue por `owner_type`, pero
           // un uuid de tenant no colisiona con uno de persona o de usuario.
-          const parentHome = await this.addressesRepo.findVigenteByOwnerAndUse(
+          const parentHome = await this.addressesRepo.findCurrentByOwnerAndUse(
             em,
             tenant.id,
             CONCEPTS.ADDR_USE_WORK,
@@ -591,12 +591,12 @@ export class DirectoryReadService {
 
     const personas = await this.legalRepo.findPersonsByIds(em, personIds);
     const documents = await this.identifiersRepo.findByIds(em, ciIds);
-    const contacts = await this.contactPointsRepo.findVigentesByOwners(
+    const contacts = await this.contactPointsRepo.findAllCurrentByOwners(
       em,
       personIds,
     );
 
-    // `findVigentesByOwners` ya viene ordenado por preferencia: el primero de
+    // `findAllCurrentByOwners` ya viene ordenado por preferencia: el primero de
     // cada sistema es el que la organización quiere que se use.
     const contact = (personId: string, systemConceptIds: string[]) =>
       contacts.find(

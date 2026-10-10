@@ -132,16 +132,16 @@ function build() {
   // el vigente ni que evite crear una fila idéntica.
   const contactPointsRepo = {
     findById: mockFn(),
-    findVigentesByOwner: mockFn().mockResolvedValue([]),
-    findVigentesByOwners: mockFn().mockResolvedValue([]),
-    findVigenteByOwnerAndSystem: mockFn().mockResolvedValue(null),
-    findVigenteByOwnerSystemAndUse: mockFn().mockResolvedValue(null),
-    closeVigente: mockFn(),
+    findAllCurrentByOwner: mockFn().mockResolvedValue([]),
+    findAllCurrentByOwners: mockFn().mockResolvedValue([]),
+    findCurrentByOwnerAndSystem: mockFn().mockResolvedValue(null),
+    findCurrentByOwnerSystemAndUse: mockFn().mockResolvedValue(null),
+    closeCurrent: mockFn(),
     create: mockFn(),
   };
   const addressesRepo = {
-    findVigenteByOwnerAndUse: mockFn().mockResolvedValue(null),
-    closeVigente: mockFn(),
+    findCurrentByOwnerAndUse: mockFn().mockResolvedValue(null),
+    closeCurrent: mockFn(),
     create: mockFn(),
   };
   // El NIT vive en `common.identifiers` como un tipo más, igual que el CI.
@@ -842,10 +842,10 @@ describe('ProfilesPatientsService', () => {
 
     it('trae el teléfono vigente y el municipio del domicilio vigente', async () => {
       const d = withPatient();
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue({
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue({
         value: '+591 700 12345',
       });
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         municipalityConceptId: 'mun-1',
       });
 
@@ -888,7 +888,7 @@ describe('ProfilesPatientsService', () => {
     it('devuelve las dos direcciones, y las coordenadas viajan juntas', async () => {
       // Media coordenada no ubica nada: si falta una, no viaja ninguna.
       const d = withPatient();
-      d.addressesRepo.findVigenteByOwnerAndUse
+      d.addressesRepo.findCurrentByOwnerAndUse
         .mockResolvedValueOnce({
           lines: 'Av. Banzer #1234',
           city: 'Santa Cruz',
@@ -1262,7 +1262,7 @@ describe('ProfilesPatientsService', () => {
     it('vaciar el teléfono cierra el vigente y no crea ninguno', async () => {
       const d = withPatient();
       const current = { id: 'cp-1', value: '+591 700 12345' };
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue(
         current,
       );
 
@@ -1270,7 +1270,7 @@ describe('ProfilesPatientsService', () => {
 
       // Quedarse sin teléfono es un dato; una fila con el valor vacío lo
       // contaría como si todavía tuviera uno.
-      expect(d.contactPointsRepo.closeVigente).toHaveBeenCalledWith(
+      expect(d.contactPointsRepo.closeCurrent).toHaveBeenCalledWith(
         current,
         expect.any(Date),
         'user-1',
@@ -1280,11 +1280,11 @@ describe('ProfilesPatientsService', () => {
 
     it('vaciar el teléfono sin tener ninguno no escribe nada', async () => {
       const d = withPatient();
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(null);
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue(null);
 
       await d.service.updateOwnProfile({ phone: '' }, titular);
 
-      expect(d.contactPointsRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.contactPointsRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
     });
 
@@ -1299,13 +1299,13 @@ describe('ProfilesPatientsService', () => {
     it('al cambiar el teléfono cierra el vigente y crea el nuevo', async () => {
       const d = withPatient();
       const current = { id: 'cp-1', value: '+591 700 00000' };
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue(
         current,
       );
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
 
-      expect(d.contactPointsRepo.closeVigente).toHaveBeenCalledWith(
+      expect(d.contactPointsRepo.closeCurrent).toHaveBeenCalledWith(
         current,
         expect.any(Date),
         'user-1',
@@ -1318,38 +1318,38 @@ describe('ProfilesPatientsService', () => {
 
     it('el mismo teléfono no cierra nada ni crea una fila', async () => {
       const d = withPatient();
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue({
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue({
         id: 'cp-1',
         value: '+591 700 12345',
       });
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
 
-      expect(d.contactPointsRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.contactPointsRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
     });
 
     it('sin teléfono vigente crea el primero sin cerrar nada', async () => {
       const d = withPatient();
-      d.contactPointsRepo.findVigenteByOwnerAndSystem.mockResolvedValue(null);
+      d.contactPointsRepo.findCurrentByOwnerAndSystem.mockResolvedValue(null);
 
       await d.service.updateOwnProfile({ phone: '+591 700 12345' }, titular);
 
-      expect(d.contactPointsRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.contactPointsRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.contactPointsRepo.create).toHaveBeenCalledTimes(1);
     });
 
     it('al cambiar el municipio cierra el domicilio vigente y crea el nuevo', async () => {
       const d = withPatient();
       const current = { id: 'ad-1', municipalityConceptId: 'mun-vieja' };
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(current);
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(current);
 
       await d.service.updateOwnProfile(
         { residenceMunicipalityConceptId: BO_MUNICIPALITY_CONCEPT_ID },
         titular,
       );
 
-      expect(d.addressesRepo.closeVigente).toHaveBeenCalledWith(
+      expect(d.addressesRepo.closeCurrent).toHaveBeenCalledWith(
         current,
         expect.any(Date),
         'user-1',
@@ -1367,7 +1367,7 @@ describe('ProfilesPatientsService', () => {
 
     it('el mismo municipio no cierra el domicilio ni crea otro', async () => {
       const d = withPatient();
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         id: 'ad-1',
         municipalityConceptId: BO_MUNICIPALITY_CONCEPT_ID,
       });
@@ -1377,7 +1377,7 @@ describe('ProfilesPatientsService', () => {
         titular,
       );
 
-      expect(d.addressesRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.addressesRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.addressesRepo.create).not.toHaveBeenCalled();
     });
 
@@ -1646,7 +1646,7 @@ describe('ProfilesPatientsService', () => {
     it('mudarse conserva el municipio y las coordenadas', async () => {
       const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Calle vieja 1',
         municipalityConceptId: sacaba,
         latitude: '-17.78',
@@ -1663,12 +1663,12 @@ describe('ProfilesPatientsService', () => {
       expect(data.lines).toBe('Av. Nueva 200');
       expect(data.municipalityConceptId).toBe(sacaba);
       expect(data.latitude).toBe('-17.78');
-      expect(d.addressesRepo.closeVigente).toHaveBeenCalled();
+      expect(d.addressesRepo.closeCurrent).toHaveBeenCalled();
     });
 
     it('el mismo texto no abre una dirección nueva', async () => {
       const d = withPatient();
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Nueva 200',
       });
 
@@ -1692,7 +1692,7 @@ describe('ProfilesPatientsService', () => {
       const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
       const trinidad = boMunicipalityConceptId('030301');
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Blanco Galindo km 5',
         municipalityConceptId: sacaba,
         latitude: '-17.40',
@@ -1710,13 +1710,13 @@ describe('ProfilesPatientsService', () => {
       expect(data.lines).toBe('Av. Blanco Galindo km 5');
       expect(data.latitude).toBe('-17.4');
       expect(data.longitude).toBe('-66.03');
-      expect(d.addressesRepo.closeVigente).toHaveBeenCalled();
+      expect(d.addressesRepo.closeCurrent).toHaveBeenCalled();
     });
 
     it('cambiar sólo el GPS conserva la calle y el municipio', async () => {
       const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Blanco Galindo km 5',
         municipalityConceptId: sacaba,
         latitude: '-17.40',
@@ -1739,7 +1739,7 @@ describe('ProfilesPatientsService', () => {
     it('los mismos tres valores no cierran ni abren ninguna fila', async () => {
       const d = withPatient();
       const sacaba = boMunicipalityConceptId('031001');
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue({
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue({
         lines: 'Av. Blanco Galindo km 5',
         municipalityConceptId: sacaba,
         latitude: '-17.40',
@@ -1757,7 +1757,7 @@ describe('ProfilesPatientsService', () => {
         titular,
       );
 
-      expect(d.addressesRepo.closeVigente).not.toHaveBeenCalled();
+      expect(d.addressesRepo.closeCurrent).not.toHaveBeenCalled();
       expect(d.addressesRepo.create).not.toHaveBeenCalled();
     });
 
@@ -1773,7 +1773,7 @@ describe('ProfilesPatientsService', () => {
      */
     it('sin dirección de trabajo previa, el país es el de Bolivia', async () => {
       const d = withPatient();
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(null);
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(null);
 
       await d.service.updateOwnProfile(
         { workAddressLines: 'Av. América esq. Beijing' } as any,
@@ -1834,14 +1834,14 @@ describe('ProfilesPatientsService', () => {
     it('el municipio de trabajo se guarda como una dirección de uso WORK', async () => {
       const d = withPatient();
       const trinidad = boMunicipalityConceptId('030301');
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(null);
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(null);
 
       await d.service.updateOwnProfile(
         { workMunicipalityConceptId: trinidad } as any,
         titular,
       );
 
-      expect(d.addressesRepo.findVigenteByOwnerAndUse).toHaveBeenCalledWith(
+      expect(d.addressesRepo.findCurrentByOwnerAndUse).toHaveBeenCalledWith(
         d.tx,
         'per-1',
         CONCEPTS.ADDR_USE_WORK,
@@ -2119,7 +2119,7 @@ describe('ProfilesPatientsService', () => {
         profileId: 'pp-1',
         patientCode: 'PC-1',
       });
-      d.addressesRepo.findVigenteByOwnerAndUse.mockResolvedValue(address);
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(address);
       return d;
     }
 
