@@ -33,9 +33,9 @@ function escalate(text: string): Escalado {
     throw new RangeError(`Importe no decimal: ${text}`);
   }
   const negative = clean.startsWith('-');
-  const [entera, fraccion = ''] = clean.replace(/^[+-]/, '').split('.');
-  const valor = BigInt(`${entera}${fraccion}`);
-  return { valor: negative ? -valor : valor, decimales: fraccion.length };
+  const [whole, fraction = ''] = clean.replace(/^[+-]/, '').split('.');
+  const value = BigInt(`${whole}${fraction}`);
+  return { valor: negative ? -value : value, decimales: fraction.length };
 }
 
 /**
