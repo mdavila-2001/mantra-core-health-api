@@ -891,7 +891,7 @@ export class ConceptsService {
     glossaryScoped: boolean,
   ): Promise<ConceptSearchItemDto[]> {
     const conceptIds = concepts.map((concept) => concept.id);
-    const [textos, etiquetas, glossaryTexts, relationsBySource, images] =
+    const [texts, labels, glossaryTexts, relationsBySource, images] =
       await Promise.all([
         this.resolveTexts(conceptIds, options.language),
         options.includeValueSets || glossaryScoped
@@ -920,8 +920,8 @@ export class ConceptsService {
     }
 
     return concepts.map((concept) => {
-      const text = textos.get(concept.id);
-      const conceptLabels = etiquetas?.get(concept.id);
+      const text = texts.get(concept.id);
+      const conceptLabels = labels?.get(concept.id);
       const { category, tags } = splitCategoryAndTags(conceptLabels);
       const thumbnail = thumbnailByConcept.get(concept.id);
       return {
@@ -939,7 +939,7 @@ export class ConceptsService {
         ...(options.language === undefined
           ? {}
           : { translated: text?.translated ?? false }),
-        ...(etiquetas === undefined
+        ...(labels === undefined
           ? {}
           : { valueSets: toValueSetRefs(conceptLabels) }),
         ...(glossaryScoped
@@ -1176,12 +1176,12 @@ export class ConceptsService {
       });
     if (!concept) throw notFound();
 
-    const [textos, etiquetas, glossaryTexts] = await Promise.all([
+    const [texts, labels, glossaryTexts] = await Promise.all([
       this.resolveTexts([conceptId], language),
       this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
       this.resolveGlossaryTexts([conceptId], language),
     ]);
-    const conceptLabels = etiquetas.get(conceptId);
+    const conceptLabels = labels.get(conceptId);
     const isGlossaryTerm = (conceptLabels ?? []).some(
       (valueSet) => valueSet.internalCode === GLOSSARY_ALL_TERMS_CODE,
     );
@@ -1198,7 +1198,7 @@ export class ConceptsService {
     return {
       conceptId: concept.id,
       slug: glossaryText.slug,
-      display: textos.get(conceptId)?.display ?? concept.display,
+      display: texts.get(conceptId)?.display ?? concept.display,
       category: category
         ? { internalCode: category.internalCode, name: category.name }
         : null,
@@ -1273,7 +1273,7 @@ export class ConceptsService {
     addLinks(incoming, 'incoming');
 
     const neighborIds = links.map((link) => link.neighborId);
-    const [terms, textos] = await Promise.all([
+    const [terms, texts] = await Promise.all([
       this.resolveGlossaryTerms(neighborIds),
       this.resolveTexts([...new Set(neighborIds)], language),
     ]);
@@ -1288,7 +1288,7 @@ export class ConceptsService {
       group.set(neighborId, {
         conceptId: neighborId,
         slug: term.slug,
-        display: textos.get(neighborId)?.display ?? term.concept.display,
+        display: texts.get(neighborId)?.display ?? term.concept.display,
       });
       byGroup.set(key, group);
     }
@@ -1362,23 +1362,17 @@ export class ConceptsService {
       });
     }
 
-    const [
-      textos,
-      etiquetas,
-      designations,
-      glossaryTexts,
-      relations,
-      properties,
-    ] = await Promise.all([
-      this.resolveTexts([conceptId], language),
-      this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
-      this.designationsRepo.findByConcept(this.em, conceptId),
-      this.resolveGlossaryTexts([conceptId], language),
-      this.resolveGlossaryRelations([conceptId]),
-      this.designationsRepo.findPropertiesByConcept(this.em, conceptId),
-    ]);
+    const [texts, labels, designations, glossaryTexts, relations, properties] =
+      await Promise.all([
+        this.resolveTexts([conceptId], language),
+        this.valueSetsRepo.findValueSetsByConceptIds(this.em, [conceptId]),
+        this.designationsRepo.findByConcept(this.em, conceptId),
+        this.resolveGlossaryTexts([conceptId], language),
+        this.resolveGlossaryRelations([conceptId]),
+        this.designationsRepo.findPropertiesByConcept(this.em, conceptId),
+      ]);
 
-    const conceptLabels = etiquetas.get(conceptId);
+    const conceptLabels = labels.get(conceptId);
     const isGlossaryTerm = (conceptLabels ?? []).some(
       (valueSet) => valueSet.internalCode === GLOSSARY_ALL_TERMS_CODE,
     );
@@ -1392,15 +1386,15 @@ export class ConceptsService {
       });
     }
 
-    const text = textos.get(conceptId);
+    const text = texts.get(conceptId);
     const display = text?.display ?? concept.display;
     const { category, tags } = splitCategoryAndTags(conceptLabels);
     const glossaryText = glossaryTexts.get(conceptId);
-    const propiedades: Record<string, unknown> = Object.fromEntries(
+    const propertyList: Record<string, unknown> = Object.fromEntries(
       properties.map((property) => [property.propertyCode, property.valueJson]),
     );
     const image = imageFromProperty(
-      propiedades[GLOSSARY_IMAGE_PROPERTY_CODE],
+      propertyList[GLOSSARY_IMAGE_PROPERTY_CODE],
       display,
     );
 
@@ -1442,7 +1436,7 @@ export class ConceptsService {
       // nunca recorriéndolo. Si un code system repitiera el mismo código en dos
       // filas —que el UPSERT de `upsertProperties` impide— gana la última, que
       // es la misma regla que aplica esa escritura.
-      properties: propiedades,
+      properties: propertyList,
       // La imagen viaja además como campo propio, ya validada: sin URL, sin
       // atribución o sin licencia no se publica — una foto sin crédito no se
       // muestra, por linda que sea.

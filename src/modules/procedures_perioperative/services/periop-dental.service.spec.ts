@@ -270,15 +270,15 @@ describe('PeriopDentalService', () => {
         },
       ]);
 
-      const pagina = await d.service.listByPatient({
+      const page = await d.service.listByPatient({
         patientProfileId: PATIENT,
       } as any);
 
-      expect(pagina.items[0].sites).toHaveLength(1);
-      expect(pagina.items[0].sites[0].bodySiteConceptId).toBe(PERIOP.TOOTH_36);
+      expect(page.items[0].sites).toHaveLength(1);
+      expect(page.items[0].sites[0].bodySiteConceptId).toBe(PERIOP.TOOTH_36);
       // Sin sitio registrado va un arreglo vacío, no `undefined`: un tratamiento
       // sin pieza es corriente y no debería obligar a distinguir dos ausencias.
-      expect(pagina.items[1].sites).toEqual([]);
+      expect(page.items[1].sites).toEqual([]);
     });
 
     /**
@@ -289,12 +289,12 @@ describe('PeriopDentalService', () => {
       const d = build();
       d.dentalRepo.countByPatient.mockResolvedValue(120);
 
-      const pagina = await d.service.listByPatient({
+      const page = await d.service.listByPatient({
         patientProfileId: PATIENT,
         limit: 1,
       } as any);
 
-      expect(pagina.total).toBe(120);
+      expect(page.total).toBe(120);
     });
 
     it('sin procedimientos no consulta la tabla de sitios', async () => {

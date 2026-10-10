@@ -181,7 +181,7 @@ export class DiagnosticsPatientResultsService {
     const truncated = rows.length > limit;
     const page = rows.slice(0, limit);
 
-    const [settlements, preparacion, informePorOrden] = await Promise.all([
+    const [settlements, preparation, reportByOrder] = await Promise.all([
       this.settlements.forOrders(
         em,
         actor.id,
@@ -199,7 +199,7 @@ export class DiagnosticsPatientResultsService {
     ]);
 
     const items: PatientOrderSummaryDto[] = page.map((order) => {
-      const reportId = informePorOrden.get(order.id);
+      const reportId = reportByOrder.get(order.id);
       return {
         id: order.id,
         ...(settlements.get(order.id) ?? unavailableSettlement()),
@@ -209,7 +209,7 @@ export class DiagnosticsPatientResultsService {
         statusConceptId: order.statusConceptId,
         priorityConceptId: order.priorityConceptId,
         createdAt: order.createdAt,
-        preparationInstructions: preparacion.get(order.codeConceptId),
+        preparationInstructions: preparation.get(order.codeConceptId),
         hasReleasedResult: reportId !== undefined,
         reportId,
       };
@@ -279,7 +279,7 @@ export class DiagnosticsPatientResultsService {
       em,
       orderIds,
     );
-    const visibles = await this.projectReleasedResults(em, reports);
+    const visible = await this.projectReleasedResults(em, reports);
 
     // Una orden puede tener más de un informe visible: un estudio que se repite
     // por muestra insuficiente deja el primero liberado y agrega el segundo.
@@ -287,7 +287,7 @@ export class DiagnosticsPatientResultsService {
     // ver; quedarse con el último que apareció en la lista sería resolver un
     // empate clínico por orden de iteración.
     const byOrder = new Map<string, { reportId: string; releasedAt: Date }>();
-    for (const result of visibles) {
+    for (const result of visible) {
       const orderId = result.serviceRequestId;
       if (orderId === undefined) {
         continue;
@@ -304,7 +304,7 @@ export class DiagnosticsPatientResultsService {
       }
     }
     return new Map(
-      [...byOrder].map(([ordenId, elegido]) => [ordenId, elegido.reportId]),
+      [...byOrder].map(([orderId, chosen]) => [orderId, chosen.reportId]),
     );
   }
 
@@ -758,14 +758,14 @@ export class DiagnosticsPatientResultsService {
       string,
       { visibilityConceptId: string; recordedAt: Date }
     >();
-    for (const evento of releases) {
-      const versionId = evento.diagnosticReportVersionId;
+    for (const event of releases) {
+      const versionId = event.diagnosticReportVersionId;
       if (versionId === undefined || lastEvent.has(versionId)) {
         continue;
       }
       lastEvent.set(versionId, {
-        visibilityConceptId: evento.patientVisibilityConceptId,
-        recordedAt: evento.recordedAt,
+        visibilityConceptId: event.patientVisibilityConceptId,
+        recordedAt: event.recordedAt,
       });
     }
 
@@ -903,8 +903,8 @@ export class DiagnosticsPatientResultsService {
     const names = await findPractitionerNames(em, [...personIdByUser.values()]);
     const result = new Map<string, string>();
     for (const [userId, personId] of personIdByUser) {
-      const nombre = names.get(personId);
-      if (nombre !== undefined) result.set(userId, nombre);
+      const name = names.get(personId);
+      if (name !== undefined) result.set(userId, name);
     }
     return result;
   }

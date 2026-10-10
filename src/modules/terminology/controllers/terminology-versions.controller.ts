@@ -40,7 +40,7 @@ import {
 } from '../dto';
 
 /** Lo que deja el interceptor de multipart, acotado a lo que aquí se usa. */
-interface ArchivoSubido {
+interface FileUploaded {
   /** Contenido en memoria. */
   buffer: Buffer;
   /** Nombre con el que llegó, sólo para el registro. */
@@ -152,7 +152,7 @@ export class TerminologyVersionsController {
   })
   async importConceptsFile(
     @Param('versionId', ParseUUIDPipe) versionId: string,
-    @UploadedFile() file: ArchivoSubido | undefined,
+    @UploadedFile() file: FileUploaded | undefined,
     @Body() options: ImportConceptsFileRequestDto,
     @CurrentUser() user: AuthenticatedUser,
     @Res({ passthrough: true }) response: Response,

@@ -63,10 +63,10 @@ describe('SearchIndexerJob', () => {
 
     await d.job.tick();
 
-    const [[ruta, cuerpo]] = d.api.post.mock.calls;
-    expect(ruta).toBe('/internal/community/search/reindex');
+    const [[route, body]] = d.api.post.mock.calls;
+    expect(route).toBe('/internal/community/search/reindex');
     // Faltan documentos: un upsert los agrega sin dejar el índice vacío.
-    expect(cuerpo).toEqual({ recreate: false });
+    expect(body).toEqual({ recreate: false });
   });
 
   it('recrea cuando el índice tiene documentos de más', async () => {
@@ -79,10 +79,10 @@ describe('SearchIndexerJob', () => {
 
     await d.job.tick();
 
-    const [[, cuerpo]] = d.api.post.mock.calls;
+    const [[, body]] = d.api.post.mock.calls;
     // Sobra algo —un perfil despublicado que sigue apareciendo a anónimos— y
     // eso sólo se arregla recreando.
-    expect(cuerpo).toEqual({ recreate: true });
+    expect(body).toEqual({ recreate: true });
   });
 
   it('con el índice caído avisa y no reindexa: la búsqueda ya degrada a SQL', async () => {

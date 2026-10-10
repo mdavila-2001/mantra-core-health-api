@@ -581,15 +581,15 @@ export class PractitionerSitesService {
     if (site.addressId) {
       const current = await em.findOne(Addresses, { id: site.addressId });
       if (current) {
-        this.addressesRepo.closeVigente(current, new Date(), actorUserId);
+        this.addressesRepo.closeCurrent(current, new Date(), actorUserId);
       }
     }
 
     // Una línea en blanco no es una dirección ausente: es una fila vacía.
     // Mismo criterio que el alta (`OwnSiteProvisioningService.provision`).
     const lines = address.lines
-      .map((linea) => linea.trim())
-      .filter((linea) => linea.length > 0);
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
     const fresh = this.addressesRepo.create(em, {
       ownerTypeConceptId: CONCEPTS.OWNER_USER,
       ownerId: actorUserId,

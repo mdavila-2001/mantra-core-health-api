@@ -246,25 +246,25 @@ export class PostsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param authorPublicProfileId - Perfil autor.
-   * @param estados - Estados de publicación y moderación admitidos.
+   * @param states - Estados de publicación y moderación admitidos.
    * @param limit - Tope de filas.
    * @returns Las publicaciones, de la más reciente a la más antigua.
    */
   findByAuthor(
     em: EntityManager,
     authorPublicProfileId: string,
-    estados: {
+    states: {
       publicationStatusConceptId?: string;
       moderationStatusConceptId?: string;
     },
     limit: number,
   ): Promise<SocialPosts[]> {
     const where: Record<string, unknown> = { authorPublicProfileId };
-    if (estados.publicationStatusConceptId) {
-      where.publicationStatusConceptId = estados.publicationStatusConceptId;
+    if (states.publicationStatusConceptId) {
+      where.publicationStatusConceptId = states.publicationStatusConceptId;
     }
-    if (estados.moderationStatusConceptId) {
-      where.moderationStatusConceptId = estados.moderationStatusConceptId;
+    if (states.moderationStatusConceptId) {
+      where.moderationStatusConceptId = states.moderationStatusConceptId;
     }
     return em.find(SocialPosts, where, {
       orderBy: { createdAt: 'DESC' },

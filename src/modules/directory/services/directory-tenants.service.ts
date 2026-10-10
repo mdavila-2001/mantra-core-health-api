@@ -231,7 +231,7 @@ export class DirectoryTenantsService {
       // El sujeto de la vitrina de una organización es su propio tenant: es lo
       // que escribe `verify()` (`targetId: tenant.id`) y lo que lee la ficha
       // pública. Si eso cambiara, cambia en los dos lados o en ninguno.
-      await this.publicProfiles.updateOrganizationVitrina(tx, {
+      await this.publicProfiles.updateOrganizationShowcase(tx, {
         targetId: tenant.id,
         displayName: dto.displayName,
         headline: dto.headline,

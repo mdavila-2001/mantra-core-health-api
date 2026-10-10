@@ -199,18 +199,18 @@ describe('PractitionerAccessRequestsService', () => {
       d.patientProfilesRepo.findById.mockResolvedValue({
         profileId: 'pac-titular',
       });
-      let dentroDeLaTransaccion = false;
-      let avisoDentro: boolean | undefined;
+      let insideTransaction = false;
+      let noticeInside: boolean | undefined;
       d.em.transactional.mockImplementation(async (cb: any) => {
-        dentroDeLaTransaccion = true;
+        insideTransaction = true;
         try {
           return await cb(d.tx);
         } finally {
-          dentroDeLaTransaccion = false;
+          insideTransaction = false;
         }
       });
       d.notices.emit.mockImplementation(async () => {
-        avisoDentro = dentroDeLaTransaccion;
+        noticeInside = insideTransaction;
       });
 
       await d.service.decide(
@@ -220,7 +220,7 @@ describe('PractitionerAccessRequestsService', () => {
       );
 
       expect(d.notices.emit).toHaveBeenCalledTimes(1);
-      expect(avisoDentro).toBe(false);
+      expect(noticeInside).toBe(false);
     });
   });
 

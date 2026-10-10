@@ -30,16 +30,16 @@ const ACTOR = { id: DOCTOR } as any;
  * mismo mensaje equivocado. La fecha se calcula al correr para que la prueba
  * mida lo que dice medir y no el paso del tiempo.
  */
-const TUESDAY_15_LOCAL = proximoMartes15Local();
+const TUESDAY_15_LOCAL = nextTuesday15Local();
 
 /** 15:00 en La Paz del primer martes estrictamente futuro. */
-function proximoMartes15Local(): Date {
-  const ahora = new Date();
+function nextTuesday15Local(): Date {
+  const now = new Date();
   const date = new Date(
     Date.UTC(
-      ahora.getUTCFullYear(),
-      ahora.getUTCMonth(),
-      ahora.getUTCDate(),
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
       19,
       0,
       0,
@@ -48,7 +48,7 @@ function proximoMartes15Local(): Date {
   );
   // Martes es 2. A las 19:00 UTC son las 15:00 del mismo día en La Paz, así que
   // el día de la semana coincide en las dos zonas y no hace falta corregirlo.
-  while (date.getUTCDay() !== 2 || date.getTime() <= ahora.getTime()) {
+  while (date.getUTCDay() !== 2 || date.getTime() <= now.getTime()) {
     date.setUTCDate(date.getUTCDate() + 1);
   }
   return date;

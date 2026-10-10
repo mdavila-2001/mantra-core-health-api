@@ -43,14 +43,14 @@ export async function findPractitionerNames(
   );
   if (practitioners.length === 0) return new Map();
 
-  const personas = await em.find(Persons, {
+  const persons = await em.find(Persons, {
     id: { $in: practitioners.map((row) => row.profileId) },
   });
 
   const result = new Map<string, string>();
-  for (const persona of personas) {
-    const nombre = nombreDe(persona);
-    if (nombre !== undefined) result.set(persona.id, nombre);
+  for (const persona of persons) {
+    const name = nameOf(persona);
+    if (name !== undefined) result.set(persona.id, name);
   }
   return result;
 }
@@ -62,7 +62,7 @@ export async function findPractitionerNames(
  * quien lo consume decide qué decir en ese caso, y una cadena vacía se
  * confundiría con un nombre en blanco.
  */
-function nombreDe(persona: Persons): string | undefined {
+function nameOf(persona: Persons): string | undefined {
   if (persona.displayName !== undefined && persona.displayName !== '') {
     return persona.displayName;
   }

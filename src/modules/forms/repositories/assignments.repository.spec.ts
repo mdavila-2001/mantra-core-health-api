@@ -74,11 +74,11 @@ const ROWS = [
  * @returns true si la fila satisface la condición.
  */
 function meets(row: any, where: any): boolean {
-  return Object.entries(where).every(([clave, condicion]) => {
-    if (clave === '$or') {
-      return (condicion as any[]).some((rama) => meets(row, rama));
+  return Object.entries(where).every(([key, condition]) => {
+    if (key === '$or') {
+      return (condition as any[]).some((branch) => meets(row, branch));
     }
-    return row[clave] === condicion;
+    return row[key] === condition;
   });
 }
 

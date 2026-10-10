@@ -62,7 +62,7 @@ function build() {
     ),
   };
   /** Da de alta un perfil de paciente de esa persona. */
-  const darPatientRegistration = (personId: string) =>
+  const registerPatient = (personId: string) =>
     profiles.set(personId, { profileId: personId });
 
   /** `profile_id` → fila, como lo indexa `HealthPractitionerProfilesRepository`. */
@@ -73,7 +73,7 @@ function build() {
     ),
   };
   /** Da de alta un perfil profesional de esa persona. */
-  const darProfessionalRegistration = (personId: string) =>
+  const registerProfessional = (personId: string) =>
     professionals.set(personId, { profileId: personId });
 
   /**
@@ -85,7 +85,7 @@ function build() {
     string,
     { startAt: Date; timeZone: string | null }[]
   >();
-  const clave = (pro: string, pac: string) => `${pro}→${pac}`;
+  const key = (pro: string, pac: string) => `${pro}→${pac}`;
   /** Consultas en curso, por par profesional→paciente. */
   const inCourse = new Set<string>();
   const bookingsRepo = {
@@ -93,7 +93,7 @@ function build() {
     // por el calendario.
     hasConsultationInProgress: mockFn(
       (_em: unknown, pro: string, pac: string) =>
-        Promise.resolve(inCourse.has(clave(pro, pac))),
+        Promise.resolve(inCourse.has(key(pro, pac))),
     ),
     findConfirmedWithPatientBetween: mockFn(
       (
@@ -101,13 +101,12 @@ function build() {
         practitionerProfileId: string,
         patientProfileId: string,
         from: Date,
-        hasta: Date,
+        until: Date,
       ) =>
         Promise.resolve(
           (
-            reservations.get(clave(practitionerProfileId, patientProfileId)) ??
-            []
-          ).filter((r) => r.startAt >= from && r.startAt < hasta),
+            reservations.get(key(practitionerProfileId, patientProfileId)) ?? []
+          ).filter((r) => r.startAt >= from && r.startAt < until),
         ),
     ),
   };
@@ -118,13 +117,13 @@ function build() {
     startAt: Date,
     timeZone: string | null = 'America/La_Paz',
   ) => {
-    const previous = reservations.get(clave(pro, pac)) ?? [];
-    reservations.set(clave(pro, pac), [...previous, { startAt, timeZone }]);
+    const previous = reservations.get(key(pro, pac)) ?? [];
+    reservations.set(key(pro, pac), [...previous, { startAt, timeZone }]);
   };
 
   /** Marca que ese profesional YA empezó la consulta con ese paciente. */
   const startConsultation = (pro: string, pac: string): void => {
-    inCourse.add(clave(pro, pac));
+    inCourse.add(key(pro, pac));
   };
 
   /**
@@ -139,19 +138,19 @@ function build() {
   const careRelationshipsRepo = {
     findActiveForPractitionerPatient: mockFn(
       (_em: unknown, pro: string, pac: string) =>
-        Promise.resolve(careRelations.get(clave(pro, pac)) ?? []),
+        Promise.resolve(careRelations.get(key(pro, pac)) ?? []),
     ),
   };
   /** Da de alta una relación asistencial ACTIVA entre ambos. */
-  const vincular = (
+  const link = (
     pro: string,
     pac: string,
     validFrom: Date = new Date(Date.now() - 86_400_000),
     validTo?: Date,
     purposeConceptId?: string,
   ) => {
-    const previous = careRelations.get(clave(pro, pac)) ?? [];
-    careRelations.set(clave(pro, pac), [
+    const previous = careRelations.get(key(pro, pac)) ?? [];
+    careRelations.set(key(pro, pac), [
       ...previous,
       { validFrom, validTo, purposeConceptId },
     ]);
@@ -215,11 +214,11 @@ function build() {
     bookingsRepo,
     pdp,
     careRelationshipsRepo,
-    darDeAltaPaciente: darPatientRegistration,
-    darDeAltaProfesional: darProfessionalRegistration,
+    darDeAltaPaciente: registerPatient,
+    darDeAltaProfesional: registerProfessional,
     agendar: schedule,
     iniciarConsulta: startConsultation,
-    vincular,
+    vincular: link,
     logger,
     vacio: empty,
     allergyReactionsRepo,
@@ -268,8 +267,8 @@ describe('ClinicalReadService · getPatientSummary deja rastro (N-04)', () => {
   it('el asiento no lleva contenido clínico: sólo identificadores', async () => {
     const d = build();
     await d.service.getPatientSummary(HOLDER_PERSON, 50, medical);
-    const asiento = d.dataAccessLogRepo.record.mock.calls[0][1];
-    expect(Object.keys(asiento).sort()).toEqual(
+    const entry = d.dataAccessLogRepo.record.mock.calls[0][1];
+    expect(Object.keys(entry).sort()).toEqual(
       [
         'actionConceptId',
         'patientProfileId',
@@ -399,8 +398,8 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
     d.historyRepo.latestBySource.mockImplementation(
       async (_em: unknown, _e: string, _ids: string[], matches?: any) => {
         const candidates = matches ? reviews.filter(matches) : reviews;
-        const ultima = candidates[candidates.length - 1];
-        return new Map(ultima ? [['cond-1', ultima]] : []);
+        const last = candidates[candidates.length - 1];
+        return new Map(last ? [['cond-1', last]] : []);
       },
     );
 
@@ -617,7 +616,7 @@ describe('ClinicalReadService · assertOwnRecord', () => {
  * atiende pasa sólo si HOY tiene turno con esa persona, y «hoy» es el día de la sede.
  */
 describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
-  const MEDICO = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const DOCTOR = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
   const PATIENT = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
   const OTHER_PATIENT = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
   const LA_PAZ = 'America/La_Paz';
@@ -627,8 +626,8 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   /** Hoy a las `hora` en punto, hora de La Paz (UTC−4), como instante UTC. */
   const todayInLaPazAt = (time: number) => {
-    const ahora = new Date();
-    const local = new Date(ahora.getTime() - 4 * 3600_000);
+    const now = new Date();
+    const local = new Date(now.getTime() - 4 * 3600_000);
     return new Date(
       Date.UTC(
         local.getUTCFullYear(),
@@ -653,9 +652,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('quien atiende pasa si HOY tiene turno con esa persona', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
-    c.agendar(MEDICO, PATIENT, todayInLaPazAt(10), LA_PAZ);
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    c.agendar(DOCTOR, PATIENT, todayInLaPazAt(10), LA_PAZ);
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN')),
@@ -664,10 +663,10 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('el turno de AYER ya no abre la historia', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
     c.agendar(
-      MEDICO,
+      DOCTOR,
       PATIENT,
       new Date(todayInLaPazAt(10).getTime() - 86_400_000),
       LA_PAZ,
@@ -680,8 +679,8 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('sin turno con esa persona no alcanza el rol', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'PRACTITIONER')),
@@ -690,9 +689,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('el turno de hoy con OTRO paciente no abre esta historia', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
-    c.agendar(MEDICO, OTHER_PATIENT, todayInLaPazAt(10), LA_PAZ);
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    c.agendar(DOCTOR, OTHER_PATIENT, todayInLaPazAt(10), LA_PAZ);
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN')),
@@ -701,7 +700,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('una cuenta con rol de atender pero sin perfil profesional no pasa', async () => {
     const c = build();
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN')),
@@ -713,15 +712,15 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
       ({
         id: 'u',
         roles: ['PRACTITIONER'],
-        practitionerProfileId: MEDICO,
+        practitionerProfileId: DOCTOR,
         tenantIds: ['t1'],
       }) as any;
 
     it('pasa cuando el PDP concede (relación asistencial/grant vigente)', async () => {
       const c = build();
-      c.darDeAltaProfesional(MEDICO);
+      c.darDeAltaProfesional(DOCTOR);
       c.accountLinksRepo.findActiveByUser.mockResolvedValue({
-        personId: MEDICO,
+        personId: DOCTOR,
       });
       c.pdp.evaluate.mockResolvedValue({ decision: 'PERMIT' });
 
@@ -731,7 +730,7 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
       expect(c.pdp.evaluate).toHaveBeenCalledWith(
         expect.objectContaining({
           patientProfileId: PATIENT,
-          practitionerProfileId: MEDICO,
+          practitionerProfileId: DOCTOR,
           action: 'READ',
           purposeOfUse: 'TREATMENT',
         }),
@@ -741,9 +740,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
     it('sigue rechazando cuando el PDP también deniega', async () => {
       const c = build();
-      c.darDeAltaProfesional(MEDICO);
+      c.darDeAltaProfesional(DOCTOR);
       c.accountLinksRepo.findActiveByUser.mockResolvedValue({
-        personId: MEDICO,
+        personId: DOCTOR,
       });
       c.pdp.evaluate.mockResolvedValue({ decision: 'DENY' });
 
@@ -764,9 +763,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
      */
     it('pasa con un acceso de emergencia vigente aunque TREATMENT sea denegado', async () => {
       const c = build();
-      c.darDeAltaProfesional(MEDICO);
+      c.darDeAltaProfesional(DOCTOR);
       c.accountLinksRepo.findActiveByUser.mockResolvedValue({
-        personId: MEDICO,
+        personId: DOCTOR,
       });
       c.pdp.evaluate.mockImplementation(async (dto: any) => ({
         decision: dto.purposeOfUse === 'EMERGENCY' ? 'PERMIT' : 'DENY',
@@ -787,9 +786,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
     it('la escritura también reconoce el acceso de emergencia (el nivel lo decide el PDP)', async () => {
       const c = build();
-      c.darDeAltaProfesional(MEDICO);
+      c.darDeAltaProfesional(DOCTOR);
       c.accountLinksRepo.findActiveByUser.mockResolvedValue({
-        personId: MEDICO,
+        personId: DOCTOR,
       });
       c.pdp.evaluate.mockImplementation(async (dto: any) => ({
         decision: dto.purposeOfUse === 'EMERGENCY' ? 'PERMIT' : 'DENY',
@@ -806,16 +805,16 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
     it('no consulta el PDP sin tenant en el actor', async () => {
       const c = build();
-      c.darDeAltaProfesional(MEDICO);
+      c.darDeAltaProfesional(DOCTOR);
       c.accountLinksRepo.findActiveByUser.mockResolvedValue({
-        personId: MEDICO,
+        personId: DOCTOR,
       });
 
       await expect(
         c.service.assertCanReadHistory(PATIENT, {
           id: 'u',
           roles: ['PRACTITIONER'],
-          practitionerProfileId: MEDICO,
+          practitionerProfileId: DOCTOR,
         } as any),
       ).rejects.toBeInstanceOf(ForbiddenException);
       expect(c.pdp.evaluate).not.toHaveBeenCalled();
@@ -829,11 +828,11 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
    */
   it('el turno de las 23:30 en La Paz es de HOY, aunque en UTC ya sea mañana', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
     const alas2330 = todayInLaPazAt(23);
     c.agendar(
-      MEDICO,
+      DOCTOR,
       PATIENT,
       new Date(alas2330.getTime() + 30 * 60_000),
       LA_PAZ,
@@ -846,9 +845,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('el recurso sin zona declarada cae al default del producto (UTC−4)', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
-    c.agendar(MEDICO, PATIENT, todayInLaPazAt(10), null);
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    c.agendar(DOCTOR, PATIENT, todayInLaPazAt(10), null);
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN')),
@@ -866,11 +865,11 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
    */
   it('una consulta EN CURSO abre el expediente aunque el turno sea de otro día', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
     // Sin turno hoy: la agenda de este profesional con este paciente está vacía
     // en la ventana que mira `atiendeHoy`.
-    c.iniciarConsulta(MEDICO, PATIENT);
+    c.iniciarConsulta(DOCTOR, PATIENT);
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN')),
@@ -881,8 +880,8 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     // La cita con ese paciente sigue siendo el filtro: esto es lo que impide
     // que «en curso» se lea como «cualquiera puede».
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN')),
@@ -893,9 +892,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     // Iniciar con un paciente no abre el expediente de otro. Es el error fácil
     // de cometer si la consulta se escribiera sin el par completo.
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
-    c.iniciarConsulta(MEDICO, 'otro-paciente-cualquiera');
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    c.iniciarConsulta(DOCTOR, 'otro-paciente-cualquiera');
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN')),
@@ -906,9 +905,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
     // No es cosmético: `findConfirmedWithPatientBetween` trae una ventana de 96
     // horas y compara zona por zona. Si la respuesta ya se sabe, no se paga.
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
-    c.iniciarConsulta(MEDICO, PATIENT);
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    c.iniciarConsulta(DOCTOR, PATIENT);
 
     await c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN'));
 
@@ -930,12 +929,12 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('el profesional lee su PROPIA historia aunque no tenga turno consigo mismo', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.darDeAltaPaciente(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.darDeAltaPaciente(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
 
     await expect(
-      c.service.assertCanReadHistory(MEDICO, actorWith('u', 'CLINICIAN')),
+      c.service.assertCanReadHistory(DOCTOR, actorWith('u', 'CLINICIAN')),
     ).resolves.toBeUndefined();
   });
 
@@ -945,8 +944,8 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
    */
   it('el rechazo es indistinguible entre paciente inexistente y sin-turno', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
     const actor = actorWith('u', 'CLINICIAN');
 
     const existsWithoutSlot = await c.service
@@ -965,9 +964,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
    */
   it('un profesional con relación asistencial vigente abre la historia aunque no tenga turno hoy', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
-    c.vincular(MEDICO, PATIENT);
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    c.vincular(DOCTOR, PATIENT);
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN')),
@@ -976,10 +975,10 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('una relación asistencial YA VENCIDA no abre la historia', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
     c.vincular(
-      MEDICO,
+      DOCTOR,
       PATIENT,
       new Date(Date.now() - 30 * 86_400_000),
       new Date(Date.now() - 86_400_000),
@@ -992,9 +991,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('una relación asistencial que TODAVÍA no empieza no abre la historia', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
-    c.vincular(MEDICO, PATIENT, new Date(Date.now() + 86_400_000));
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    c.vincular(DOCTOR, PATIENT, new Date(Date.now() + 86_400_000));
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN')),
@@ -1010,10 +1009,10 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
    */
   it('una relación asistencial ACOTADA A UN PROPÓSITO no abre el resumen completo', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
     c.vincular(
-      MEDICO,
+      DOCTOR,
       PATIENT,
       new Date(Date.now() - 86_400_000),
       undefined,
@@ -1027,9 +1026,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('la relación asistencial es de ESE par: con OTRO paciente no abre esta historia', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
-    c.vincular(MEDICO, OTHER_PATIENT);
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    c.vincular(DOCTOR, OTHER_PATIENT);
 
     await expect(
       c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN')),
@@ -1038,9 +1037,9 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('el camino barato va primero: con turno de hoy no se consulta la relación asistencial', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
-    c.agendar(MEDICO, PATIENT, todayInLaPazAt(10), LA_PAZ);
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
+    c.agendar(DOCTOR, PATIENT, todayInLaPazAt(10), LA_PAZ);
 
     await c.service.assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN'));
 
@@ -1051,8 +1050,8 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 
   it('resuelve el vínculo de la cuenta UNA sola vez por lectura', async () => {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
 
     await c.service
       .assertCanReadHistory(PATIENT, actorWith('u', 'CLINICIAN'))
@@ -1063,15 +1062,15 @@ describe('ClinicalReadService · assertPuedeLeerHistoria', () => {
 });
 
 describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
-  const MEDICO = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const DOCTOR = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
   const PATIENT = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
   const LA_PAZ = 'America/La_Paz';
 
-  const medico = () =>
+  const doctor = () =>
     ({
       id: 'u',
       roles: ['PRACTITIONER'],
-      practitionerProfileId: MEDICO,
+      practitionerProfileId: DOCTOR,
       tenantIds: ['t1'],
     }) as any;
 
@@ -1083,8 +1082,8 @@ describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
 
   function doctorWithoutSlot() {
     const c = build();
-    c.darDeAltaProfesional(MEDICO);
-    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: MEDICO });
+    c.darDeAltaProfesional(DOCTOR);
+    c.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: DOCTOR });
     return c;
   }
 
@@ -1093,10 +1092,10 @@ describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
     pdpThatGrants(c, ['READ']);
 
     await expect(
-      c.service.assertCanReadHistory(PATIENT, medico()),
+      c.service.assertCanReadHistory(PATIENT, doctor()),
     ).resolves.toBeUndefined();
     await expect(
-      c.service.assertCanWriteHistory(PATIENT, medico()),
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
     ).rejects.toBeInstanceOf(ForbiddenException);
     expect(c.pdp.evaluate).toHaveBeenLastCalledWith(
       expect.objectContaining({ action: 'WRITE', patientProfileId: PATIENT }),
@@ -1109,7 +1108,7 @@ describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
     pdpThatGrants(c, ['READ', 'WRITE']);
 
     await expect(
-      c.service.assertCanWriteHistory(PATIENT, medico()),
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
     ).resolves.toBeUndefined();
   });
 
@@ -1117,17 +1116,17 @@ describe('ClinicalReadService · assertPuedeEscribirHistoria (MCH-007)', () => {
     const c = doctorWithoutSlot();
 
     await expect(
-      c.service.assertCanWriteHistory(PATIENT, medico()),
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
   it('quien lo atiende hoy escribe sin preguntarle al PDP', async () => {
     const c = doctorWithoutSlot();
-    const ahora = new Date();
-    c.agendar(MEDICO, PATIENT, ahora, LA_PAZ);
+    const now = new Date();
+    c.agendar(DOCTOR, PATIENT, now, LA_PAZ);
 
     await expect(
-      c.service.assertCanWriteHistory(PATIENT, medico()),
+      c.service.assertCanWriteHistory(PATIENT, doctor()),
     ).resolves.toBeUndefined();
     expect(c.pdp.evaluate).not.toHaveBeenCalled();
   });

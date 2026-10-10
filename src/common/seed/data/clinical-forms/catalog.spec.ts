@@ -29,14 +29,14 @@ const WITHOUT_PRESUMPTIVE_DIAGNOSIS = new Set([
   'PSIQ_EVALUACION_BASE',
 ]);
 
-const campos = STANDARD_FORMS.flatMap((form) =>
+const fields = STANDARD_FORMS.flatMap((form) =>
   form.fields.map((field) => ({ form, field })),
 );
 
 describe('catálogo v2 — contenido', () => {
   it('las escalas con categorías finitas se eligen de una lista, no se escriben', () => {
     const scales = /\b(ASA|Mallampati|NYHA|ECOG|mMRC|Bristol|Fitzpatrick)\b/;
-    const free = campos
+    const free = fields
       .filter(({ field }) => scales.test(field.name))
       .filter(({ field }) => field.options === undefined)
       .map(({ form, field }) => `${form.code}.${field.code}`);
@@ -57,16 +57,16 @@ describe('catálogo v2 — contenido', () => {
       (form.kind === 'BASE' ? group.base : group.especificas).push(form.code);
       bySpecialty.set(form.specialty.code, group);
     }
-    for (const [especialidad, grupo] of bySpecialty) {
-      expect({ especialidad, bases: grupo.base.length }).toEqual({
-        especialidad,
+    for (const [specialty, group] of bySpecialty) {
+      expect({ especialidad: specialty, bases: group.base.length }).toEqual({
+        especialidad: specialty,
         bases: 1,
       });
       expect({
-        especialidad,
-        especificas: grupo.especificas.length > 0,
+        especialidad: specialty,
+        especificas: group.especificas.length > 0,
       }).toEqual({
-        especialidad,
+        especialidad: specialty,
         especificas: true,
       });
     }
@@ -116,7 +116,7 @@ describe('catálogo v2 — contenido', () => {
         true,
       );
       expect(
-        [...sections].some((nombre) => nombre?.startsWith('Evaluación:')),
+        [...sections].some((name) => name?.startsWith('Evaluación:')),
       ).toBe(true);
     }
   });
@@ -137,7 +137,7 @@ describe('catálogo v2 — contenido', () => {
   });
 
   it('el dengue pide los signos de alarma de la guía OPS/OMS', () => {
-    const signs = campos.filter(
+    const signs = fields.filter(
       ({ field }) => field.code === 'dengue_signos_de_alarma',
     );
     expect(signs.length).toBeGreaterThanOrEqual(1);
@@ -151,7 +151,7 @@ describe('catálogo v2 — contenido', () => {
   });
 
   it('una lista de varias respuestas se guarda como json, y una de una sola como texto', () => {
-    for (const { field } of campos) {
+    for (const { field } of fields) {
       if (field.options === undefined) continue;
       expect(field.dataType).toBe(field.multiple === true ? 'json' : 'string');
     }
@@ -160,7 +160,7 @@ describe('catálogo v2 — contenido', () => {
   it('ninguna ficha cita un instrumento con licencia comercial no confirmada', () => {
     const withLicense =
       /PHQ-9|GAD-7|Beck|MMSE|Mini-Mental|STOP-BANG|IIEF|Braden|Morse|MUST|Roma IV|CAM-ICU/;
-    const cited = campos
+    const cited = fields
       .filter(({ field }) =>
         withLicense.test(
           `${field.name} ${(field.options ?? []).join(' ')} ${field.description ?? ''}`,
@@ -261,13 +261,13 @@ describe('fichas de las NNAC de Bolivia', () => {
   const nnac = STANDARD_FORMS.filter((record) =>
     record.code.startsWith('NNAC'),
   );
-  const DOSIS =
+  const DOSE =
     /\b\d+(?:[.,]\d+)?\s?(?:mg|mcg|µg|ml|mL|UI|mEq|gotas?|comprimidos?|tabletas?|ampollas?)\b|\b(?:IV|VO|IM|SC)\b|\bdosis\b/u;
 
   it('hay fichas de las dos ediciones de la norma, una por enfermedad', () => {
-    const de2025 = nnac.filter((record) => record.code.startsWith('NNAC25_'));
-    expect(de2025.length).toBeGreaterThanOrEqual(70);
-    expect(nnac.length - de2025.length).toBeGreaterThanOrEqual(140);
+    const nnac2025 = nnac.filter((record) => record.code.startsWith('NNAC25_'));
+    expect(nnac2025.length).toBeGreaterThanOrEqual(70);
+    expect(nnac.length - nnac2025.length).toBeGreaterThanOrEqual(140);
     const names = nnac.map((record) =>
       record.name.replace(/ \(NNAC (?:2012|2025)\)$/, ''),
     );
@@ -275,12 +275,14 @@ describe('fichas de las NNAC de Bolivia', () => {
   });
 
   it('el código CIE-10 de 2025 es una lista de «código: nombre» de la norma', () => {
-    const con = STANDARD_FORMS.filter((f) => f.code.startsWith('NNAC25_'))
+    const formsWithOptions = STANDARD_FORMS.filter((f) =>
+      f.code.startsWith('NNAC25_'),
+    )
       .map((f) => f.fields.find((c) => c.code === 'codigo_cie10'))
       .filter((c) => c?.options !== undefined);
-    expect(con.length).toBeGreaterThan(60);
-    for (const campo of con)
-      for (const option of campo?.options ?? [])
+    expect(formsWithOptions.length).toBeGreaterThan(60);
+    for (const field of formsWithOptions)
+      for (const option of field?.options ?? [])
         expect(option).toMatch(/^[A-Z]\d{2}(\.\d+)?: .{4,}/);
   });
 
@@ -294,13 +296,13 @@ describe('fichas de las NNAC de Bolivia', () => {
   });
 
   it('ninguna opción es una dosis, una vía de administración o una instrucción', () => {
-    const ofensoras = nnac.flatMap((record) =>
+    const offending = nnac.flatMap((record) =>
       record.fields
-        .flatMap((campo) => campo.options ?? [])
-        .filter((option) => DOSIS.test(option))
+        .flatMap((field) => field.options ?? [])
+        .filter((option) => DOSE.test(option))
         .map((option) => `${record.code}: ${option}`),
     );
-    expect(ofensoras).toEqual([]);
+    expect(offending).toEqual([]);
   });
 
   it('las opciones son frases cortas, sin restos de otra sección', () => {

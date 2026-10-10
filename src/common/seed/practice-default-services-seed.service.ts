@@ -56,7 +56,7 @@ export class PracticeDefaultServicesSeedService {
       { fields: ['practiceId'] },
     );
     const alreadyHave = new Set(existing.map((row) => row.practiceId));
-    const ahora = new Date();
+    const now = new Date();
 
     let inserted = 0;
     for (const practice of practices) {
@@ -71,7 +71,7 @@ export class PracticeDefaultServicesSeedService {
           currencyConceptId: DEFAULT_APPOINTMENT_SERVICE.currencyConceptId,
           isActive: true,
           // Sin actor: lo sembró el arranque, no una persona.
-          ...createdBy(undefined, ahora),
+          ...createdBy(undefined, now),
         },
         { partial: true },
       );

@@ -10,11 +10,11 @@ import type { Persons } from './entities';
  * que no se declaró viaja ausente—. Además metería un espacio de más al
  * recomponer el nombre visible.
  *
- * @param valor - Lo que llegó en el cuerpo.
+ * @param value - Lo que llegó en el cuerpo.
  * @returns El texto, o `undefined` para que la columna quede en `NULL`.
  */
-export function optionalText(valor: string): string | undefined {
-  return valor.trim() === '' ? undefined : valor;
+export function optionalText(value: string): string | undefined {
+  return value.trim() === '' ? undefined : value;
 }
 
 /** Lo único que {@link applyOccupation} necesita del cuerpo del `PATCH`. */

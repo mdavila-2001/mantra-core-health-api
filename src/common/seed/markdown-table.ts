@@ -16,8 +16,8 @@ export interface MarkdownTableRow {
   readonly cells: readonly string[];
 }
 
-function cells(linea: string): string[] {
-  const t = linea.trim();
+function cells(line: string): string[] {
+  const t = line.trim();
   if (!t.startsWith('|')) return [];
   return t
     .replace(/^\|/, '')
@@ -35,21 +35,21 @@ function isSeparator(row: readonly string[]): boolean {
 export function tableRows(text: string): MarkdownTableRow[] {
   const rows: MarkdownTableRow[] = [];
   let header: string[] = [];
-  let anterior: string[] = [];
-  for (const linea of text.split(/\r?\n/)) {
-    const row = cells(linea);
+  let previous: string[] = [];
+  for (const line of text.split(/\r?\n/)) {
+    const row = cells(line);
     if (row.length === 0) {
-      anterior = [];
+      previous = [];
       continue;
     }
     if (isSeparator(row)) {
-      header = anterior;
+      header = previous;
       continue;
     }
     if (header.length > 0) {
       rows.push({ header: header, cells: row });
     }
-    anterior = row;
+    previous = row;
   }
   return rows;
 }
@@ -65,8 +65,8 @@ function normalize(text: string): string {
 
 /** La celda de la primera columna cuyo título case con alguno de `nombres`. */
 export function column(row: MarkdownTableRow, ...names: string[]): string {
-  for (const nombre of names) {
-    const target = normalize(nombre);
+  for (const name of names) {
+    const target = normalize(name);
     const i = row.header.findIndex((h) => normalize(h) === target);
     if (i >= 0 && i < row.cells.length) return row.cells[i].trim();
   }
@@ -74,7 +74,7 @@ export function column(row: MarkdownTableRow, ...names: string[]): string {
 }
 
 /** `undefined` si la celda está vacía, el valor recortado si no. */
-export function optional(valor: string): string | undefined {
-  const v = valor.trim();
+export function optional(value: string): string | undefined {
+  const v = value.trim();
   return v || undefined;
 }

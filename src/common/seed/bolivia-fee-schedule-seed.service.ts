@@ -217,8 +217,7 @@ export class BoliviaFeeScheduleSeedService {
     const declared = new Map(
       BOLIVIA_PROCEDURES.flatMap((p) =>
         this.propertiesOf(p).map(
-          ([codigo, valor]) =>
-            [boFeePropertyId(p.code, codigo), valor] as const,
+          ([code, value]) => [boFeePropertyId(p.code, code), value] as const,
         ),
       ),
     );
@@ -229,24 +228,24 @@ export class BoliviaFeeScheduleSeedService {
       for (const concept of await em.find(CatalogConcepts, {
         id: { $in: block },
       })) {
-        const nombre = names.get(concept.id);
-        if (nombre !== undefined && concept.display !== nombre) {
-          concept.display = nombre;
+        const name = names.get(concept.id);
+        if (name !== undefined && concept.display !== name) {
+          concept.display = name;
           concept.updatedAt = now;
           changes += 1;
         }
       }
-      const propiedades = await em.find(ConceptProperties, {
+      const properties = await em.find(ConceptProperties, {
         conceptId: { $in: block },
         propertyCode: { $in: ownCodes },
       });
-      for (const property of propiedades) {
-        const valor = declared.get(property.id);
-        if (valor === undefined) {
+      for (const property of properties) {
+        const value = declared.get(property.id);
+        if (value === undefined) {
           em.remove(property);
           changes += 1;
-        } else if (property.valueJson !== valor) {
-          property.valueJson = valor;
+        } else if (property.valueJson !== value) {
+          property.valueJson = value;
           property.updatedAt = now;
           changes += 1;
         }
@@ -258,14 +257,14 @@ export class BoliviaFeeScheduleSeedService {
 
   /** Rompe si el nomenclador declara dos veces el mismo código. */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
+    const seen = new Set<string>();
     for (const procedure of BOLIVIA_PROCEDURES) {
-      if (vistos.has(procedure.code)) {
+      if (seen.has(procedure.code)) {
         throw new Error(
           `El nomenclador declara el código "${procedure.code}" más de una vez`,
         );
       }
-      vistos.add(procedure.code);
+      seen.add(procedure.code);
     }
   }
 
@@ -360,14 +359,14 @@ export class BoliviaFeeScheduleSeedService {
    * detectó daño» — que no es lo mismo que «está bien», pero es lo que se sabe.
    */
   private propertiesOf(procedure: BoliviaProcedureSeed): [string, string][] {
-    const pares: [string, string | null][] = [
+    const pairs: [string, string | null][] = [
       [BO_FEE_PROPERTY_CODES.especialidad, procedure.especialidad],
       [BO_FEE_PROPERTY_CODES.grupo, procedure.grupo],
       [BO_FEE_PROPERTY_CODES.precio, String(procedure.precio)],
       [BO_FEE_PROPERTY_CODES.unidad, procedure.unidad],
       [BO_FEE_PROPERTY_CODES.revision, procedure.ocrSospechoso ? 'true' : null],
     ];
-    return pares.filter((par): par is [string, string] => Boolean(par[1]));
+    return pairs.filter((par): par is [string, string] => Boolean(par[1]));
   }
 
   /** La expansión, en el orden del arancel. */

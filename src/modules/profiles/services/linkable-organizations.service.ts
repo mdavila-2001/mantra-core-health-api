@@ -173,7 +173,7 @@ export class LinkableOrganizationsService {
     concepts: { conceptId: string; code: string; display: string }[],
   ): Promise<LinkableOrganizationDto[]> {
     const ids = concepts.map((concept) => concept.conceptId);
-    const [municipios, tipos, direcciones] = await Promise.all([
+    const [municipalities, types, addresses] = await Promise.all([
       this.propertyByConcept(ids, BO_FACILITY_PROPERTY_CODES.municipio),
       this.propertyByConcept(ids, BO_FACILITY_PROPERTY_CODES.tipo),
       this.propertyByConcept(ids, BO_FACILITY_PROPERTY_CODES.direccion),
@@ -186,9 +186,9 @@ export class LinkableOrganizationsService {
       // oficial y el que un humano puede cotejar.
       code: concept.code.replace(/^facility:bo:/, ''),
       name: concept.display,
-      municipality: municipios.get(concept.conceptId) ?? null,
-      type: tipos.get(concept.conceptId) ?? null,
-      address: direcciones.get(concept.conceptId) ?? null,
+      municipality: municipalities.get(concept.conceptId) ?? null,
+      type: types.get(concept.conceptId) ?? null,
+      address: addresses.get(concept.conceptId) ?? null,
     }));
   }
 

@@ -165,8 +165,8 @@ describe('AccountingReadService', () => {
 
     it('elige el ejercicio que cubre hoy sobre uno más viejo', async () => {
       const { service, fiscalRepo } = build();
-      const hoy = new Date();
-      hoy.setUTCHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
       const old = {
         id: 'fy-viejo',
         code: '2020',
@@ -176,18 +176,18 @@ describe('AccountingReadService', () => {
       const current = {
         id: 'fy-vigente',
         code: '2026',
-        startDate: new Date(hoy.getFullYear(), 0, 1),
-        endDate: new Date(hoy.getFullYear(), 11, 31),
+        startDate: new Date(today.getFullYear(), 0, 1),
+        endDate: new Date(today.getFullYear(), 11, 31),
       };
       fiscalRepo.findYearsByPractice.mockResolvedValue([current, old]);
-      const abierto = period(
+      const open = period(
         'p1',
         '2026-01',
-        new Date(hoy.getFullYear(), 0, 1),
-        new Date(hoy.getFullYear(), 11, 31),
+        new Date(today.getFullYear(), 0, 1),
+        new Date(today.getFullYear(), 11, 31),
         ACCT.PERIOD_OPEN,
       );
-      fiscalRepo.findPeriodsByYear.mockResolvedValue([abierto]);
+      fiscalRepo.findPeriodsByYear.mockResolvedValue([open]);
 
       const result = await service.fiscalYear(PRACTICE, ACTOR_ADMIN);
 
@@ -284,8 +284,8 @@ describe('AccountingReadService', () => {
       };
       accountsRepo.findByPractice.mockResolvedValue([account]);
 
-      const hoy = new Date();
-      const overdue120DaysAgo = new Date(hoy.getTime() - 120 * 86400000);
+      const today = new Date();
+      const overdue120DaysAgo = new Date(today.getTime() - 120 * 86400000);
 
       subledgerRepo.findOpenItemsByReconciliationAccounts.mockResolvedValue([
         {
@@ -295,7 +295,7 @@ describe('AccountingReadService', () => {
             documentTypeConceptId: ACCT.DOC_TYPE_INVOICE,
             originalAmount: '100.00',
             outstandingAmount: '0.00',
-            createdAt: hoy,
+            createdAt: today,
           },
           subledger: {
             id: 'sl1',
@@ -312,7 +312,7 @@ describe('AccountingReadService', () => {
             originalAmount: '500.00',
             outstandingAmount: '500.00',
             dueDate: overdue120DaysAgo,
-            createdAt: hoy,
+            createdAt: today,
           },
           subledger: {
             id: 'sl1',
@@ -347,11 +347,11 @@ describe('AccountingReadService', () => {
       expect(result.totalReceivable).toBe('500.00');
       expect(result.totalPayable).toBe('0.00');
 
-      const soloPayable = await service.openItems(
+      const onlyPayable = await service.openItems(
         { practiceId: PRACTICE, side: 'PAYABLE' },
         ACTOR_ADMIN,
       );
-      expect(soloPayable.items).toHaveLength(0);
+      expect(onlyPayable.items).toHaveLength(0);
     });
   });
 

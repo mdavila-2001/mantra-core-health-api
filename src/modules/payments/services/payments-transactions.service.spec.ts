@@ -832,7 +832,7 @@ describe('PaymentsTransactionsService', () => {
         });
         d.transactionsRepo.createRefund.mockReturnValue({ id: 'refund-n' });
       }
-      const pendiente = (amount: string) => ({
+      const pending = (amount: string) => ({
         amount,
         statusConceptId: CONCEPTS.REFUND_PENDING,
       });
@@ -841,7 +841,7 @@ describe('PaymentsTransactionsService', () => {
         const d = build();
         captured(d, '0.30');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
-          pendiente('0.10'),
+          pending('0.10'),
         ]);
 
         const res = await d.service.refund('txn-1', { amount: '0.20' }, actor);
@@ -854,7 +854,7 @@ describe('PaymentsTransactionsService', () => {
         const d = build();
         captured(d, '0.30');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
-          pendiente('0.10'),
+          pending('0.10'),
         ]);
 
         await expect(
@@ -869,7 +869,7 @@ describe('PaymentsTransactionsService', () => {
         const d = build();
         captured(d, '2.00');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue(
-          Array.from({ length: 19 }, () => pendiente('0.10')),
+          Array.from({ length: 19 }, () => pending('0.10')),
         );
 
         const res = await d.service.refund('txn-1', { amount: '0.10' }, actor);
@@ -883,7 +883,7 @@ describe('PaymentsTransactionsService', () => {
         // decimales llega como entero.
         captured(d, '0.3');
         d.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
-          pendiente('0.1'),
+          pending('0.1'),
         ]);
         await expect(
           d.service.refund('txn-1', { amount: '0.20' }, actor),
@@ -892,7 +892,7 @@ describe('PaymentsTransactionsService', () => {
         const e = build();
         captured(e, '300');
         e.transactionsRepo.findRefundsByTransaction.mockResolvedValue([
-          pendiente('100'),
+          pending('100'),
         ]);
         await expect(
           e.service.refund('txn-1', { amount: '200.01' }, actor),

@@ -50,38 +50,38 @@ export interface OutOfRangeTarget {
 /**
  * Valida un objetivo contra su propio rango.
  *
- * @param campo - Objetivo a validar (`rpoSeconds` o `rtoSeconds`).
- * @param valor - Valor recibido del DTO.
+ * @param field - Objetivo a validar (`rpoSeconds` o `rtoSeconds`).
+ * @param value - Valor recibido del DTO.
  * @returns El incumplimiento, o `null` si el valor es admisible.
  */
 export function validateTarget(
-  campo: TargetName,
-  valor: unknown,
+  field: TargetName,
+  value: unknown,
 ): OutOfRangeTarget | null {
-  const { min, max } = TARGETS_RANGE[campo];
-  const label = campo === 'rpoSeconds' ? 'RPO' : 'RTO';
+  const { min, max } = TARGETS_RANGE[field];
+  const label = field === 'rpoSeconds' ? 'RPO' : 'RTO';
 
-  if (typeof valor !== 'number' || !Number.isInteger(valor)) {
+  if (typeof value !== 'number' || !Number.isInteger(value)) {
     return {
-      campo,
-      valor,
+      campo: field,
+      valor: value,
       mensaje: `El ${label} se expresa en segundos enteros`,
     };
   }
-  if (valor < min) {
+  if (value < min) {
     return {
-      campo,
-      valor,
+      campo: field,
+      valor: value,
       mensaje:
-        campo === 'rtoSeconds' && valor === 0
+        field === 'rtoSeconds' && value === 0
           ? 'Un RTO de cero segundos no es alcanzable: indique el tiempo de indisponibilidad que el negocio tolera'
           : `El ${label} no puede ser menor que ${min} segundos`,
     };
   }
-  if (valor > max) {
+  if (value > max) {
     return {
-      campo,
-      valor,
+      campo: field,
+      valor: value,
       mensaje: `El ${label} no puede superar ${max} segundos (un año); revise si cargó milisegundos`,
     };
   }

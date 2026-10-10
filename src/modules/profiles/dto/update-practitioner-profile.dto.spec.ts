@@ -42,8 +42,8 @@ describe('UpdateOwnPractitionerProfileDto — workEmail', () => {
 
   it.each([[''], ['no-es-un-correo'], ['a@'], [42]])(
     'rechaza %p',
-    async (valor) => {
-      expect(await propertiesWithError({ workEmail: valor })).toEqual([
+    async (value) => {
+      expect(await propertiesWithError({ workEmail: value })).toEqual([
         'workEmail',
       ]);
     },
@@ -56,18 +56,18 @@ describe('UpdateOwnPractitionerProfileDto — workEmail', () => {
  * 400. Mismas tres columnas que `profiles.practitioner_languages`.
  */
 describe('UpdateOwnPractitionerProfileDto — languages', () => {
-  const ESPANOL = '22222222-2222-4222-8222-222222222222';
+  const SPANISH = '22222222-2222-4222-8222-222222222222';
 
   it('acepta la forma que manda la pantalla', async () => {
     expect(
       await propertiesWithError({
         languages: [
           {
-            languageConceptId: ESPANOL,
+            languageConceptId: SPANISH,
             proficiencyConceptId: '44444444-4444-4444-8444-444444444444',
             clinicalInterpretationAllowed: true,
           },
-          { languageConceptId: ESPANOL, clinicalInterpretationAllowed: false },
+          { languageConceptId: SPANISH, clinicalInterpretationAllowed: false },
         ],
       }),
     ).toEqual([]);
@@ -79,10 +79,10 @@ describe('UpdateOwnPractitionerProfileDto — languages', () => {
 
   it.each([
     [{ languageConceptId: 'es', clinicalInterpretationAllowed: true }],
-    [{ languageConceptId: ESPANOL }],
+    [{ languageConceptId: SPANISH }],
     [
       {
-        languageConceptId: ESPANOL,
+        languageConceptId: SPANISH,
         clinicalInterpretationAllowed: true,
         level: 'C1',
       },
@@ -95,7 +95,7 @@ describe('UpdateOwnPractitionerProfileDto — languages', () => {
 
   it('rechaza más de 20 idiomas', async () => {
     const languages = Array.from({ length: 21 }, () => ({
-      languageConceptId: ESPANOL,
+      languageConceptId: SPANISH,
       clinicalInterpretationAllowed: false,
     }));
     expect(await propertiesWithError({ languages })).toEqual(['languages']);

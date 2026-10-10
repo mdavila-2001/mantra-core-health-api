@@ -96,9 +96,11 @@ describe('RegisterPatientDto · parentesco del contacto de emergencia', () => {
  */
 describe('RegisterPatientDto · departamento emisor del documento (1.4)', () => {
   it('rechaza el alta sin el campo: es obligatorio', async () => {
-    const { issuerAdministrativeAreaConceptId: _omitido, ...sinDepartamento } =
-      MINIMAL_REGISTRATION;
-    expect(await propertiesWithError(sinDepartamento)).toEqual([
+    const {
+      issuerAdministrativeAreaConceptId: _skipped,
+      ...withoutDepartment
+    } = MINIMAL_REGISTRATION;
+    expect(await propertiesWithError(withoutDepartment)).toEqual([
       'issuerAdministrativeAreaConceptId',
     ]);
   });

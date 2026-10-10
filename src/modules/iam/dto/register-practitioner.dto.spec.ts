@@ -25,8 +25,9 @@ const MINIMAL_REGISTRATION = {
 
 describe('RegisterPractitionerDto · CI obligatorio (MED-01)', () => {
   it('rechaza el alta si falta el documento de identidad', async () => {
-    const { nationalId: _nationalId, ...sinDocumento } = MINIMAL_REGISTRATION;
-    expect(await propertiesWithError(sinDocumento)).toContain('nationalId');
+    const { nationalId: _nationalId, ...withoutDocument } =
+      MINIMAL_REGISTRATION;
+    expect(await propertiesWithError(withoutDocument)).toContain('nationalId');
   });
 });
 
@@ -92,19 +93,19 @@ describe('RegisterPractitionerDto · especialidad principal y tres adicionales (
  * @param prefix - La ruta acumulada hasta este nivel.
  * @returns Las rutas de las propiedades con error, ordenadas y sin repetidos.
  */
-function rutasWithError(
+function routesWithError(
   errors: readonly ValidationError[],
   prefix = '',
 ): string[] {
-  const rutas: string[] = [];
+  const routes: string[] = [];
   for (const error of errors) {
-    const ruta = prefix ? `${prefix}.${error.property}` : error.property;
-    if (error.constraints) rutas.push(ruta);
+    const route = prefix ? `${prefix}.${error.property}` : error.property;
+    if (error.constraints) routes.push(route);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasWithError(error.children, ruta));
+      routes.push(...routesWithError(error.children, route));
     }
   }
-  return [...new Set(rutas)].sort();
+  return [...new Set(routes)].sort();
 }
 
 /**
@@ -125,7 +126,7 @@ async function propertiesWithError(
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasWithError(errors);
+  return routesWithError(errors);
 }
 
 /**
@@ -383,9 +384,9 @@ describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', (
   it('rechaza el alta si falta el departamento emisor', async () => {
     const {
       issuerAdministrativeAreaConceptId: _issuerAdministrativeAreaConceptId,
-      ...sinDepartamento
+      ...withoutDepartment
     } = MINIMAL_REGISTRATION;
-    expect(await propertiesWithError(sinDepartamento)).toEqual([
+    expect(await propertiesWithError(withoutDepartment)).toEqual([
       'issuerAdministrativeAreaConceptId',
     ]);
   });
@@ -402,10 +403,11 @@ describe('RegisterPractitionerDto · departamento emisor del documento (1.4)', (
   });
 
   it('rechaza el departamento sin documento', async () => {
-    const { nationalId: _nationalId, ...sinDocumento } = MINIMAL_REGISTRATION;
+    const { nationalId: _nationalId, ...withoutDocument } =
+      MINIMAL_REGISTRATION;
     expect(
       await propertiesWithError({
-        ...sinDocumento,
+        ...withoutDocument,
       }),
     ).toEqual(['nationalId']);
   });
@@ -490,9 +492,10 @@ describe('RegisterPractitionerDto · ownSite (P20)', () => {
   });
 
   it('el alta asistida (OmitType) hereda ownSite', async () => {
-    const { password: _password, ...altaSinPassword } = MINIMAL_REGISTRATION;
+    const { password: _password, ...signupWithoutPassword } =
+      MINIMAL_REGISTRATION;
     const dto = plainToInstance(AssistedPractitionerRegistrationDto, {
-      ...altaSinPassword,
+      ...signupWithoutPassword,
       reason: 'Alta de plantel',
       ownSite: { name: 'X' },
     });
@@ -500,7 +503,7 @@ describe('RegisterPractitionerDto · ownSite (P20)', () => {
       whitelist: true,
       forbidNonWhitelisted: true,
     });
-    expect(rutasWithError(errors)).toEqual(['ownSite.name']);
+    expect(routesWithError(errors)).toEqual(['ownSite.name']);
   });
 });
 
@@ -563,9 +566,10 @@ describe('RegisterPractitionerDto · domicilio (P19)', () => {
   });
 
   it('el alta asistida (OmitType) hereda el domicilio', async () => {
-    const { password: _password, ...altaSinPassword } = MINIMAL_REGISTRATION;
+    const { password: _password, ...signupWithoutPassword } =
+      MINIMAL_REGISTRATION;
     const dto = plainToInstance(AssistedPractitionerRegistrationDto, {
-      ...altaSinPassword,
+      ...signupWithoutPassword,
       reason: 'Alta de plantel',
       homeLatitude: -17.7689,
     });
@@ -573,7 +577,7 @@ describe('RegisterPractitionerDto · domicilio (P19)', () => {
       whitelist: true,
       forbidNonWhitelisted: true,
     });
-    expect(rutasWithError(errors)).toEqual(['homeLongitude']);
+    expect(routesWithError(errors)).toEqual(['homeLongitude']);
   });
 });
 
@@ -629,13 +633,13 @@ describe('RegisterPractitionerDto · firma y sello reales', () => {
 
   it.each(['signatureFileId', 'sealFileId'])(
     'rechaza %s inválido',
-    async (campo) => {
+    async (field) => {
       expect(
         await propertiesWithError({
           ...MINIMAL_REGISTRATION,
-          [campo]: 'no-es-uuid',
+          [field]: 'no-es-uuid',
         }),
-      ).toContain(campo);
+      ).toContain(field);
     },
   );
 

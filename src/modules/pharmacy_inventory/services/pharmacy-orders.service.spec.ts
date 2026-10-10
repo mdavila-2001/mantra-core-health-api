@@ -30,7 +30,7 @@ const patient = {
   patientProfileId: 'pat-1',
 } as any;
 const staff = { id: 'user-9', roles: ['SECURITY_ADMIN'] } as any;
-const sistema = { id: 'user-sys', roles: ['SYSTEM'] } as any;
+const system = { id: 'user-sys', roles: ['SYSTEM'] } as any;
 
 const PHARMACY = {
   id: 'ph-1',
@@ -275,8 +275,8 @@ describe('PharmacyOrdersService', () => {
 
     it('a line without stock stays SIN_STOCK and does NOT sink the order', async () => {
       const d = build();
-      const productos = [PRODUCT, { ...PRODUCT, id: 'prod-2' }];
-      d.pharmacyRepo.findActiveProductsByIds.mockResolvedValue(productos);
+      const products = [PRODUCT, { ...PRODUCT, id: 'prod-2' }];
+      d.pharmacyRepo.findActiveProductsByIds.mockResolvedValue(products);
       // Solo prod-1 tiene posición; prod-2 no existe en el estante.
       d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
       d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());
@@ -319,7 +319,7 @@ describe('PharmacyOrdersService', () => {
       d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());
       withReading(d, order(), []);
 
-      const antes = Date.now();
+      const before = Date.now();
       await runWithTenant('tenant-a', () =>
         d.service.create(
           { siteId: 'site-1', lines: [{ productId: 'prod-1', quantity: 1 }] },
@@ -328,7 +328,7 @@ describe('PharmacyOrdersService', () => {
       );
 
       const data = d.reservationsRepo.create.mock.calls[0][1];
-      const ttlMs = data.expiresAt.getTime() - antes;
+      const ttlMs = data.expiresAt.getTime() - before;
       expect(ttlMs).toBeGreaterThanOrEqual(ORDER_TTL_HOURS * 3_600_000 - 5_000);
       expect(ttlMs).toBeLessThanOrEqual(ORDER_TTL_HOURS * 3_600_000 + 5_000);
     });
@@ -958,8 +958,8 @@ describe('PharmacyOrdersService', () => {
   describe('cancel', () => {
     it('cancels a live order releasing stock through the shared primitive', async () => {
       const d = build();
-      const vivo = order();
-      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(vivo);
+      const live = order();
+      d.ordersRepo.findOrderByIdForUpdate.mockResolvedValue(live);
       withReading(
         d,
         order({ reservationStatusConceptId: PINV.ORDER_CANCELADO }),
@@ -970,11 +970,11 @@ describe('PharmacyOrdersService', () => {
         d.service.cancel('order-1', patient),
       );
 
-      expect(vivo.reservationStatusConceptId).toBe(PINV.ORDER_CANCELADO);
-      expect(vivo.releasedAt).toBeInstanceOf(Date);
+      expect(live.reservationStatusConceptId).toBe(PINV.ORDER_CANCELADO);
+      expect(live.releasedAt).toBeInstanceOf(Date);
       expect(d.reservationsService.releaseConfirmedLines).toHaveBeenCalledWith(
         d.tx,
-        vivo,
+        live,
         patient,
       );
       expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
@@ -1020,7 +1020,7 @@ describe('PharmacyOrdersService', () => {
       const expirable = order({ expiresAt: new Date(Date.now() - 1_000) });
       d.ordersRepo.findDueOrdersForUpdate.mockResolvedValue([expirable]);
 
-      const res = await d.service.expireDue(sistema);
+      const res = await d.service.expireDue(system);
 
       expect(res.expiredCount).toBe(1);
       expect(expirable.reservationStatusConceptId).toBe(PINV.ORDER_VENCIDO);
@@ -1028,7 +1028,7 @@ describe('PharmacyOrdersService', () => {
       expect(d.reservationsService.releaseConfirmedLines).toHaveBeenCalledWith(
         d.tx,
         expirable,
-        sistema,
+        system,
       );
       expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
         d.tx,
@@ -1041,7 +1041,7 @@ describe('PharmacyOrdersService', () => {
 
     it('with nothing overdue it does nothing and reports zero', async () => {
       const d = build();
-      const res = await d.service.expireDue(sistema);
+      const res = await d.service.expireDue(system);
       expect(res.expiredCount).toBe(0);
       expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
     });

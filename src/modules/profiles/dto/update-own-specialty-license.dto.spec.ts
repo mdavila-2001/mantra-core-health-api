@@ -6,7 +6,7 @@ import { UpdateOwnLicenseDto } from './update-own-license.dto';
 
 const UUID = '7218acbc-5098-56ae-980a-9345961ced89';
 
-async function rutasWithError<T extends object>(
+async function routesWithError<T extends object>(
   classKey: ClassConstructor<T>,
   body: Record<string, unknown>,
 ): Promise<string[]> {
@@ -19,9 +19,9 @@ async function rutasWithError<T extends object>(
 
 describe('UpdateOwnSpecialtyDto', () => {
   it('acepta vacío y los dos campos editables', async () => {
-    expect(await rutasWithError(UpdateOwnSpecialtyDto, {})).toEqual([]);
+    expect(await routesWithError(UpdateOwnSpecialtyDto, {})).toEqual([]);
     expect(
-      await rutasWithError(UpdateOwnSpecialtyDto, {
+      await routesWithError(UpdateOwnSpecialtyDto, {
         specialtyConceptId: UUID,
         boardCertified: true,
       }),
@@ -30,13 +30,13 @@ describe('UpdateOwnSpecialtyDto', () => {
 
   it('isPrimary se rechaza: la principal tiene su propia ruta', async () => {
     expect(
-      await rutasWithError(UpdateOwnSpecialtyDto, { isPrimary: true }),
+      await routesWithError(UpdateOwnSpecialtyDto, { isPrimary: true }),
     ).toEqual(['isPrimary']);
   });
 
   it('rechaza claves de estado y un uuid inválido', async () => {
     expect(
-      await rutasWithError(UpdateOwnSpecialtyDto, {
+      await routesWithError(UpdateOwnSpecialtyDto, {
         verificationStatusConceptId: UUID,
         specialtyConceptId: 'x',
       }),
@@ -46,9 +46,9 @@ describe('UpdateOwnSpecialtyDto', () => {
 
 describe('UpdateOwnLicenseDto', () => {
   it('acepta vacío y los cuatro campos editables', async () => {
-    expect(await rutasWithError(UpdateOwnLicenseDto, {})).toEqual([]);
+    expect(await routesWithError(UpdateOwnLicenseDto, {})).toEqual([]);
     expect(
-      await rutasWithError(UpdateOwnLicenseDto, {
+      await routesWithError(UpdateOwnLicenseDto, {
         licenseNumber: 'MP-9',
         regulatoryAuthority: 'SEDES La Paz',
         validFrom: '2024-03-15',
@@ -59,7 +59,7 @@ describe('UpdateOwnLicenseDto', () => {
 
   it('rechaza estado, jurisdicción y vencimiento: los mueve el trámite', async () => {
     expect(
-      await rutasWithError(UpdateOwnLicenseDto, {
+      await routesWithError(UpdateOwnLicenseDto, {
         stateConceptId: UUID,
         jurisdictionConceptId: UUID,
         validTo: '2030-01-01',
@@ -69,7 +69,7 @@ describe('UpdateOwnLicenseDto', () => {
 
   it('rechaza un número vacío', async () => {
     expect(
-      await rutasWithError(UpdateOwnLicenseDto, { licenseNumber: '  ' }),
+      await routesWithError(UpdateOwnLicenseDto, { licenseNumber: '  ' }),
     ).toEqual(['licenseNumber']);
   });
 });

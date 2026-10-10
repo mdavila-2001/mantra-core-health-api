@@ -10,8 +10,8 @@ import {
  *
  * @returns Las clases registradas en `controllers`.
  */
-function controllers(modulo: unknown): readonly unknown[] {
-  return (Reflect.getMetadata('controllers', modulo as object) ??
+function controllers(module: unknown): readonly unknown[] {
+  return (Reflect.getMetadata('controllers', module as object) ??
     []) as readonly unknown[];
 }
 
@@ -21,9 +21,9 @@ function controllers(modulo: unknown): readonly unknown[] {
  */
 describe('IamModule', () => {
   it('publica los controladores de sesión y cuenta', () => {
-    const controladores = controllers(IamModule);
-    expect(controladores).toContain(IamAuthController);
-    expect(controladores).toContain(IamUsersController);
-    expect(controladores).toContain(IamAccountSecurityController);
+    const declaredControllers = controllers(IamModule);
+    expect(declaredControllers).toContain(IamAuthController);
+    expect(declaredControllers).toContain(IamUsersController);
+    expect(declaredControllers).toContain(IamAccountSecurityController);
   });
 });

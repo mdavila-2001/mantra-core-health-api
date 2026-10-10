@@ -95,13 +95,13 @@ function label(
 }
 
 /** Edad en años cumplidos, a partir de la fecha de nacimiento. */
-function ageInYears(birth: Date | undefined, ahora: Date): string {
+function ageInYears(birth: Date | undefined, now: Date): string {
   if (!birth) return NO_DATA_POINT;
-  let years = ahora.getUTCFullYear() - birth.getUTCFullYear();
+  let years = now.getUTCFullYear() - birth.getUTCFullYear();
   const notYetFulfilled =
-    ahora.getUTCMonth() < birth.getUTCMonth() ||
-    (ahora.getUTCMonth() === birth.getUTCMonth() &&
-      ahora.getUTCDate() < birth.getUTCDate());
+    now.getUTCMonth() < birth.getUTCMonth() ||
+    (now.getUTCMonth() === birth.getUTCMonth() &&
+      now.getUTCDate() < birth.getUTCDate());
   if (notYetFulfilled) years -= 1;
   return `${years} años`;
 }
@@ -185,21 +185,21 @@ export interface PrescriptionVerificationResult {
  * INVALIDATED/REPLACED son inmutables pero dejaron de servir: «sin validez»,
  * con el motivo si el profesional lo declaró (`statusReasonText`).
  */
-function watermarkFor(estado: PrescriptionState): string | undefined {
-  if (estado.statusConceptId === CLIN.MEDICATION_REQUEST_DRAFT) {
+function watermarkFor(status: PrescriptionState): string | undefined {
+  if (status.statusConceptId === CLIN.MEDICATION_REQUEST_DRAFT) {
     return 'COPIA DE TRABAJO - SIN VALIDEZ FARMACÉUTICA';
   }
-  if (isOfficialState(estado.statusConceptId)) return undefined;
-  const reason = estado.statusReasonText ? ` — ${estado.statusReasonText}` : '';
+  if (isOfficialState(status.statusConceptId)) return undefined;
+  const reason = status.statusReasonText ? ` — ${status.statusReasonText}` : '';
   return `SIN VALIDEZ FARMACÉUTICA${reason}`;
 }
 
 /** El asunto del documento: lo que un lector ve en las propiedades del PDF. */
-function subjectFor(estado: PrescriptionState): string {
-  if (estado.statusConceptId === CLIN.MEDICATION_REQUEST_DRAFT) {
+function subjectFor(status: PrescriptionState): string {
+  if (status.statusConceptId === CLIN.MEDICATION_REQUEST_DRAFT) {
     return 'Copia de trabajo — sin validez farmacéutica';
   }
-  if (isOfficialState(estado.statusConceptId)) {
+  if (isOfficialState(status.statusConceptId)) {
     return 'Receta médica oficial';
   }
   return 'Receta sin validez farmacéutica';
@@ -253,30 +253,30 @@ export function buildPrescription(data: PrescriptionData): PrescriptionRole {
     `Fecha: ${formatDate(data.issuedAt ?? data.createdAt)}`,
   ];
 
-  const estadoMatricula = data.hasLicense
+  const registrationStatus = data.hasLicense
     ? data.licenseVerified
       ? 'verificada'
       : 'declarada, pendiente de verificación'
     : undefined;
-  const lineasMedico = [
+  const doctorLines = [
     `Nombre: ${data.practitionerTitle ? `${data.practitionerTitle} ` : ''}${data.practitionerName}`,
     `Especialidad: ${label(data.conceptsById, data.specialtyConceptId)}`,
     data.hasLicense
       ? `Matrícula: ${data.licenseNumber}${
           data.regulatoryAuthority ? ` · ${data.regulatoryAuthority}` : ''
-        } (${estadoMatricula})`
+        } (${registrationStatus})`
       : 'Matrícula: sin registrar',
     ...(data.signedAt ? [`Firmada el ${formatDate(data.signedAt)}`] : []),
   ];
 
-  const documento = data.patientDocument
+  const document = data.patientDocument
     ? `${data.patientDocument}${
         data.patientDocumentArea ? ` ${data.patientDocumentArea}` : ''
       }`
     : NO_DATA_POINT;
   const patientLines = [
     `Nombre: ${data.patientName}`,
-    `Documento: ${documento}`,
+    `Documento: ${document}`,
     `Edad: ${ageInYears(data.patientBirthDate, data.ahora)}`,
     `Fecha de nacimiento: ${formatDate(data.patientBirthDate)}`,
   ];
@@ -334,7 +334,7 @@ export function buildPrescription(data: PrescriptionData): PrescriptionRole {
   });
 
   const sections: PrescriptionSection[] = [
-    { titulo: 'Profesional', lineas: lineasMedico },
+    { titulo: 'Profesional', lineas: doctorLines },
     { titulo: 'Paciente', lineas: patientLines },
     { titulo: 'Detalle farmacológico', lineas: medicationLines },
     {
@@ -404,14 +404,14 @@ export function draw(role: PrescriptionRole): Promise<Buffer> {
       PAGE_MARGIN + Math.max(brandHeight(brandWidth), TITLE_FONT_SIZE) + 12;
 
     doc.fontSize(BODY_FONT_SIZE);
-    for (const linea of role.encabezado) doc.text(linea);
+    for (const line of role.encabezado) doc.text(line);
 
     for (const section of role.secciones) {
       doc.moveDown(1);
       doc.fontSize(SECTION_FONT_SIZE).text(section.titulo);
       doc.moveDown(0.3);
-      for (const linea of section.lineas) {
-        doc.fontSize(BODY_FONT_SIZE).text(linea, { lineGap: LINE_GAP });
+      for (const line of section.lineas) {
+        doc.fontSize(BODY_FONT_SIZE).text(line, { lineGap: LINE_GAP });
       }
     }
 
@@ -496,8 +496,8 @@ export class PrescriptionPdfService {
 
     await this.assertPrescriptionCanSee(request, actor);
 
-    const ahora = new Date();
-    const [patientName, patientDoc, medico, coverages, indicationCondition] =
+    const now = new Date();
+    const [patientName, patientDoc, doctor, coverages, indicationCondition] =
       await Promise.all([
         this.resolvePatientName(em, request.patientProfileId),
         this.resolvePatientDocument(em, request.patientProfileId),
@@ -520,7 +520,7 @@ export class PrescriptionPdfService {
       conceptIds.add(request.substanceAtcConceptId);
     if (request.routeConceptId) conceptIds.add(request.routeConceptId);
     if (request.unitConceptId) conceptIds.add(request.unitConceptId);
-    if (medico?.specialtyConceptId) conceptIds.add(medico.specialtyConceptId);
+    if (doctor?.specialtyConceptId) conceptIds.add(doctor.specialtyConceptId);
     if (patientDoc?.issuerAdministrativeAreaConceptId)
       conceptIds.add(patientDoc.issuerAdministrativeAreaConceptId);
     if (indicationCondition) conceptIds.add(indicationCondition.codeConceptId);
@@ -546,13 +546,13 @@ export class PrescriptionPdfService {
         patientDoc?.issuerAdministrativeAreaConceptId,
       ),
       patientBirthDate,
-      practitionerName: medico?.name ?? UNIDENTIFIED,
-      practitionerTitle: medico?.professionalTitle,
-      specialtyConceptId: medico?.specialtyConceptId,
-      licenseNumber: medico?.licenseNumber,
-      regulatoryAuthority: medico?.regulatoryAuthority,
-      licenseVerified: medico?.licenseState === PROF.AUTH_ACTIVE,
-      hasLicense: Boolean(medico?.licenseNumber),
+      practitionerName: doctor?.name ?? UNIDENTIFIED,
+      practitionerTitle: doctor?.professionalTitle,
+      specialtyConceptId: doctor?.specialtyConceptId,
+      licenseNumber: doctor?.licenseNumber,
+      regulatoryAuthority: doctor?.regulatoryAuthority,
+      licenseVerified: doctor?.licenseState === PROF.AUTH_ACTIVE,
+      hasLicense: Boolean(doctor?.licenseNumber),
       medicationConceptId: request.medicationConceptId,
       substanceAtcConceptId: request.substanceAtcConceptId,
       routeConceptId: request.routeConceptId,
@@ -568,7 +568,7 @@ export class PrescriptionPdfService {
       conceptsById,
       contentHash,
       qrUrl,
-      ahora,
+      ahora: now,
     });
 
     const buffer = await draw(role);
@@ -623,15 +623,15 @@ export class PrescriptionPdfService {
         em,
         practitionerProfileId,
       );
-    const matricula = authorizations.find(
+    const registration = authorizations.find(
       (auth) => auth.jurisdictionConceptId === PROF.JURISDICTION_NATIONAL,
     );
-    if (!matricula) return null;
+    if (!registration) return null;
     return {
-      number: matricula.licenseNumber,
-      authority: matricula.regulatoryAuthority ?? null,
+      number: registration.licenseNumber,
+      authority: registration.regulatoryAuthority ?? null,
       state:
-        matricula.stateConceptId === PROF.AUTH_ACTIVE ? 'ACTIVE' : 'PENDING',
+        registration.stateConceptId === PROF.AUTH_ACTIVE ? 'ACTIVE' : 'PENDING',
     };
   }
 
@@ -704,14 +704,14 @@ export class PrescriptionPdfService {
       em,
       patientProfile.profileId,
     );
-    const documento = identifiers.find(
+    const document = identifiers.find(
       (row) => row.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
-    if (!documento) return null;
+    if (!document) return null;
     return {
-      value: documento.value,
+      value: document.value,
       issuerAdministrativeAreaConceptId:
-        documento.issuerAdministrativeAreaConceptId,
+        document.issuerAdministrativeAreaConceptId,
     };
   }
 
@@ -740,16 +740,16 @@ export class PrescriptionPdfService {
         practitionerProfileId,
       ),
     ]);
-    const matricula = authorizations.find(
+    const registration = authorizations.find(
       (auth) => auth.jurisdictionConceptId === PROF.JURISDICTION_NATIONAL,
     );
     return {
       name: this.displayNameOf(person) ?? UNIDENTIFIED,
       professionalTitle: practitionerProfile.professionalTitle,
       specialtyConceptId: specialties[0]?.specialtyConceptId,
-      licenseNumber: matricula?.licenseNumber,
-      regulatoryAuthority: matricula?.regulatoryAuthority,
-      licenseState: matricula?.stateConceptId,
+      licenseNumber: registration?.licenseNumber,
+      regulatoryAuthority: registration?.regulatoryAuthority,
+      licenseState: registration?.stateConceptId,
     };
   }
 

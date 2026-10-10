@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PractitionerAffiliations } from '../../../profiles/entities';
-import { esEstado } from '../../../profiles/services/profiles-affiliations.service';
+import { isStatus } from '../../../profiles/services/profiles-affiliations.service';
 import type {
   AffiliationStatus,
   PractitionerAffiliationFact,
@@ -10,7 +10,7 @@ import type {
 
 /** Conceptos de estado de `profiles`, en el orden en que se clasifican. */
 const STATUS_BY_STATE: readonly [
-  Parameters<typeof esEstado>[1],
+  Parameters<typeof isStatus>[1],
   AffiliationStatus,
 ][] = [
   ['APROBADO', 'APPROVED'],
@@ -64,7 +64,7 @@ export class ProfilesAffiliationsAdapter implements PractitionerAffiliationsPort
 
   private classify(statusConceptId: string): AffiliationStatus {
     const match = STATUS_BY_STATE.find(([state]) =>
-      esEstado(statusConceptId, state),
+      isStatus(statusConceptId, state),
     );
     return match ? match[1] : 'OTHER';
   }

@@ -44,28 +44,28 @@ export function validateRows(
   const valid: FilaLeida[] = [];
   const problems: ProblemaDeFila[] = [];
   const identity = profile.columnas.find((column) => column.obligatoria);
-  const vistos = new Map<string, number>();
+  const seen = new Map<string, number>();
 
   for (const row of rows) {
     const values = trim(row.valores);
     const rowProblems = reviewColumns(row.numero, values, profile);
 
-    const clave = identity === undefined ? undefined : values[identity.nombre];
+    const key = identity === undefined ? undefined : values[identity.nombre];
     if (
       rowProblems.length === 0 &&
       identity !== undefined &&
-      clave !== undefined &&
-      clave !== ''
+      key !== undefined &&
+      key !== ''
     ) {
-      const anterior = vistos.get(clave);
-      if (anterior !== undefined) {
+      const previous = seen.get(key);
+      if (previous !== undefined) {
         rowProblems.push({
           fila: row.numero,
           columna: identity.nombre,
-          motivo: `«${clave}» ya está repetido en la fila ${anterior}`,
+          motivo: `«${key}» ya está repetido en la fila ${previous}`,
         });
       } else {
-        vistos.set(clave, row.numero);
+        seen.set(key, row.numero);
       }
     }
 
@@ -89,8 +89,8 @@ function trim(
   values: Readonly<Record<string, string>>,
 ): Record<string, string> {
   const trimmed: Record<string, string> = {};
-  for (const [clave, valor] of Object.entries(values)) {
-    trimmed[clave] = valor.trim();
+  for (const [key, value] of Object.entries(values)) {
+    trimmed[key] = value.trim();
   }
   return trimmed;
 }
@@ -111,9 +111,9 @@ function reviewColumns(
   const problems: ProblemaDeFila[] = [];
 
   for (const column of profile.columnas) {
-    const valor = values[column.nombre];
+    const value = values[column.nombre];
 
-    if (valor === undefined || valor === '') {
+    if (value === undefined || value === '') {
       // Una columna opcional ausente no es un problema: es lo normal.
       if (column.obligatoria) {
         problems.push({
@@ -125,7 +125,7 @@ function reviewColumns(
       continue;
     }
 
-    if (column.maxLargo !== undefined && valor.length > column.maxLargo) {
+    if (column.maxLargo !== undefined && value.length > column.maxLargo) {
       problems.push({
         fila: row,
         columna: column.nombre,
@@ -134,7 +134,7 @@ function reviewColumns(
       continue;
     }
 
-    if (containsNul(valor)) {
+    if (containsNul(value)) {
       problems.push(nulProblem(row, column));
     }
   }
@@ -165,9 +165,9 @@ function nulProblem(row: number, column: ColumnaDePerfil): ProblemaDeFila {
 /**
  * Comprueba si el texto trae el carácter NUL.
  *
- * @param valor - El texto a revisar.
+ * @param value - El texto a revisar.
  * @returns Si lo trae.
  */
-function containsNul(valor: string): boolean {
-  return valor.includes('\u0000');
+function containsNul(value: string): boolean {
+  return value.includes('\u0000');
 }

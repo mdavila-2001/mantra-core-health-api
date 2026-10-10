@@ -76,17 +76,17 @@ describe('ContentPacksService', () => {
     ['VADEMECUM', 'vademecum'],
     ['FORMULARIOS_CLINICOS', 'clinicalForms'],
   ])('%s corre su propio seed y ninguno más', async (code, expected) => {
-    const { service, dobles } = build();
+    const { service, dobles: doubles } = build();
 
     await service.apply(code);
 
-    for (const [nombre, doble] of Object.entries(dobles)) {
+    for (const [name, double] of Object.entries(doubles)) {
       // Las aseguradoras arrastran los departamentos a propósito: declaran
       // domicilio con uno de ellos.
       const shouldRun =
-        nombre === expected ||
-        (code === 'ASEGURADORAS_BO' && nombre === 'geography');
-      expect(doble.run).toHaveBeenCalledTimes(shouldRun ? 1 : 0);
+        name === expected ||
+        (code === 'ASEGURADORAS_BO' && name === 'geography');
+      expect(double.run).toHaveBeenCalledTimes(shouldRun ? 1 : 0);
     }
   });
 
@@ -102,39 +102,39 @@ describe('ContentPacksService', () => {
     // Sin contraseña el seed no haría nada y devolvería un cero indistinguible
     // de «ya estaban». Decir qué falta es más útil que un cero mudo.
     delete process.env.SEED_DEMO_PASSWORD;
-    const { service, dobles } = build();
+    const { service, dobles: doubles } = build();
 
     await expect(service.apply('CUENTAS_DEMO')).rejects.toBeInstanceOf(
       PreconditionFailedException,
     );
-    expect(dobles.providerAccounts.run).not.toHaveBeenCalled();
+    expect(doubles.providerAccounts.run).not.toHaveBeenCalled();
   });
 
   it('la contraseña de la petición gana sobre la del entorno', async () => {
     // Quien aplica el paquete desde la pantalla no puede tocar las variables
     // del servidor.
     process.env.SEED_DEMO_PASSWORD = 'la-del-entorno';
-    const { service, dobles } = build();
+    const { service, dobles: doubles } = build();
 
     await service.apply('CUENTAS_DEMO', 'la-de-la-peticion');
 
-    expect(dobles.providerAccounts.run).toHaveBeenCalledWith(
+    expect(doubles.providerAccounts.run).toHaveBeenCalledWith(
       'la-de-la-peticion',
     );
   });
 
   it('sin contraseña en la petición cae a la del entorno', async () => {
     process.env.SEED_DEMO_PASSWORD = 'la-del-entorno';
-    const { service, dobles } = build();
+    const { service, dobles: doubles } = build();
 
     await service.apply('CUENTAS_DEMO');
 
-    expect(dobles.providerAccounts.run).toHaveBeenCalledWith('la-del-entorno');
+    expect(doubles.providerAccounts.run).toHaveBeenCalledWith('la-del-entorno');
   });
 
   it('suma los contadores del seed y conserva su forma cruda', async () => {
-    const { service, dobles } = build();
-    dobles.clinicalForms.run.mockResolvedValue({
+    const { service, dobles: doubles } = build();
+    doubles.clinicalForms.run.mockResolvedValue({
       templates: 43,
       specialties: 36,
     });
@@ -149,8 +149,8 @@ describe('ContentPacksService', () => {
 
   it('re-aplicar devuelve cero filas, que es «ya estaba»', async () => {
     // Los seeds convergen: no hace falta guardar ninguna marca de aplicado.
-    const { service, dobles } = build();
-    dobles.vademecum.run.mockResolvedValue({ inserted: 0 });
+    const { service, dobles: doubles } = build();
+    doubles.vademecum.run.mockResolvedValue({ inserted: 0 });
 
     const result = await service.apply('VADEMECUM');
 

@@ -139,7 +139,7 @@ export class CommunityChatAutoReplyService {
    * @param em - La transacción del mensaje entrante.
    * @param conversationId - Dónde llegó.
    * @param recipientProfileId - A quién le llegó.
-   * @param ahora - En qué instante se evalúa. Se pide para que una prueba
+   * @param now - En qué instante se evalúa. Se pide para que una prueba
    *   pueda pararlo y para que las cuatro condiciones midan el mismo momento.
    * @returns El texto a mandar, o `null` si no corresponde.
    */
@@ -147,7 +147,7 @@ export class CommunityChatAutoReplyService {
     em: EntityManager,
     conversationId: string,
     recipientProfileId: string,
-    ahora: Date = new Date(),
+    now: Date = new Date(),
   ): Promise<string | null> {
     const config = await em.findOne(ChatAutoReplies, {
       publicProfileId: recipientProfileId,
@@ -164,26 +164,26 @@ export class CommunityChatAutoReplyService {
       return null;
     }
 
-    const absent = await this.wasAbsent(em, config, recipientProfileId, ahora);
+    const absent = await this.wasAbsent(em, config, recipientProfileId, now);
     if (!absent) {
       return null;
     }
 
-    const ultimoAviso = participation.lastAutoReplyAt;
+    const lastNotice = participation.lastAutoReplyAt;
     if (
-      ultimoAviso &&
-      ahora.getTime() - ultimoAviso.getTime() < config.cooldownHours * 3_600_000
+      lastNotice &&
+      now.getTime() - lastNotice.getTime() < config.cooldownHours * 3_600_000
     ) {
       return null;
     }
 
-    if (config.onlyOutsideBusinessHours && bandInside(config, ahora)) {
+    if (config.onlyOutsideBusinessHours && bandInside(config, now)) {
       return null;
     }
 
     // La marca se pone acá, dentro de la misma transacción del mensaje
     // entrante: si el envío falla, tampoco queda anotado el aviso.
-    participation.lastAutoReplyAt = ahora;
+    participation.lastAutoReplyAt = now;
 
     return config.bodyText;
   }
@@ -197,24 +197,24 @@ export class CommunityChatAutoReplyService {
     em: EntityManager,
     config: ChatAutoReplies,
     recipientProfileId: string,
-    ahora: Date,
+    now: Date,
   ): Promise<boolean> {
-    const ultima = await em.findOne(
+    const last = await em.findOne(
       ConversationParticipants,
       { participantProfileId: recipientProfileId },
       { orderBy: { updatedAt: 'DESC' } },
     );
-    if (!ultima?.updatedAt) {
+    if (!last?.updatedAt) {
       return false;
     }
-    const inactivity = ahora.getTime() - ultima.updatedAt.getTime();
+    const inactivity = now.getTime() - last.updatedAt.getTime();
     return inactivity >= config.inactivityMinutes * 60_000;
   }
 }
 
 /** `HH:MM:SS` → `HH:MM`; `undefined` se queda como está. */
-function normalizeTime(valor: string | undefined): string | undefined {
-  return valor === undefined ? undefined : valor.slice(0, 5);
+function normalizeTime(value: string | undefined): string | undefined {
+  return value === undefined ? undefined : value.slice(0, 5);
 }
 
 /**
@@ -224,27 +224,27 @@ function normalizeTime(valor: string | undefined): string | undefined {
  * atiende de noche y cruza la medianoche: se resuelve como la unión de los dos
  * tramos, no como un rango vacío.
  */
-function bandInside(config: ChatAutoReplies, ahora: Date): boolean {
+function bandInside(config: ChatAutoReplies, now: Date): boolean {
   const from = inMinutes(config.businessHoursFrom);
-  const hasta = inMinutes(config.businessHoursTo);
-  if (from === null || hasta === null) {
+  const until = inMinutes(config.businessHoursTo);
+  if (from === null || until === null) {
     // Pidió franja y no la declaró: no hay horario que respetar, así que la
     // condición no bloquea nada.
     return false;
   }
-  const minutes = ahora.getHours() * 60 + ahora.getMinutes();
-  return from <= hasta
-    ? minutes >= from && minutes < hasta
-    : minutes >= from || minutes < hasta;
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  return from <= until
+    ? minutes >= from && minutes < until
+    : minutes >= from || minutes < until;
 }
 
 function inMinutes(hhmm: string | undefined): number | null {
   if (!hhmm) {
     return null;
   }
-  const [horas, min] = hhmm.split(':').map(Number);
-  return Number.isFinite(horas) && Number.isFinite(min)
-    ? horas * 60 + min
+  const [hours, min] = hhmm.split(':').map(Number);
+  return Number.isFinite(hours) && Number.isFinite(min)
+    ? hours * 60 + min
     : null;
 }
 

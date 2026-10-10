@@ -195,14 +195,14 @@ export class ReviewsRepository {
     const output = new Map<string, string>();
     if (personIds.length === 0) return output;
 
-    const personas = await em.find(
+    const persons = await em.find(
       Persons,
       { id: { $in: [...new Set(personIds)] } },
       { fields: ['id', 'displayName'] },
     );
-    for (const persona of personas) {
-      const nombre = persona.displayName?.trim();
-      if (nombre) output.set(persona.id, nombre);
+    for (const persona of persons) {
+      const name = persona.displayName?.trim();
+      if (name) output.set(persona.id, name);
     }
     return output;
   }

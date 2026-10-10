@@ -58,7 +58,7 @@ import type { AffiliationRequestListDto, RejectAffiliationDto } from '../dto';
  * Cuando el value set exista, cambia este objeto y nada más: ningún otro lugar
  * compara contra estos conceptos a mano.
  */
-export const ESTADO_DEL_VINCULO = {
+export const LINK_STATUS = {
   /** Pedido y esperando que la organización decida. */
   PENDIENTE: PROF.AFFILIATION_PENDING,
   /**
@@ -108,14 +108,14 @@ const IDS_ACCEPTED: Readonly<Record<string, readonly string[]>> = {
  * backfill no haya corrido.
  *
  * @param conceptId - El estado tal como está en la fila.
- * @param estado - El estado buscado.
+ * @param status - El estado buscado.
  * @returns `true` si coinciden, con id viejo o nuevo.
  */
-export function esEstado(
+export function isStatus(
   conceptId: string,
-  estado: keyof typeof ESTADO_DEL_VINCULO,
+  status: keyof typeof LINK_STATUS,
 ): boolean {
-  return IDS_ACCEPTED[estado].includes(conceptId);
+  return IDS_ACCEPTED[status].includes(conceptId);
 }
 
 /** Todos los ids que significan «la organización todavía no decidió». */
@@ -171,7 +171,7 @@ export class ProfilesAffiliationsService {
     private readonly memberships: DirectoryMembershipsService,
     private readonly logger: PinoLogger,
     @Inject(AFFILIATION_NOTICE_PORT)
-    private readonly avisos: AffiliationNoticePort,
+    private readonly notices: AffiliationNoticePort,
   ) {
     this.logger.setContext(ProfilesAffiliationsService.name);
   }
@@ -191,14 +191,14 @@ export class ProfilesAffiliationsService {
    * @param practitionerProfileId - Profesional consultado.
    * @returns Sus afiliaciones publicables.
    */
-  visiblesThird(
+  visibleThird(
     em: EntityManager,
     practitionerProfileId: string,
   ): Promise<PractitionerAffiliations[]> {
     return this.affiliationsRepo.findByPractitionerInStatus(
       em,
       practitionerProfileId,
-      [ESTADO_DEL_VINCULO.APROBADO],
+      [LINK_STATUS.APROBADO],
     );
   }
 
@@ -223,7 +223,7 @@ export class ProfilesAffiliationsService {
     // Sin sede el vínculo no nombra ninguna organización de la plataforma: es
     // una línea de currículum. Nadie lo aprobó, así que decir «aprobado» sería
     // escribir un hecho que no ocurrió.
-    if (!practiceSiteId) return ESTADO_DEL_VINCULO.DECLARADO;
+    if (!practiceSiteId) return LINK_STATUS.DECLARADO;
 
     const site = await em.findOne(PracticeSites, { id: practiceSiteId });
     if (!site) {
@@ -234,21 +234,19 @@ export class ProfilesAffiliationsService {
 
     const tenantId = site.managingTenantId;
     // Una sede sin organización a cargo no tiene a quién pedirle permiso.
-    if (!tenantId) return ESTADO_DEL_VINCULO.DECLARADO;
+    if (!tenantId) return LINK_STATUS.DECLARADO;
 
     // La propia organización dando de alta a su gente: ahí sí aprobó alguien, y
     // ese alguien es quien está creando el vínculo.
     if (actor.tenantIds?.includes(tenantId) === true) {
-      return ESTADO_DEL_VINCULO.APROBADO;
+      return LINK_STATUS.APROBADO;
     }
 
     // Y si la organización no tiene a nadie que pueda decidir —los hospitales
     // públicos y las cajas del padrón, que nunca van a registrarse—, dejar el
     // pedido pendiente lo condenaría a esperar para siempre.
     const hasDecider = await this.tenantAdmin.hasAdministrators(em, tenantId);
-    return hasDecider
-      ? ESTADO_DEL_VINCULO.PENDIENTE
-      : ESTADO_DEL_VINCULO.DECLARADO;
+    return hasDecider ? LINK_STATUS.PENDIENTE : LINK_STATUS.DECLARADO;
   }
 
   /**
@@ -265,7 +263,7 @@ export class ProfilesAffiliationsService {
    * @param actor - Quien la mira; tiene que administrarla.
    * @returns Las solicitudes pendientes de sus sedes.
    */
-  async listSolicitudes(
+  async listRequests(
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<AffiliationRequestListDto> {
@@ -278,25 +276,25 @@ export class ProfilesAffiliationsService {
       { fields: ['id'] },
     );
 
-    const solicitudes = await this.affiliationsRepo.findBySites(
+    const requests = await this.affiliationsRepo.findBySites(
       em,
       sites.map((site) => site.id),
-      [ESTADO_DEL_VINCULO.PENDIENTE],
+      [LINK_STATUS.PENDIENTE],
     );
 
     const who = await this.identity(
       em,
-      solicitudes.map((row) => row.practitionerProfileId),
+      requests.map((row) => row.practitionerProfileId),
     );
 
     return {
-      items: solicitudes.map((row) => {
-        const quien = who.get(row.practitionerProfileId);
+      items: requests.map((row) => {
+        const practitionerEntry = who.get(row.practitionerProfileId);
         return {
           id: row.id,
           practitionerProfileId: row.practitionerProfileId,
-          practitionerName: quien?.nombre ?? null,
-          practitionerLicense: quien?.matricula ?? null,
+          practitionerName: practitionerEntry?.nombre ?? null,
+          practitionerLicense: practitionerEntry?.matricula ?? null,
           organizationName: row.organizationName,
           roleTitle: row.roleTitle ?? null,
           practiceSiteId: row.practiceSiteId ?? null,
@@ -334,20 +332,23 @@ export class ProfilesAffiliationsService {
     if (profiles.length === 0) return identities;
 
     const ids = [...new Set(profiles)];
-    const [personas, matriculas] = await Promise.all([
+    const [persons, registrations] = await Promise.all([
       em.find(Persons, { id: { $in: ids } }),
       em.find(JurisdictionAuthorizations, {
         practitionerProfileId: { $in: ids },
       }),
     ]);
 
-    const matriculaByProfile = new Map(
-      matriculas.map((row) => [row.practitionerProfileId, row.licenseNumber]),
+    const registrationByProfile = new Map(
+      registrations.map((row) => [
+        row.practitionerProfileId,
+        row.licenseNumber,
+      ]),
     );
-    for (const persona of personas) {
+    for (const persona of persons) {
       identities.set(persona.id, {
         nombre: nameVisible(persona),
-        matricula: matriculaByProfile.get(persona.id) ?? null,
+        matricula: registrationByProfile.get(persona.id) ?? null,
       });
     }
     return identities;
@@ -360,7 +361,7 @@ export class ProfilesAffiliationsService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     await this.decide(tenantId, affiliationId, actor, {
-      destino: ESTADO_DEL_VINCULO.APROBADO,
+      destino: LINK_STATUS.APROBADO,
       operacion: 'profiles.affiliation.approve',
       desde: 'PENDIENTE',
       siNoEsta: 'Esa solicitud ya fue resuelta',
@@ -382,7 +383,7 @@ export class ProfilesAffiliationsService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     await this.decide(tenantId, affiliationId, actor, {
-      destino: ESTADO_DEL_VINCULO.RECHAZADO,
+      destino: LINK_STATUS.RECHAZADO,
       operacion: 'profiles.affiliation.reject',
       motivo: dto.reason,
       desde: 'PENDIENTE',
@@ -419,7 +420,7 @@ export class ProfilesAffiliationsService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     await this.decide(tenantId, affiliationId, actor, {
-      destino: ESTADO_DEL_VINCULO.REVOCADO,
+      destino: LINK_STATUS.REVOCADO,
       operacion: 'profiles.affiliation.revoke',
       motivo: dto.reason,
       desde: 'APROBADO',
@@ -450,7 +451,7 @@ export class ProfilesAffiliationsService {
        * revocar, sólo sobre uno ya aprobado. Declararlo acá evita que cada
        * operación repita la comprobación y que una se olvide.
        */
-      readonly desde: keyof typeof ESTADO_DEL_VINCULO;
+      readonly desde: keyof typeof LINK_STATUS;
       /** Qué decir cuando el vínculo no está en ese estado. */
       readonly siNoEsta: string;
     },
@@ -483,7 +484,7 @@ export class ProfilesAffiliationsService {
         });
       }
 
-      if (!esEstado(request.statusConceptId, decision.desde)) {
+      if (!isStatus(request.statusConceptId, decision.desde)) {
         throw new PreconditionFailedException(decision.siNoEsta, {
           affiliationId,
           statusConceptId: request.statusConceptId,
@@ -501,7 +502,7 @@ export class ProfilesAffiliationsService {
       // que es el rastro que el prompt pide y el que la tabla ya sabe guardar.
       touch(request, actor.id);
 
-      if (decision.destino === ESTADO_DEL_VINCULO.APROBADO) {
+      if (decision.destino === LINK_STATUS.APROBADO) {
         await this.grantMembership(tx, request, tenantId, actor);
       }
 
@@ -562,7 +563,7 @@ export class ProfilesAffiliationsService {
         ? ` Motivo: ${decision.motivo.trim()}`
         : '';
 
-    await this.avisos.emit({
+    await this.notices.emit({
       kind,
       recipientUserId: account,
       tenantId,
@@ -617,7 +618,7 @@ export class ProfilesAffiliationsService {
     const who =
       identities.get(practitionerProfileId)?.nombre ?? 'Un profesional';
     for (const admin of admins) {
-      await this.avisos.emit({
+      await this.notices.emit({
         kind: 'AFFILIATION_REQUESTED',
         recipientUserId: admin.user_id,
         tenantId,
@@ -708,14 +709,12 @@ export class ProfilesAffiliationsService {
       return;
     }
 
-    const { membership, creada } = await this.memberships.ensureCareMembership(
-      tx,
-      {
+    const { membership, creada: created } =
+      await this.memberships.ensureCareMembership(tx, {
         userId: account.userId,
         tenantId,
         actorUserId: actor.id,
-      },
-    );
+      });
 
     this.logger.info(
       {
@@ -723,7 +722,7 @@ export class ProfilesAffiliationsService {
         affiliationId: request.id,
         tenantId,
         membershipId: membership.id,
-        outcome: creada ? 'creada' : 'ya-existia',
+        outcome: created ? 'creada' : 'ya-existia',
       },
       'Membership granted for approved affiliation',
     );
@@ -757,9 +756,9 @@ function nameVisible(persona: Persons): string | null {
  * `PENDIENTE` no son decisiones de la organización, son cómo nace el vínculo.
  */
 const NOTICE_BY_DESTINATION: Readonly<Record<string, AffiliationNoticeKind>> = {
-  [ESTADO_DEL_VINCULO.APROBADO]: 'AFFILIATION_APPROVED',
-  [ESTADO_DEL_VINCULO.RECHAZADO]: 'AFFILIATION_REJECTED',
-  [ESTADO_DEL_VINCULO.REVOCADO]: 'AFFILIATION_REVOKED',
+  [LINK_STATUS.APROBADO]: 'AFFILIATION_APPROVED',
+  [LINK_STATUS.RECHAZADO]: 'AFFILIATION_REJECTED',
+  [LINK_STATUS.REVOCADO]: 'AFFILIATION_REVOKED',
 };
 
 /** Lo que se lee en la campana sin abrir nada. */

@@ -208,7 +208,7 @@ const HANDLERS_WITHOUT_GUARD: ReadonlyArray<
 describe('SEC-01 · montaje de ClinicalRecordAccessGuard', () => {
   it.each(HANDLERS_PROTECTED)(
     'protege %p.%s (%s)',
-    (controller, handler, _ruta) => {
+    (controller, handler, _route) => {
       expect(guards(controller, handler)).toContain(ClinicalRecordAccessGuard);
     },
   );

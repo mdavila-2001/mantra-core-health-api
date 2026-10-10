@@ -102,8 +102,8 @@ export class CsvParser implements FileParser {
 
       const values: Record<string, string> = {};
       record.forEach((cell, indexColumn) => {
-        const nombre = columns[indexColumn];
-        if (nombre !== undefined) values[nombre] = cell;
+        const name = columns[indexColumn];
+        if (name !== undefined) values[name] = cell;
       });
       rows.push({ numero: index + 2, valores: values });
     });
@@ -169,12 +169,16 @@ function chunk(text: string, separator: string): string[][] {
   const records: string[][] = [];
   let from = 0;
   while (from < text.length) {
-    const { celdas, siguiente, crudo } = chunkRecord(text, from, separator);
+    const {
+      celdas: cells,
+      siguiente: next,
+      crudo: raw,
+    } = chunkRecord(text, from, separator);
     // El último renglón de un archivo que termina en salto de línea es vacío y
     // no es un registro: sin esto, todo archivo bien formado traería una fila
     // fantasma al final.
-    if (!(crudo === '' && siguiente >= text.length)) records.push(celdas);
-    from = siguiente;
+    if (!(raw === '' && next >= text.length)) records.push(cells);
+    from = next;
   }
   return records;
 }
