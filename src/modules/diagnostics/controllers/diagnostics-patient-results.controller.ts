@@ -21,11 +21,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { DiagnosticsPatientResultsService } from '../services';
 import type {
@@ -216,6 +217,11 @@ export class DiagnosticsPatientResultsController {
    * @param dto - Con quién y hasta cuándo.
    * @returns El compartido creado.
    */
+  @Audited({
+    action: 'DIAGNOSTIC_RESULT_SHARED',
+    entity: 'diagnostic_report',
+    entityId: 'param:reportId',
+  })
   @Post('me/:reportId/shares')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -264,6 +270,11 @@ export class DiagnosticsPatientResultsController {
    * @param shareId - Compartido a cerrar.
    * @returns El compartido, ya cerrado.
    */
+  @Audited({
+    action: 'DIAGNOSTIC_RESULT_SHARE_REVOKED',
+    entity: 'diagnostic_report',
+    entityId: 'param:shareId',
+  })
   @Post('me/:reportId/shares/:shareId/revoke')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Dejar de compartir un resultado' })

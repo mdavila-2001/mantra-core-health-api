@@ -19,10 +19,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { ChartNotesService, ChartNotesReadService } from '../services';
@@ -95,6 +96,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-01. */
+  @Audited({
+    action: 'CLINICAL_NOTE_CREATED',
+    entity: 'clinical_note_header',
+    entityId: 'result.id',
+  })
   @Post()
   @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -109,6 +115,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-02. */
+  @Audited({
+    action: 'CLINICAL_NOTE_VERSION_ADDED',
+    entity: 'clinical_note_header',
+    entityId: 'param:noteId',
+  })
   @Put(':noteId/versions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -123,6 +134,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-03. */
+  @Audited({
+    action: 'CLINICAL_NOTE_VERSION_SIGNED',
+    entity: 'clinical_note_version',
+    entityId: 'param:versionId',
+  })
   @Post(':noteId/versions/:versionId/sign')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Firmar una versión y sellar su contenido' })
@@ -136,6 +152,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-04. */
+  @Audited({
+    action: 'CLINICAL_NOTE_VERSION_COSIGNED',
+    entity: 'clinical_note_version',
+    entityId: 'param:versionId',
+  })
   @Post(':noteId/versions/:versionId/cosign')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Cofirmar una versión firmada (cadena de firmas)' })
@@ -149,6 +170,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-05. */
+  @Audited({
+    action: 'CLINICAL_NOTE_AMENDED',
+    entity: 'clinical_note_header',
+    entityId: 'param:noteId',
+  })
   @Post(':noteId/amendments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Enmendar una nota firmada (addendum versionado)' })
@@ -161,6 +187,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-06. */
+  @Audited({
+    action: 'CLINICAL_NOTE_VERSION_RELEASED',
+    entity: 'clinical_note_version',
+    entityId: 'param:versionId',
+  })
   @Post('versions/:versionId/release')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Liberar una versión al paciente' })
@@ -173,6 +204,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-07. */
+  @Audited({
+    action: 'CLINICAL_NOTE_VERSION_WITHHELD',
+    entity: 'clinical_note_version',
+    entityId: 'param:versionId',
+  })
   @Post('versions/:versionId/withhold')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Retener una versión del paciente (motivo legal)' })
@@ -185,6 +221,11 @@ export class ChartNotesController {
   }
 
   /** UC-15-08. */
+  @Audited({
+    action: 'CLINICAL_NOTE_EXAM_FINDINGS_RECORDED',
+    entity: 'clinical_note_version',
+    entityId: 'param:versionId',
+  })
   @Post('versions/:versionId/exam-findings')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar hallazgos de examen físico' })

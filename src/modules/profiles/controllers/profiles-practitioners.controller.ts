@@ -21,6 +21,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -233,6 +234,11 @@ export class ProfilesPractitionersController {
    * matrícula, y dejarlos acá convertiría el perfil en una declaración jurada de
    * uno mismo.
    */
+  @Audited({
+    action: 'PRACTITIONER_PROFILE_UPDATED',
+    entity: 'health_practitioner_profile',
+    entityId: 'result.id',
+  })
   @Patch('practitioners/me')
   @ApiOperation({
     summary: 'Editar la presentación del propio perfil profesional',
@@ -262,6 +268,11 @@ export class ProfilesPractitionersController {
    * @param actor - Quien pide la operación.
    * @returns El perfil releído, ya con su foto.
    */
+  @Audited({
+    action: 'PRACTITIONER_PHOTO_SET',
+    entity: 'health_practitioner_profile',
+    entityId: 'param:profileId',
+  })
   @Put('practitioners/:profileId/photo')
   @ApiOperation({ summary: 'Fijar la foto del perfil profesional' })
   setPractitionerPhoto(
@@ -287,6 +298,11 @@ export class ProfilesPractitionersController {
    * @param actor - Quien pide la operación.
    * @returns El perfil releído, ya sin foto.
    */
+  @Audited({
+    action: 'PRACTITIONER_PHOTO_REMOVED',
+    entity: 'health_practitioner_profile',
+    entityId: 'param:profileId',
+  })
   @Delete('practitioners/:profileId/photo')
   @ApiOperation({ summary: 'Quitar la foto del perfil profesional' })
   removePractitionerPhoto(
@@ -297,6 +313,11 @@ export class ProfilesPractitionersController {
   }
 
   /** UC-05-03. */
+  @Audited({
+    action: 'PRACTITIONER_ONBOARDED',
+    entity: 'health_practitioner_profile',
+    entityId: 'result.id',
+  })
   @Post('practitioners')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -311,6 +332,11 @@ export class ProfilesPractitionersController {
   }
 
   /** UC-05-04. */
+  @Audited({
+    action: 'PRACTITIONER_LICENSE_ADDED',
+    entity: 'jurisdiction_authorization',
+    entityId: 'result.id',
+  })
   @Post('practitioners/:profileId/jurisdiction-authorizations')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -391,6 +417,11 @@ export class ProfilesPractitionersController {
   }
 
   /** UC-05-16. */
+  @Audited({
+    action: 'PRACTITIONER_AFFILIATION_ADDED',
+    entity: 'practitioner_affiliation',
+    entityId: 'result.id',
+  })
   @Post('practitioners/me/affiliations')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -411,6 +442,11 @@ export class ProfilesPractitionersController {
    * El sujeto sigue saliendo de la sesión: el id de una afiliación ajena
    * responde `404`, igual que uno inexistente.
    */
+  @Audited({
+    action: 'PRACTITIONER_AFFILIATION_UPDATED',
+    entity: 'practitioner_affiliation',
+    entityId: 'param:affiliationId',
+  })
   @Patch('practitioners/me/affiliations/:affiliationId')
   @ApiOperation({
     summary: 'Corregir una afiliación del historial laboral propio',
@@ -432,6 +468,11 @@ export class ProfilesPractitionersController {
   }
 
   /** UC-05-16·B: quitar una línea del historial propio. */
+  @Audited({
+    action: 'PRACTITIONER_AFFILIATION_REMOVED',
+    entity: 'practitioner_affiliation',
+    entityId: 'param:affiliationId',
+  })
   @Delete('practitioners/me/affiliations/:affiliationId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
@@ -454,6 +495,11 @@ export class ProfilesPractitionersController {
    * sujeto sale de la sesión: así no existe la forma de escribir la formación
    * de otro profesional, ni siquiera equivocándose de id.
    */
+  @Audited({
+    action: 'PRACTITIONER_CREDENTIAL_ADDED',
+    entity: 'professional_credential',
+    entityId: 'result.id',
+  })
   @Post('practitioners/me/credentials')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -472,6 +518,11 @@ export class ProfilesPractitionersController {
    * Corregir los campos propios de un título aún pendiente de revisión.
    * El perfil se deduce de la sesión y no se acepta por cuerpo ni URL.
    */
+  @Audited({
+    action: 'PRACTITIONER_CREDENTIAL_UPDATED',
+    entity: 'professional_credential',
+    entityId: 'param:credentialId',
+  })
   @Patch('practitioners/me/credentials/:credentialId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
@@ -504,6 +555,11 @@ export class ProfilesPractitionersController {
    * borrándolo. `404` si no existe o es de otro profesional —indistinguible,
    * como el resto del módulo—.
    */
+  @Audited({
+    action: 'PRACTITIONER_CREDENTIAL_REMOVED',
+    entity: 'professional_credential',
+    entityId: 'param:credentialId',
+  })
   @Delete('practitioners/me/credentials/:credentialId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
@@ -528,6 +584,11 @@ export class ProfilesPractitionersController {
    * Pide rol administrativo: escribir el historial laboral de alguien que no
    * está mirando es otra cosa que escribir el propio.
    */
+  @Audited({
+    action: 'PRACTITIONER_AFFILIATION_ADDED_BY_ADMIN',
+    entity: 'practitioner_affiliation',
+    entityId: 'result.id',
+  })
   @Post('practitioners/:profileId/affiliations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -545,6 +606,11 @@ export class ProfilesPractitionersController {
   }
 
   /** UC-05-06. */
+  @Audited({
+    action: 'PRACTITIONER_SPECIALTY_ADDED',
+    entity: 'practitioner_specialty',
+    entityId: 'result.id',
+  })
   @Post('practitioners/:profileId/specialties')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Agregar especialidad con credencial de soporte' })
@@ -562,6 +628,11 @@ export class ProfilesPractitionersController {
    * El sujeto sale de la sesión: el id de una especialidad ajena responde
    * `404`, igual que uno inexistente.
    */
+  @Audited({
+    action: 'PRACTITIONER_PRIMARY_SPECIALTY_SET',
+    entity: 'practitioner_specialty',
+    entityId: 'param:specialtyId',
+  })
   @Patch('practitioners/me/specialties/:specialtyId/primary')
   @ApiOperation({
     summary: 'Marcar una especialidad propia como la principal',
@@ -581,6 +652,11 @@ export class ProfilesPractitionersController {
    * Corregir una especialidad propia pendiente. `isPrimary` no se acepta acá
    * (400 por la lista blanca): para eso está `…/:specialtyId/primary`.
    */
+  @Audited({
+    action: 'PRACTITIONER_SPECIALTY_UPDATED',
+    entity: 'practitioner_specialty',
+    entityId: 'param:specialtyId',
+  })
   @Patch('practitioners/me/specialties/:specialtyId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
@@ -602,6 +678,11 @@ export class ProfilesPractitionersController {
   }
 
   /** Retirar una especialidad propia pendiente; no promueve otra como principal. */
+  @Audited({
+    action: 'PRACTITIONER_SPECIALTY_REMOVED',
+    entity: 'practitioner_specialty',
+    entityId: 'param:specialtyId',
+  })
   @Delete('practitioners/me/specialties/:specialtyId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
@@ -618,6 +699,11 @@ export class ProfilesPractitionersController {
   }
 
   /** Corregir una matrícula propia pendiente y sin verificación en curso. */
+  @Audited({
+    action: 'PRACTITIONER_LICENSE_UPDATED',
+    entity: 'jurisdiction_authorization',
+    entityId: 'param:licenseId',
+  })
   @Patch('practitioners/me/jurisdiction-authorizations/:licenseId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
@@ -635,6 +721,11 @@ export class ProfilesPractitionersController {
   }
 
   /** Retirar una matrícula propia pendiente; con historial de auditoría, 422. */
+  @Audited({
+    action: 'PRACTITIONER_LICENSE_REMOVED',
+    entity: 'jurisdiction_authorization',
+    entityId: 'param:licenseId',
+  })
   @Delete('practitioners/me/jurisdiction-authorizations/:licenseId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
@@ -682,6 +773,11 @@ export class ProfilesPractitionersController {
   }
 
   /** UC-05-05. */
+  @Audited({
+    action: 'PRACTITIONER_CREDENTIAL_VERIFIED',
+    entity: 'professional_credential',
+    entityId: 'param:credentialId',
+  })
   @Post('credentials/:credentialId/verify')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

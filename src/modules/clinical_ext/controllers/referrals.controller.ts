@@ -12,10 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { ReferralsService } from '../services';
 import {
@@ -42,6 +43,11 @@ export class ReferralsController {
   constructor(private readonly referralsService: ReferralsService) {}
 
   /** UC-18-07. */
+  @Audited({
+    action: 'REFERRAL_CREATED',
+    entity: 'referral',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Emitir una referencia desde un encuentro' })
@@ -53,6 +59,11 @@ export class ReferralsController {
   }
 
   /** UC-18-08. */
+  @Audited({
+    action: 'REFERRAL_RESPONDED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
   @Patch(':id/respond')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Responder / aceptar una referencia inter-tenant' })

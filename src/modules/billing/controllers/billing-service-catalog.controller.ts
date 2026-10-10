@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -122,6 +123,11 @@ export class BillingServiceCatalogController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Servicio recién creado.
    */
+  @Audited({
+    action: 'BILLING_SERVICE_CREATED',
+    entity: 'service_catalog',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -147,6 +153,11 @@ export class BillingServiceCatalogController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns El servicio ya corregido.
    */
+  @Audited({
+    action: 'BILLING_SERVICE_UPDATED',
+    entity: 'service_catalog',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @Roles('PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

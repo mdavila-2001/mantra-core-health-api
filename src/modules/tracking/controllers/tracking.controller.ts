@@ -10,6 +10,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
+  NotAudited,
   Public,
   Roles,
   type AuthenticatedUser,
@@ -116,6 +117,9 @@ export class TrackingController {
   }
 
   /** UC-37-05. */
+  @NotAudited(
+    'Evento de seguimiento (createEvent, deduplicado por referencia externa) en TrackingService.ingestCarrierWebhook.',
+  )
   @Post('webhooks/carriers/:carrierCode')
   @Public()
   @HttpCode(HttpStatus.OK)

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AuthzMeService } from '../services';
 import { AuthzStatusResultDto, MyClinicalAccessResponseDto } from '../dto';
 
@@ -38,6 +43,11 @@ export class AuthzMeController {
   }
 
   /** Revoca una de mis relaciones asistenciales. */
+  @Audited({
+    action: 'CARE_RELATIONSHIP_REVOKED',
+    entity: 'care_relationship',
+    entityId: 'param:id',
+  })
   @Post('care-relationships/:id/revoke')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Revocar una de mis relaciones asistenciales' })
@@ -49,6 +59,11 @@ export class AuthzMeController {
   }
 
   /** Revoca uno de los accesos clínicos a mi historia. */
+  @Audited({
+    action: 'CLINICAL_ACCESS_REVOKED',
+    entity: 'clinical_access_grant',
+    entityId: 'param:grantId',
+  })
   @Post('clinical-access-grants/:grantId/revoke')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

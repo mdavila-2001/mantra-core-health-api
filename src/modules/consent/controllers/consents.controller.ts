@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ConsentsService } from '../services';
 import {
   AmendProvisionsDto,
@@ -35,6 +40,11 @@ export class ConsentsController {
   constructor(private readonly consentsService: ConsentsService) {}
 
   /** UC-07-01. */
+  @Audited({
+    action: 'CONSENT_CAPTURED',
+    entity: 'consent',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -49,6 +59,11 @@ export class ConsentsController {
   }
 
   /** UC-07-02. */
+  @Audited({
+    action: 'CONSENT_WITHDRAWN',
+    entity: 'consent',
+    entityId: 'param:id',
+  })
   @Post(':id/withdraw')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -65,6 +80,11 @@ export class ConsentsController {
   }
 
   /** UC-07-09. */
+  @Audited({
+    action: 'CONSENT_PROVISIONS_AMENDED',
+    entity: 'consent',
+    entityId: 'param:id',
+  })
   @Patch(':id/provisions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

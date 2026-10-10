@@ -12,9 +12,16 @@
 import 'reflect-metadata';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { NestFactory } from '@nestjs/core';
+import { ModulesContainer, NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { dump } from 'js-yaml';
+
+import {
+  closeRequestBodies,
+  collectBodyClasses,
+  disambiguateHomonymSchemas,
+  modulesOf,
+} from './request-body-contract.mjs';
 
 process.env.ORM_SCHEMA_SYNC = 'off';
 process.env.RATE_LIMIT_DISABLED = 'true';
@@ -359,7 +366,21 @@ async function main() {
     )
     .build();
 
+  // Antes de generar: dos DTO homónimos en módulos distintos comparten un solo
+  // esquema y una de las rutas queda documentada con el cuerpo ajeno. Ver
+  // `request-body-contract.mjs`.
+  const bodyClasses = collectBodyClasses(modulesOf(app.get(ModulesContainer)));
+  const renamed = disambiguateHomonymSchemas(bodyClasses);
+
   const document = SwaggerModule.createDocument(app, config);
+  // `forbidNonWhitelisted`, dicho en el contrato: una clave que el DTO no
+  // declara es un 400, así que el esquema del cuerpo es cerrado.
+  const closedBodies = closeRequestBodies(document, bodyClasses);
+  console.log(
+    `  ${bodyClasses.size} DTO de cuerpo · ${renamed.length} esquemas homónimos renombrados ` +
+      `(${[...new Set(renamed.map((r) => r.from))].join(', ') || 'ninguno'}) · ` +
+      `${closedBodies} esquemas con additionalProperties: false.`,
+  );
   const dupCount = dedupeOperationIds(document);
   if (dupCount > 0) {
     console.log(

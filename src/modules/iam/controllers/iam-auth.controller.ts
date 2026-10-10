@@ -23,6 +23,7 @@ import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import {
   CurrentUser,
+  NotAudited,
   Public,
   Roles,
   TenantAgnostic,
@@ -105,6 +106,9 @@ export class IamAuthController {
    * Auto-registro de un paciente con su documento de identidad. El correo es
    * opcional y no condiciona el acceso: la cuenta queda usable de inmediato.
    */
+  @NotAudited(
+    'iam.security_events (SEC_ROLE_GRANT) en IamPatientSelfRegistrationService.registerPatient.',
+  )
   @Post('register-patient')
   @Public()
   // Mismo límite estricto que el resto de rutas públicas de escritura: crear
@@ -126,6 +130,9 @@ export class IamAuthController {
    * organización queda PENDIENTE de verificación por la plataforma; el owner
    * puede iniciar sesión de inmediato y preparar su cuenta mientras tanto.
    */
+  @NotAudited(
+    'iam.security_events en IamOrganizationSelfRegistrationService.registerOrganization.',
+  )
   @Post('register-organization')
   @Public()
   // Mismo límite estricto que el resto de rutas públicas de escritura: crear
@@ -158,6 +165,9 @@ export class IamAuthController {
    * anónimas que nunca se reclaman (abandono del formulario, rechazo del
    * alta). Quedan en `common.files` con el tenant DEFAULT y sin dueño.
    */
+  @NotAudited(
+    'Archivo anónimo previo al alta (common.files vía uploadAnonymous); se vincula al usuario al registrarse.',
+  )
   @Post('upload-registration-document')
   @Public()
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
@@ -190,6 +200,9 @@ export class IamAuthController {
    * PENDIENTE de verificación: puede iniciar sesión de inmediato, pero no está
    * habilitado para ejercer hasta que la plataforma valide la documentación.
    */
+  @NotAudited(
+    'iam.security_events en IamPractitionerSelfRegistrationService.registerPractitioner.',
+  )
   @Post('register-practitioner')
   @Public()
   // Mismo límite estricto que el resto de rutas públicas de escritura: crear
@@ -220,6 +233,9 @@ export class IamAuthController {
    * Mismo techo que `forgot-password`: cada solicitud válida dispara un correo,
    * y sin límite el formulario es un amplificador de spam contra un tercero.
    */
+  @NotAudited(
+    'Fila nueva en iam.email_verifications con su emisión y vencimiento.',
+  )
   @Post('resend-verification')
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
@@ -234,6 +250,9 @@ export class IamAuthController {
     return this.emailVerificationService.resend(dto, ip);
   }
 
+  @NotAudited(
+    'iam.email_verifications pasa a VERIFIED con consumed_at + revisión en audit.users_history (HistoryMirrorSubscriber).',
+  )
   @Post('verify-email')
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -247,6 +266,9 @@ export class IamAuthController {
    * C-18: el titular consume el token de activación de un solo uso y fija su
    * contraseña definitiva. El creador de la cuenta nunca ve esta contraseña.
    */
+  @NotAudited(
+    'iam.security_events (éxito y fallo) en IamAssistedRegistrationService.activateAccount.',
+  )
   @Post('activate')
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -263,6 +285,9 @@ export class IamAuthController {
   }
 
   /** UC-01-04. */
+  @NotAudited(
+    'iam.security_events (SEC_LOGIN / SEC_LOGIN_FAILED) en IamAuthService.performLogin.',
+  )
   @Post('login')
   @Public()
   // Límite estricto contra fuerza bruta / credential stuffing sobre el login,
@@ -293,6 +318,7 @@ export class IamAuthController {
    * dispara un correo: sin techo, el formulario es un amplificador de spam
    * contra la bandeja de un tercero.
    */
+  @NotAudited('iam.security_events en IamPasswordResetService.requestReset.')
   @Post('forgot-password')
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
@@ -313,6 +339,7 @@ export class IamAuthController {
    * Cierra todas las sesiones abiertas del usuario: quien recupera su cuenta lo
    * hace porque perdió el control de la clave anterior.
    */
+  @NotAudited('iam.security_events en IamPasswordResetService.resetPassword.')
   @Post('reset-password')
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
@@ -328,6 +355,9 @@ export class IamAuthController {
   }
 
   /** UC-01-06. */
+  @NotAudited(
+    'iam.security_events (SEC_TOKEN_REFRESH / SEC_TOKEN_REUSE) en IamAuthService.refresh.',
+  )
   @Post('token/refresh')
   @Public()
   @Throttle({ default: { limit: 20, ttl: 60_000 } })

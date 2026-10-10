@@ -16,10 +16,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { DataReleaseService } from '../services';
 import {
@@ -48,6 +49,11 @@ export class FhirR5Controller {
   constructor(private readonly releaseService: DataReleaseService) {}
 
   /** UC-52-12. */
+  @Audited({
+    action: 'FHIR_BULK_EXPORT_STARTED',
+    entity: 'health_export_job',
+    entityId: 'result.id',
+  })
   @Post('$export')
   @Roles('PRIVACY_OFFICER', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)

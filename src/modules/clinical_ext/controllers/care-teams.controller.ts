@@ -12,10 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
-  type AuthenticatedUser,
   AccessLogged,
+  type AuthenticatedUser,
 } from '../../../common';
 import { CareTeamsService } from '../services';
 import {
@@ -41,6 +42,11 @@ export class CareTeamsController {
   constructor(private readonly careTeamsService: CareTeamsService) {}
 
   /** UC-18-01. */
+  @Audited({
+    action: 'CARE_TEAM_CREATED',
+    entity: 'care_team',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un equipo de cuidado con sus miembros' })
@@ -52,6 +58,11 @@ export class CareTeamsController {
   }
 
   /** UC-18-02. */
+  @Audited({
+    action: 'CARE_TEAM_RESPONSIBLE_SET',
+    entity: 'care_team_member',
+    entityId: 'param:memberId',
+  })
   @Patch(':id/members/:memberId/set-responsible')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AccessRequestsService } from '../services';
 import { DecideAccessRequestDto, DecisionResultDto } from '../dto';
 
@@ -25,6 +30,11 @@ export class AccessRequestsController {
   constructor(private readonly service: AccessRequestsService) {}
 
   /** UC-29-05. */
+  @Audited({
+    action: 'ACCESS_REQUEST_DECIDED',
+    entity: 'delegated_access_approval_request',
+    entityId: 'param:id',
+  })
   @Post(':id/decision')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
