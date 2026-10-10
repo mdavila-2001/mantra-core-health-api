@@ -35,8 +35,8 @@ function IsExclusiveWith(
       validator: {
         validate(value: unknown, args: ValidationArguments): boolean {
           if (value === undefined) return true;
-          const otro = (args.object as Record<string, unknown>)[other];
-          return otro === undefined;
+          const otherValue = (args.object as Record<string, unknown>)[other];
+          return otherValue === undefined;
         },
       },
     });

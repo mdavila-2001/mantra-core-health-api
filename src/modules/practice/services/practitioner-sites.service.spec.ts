@@ -100,7 +100,7 @@ function build() {
 }
 
 /** Una sede de la práctica del tenant. */
-const sede = (over: Record<string, unknown> = {}): any => ({
+const siteRecord = (over: Record<string, unknown> = {}): any => ({
   id: 'site-1',
   practiceId: 'pr-1',
   code: 'CC',
@@ -117,7 +117,7 @@ describe('PractitionerSitesService', () => {
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
 
       const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
 
@@ -148,7 +148,7 @@ describe('PractitionerSitesService', () => {
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
       d.practicesRepo.findById.mockResolvedValue({
         id: 'pr-1',
         tenantId: OTHER_TENANT,
@@ -165,7 +165,7 @@ describe('PractitionerSitesService', () => {
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede({ addressId: 'addr-1' }));
+      d.sitesRepo.findById.mockResolvedValue(siteRecord({ addressId: 'addr-1' }));
       d.fork.findOne.mockResolvedValue({
         lines: 'Av. Brasil 1234',
         city: 'La Paz',
@@ -185,7 +185,7 @@ describe('PractitionerSitesService', () => {
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-9' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
 
       const res = await d.service.resolveSitesForResources(
         [{ refType: 'health_practitioner_profiles', refId: 'prac-1' }],
@@ -202,7 +202,7 @@ describe('PractitionerSitesService', () => {
         id: 'space-9',
         practiceSiteId: 'site-1',
       });
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
 
       const res = await d.service.resolveSitesForResources(
         [{ refType: 'care_spaces', refId: 'space-9' }],
@@ -237,7 +237,7 @@ describe('PractitionerSitesService', () => {
   describe('getSite', () => {
     it('fails with not found when the site belongs to another organization', async () => {
       const d = build();
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
       d.practicesRepo.findById.mockResolvedValue({
         id: 'pr-1',
         tenantId: OTHER_TENANT,
@@ -337,7 +337,7 @@ describe('PractitionerSitesService', () => {
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede({ bankQrFileId: 'file-qr' }));
+      d.sitesRepo.findById.mockResolvedValue(siteRecord({ bankQrFileId: 'file-qr' }));
       d.practicesRepo.findById.mockResolvedValue({
         id: 'pr-1',
         tenantId: TENANT,
@@ -361,7 +361,7 @@ describe('PractitionerSitesService', () => {
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
       d.practicesRepo.findById.mockResolvedValue({
         id: 'pr-1',
         tenantId: TENANT,
@@ -382,7 +382,7 @@ describe('PractitionerSitesService', () => {
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
         { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
       ]);
-      d.sitesRepo.findById.mockResolvedValue(sede());
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
       d.practicesRepo.findById.mockResolvedValue({
         id: 'pr-1',
         tenantId: TENANT,
@@ -415,7 +415,7 @@ describe('PractitionerSitesService', () => {
 
     it('changes only the fields present in the body', async () => {
       const d = build();
-      const site = sede({ id: 'site-own-1', practiceId: 'pr-own-1' });
+      const site = siteRecord({ id: 'site-own-1', practiceId: 'pr-own-1' });
       withOwnOffice(d, site);
 
       const res = await runWithTenant(TENANT, () =>
@@ -431,7 +431,7 @@ describe('PractitionerSitesService', () => {
 
     it('fails with not found when the site is not their own office', async () => {
       const d = build();
-      d.sitesRepo.findById.mockResolvedValue(sede({ practiceId: 'pr-ajena' }));
+      d.sitesRepo.findById.mockResolvedValue(siteRecord({ practiceId: 'pr-ajena' }));
       d.practicesRepo.findOwnOffice.mockResolvedValue({ id: 'pr-own-1' });
 
       await expect(
@@ -443,7 +443,7 @@ describe('PractitionerSitesService', () => {
 
     it('ends the previous address instead of overwriting it', async () => {
       const d = build();
-      const site = sede({
+      const site = siteRecord({
         id: 'site-own-1',
         practiceId: 'pr-own-1',
         addressId: 'addr-vieja',
@@ -473,7 +473,7 @@ describe('PractitionerSitesService', () => {
 
     it('authorizes by current assignment, so it works on a site that is not their own', async () => {
       const d = build();
-      const site = sede({ id: 'site-clinica', practiceId: 'pr-clinica' });
+      const site = siteRecord({ id: 'site-clinica', practiceId: 'pr-clinica' });
       d.rolesRepo.findCurrentBySite.mockResolvedValue({ id: 'ra-1' });
       d.sitesRepo.findById.mockResolvedValue(site);
       d.practicesRepo.findOwnOffice.mockResolvedValue({ id: 'pr-own-1' });
@@ -488,7 +488,7 @@ describe('PractitionerSitesService', () => {
 
     it('clears the QR when the body carries an explicit null', async () => {
       const d = build();
-      const site = sede({ bankQrFileId: 'file-viejo' });
+      const site = siteRecord({ bankQrFileId: 'file-viejo' });
       d.rolesRepo.findCurrentBySite.mockResolvedValue({ id: 'ra-1' });
       d.sitesRepo.findById.mockResolvedValue(site);
 

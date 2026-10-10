@@ -242,47 +242,47 @@ export class EncountersService {
       tx,
       appointmentId,
     );
-    const previo = previous[0];
-    if (!previo) {
+    const previousEncounter = previous[0];
+    if (!previousEncounter) {
       return null;
     }
 
-    if (previo.statusConceptId === CLIN.ENCOUNTER_IN_PROGRESS) {
+    if (previousEncounter.statusConceptId === CLIN.ENCOUNTER_IN_PROGRESS) {
       const [participants, locations] = await Promise.all([
         this.encountersRepo.findActiveParticipants(
           tx,
-          previo.id,
+          previousEncounter.id,
           CLIN.PARTICIPANT_ACTIVE,
         ),
         this.encountersRepo.findActiveLocations(
           tx,
-          previo.id,
+          previousEncounter.id,
           CLIN.LOCATION_ACTIVE,
         ),
       ]);
       this.logger.info(
         {
           operation: 'clinical.encounter.check-in',
-          encounterId: previo.id,
+          encounterId: previousEncounter.id,
           reused: true,
         },
         'Encounter reused',
       );
       return this.toResponse(
-        previo,
+        previousEncounter,
         participants.map((p) => p.id),
         locations.map((l) => l.id),
       );
     }
 
-    if (previo.statusConceptId === CLIN.ENCOUNTER_FINISHED) {
+    if (previousEncounter.statusConceptId === CLIN.ENCOUNTER_FINISHED) {
       throw new ConflictException(
         'La cita ya cuenta con un encuentro clínico finalizado.',
         {
           appointmentId,
-          encounterId: previo.id,
+          encounterId: previousEncounter.id,
           status: ENCOUNTER_FINISHED_STATUS_CODE,
-          endAt: previo.endAt ?? null,
+          endAt: previousEncounter.endAt ?? null,
         },
       );
     }

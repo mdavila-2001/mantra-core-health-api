@@ -279,7 +279,7 @@ export class DirectoryReadService {
         }
       }
 
-      const representation = await this.leerRepresentacion(em, tenant.id);
+      const representation = await this.loadRepresentation(em, tenant.id);
 
       items.push({
         id: tenant.id,
@@ -545,7 +545,7 @@ export class DirectoryReadService {
   async readRepresentation(
     tenantId: string,
   ): Promise<Pick<MyOrganizationDto, 'legalRepresentative' | 'executives'>> {
-    return this.leerRepresentacion(this.em.fork(), tenantId);
+    return this.loadRepresentation(this.em.fork(), tenantId);
   }
 
   /**
@@ -566,7 +566,7 @@ export class DirectoryReadService {
    * @param tenantId - La organización.
    * @returns Las claves a mezclar en la ficha; vacío si no hay vínculos.
    */
-  private async leerRepresentacion(
+  private async loadRepresentation(
     em: EntityManager,
     tenantId: string,
   ): Promise<

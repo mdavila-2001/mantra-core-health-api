@@ -41,7 +41,7 @@ export class S3ObjectStoreInventory implements ObjectStoreInventory {
     let continuationToken: string | undefined;
 
     try {
-      const client = this.cliente();
+      const client = this.createClient();
       do {
         const remaining = scope.limit - objects.length;
         if (remaining <= 0) return { estado: 'TRUNCADO', objetos: objects };
@@ -90,7 +90,7 @@ export class S3ObjectStoreInventory implements ObjectStoreInventory {
    *
    * @returns Cliente conectado a la configuración de `FILE_STORAGE_S3_*`.
    */
-  private cliente(): S3Client {
+  private createClient(): S3Client {
     if (!this.client) {
       const { s3 } = loadStorageEnv();
       this.client = new S3Client({

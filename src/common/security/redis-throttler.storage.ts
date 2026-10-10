@@ -75,11 +75,11 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
     if (!this.redis) return this.incrementLocal(key, ttl, limit, blockDuration);
 
     try {
-      const clave = `${KEY_PREFIX}${key}`;
+      const redisKey = `${KEY_PREFIX}${key}`;
       const [[, totalRaw], [, remainingRaw]] = (await this.redis
         .multi()
-        .incr(clave)
-        .pttl(clave)
+        .incr(redisKey)
+        .pttl(redisKey)
         .exec()) as [[Error | null, number], [Error | null, number]];
 
       const total = Number(totalRaw);
@@ -89,13 +89,13 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
       // INCR corrió y el PEXPIRE no llegó a aplicarse. Se repone la ventana en
       // vez de dejar una clave inmortal que bloquearía a esa IP para siempre.
       if (total === 1 || remaining < 0) {
-        await this.redis.pexpire(clave, ttl);
+        await this.redis.pexpire(redisKey, ttl);
         remaining = ttl;
       }
 
       const exceeded = total > limit;
       if (exceeded && blockDuration > remaining) {
-        await this.redis.pexpire(clave, blockDuration);
+        await this.redis.pexpire(redisKey, blockDuration);
         remaining = blockDuration;
       }
 

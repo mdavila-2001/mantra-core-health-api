@@ -12,7 +12,7 @@ import { Practices } from '../../practice/entities';
 import { PracticeTenantLookupService } from '../../practice/services';
 import { AccountsRepository, JournalRepository } from '../repositories';
 import { ACCT } from '../accounting.concepts';
-import { toCentimos, toText, amountInBase } from './money';
+import { toBigIntCents, toText, amountInBase } from './money';
 import type {
   BalanceSheetResponseDto,
   ChartOfAccountsResponseDto,
@@ -348,7 +348,7 @@ export class LedgerReadService {
     const sums = new Map<string, { debe: bigint; haber: bigint }>();
     for (const line of lines) {
       const actual = sums.get(line.accountId) ?? { debe: 0n, haber: 0n };
-      const amount = toCentimos(amountInBase(line));
+      const amount = toBigIntCents(amountInBase(line));
       if (line.directionConceptId === ACCT.DIRECTION_DEBIT) {
         actual.debe += amount;
       } else {
@@ -475,7 +475,7 @@ export class LedgerReadService {
     // aunque la página 1 nunca se haya pedido.
     let accumulated = 0n;
     const withBalance = lines.map((line) => {
-      const amount = toCentimos(line.amount);
+      const amount = toBigIntCents(line.amount);
       accumulated +=
         line.directionConceptId === ACCT.DIRECTION_DEBIT
           ? debtor
@@ -591,7 +591,7 @@ export class LedgerReadService {
     for (const line of lines) {
       const account = byId.get(line.accountId);
       const debtor = account?.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
-      const amount = toCentimos(amountInBase(line));
+      const amount = toBigIntCents(amountInBase(line));
       const sign =
         line.directionConceptId === ACCT.DIRECTION_DEBIT
           ? debtor
@@ -669,11 +669,11 @@ export class LedgerReadService {
     );
 
     const totalRevenue = revenueItems.reduce(
-      (acc, i) => acc + toCentimos(i.amount),
+      (acc, i) => acc + toBigIntCents(i.amount),
       0n,
     );
     const totalExpense = expenseItems.reduce(
-      (acc, i) => acc + toCentimos(i.amount),
+      (acc, i) => acc + toBigIntCents(i.amount),
       0n,
     );
 
@@ -727,10 +727,10 @@ export class LedgerReadService {
     );
     const revenueTotal = items
       .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_REVENUE)
-      .reduce((acc, i) => acc + toCentimos(i.amount), 0n);
+      .reduce((acc, i) => acc + toBigIntCents(i.amount), 0n);
     const expenseTotal = items
       .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EXPENSE)
-      .reduce((acc, i) => acc + toCentimos(i.amount), 0n);
+      .reduce((acc, i) => acc + toBigIntCents(i.amount), 0n);
     const netIncome = revenueTotal - expenseTotal;
 
     const { page, nextCursor } = paginateByCode(
@@ -740,15 +740,15 @@ export class LedgerReadService {
     );
 
     const totalAssets = assetItems.reduce(
-      (acc, i) => acc + toCentimos(i.amount),
+      (acc, i) => acc + toBigIntCents(i.amount),
       0n,
     );
     const totalLiabilities = liabilityItems.reduce(
-      (acc, i) => acc + toCentimos(i.amount),
+      (acc, i) => acc + toBigIntCents(i.amount),
       0n,
     );
     const totalEquityDeclared = equityItems.reduce(
-      (acc, i) => acc + toCentimos(i.amount),
+      (acc, i) => acc + toBigIntCents(i.amount),
       0n,
     );
     const totalEquity = totalEquityDeclared + netIncome;

@@ -214,11 +214,11 @@ describe('ProfilesPatientsController', () => {
      */
     async function errors(body: unknown): Promise<string[]> {
       const dto = plainToInstance(SearchPatientsQueryDto, body);
-      const errores = await validate(dto, {
+      const validationErrors = await validate(dto, {
         whitelist: true,
         forbidNonWhitelisted: true,
       });
-      return errores.map((e) => e.property);
+      return validationErrors.map((e) => e.property);
     }
 
     it('delega los filtros del cuerpo con el actor de la sesión, igual que el GET', async () => {

@@ -291,12 +291,12 @@ export class ProfilesAffiliationsService {
 
     return {
       items: requests.map((row) => {
-        const quien = who.get(row.practitionerProfileId);
+        const practitionerEntry = who.get(row.practitionerProfileId);
         return {
           id: row.id,
           practitionerProfileId: row.practitionerProfileId,
-          practitionerName: quien?.nombre ?? null,
-          practitionerLicense: quien?.matricula ?? null,
+          practitionerName: practitionerEntry?.nombre ?? null,
+          practitionerLicense: practitionerEntry?.matricula ?? null,
           organizationName: row.organizationName,
           roleTitle: row.roleTitle ?? null,
           practiceSiteId: row.practiceSiteId ?? null,

@@ -68,13 +68,13 @@ function build(memberships: Record<string, string> = {}) {
     service,
     /** Rol de tenant con el que quedó (o se creó) la membresía de la cuenta. */
     rolDe: (email: string): string | undefined => {
-      const creada = created.find(
+      const createdAccount = created.find(
         (row) =>
           row.entity === 'TenantMemberships' &&
           row.data.userId === userId(email),
       );
       return (
-        creada?.data.tenantRoleConceptId ??
+        createdAccount?.data.tenantRoleConceptId ??
         rows.get(userId(email))?.tenantRoleConceptId
       );
     },

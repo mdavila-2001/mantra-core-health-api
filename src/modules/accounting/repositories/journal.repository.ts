@@ -549,15 +549,15 @@ export class JournalRepository {
       segmentId: string | null;
     }>
   > {
-    const asientos = await em.find(
+    const journalEntries = await em.find(
       JournalTransactions,
       { practiceId, statusConceptId: postedStatusConceptId },
       { limit },
     );
-    if (asientos.length === 0) return [];
+    if (journalEntries.length === 0) return [];
 
     const entries = await em.find(LedgerEntries, {
-      transactionId: { $in: asientos.map((a) => a.id) },
+      transactionId: { $in: journalEntries.map((a) => a.id) },
     });
     if (entries.length === 0) return [];
 

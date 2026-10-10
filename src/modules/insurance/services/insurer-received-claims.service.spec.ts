@@ -62,7 +62,7 @@ function request(over: Record<string, unknown> = {}) {
 }
 
 /** Los dos renglones de la solicitud: 250,00 y 150,00. */
-function renglones() {
+function claimLines() {
   return [
     {
       id: 'l-2',
@@ -90,7 +90,7 @@ interface Options {
   administra?: boolean;
   claim?: ReturnType<typeof request> | null;
   claims?: ReturnType<typeof request>[];
-  lines?: ReturnType<typeof renglones>;
+  lines?: ReturnType<typeof claimLines>;
   versions?: any[];
   pedidoCambio?: boolean;
 }
@@ -106,7 +106,7 @@ interface Options {
  */
 function build(options: Options = {}) {
   const claim = 'claim' in options ? options.claim : request();
-  const lines = options.lines ?? renglones();
+  const lines = options.lines ?? claimLines();
   const versions: any[] = options.versions ?? [];
 
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
@@ -453,7 +453,7 @@ describe('InsurerReceivedClaimsService.list', () => {
     it('una línea sin servicio catalogado no inventa un código', async () => {
       const d = build({
         administra: true,
-        lines: [{ ...renglones()[1], serviceConceptId: undefined } as any],
+        lines: [{ ...claimLines()[1], serviceConceptId: undefined } as any],
       });
 
       const [item] = (await inTenant(() => d.service.list(owner))).items;
@@ -463,7 +463,7 @@ describe('InsurerReceivedClaimsService.list', () => {
     });
 
     it('un importe guardado ilegible no se muestra como cero: falla nombrando el renglón', async () => {
-      const corrupt = { ...renglones()[1], billedAmount: 'abc' } as any;
+      const corrupt = { ...claimLines()[1], billedAmount: 'abc' } as any;
       const d = build({ administra: true, lines: [corrupt] });
 
       const attempt = inTenant(() => d.service.list(owner));
@@ -733,10 +733,10 @@ describe('InsurerReceivedClaimsService.decide', () => {
         administra: true,
         claim: request({ totalAmount: '100.00' }),
         lines: [
-          { ...renglones()[1], billedAmount: '33.33' },
-          { ...renglones()[0], billedAmount: '33.33' },
+          { ...claimLines()[1], billedAmount: '33.33' },
+          { ...claimLines()[0], billedAmount: '33.33' },
           {
-            ...renglones()[0],
+            ...claimLines()[0],
             id: 'l-3',
             lineSequence: 3,
             billedAmount: '33.34',

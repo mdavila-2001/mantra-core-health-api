@@ -77,8 +77,8 @@ export class ImportTemplateService {
    * @returns El archivo, con su tipo y su nombre.
    */
   generate(profile: string, format: string): ImportTemplate {
-    const perfil = this.reader.perfil(profile);
-    if (perfil === undefined) {
+    const importProfile = this.reader.perfil(profile);
+    if (importProfile === undefined) {
       throw new ImportFileRejectedException(
         ErrorCode.IMPORT_PROFILE_UNKNOWN,
         `No hay plantilla para «${profile}»`,
@@ -96,9 +96,9 @@ export class ImportTemplateService {
     }
 
     return {
-      contenido: generator.armar(perfil),
+      contenido: generator.armar(importProfile),
       tipo: generator.tipo,
-      nombre: `plantilla-${perfil.id}.${generator.extension}`,
+      nombre: `plantilla-${importProfile.id}.${generator.extension}`,
     };
   }
 }
