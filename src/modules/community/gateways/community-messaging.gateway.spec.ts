@@ -86,7 +86,7 @@ describe('CommunityMessagingGateway', () => {
   describe('typing (F4.1)', () => {
     it('reemite «escribiendo» a los demás del hilo, sin tocar la base', () => {
       const d = build();
-      const { client, emitidoAOtros } = socket(['conversation:c-1'], ['p-1']);
+      const { client, emitidoAOtros: issuedToOthers } = socket(['conversation:c-1'], ['p-1']);
 
       d.gateway.handleTyping(client as any, {
         conversationId: 'c-1',
@@ -95,7 +95,7 @@ describe('CommunityMessagingGateway', () => {
       });
 
       expect(client.to).toHaveBeenCalledWith('conversation:c-1');
-      expect(emitidoAOtros).toHaveBeenCalledWith('conversation:typing', {
+      expect(issuedToOthers).toHaveBeenCalledWith('conversation:typing', {
         conversationId: 'c-1',
         profileId: 'p-1',
         typing: true,
@@ -122,7 +122,7 @@ describe('CommunityMessagingGateway', () => {
 
     it('salir del hilo avisa que dejó de escribir', async () => {
       const d = build();
-      const { client, emitidoAOtros } = socket(['conversation:c-1'], ['p-1']);
+      const { client, emitidoAOtros: issuedToOthers } = socket(['conversation:c-1'], ['p-1']);
 
       await d.gateway.handleLeaveConversation(client as any, {
         conversationId: 'c-1',
@@ -130,7 +130,7 @@ describe('CommunityMessagingGateway', () => {
       });
 
       expect(client.leave).toHaveBeenCalledWith('conversation:c-1');
-      expect(emitidoAOtros).toHaveBeenCalledWith('conversation:typing', {
+      expect(issuedToOthers).toHaveBeenCalledWith('conversation:typing', {
         conversationId: 'c-1',
         profileId: 'p-1',
         typing: false,

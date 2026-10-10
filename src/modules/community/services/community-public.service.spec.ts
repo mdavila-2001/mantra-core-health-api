@@ -494,13 +494,13 @@ describe('CommunityPublicService', () => {
       'createdByUserId',
       'updatedByUserId',
       'rowVersion',
-    ])('la ficha pública no expone %s', async (clave) => {
+    ])('la ficha pública no expone %s', async (key) => {
       const d = build();
       d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
 
       const res = await d.service.getBySlug('dra-quispe');
 
-      expect(res).not.toHaveProperty(clave);
+      expect(res).not.toHaveProperty(key);
     });
 
     // El identificador aparece *dentro* de la URL, y eso está bien: así se
@@ -619,11 +619,11 @@ describe('CommunityPublicService', () => {
       // poder cometerlo.
       repo.searchProfiles.mockResolvedValue([completeProfile]);
 
-      const pagina = await service.search({ kind: 'MEDICATION' });
+      const page = await service.search({ kind: 'MEDICATION' });
 
-      expect(pagina.items).toEqual([]);
-      expect(pagina.nextCursor).toBeNull();
-      expect(pagina.totalHint).toBe(0);
+      expect(page.items).toEqual([]);
+      expect(page.nextCursor).toBeNull();
+      expect(page.totalHint).toBe(0);
     });
 
     it('no llega a consultar el directorio', async () => {
@@ -656,8 +656,8 @@ describe('CommunityPublicService', () => {
       await service.search({});
 
       expect(repo.searchProfiles).toHaveBeenCalled();
-      const filtros = repo.searchProfiles.mock.calls[0][1];
-      expect(filtros.targetTypeConceptId).toBeUndefined();
+      const filters = repo.searchProfiles.mock.calls[0][1];
+      expect(filters.targetTypeConceptId).toBeUndefined();
     });
   });
 
@@ -667,7 +667,7 @@ describe('CommunityPublicService', () => {
       ['latitud fuera de rango', { lat: 91, lng: 0 }],
       ['longitud fuera de rango', { lat: 0, lng: 181 }],
       ['sólo latitud', { lat: -17.8 }],
-    ])('da 400 %s', async (_caso, params) => {
+    ])('da 400 %s', async (_case, params) => {
       const d = build();
       await expect(d.service.nearby(params)).rejects.toBeInstanceOf(
         BadRequestException,
@@ -808,8 +808,8 @@ describe('CommunityPublicService · P10', () => {
         radiusKm: 3,
       });
 
-      const [[indice, params]] = d.searchIndex.search.mock.calls;
-      expect(indice).toBe('community_public_profiles');
+      const [[index, params]] = d.searchIndex.search.mock.calls;
+      expect(index).toBe('community_public_profiles');
       expect(params.geo).toEqual({
         field: 'location',
         lat: -16.5,

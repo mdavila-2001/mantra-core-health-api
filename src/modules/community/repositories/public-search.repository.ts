@@ -321,10 +321,10 @@ export function publicSitesOf(
   }
 
   const output = new Map<string, ProfilePracticeSite[]>();
-  for (const [practitionerProfileId, sedes] of byProfessional) {
+  for (const [practitionerProfileId, sites] of byProfessional) {
     output.set(
       practitionerProfileId,
-      [...sedes.values()].sort(
+      [...sites.values()].sort(
         (a, b) => Number(b.isOwn) - Number(a.isOwn) || compareIds(a.id, b.id),
       ),
     );
@@ -397,13 +397,13 @@ export class PublicSearchRepository {
    * Página del directorio público, filtrada por texto, ciudad, especialidad y tipo.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Texto, ciudad, especialidad, tipo de sujeto y verificación.
+   * @param filters - Texto, ciudad, especialidad, tipo de sujeto y verificación.
    * @param limit - Tope de filas; se pide una de más para saber si hay página.
    * @returns Los perfiles públicos que coinciden.
    */
   async searchProfiles(
     em: EntityManager,
-    filtros: {
+    filters: {
       /** Texto libre, ya recortado. */
       q?: string;
       /** Tipo de sujeto al que acotar. */
@@ -425,9 +425,9 @@ export class PublicSearchRepository {
       visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
       statusConceptId: CONCEPTS.STATE_ACTIVE,
     };
-    if (filtros.targetTypeConceptId)
-      where.targetTypeConceptId = filtros.targetTypeConceptId;
-    if (filtros.verified)
+    if (filters.targetTypeConceptId)
+      where.targetTypeConceptId = filters.targetTypeConceptId;
+    if (filters.verified)
       where.verificationStatusConceptId = CONCEPTS.STATE_ACTIVE;
 
     // La ciudad vive en `common.addresses`, no en el perfil: se resuelve a
@@ -447,17 +447,17 @@ export class PublicSearchRepository {
     // pisarse: con el segundo sobreescribiendo al primero, «cardiólogos en
     // Cochabamba» habría devuelto los cardiólogos del país entero.
     const subjectsSets: string[][] = [];
-    if (filtros.city) {
-      subjectsSets.push(await this.targetIdsByCity(em, filtros.city));
+    if (filters.city) {
+      subjectsSets.push(await this.targetIdsByCity(em, filters.city));
     }
     // El lugar del catálogo acota el mismo eje —el sujeto— y por la misma
     // puerta que la ciudad: «cardiólogos en Cochabamba» interseca, no pisa.
-    if (filtros.territory) {
-      subjectsSets.push(await this.targetIdsByTerritory(em, filtros.territory));
+    if (filters.territory) {
+      subjectsSets.push(await this.targetIdsByTerritory(em, filters.territory));
     }
-    if (filtros.specialtyConceptId) {
+    if (filters.specialtyConceptId) {
       subjectsSets.push(
-        await this.practitionerIdsBySpecialty(em, filtros.specialtyConceptId),
+        await this.practitionerIdsBySpecialty(em, filters.specialtyConceptId),
       );
     }
     if (subjectsSets.length > 0) {
@@ -471,12 +471,12 @@ export class PublicSearchRepository {
 
     // El keyset va sobre `(display_name, id)`: `display_name` solo no es único
     // —hay homónimos— y una página que empieza en un empate se saltea filas.
-    if (filtros.after) {
+    if (filters.after) {
       where.$or = [
-        { displayName: { $gt: filtros.after.displayName } },
+        { displayName: { $gt: filters.after.displayName } },
         {
-          displayName: filtros.after.displayName,
-          id: { $gt: filtros.after.id },
+          displayName: filters.after.displayName,
+          id: { $gt: filters.after.id },
         },
       ];
     }
@@ -486,11 +486,11 @@ export class PublicSearchRepository {
       limit,
     });
 
-    if (!filtros.q) return rows;
+    if (!filters.q) return rows;
 
     // El filtro de texto se aplica sobre los ids candidatos y no en memoria
     // sobre la página: filtrar después de paginar devolvería páginas de menos.
-    const ids = await this.matchIdsByText(em, filtros.q, where, limit);
+    const ids = await this.matchIdsByText(em, filters.q, where, limit);
     const allowed = new Set(ids);
     return rows.filter((row) => allowed.has(row.id));
   }
@@ -526,14 +526,14 @@ export class PublicSearchRepository {
     // directorio de una ciudad real, y muy por encima del de éste.
     const params = [city, 5000];
     const norm = await this.normalizer(em);
-    const filas = await em
+    const rows = await em
       .getConnection()
       .execute<{ owner_id: string }[]>(
         base.replace(/%NORM%/g, norm),
         params,
         'all',
       );
-    return filas.map((f) => f.owner_id);
+    return rows.map((f) => f.owner_id);
   }
 
   /**
@@ -599,7 +599,7 @@ export class PublicSearchRepository {
     where: Record<string, unknown>,
     limit: number,
   ): Promise<string[]> {
-    const patron = `%${q.toLowerCase()}%`;
+    const pattern = `%${q.toLowerCase()}%`;
     const base = `
       SELECT id FROM community.public_profiles
       WHERE visibility_concept_id = ? AND status_concept_id = ?
@@ -610,15 +610,15 @@ export class PublicSearchRepository {
     const params = [
       where.visibilityConceptId,
       where.statusConceptId,
-      patron,
-      patron,
+      pattern,
+      pattern,
       limit,
     ];
     const norm = await this.normalizer(em);
-    const filas = await em
+    const rows = await em
       .getConnection()
       .execute<{ id: string }[]>(base.replace(/%NORM%/g, norm), params, 'all');
-    return filas.map((f) => f.id);
+    return rows.map((f) => f.id);
   }
 
   /**
@@ -1299,7 +1299,7 @@ export class PublicSearchRepository {
 
     const conn = em.getConnection();
 
-    const medios = await conn.execute<{ post_id: string; file_id: string }[]>(
+    const media = await conn.execute<{ post_id: string; file_id: string }[]>(
       `SELECT post_id, file_id
          FROM community.post_media
         WHERE post_id IN (?)
@@ -1308,7 +1308,7 @@ export class PublicSearchRepository {
       [postIds, COMM.MEDIA_ROLE_IMAGE],
       'all',
     );
-    for (const row of medios)
+    for (const row of media)
       ensure(row.post_id).imageFileIds.push(row.file_id);
 
     const reactions = await conn.execute<

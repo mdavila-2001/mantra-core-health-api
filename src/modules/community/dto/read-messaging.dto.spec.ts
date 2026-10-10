@@ -50,7 +50,7 @@ describe('SearchChatContactsRequestDto', () => {
     ['consulta vacía', { q: '   ' }],
     ['límite excesivo', { q: 'maria', limit: '21' }],
     ['consulta no textual', { q: ['maria'] }],
-  ])('rechaza %s', async (_caso, extra) => {
+  ])('rechaza %s', async (_case, extra) => {
     await expect(
       pipe.transform(
         {

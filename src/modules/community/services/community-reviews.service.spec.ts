@@ -35,7 +35,7 @@ const validCare = {
 };
 
 /** La vitrina calificada, cuyo sujeto es el profesional `hp-1`. */
-const vitrina = {
+const showcase = {
   id: 'p1',
   targetId: 'hp-1',
   acceptsReviews: true,
@@ -106,7 +106,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
   it('rejects when the profile does not accept reviews', async () => {
     const d = build();
     d.profilesRepo.findById.mockResolvedValue({
-      ...vitrina,
+      ...showcase,
       acceptsReviews: false,
     });
     await expect(
@@ -116,7 +116,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
 
   it('rejects a duplicate verified review for the same encounter', async () => {
     const d = build();
-    d.profilesRepo.findById.mockResolvedValue(vitrina);
+    d.profilesRepo.findById.mockResolvedValue(showcase);
     d.reviewsRepo.findByReviewerEncounter.mockResolvedValue({ id: 'rev0' });
     await expect(
       d.service.publishReview('p1', body as any, patient),
@@ -125,7 +125,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
 
   it('publishes a verified review with dimension scores', async () => {
     const d = build();
-    d.profilesRepo.findById.mockResolvedValue(vitrina);
+    d.profilesRepo.findById.mockResolvedValue(showcase);
     d.reviewsRepo.create.mockReturnValue({ id: 'rev1', overallRating: 4 });
 
     const res = await d.service.publishReview(
@@ -154,7 +154,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
   describe('elegibilidad (carril P6 §3)', () => {
     it('el reseñador sale del token, no del cuerpo', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.reviewsRepo.create.mockReturnValue({ id: 'rev1', overallRating: 4 });
 
       await d.service.publishReview(
@@ -172,7 +172,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
 
     it('una sesión sin perfil de paciente no puede calificar', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
 
       await expect(
         d.service.publishReview(
@@ -188,7 +188,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
 
     it('una atención inexistente no habilita la reseña', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.encountersRepo.findById.mockResolvedValue(null);
 
       await expect(
@@ -199,7 +199,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
 
     it('la atención de otro paciente no habilita la reseña', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.encountersRepo.findById.mockResolvedValue({
         ...validCare,
         patientProfileId: 'pat-de-otro',
@@ -213,7 +213,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
     /** Calificar una cita que todavía no ocurrió no califica nada. */
     it('una atención sin terminar no habilita la reseña', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.encountersRepo.findById.mockResolvedValue({
         ...validCare,
         statusConceptId: CLIN.ENCOUNTER_IN_PROGRESS,
@@ -226,7 +226,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
 
     it('una atención con otro profesional no habilita calificar a éste', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.encountersRepo.findById.mockResolvedValue({
         ...validCare,
         primaryPractitionerId: 'hp-de-otro',
@@ -244,7 +244,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
      */
     it('un participante del encuentro también habilita la reseña', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.encountersRepo.findById.mockResolvedValue({
         ...validCare,
         primaryPractitionerId: 'hp-de-otro',
@@ -268,7 +268,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
   describe('respondToReview', () => {
     it('el titular de la vitrina puede responder', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.reviewsRepo.findById.mockResolvedValue({
         id: 'rev1',
         targetPublicProfileId: 'p1',
@@ -287,7 +287,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
 
     it('exige la titularidad de la vitrina con la regla compartida', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.reviewsRepo.findById.mockResolvedValue({
         id: 'rev1',
         targetPublicProfileId: 'p1',
@@ -315,7 +315,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
      */
     it('si la vitrina no es del actor, no escribe nada', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.visibility.assertActsAsProfile.mockRejectedValue(
         new ForbiddenException('perfil ajeno'),
       );
@@ -337,7 +337,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
      */
     it('una reseña de otra vitrina se trata como inexistente', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.reviewsRepo.findById.mockResolvedValue({
         id: 'rev1',
         targetPublicProfileId: 'otra-vitrina',
@@ -355,7 +355,7 @@ describe('CommunityReviewsService (UC-19-11)', () => {
 
     it('no se puede responder dos veces la misma reseña', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(vitrina);
+      d.profilesRepo.findById.mockResolvedValue(showcase);
       d.reviewsRepo.findById.mockResolvedValue({
         id: 'rev1',
         targetPublicProfileId: 'p1',
@@ -379,8 +379,8 @@ describe('CommunityReviewsService — calificar desde el portal del paciente (C.
     // Es el motivo entero de la ruta: la ficha pública se abre por slug y no
     // publica su id, así que el paciente no puede nombrarla.
     const d = build();
-    d.profilesRepo.findByTarget.mockResolvedValue(vitrina);
-    d.profilesRepo.findById.mockResolvedValue(vitrina);
+    d.profilesRepo.findByTarget.mockResolvedValue(showcase);
+    d.profilesRepo.findById.mockResolvedValue(showcase);
     d.reviewsRepo.create.mockReturnValue({ id: 'r1', overallRating: 4 });
 
     const res = await d.service.publishOwnReview(body as any, patient);
@@ -429,8 +429,8 @@ describe('CommunityReviewsService — calificar desde el portal del paciente (C.
     // La resolución del destinatario no reemplaza ninguna comprobación:
     // `publishReview` las hace todas, en un solo lugar.
     const d = build();
-    d.profilesRepo.findByTarget.mockResolvedValue(vitrina);
-    d.profilesRepo.findById.mockResolvedValue(vitrina);
+    d.profilesRepo.findByTarget.mockResolvedValue(showcase);
+    d.profilesRepo.findById.mockResolvedValue(showcase);
     d.encountersRepo.findById.mockResolvedValue({
       ...validCare,
       statusConceptId: 'en-curso',
@@ -444,8 +444,8 @@ describe('CommunityReviewsService — calificar desde el portal del paciente (C.
 
   it('una cuenta sin perfil de paciente no puede calificar', async () => {
     const d = build();
-    d.profilesRepo.findByTarget.mockResolvedValue(vitrina);
-    d.profilesRepo.findById.mockResolvedValue(vitrina);
+    d.profilesRepo.findByTarget.mockResolvedValue(showcase);
+    d.profilesRepo.findById.mockResolvedValue(showcase);
 
     await expect(
       d.service.publishOwnReview(
