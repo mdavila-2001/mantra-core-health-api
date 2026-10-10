@@ -160,8 +160,8 @@ export class CommunityMessagingService {
         );
       }
 
-      const [perfilA, perfilB] = dto.participantProfileIds;
-      const recipient = await this.profilesRepo.findById(tx, perfilB);
+      const [profileA, profileB] = dto.participantProfileIds;
+      const recipient = await this.profilesRepo.findById(tx, profileB);
       const eligibleRecipient =
         recipient?.statusConceptId === CONCEPTS.STATE_ACTIVE &&
         (!requirePublicRecipient ||
@@ -178,8 +178,8 @@ export class CommunityMessagingService {
 
       const blocked = await this.blocksRepo.existsBetween(
         tx,
-        perfilA,
-        perfilB,
+        profileA,
+        profileB,
         CONCEPTS.STATE_ACTIVE,
       );
       if (blocked) {
@@ -191,8 +191,8 @@ export class CommunityMessagingService {
 
       const existing = await this.conversationsRepo.findDirectBetween(
         tx,
-        perfilA,
-        perfilB,
+        profileA,
+        profileB,
         COMM.CONVERSATION_DIRECT,
         CONCEPTS.STATE_ACTIVE,
       );
@@ -455,7 +455,7 @@ export class CommunityMessagingService {
     // que corta el bucle: con dos personas ausentes y las dos con respuesta
     // automática encendida, cada aviso dispararía el del otro para siempre.
     if (evaluateAutomaticResponse) {
-      await this.responderSolo(conversationId, sent.destinatarios);
+      await this.responderOnly(conversationId, sent.destinatarios);
     }
 
     return {
@@ -557,7 +557,7 @@ export class CommunityMessagingService {
    * @param senderProfileId - Quién escribió, para no contestarse a sí mismo.
    * @param recipients - A quiénes les llegó.
    */
-  private async responderSolo(
+  private async responderOnly(
     conversationId: string,
     recipients: readonly string[],
   ): Promise<void> {
@@ -788,8 +788,8 @@ export class CommunityMessagingService {
         profileId,
       );
 
-      const ahora = new Date();
-      message.deletedAt = ahora;
+      const now = new Date();
+      message.deletedAt = now;
       touch(message, actor.id);
 
       const conversation = await this.conversationsRepo.findConversationById(
@@ -805,7 +805,7 @@ export class CommunityMessagingService {
       await tx.flush();
 
       return {
-        deletedAt: ahora,
+        deletedAt: now,
         seSolto: wasReleased,
         destinatarios: await this.otherParticipants(
           tx,

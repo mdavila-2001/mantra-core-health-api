@@ -117,14 +117,14 @@ export class CommunityReviewsReadService {
       throw new ResourceNotFoundException('No encontrado', { slug });
     }
 
-    const [pagina, ratings] = await Promise.all([
+    const [page, ratings] = await Promise.all([
       this.projectPage(em, profile.id, options),
       this.searchRepo.ratingsByProfile(em, [profile.id]),
     ]);
     const rating = ratings.get(profile.id);
 
     return {
-      ...pagina,
+      ...page,
       // `null` y no `0`: cero estrellas es una calificación pésima y «todavía
       // nadie calificó» no lo es.
       ratingAverage: rating?.average ?? null,
@@ -183,7 +183,7 @@ export class CommunityReviewsReadService {
       )
       .map((review) => review.reviewerPatientProfileId);
 
-    const [scores, responses, nombres] = await Promise.all([
+    const [scores, responses, names] = await Promise.all([
       this.reviewsRepo.listDimensionScores(em, reviewIds),
       this.reviewsRepo.listResponses(em, reviewIds),
       this.reviewsRepo.displayNamesByPerson(em, signers),
@@ -200,7 +200,7 @@ export class CommunityReviewsReadService {
           review.reviewerDisplayModeConceptId ?? null,
         reviewerDisplayName:
           review.reviewerDisplayModeConceptId === COMM.REVIEW_DISPLAY_REAL_NAME
-            ? (nombres.get(review.reviewerPatientProfileId) ?? null)
+            ? (names.get(review.reviewerPatientProfileId) ?? null)
             : null,
         verificationStatusConceptId: review.verificationStatusConceptId,
         publishedAt: review.publishedAt ?? null,

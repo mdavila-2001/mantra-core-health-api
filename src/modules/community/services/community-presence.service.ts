@@ -67,23 +67,23 @@ export class CommunityPresenceService {
    */
   async markInLine(profileId: string): Promise<boolean> {
     try {
-      const ahora = new Date().toISOString();
-      const [estaba] = await Promise.all([
+      const now = new Date().toISOString();
+      const [was] = await Promise.all([
         this.redis.set(
           this.presenceKey(profileId),
-          ahora,
+          now,
           'EX',
           PRESENCE_TTL_SEC,
           'GET',
         ),
         this.redis.set(
           this.lastTimeKey(profileId),
-          ahora,
+          now,
           'EX',
           LAST_SEEN_TTL_SEC,
         ),
       ]);
-      return estaba === null;
+      return was === null;
     } catch (error) {
       this.logger.warn(
         { operation: 'community.presence.online', profileId, err: error },
@@ -101,17 +101,17 @@ export class CommunityPresenceService {
    */
   async markDisconnected(profileId: string): Promise<Date | null> {
     try {
-      const ahora = new Date();
+      const now = new Date();
       await Promise.all([
         this.redis.del(this.presenceKey(profileId)),
         this.redis.set(
           this.lastTimeKey(profileId),
-          ahora.toISOString(),
+          now.toISOString(),
           'EX',
           LAST_SEEN_TTL_SEC,
         ),
       ]);
-      return ahora;
+      return now;
     } catch (error) {
       this.logger.warn(
         { operation: 'community.presence.offline', profileId, err: error },
@@ -131,14 +131,14 @@ export class CommunityPresenceService {
   async presence(profileIds: string[]): Promise<ProfilePresenceDto[]> {
     if (profileIds.length === 0) return [];
     try {
-      const [enLinea, ultimaVez] = await Promise.all([
+      const [enLine, lastTime] = await Promise.all([
         this.redis.mget(profileIds.map((id) => this.presenceKey(id))),
         this.redis.mget(profileIds.map((id) => this.lastTimeKey(id))),
       ]);
       return profileIds.map((profileId, index) => ({
         profileId,
-        online: enLinea[index] !== null && enLinea[index] !== undefined,
-        lastSeenAt: toDate(ultimaVez[index]),
+        online: enLine[index] !== null && enLine[index] !== undefined,
+        lastSeenAt: toDate(lastTime[index]),
       }));
     } catch (error) {
       this.logger.warn(
@@ -162,8 +162,8 @@ export class CommunityPresenceService {
   }
 }
 
-function toDate(valor: string | null | undefined): Date | null {
-  if (valor === null || valor === undefined) return null;
-  const date = new Date(valor);
+function toDate(value: string | null | undefined): Date | null {
+  if (value === null || value === undefined) return null;
+  const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 }

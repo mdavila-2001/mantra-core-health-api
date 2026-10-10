@@ -110,8 +110,8 @@ export class CommunityReviewsService {
     patientProfileId: string,
     targetSubjectId: string,
   ): Promise<void> {
-    const encuentro = await this.encountersRepo.findById(em, encounterId);
-    if (!encuentro) {
+    const encounter = await this.encountersRepo.findById(em, encounterId);
+    if (!encounter) {
       // El mismo mensaje que los demás casos: decir «ese encuentro no existe»
       // le confirmaría a quien prueba uuids cuáles sí existen.
       throw new PreconditionFailedException(
@@ -120,14 +120,14 @@ export class CommunityReviewsService {
         CommunityErrorReason.ENCOUNTER_NOT_FOUND_FOR_REVIEW,
       );
     }
-    if (encuentro.patientProfileId !== patientProfileId) {
+    if (encounter.patientProfileId !== patientProfileId) {
       throw new PreconditionFailedException(
         'La atención declarada no habilita una reseña',
         { encounterId },
         CommunityErrorReason.ENCOUNTER_NOT_OWNED_BY_PATIENT,
       );
     }
-    if (encuentro.statusConceptId !== CLIN.ENCOUNTER_FINISHED) {
+    if (encounter.statusConceptId !== CLIN.ENCOUNTER_FINISHED) {
       throw new PreconditionFailedException(
         'La atención todavía no terminó',
         {
@@ -147,7 +147,7 @@ export class CommunityReviewsService {
         practitionerProfileId: targetSubjectId,
       })) !== null;
     const attended =
-      encuentro.primaryPractitionerId === targetSubjectId || participated;
+      encounter.primaryPractitionerId === targetSubjectId || participated;
     if (!attended) {
       throw new PreconditionFailedException(
         'La atención declarada no fue con este profesional',
@@ -208,18 +208,18 @@ export class CommunityReviewsService {
    */
   private async resolveTargetOfEncounter(encounterId: string): Promise<string> {
     const em = this.em.fork();
-    const encuentro = await this.encountersRepo.findById(em, encounterId);
-    const practitionerId = encuentro?.primaryPractitionerId;
-    const vitrina = practitionerId
+    const encounter = await this.encountersRepo.findById(em, encounterId);
+    const practitionerId = encounter?.primaryPractitionerId;
+    const showcase = practitionerId
       ? await this.profilesRepo.findByTarget(em, practitionerId)
       : null;
-    if (!vitrina) {
+    if (!showcase) {
       throw new PreconditionFailedException(
         'La atención declarada no habilita una reseña',
         { encounterId },
       );
     }
-    return vitrina.id;
+    return showcase.id;
   }
 
   /** UC-19-11: publica una review verificada con puntuaciones por dimensión. */
