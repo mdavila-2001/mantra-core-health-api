@@ -588,8 +588,8 @@ export class PractitionerSitesService {
     // Una línea en blanco no es una dirección ausente: es una fila vacía.
     // Mismo criterio que el alta (`OwnSiteProvisioningService.provision`).
     const lines = address.lines
-      .map((linea) => linea.trim())
-      .filter((linea) => linea.length > 0);
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
     const fresh = this.addressesRepo.create(em, {
       ownerTypeConceptId: CONCEPTS.OWNER_USER,
       ownerId: actorUserId,
