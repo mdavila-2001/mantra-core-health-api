@@ -15,7 +15,7 @@ import { UpdateOwnPatientProfileDto } from './update-own-patient-profile.dto';
  * @param prefix - La ruta acumulada hasta este nivel.
  * @returns Las rutas de las propiedades con error, ordenadas y sin repetidos.
  */
-function rutasWithError(
+function routesWithError(
   errors: readonly ValidationError[],
   prefix = '',
 ): string[] {
@@ -24,7 +24,7 @@ function rutasWithError(
     const ruta = prefix ? `${prefix}.${error.property}` : error.property;
     if (error.constraints) rutas.push(ruta);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasWithError(error.children, ruta));
+      rutas.push(...routesWithError(error.children, ruta));
     }
   }
   return [...new Set(rutas)].sort();
@@ -52,7 +52,7 @@ async function propertiesWithError(
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasWithError(errors);
+  return routesWithError(errors);
 }
 
 /**

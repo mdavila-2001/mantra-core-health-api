@@ -102,8 +102,8 @@ function isReadableImage(base64: string): boolean {
 }
 
 /** Texto recortado, o `undefined` si viene vacío: una cadena en blanco no es un dato. */
-function optionalText(valor: string | undefined): string | undefined {
-  const clean = valor?.trim();
+function optionalText(value: string | undefined): string | undefined {
+  const clean = value?.trim();
   return clean ? clean : undefined;
 }
 
@@ -192,11 +192,11 @@ function declaredContacts(
   // ID-12: sin correo institucional el cliente manda `personalEmail === email`.
   // Eso dice que el único correo es personal, y guardarlo además como de
   // trabajo sería inventar un contacto laboral que la persona no declaró.
-  const soloPersonal =
+  const onlyPersonal =
     dto.workEmail === undefined &&
     dto.personalEmail !== undefined &&
     dto.personalEmail.trim().toLowerCase() === dto.email.trim().toLowerCase();
-  const workEmail = soloPersonal ? undefined : (dto.workEmail ?? dto.email);
+  const workEmail = onlyPersonal ? undefined : (dto.workEmail ?? dto.email);
 
   const candidates: readonly (DeclaredContact | null)[] = [
     workEmail
@@ -661,7 +661,7 @@ export class IamPractitionerSelfRegistrationService {
       // perfil las muestra juntas. Antes entraba por `credentialNumber` y se
       // archivaba como `CREDENTIAL_TYPE_DEGREE`: el padrón real cargaba ahí su
       // «T.I. 538/14» y el perfil lo anunciaba como «Título universitario».
-      const sedesLicense =
+      const sitesLicense =
         dto.sedesLicenseNumber === undefined
           ? undefined
           : this.authorizationsRepo.create(tx, {
@@ -771,7 +771,7 @@ export class IamPractitionerSelfRegistrationService {
       // `VS_MEDICAL_SPECIALTY`, no el formato del uuid. Repetir una no crea
       // dos filas: quien pega dos veces la misma opción declara una.
       const specialties = [...new Set(dto.specialtyConceptIds ?? [])];
-      for (const [orden, specialtyConceptId] of specialties.entries()) {
+      for (const [order, specialtyConceptId] of specialties.entries()) {
         await this.specialtyCatalog.assertIsMedicalSpecialty(
           tx,
           specialtyConceptId,
@@ -779,7 +779,7 @@ export class IamPractitionerSelfRegistrationService {
         this.specialtiesRepo.create(tx, {
           practitionerProfileId: person.id,
           specialtyConceptId,
-          isPrimary: orden === 0,
+          isPrimary: order === 0,
           boardCertified: false,
           verificationStatusConceptId: PROF.SPEC_VERIF_PENDING,
           validFrom: new Date(),
@@ -973,7 +973,7 @@ export class IamPractitionerSelfRegistrationService {
         practitionerCode,
         licenseId: license.id,
         credentialId: credential?.id,
-        sedesLicenseId: sedesLicense?.id,
+        sedesLicenseId: sitesLicense?.id,
         photoFileId,
         emailVerificationToken: raw,
         activacion: activation,

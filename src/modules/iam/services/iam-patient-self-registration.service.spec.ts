@@ -337,10 +337,10 @@ describe('IamPatientSelfRegistrationService', () => {
      */
     it('writes no address at all when nothing about it was given', async () => {
       const d = build();
-      const { residenceMunicipalityConceptId: _sinMunicipio, ...sinDireccion } =
+      const { residenceMunicipalityConceptId: _withoutMunicipality, ...withoutAddress } =
         dto;
 
-      await d.service.registerPatient(sinDireccion as typeof dto);
+      await d.service.registerPatient(withoutAddress as typeof dto);
 
       expect(d.addressesRepo.create).not.toHaveBeenCalled();
     });
@@ -497,9 +497,9 @@ describe('IamPatientSelfRegistrationService', () => {
      */
     it('skips every email side effect when no email is given', async () => {
       const d = build();
-      const { email: _sinCorreo, phone: _sinTelefono, ...sinContacto } = dto;
+      const { email: _withoutMail, phone: _withoutPhone, ...withoutContact } = dto;
 
-      await d.service.registerPatient(sinContacto as typeof dto);
+      await d.service.registerPatient(withoutContact as typeof dto);
 
       expect(d.contactPointsRepo.create).not.toHaveBeenCalled();
       expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
