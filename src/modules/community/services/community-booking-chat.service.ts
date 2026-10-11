@@ -72,12 +72,16 @@ export class CommunityBookingChatService {
         );
         return false;
       }
-      const hilo = await this.messaging.createConversation(
+      // Es un aviso transaccional de la agenda: la preferencia de directorio del
+      // paciente (vitrina privada) no impide recibir la confirmación de SU cita.
+      // Por eso se usa el canal interno, que exige el rol `SYSTEM`; el rol se
+      // concede sólo a esta llamada, y el mensaje se firma con el actor real.
+      const hilo = await this.messaging.createSystemDirectConversation(
         {
           conversationType: 'DIRECT',
           participantProfileIds: [delProfesional.id, delPaciente.id],
         },
-        actor,
+        { ...actor, roles: [...actor.roles, 'SYSTEM'] },
       );
       await this.messaging.sendMessage(
         hilo.id,
