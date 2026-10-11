@@ -198,4 +198,16 @@ export class ServiceRequestResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+
+  /** Informe previo enlazado (antiduplicación); nulo si no hubo. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  previousDiagnosticReportId?: string | null;
+
+  /** Orden activa sin informe sobre la que se repitió el estudio; nulo si no hubo. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  previousServiceRequestId?: string | null;
+
+  /** Justificación clínica guardada al repetir un estudio; nulo si no hubo. */
+  @ApiPropertyOptional({ nullable: true })
+  duplicateOverrideReason?: string | null;
 }

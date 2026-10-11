@@ -49,6 +49,9 @@ export class DiagnosticOrderSummaryDto {
 
   /** Justificación del médico si repitió un estudio duplicado (antiduplicación). */
   @ApiPropertyOptional() duplicateOverrideReason?: string;
+
+  /** La orden activa sin informe sobre la que se repitió el estudio (v4.2.47). */
+  @ApiPropertyOptional({ format: 'uuid' }) previousServiceRequestId?: string;
 }
 
 /**

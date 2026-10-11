@@ -417,9 +417,41 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         expect.objectContaining({
           statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
           previousDiagnosticReportId: undefined,
-          duplicateOverrideReason: undefined,
+          previousServiceRequestId: 'sr-prev',
+          duplicateOverrideReason:
+            'Muestra anterior hemolizada, se necesita repetir hoy',
         }),
       );
+    });
+
+    it('returns the saved justification and the repeated order in the response', async () => {
+      const d = build();
+      d.duplicateStudyDetector.findActiveOrderWithoutReport.mockResolvedValue(
+        ACTIVE_ORDER_STUDY,
+      );
+      d.serviceRequestsRepo.create.mockReturnValue({
+        id: 'sr2',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+        intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
+        createdAt: new Date(),
+        previousServiceRequestId: 'sr-prev',
+        duplicateOverrideReason: 'Muestra anterior hemolizada, repetir hoy',
+      });
+      const res = await d.service.create(
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          codeConceptId: 'code1',
+          duplicateOverrideReason: 'Muestra anterior hemolizada, repetir hoy',
+        } as any,
+        actor,
+      );
+      expect(res).toMatchObject({
+        previousServiceRequestId: 'sr-prev',
+        previousDiagnosticReportId: null,
+        duplicateOverrideReason: 'Muestra anterior hemolizada, repetir hoy',
+      });
     });
 
     it('does not consult the detector when duplicatePolicy is "skip"', async () => {

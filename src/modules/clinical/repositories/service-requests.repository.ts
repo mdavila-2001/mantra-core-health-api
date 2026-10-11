@@ -61,6 +61,7 @@ export interface CreateServiceRequestData {
    * cuando la orden reutiliza el informe previo o no hubo duplicado.
    */
   duplicateOverrideReason?: string;
+  previousServiceRequestId?: string;
   /**
    * Identificador asociado a actor user.
    */
@@ -105,6 +106,7 @@ export class ServiceRequestsRepository {
         performerTenantId: data.performerTenantId,
         previousDiagnosticReportId: data.previousDiagnosticReportId,
         duplicateOverrideReason: data.duplicateOverrideReason,
+        previousServiceRequestId: data.previousServiceRequestId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

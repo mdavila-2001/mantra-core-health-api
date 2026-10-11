@@ -107,6 +107,18 @@ export class ServiceRequests {
   duplicateOverrideReason?: string;
 
   /**
+   * La orden ACTIVA, aún sin informe, sobre la que se repite el estudio
+   * (parche v4.2.47). Con ella la justificación queda auditable aunque no
+   * exista informe previo. `null` cuando no hubo repetición sobre una orden.
+   */
+  @Property({
+    fieldName: 'previous_service_request_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → clinical.service_requests
+  previousServiceRequestId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

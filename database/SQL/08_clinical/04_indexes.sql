@@ -253,6 +253,7 @@ CREATE INDEX IF NOT EXISTS "ix_service_requests_status_concept_id" ON "clinical"
 CREATE INDEX IF NOT EXISTS "ix_service_requests_requester_profile_id" ON "clinical"."service_requests" ("requester_profile_id");
 
 CREATE INDEX IF NOT EXISTS "ix_service_requests_performer_tenant_id" ON "clinical"."service_requests" ("performer_tenant_id");
+CREATE INDEX IF NOT EXISTS "ix_service_requests_previous_service_request_id" ON "clinical"."service_requests" ("previous_service_request_id");
 
 CREATE INDEX IF NOT EXISTS "ix_service_requests_previous_diagnostic_report_id" ON "clinical"."service_requests" ("previous_diagnostic_report_id");
 

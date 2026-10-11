@@ -9,7 +9,10 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;  -- requerido por EXCLUDE
 -- ═══ service_requests ═══
 -- CHECK concreto declarado por el modelo (CHECK_SQL).
 ALTER TABLE "clinical"."service_requests" DROP CONSTRAINT IF EXISTS "ck_service_requests_override_reason_requires_previous_report";
-ALTER TABLE "clinical"."service_requests" ADD CONSTRAINT "ck_service_requests_override_reason_requires_previous_report" CHECK (("duplicate_override_reason" IS NULL OR "previous_diagnostic_report_id" IS NOT NULL));
+ALTER TABLE "clinical"."service_requests" DROP CONSTRAINT IF EXISTS "ck_service_requests_override_reason_requires_previous_study";
+ALTER TABLE "clinical"."service_requests" ADD CONSTRAINT "ck_service_requests_override_reason_requires_previous_study" CHECK (("duplicate_override_reason" IS NULL OR "previous_diagnostic_report_id" IS NOT NULL OR "previous_service_request_id" IS NOT NULL));
+ALTER TABLE "clinical"."service_requests" DROP CONSTRAINT IF EXISTS "ck_service_requests_previous_service_request_not_self";
+ALTER TABLE "clinical"."service_requests" ADD CONSTRAINT "ck_service_requests_previous_service_request_not_self" CHECK (("previous_service_request_id" IS NULL OR "previous_service_request_id" <> "id"));
 
 
 -- ═══ appointments ═══

@@ -93,6 +93,7 @@ export class DiagnosticsOrdersService {
         createdAt: row.createdAt,
         previousDiagnosticReportId: row.previousDiagnosticReportId,
         duplicateOverrideReason: row.duplicateOverrideReason,
+        previousServiceRequestId: row.previousServiceRequestId,
       })),
       reports: this.cut(reports, limit, 'reports', truncated).map((row) => ({
         id: row.id,

@@ -248,6 +248,7 @@ export class ServiceRequestsService {
         performerTenantId: dto.performerTenantId,
         previousDiagnosticReportId: decision.previousDiagnosticReportId,
         duplicateOverrideReason: decision.duplicateOverrideReason,
+        previousServiceRequestId: decision.previousServiceRequestId,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -308,6 +309,9 @@ export class ServiceRequestsService {
         status: sr.statusConceptId,
         intent: sr.intentConceptId ?? CLIN.SERVICE_REQUEST_INTENT_ORDER,
         createdAt: sr.createdAt,
+        previousDiagnosticReportId: sr.previousDiagnosticReportId ?? null,
+        previousServiceRequestId: sr.previousServiceRequestId ?? null,
+        duplicateOverrideReason: sr.duplicateOverrideReason ?? null,
       };
     });
   }
@@ -328,6 +332,7 @@ export class ServiceRequestsService {
     statusConceptId: string;
     previousDiagnosticReportId?: string;
     duplicateOverrideReason?: string;
+    previousServiceRequestId?: string;
   }> {
     if (options.duplicatePolicy === 'skip') {
       return { statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE };
@@ -376,10 +381,8 @@ export class ServiceRequestsService {
 
     // Sin informe previo, una orden activa del mismo estudio también es
     // duplicado. No hay informe que reutilizar ni al que enlazar: sólo se puede
-    // repetir con justificación. La columna `duplicate_override_reason` exige
-    // `previous_diagnostic_report_id` (CHECK), así que la justificación se
-    // valida (mín. 20 caracteres, en el DTO) y se registra la decisión en el
-    // log, pero no se persiste en la orden.
+    // repetir con justificación (mín. 20 caracteres, en el DTO), que se guarda
+    // junto con la orden a la que se repite (`previous_service_request_id`, v4.2.47).
     if (!dto.previousDiagnosticReportId) {
       const activa =
         await this.duplicateStudyDetector.findActiveOrderWithoutReport(
@@ -403,12 +406,16 @@ export class ServiceRequestsService {
         this.logger.info(
           {
             operation: 'clinical.service-request.duplicate-decision',
-            previousServiceRequestId: activa.serviceRequestId,
+            previousServiceRequestId: activa.serviceRequestId ?? undefined,
             reused: false,
           },
           'Duplicate active order repeated with justification',
         );
-        return { statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE };
+        return {
+          statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+          previousServiceRequestId: activa.serviceRequestId ?? undefined,
+          duplicateOverrideReason: dto.duplicateOverrideReason,
+        };
       }
     }
 
