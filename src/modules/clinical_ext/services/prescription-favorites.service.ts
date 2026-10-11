@@ -11,7 +11,7 @@ import {
   MAX_FAVORITES_PER_PRACTITIONER,
   PrescriptionFavoritesRepository,
 } from '../repositories';
-import { ProfileOwnershipService } from '../../profiles/services/profile-ownership.service';
+import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
 import { PrescriptionFavorites } from '../entities';
 import {
   CreatePrescriptionFavoriteDto,

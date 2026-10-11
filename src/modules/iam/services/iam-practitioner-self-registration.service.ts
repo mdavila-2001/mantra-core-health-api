@@ -27,7 +27,7 @@ import {
   BIRTH_SEX_CONCEPT_BY_CODE,
   PROF,
 } from '../../profiles/profiles.concepts';
-import { composeAccountDisplayName } from '../../profiles/person-name';
+import { composeAccountDisplayName } from '../../profiles/domain/person-name';
 import {
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
@@ -37,9 +37,9 @@ import {
   PractitionerLanguagesRepository,
   PractitionerSpecialtiesRepository,
   ProfessionalCredentialsRepository,
-} from '../../profiles/repositories';
-import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
-import { AdministrativeAreaCatalogService } from '../../profiles/services/administrative-area-catalog.service';
+} from '../../profiles/infrastructure/repositories';
+import { MedicalSpecialtyCatalogService } from '../../profiles/application/services/medical-specialty-catalog.service';
+import { AdministrativeAreaCatalogService } from '../../profiles/application/services/administrative-area-catalog.service';
 import {
   AddressesRepository,
   ContactPointsRepository,

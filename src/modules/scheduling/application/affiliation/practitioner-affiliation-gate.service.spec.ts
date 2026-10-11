@@ -9,7 +9,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PractitionerAffiliationGateService } from './practitioner-affiliation-gate.service';
-import { LINK_STATUS } from '../../../profiles/services/profiles-affiliations.service';
+import { LINK_STATUS } from '../../../profiles/application/services/profiles-affiliations.service';
 import { PROF } from '../../../profiles/profiles.concepts';
 import { ProfilesAffiliationsAdapter } from '../../infrastructure/adapters/profiles-affiliations.adapter';
 

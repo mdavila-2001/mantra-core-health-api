@@ -12,7 +12,7 @@ import { ReferralsRepository } from '../repositories';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import type { Referrals } from '../entities';
 import {
   CreateReferralDto,

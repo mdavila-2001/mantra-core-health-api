@@ -3,7 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { createdBy } from '../../../common';
 import { InsuranceCampaignPartners, InsuranceCampaigns } from '../entities';
 import { INS } from '../insurance.concepts';
-import { patientCoverageValidity } from '../../profiles/patient-coverage-validity';
+import { patientCoverageValidity } from '../../profiles/domain/patient-coverage-validity';
 
 /** Un aliado tal como sale de la consulta (columnas de `json_build_object`). */
 export interface CampaignPartnerRow {

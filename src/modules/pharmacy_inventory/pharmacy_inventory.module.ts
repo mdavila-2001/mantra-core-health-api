@@ -29,7 +29,7 @@ import {
 // La campana del pedido resuelve la cuenta del paciente igual que el carril
 // clínico: el repositorio de vínculos persona↔cuenta se registra local, como
 // hace `clinical.module.ts`.
-import { PersonAccountLinksRepository } from '../profiles/repositories';
+import { PersonAccountLinksRepository } from '../profiles/infrastructure/repositories';
 import {
   SuppliersRepository,
   LocationsRepository,

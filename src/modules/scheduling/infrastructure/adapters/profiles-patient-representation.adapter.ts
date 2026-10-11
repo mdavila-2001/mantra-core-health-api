@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PatientRepresentationService } from '../../../profiles/services/patient-representation.service';
+import { PatientRepresentationService } from '../../../profiles/application/services/patient-representation.service';
 import type { AuthenticatedUser } from '../../../../common';
 import type { PatientRepresentationPort } from '../../application/ports/patient-representation.port';
 import type { UnitOfWork } from '../../application/ports/unit-of-work';

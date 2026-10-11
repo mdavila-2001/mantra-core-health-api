@@ -15,8 +15,8 @@ import { Addresses } from '../../common/entities';
 import { AddressesRepository } from '../../common/repositories';
 // Mismo patrón que `clinical_ext` con `ProfileOwnershipService`: se importa la
 // clase puntual, no `ProfilesModule`, para no cerrar un ciclo entre módulos.
-import { ProfileOwnershipService } from '../../profiles/services/profile-ownership.service';
-import { PersonAccountLinksRepository } from '../../profiles/repositories';
+import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
+import { PersonAccountLinksRepository } from '../../profiles/infrastructure/repositories';
 import { PRAC } from '../practice.concepts';
 import {
   CareSpacesRepository,

@@ -50,7 +50,7 @@ import {
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 
 /**
  * Flujos de autenticación de sesión: login (UC-01-04), rotación de tokens con
