@@ -9,6 +9,7 @@ import {
 } from '../../../common';
 import {
   GLOSSARY_ALL_TERMS_CODE,
+  GLOSSARY_ARTICLE_PROPERTY_CODE,
   GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
   GLOSSARY_IMAGE_PROPERTY_CODE,
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
@@ -93,6 +94,32 @@ function build() {
 }
 
 describe('ConceptsService', () => {
+  describe('readGlossaryArticle', () => {
+    it('returns the stored glossary article property', async () => {
+      const { service, em, designationsRepo } = build();
+      const article = { conceptRef: { code: 'x' }, sections: [] };
+      designationsRepo.findProperty.mockResolvedValue({ valueJson: article });
+
+      await expect(service.readGlossaryArticle('concept-1')).resolves.toBe(
+        article,
+      );
+      expect(designationsRepo.findProperty).toHaveBeenCalledWith(
+        em,
+        'concept-1',
+        GLOSSARY_ARTICLE_PROPERTY_CODE,
+      );
+    });
+
+    it('returns 404 when the concept has no article property', async () => {
+      const { service, designationsRepo } = build();
+      designationsRepo.findProperty.mockResolvedValue(null);
+
+      await expect(
+        service.readGlossaryArticle('concept-1'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
   describe('addDesignation', () => {
     it('crea la designación con idioma/tipo por defecto y sus propiedades', async () => {
       const { service, conceptsRepo, designationsRepo } = build();
