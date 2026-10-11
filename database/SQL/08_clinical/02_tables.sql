@@ -276,6 +276,7 @@ CREATE TABLE IF NOT EXISTS "clinical"."medication_requests" (
     "valid_to" timestamptz,
     "patient_instructions_text" text,
     "indication_condition_id" uuid,
+    "indication_text" varchar(200),
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
