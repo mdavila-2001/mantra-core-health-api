@@ -10,7 +10,7 @@ import { jest } from '@jest/globals';
 import type { NextFunction, Response } from 'express';
 import type { AuthenticatedRequest } from '../../../../common/auth/authenticated-user.interface';
 import { InsurerPatientsController } from './insurer-patients.controller';
-import { InsurerPatientsService } from '../../services/insurer-patients.service';
+import { InsurerPatientsService } from '../../application/services/insurer-patients.service';
 
 /** Transport and OpenAPI only. Persistence and authorization use the integration suite. */
 describe('InsurerPatientsController contract', () => {

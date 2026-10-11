@@ -7,7 +7,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles, AccessLogged } from '../../../../common';
-import { ClaimsReadService } from '../../services';
+import { ClaimsReadService } from '../../application/services';
 import {
   ClaimDetailDto,
   ClaimListQueryDto,

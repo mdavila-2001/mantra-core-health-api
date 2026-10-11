@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
-import { ReconciliationService } from '../../services';
+import { ReconciliationService } from '../../application/services';
 import {
   CreateReconciliationBatchDto,
   CreateReconciliationItemDto,

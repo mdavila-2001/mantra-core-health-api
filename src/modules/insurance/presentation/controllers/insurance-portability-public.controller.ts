@@ -16,7 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Public } from '../../../../common';
-import { InsurancePortabilityService } from '../../services/insurance-portability.service';
+import { InsurancePortabilityService } from '../../application/services/insurance-portability.service';
 import { PortabilityVerificationResponseDto } from '../dto';
 
 const PUBLIC_RATE_LIMIT = { default: { limit: 60, ttl: 60_000 } };

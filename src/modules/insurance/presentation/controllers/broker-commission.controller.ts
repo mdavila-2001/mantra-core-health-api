@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
-import { BrokerCommissionService } from '../../services';
+import { BrokerCommissionService } from '../../application/services';
 import { CreateCommissionStatementDto, CreatedResourceDto } from '../dto';
 
 /**

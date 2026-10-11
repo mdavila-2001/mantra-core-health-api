@@ -6,7 +6,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { InsuranceReadService } from '../../services';
+import { InsuranceReadService } from '../../application/services';
 import {
   BrokerDirectoryResponseDto,
   BrokerPortfolioResponseDto,

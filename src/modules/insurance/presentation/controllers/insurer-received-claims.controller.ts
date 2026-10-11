@@ -23,7 +23,7 @@ import {
   type AuthenticatedUser,
   AccessLogged,
 } from '../../../../common';
-import { InsurerReceivedClaimsService } from '../../services';
+import { InsurerReceivedClaimsService } from '../../application/services';
 import {
   ReceivedClaimDecisionDto,
   ReceivedClaimDto,

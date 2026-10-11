@@ -15,7 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
-import { InsuranceBackboneService } from '../../services';
+import { InsuranceBackboneService } from '../../application/services';
 import {
   CarrierContactChannelsDto,
   CreateCarrierDto,

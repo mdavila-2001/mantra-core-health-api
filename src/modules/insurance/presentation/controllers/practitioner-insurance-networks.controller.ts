@@ -1,7 +1,7 @@
 import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../../../common';
-import { PractitionerInsuranceNetworksService } from '../../services/practitioner-insurance-networks.service';
+import { PractitionerInsuranceNetworksService } from '../../application/services/practitioner-insurance-networks.service';
 import { PractitionerInsuranceNetworkPageDto } from '../dto/practitioner-insurance-network.dto';
 
 /**

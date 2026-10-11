@@ -21,7 +21,10 @@ import {
   type AuthenticatedUser,
   AccessLogged,
 } from '../../../../common';
-import { PriorAuthReadService, PriorAuthService } from '../../services';
+import {
+  PriorAuthReadService,
+  PriorAuthService,
+} from '../../application/services';
 import {
   CreatePriorAuthRequestDto,
   CreateDeterminationDto,

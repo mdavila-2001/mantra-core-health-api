@@ -3,7 +3,7 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 
 import { Public } from '../../../../common';
-import { InsuranceCatalogService } from '../../services';
+import { InsuranceCatalogService } from '../../application/services';
 import { CarrierCatalogResponseDto } from '../dto';
 
 /**

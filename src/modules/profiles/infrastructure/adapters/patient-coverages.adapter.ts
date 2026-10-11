@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { createDeclaredCoverage } from '../../../insurance/services/declared-coverage';
-import { DeclaredCoveragesReader } from '../../../insurance/services/declared-coverages-reader';
+import { createDeclaredCoverage } from '../../../insurance/application/services/declared-coverage';
+import { DeclaredCoveragesReader } from '../../../insurance/application/services/declared-coverages-reader';
 import {
   CatalogRepository,
   CoverageRepository,

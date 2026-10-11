@@ -13,7 +13,7 @@ import {
   type AuthenticatedUser,
 } from '../../../../common';
 import { MyClaimListDto } from '../dto/my-claims.dto';
-import { MyClaimsService } from '../../services/my-claims.service';
+import { MyClaimsService } from '../../application/services/my-claims.service';
 
 /**
  * Autoservicio P56: el titular puede no pertenecer a ninguna organización.

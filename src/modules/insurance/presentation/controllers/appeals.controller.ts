@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
-import { AppealsService } from '../../services';
+import { AppealsService } from '../../application/services';
 import { CreateAppealDecisionDto, CreatedResourceDto } from '../dto';
 
 /**

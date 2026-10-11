@@ -1,5 +1,5 @@
 import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
-import { PatientSettlementService } from '../../insurance/services/patient-settlement.service';
+import { PatientSettlementService } from '../../insurance/application/services/patient-settlement.service';
 import { unavailableSettlement } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { randomInt } from 'node:crypto';
 import { Injectable } from '@nestjs/common';

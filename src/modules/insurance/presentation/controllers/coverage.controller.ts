@@ -13,7 +13,7 @@ import {
   type AuthenticatedUser,
   AccessLogged,
 } from '../../../../common';
-import { CoverageService } from '../../services';
+import { CoverageService } from '../../application/services';
 import {
   CreateCoverageDto,
   CreateEligibilityRequestDto,

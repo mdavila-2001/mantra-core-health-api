@@ -41,14 +41,14 @@ Reubicar el módulo `insurance` bajo el molde ADR-0026 (`presentation/`, `applic
 
 | ID | Microtarea | Verificación | Estado |
 |---|---|---|---|
-| S3.M1 | Mover repositorios propios a `infrastructure/repositories/` | Consultas y firmas sin cambios; suite dirigida | TODO |
-| S3.M2 | Aislar dependencias de contexts externos con ports/adapters | Aplicación/dominio sin imports de otros módulos | TODO |
+| S3.M1 | Mover repositorios propios a `infrastructure/repositories/` | Consultas y firmas sin cambios; suite dirigida | HECHO |
+| S3.M2 | Aislar dependencias de contexts externos con ports/adapters | Aplicación/dominio sin imports de otros módulos | A MEDIAS |
 
 ### H1.S4 — Aplicación y composición — TODO
 
 | ID | Microtarea | Verificación | Estado |
 |---|---|---|---|
-| S4.M1 | Migrar servicios/fachadas de seguros por grupos funcionales, en orden de sus dependencias | Specs actuales preservadas, tests nuevos para reglas extraídas | TODO |
+| S4.M1 | Migrar servicios/fachadas de seguros por grupos funcionales, en orden de sus dependencias | Specs actuales preservadas, tests nuevos para reglas extraídas | EN CURSO |
 | S4.M2 | Actualizar `InsuranceModule` y `InsurancePatientSettlementModule` | Providers resueltos y puertos cableados | TODO |
 | S4.M3 | Agregar `insurance` a `MIGRATED_MODULES` y resolver violaciones | Guard del módulo y suite de arquitectura | TODO |
 

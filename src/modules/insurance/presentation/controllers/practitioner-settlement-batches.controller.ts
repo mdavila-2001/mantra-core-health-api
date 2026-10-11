@@ -13,7 +13,7 @@ import {
 import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
-import { PractitionerSettlementBatchesService } from '../../services';
+import { PractitionerSettlementBatchesService } from '../../application/services';
 import {
   GeneratePractitionerSettlementBatchDto,
   PractitionerSettlementBatchDto,

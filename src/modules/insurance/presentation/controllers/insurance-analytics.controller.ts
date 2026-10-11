@@ -8,7 +8,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser, type AuthenticatedUser } from '../../../../common';
-import { InsuranceAnalyticsService } from '../../services';
+import { InsuranceAnalyticsService } from '../../application/services';
 import {
   InsuranceAnalyticsQueryDto,
   InsuranceDashboardAnalyticsResponseDto,

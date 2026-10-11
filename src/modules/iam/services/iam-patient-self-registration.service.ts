@@ -57,7 +57,7 @@ import {
   createWorkAddress,
 } from '../../common/services/residence-address';
 import { createGuardianRelatedPerson } from '../../profiles/application/services/guardian-related-person';
-import { createDeclaredCoverage } from '../../insurance/services/declared-coverage';
+import { createDeclaredCoverage } from '../../insurance/application/services/declared-coverage';
 import {
   CatalogRepository,
   CoverageRepository,

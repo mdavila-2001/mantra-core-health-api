@@ -23,7 +23,7 @@ import {
   createWorkAddress,
   replaceResidenceAddress,
 } from '../../../common/services/residence-address';
-import { createDeclaredCoverage } from '../../../insurance/services/declared-coverage';
+import { createDeclaredCoverage } from '../../../insurance/application/services/declared-coverage';
 import { boMunicipalityConceptId } from '../../../../common/seed/bo-geography.catalog';
 import { boOccupationConceptId } from '../../../../common/seed/bo-occupations.catalog';
 import { boEmployerConceptId } from '../../../../common/seed/bo-employers.catalog';

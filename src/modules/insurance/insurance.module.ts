@@ -1,5 +1,5 @@
 import { MyClaimsController } from './presentation/controllers/my-claims.controller';
-import { MyClaimsService } from './services/my-claims.service';
+import { MyClaimsService } from './application/services/my-claims.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CommunityModule } from '../community/community.module';
@@ -15,8 +15,8 @@ import { TerminologyModule } from '../terminology/terminology.module';
 // ningún ciclo con `insurance`.
 import { MessagingModule } from '../messaging/messaging.module';
 import * as entities from './entities';
-import { LinkedClaimOrderService } from './services/linked-claim-order.service';
-import { LinkedClaimAccessService } from './services/linked-claim-access.service';
+import { LinkedClaimOrderService } from './application/services/linked-claim-order.service';
+import { LinkedClaimAccessService } from './application/services/linked-claim-access.service';
 // Mismo criterio que `DeclaredCoveragesReader` (más abajo): clase sin estado
 // por `EntityManager`, provista directo sin importar `ClinicalModule` entero
 // — evita el ciclo de que `ClinicalModule` ya la provee él mismo.
@@ -61,7 +61,7 @@ import {
   InsurerContextService,
   InsurerReceivedClaimsService,
   InsurerPatientsService,
-} from './services';
+} from './application/services';
 import {
   CatalogRepository,
   CoverageRepository,
@@ -98,7 +98,7 @@ import { HealthProvenanceRepository } from '../health_data/repositories/health-p
 import { DsarRequestsRepository } from '../audit/repositories/dsar-requests.repository';
 import { DataAccessLogRepository } from '../audit/repositories/data-access-log.repository';
 import { PractitionerInsuranceNetworksController } from './presentation/controllers/practitioner-insurance-networks.controller';
-import { PractitionerInsuranceNetworksService } from './services/practitioner-insurance-networks.service';
+import { PractitionerInsuranceNetworksService } from './application/services/practitioner-insurance-networks.service';
 import { DirectoryTenantAdministrationAdapter } from './infrastructure/adapters/directory-tenant-administration.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
 

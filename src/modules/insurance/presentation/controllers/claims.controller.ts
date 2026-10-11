@@ -15,7 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
-import { ClaimsService } from '../../services';
+import { ClaimsService } from '../../application/services';
 import {
   CreateClaimDto,
   CreatedClaimDto,

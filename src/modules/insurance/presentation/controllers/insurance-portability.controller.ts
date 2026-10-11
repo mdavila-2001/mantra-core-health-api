@@ -26,7 +26,7 @@ import {
   type AuthenticatedUser,
   AccessLogged,
 } from '../../../../common';
-import { InsurancePortabilityService } from '../../services/insurance-portability.service';
+import { InsurancePortabilityService } from '../../application/services/insurance-portability.service';
 import {
   PortabilityExportResultDto,
   RequestPortabilityExportDto,

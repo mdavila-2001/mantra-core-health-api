@@ -18,7 +18,7 @@ import {
   InsurerPatientOptionsDto,
   InsurerPatientSearchQueryDto,
 } from '../dto/insurer-patients.dto';
-import { InsurerPatientsService } from '../../services/insurer-patients.service';
+import { InsurerPatientsService } from '../../application/services/insurer-patients.service';
 
 /** El servicio valida plataforma o membresía vigente en la aseguradora activa. */
 @ApiTags('insurer-patients')

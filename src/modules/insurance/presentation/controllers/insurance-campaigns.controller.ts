@@ -24,7 +24,7 @@ import {
   type AuthenticatedUser,
   AccessLogged,
 } from '../../../../common';
-import { InsuranceCampaignsService } from '../../services';
+import { InsuranceCampaignsService } from '../../application/services';
 import {
   ActiveCampaignsQueryDto,
   CreateInsuranceCampaignDto,
