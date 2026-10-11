@@ -53,6 +53,7 @@ import {
   GLOSSARY_CATEGORY_PREFIX,
   GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
   GLOSSARY_IMAGE_PROPERTY_CODE,
+  GLOSSARY_ARTICLE_PROPERTY_CODE,
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
   GLOSSARY_RELATION_TYPE_CONCEPT_IDS,
   GLOSSARY_SLUG_PROPERTY_CODE,
@@ -170,6 +171,24 @@ export class ConceptsService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ConceptsService.name);
+  }
+
+  /** Lee el artículo enciclopédico publicado del término, si existe. */
+  async readGlossaryArticle(conceptId: string): Promise<unknown> {
+    const property = await this.designationsRepo.findProperty(
+      this.em,
+      conceptId,
+      GLOSSARY_ARTICLE_PROPERTY_CODE,
+    );
+    if (!property) {
+      throw new ResourceNotFoundException(
+        'Artículo del glosario no encontrado',
+        {
+          conceptId,
+        },
+      );
+    }
+    return property.valueJson;
   }
 
   /** UC-03-05: añade una designación (y opcionalmente propiedades) a un concepto. */
