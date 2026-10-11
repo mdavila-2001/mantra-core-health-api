@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { AuthenticationCredentials } from '../entities';
+import { ContactPoints } from '../../common/entities';
+import { PersonAccountLinks } from '../../profiles/entities';
+import { PROF } from '../../profiles/profiles.concepts';
 import { CONCEPTS, createdBy } from '../../../common';
 
 /** Alta de una credencial de contraseña (identidad de login del usuario). */
@@ -59,6 +62,44 @@ export class CredentialsRepository {
     return em.findOne(AuthenticationCredentials, {
       methodConceptId: CONCEPTS.CRED_PASSWORD,
       externalSubject,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
+  /**
+   * La credencial de contraseña activa para un identificador de **login**: el
+   * sujeto exacto (documento o correo de alta) o, si es un correo, el correo de
+   * contacto de un paciente.
+   *
+   * El paciente se da de alta con su **documento** como sujeto y el correo queda
+   * sólo como dato de contacto; sin este rodeo, la pantalla de ingreso —que
+   * acepta «documento o correo»— lo rechazaba con «Credenciales inválidas».
+   *
+   * Ante un correo que pertenece a **más de una** cuenta no se adivina: sin
+   * credencial, y el ingreso falla igual que con una clave errónea.
+   */
+  async findActivePasswordByLoginIdentifier(
+    em: EntityManager,
+    identifier: string,
+  ): Promise<AuthenticationCredentials | null> {
+    const exact = await this.findActivePasswordBySubject(em, identifier);
+    if (exact || !identifier.includes('@')) return exact;
+
+    const contacts = await em.find(ContactPoints, {
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      systemConceptId: CONCEPTS.CONTACT_EMAIL,
+      value: { $ilike: identifier.trim() },
+    });
+    if (contacts.length === 0) return null;
+    const links = await em.find(PersonAccountLinks, {
+      personId: { $in: contacts.map((contact) => contact.ownerId) },
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+    const userIds = [...new Set(links.map((link) => link.userId))];
+    if (userIds.length !== 1) return null;
+    return em.findOne(AuthenticationCredentials, {
+      userId: userIds[0],
+      methodConceptId: CONCEPTS.CRED_PASSWORD,
       stateConceptId: CONCEPTS.STATE_ACTIVE,
     });
   }
