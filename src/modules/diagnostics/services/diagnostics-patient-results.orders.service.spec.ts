@@ -115,7 +115,7 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
     expect(ordersRepo.findOrdersForPatientPortal.mock.calls[0]).toHaveLength(4);
   });
 
-  it('pide sólo laboratorio e imagenología, no toda orden de servicio', async () => {
+  it('pide sólo las categorías de estudio, no toda orden de servicio', async () => {
     const { service, ordersRepo } = build();
 
     await service.listOwnOrders(USER, 50);
@@ -125,8 +125,14 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
       [
         CLIN.SERVICE_REQUEST_CATEGORY_LAB,
         DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+        // La que ofrece el catálogo `service-request-category` a la web y la
+        // app: sin ella, una radiografía pedida en la ficha no llegaba aquí.
+        CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
+        CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
+        CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
       ].sort(),
     );
+    expect(categories).not.toContain(CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE);
   });
 
   it('pide una fila de más y avisa que la lista quedó recortada', async () => {

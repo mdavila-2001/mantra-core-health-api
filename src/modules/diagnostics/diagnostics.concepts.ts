@@ -311,9 +311,17 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
  * Las categorías de `service_requests` que forman el circuito diagnóstico.
  *
  * Laboratorio la declara `clinical` (es suya desde antes); imagenología la
- * declara este módulo. Son las dos únicas: si mañana aparece otra, se agrega
- * acá y **las dos lecturas** —la del personal y la del portal del paciente— la
- * muestran sin cambiar nada más.
+ * declaran los dos módulos. Si mañana aparece otra, se agrega acá y **las dos
+ * lecturas** —la del personal y la del portal del paciente— la muestran sin
+ * cambiar nada más.
+ *
+ * La imagenología de `clinical` va además de la de este módulo porque es la que
+ * el médico elige: el catálogo `service-request-category` (lo que ofrecen la
+ * web y la app) publica las de `clinical`. Con sólo la de `diagnostics`, una
+ * radiografía pedida desde la ficha nunca llegaba al portal del paciente
+ * (prueba integral del 11/10/2026). Cardiología y anatomía patológica entran
+ * por lo mismo: son estudios con informe que la persona tiene que ir a hacerse.
+ * Procedimiento no: no es un estudio.
  *
  * Vive en el catálogo y no en un servicio porque tiene dos consumidores:
  * `DiagnosticsOrdersService` (mostrador) y `DiagnosticsPatientResultsService`
@@ -324,6 +332,9 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
 export const DIAGNOSTIC_CATEGORIES: readonly string[] = [
   CLIN.SERVICE_REQUEST_CATEGORY_LAB,
   DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+  CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
+  CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
+  CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
 ];
 
 /**

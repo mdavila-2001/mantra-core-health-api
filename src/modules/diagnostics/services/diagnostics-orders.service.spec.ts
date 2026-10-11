@@ -98,7 +98,7 @@ describe('DiagnosticsOrdersService', () => {
       );
     });
 
-    it('pide exactamente las dos categorías diagnósticas', async () => {
+    it('pide exactamente las categorías diagnósticas, incluida la imagenología que elige el médico', async () => {
       const d = build();
 
       await d.service.getPatientOrders(TENANT, PATIENT, 50);
@@ -107,7 +107,12 @@ describe('DiagnosticsOrdersService', () => {
       expect(categories).toEqual([
         CLIN.SERVICE_REQUEST_CATEGORY_LAB,
         DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+        CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
+        CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
+        CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
       ]);
+      // Un procedimiento no es un estudio: no entra al circuito diagnóstico.
+      expect(categories).not.toContain(CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE);
     });
 
     it('proyecta órdenes e informes con el tope aplicado', async () => {
