@@ -1,8 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsEmail,
   IsIn,
+  IsLatitude,
+  IsLongitude,
   IsNotEmptyObject,
   IsOptional,
   IsString,
@@ -379,6 +382,61 @@ export class RegisterOrganizationExecutivesDto {
   marketingManager!: RegisterOrganizationExecutiveContactDto;
 }
 
+/** Una sucursal declarada en el alta de una farmacia. */
+export class RegisterPharmacyBranchDto {
+  @ApiProperty({ description: 'Nombre de la sucursal', maxLength: 300 })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(300)
+  name!: string;
+
+  @ApiPropertyOptional({ description: 'Latitud', example: -17.769 })
+  @IsOptional()
+  @IsLatitude()
+  latitude?: number;
+
+  @ApiPropertyOptional({ description: 'Longitud', example: -63.196 })
+  @IsOptional()
+  @IsLongitude()
+  longitude?: number;
+
+  @ApiPropertyOptional({ description: 'Descripción', maxLength: 1000 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Enlace de ubicación (http/https)',
+    maxLength: 2000,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  @Matches(/^https?:\/\//i, { message: 'locationUrl debe ser http o https' })
+  locationUrl?: string;
+}
+
+/** Bloque propio de la farmacia en el alta pública (P50). */
+export class RegisterPharmacyBlockDto {
+  @ApiPropertyOptional({ description: 'Latitud de la casa central' })
+  @IsOptional()
+  @IsLatitude()
+  latitude?: number;
+
+  @ApiPropertyOptional({ description: 'Longitud de la casa central' })
+  @IsOptional()
+  @IsLongitude()
+  longitude?: number;
+
+  @ApiPropertyOptional({ type: [RegisterPharmacyBranchDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RegisterPharmacyBranchDto)
+  branches?: RegisterPharmacyBranchDto[];
+}
+
 /** Datos de la organización que se está dando de alta a sí misma. */
 export class RegisterOrganizationDetailsDto {
   /**
@@ -560,6 +618,13 @@ export class RegisterOrganizationDetailsDto {
   @IsString()
   @MaxLength(100)
   timeZone?: string;
+
+  /** Sólo para `PHARMACY`: casa central y sucursales. */
+  @ApiPropertyOptional({ type: RegisterPharmacyBlockDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RegisterPharmacyBlockDto)
+  pharmacy?: RegisterPharmacyBlockDto;
 }
 
 /**

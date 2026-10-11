@@ -4,6 +4,7 @@ export * from './verify-tenant.dto';
 export * from './suspend-tenant.dto';
 export * from './update-tenant-public-profile.dto';
 export * from './create-branch.dto';
+export * from './update-branch.dto';
 export * from './create-membership.dto';
 export * from './branch-assignment.dto';
 export * from './transfer-membership.dto';
