@@ -87,6 +87,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     d.em,
     d.noticeRepo,
     d.notices,
+    { announceAcceptance: async () => false },
     d.logger,
   );
   const clinicalSync = new ClinicalAppointmentSync(clinical);
