@@ -1,6 +1,6 @@
 # DDD insurance — plan de ejecución
 
-Base: `origin/dev` (`594e64e5`). Rama: `justin/ddd-insurance-dev`.
+Base inicial: `origin/dev` (`594e64e5`); rebase actual: `origin/dev` (`ce2910eb`, PR #640). Rama: `justin/ddd-insurance-dev`.
 
 ## Objetivo
 
