@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -27,9 +28,11 @@ import {
   AccessLogged,
   type AuthenticatedUser,
 } from '../../../../common';
-import { ModuleRef } from '@nestjs/core';
-import { ClinicalReadService } from '../../../clinical/services';
 import { ProfilesPatientsService } from '../../application/services';
+import {
+  CLINICAL_PATIENT_HISTORY_ACCESS_PORT,
+  type ClinicalPatientHistoryAccessPort,
+} from '../../application/ports/clinical-patient-history-access.port';
 import {
   CreatePatientDto,
   PatientProfileResponseDto,
@@ -79,10 +82,8 @@ export class ProfilesPatientsController {
    */
   constructor(
     private readonly patientsService: ProfilesPatientsService,
-    // Se resuelve perezosamente y no se importa `ClinicalModule` en
-    // `ProfilesModule`: `Profiles → Directory → Community → Clinical` ya existe
-    // y cerrar el ciclo rompería el arranque.
-    private readonly moduleRef: ModuleRef,
+    @Inject(CLINICAL_PATIENT_HISTORY_ACCESS_PORT)
+    private readonly clinicalHistoryAccess: ClinicalPatientHistoryAccessPort,
   ) {}
 
   /**
@@ -434,9 +435,7 @@ export class ProfilesPatientsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PatientDetailResponseDto> {
     if (!actor.roles.includes('SECURITY_ADMIN')) {
-      await this.moduleRef
-        .get(ClinicalReadService, { strict: false })
-        .assertCanReadHistory(profileId, actor);
+      await this.clinicalHistoryAccess.assertCanReadHistory(profileId, actor);
     }
     return this.patientsService.getPatientById(profileId);
   }

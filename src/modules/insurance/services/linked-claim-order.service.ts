@@ -17,8 +17,8 @@ import {
   InventoryReservationLines,
   PharmacyOrderSubstitutions,
 } from '../../pharmacy_inventory/entities';
-import { PINV } from '../../pharmacy_inventory/pharmacy_inventory.concepts';
-import { multiplyAmounts } from '../../pharmacy_inventory/services/pharmacy-pricing';
+import { PINV } from '../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
+import { multiplyAmounts } from '../../pharmacy_inventory/domain/pricing/pharmacy-pricing';
 import { InsuranceClaimLines, type InsuranceClaims } from '../entities';
 import { INS } from '../insurance.concepts';
 import {

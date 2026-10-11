@@ -11,7 +11,7 @@ import {
   InventoryReservationLines,
   PharmacyOrderSubstitutions,
 } from '../../pharmacy_inventory/entities';
-import { PINV } from '../../pharmacy_inventory/pharmacy_inventory.concepts';
+import { PINV } from '../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
 import { InsuranceClaims, InsuranceClaimLines } from '../entities';
 import { INS } from '../insurance.concepts';
 import { LinkedClaimOrderService } from './linked-claim-order.service';

@@ -1,0 +1,15 @@
+$ corepack yarn test src/modules/pharmacy_inventory src/modules/insurance/services/linked-claim-order.service.spec.ts --runInBand --silent
+(node:96045) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 8 passed, 8 total
+Tests:       136 passed, 136 total
+Snapshots:   0 total
+Time:        2.645 s, estimated 4 s
+
+$ corepack yarn typecheck
+
+$ corepack yarn eslint src/modules/pharmacy_inventory/domain
+
+$ git diff --check && git diff --cached --check
+exit code 0
