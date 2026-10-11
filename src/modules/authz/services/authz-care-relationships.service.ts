@@ -15,7 +15,7 @@ import {
 } from '../repositories';
 import { AuditTrailService } from '../../audit/services';
 import { NotificationsService, OutboxService } from '../../messaging/services';
-import { PersonAccountLinksRepository } from '../../profiles/repositories';
+import { PersonAccountLinksRepository } from '../../profiles/infrastructure/repositories';
 import {
   CreateCareRelationshipDto,
   CreateLegalRepresentationDto,

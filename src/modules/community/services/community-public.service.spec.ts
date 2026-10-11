@@ -26,7 +26,7 @@ import {
   CONCEPTS,
 } from '../../../common';
 import { COMM } from '../community.concepts';
-import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
+import { MedicalSpecialtyCatalogService } from '../../profiles/application/services/medical-specialty-catalog.service';
 import { PublicTerritoryFilterService } from './public-territory-filter.service';
 
 /** Un concepto de `VS_MEDICAL_SPECIALTY`, el que el catálogo doble declara. */

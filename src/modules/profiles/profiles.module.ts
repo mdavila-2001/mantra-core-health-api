@@ -15,21 +15,21 @@ import { DirectoryModule } from '../directory/directory.module';
 // `insurance` no importa `profiles`.
 import { InsuranceModule } from '../insurance/insurance.module';
 import * as entities from './entities';
-import { MedicalSpecialtyCatalogService } from './services/medical-specialty-catalog.service';
-import { AdministrativeAreaCatalogService } from './services/administrative-area-catalog.service';
-import { HealthFacilityCatalogService } from './services/health-facility-catalog.service';
+import { MedicalSpecialtyCatalogService } from './application/services/medical-specialty-catalog.service';
+import { AdministrativeAreaCatalogService } from './application/services/administrative-area-catalog.service';
+import { HealthFacilityCatalogService } from './application/services/health-facility-catalog.service';
 import {
   ProfilesDependentRequestsController,
   ProfilesPatientsController,
   ProfilesPractitionersController,
   TenantPractitionerRequestsController,
-} from './controllers';
+} from './presentation/controllers';
 import {
   DependentLinkRequestsService,
   ProfilesAffiliationsService,
   ProfilesPatientsService,
   ProfilesPractitionersService,
-} from './services';
+} from './application/services';
 import {
   PersonsRepository,
   PersonProfilesRepository,
@@ -45,13 +45,28 @@ import {
   PatientMergeEventsRepository,
   RelatedPersonsRepository,
   PatientPortalProxiesRepository,
-} from './repositories';
-import { ProfileOwnershipService } from './services';
-import { PatientRepresentationService } from './services/patient-representation.service';
-import { LinkableOrganizationsService } from './services/linkable-organizations.service';
-import { MessagingAffiliationNoticeAdapter } from './adapters/messaging-affiliation-notice.adapter';
-import { AFFILIATION_NOTICE_PORT } from './ports/affiliation-notice.port';
+} from './infrastructure/repositories';
+import { ProfileOwnershipService } from './application/services';
+import { PatientRepresentationService } from './application/services/patient-representation.service';
+import { LinkableOrganizationsService } from './application/services/linkable-organizations.service';
+import { MessagingAffiliationNoticeAdapter } from './infrastructure/adapters/messaging-affiliation-notice.adapter';
+import { AFFILIATION_NOTICE_PORT } from './application/ports/affiliation-notice.port';
 import { MessagingModule } from '../messaging/messaging.module';
+import { PROFILES_TERMINOLOGY_PORT } from './application/ports/profiles-terminology.port';
+import { ProfilesTerminologyAdapter } from './infrastructure/adapters/profiles-terminology.adapter';
+import { AFFILIATION_ORGANIZATIONS_PORT } from './application/ports/affiliation-organizations.port';
+import { ATTACHABLE_FILES_PORT } from './application/ports/attachable-files.port';
+import { DEPENDENT_LINK_IDENTIFIERS_PORT } from './application/ports/dependent-link-identifiers.port';
+import { DEPENDENT_LINK_NOTIFICATIONS_PORT } from './application/ports/dependent-link-notifications.port';
+import { AffiliationOrganizationsAdapter } from './infrastructure/adapters/affiliation-organizations.adapter';
+import { AttachableFilesAdapter } from './infrastructure/adapters/attachable-files.adapter';
+import { DependentLinkContextAdapter } from './infrastructure/adapters/dependent-link-context.adapter';
+import { PRACTITIONER_CONTEXT_PORT } from './application/ports/practitioner-context.port';
+import { PractitionerContextAdapter } from './infrastructure/adapters/practitioner-context.adapter';
+import { PERSON_RECORDS_PORT } from './application/ports/person-records.port';
+import { PersonRecordsAdapter } from './infrastructure/adapters/person-records.adapter';
+import { PATIENT_COVERAGES_PORT } from './application/ports/patient-coverages.port';
+import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-coverages.adapter';
 
 /**
  * Módulo Profiles (05): personas, pacientes y fuerza laboral de salud. Cubre alta
@@ -82,6 +97,11 @@ import { MessagingModule } from '../messaging/messaging.module';
     TenantPractitionerRequestsController,
   ],
   providers: [
+    PractitionerContextAdapter,
+    {
+      provide: PRACTITIONER_CONTEXT_PORT,
+      useExisting: PractitionerContextAdapter,
+    },
     ProfileOwnershipService,
     PatientRepresentationService,
     MedicalSpecialtyCatalogService,
@@ -95,6 +115,37 @@ import { MessagingModule } from '../messaging/messaging.module';
     {
       provide: AFFILIATION_NOTICE_PORT,
       useClass: MessagingAffiliationNoticeAdapter,
+    },
+    {
+      provide: PROFILES_TERMINOLOGY_PORT,
+      useClass: ProfilesTerminologyAdapter,
+    },
+    {
+      provide: AFFILIATION_ORGANIZATIONS_PORT,
+      useClass: AffiliationOrganizationsAdapter,
+    },
+    {
+      provide: ATTACHABLE_FILES_PORT,
+      useClass: AttachableFilesAdapter,
+    },
+    PersonRecordsAdapter,
+    PatientCoveragesAdapter,
+    {
+      provide: PERSON_RECORDS_PORT,
+      useExisting: PersonRecordsAdapter,
+    },
+    {
+      provide: PATIENT_COVERAGES_PORT,
+      useExisting: PatientCoveragesAdapter,
+    },
+    DependentLinkContextAdapter,
+    {
+      provide: DEPENDENT_LINK_IDENTIFIERS_PORT,
+      useExisting: DependentLinkContextAdapter,
+    },
+    {
+      provide: DEPENDENT_LINK_NOTIFICATIONS_PORT,
+      useExisting: DependentLinkContextAdapter,
     },
     // Repositorios
     PersonsRepository,

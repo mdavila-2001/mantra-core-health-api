@@ -13,7 +13,7 @@ import { ServiceCatalogRepository } from '../billing/repositories';
 import {
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
-} from '../profiles/repositories';
+} from '../profiles/infrastructure/repositories';
 import { ConditionsRepository } from '../clinical/repositories';
 
 /**

@@ -18,7 +18,7 @@ import {
   PeriopInstrumentsRepository,
   PeriopDentalRepository,
 } from './repositories';
-import { ProfessionalCredentialsRepository } from '../profiles/repositories';
+import { ProfessionalCredentialsRepository } from '../profiles/infrastructure/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { MessagingModule } from '../messaging/messaging.module';
 import { ClinicalModule } from '../clinical/clinical.module';

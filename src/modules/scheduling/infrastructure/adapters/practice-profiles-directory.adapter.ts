@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PractitionerSitesService } from '../../../practice/services';
-import { findPractitionerNames } from '../../../profiles/read/practitioner-names';
+import { findPractitionerNames } from '../../../profiles/infrastructure/read-models/practitioner-names';
 import type {
   PractitionerDirectoryPort,
   ResourceRef,

@@ -9,7 +9,7 @@ import { MessagingModule } from '../messaging/messaging.module';
 // El vínculo persona ↔ cuenta, para resolver a qué usuario avisarle. Se provee
 // el repositorio suelto y no se importa `ProfilesModule`, por lo mismo que hace
 // `clinical`: es una clase sin estado que recibe el `EntityManager`.
-import { PersonAccountLinksRepository } from '../profiles/repositories';
+import { PersonAccountLinksRepository } from '../profiles/infrastructure/repositories';
 // El filtro por especialidad del directorio público valida contra el value set
 // `VS_MEDICAL_SPECIALTY` con **el mismo servicio** que el alta de profesional.
 // Se provee la clase suelta y no se importa `ProfilesModule` por el mismo
@@ -17,7 +17,7 @@ import { PersonAccountLinksRepository } from '../profiles/repositories';
 // `ProfilesModule` importa `DirectoryModule`, que importa este módulo. La clase
 // no tiene estado —no cachea, y su propio TSDoc explica por qué— así que una
 // segunda instancia responde exactamente lo mismo que la de `profiles`.
-import { MedicalSpecialtyCatalogService } from '../profiles/services/medical-specialty-catalog.service';
+import { MedicalSpecialtyCatalogService } from '../profiles/application/services/medical-specialty-catalog.service';
 // De acá sale `ValueSetsRepository`, que es de donde el servicio de arriba lee
 // los 36 conceptos, y `CatalogConceptsRepository`, que da el rótulo con el que
 // el índice de búsqueda guarda la especialidad. `terminology` no importa ningún

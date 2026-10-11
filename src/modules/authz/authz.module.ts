@@ -48,7 +48,7 @@ import { MessagingModule } from '../messaging/messaging.module';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../profiles/repositories';
+} from '../profiles/infrastructure/repositories';
 
 /**
  * Módulo 06 — Authorization, Purpose of Use and Field Masking.

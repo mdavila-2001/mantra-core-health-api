@@ -49,12 +49,12 @@ import { ClinicalModule } from '../clinical/clinical.module';
 // parámetro— en vez de importar `ProfilesModule` entero, por lo mismo que hace
 // `clinical`: importar el módulo cerraría un ciclo (perfiles ya lee lo que el
 // profesional asentó acá) y duplicaría fuente de verdad.
-import { ProfileOwnershipService } from '../profiles/services/profile-ownership.service';
+import { ProfileOwnershipService } from '../profiles/application/services/profile-ownership.service';
 import {
   PersonAccountLinksRepository,
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
-} from '../profiles/repositories';
+} from '../profiles/infrastructure/repositories';
 
 /**
  * Módulo Clinical-Ext (18): coordinación de cuidado (equipos), decisión clínica

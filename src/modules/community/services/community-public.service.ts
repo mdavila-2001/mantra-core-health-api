@@ -24,7 +24,7 @@ import type {
 // no el módulo porque `ProfilesModule` importa `DirectoryModule`, que importa
 // `CommunityModule`: importarlo acá cerraría el ciclo. Es el mismo criterio con
 // el que este módulo ya provee `PersonAccountLinksRepository` suelto.
-import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
+import { MedicalSpecialtyCatalogService } from '../../profiles/application/services/medical-specialty-catalog.service';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
 import {
   COMMUNITY_PUBLIC_PROFILES_INDEX,
