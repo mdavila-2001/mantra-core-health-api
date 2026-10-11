@@ -8,7 +8,7 @@ import {
   InventoryReservationLines,
   InventoryReservations,
 } from '../../pharmacy_inventory/entities';
-import { PINV } from '../../pharmacy_inventory/pharmacy_inventory.concepts';
+import { PINV } from '../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
 import { CatalogConcepts } from '../../terminology/entities';
 import {
   ClaimAdjudicationVersions,

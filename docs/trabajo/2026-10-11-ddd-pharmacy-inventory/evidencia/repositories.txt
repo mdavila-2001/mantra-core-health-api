@@ -1,0 +1,15 @@
+$ corepack yarn test src/modules/pharmacy_inventory --runInBand --silent
+(node:96350) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 7 passed, 7 total
+Tests:       117 passed, 117 total
+Snapshots:   0 total
+Time:        2.406 s, estimated 3 s
+
+$ corepack yarn typecheck
+
+$ corepack yarn eslint src/modules/pharmacy_inventory/infrastructure/repositories
+
+$ git diff --check && git diff --cached --check
+exit code 0

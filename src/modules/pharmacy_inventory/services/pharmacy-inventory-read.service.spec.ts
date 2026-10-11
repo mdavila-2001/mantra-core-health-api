@@ -7,7 +7,8 @@ import {
 import {
   haversineKm,
   PharmacyInventoryReadService,
-} from './pharmacy-inventory-read.service';
+} from '../application/pharmacy-inventory-read/pharmacy-inventory-read.service';
+import { ReadPharmacyInventoryUseCase } from '../application/pharmacy-inventory-read/read-pharmacy-inventory.use-case';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -61,11 +62,12 @@ function build() {
     findAddresses: mockFn().mockResolvedValue([]),
     findConcepts: mockFn().mockResolvedValue([]),
   };
-  const service = new PharmacyInventoryReadService(
+  const useCase = new ReadPharmacyInventoryUseCase(
     em as any,
     inventoryRepo as any,
     pharmacyRepo as any,
   );
+  const service = new PharmacyInventoryReadService(useCase);
   return { service, inventoryRepo, pharmacyRepo, fork };
 }
 
