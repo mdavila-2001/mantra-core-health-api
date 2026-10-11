@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1471 de 1471 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1492 de 1492 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -14,12 +14,12 @@ Se documentan **1471 de 1471 endpoints** en **72 módulos**. La referencia compl
 | `auth_providers` | 12 | [Abrir referencia](endpoints/auth-providers.md) |
 | `authz` | 27 | [Abrir referencia](endpoints/authz.md) |
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
-| `billing` | 21 | [Abrir referencia](endpoints/billing.md) |
+| `billing` | 34 | [Abrir referencia](endpoints/billing.md) |
 | `chart` | 23 | [Abrir referencia](endpoints/chart.md) |
 | `clinical` | 39 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 27 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 19 | [Abrir referencia](endpoints/common.md) |
-| `community` | 92 | [Abrir referencia](endpoints/community.md) |
+| `community` | 96 | [Abrir referencia](endpoints/community.md) |
 | `consent` | 22 | [Abrir referencia](endpoints/consent.md) |
 | `content_packs` | 2 | [Abrir referencia](endpoints/content-packs.md) |
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
@@ -28,7 +28,7 @@ Se documentan **1471 de 1471 endpoints** en **72 módulos**. La referencia compl
 | `delegated_access` | 12 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 21 | [Abrir referencia](endpoints/diagnostic-units.md) |
 | `diagnostics` | 31 | [Abrir referencia](endpoints/diagnostics.md) |
-| `directory` | 22 | [Abrir referencia](endpoints/directory.md) |
+| `directory` | 23 | [Abrir referencia](endpoints/directory.md) |
 | `document_store` | 5 | [Abrir referencia](endpoints/document-store.md) |
 | `education` | 14 | [Abrir referencia](endpoints/education.md) |
 | `erp` | 17 | [Abrir referencia](endpoints/erp.md) |
@@ -52,7 +52,7 @@ Se documentan **1471 de 1471 endpoints** en **72 módulos**. La referencia compl
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
 | `payments` | 14 | [Abrir referencia](endpoints/payments.md) |
 | `pharma_lab` | 76 | [Abrir referencia](endpoints/pharma-lab.md) |
-| `pharmacy` | 22 | [Abrir referencia](endpoints/pharmacy.md) |
+| `pharmacy` | 24 | [Abrir referencia](endpoints/pharmacy.md) |
 | `pharmacy_inventory` | 29 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
@@ -73,7 +73,7 @@ Se documentan **1471 de 1471 endpoints** en **72 módulos**. La referencia compl
 | `system_context` | 13 | [Abrir referencia](endpoints/system-context.md) |
 | `system_ops` | 24 | [Abrir referencia](endpoints/system-ops.md) |
 | `telemetry` | 21 | [Abrir referencia](endpoints/telemetry.md) |
-| `terminology` | 24 | [Abrir referencia](endpoints/terminology.md) |
+| `terminology` | 25 | [Abrir referencia](endpoints/terminology.md) |
 | `time_series` | 14 | [Abrir referencia](endpoints/time-series.md) |
 | `tracking` | 11 | [Abrir referencia](endpoints/tracking.md) |
 | `vector_rag` | 16 | [Abrir referencia](endpoints/vector-rag.md) |

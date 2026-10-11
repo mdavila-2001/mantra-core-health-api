@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 92 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 96 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-reviews`, `community-social`, `community-timeline`
-- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PatientReviewsController`
+- **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline`
+- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -72,37 +72,41 @@ Referencia exhaustiva de 92 operación(es) del módulo `community`, derivada del
 59. [PUT /community/profiles/me](#59-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
 60. [GET /community/profiles/me/stats](#60-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
 61. [POST /community/public-profiles](#61-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
-62. [PUT /community/reactions](#62-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
-63. [POST /community/reports](#63-post-community-reports) — Reportar contenido y encolar moderación
-64. [GET /community/topics](#64-get-community-topics) — Temas de la comunidad
-65. [GET /f/{slug}](#65-get-f-slug) — Ficha pública de una farmacia
-66. [GET /internal/community/feed/pending](#66-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-67. [POST /internal/community/feed/rebuild](#67-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
-68. [GET /internal/community/search/health](#68-get-internal-community-search-health) — Estado del índice del directorio público
-69. [POST /internal/community/search/reindex](#69-post-internal-community-search-reindex) — Reindexar el directorio público
-70. [POST /internal/community/verification/badges](#70-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
-71. [POST /internal/community/verification/badges/{targetId}/revoke](#71-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
-72. [POST /internal/community/verification/badges/expire-sweep](#72-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
-73. [GET /l/{slug}](#73-get-l-slug) — Ficha pública de un laboratorio
-74. [GET /o/{slug}](#74-get-o-slug) — Ficha pública de una organización
-75. [GET /p/{slug}](#75-get-p-slug) — Ficha pública de un profesional
-76. [POST /patients/me/reviews](#76-post-patients-me-reviews) — Calificar una atención recibida
-77. [GET /public/comments/{commentId}/replies](#77-get-public-comments-commentid-replies) — Respuestas de un comentario público
-78. [GET /public/media/{id}](#78-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
-79. [GET /public/nearby](#79-get-public-nearby) — Prestadores cercanos, en línea recta
-80. [GET /public/posts](#80-get-public-posts) — Últimas publicaciones de todos los profesionales
-81. [GET /public/posts/{postId}/comments](#81-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
-82. [GET /public/posts/{postId}/reactions](#82-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
-83. [GET /public/profiles/{prefijo}/{slug}](#83-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
-84. [GET /public/profiles/{prefijo}/{slug}/reviews](#84-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
-85. [GET /public/search](#85-get-public-search) — Buscador público unificado
-86. [GET /public/search/diagnostic-units](#86-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-87. [GET /public/search/insurers](#87-get-public-search-insurers) — Aseguradoras en el directorio público
-88. [GET /public/search/medications](#88-get-public-search-medications) — Medicamentos ofertados públicamente
-89. [GET /public/search/organizations](#89-get-public-search-organizations) — Organizaciones en el directorio público
-90. [GET /public/search/pharmacies](#90-get-public-search-pharmacies) — Farmacias en el directorio público
-91. [GET /public/search/practitioners](#91-get-public-search-practitioners) — Profesionales en el directorio público
-92. [GET /s/{slug}](#92-get-s-slug) — Ficha pública de una aseguradora
+62. [GET /community/ratings](#62-get-community-ratings) — Calificaciones de un médico, paciente u organización
+63. [PUT /community/ratings](#63-put-community-ratings) — Calificar con estrellas a un médico, paciente u organización
+64. [GET /community/ratings/mine](#64-get-community-ratings-mine) — Mis calificaciones
+65. [GET /community/ratings/summary](#65-get-community-ratings-summary) — Nota media de un médico, paciente u organización
+66. [PUT /community/reactions](#66-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
+67. [POST /community/reports](#67-post-community-reports) — Reportar contenido y encolar moderación
+68. [GET /community/topics](#68-get-community-topics) — Temas de la comunidad
+69. [GET /f/{slug}](#69-get-f-slug) — Ficha pública de una farmacia
+70. [GET /internal/community/feed/pending](#70-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
+71. [POST /internal/community/feed/rebuild](#71-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+72. [GET /internal/community/search/health](#72-get-internal-community-search-health) — Estado del índice del directorio público
+73. [POST /internal/community/search/reindex](#73-post-internal-community-search-reindex) — Reindexar el directorio público
+74. [POST /internal/community/verification/badges](#74-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
+75. [POST /internal/community/verification/badges/{targetId}/revoke](#75-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
+76. [POST /internal/community/verification/badges/expire-sweep](#76-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
+77. [GET /l/{slug}](#77-get-l-slug) — Ficha pública de un laboratorio
+78. [GET /o/{slug}](#78-get-o-slug) — Ficha pública de una organización
+79. [GET /p/{slug}](#79-get-p-slug) — Ficha pública de un profesional
+80. [POST /patients/me/reviews](#80-post-patients-me-reviews) — Calificar una atención recibida
+81. [GET /public/comments/{commentId}/replies](#81-get-public-comments-commentid-replies) — Respuestas de un comentario público
+82. [GET /public/media/{id}](#82-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
+83. [GET /public/nearby](#83-get-public-nearby) — Prestadores cercanos, en línea recta
+84. [GET /public/posts](#84-get-public-posts) — Últimas publicaciones de todos los profesionales
+85. [GET /public/posts/{postId}/comments](#85-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
+86. [GET /public/posts/{postId}/reactions](#86-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
+87. [GET /public/profiles/{prefijo}/{slug}](#87-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+88. [GET /public/profiles/{prefijo}/{slug}/reviews](#88-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
+89. [GET /public/search](#89-get-public-search) — Buscador público unificado
+90. [GET /public/search/diagnostic-units](#90-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+91. [GET /public/search/insurers](#91-get-public-search-insurers) — Aseguradoras en el directorio público
+92. [GET /public/search/medications](#92-get-public-search-medications) — Medicamentos ofertados públicamente
+93. [GET /public/search/organizations](#93-get-public-search-organizations) — Organizaciones en el directorio público
+94. [GET /public/search/pharmacies](#94-get-public-search-pharmacies) — Farmacias en el directorio público
+95. [GET /public/search/practitioners](#95-get-public-search-practitioners) — Profesionales en el directorio público
+96. [GET /s/{slug}](#96-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -6896,8 +6900,8 @@ Content-Type: application/json
 | `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 4000 | Texto de la respuesta | `valor-ejemplo` |
 | `cooldownHours` | Sí | `number` | mínimo 1; máximo 168 | Horas de descanso antes de repetirle a la misma conversación | `1` |
 | `onlyOutsideBusinessHours` | Sí | `boolean` | Sin restricción adicional declarada | Contestar sólo fuera del horario de atención | `true` |
-| `businessHoursFrom` | No | `string` | patrón runtime `HORA` | Inicio del horario de atención | `08:00` |
-| `businessHoursTo` | No | `string` | patrón runtime `HORA` | Fin del horario de atención | `18:00` |
+| `businessHoursFrom` | No | `string` | patrón runtime `HOUR` | Inicio del horario de atención | `08:00` |
+| `businessHoursTo` | No | `string` | patrón runtime `HOUR` | Fin del horario de atención | `18:00` |
 
 ### Payload completo de ejemplo
 
@@ -8478,7 +8482,500 @@ Ejemplo de error normalizado:
 
 ---
 
-## 62. PUT /community/reactions
+## 62. GET /community/ratings
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Calificaciones de un médico, paciente u organización
+- **Operation ID:** `PartyRatingsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.list](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Calificaciones de un médico, paciente u organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Nota media y calificaciones individuales de una parte.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/ratings` en `PartyRatingsController_list`. El controlador delega en `PartyRatingsReadService.list`. No recibe body. El tipo de retorno estático es `Promise<RatingListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `targetType` | query | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `targetId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/ratings?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/ratings?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RatingListDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<RatingListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RatingListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "reviewerType": {},
+      "overallRating": 1,
+      "commentText": "valor-ejemplo",
+      "updatedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<RatingItemDto>` | Sin restricción adicional declarada | Calificaciones individuales (hasta 50, las más recientes). | `[{"id":"00000000-0000-4000-8000-000000000001","reviewerType":{},"overallRating":1,"commentText":"valor-ejemplo","updatedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la calificación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reviewerType` | Sí | `object` | Sin restricción adicional declarada | Qué tipo de parte calificó. | `{}` |
+| `items[].overallRating` | Sí | `number` | Sin restricción adicional declarada | Estrellas. | `1` |
+| `items[].commentText` | No | `string` | Sin restricción adicional declarada | Comentario, si lo dejó. | `valor-ejemplo` |
+| `items[].updatedAt` | Sí | `string` | formato `date-time` | Cuándo se calificó por última vez. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La calificación de un paciente sólo la ven los profesionales que lo atienden | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings"
+}
+```
+
+---
+
+## 63. PUT /community/ratings
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Calificar con estrellas a un médico, paciente u organización
+- **Operation ID:** `PartyRatingsController_rate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.rate](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Exige una atención terminada cuando hay un paciente de por medio, y el vínculo de trabajo entre médico y organización. Volver a calificar el mismo respaldo actualiza la calificación.
+
+Contexto declarado en el controlador: Califico (o recalifico) a una parte. Idempotente por respaldo.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /community/ratings` en `PartyRatingsController_rate`. El controlador delega en `PartyRatingsService.rate`. Valida el body como `CommunityRatePartyDto` y consume `application/json`. El tipo de retorno estático es `Promise<PartyRatingResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CommunityRatePartyDto`; los campos opcionales se omiten.
+
+```http
+PUT /community/ratings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reviewerType": "PATIENT",
+  "targetType": "PATIENT",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reviewerType` | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en el contrato OpenAPI. | `PATIENT` |
+| `reviewerOrganizationId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `targetType` | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en el contrato OpenAPI. | `PATIENT` |
+| `targetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `roleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `overallRating` | Sí | `number` | mínimo 1; máximo 5 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `commentText` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /community/ratings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reviewerType": "PATIENT",
+  "reviewerOrganizationId": "00000000-0000-4000-8000-000000000001",
+  "targetType": "PATIENT",
+  "targetId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "roleAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1,
+  "commentText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PartyRatingResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PartyRatingResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "overallRating": 1,
+  "created": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la calificación. | `00000000-0000-4000-8000-000000000001` |
+| `overallRating` | Sí | `number` | Sin restricción adicional declarada | Estrellas guardadas. | `1` |
+| `created` | Sí | `boolean` | Sin restricción adicional declarada | `true` si se creó; `false` si se actualizó una calificación previa. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | Indique la atención terminada que respalda la calificación | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 400 | `VALIDATION_FAILED` | Indique el vínculo de trabajo que respalda la calificación | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 400 | `VALIDATION_FAILED` | Indique en nombre de qué organización califica | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No puede calificar a una organización que usted administra | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil de paciente con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil profesional con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Sólo quien administra la organización puede calificar en su nombre | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 409 | `CONFLICT` | Esta calificación se está guardando en otro pedido; vuelva a intentarlo | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | BASIS_REJECTED | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 422 | `PRECONDITION_FAILED` | La atención todavía no terminó | Excepción explícita en src/modules/community/services/party-ratings.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings"
+}
+```
+
+---
+
+## 64. GET /community/ratings/mine
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Mis calificaciones
+- **Operation ID:** `PartyRatingsController_mine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.mine](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Mis calificaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Las calificaciones que hice, para precargar el formulario.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/ratings/mine` en `PartyRatingsController_mine`. El controlador delega en `PartyRatingsReadService.mine`. No recibe body. El tipo de retorno estático es `Promise<MyRatingDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `reviewerType` | query | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `reviewerOrganizationId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/ratings/mine?reviewerType=PATIENT HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/ratings/mine?reviewerType=PATIENT&reviewerOrganizationId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyRatingDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyRatingDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "reviewerType": {},
+    "targetType": {},
+    "targetId": "00000000-0000-4000-8000-000000000001",
+    "encounterId": "00000000-0000-4000-8000-000000000001",
+    "roleAssignmentId": "00000000-0000-4000-8000-000000000001",
+    "overallRating": 1,
+    "commentText": "valor-ejemplo"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | Indique en nombre de qué organización califica | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil de paciente con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Su cuenta no tiene un perfil profesional con el cual calificar | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 403 | `FORBIDDEN` | Sólo quien administra la organización puede calificar en su nombre | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings/mine"
+}
+```
+
+---
+
+## 65. GET /community/ratings/summary
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-ratings`
+- **Nombre:** Nota media de un médico, paciente u organización
+- **Operation ID:** `PartyRatingsController_summary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PartyRatingsController.summary](../../src/modules/community/controllers/party-ratings.controller.ts)
+
+### Descripción de negocio
+
+Nota media de un médico, paciente u organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Nota media de una parte.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/ratings/summary` en `PartyRatingsController_summary`. El controlador delega en `PartyRatingsReadService.summary`. No recibe body. El tipo de retorno estático es `Promise<RatingSummaryDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `targetType` | query | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `ORGANIZATION` | Sin descripción específica en OpenAPI. | `PATIENT` |
+| `targetId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/ratings/summary?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/ratings/summary?targetType=PATIENT&targetId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<RatingSummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RatingSummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "average": 1,
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `average` | Sí | `number` | admite null | Media de estrellas, con un decimal; `null` si nadie la calificó. | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas calificaciones la componen. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La calificación de un paciente sólo la ven los profesionales que lo atienden | Excepción explícita en src/modules/community/services/rating-parties.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/ratings/summary"
+}
+```
+
+---
+
+## 66. PUT /community/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8610,7 +9107,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 63. POST /community/reports
+## 67. POST /community/reports
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -8739,7 +9236,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 64. GET /community/topics
+## 68. GET /community/topics
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -8857,7 +9354,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 65. GET /f/{slug}
+## 69. GET /f/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9067,7 +9564,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 66. GET /internal/community/feed/pending
+## 70. GET /internal/community/feed/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9183,7 +9680,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 67. POST /internal/community/feed/rebuild
+## 71. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9311,7 +9808,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 68. GET /internal/community/search/health
+## 72. GET /internal/community/search/health
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9421,7 +9918,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 69. POST /internal/community/search/reindex
+## 73. POST /internal/community/search/reindex
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9550,7 +10047,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 70. POST /internal/community/verification/badges
+## 74. POST /internal/community/verification/badges
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9674,7 +10171,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 71. POST /internal/community/verification/badges/{targetId}/revoke
+## 75. POST /internal/community/verification/badges/{targetId}/revoke
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9795,7 +10292,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 72. POST /internal/community/verification/badges/expire-sweep
+## 76. POST /internal/community/verification/badges/expire-sweep
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -9901,7 +10398,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 73. GET /l/{slug}
+## 77. GET /l/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10111,7 +10608,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 74. GET /o/{slug}
+## 78. GET /o/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10321,7 +10818,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 75. GET /p/{slug}
+## 79. GET /p/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10531,7 +11028,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 76. POST /patients/me/reviews
+## 80. POST /patients/me/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -10680,7 +11177,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 77. GET /public/comments/{commentId}/replies
+## 81. GET /public/comments/{commentId}/replies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10772,7 +11269,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 78. GET /public/media/{id}
+## 82. GET /public/media/{id}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10865,7 +11362,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 79. GET /public/nearby
+## 83. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10959,7 +11456,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 80. GET /public/posts
+## 84. GET /public/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11046,7 +11543,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 81. GET /public/posts/{postId}/comments
+## 85. GET /public/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11137,7 +11634,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 82. GET /public/posts/{postId}/reactions
+## 86. GET /public/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11228,7 +11725,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 83. GET /public/profiles/{prefijo}/{slug}
+## 87. GET /public/profiles/{prefijo}/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11439,7 +11936,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 84. GET /public/profiles/{prefijo}/{slug}/reviews
+## 88. GET /public/profiles/{prefijo}/{slug}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11544,7 +12041,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 85. GET /public/search
+## 89. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11618,8 +12115,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
@@ -11643,7 +12140,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 86. GET /public/search/diagnostic-units
+## 90. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11717,8 +12214,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
@@ -11742,7 +12239,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 87. GET /public/search/insurers
+## 91. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11816,8 +12313,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
@@ -11841,7 +12338,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 88. GET /public/search/medications
+## 92. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11915,8 +12412,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
@@ -11940,7 +12437,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 89. GET /public/search/organizations
+## 93. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12017,8 +12514,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
@@ -12042,7 +12539,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 90. GET /public/search/pharmacies
+## 94. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12116,8 +12613,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
@@ -12141,7 +12638,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 91. GET /public/search/practitioners
+## 95. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12219,8 +12716,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Índice de búsqueda no reconocido | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant de contexto para la operación de búsqueda | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
 | 422 | `PRECONDITION_FAILED` | Campo de ${kind} no permitido para el índice | Excepción explícita en src/modules/search_platform/services/search-index.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no tiene una sigla reconocible en el catálogo | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El municipio no pertenece al departamento elegido | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo territorial no está disponible | Excepción explícita en src/modules/community/services/public-territory-filter.service.ts |
@@ -12244,7 +12741,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 92. GET /s/{slug}
+## 96. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
