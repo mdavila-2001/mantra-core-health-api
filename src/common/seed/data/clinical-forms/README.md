@@ -89,11 +89,13 @@ ficha declara su clase en `kind`:
 | `kind`     | Qué es                                                                                                                                        | Cuántas                  |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
 | `BASE`     | La consulta inicial de la especialidad («Cardiología — consulta inicial (ficha base)»)                                                        | 36, una por especialidad |
-| `SPECIFIC` | El control o la evaluación estándar de una condición (control de HTA, de asma, de diabetes, dengue, trabajo de parto, informe de mamografía…) | 97                       |
+| `SPECIFIC` | El control o la evaluación estándar de una condición (control de HTA, de asma, de diabetes, dengue, trabajo de parto, informe de mamografía y tamizajes focalizados como SRQ-20 o AUDIT) | 99                       |
 | `GENERAL`  | Las transversales: anamnesis, examen físico, consentimiento, epicrisis                                                                        | 4                        |
 
 - La base pregunta el **diagnóstico presuntivo de una lista**; lo que hay que observar de cada
   cuadro está en su ficha específica.
+- Los tamizajes SRQ-20 y AUDIT son fichas `SPECIFIC`: se aplican para evaluar condiciones concretas y
+  no sustituyen la consulta inicial ni la pregunta de diagnóstico presuntivo de la ficha base.
 - Las específicas comparten un armazón (`control()` en `tools/clinical-forms/lib.mjs`), según el
   tipo de ficha:
   - **controles crónicos:** tipo de control, fecha del diagnóstico, tratamiento, adherencia y

@@ -38,8 +38,8 @@ Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationM
 | --- | --- | --- |
 | `POST /claim-disputes/:id/appeal-decisions` | BILLING, FINANCE | `appeals` |
 | `POST /broker-commission-statements` | BILLING, FINANCE | `broker-commission` |
-| `GET /insurance-claims` | BILLING_OPERATOR, SECURITY_ADMIN | `claims-read` |
-| `GET /insurance-claims/:id` | BILLING_OPERATOR, SECURITY_ADMIN | `claims-read` |
+| `GET /insurance-claims` | BILLING_OPERATOR, SECURITY_ADMIN, BILLING, FINANCE, INSURANCE_OPERATOR, USER | `claims-read` |
+| `GET /insurance-claims/:id` | BILLING_OPERATOR, SECURITY_ADMIN, BILLING, FINANCE, INSURANCE_OPERATOR, USER | `claims-read` |
 | `POST /insurance-claims` |  | `claims` |
 | `POST /insurance-claims/:id/adjudications` |  | `claims` |
 | `POST /insurance-claims/:id/eob` |  | `claims` |
@@ -101,6 +101,10 @@ Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationM
 | `POST /prior-authorization-requests/:id/determinations` |  | `prior-auth` |
 | `POST /reconciliation-batches` | SECURITY_ADMIN | `reconciliation` |
 | `POST /reconciliation-batches/:id/items` | SECURITY_ADMIN | `reconciliation` |
+
+`claims-read` permite consultar reclamos desde el tenant activo de un prestador o de
+una aseguradora. El servicio limita las filas a las prácticas/unidades del prestador
+o a la aseguradora de ese tenant; los roles de la tabla no amplían ese alcance.
 
 ## Liquidación al profesional (H8)
 

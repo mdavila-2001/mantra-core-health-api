@@ -1,5 +1,6 @@
 {
   "code": "PSIQ_SRQ20_TAMIZAJE",
+  "kind": "SPECIFIC",
   "name": "SRQ-20 — Cuestionario de Autorreporte (tamizaje de trastornos mentales comunes)",
   "specialty": {
     "code": "PSIQUIATRIA",

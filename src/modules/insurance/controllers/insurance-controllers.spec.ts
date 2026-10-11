@@ -253,13 +253,17 @@ describe('Insurance controllers (delegación)', () => {
     expect(roles('createCarrier')).toEqual(['SECURITY_ADMIN']);
   });
 
-  /**
-   * TAREA-16 · D1.b (Justin, 2026-09-04): la lectura de solicitudes **sí**
-   * exige rol, y es el del prestador que las envió.
-   */
-  it('la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN', () => {
+  /** La lectura admite los roles de facturación/seguro; el servicio limita por tenant activo. */
+  it('la lectura de solicitudes admite roles de proveedor y aseguradora en alcance tenant', () => {
     const roles = Reflect.getMetadata('requiredRoles', ClaimsReadController);
-    expect(roles).toEqual(['BILLING_OPERATOR', 'SECURITY_ADMIN']);
+    expect(roles).toEqual([
+      'BILLING_OPERATOR',
+      'SECURITY_ADMIN',
+      'BILLING',
+      'FINANCE',
+      'INSURANCE_OPERATOR',
+      'USER',
+    ]);
   });
 
   /** Las membresías se resuelven por origen; las disputas conservan su política. */
