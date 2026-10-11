@@ -9,9 +9,10 @@ import {
 import {
   PharmacyOrdersService,
   PICKUP_CODE_UNIQUE_INDEX,
-} from './pharmacy-orders.service';
+} from '../application/pharmacy-orders/pharmacy-orders.service';
+import { PharmacyOrdersUseCases } from '../application/pharmacy-orders/pharmacy-orders.use-cases';
 import { pharmacyInventoryIndexes } from '../../../orm/catalog/indexes/pharmacy_inventory.idx';
-import { PINV } from '../pharmacy_inventory.concepts';
+import { PINV } from '../domain/pharmacy_inventory.concepts';
 
 /**
  * Ejecuta la operación mock fn.
@@ -154,7 +155,7 @@ function build() {
     findCurrentPrices: mockFn(async () => []),
   };
   const reservationsService = { releaseConfirmedLines: mockFn(async () => 1) };
-  const outbox = { publishDomainEvent: mockFn(async () => ({})) };
+  const outbox = { publish: mockFn(async () => ({})) };
   const orderNotifications = {
     orderUnderReview: mockFn(async () => ({ suppressed: false })),
     orderConfirmed: mockFn(async () => ({ suppressed: false })),
@@ -171,7 +172,7 @@ function build() {
   };
   const tenantAdministration = { canAdminister: mockFn(async () => false) };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new PharmacyOrdersService(
+  const useCases = new PharmacyOrdersUseCases(
     em as any,
     ordersRepo as any,
     reservationsRepo as any,
@@ -188,6 +189,7 @@ function build() {
     settlements as any,
     tenantAdministration as any,
   );
+  const service = new PharmacyOrdersService(useCases, logger as any);
   return {
     service,
     settlements,
@@ -468,7 +470,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       );
 
       expect(live.reservationStatusConceptId).toBe(PINV.ORDER_EN_REVISION);
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderUnderReview',
@@ -491,7 +493,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       await expect(
         runWithTenant('tenant-a', () => d.service.openReview('order-1', staff)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
       expect(
         d.reservationsService.releaseConfirmedLines,
       ).not.toHaveBeenCalled();
@@ -507,7 +509,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       await expect(
         runWithTenant('tenant-a', () => d.service.openReview('order-1', staff)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
       expect(d.orderNotifications.orderUnderReview).not.toHaveBeenCalled();
     });
 
@@ -519,7 +521,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       await expect(
         runWithTenant('tenant-b', () => d.service.openReview('order-1', staff)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
   });
 
@@ -538,7 +540,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
 
       expect(live.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
       expect(live.confirmedAt).toBeInstanceOf(Date);
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventType: 'PharmacyOrderConfirmed' }),
       );
@@ -666,7 +668,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(
         d.reservationsService.releaseConfirmedLines,
       ).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderSubstitutionsProposed',
@@ -712,7 +714,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(error).toBeInstanceOf(PreconditionFailedException);
       expect(live.reservationStatusConceptId).toBe(PINV.ORDER_ENVIADO);
       expect(d.substitutionsRepo.create).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('PROPONER_GENERICO without a proposed product answers 422', async () => {
@@ -754,7 +756,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
           ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
   });
 
@@ -777,7 +779,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
         live,
         staff,
       );
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderRejected',
@@ -834,7 +836,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(
         d.reservationsService.releaseConfirmedLines,
       ).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
   });
 
@@ -870,7 +872,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(hours).toBeGreaterThan(47.9);
       expect(hours).toBeLessThanOrEqual(48);
       // El hecho en la transacción; la campana después, CON el código.
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventType: 'PharmacyOrderReady' }),
       );
@@ -918,7 +920,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(confirmed.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
       expect(confirmed.pickupCode).toBeUndefined();
       expect(confirmed.expiresAt).toBe(expires);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
       expect(d.orderNotifications.orderReady).not.toHaveBeenCalled();
     });
 
@@ -938,7 +940,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
         deliveryMode: 'PINV_DELIVERY_DOMICILIO',
       });
       expect(confirmed.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('a site without a counter cannot promise a pickup: typed 422', async () => {
@@ -956,7 +958,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(error).toBeInstanceOf(PreconditionFailedException);
       expect((error as any).details).toMatchObject({ siteId: 'site-1' });
       expect(confirmed.reservationStatusConceptId).toBe(PINV.ORDER_CONFIRMADO);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('a pickup-code collision retries the whole transaction with a fresh code', async () => {
@@ -1114,7 +1116,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(pharmacyOrder.reservationStatusConceptId).toBe(
         PINV.ORDER_RETIRADO,
       );
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderDispensed',
@@ -1146,7 +1148,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       // Cero efectos: ni dispensación, ni ledger, ni estado, ni evento.
       expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
       expect(d.ledgerRepo.append).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
       expect(pharmacyOrder.reservationStatusConceptId).toBe(
         PINV.ORDER_LISTO_PARA_RETIRO,
       );
@@ -1181,7 +1183,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
         PINV.ORDER_LISTO_PARA_RETIRO,
       );
       expect(pharmacyOrder.pickupCode).toBe('ABC234');
-      expect(d.outbox.publishDomainEvent).toHaveBeenLastCalledWith(
+      expect(d.outbox.publish).toHaveBeenLastCalledWith(
         d.tx,
         expect.objectContaining({
           payloadJson: expect.objectContaining({
@@ -1255,7 +1257,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(res.id).toBe('order-1');
       expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
       expect(d.ledgerRepo.append).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('an idempotency key from another delivery is a conflict, not a silent no-op', async () => {
@@ -1398,7 +1400,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(pharmacyOrder.reservationStatusConceptId).toBe(
         PINV.ORDER_ACEPTADO,
       );
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderSubstitutionsAccepted',
@@ -1531,7 +1533,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(pharmacyOrder.reservationStatusConceptId).toBe(
         PINV.ORDER_CONFIRMADO,
       );
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderOriginalPreferred',
@@ -1556,7 +1558,7 @@ describe('PharmacyOrdersService · mostrador (FAR-E2)', () => {
       expect(pharmacyOrder.reservationStatusConceptId).toBe(
         PINV.ORDER_CONFIRMADO,
       );
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('a non-owner gets the same 404 as a nonexistent order', async () => {
