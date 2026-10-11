@@ -1,5 +1,6 @@
 {
   "code": "PSIQ_AUDIT_TAMIZAJE",
+  "kind": "SPECIFIC",
   "name": "AUDIT — Cuestionario de identificación de trastornos por consumo de alcohol",
   "specialty": {
     "code": "PSIQUIATRIA",
