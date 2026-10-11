@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { Addresses } from '../../common/entities';
 import { PracticeSites } from '../../practice/entities';
 import { Addresses } from '../../common/entities';
 import { CatalogConcepts } from '../../terminology/entities';
@@ -162,15 +161,6 @@ export class DiagnosticUnitsReadRepository {
   ): Promise<PracticeSites[]> {
     if (ids.length === 0) return Promise.resolve([]);
     return em.find(PracticeSites, { id: { $in: ids } });
-  }
-
-  /** Direcciones (con coordenadas) de las sedes físicas, por id. */
-  findAddresses(
-    em: EntityManager,
-    ids: readonly string[],
-  ): Promise<Addresses[]> {
-    if (ids.length === 0) return Promise.resolve([]);
-    return em.find(Addresses, { id: { $in: ids } });
   }
 
   findConcepts(
