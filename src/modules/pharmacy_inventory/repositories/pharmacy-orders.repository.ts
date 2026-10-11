@@ -222,11 +222,17 @@ export class PharmacyOrdersRepository {
   /** Farmacias por id **del tenant activo**: el tenant va en el WHERE. */
   findPharmaciesByIdsInTenant(
     em: EntityManager,
-    tenantId: string,
+    tenantId: string | undefined,
     ids: readonly string[],
   ): Promise<Pharmacies[]> {
     if (ids.length === 0) return Promise.resolve([]);
-    return em.find(Pharmacies, { id: { $in: [...ids] }, tenantId });
+    // `undefined`: la vista del paciente. Sus pedidos viajan entre
+    // organizaciones (la farmacia es de otro tenant que el suyo); la
+    // titularidad la sigue acotando `patient_profile_id`, no el tenant.
+    return em.find(Pharmacies, {
+      id: { $in: [...ids] },
+      ...(tenantId === undefined ? {} : { tenantId }),
+    });
   }
 
   /** Sedes por id, sin filtro de estado: la historia del pedido no se borra. */

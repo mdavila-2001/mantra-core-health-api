@@ -68,6 +68,22 @@ type RefreshOutcome =
   | { kind: 'expired' }
   | { kind: 'invalid' };
 
+/**
+ * El personal de una farmacia no tiene un rol global de plataforma: su
+ * autoridad nace de una membresía activa en un tenant de tipo `PHARMACY`. Se
+ * materializa como el rol de runtime `PHARMACY_STAFF` para que `@Roles` pueda
+ * nombrarlo; el aislamiento entre farmacias lo siguen dando el tenant del
+ * request y `PharmacyTenantScopeGuard`.
+ */
+function withPharmacyStaffRole(
+  roles: string[],
+  tenantTypes: Record<string, string>,
+): string[] {
+  return Object.values(tenantTypes).includes('PHARMACY')
+    ? [...new Set([...roles, 'PHARMACY_STAFF'])]
+    : roles;
+}
+
 @Injectable()
 export class IamAuthService {
   /**
@@ -392,7 +408,7 @@ export class IamAuthService {
     );
     const readEm = this.em.fork();
 
-    const cred = await this.credentialsRepo.findActivePasswordBySubject(
+    const cred = await this.credentialsRepo.findActivePasswordByLoginIdentifier(
       readEm,
       subject,
     );
@@ -434,7 +450,7 @@ export class IamAuthService {
       );
       const issued = this.tokenService.issueSessionTokens(
         user.id,
-        roles,
+        withPharmacyStaffRole(roles, tenantTypes),
         tenants,
         {
           name: user.displayName,
@@ -621,7 +637,7 @@ export class IamAuthService {
         const accessToken = this.tokenService.signAccessToken(
           session.userId,
           session.tokenId,
-          roles,
+          withPharmacyStaffRole(roles, tenantTypes),
           tenants,
           {
             name: holder?.displayName,

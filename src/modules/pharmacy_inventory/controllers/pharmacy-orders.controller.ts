@@ -53,13 +53,13 @@ export class PharmacyOrdersController {
   /**
    * FAR-E2: la bandeja del mostrador — los pedidos del tenant de la farmacia.
    *
-   * `SECURITY_ADMIN` es **provisional**: no existe todavía un rol runtime de
-   * farmacia; cuando FAR-E2 lo defina, se reemplaza acá. La protección real es
-   * el tenant en el WHERE: una organización nunca ve pedidos de otra.
+   * `PHARMACY_STAFF` es el rol de runtime del personal de una farmacia (lo
+   * materializa el login por membresía en un tenant `PHARMACY`). La protección
+   * real es el tenant en el WHERE: una organización nunca ve pedidos de otra.
    */
   @Get()
   @AccessLogged({ resourceType: 'PHARMACY_ORDERS' })
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @ApiOperation({
     summary: 'Bandeja de pedidos de las farmacias del tenant (FAR-E2)',
   })
@@ -163,7 +163,7 @@ export class PharmacyOrdersController {
 
   /** FAR-E2: recepcionar — `ENVIADO → EN_REVISION` (el «visto»). */
   @Post(':id/review')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Abrir revisión del pedido (FAR-E2)',
@@ -179,7 +179,7 @@ export class PharmacyOrdersController {
 
   /** FAR-E2: confirmar, con genéricos propuestos si el mostrador los declara. */
   @Post(':id/confirm')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Confirmar el pedido (FAR-E2)',
@@ -234,7 +234,7 @@ export class PharmacyOrdersController {
 
   /** FAR-E2: rechazar con motivo (v4.2.1 lo persiste en el pedido). */
   @Post(':id/reject')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Rechazar el pedido (FAR-E2)',
@@ -255,7 +255,7 @@ export class PharmacyOrdersController {
    * mostrador; sella el código de retiro y renueva la reserva 48 h.
    */
   @Post(':id/ready')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Marcar el pedido listo para retiro (FAR-E2/E3)',
@@ -275,7 +275,7 @@ export class PharmacyOrdersController {
    * mismo código, y pasa a RETIRADO cuando la última línea se cubre.
    */
   @Post(':id/dispense')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Dispensar el pedido en el mostrador (FAR-E3)',

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { requireTenantId, ResourceNotFoundException } from '../../../common';
+import {
+  marketplaceTenantScope,
+  ResourceNotFoundException,
+} from '../../../common';
 import type { Addresses } from '../../common/entities';
 import type { CatalogConcepts } from '../../terminology/entities';
 import type {
@@ -82,7 +85,7 @@ export class PharmacyInventoryReadService {
     siteId: string,
     productId?: string,
   ): Promise<SiteStockResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
 
     const site = await this.pharmacyRepo.findActiveSiteById(em, siteId);
@@ -173,7 +176,7 @@ export class PharmacyInventoryReadService {
     origin: GeoPoint | undefined,
     limit: number = DEFAULT_AVAILABILITY_LIMIT,
   ): Promise<AvailabilityResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
 
     // Sólo productos activos de farmacias publicadas del tenant: un id ajeno

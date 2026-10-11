@@ -924,3 +924,8 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_quotations_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+    ALTER TABLE "billing"."siat_simulated_invoices"
+        ADD CONSTRAINT "fk_siat_simulated_invoices_practice_id" FOREIGN KEY ("practice_id")
+        REFERENCES "practice"."practices" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;

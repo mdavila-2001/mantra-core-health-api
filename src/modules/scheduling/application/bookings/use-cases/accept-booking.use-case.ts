@@ -155,6 +155,8 @@ export class AcceptBookingUseCase {
       undefined,
       'PROVIDER',
     );
+    // La confirmación también queda en el chat de la app (no lanza).
+    await this.notifier.notifyAcceptedInChat(bookingId, actor);
     // Y un aviso por cada solicitud que este «sí» dejó sin efecto: el
     // paciente las pidió y tiene que enterarse de que ya no van, aunque él
     // no haya hecho nada. Uno por uno, porque cada una es de otro médico.

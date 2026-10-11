@@ -39,6 +39,7 @@ function build() {
   const duplicateStudyDetector = {
     findDuplicate: mockFn().mockResolvedValue(null),
     findPendingReport: mockFn().mockResolvedValue(false),
+    findActiveOrderWithoutReport: mockFn().mockResolvedValue(null),
     describe: mockFn(),
     warningMessageFor: mockFn().mockReturnValue('warning'),
   };
@@ -88,6 +89,19 @@ const MATCH = {
   version: null,
   performedAt: new Date(),
   resultsAvailable: true,
+};
+
+const ACTIVE_ORDER_STUDY = {
+  reportId: null,
+  serviceRequestId: 'sr-prev',
+  studyName: 'Hemograma completo',
+  providerName: 'Laboratorio Central',
+  performedAt: new Date(),
+  daysAgo: 0,
+  resultsAvailable: false,
+  conclusionText: null,
+  reportDownloadUrl: null,
+  sameOrganization: true,
 };
 
 const PREVIOUS_STUDY = {
@@ -333,6 +347,81 @@ describe('ServiceRequestsService (UC-08-05)', () => {
       );
     });
 
+    it('rejects with DUPLICATE_STUDY_DETECTED (reportId null) when an active order without report exists and no reason was given', async () => {
+      const d = build();
+      d.duplicateStudyDetector.findActiveOrderWithoutReport.mockResolvedValue(
+        ACTIVE_ORDER_STUDY,
+      );
+      await expect(
+        d.service.create(
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            codeConceptId: 'code1',
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        details: {
+          reason: 'DUPLICATE_STUDY_DETECTED',
+          previousStudy: { reportId: null, serviceRequestId: 'sr-prev' },
+        },
+      });
+      expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects reusing when the duplicate is an active order: there is no report to reuse', async () => {
+      const d = build();
+      d.duplicateStudyDetector.findActiveOrderWithoutReport.mockResolvedValue(
+        ACTIVE_ORDER_STUDY,
+      );
+      await expect(
+        d.service.create(
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            codeConceptId: 'code1',
+            reusePreviousReport: true,
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        details: { reason: 'DUPLICATE_STUDY_DETECTED' },
+      });
+    });
+
+    it('creates the ACTIVE order, without previous report, when repeating over an active order with a reason', async () => {
+      const d = build();
+      d.duplicateStudyDetector.findActiveOrderWithoutReport.mockResolvedValue(
+        ACTIVE_ORDER_STUDY,
+      );
+      d.serviceRequestsRepo.create.mockReturnValue({
+        id: 'sr2',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+        intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
+        createdAt: new Date(),
+      });
+      await d.service.create(
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          codeConceptId: 'code1',
+          duplicateOverrideReason:
+            'Muestra anterior hemolizada, se necesita repetir hoy',
+        } as any,
+        actor,
+      );
+      expect(d.serviceRequestsRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+          previousDiagnosticReportId: undefined,
+          duplicateOverrideReason: undefined,
+        }),
+      );
+    });
+
     it('does not consult the detector when duplicatePolicy is "skip"', async () => {
       const d = build();
       d.serviceRequestsRepo.create.mockReturnValue({
@@ -394,6 +483,28 @@ describe('ServiceRequestsService (UC-08-05)', () => {
       expect(result.isDuplicate).toBe(true);
       expect(result.previousStudy).toEqual(PREVIOUS_STUDY);
       expect(result.requiresJustification).toBe(true);
+    });
+
+    it('flags an active order without report as duplicate with reportId null and pendingReport', async () => {
+      const d = build();
+      d.duplicateStudyDetector.findActiveOrderWithoutReport.mockResolvedValue(
+        ACTIVE_ORDER_STUDY,
+      );
+      const result = await runWithTenant('t1', () =>
+        d.service.checkDuplicate(
+          {
+            patientProfileId: 'p1',
+            codeConceptId: 'code1',
+            encounterId: 'enc-1',
+          } as any,
+          actor,
+        ),
+      );
+      expect(result.isDuplicate).toBe(true);
+      expect(result.pendingReport).toBe(true);
+      expect(result.requiresJustification).toBe(true);
+      expect(result.previousStudy).toEqual(ACTIVE_ORDER_STUDY);
+      expect(result.previousStudy?.reportId).toBeNull();
     });
 
     it('rejects with 404 when the encounter belongs to another patient', async () => {

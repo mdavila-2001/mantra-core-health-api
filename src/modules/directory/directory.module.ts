@@ -95,6 +95,7 @@ import {
   exports: [
     TenantsRepository,
     DirectoryAuthorizationModule,
+    BranchesRepository,
     TenantTypeProfileService,
     DirectoryMembershipsService,
     TenantAffiliationDocumentsService,

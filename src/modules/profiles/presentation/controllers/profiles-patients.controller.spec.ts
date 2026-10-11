@@ -40,7 +40,10 @@ function build() {
     registerOwnDependent: mockFn(),
     searchPatients: mockFn(),
   };
-  const controller = new ProfilesPatientsController(patientsService as any);
+  const controller = new ProfilesPatientsController(
+    patientsService as any,
+    { get: () => ({ assertCanReadHistory: async () => undefined }) } as any,
+  );
   return { controller, patientsService };
 }
 

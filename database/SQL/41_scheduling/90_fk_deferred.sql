@@ -172,6 +172,13 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
+    ALTER TABLE "scheduling"."schedule_rules"
+        ADD CONSTRAINT "fk_schedule_rules_booking_mode_concept_id" FOREIGN KEY ("booking_mode_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
     ALTER TABLE "scheduling"."availability_exceptions"
         ADD CONSTRAINT "fk_availability_exceptions_exception_type_concept_id" FOREIGN KEY ("exception_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");

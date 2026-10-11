@@ -397,6 +397,11 @@ export class DirectoryReadService {
       branchTypeConceptId: branch.branchTypeConceptId,
       statusConceptId: branch.statusConceptId,
       timeZone: branch.timeZone,
+      description: branch.description ?? undefined,
+      locationUrl: branch.locationUrl ?? undefined,
+      latitude: branch.latitude == null ? undefined : Number(branch.latitude),
+      longitude:
+        branch.longitude == null ? undefined : Number(branch.longitude),
       createdAt: branch.createdAt,
     }));
     return { items, count: items.length };

@@ -335,3 +335,11 @@ CREATE INDEX IF NOT EXISTS "ix_financial_kpi_snapshots_fiscal_period_id" ON "bil
 CREATE INDEX IF NOT EXISTS "ix_financial_kpi_snapshots_recorded_by_user_id" ON "billing"."financial_kpi_snapshots" ("recorded_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "brin_financial_kpi_snapshots_recorded_at" ON "billing"."financial_kpi_snapshots" USING brin ("recorded_at") WITH (pages_per_range=128);
+
+CREATE INDEX IF NOT EXISTS "ix_siat_simulated_invoices_invoice_id" ON "billing"."siat_simulated_invoices" ("invoice_id");
+CREATE INDEX IF NOT EXISTS "ix_siat_simulated_invoices_encounter_id" ON "billing"."siat_simulated_invoices" ("encounter_id");
+CREATE INDEX IF NOT EXISTS "ix_siat_simulated_invoices_patient_profile_id" ON "billing"."siat_simulated_invoices" ("patient_profile_id");
+-- El correlativo no se repite por emisor; una recepción rechazada no consume número.
+CREATE UNIQUE INDEX IF NOT EXISTS "uk_siat_simulated_invoices_practice_number"
+    ON "billing"."siat_simulated_invoices" ("practice_id", "invoice_number") WHERE "status" <> 'REJECTED';
+CREATE INDEX IF NOT EXISTS "ix_siat_simulated_outbox_siat_invoice_id" ON "billing"."siat_simulated_outbox" ("siat_invoice_id");
