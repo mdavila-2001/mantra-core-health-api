@@ -4,7 +4,7 @@ import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../../profiles/infrastructure/repositories';
-import { PatientSettlementRepository } from '../repositories/patient-settlement.repository';
+import { PatientSettlementRepository } from '../infrastructure/repositories/patient-settlement.repository';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { PatientSettlementService } from './patient-settlement.service';
 

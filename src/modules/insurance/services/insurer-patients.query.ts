@@ -14,8 +14,8 @@ import type {
   InsurerPatientInsuranceStatus,
   InsurerPatientSortField,
   InsurerPatientSortDirection,
-} from '../dto/insurer-patients.dto';
-import { INS } from '../insurance.concepts';
+} from '../presentation/dto/insurer-patients.dto';
+import { INS } from '../domain/insurance.concepts';
 
 /** Filtros ya validados y con sus valores por omisión resueltos. */
 export interface InsurerPatientCriteria {

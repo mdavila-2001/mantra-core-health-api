@@ -3,7 +3,7 @@ import {
   PreconditionFailedException,
   sumarDecimales,
 } from '../../../common';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 
 type Amount = string | null | undefined;
 export interface SettlementClaim {

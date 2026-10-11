@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
 import { runWithTenant } from '../../../common';
 import { ClaimsReadService } from './claims-read.service';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 
 /**
  * Mock sin tipar, como en el resto de los specs del módulo.

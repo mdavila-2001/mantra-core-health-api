@@ -7,7 +7,7 @@ import {
   InsuranceClaims,
   PatientExplanationsOfBenefit,
 } from '../entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import {
   addCivilDays,
   inferSettlementCadence,

@@ -6,13 +6,13 @@ import {
   ResourceNotFoundException,
   runWithTenant,
 } from '../../../common';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import {
   CLAIM_DECIDED_EVENT,
   InsurerReceivedClaimsService,
   MAX_RECEIVED_CLAIMS,
 } from './insurer-received-claims.service';
-import { CorruptStoredAmountError } from './received-claim-settlement';
+import { CorruptStoredAmountError } from '../domain/settlement/received-claim-settlement';
 import { InsurerContextService } from './insurer-context.service';
 
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.

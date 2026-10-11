@@ -1,13 +1,19 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   type AuthenticatedUser,
   requireTenantId,
   PreconditionFailedException,
 } from '../../../common';
-import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
-import { CatalogRepository, CoverageRepository } from '../repositories';
-import { INS } from '../insurance.concepts';
+import {
+  DIRECTORY_TENANT_ADMINISTRATION_PORT,
+  type DirectoryTenantAdministrationPort,
+} from '../application/ports/directory-tenant-administration.port';
+import {
+  CatalogRepository,
+  CoverageRepository,
+} from '../infrastructure/repositories';
+import { INS } from '../domain/insurance.concepts';
 import type { LinkedOrderSnapshot } from './linked-claim-validation';
 
 export function assertLegacyClaimRoles(actor: AuthenticatedUser): void {
@@ -38,7 +44,8 @@ export async function authorizeClaimResource(
 @Injectable()
 export class LinkedClaimAccessService {
   constructor(
-    private readonly administration: TenantAdministrationService,
+    @Inject(DIRECTORY_TENANT_ADMINISTRATION_PORT)
+    private readonly administration: DirectoryTenantAdministrationPort,
     private readonly catalog: CatalogRepository,
     private readonly coverages: CoverageRepository,
   ) {}

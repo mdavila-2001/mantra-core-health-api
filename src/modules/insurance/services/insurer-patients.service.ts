@@ -30,8 +30,8 @@ import type {
   InsurerPatientListDto,
   InsurerPatientListItemDto,
   InsurerPatientSearchQueryDto,
-} from '../dto/insurer-patients.dto';
-import { INS } from '../insurance.concepts';
+} from '../presentation/dto/insurer-patients.dto';
+import { INS } from '../domain/insurance.concepts';
 import { InsurerContextService } from './insurer-context.service';
 import {
   buildInsurerPatientPageQuery,

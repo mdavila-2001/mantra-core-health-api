@@ -8,11 +8,11 @@ import {
 import {
   unavailableSettlement,
   type PatientSettlementProjection,
-} from '../dto/patient-settlement.dto';
+} from '../presentation/dto/patient-settlement.dto';
 import {
   PatientSettlementRepository,
   type SettlementOrigin,
-} from '../repositories/patient-settlement.repository';
+} from '../infrastructure/repositories/patient-settlement.repository';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { projectPatientSettlement } from './patient-settlement-projection';
 

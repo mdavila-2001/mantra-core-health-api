@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
 import { runWithTenant } from '../../../common';
 import { ClaimsService } from './claims.service';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 
 /** Mock laxo, como en el resto de los specs del módulo. */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);

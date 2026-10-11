@@ -1,5 +1,5 @@
 import { PreconditionFailedException } from '../../../common';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import {
   validateLinkedClaimSettlement,
   matchesLinkedClaimSnapshot,

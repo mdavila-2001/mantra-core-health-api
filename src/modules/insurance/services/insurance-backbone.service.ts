@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -8,10 +8,13 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { TenantAdministrationService } from '../../directory/services';
-import { CatalogRepository } from '../repositories';
+import {
+  DIRECTORY_TENANT_ADMINISTRATION_PORT,
+  type DirectoryTenantAdministrationPort,
+} from '../application/ports/directory-tenant-administration.port';
+import { CatalogRepository } from '../infrastructure/repositories';
 import type { InsuranceCarriers } from '../entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import {
   CarrierContactChannelsDto,
   CreateCarrierDto,
@@ -31,7 +34,7 @@ import {
   UpdatePlanBenefitDto,
   UpdatePlanBenefitRulesDto,
   UpdatePlanPremiumDto,
-} from '../dto';
+} from '../presentation/dto';
 
 /**
  * Backbone de aseguramiento y alta de membresías de red.
@@ -54,7 +57,8 @@ export class InsuranceBackboneService {
   constructor(
     private readonly em: EntityManager,
     private readonly repo: CatalogRepository,
-    private readonly tenantAdministration: TenantAdministrationService,
+    @Inject(DIRECTORY_TENANT_ADMINISTRATION_PORT)
+    private readonly tenantAdministration: DirectoryTenantAdministrationPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(InsuranceBackboneService.name);

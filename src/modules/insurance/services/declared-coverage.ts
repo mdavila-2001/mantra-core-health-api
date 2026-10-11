@@ -5,8 +5,11 @@ import {
   declaredPlanSector,
   type InsuranceSector,
 } from '../../../common/seed/bolivia-insurance.catalog';
-import { INS } from '../insurance.concepts';
-import type { CatalogRepository, CoverageRepository } from '../repositories';
+import { INS } from '../domain/insurance.concepts';
+import type {
+  CatalogRepository,
+  CoverageRepository,
+} from '../infrastructure/repositories';
 
 /** Lo que hace falta para anotar el seguro que el paciente declara al registrarse. */
 export interface DeclaredCoverageData {

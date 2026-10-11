@@ -7,9 +7,15 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
-import { SettlementRepository, CatalogRepository } from '../repositories';
-import { INS } from '../insurance.concepts';
-import { CreateCommissionStatementDto, CreatedResourceDto } from '../dto';
+import {
+  SettlementRepository,
+  CatalogRepository,
+} from '../infrastructure/repositories';
+import { INS } from '../domain/insurance.concepts';
+import {
+  CreateCommissionStatementDto,
+  CreatedResourceDto,
+} from '../presentation/dto';
 
 /**
  * UC-26-14: generar liquidación de comisión de broker. Requiere un acuerdo

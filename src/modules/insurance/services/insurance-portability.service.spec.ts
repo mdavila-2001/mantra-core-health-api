@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import { InsurancePortabilityService } from './insurance-portability.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);

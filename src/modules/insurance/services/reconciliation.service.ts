@@ -9,14 +9,14 @@ import {
   SettlementRepository,
   ClaimRepository,
   CatalogRepository,
-} from '../repositories';
-import { INS } from '../insurance.concepts';
+} from '../infrastructure/repositories';
+import { INS } from '../domain/insurance.concepts';
 import {
   CreateReconciliationBatchDto,
   CreateReconciliationItemDto,
   CreatedResourceDto,
   ResourceStatusDto,
-} from '../dto';
+} from '../presentation/dto';
 
 /**
  * UC-26-13: conciliar pagos vs adjudicación. Abre un lote (batch) y agrega ítems

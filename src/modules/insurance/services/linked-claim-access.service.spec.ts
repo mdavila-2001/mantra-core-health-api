@@ -8,7 +8,7 @@ import {
   InsuranceProducts,
   PatientCoverages,
 } from '../entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import {
   LinkedClaimAccessService,
   assertLegacyClaimRoles,

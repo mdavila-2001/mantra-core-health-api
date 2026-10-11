@@ -8,8 +8,8 @@ import {
 } from '../../../common';
 import { encodeKeysetCursor } from '../../../common/pagination/keyset-cursor';
 import { patientCoverageReferenceDate } from '../../profiles/domain/patient-coverage-validity';
-import { INS } from '../insurance.concepts';
-import type { CreateInsuranceCampaignDto } from '../dto/insurance-campaigns.dto';
+import { INS } from '../domain/insurance.concepts';
+import type { CreateInsuranceCampaignDto } from '../presentation/dto/insurance-campaigns.dto';
 import { InsuranceCampaignsService } from './insurance-campaigns.service';
 
 const fn = jest.fn as unknown as (impl?: (...args: any[]) => any) => any;

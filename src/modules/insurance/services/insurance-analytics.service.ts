@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -7,20 +7,23 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
-import { TenantAdministrationService } from '../../directory/services';
+import {
+  DIRECTORY_TENANT_ADMINISTRATION_PORT,
+  type DirectoryTenantAdministrationPort,
+} from '../application/ports/directory-tenant-administration.port';
 import { patientCoverageReferenceDate } from '../../profiles/domain/patient-coverage-validity';
-import { CatalogRepository } from '../repositories';
+import { CatalogRepository } from '../infrastructure/repositories';
 import {
   InsuranceAnalyticsRepository,
   type AnalyticsPeriod,
-} from '../repositories/insurance-analytics.repository';
-import { INS } from '../insurance.concepts';
+} from '../infrastructure/repositories/insurance-analytics.repository';
+import { INS } from '../domain/insurance.concepts';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import type {
   InsuranceAnalyticsQueryDto,
   InsuranceDashboardAnalyticsResponseDto,
-} from '../dto';
+} from '../presentation/dto';
 
 /** Roles que pueden ver el tablero de una aseguradora sin ser OWNER/ADMIN de su tenant. */
 const ANALYTICS_ROLES = ['INSURANCE_OPERATOR', 'SECURITY_ADMIN', 'SUPERADMIN'];
@@ -77,7 +80,8 @@ export class InsuranceAnalyticsService {
     private readonly em: EntityManager,
     private readonly catalogRepo: CatalogRepository,
     private readonly analyticsRepo: InsuranceAnalyticsRepository,
-    private readonly tenantAdministration: TenantAdministrationService,
+    @Inject(DIRECTORY_TENANT_ADMINISTRATION_PORT)
+    private readonly tenantAdministration: DirectoryTenantAdministrationPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(InsuranceAnalyticsService.name);

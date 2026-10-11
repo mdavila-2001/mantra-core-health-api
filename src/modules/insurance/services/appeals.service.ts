@@ -7,9 +7,12 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { DisputeRepository } from '../repositories';
-import { INS } from '../insurance.concepts';
-import { CreateAppealDecisionDto, CreatedResourceDto } from '../dto';
+import { DisputeRepository } from '../infrastructure/repositories';
+import { INS } from '../domain/insurance.concepts';
+import {
+  CreateAppealDecisionDto,
+  CreatedResourceDto,
+} from '../presentation/dto';
 
 /**
  * UC-26-12: emitir decisión de apelación inmutable. Cada `decision_version`

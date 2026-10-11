@@ -11,8 +11,11 @@ import { Encounters } from '../../clinical/entities';
 import { DiagnosticUnits } from '../../diagnostic_units/entities';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import { InsuranceClaims, PatientCoverages } from '../entities';
-import { INS } from '../insurance.concepts';
-import type { MyClaimListDto, MyClaimsView } from '../dto/my-claims.dto';
+import { INS } from '../domain/insurance.concepts';
+import type {
+  MyClaimListDto,
+  MyClaimsView,
+} from '../presentation/dto/my-claims.dto';
 import {
   InsurerReceivedClaimsService,
   MAX_RECEIVED_CLAIMS,

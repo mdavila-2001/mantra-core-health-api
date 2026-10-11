@@ -7,8 +7,8 @@ import {
   InsurancePlans,
 } from '../entities';
 import { InventoryReservationLines } from '../../pharmacy_inventory/entities';
-import { INS } from '../insurance.concepts';
-import type { CreatePriorAuthRequestDto } from '../dto';
+import { INS } from '../domain/insurance.concepts';
+import type { CreatePriorAuthRequestDto } from '../presentation/dto';
 import type { LinkedOrderSnapshot } from './linked-claim-validation';
 
 const fn = (implementation?: any): any => (jest.fn as any)(implementation);

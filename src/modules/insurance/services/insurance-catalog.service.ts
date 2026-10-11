@@ -12,8 +12,11 @@ import {
   InsurancePlans,
   InsuranceProducts,
 } from '../entities';
-import { INS } from '../insurance.concepts';
-import type { CarrierCatalogEntryDto, CarrierCatalogResponseDto } from '../dto';
+import { INS } from '../domain/insurance.concepts';
+import type {
+  CarrierCatalogEntryDto,
+  CarrierCatalogResponseDto,
+} from '../presentation/dto';
 
 /**
  * Rótulo de un seguro público: «Caja de Salud de la Banca Privada - CSBP».

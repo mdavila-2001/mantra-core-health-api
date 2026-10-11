@@ -14,16 +14,16 @@ import {
   PriorAuthRepository,
   CoverageRepository,
   CatalogRepository,
-} from '../repositories';
+} from '../infrastructure/repositories';
 import { PriorAuthorizationRequests } from '../entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import {
   CreatePriorAuthRequestDto,
   CreateDeterminationDto,
   CreatedResourceDto,
   ItemDeterminationDto,
   ResourceStatusDto,
-} from '../dto';
+} from '../presentation/dto';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import {
   LinkedClaimAccessService,

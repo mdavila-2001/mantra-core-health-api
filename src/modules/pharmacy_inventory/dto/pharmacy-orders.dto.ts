@@ -1,7 +1,7 @@
 import {
   PatientInsuranceSettlementDto,
   type PatientSettlementProjection,
-} from '../../insurance/dto/patient-settlement.dto';
+} from '../../insurance/presentation/dto/patient-settlement.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {

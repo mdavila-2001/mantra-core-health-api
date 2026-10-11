@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import { PRAC } from '../../practice/practice.concepts';
 import { PractitionerInsuranceNetworksService } from './practitioner-insurance-networks.service';
 

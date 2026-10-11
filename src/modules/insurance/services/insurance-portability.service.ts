@@ -9,16 +9,16 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { addDecimals } from '../../../common/money/decimal-money';
-import { CatalogRepository } from '../repositories';
-import { InsurancePortabilityRepository } from '../repositories/insurance-portability.repository';
+import { CatalogRepository } from '../infrastructure/repositories';
+import { InsurancePortabilityRepository } from '../infrastructure/repositories/insurance-portability.repository';
 import type {
   PortabilityClaimLineRow,
   PortabilityConditionRow,
   PortabilityEncounterRow,
   PortabilityPolicyRow,
-} from '../repositories/insurance-portability.repository';
-import { INS } from '../insurance.concepts';
-import { resolveInsuranceCurrencyCode } from '../insurance-currency';
+} from '../infrastructure/repositories/insurance-portability.repository';
+import { INS } from '../domain/insurance.concepts';
+import { resolveInsuranceCurrencyCode } from '../domain/insurance-currency';
 import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
 import {
   PatientProfilesRepository,
@@ -52,7 +52,7 @@ import {
   type PortabilityVerificationResponseDto,
   type PortabilityYearStatsDto,
   type RequestPortabilityExportDto,
-} from '../dto/insurance-portability.dto';
+} from '../presentation/dto/insurance-portability.dto';
 
 /** Versión del esquema del certificado. Cambia si la forma del JSON cambia. */
 const SCHEMA_VERSION = 'alovida.insurance-portability/2';

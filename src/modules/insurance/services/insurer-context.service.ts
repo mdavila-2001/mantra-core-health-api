@@ -1,12 +1,15 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   requireTenantId,
   roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../common';
-import { TenantAdministrationService } from '../../directory/services';
-import { CatalogRepository } from '../repositories';
+import {
+  DIRECTORY_TENANT_ADMINISTRATION_PORT,
+  type DirectoryTenantAdministrationPort,
+} from '../application/ports/directory-tenant-administration.port';
+import { CatalogRepository } from '../infrastructure/repositories';
 
 /** Roles que operan una aseguradora, siempre vigentes **en su tenant**. */
 const INSURER_ROLES = ['INSURANCE_OPERATOR', 'SECURITY_ADMIN', 'SUPERADMIN'];
@@ -43,7 +46,8 @@ export class InsurerContextService {
    */
   constructor(
     private readonly catalogRepo: CatalogRepository,
-    private readonly tenantAdministration: TenantAdministrationService,
+    @Inject(DIRECTORY_TENANT_ADMINISTRATION_PORT)
+    private readonly tenantAdministration: DirectoryTenantAdministrationPort,
   ) {}
 
   /**

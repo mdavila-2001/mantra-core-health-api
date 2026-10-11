@@ -1,0 +1,19 @@
+$ corepack yarn test src/modules/insurance --runInBand --silent
+(node:7946) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "/Users/josejeremias/Desktop/Mantra Core Technologies/Mantra Core Health/wt-ddd-insurance-dev/src/common/seed/data/bolivia/insurance-carriers.dataset.json" (from /Users/josejeremias/Desktop/Mantra Core Technologies/Mantra Core Health/wt-ddd-insurance-dev/src/common/seed/bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "/Users/josejeremias/Desktop/Mantra Core Technologies/Mantra Core Health/wt-ddd-insurance-dev/src/common/seed/data/bolivia/insurance-carrier-contact-channels.dataset.json" (from /Users/josejeremias/Desktop/Mantra Core Technologies/Mantra Core Health/wt-ddd-insurance-dev/src/common/seed/bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+
+Test Suites: 43 passed, 43 total
+Tests:       681 passed, 681 total
+Snapshots:   0 total
+Time:        14.005 s
+
+$ corepack yarn test src/architecture/module-layering.spec.ts --runInBand --silent
+(node:7978) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 1 passed, 1 total
+Tests:       5 passed, 5 total
+Snapshots:   0 total
+Time:        0.385 s

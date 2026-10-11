@@ -16,8 +16,8 @@ import {
   PatientExplanationsOfBenefit,
 } from '../entities';
 import { CatalogConcepts } from '../../terminology/entities';
-import { INS } from '../insurance.concepts';
-import type { PatientSettlementBatch } from '../repositories/patient-settlement.repository';
+import { INS } from '../domain/insurance.concepts';
+import type { PatientSettlementBatch } from '../infrastructure/repositories/patient-settlement.repository';
 import type { LinkedOrderSnapshot } from './linked-claim-validation';
 import { projectPatientSettlement } from './patient-settlement-projection';
 

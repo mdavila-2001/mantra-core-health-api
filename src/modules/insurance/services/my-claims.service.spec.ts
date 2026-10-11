@@ -6,7 +6,7 @@ import { Encounters } from '../../clinical/entities';
 import { DiagnosticUnits } from '../../diagnostic_units/entities';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import { InsuranceClaims, PatientCoverages } from '../entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import { MyClaimsService } from './my-claims.service';
 import { InsurerReceivedClaimsService } from './insurer-received-claims.service';
 

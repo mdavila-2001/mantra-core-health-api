@@ -4,7 +4,7 @@ import {
   ResourceNotFoundException,
   runWithTenant,
 } from '../../../common';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import { InsuranceReadService } from './insurance-read.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);

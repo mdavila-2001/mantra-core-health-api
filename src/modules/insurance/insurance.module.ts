@@ -1,4 +1,4 @@
-import { MyClaimsController } from './controllers/my-claims.controller';
+import { MyClaimsController } from './presentation/controllers/my-claims.controller';
 import { MyClaimsService } from './services/my-claims.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
@@ -39,7 +39,7 @@ import {
   InsuranceCampaignsController,
   InsurerReceivedClaimsController,
   InsurerPatientsController,
-} from './controllers';
+} from './presentation/controllers';
 import {
   InsuranceBackboneService,
   CoverageService,
@@ -74,7 +74,7 @@ import {
   InsuranceAnalyticsRepository,
   InsurancePortabilityRepository,
   InsuranceCampaignsRepository,
-} from './repositories';
+} from './infrastructure/repositories';
 // Portabilidad de póliza y siniestralidad (subtarea 3.3): el certificado se
 // autoriza contra el titular (`ProfileOwnershipService`, mismo criterio que
 // `practice.module.ts` §ALV-005/006 — clases sueltas, no `ProfilesModule`
@@ -97,8 +97,10 @@ import { DataReleaseRepository } from '../health_data/repositories/data-release.
 import { HealthProvenanceRepository } from '../health_data/repositories/health-provenance.repository';
 import { DsarRequestsRepository } from '../audit/repositories/dsar-requests.repository';
 import { DataAccessLogRepository } from '../audit/repositories/data-access-log.repository';
-import { PractitionerInsuranceNetworksController } from './controllers/practitioner-insurance-networks.controller';
+import { PractitionerInsuranceNetworksController } from './presentation/controllers/practitioner-insurance-networks.controller';
 import { PractitionerInsuranceNetworksService } from './services/practitioner-insurance-networks.service';
+import { DirectoryTenantAdministrationAdapter } from './infrastructure/adapters/directory-tenant-administration.adapter';
+import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
 
 /**
  * Módulo Insurance (26): redes, coberturas, elegibilidad, autorización previa,
@@ -143,6 +145,11 @@ import { PractitionerInsuranceNetworksService } from './services/practitioner-in
     InsurerPatientsController,
   ],
   providers: [
+    DirectoryTenantAdministrationAdapter,
+    {
+      provide: DIRECTORY_TENANT_ADMINISTRATION_PORT,
+      useExisting: DirectoryTenantAdministrationAdapter,
+    },
     PractitionerInsuranceNetworksService,
     MyClaimsService,
     // Repositorios

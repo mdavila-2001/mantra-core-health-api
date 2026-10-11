@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { CONCEPTS, encodeKeysetCursor } from '../../../common';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import {
   buildInsurerPatientPageQuery,
   buildInsurerPatientCountQuery,

@@ -1,9 +1,9 @@
 import { mismosDecimales, PreconditionFailedException } from '../../../common';
-import type { PatientSettlementProjection } from '../dto/patient-settlement.dto';
+import type { PatientSettlementProjection } from '../presentation/dto/patient-settlement.dto';
 import type { InsuranceClaims } from '../entities';
-import { INS } from '../insurance.concepts';
-import { resolveInsuranceCurrencyCode } from '../insurance-currency';
-import type { PatientSettlementBatch } from '../repositories/patient-settlement.repository';
+import { INS } from '../domain/insurance.concepts';
+import { resolveInsuranceCurrencyCode } from '../domain/insurance-currency';
+import type { PatientSettlementBatch } from '../infrastructure/repositories/patient-settlement.repository';
 import {
   matchesLinkedClaimSnapshot,
   validateLinkedClaimSettlement,

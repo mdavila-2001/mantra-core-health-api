@@ -16,7 +16,7 @@ import {
   ClaimRepository,
   CoverageRepository,
   CatalogRepository,
-} from '../repositories';
+} from '../infrastructure/repositories';
 import {
   InsuranceClaims,
   InsuranceClaimLines,
@@ -24,7 +24,7 @@ import {
   ClaimReversals,
   PriorAuthorizationRequests,
 } from '../entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import {
   CreateClaimDto,
   CreatedClaimDto,
@@ -34,7 +34,7 @@ import {
   CreateDisputeDto,
   CreatedResourceDto,
   ResourceStatusDto,
-} from '../dto';
+} from '../presentation/dto';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import {
   LinkedClaimAccessService,

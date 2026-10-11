@@ -11,7 +11,7 @@ import { PostgreSqlPlatform } from '@mikro-orm/postgresql';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { DeclaredCoveragesReader } from './declared-coverages-reader';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import { PHARM } from '../../pharmacy/pharmacy.concepts';
 import { CONCEPTS } from '../../../common';
 

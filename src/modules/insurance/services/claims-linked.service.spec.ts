@@ -9,8 +9,11 @@ import {
   ClaimLineAdjudications,
   PriorAuthorizationRequests,
 } from '../entities';
-import { INS } from '../insurance.concepts';
-import type { CreateClaimDto, CreateAdjudicationDto } from '../dto';
+import { INS } from '../domain/insurance.concepts';
+import type {
+  CreateClaimDto,
+  CreateAdjudicationDto,
+} from '../presentation/dto';
 import type { LinkedOrderSnapshot } from './linked-claim-validation';
 
 const fn = (implementation?: any): any => (jest.fn as any)(implementation);

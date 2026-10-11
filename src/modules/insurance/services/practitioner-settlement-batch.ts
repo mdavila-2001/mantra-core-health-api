@@ -1,6 +1,6 @@
 import { PreconditionFailedException } from '../../../common';
 import { mismosDecimales, sumarDecimales } from '../../../common';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import type {
   ClaimAdjudicationVersions,
   ClaimLineAdjudications,
@@ -8,7 +8,7 @@ import type {
   InsuranceClaims,
   PatientExplanationsOfBenefit,
 } from '../entities';
-import { buildClaimSettlementBreakdown } from './claim-settlement-breakdown';
+import { buildClaimSettlementBreakdown } from '../domain/settlement/claim-settlement-breakdown';
 
 /**
  * Dominio puro del lote periódico de liquidación al profesional (Tarea 3 ·

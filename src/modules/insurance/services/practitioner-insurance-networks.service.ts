@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import { PRAC } from '../../practice/practice.concepts';
-import type { PractitionerInsuranceNetworkDto } from '../dto/practitioner-insurance-network.dto';
+import type { PractitionerInsuranceNetworkDto } from '../presentation/dto/practitioner-insurance-network.dto';
 
 /** Una fila de la consulta, tal como la devuelve Postgres. */
 interface NetworkRow {

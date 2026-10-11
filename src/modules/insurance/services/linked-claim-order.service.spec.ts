@@ -13,7 +13,7 @@ import {
 } from '../../pharmacy_inventory/entities';
 import { PINV } from '../../pharmacy_inventory/pharmacy_inventory.concepts';
 import { InsuranceClaims, InsuranceClaimLines } from '../entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 
 const fn = (implementation?: any): any => (jest.fn as any)(implementation);

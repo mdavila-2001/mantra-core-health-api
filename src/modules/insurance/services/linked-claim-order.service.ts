@@ -20,7 +20,7 @@ import {
 import { PINV } from '../../pharmacy_inventory/pharmacy_inventory.concepts';
 import { multiplyAmounts } from '../../pharmacy_inventory/services/pharmacy-pricing';
 import { InsuranceClaimLines, type InsuranceClaims } from '../entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import {
   type LinkedOrderLine,
   type LinkedOrderSnapshot,

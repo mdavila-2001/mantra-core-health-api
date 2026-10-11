@@ -7,8 +7,8 @@ import {
   InsurancePlans,
   PatientCoverages,
 } from '../entities';
-import { INS } from '../insurance.concepts';
-import type { CreateAdjudicationDto } from '../dto';
+import { INS } from '../domain/insurance.concepts';
+import type { CreateAdjudicationDto } from '../presentation/dto';
 import type { LinkedOrderSnapshot } from './linked-claim-validation';
 
 /**

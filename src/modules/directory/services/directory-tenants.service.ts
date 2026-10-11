@@ -23,7 +23,7 @@ import {
   TenantMembershipsRepository,
   TenantsRepository,
 } from '../repositories';
-import { CatalogRepository } from '../../insurance/repositories';
+import { CatalogRepository } from '../../insurance/infrastructure/repositories';
 import type { Tenants } from '../entities';
 import {
   CreateChildTenantDto,

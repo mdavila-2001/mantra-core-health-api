@@ -9,7 +9,7 @@ import {
   carrierProductId,
   declaredPlanSector,
 } from '../../../common/seed/bolivia-insurance.catalog';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import { InsuranceCatalogService } from './insurance-catalog.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);

@@ -25,7 +25,7 @@ import {
   InsuranceBrokers as InsuranceBrokersEntity,
   ClaimReversals,
 } from '../entities';
-import { buildClaimSettlementBreakdown } from './claim-settlement-breakdown';
+import { buildClaimSettlementBreakdown } from '../domain/settlement/claim-settlement-breakdown';
 import type {
   ClaimAdjudicationDto,
   ClaimDetailDto,
@@ -38,14 +38,14 @@ import type {
   ClaimSettlementBreakdownDto,
   InsuranceConceptDto,
   MoneyDto,
-} from '../dto';
-import { INS } from '../insurance.concepts';
+} from '../presentation/dto';
+import { INS } from '../domain/insurance.concepts';
 import {
   CatalogRepository,
   ClaimReadRepository,
   type ClaimCursor,
   type ClaimListFilters,
-} from '../repositories';
+} from '../infrastructure/repositories';
 
 /** Tamaño de página por defecto del listado de solicitudes. */
 const DEFAULT_PAGE_SIZE = 25;

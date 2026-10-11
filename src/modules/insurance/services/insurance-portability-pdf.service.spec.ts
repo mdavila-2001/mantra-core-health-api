@@ -4,7 +4,7 @@ import {
   draw,
   InsurancePortabilityPdfService,
 } from './insurance-portability-pdf.service';
-import type { InsurancePortabilityReportDto } from '../dto/insurance-portability.dto';
+import type { InsurancePortabilityReportDto } from '../presentation/dto/insurance-portability.dto';
 import PDFDocument from 'pdfkit';
 
 const HASH = 'e404be51f92fcabebab7b829051cb2522d940ec09c3f5ef8f63ee122d1beedb7';

@@ -5,7 +5,7 @@ import { InsurancePlans, PatientCoverages } from '../entities';
 import { Persons, PatientProfiles } from '../../profiles/entities';
 import { PharmacyProducts } from '../../pharmacy/entities';
 import { CatalogConcepts } from '../../terminology/entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 
 const fn = (implementation?: any): any => (jest.fn as any)(implementation);
 const actor = { id: 'user', roles: ['USER'] };

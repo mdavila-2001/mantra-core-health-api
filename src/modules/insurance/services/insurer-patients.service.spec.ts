@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import { context } from '@opentelemetry/api';
 import { isTracingSuppressed } from '@opentelemetry/core';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import { ageAt, InsurerPatientsService } from './insurer-patients.service';
 
 // Alias con tipado laxo: evita el 'never' que @jest/globals infiere para jest.fn() en ESM.

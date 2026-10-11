@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
 } from '@nestjs/common';
 import { TransactionPropagation } from '@mikro-orm/core';
@@ -18,19 +19,22 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
 } from '../../../common/pagination/keyset-cursor';
-import { TenantAdministrationService } from '../../directory/services';
+import {
+  DIRECTORY_TENANT_ADMINISTRATION_PORT,
+  type DirectoryTenantAdministrationPort,
+} from '../application/ports/directory-tenant-administration.port';
 import { AuditTrailService } from '../../audit/services';
 import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
 import { patientCoverageReferenceDate } from '../../profiles/domain/patient-coverage-validity';
-import { CatalogRepository } from '../repositories';
+import { CatalogRepository } from '../infrastructure/repositories';
 import {
   InsuranceCampaignsRepository,
   type CampaignPartnerRow,
   type CampaignRow,
   type PatientCampaignRow,
-} from '../repositories/insurance-campaigns.repository';
+} from '../infrastructure/repositories/insurance-campaigns.repository';
 import type { InsuranceCampaigns, InsuranceCarriers } from '../entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import type {
   ActiveCampaignsQueryDto,
   CampaignPartnerRoleDto,
@@ -46,7 +50,7 @@ import type {
   PatientCampaignDto,
   UpdateInsuranceCampaignDto,
   UpdateInsuranceCampaignStatusDto,
-} from '../dto/insurance-campaigns.dto';
+} from '../presentation/dto/insurance-campaigns.dto';
 
 /** Roles de plataforma: operan sobre cualquier aseguradora indicando el tenant. */
 const PLATFORM_ROLES: ReadonlySet<string> = new Set([
@@ -177,7 +181,8 @@ export class InsuranceCampaignsService {
     private readonly em: EntityManager,
     private readonly repo: InsuranceCampaignsRepository,
     private readonly catalog: CatalogRepository,
-    private readonly tenantAdministration: TenantAdministrationService,
+    @Inject(DIRECTORY_TENANT_ADMINISTRATION_PORT)
+    private readonly tenantAdministration: DirectoryTenantAdministrationPort,
     private readonly profileOwnership: ProfileOwnershipService,
     private readonly auditTrail: AuditTrailService,
   ) {}

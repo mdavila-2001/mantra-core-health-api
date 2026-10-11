@@ -5,7 +5,7 @@ import {
   brandHeight,
 } from '../../clinical/services/alovida-mark';
 import { drawQr } from '../../clinical/services/prescription-qr';
-import type { InsurancePortabilityReportDto } from '../dto/insurance-portability.dto';
+import type { InsurancePortabilityReportDto } from '../presentation/dto/insurance-portability.dto';
 
 /**
  * Reutiliza el membrete de recetas (`clinical/services/alovida-mark.ts` y

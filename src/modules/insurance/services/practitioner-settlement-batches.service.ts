@@ -20,9 +20,12 @@ import {
   PatientExplanationsOfBenefit,
 } from '../entities';
 import { CatalogConcepts } from '../../terminology/entities';
-import { CatalogRepository, SettlementRepository } from '../repositories';
-import { INS } from '../insurance.concepts';
-import { resolveInsuranceCurrencyCode } from '../insurance-currency';
+import {
+  CatalogRepository,
+  SettlementRepository,
+} from '../infrastructure/repositories';
+import { INS } from '../domain/insurance.concepts';
+import { resolveInsuranceCurrencyCode } from '../domain/insurance-currency';
 import {
   LinkedClaimAccessService,
   claimAccessDenied,
@@ -38,7 +41,7 @@ import type {
   GeneratePractitionerSettlementBatchDto,
   PractitionerSettlementBatchDto,
   PractitionerSettlementBatchListQueryDto,
-} from '../dto';
+} from '../presentation/dto';
 
 /** La versión no superada por ninguna otra del mismo reclamo (idéntico criterio que `ClaimsReadService.currentVersion`). */
 function currentVersionOf(

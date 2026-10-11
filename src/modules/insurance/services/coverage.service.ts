@@ -7,12 +7,15 @@ import {
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../common';
-import { CoverageRepository, CatalogRepository } from '../repositories';
+import {
+  CoverageRepository,
+  CatalogRepository,
+} from '../infrastructure/repositories';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../../profiles/infrastructure/repositories';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import {
   CreateCoverageDto,
   CreateEligibilityRequestDto,
@@ -20,7 +23,7 @@ import {
   CreatedResourceDto,
   ResourceStatusDto,
   MyCoverageDto,
-} from '../dto';
+} from '../presentation/dto';
 
 const RELATIONSHIP_CONCEPT: Record<string, string> = {
   SPOUSE: INS.RELATIONSHIP_SPOUSE,

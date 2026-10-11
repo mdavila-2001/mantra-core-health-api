@@ -61,7 +61,7 @@ import { createDeclaredCoverage } from '../../insurance/services/declared-covera
 import {
   CatalogRepository,
   CoverageRepository,
-} from '../../insurance/repositories';
+} from '../../insurance/infrastructure/repositories';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 

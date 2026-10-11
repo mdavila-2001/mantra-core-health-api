@@ -5,7 +5,10 @@ import { CatalogConcepts } from '../../terminology/entities';
 import { Persons, PatientProfiles } from '../../profiles/entities';
 import { PharmacyProducts } from '../../pharmacy/entities';
 import { DiagnosticStudyOfferings } from '../../diagnostic_units/entities';
-import { CatalogRepository, PriorAuthRepository } from '../repositories';
+import {
+  CatalogRepository,
+  PriorAuthRepository,
+} from '../infrastructure/repositories';
 import {
   InsurancePlans,
   PatientCoverages,
@@ -13,15 +16,15 @@ import {
   type PriorAuthorizationItems,
   type PriorAuthorizationRequests,
 } from '../entities';
-import { INS } from '../insurance.concepts';
-import { resolveInsuranceCurrencyCode } from '../insurance-currency';
+import { INS } from '../domain/insurance.concepts';
+import { resolveInsuranceCurrencyCode } from '../domain/insurance-currency';
 import type {
   PriorAuthDetailDto,
   PriorAuthInboxQueryDto,
   PriorAuthItemViewDto,
   PriorAuthListDto,
   PriorAuthListItemDto,
-} from '../dto';
+} from '../presentation/dto';
 import {
   LinkedClaimAccessService,
   authorizeClaimResource,

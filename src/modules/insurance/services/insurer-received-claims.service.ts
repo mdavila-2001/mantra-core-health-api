@@ -16,8 +16,11 @@ import type {
   InsuranceClaimLines,
   InsuranceClaims,
 } from '../entities';
-import { INS } from '../insurance.concepts';
-import { ClaimReadRepository, ClaimRepository } from '../repositories';
+import { INS } from '../domain/insurance.concepts';
+import {
+  ClaimReadRepository,
+  ClaimRepository,
+} from '../infrastructure/repositories';
 import type {
   ClaimPatientDto,
   InsuranceConceptDto,
@@ -29,18 +32,21 @@ import type {
   ReceivedClaimListDto,
   ReceivedClaimOutcome,
   ReceivedClaimPractitionerDto,
-} from '../dto';
+} from '../presentation/dto';
 import { InsurerContextService } from './insurer-context.service';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { matchesLinkedClaimSnapshot } from './linked-claim-validation';
-import type { MyClaimDto, MyClaimsView } from '../dto/my-claims.dto';
+import type {
+  MyClaimDto,
+  MyClaimsView,
+} from '../presentation/dto/my-claims.dto';
 import {
   CorruptStoredAmountError,
   fromCents,
   splitApproval,
   toCents,
   type LineSettlement,
-} from './received-claim-settlement';
+} from '../domain/settlement/received-claim-settlement';
 
 /** Tope de filas del listado: por encima se recorta y se avisa con `truncated`. */
 export const MAX_RECEIVED_CLAIMS = 500;

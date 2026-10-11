@@ -5,7 +5,7 @@ import { DeclaredCoveragesReader } from '../../../insurance/services/declared-co
 import {
   CatalogRepository,
   CoverageRepository,
-} from '../../../insurance/repositories';
+} from '../../../insurance/infrastructure/repositories';
 import type { PatientCoveragesPort } from '../../application/ports/patient-coverages.port';
 
 @Injectable()

@@ -10,8 +10,8 @@ import type {
   OwnCoverageDto,
 } from '../../profiles/presentation/dto/read-patients.dto';
 import { isPublicCarrierId } from '../../../common/seed/bolivia-insurance.catalog';
-import { resolveInsuranceCurrencyCode } from '../insurance-currency';
-import { INS } from '../insurance.concepts';
+import { resolveInsuranceCurrencyCode } from '../domain/insurance-currency';
+import { INS } from '../domain/insurance.concepts';
 
 /** El mismo objeto sin las claves `null`/`undefined` (patrón de `profiles-patients.service.ts`). */
 function withoutAbsentFields<T extends object>(response: T): T {

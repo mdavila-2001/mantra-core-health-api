@@ -12,7 +12,7 @@ import {
 import { CatalogConcepts } from '../../terminology/entities';
 import { DiagnosticUnits } from '../../diagnostic_units/entities';
 import { Pharmacies } from '../../pharmacy/entities';
-import { INS } from '../insurance.concepts';
+import { INS } from '../domain/insurance.concepts';
 import { PractitionerSettlementBatchesService } from './practitioner-settlement-batches.service';
 
 const fn = (implementation?: any): any => (jest.fn as any)(implementation);
