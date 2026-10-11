@@ -17,6 +17,7 @@ No se tocaron entidades, DDL, seeds ni el modelo externo. Los cambios a consumer
 - Guard de arquitectura actual: 1 suite / 7 tests; incluye `pharmacy_inventory`.
 - Suite completa en `dev`: 837 suites pasaron; 1 suite quedó omitida; 10.214 tests pasaron y 1 quedó omitido. Duración: 144.443 s. No hubo fallos.
 - Typecheck, ESLint dirigido y `git diff --check` pasaron.
+- En base `test` (`13848053`), el mismo commit funcional pasó 21 suites / 151 tests, guard 7/7, typecheck y ESLint dirigido. Evidencia: `evidencia/test-targeted.txt`.
 - No se ejecutaron pruebas con simulador ni Docker.
 - `corepack yarn pw playwright/carril-19-route-health.spec.ts --workers=1` no aplica a este checkout API: el `package.json` de esta rama no define un script `pw`. El intento y su salida están en `evidencia/dev-route-health.txt`.
 
@@ -26,4 +27,4 @@ Las salidas literales se guardan en `evidencia/`.
 
 - El baseline completo previo no quedó capturado; la comparación previa disponible corresponde al módulo y guard, arriba.
 - La suite completa reportó una suite/test omitido. No se modificaron ni desactivaron tests para ocultarlo.
-- La preparación de la rama `test` y sus gates todavía está pendiente.
+- Los gates dirigidos de `test` pasaron; su PR separado está en preparación.

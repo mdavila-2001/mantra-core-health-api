@@ -78,7 +78,7 @@
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
 | H1.S5.M1 | Ejecutar los gates dirigidos y la suite completa en `dev` | Todos los gates salen con código 0 | comandos indicados + salida en `evidencia/dev-full-test.txt`, `evidencia/s4-final.txt` | HECHO |
-| H1.S5.M2 | Portar el commit a base fresca `test` y repetir gates dirigidos | `test` conserva el mismo diff funcional y gates dirigidos verdes | specs + guard + typecheck + lint |
+| H1.S5.M2 | Portar el commit a base fresca `test` y repetir gates dirigidos | `test` conserva el mismo diff funcional y gates dirigidos verdes | specs + guard + typecheck + lint | HECHO |
 | H1.S5.M3 | Escribir reporte y abrir PR por base con límites y no cubierto explícitos | Reporte enlazado, PRs abiertos y sin merge | `gh pr view` con estado, base, mergeabilidad y checks |
 
 ## Riesgos y bloqueos previstos
