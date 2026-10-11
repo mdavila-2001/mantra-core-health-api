@@ -3,7 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { NotificationsService } from '../../messaging/services';
 import type { EmitInAppResult } from '../../messaging/notifications.contract';
-import { PersonAccountLinksRepository } from '../../profiles/repositories';
+import { PersonAccountLinksRepository } from '../../profiles/infrastructure/repositories';
 
 /**
  * Carril P1 · los disparadores clínicos de la campana.

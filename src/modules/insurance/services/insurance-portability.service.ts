@@ -19,13 +19,13 @@ import type {
 } from '../repositories/insurance-portability.repository';
 import { INS } from '../insurance.concepts';
 import { resolveInsuranceCurrencyCode } from '../insurance-currency';
-import { ProfileOwnershipService } from '../../profiles/services/profile-ownership.service';
+import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
 import {
   PatientProfilesRepository,
   PersonsRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { IdentifiersRepository } from '../../common/repositories';
-import { composePersonDisplayName } from '../../profiles/person-name';
+import { composePersonDisplayName } from '../../profiles/domain/person-name';
 import { CatalogConcepts } from '../../terminology/entities';
 import { FileUploadService } from '../../common/services';
 import { FileCategory, FileSensitivity } from '../../common/dto';

@@ -43,12 +43,12 @@ import { AddressesRepository } from '../common/repositories';
 // criterio que `ServiceCatalogRepository` arriba: se registran las clases
 // puntuales, no `ProfilesModule`/`CommonModule` enteros — evita el ciclo
 // (`profiles` ya lee lo que `practice` expone) y no duplica fuente de verdad.
-import { ProfileOwnershipService } from '../profiles/services/profile-ownership.service';
+import { ProfileOwnershipService } from '../profiles/application/services/profile-ownership.service';
 import {
   PersonAccountLinksRepository,
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
-} from '../profiles/repositories';
+} from '../profiles/infrastructure/repositories';
 
 /**
  * Módulo Practice (14): organizaciones de atención, sitios, unidades clínicas,

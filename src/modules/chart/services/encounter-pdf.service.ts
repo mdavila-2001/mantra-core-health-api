@@ -17,11 +17,11 @@ import { CLIN } from '../../clinical/clinical.concepts';
 import type { CatalogConcepts } from '../../terminology/entities';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { FilesRepository } from '../../common/repositories/files.repository';
-import { PatientProfilesRepository } from '../../profiles/repositories/patient-profiles.repository';
-import { HealthPractitionerProfilesRepository } from '../../profiles/repositories/health-practitioner-profiles.repository';
-import { PersonsRepository } from '../../profiles/repositories/persons.repository';
+import { PatientProfilesRepository } from '../../profiles/infrastructure/repositories/patient-profiles.repository';
+import { HealthPractitionerProfilesRepository } from '../../profiles/infrastructure/repositories/health-practitioner-profiles.repository';
+import { PersonsRepository } from '../../profiles/infrastructure/repositories/persons.repository';
 import type { Persons } from '../../profiles/entities';
-import { composePersonDisplayName } from '../../profiles/person-name';
+import { composePersonDisplayName } from '../../profiles/domain/person-name';
 import {
   CarePlansRepository,
   ClinicalNotesRepository,

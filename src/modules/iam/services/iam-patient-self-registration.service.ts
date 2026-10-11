@@ -28,9 +28,9 @@ import {
   PersonProfilesRepository,
   PersonsRepository,
   RelatedPersonsRepository,
-} from '../../profiles/repositories';
-import { composeAccountDisplayName } from '../../profiles/person-name';
-import { AdministrativeAreaCatalogService } from '../../profiles/services/administrative-area-catalog.service';
+} from '../../profiles/infrastructure/repositories';
+import { composeAccountDisplayName } from '../../profiles/domain/person-name';
+import { AdministrativeAreaCatalogService } from '../../profiles/application/services/administrative-area-catalog.service';
 import {
   AddressesRepository,
   ContactPointsRepository,
@@ -56,7 +56,7 @@ import {
   createResidenceAddress,
   createWorkAddress,
 } from '../../common/services/residence-address';
-import { createGuardianRelatedPerson } from '../../profiles/services/guardian-related-person';
+import { createGuardianRelatedPerson } from '../../profiles/application/services/guardian-related-person';
 import { createDeclaredCoverage } from '../../insurance/services/declared-coverage';
 import {
   CatalogRepository,

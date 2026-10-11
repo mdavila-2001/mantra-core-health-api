@@ -14,7 +14,7 @@ import {
   PeriopPreopRepository,
   PeriopIntraopRepository,
 } from '../repositories';
-import { ProfessionalCredentialsRepository } from '../../profiles/repositories';
+import { ProfessionalCredentialsRepository } from '../../profiles/infrastructure/repositories';
 import { AuditTrailService } from '../../audit/services';
 import { OutboxService } from '../../messaging/services';
 // La historia clínica sigue siendo de `clinical`: el caso quirúrgico pide que

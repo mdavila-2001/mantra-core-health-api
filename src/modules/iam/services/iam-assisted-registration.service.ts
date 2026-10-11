@@ -9,7 +9,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { composeAccountDisplayName } from '../../profiles/person-name';
+import { composeAccountDisplayName } from '../../profiles/domain/person-name';
 import {
   UsersRepository,
   CredentialsRepository,

@@ -26,7 +26,7 @@ import {
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 // FT-07-R05/R08: el PDP resuelve si hay grant/relación/representación vigente
 // más allá del turno de hoy. `AuthzModule` lo exporta justamente para esto.
 import { AuthzPdpService } from '../../authz/services';
@@ -37,7 +37,7 @@ import { AuthzPdpService } from '../../authz/services';
 // archivo: es una clase sin estado que recibe el `EntityManager` por
 // parámetro, y `authz` no depende de `clinical`, así que no cierra ciclo.
 import { CareRelationshipsRepository } from '../../authz/repositories';
-import { PatientRepresentationService } from '../../profiles/services/patient-representation.service';
+import { PatientRepresentationService } from '../../profiles/application/services/patient-representation.service';
 // N-04 (BR-13 / M3): toda lectura del resumen clínico deja su fila en
 // `audit.data_access_log`, como ya hace el break-the-glass. Repositorio sin
 // estado por `EntityManager`, provisto en `ClinicalModule` sin importar más de

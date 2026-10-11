@@ -32,7 +32,7 @@ import {
   TenantAffiliationDocumentsService,
   TenantTypeProfileService,
 } from '../../directory/services';
-import { composeAccountDisplayName } from '../../profiles/person-name';
+import { composeAccountDisplayName } from '../../profiles/domain/person-name';
 import {
   CredentialsRepository,
   EmailVerificationsRepository,

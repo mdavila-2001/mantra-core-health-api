@@ -5,7 +5,7 @@ import { touch, type AuthenticatedUser } from '../../../common';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { PatientReportedHealthStatementsRepository } from '../repositories';
 import type { PatientReportedHealthStatements } from '../entities';
 import { MedicalAspectsResponseDto, UpdateOwnMedicalAspectsDto } from '../dto';

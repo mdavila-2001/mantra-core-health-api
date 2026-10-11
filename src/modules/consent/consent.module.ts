@@ -42,7 +42,7 @@ import { ClinicalAccessGrantsRepository } from '../authz/repositories';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../profiles/repositories';
+} from '../profiles/infrastructure/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { MessagingModule } from '../messaging/messaging.module';
 // El médico registra el consentimiento informado desde su consulta (CL-77): hace
