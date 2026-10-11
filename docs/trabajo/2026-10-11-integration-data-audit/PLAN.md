@@ -5,9 +5,9 @@
 - Kill-test: si las consultas de sólo lectura no confirman que falta `I10` y que anatomía tiene 16 miembros, no se atribuyen los 400 ni los conteos a datos.
 
 ## Alcance
-- IN: documentar la corrida autorizada de los tres specs, las comprobaciones de sólo lectura y la falla WORM del cleanup.
-- OUT: cargar semillas, editar tests/código productivo, borrar tenants o tocar `audit.audit_log`.
-- Ambigüedades registradas: la carga idempotente de CIE-10 modifica la base local; el handoff indica que requiere autorización explícita. Se asume no autorizada hasta confirmación del propietario.
+- IN: documentar la corrida autorizada de los tres specs, las comprobaciones de sólo lectura y la falla WORM del cleanup; tras autorización explícita, cargar sólo la capa CIE-10-ES Diagnósticos en la base local.
+- OUT: editar tests/código productivo, borrar tenants o tocar `audit.audit_log`.
+- Ambigüedades registradas: la carga idempotente de CIE-10 modifica la base local; el handoff exige autorización explícita. El propietario la autorizó el 2026-10-11 tras revisar el dry-run y confirmar destino local.
 
 ## H1 — Clasificar los fallos y dejar evidencia reproducible
 **CA:** Dado el resultado de los tres specs y las consultas de sólo lectura, cuando se revise el reporte, entonces cada fallo queda clasificado o marcado como pendiente con su evidencia.
@@ -23,6 +23,7 @@
 | H1.S1.M1 | Documentar 3 suites, 11 fallos y 19 pruebas aprobadas | El reporte refleja el resultado de la corrida autorizada | `git diff --check` → código 0 | HECHO |
 | H1.S1.M2 | Clasificar ausencia de `I10`, conteo anatómico y fallback español | El reporte vincula cada caso a evidencia observada | `git diff --check` → código 0 | HECHO |
 | H1.S1.M3 | Documentar residuo sintético protegido por WORM | Se indica que el cleanup falló y que `audit_log` quedó intacto | `git diff --check` → código 0 | HECHO |
+| H1.S1.M4 | Cargar selectivamente CIE-10-ES Diagnósticos en la base local autorizada | `I10` aparece en el catálogo de la base `mantra_redesa_health` | `load-glossary-es.mjs --layers cie10es-diagnosticos --apply` y consulta `BEGIN READ ONLY` → `I10` count = 1 | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
