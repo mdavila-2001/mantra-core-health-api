@@ -3,7 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import {
   marketplaceTenantScope,
   ResourceNotFoundException,
-} from '../../../common';
+} from '../../../../common';
 import type {
   PharmacyAddressSnapshot,
   PharmacyConceptSnapshot,

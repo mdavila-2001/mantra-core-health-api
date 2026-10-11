@@ -5,8 +5,8 @@
 - Kill-test: `corepack yarn lint --max-warnings=0` reproduce el fallo en `src/modules/terminology/repositories/glossary-search.sql.ts`.
 
 ## Alcance
-- IN: resolver el import sin uso que hace fallar el check; incorporar los commits nuevos de `dev` en la rama del PR; revalidar gates afectados y actualizar este reporte.
-- OUT: cambios de comportamiento, cambios de esquema/modelo, reparación general de errores ajenos a los checks de este PR.
+- IN: resolver el import sin uso que hace fallar el check; incorporar los commits nuevos de `dev` en la rama del PR; reponer como puerto local la consulta clínica directa nueva de `profiles`, que hace fallar el guard de capas al sincronizar; corregir los errores mecánicos de lint que aparecieron al integrar `dev` y bloquean el workflow global; revalidar gates afectados y actualizar este reporte.
+- OUT: cambios de comportamiento, cambios de esquema/modelo, reparación de errores ajenos a los gates que bloquean este PR.
 - Ambigüedades registradas: ninguna. El CI identifica un import directo no usado; la corrección conserva la exportación pública.
 
 ## H1 — PR #641 integrable y con lint verde
@@ -22,14 +22,15 @@
 |---|---|---|---|---|
 | H1.S1.M1 | Quitar el import local duplicado y conservar la reexportación | `normalizeSearchText` sigue exportado y ESLint no reporta unused vars | `corepack yarn lint --max-warnings=0` → código 0 | HECHO |
 
-### H1.S2 — Sincronizar con la base actual
-**CA:** Dado que `dev` avanzó, cuando se integra en la rama del PR, entonces la rama contiene la base actual sin conflictos pendientes ni pérdida de cambios del PR.
+### H1.S2 — Sincronizar con la base actual y conservar los límites de capas
+**CA:** Dado que `dev` avanzó, cuando se integra en la rama del PR, entonces la rama contiene la base actual sin conflictos pendientes ni pérdida de cambios del PR y el guard no detecta llamadas directas entre capas/contextos.
 **DoD:** `git merge-tree` sin conflictos; `git status` limpio; `gh pr view 641` sin estado `DIRTY`.
-**Estado:** TODO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H1.S2.M1 | Integrar la punta actual de `origin/dev` en la rama del PR y resolver conflictos, si aparecen | El ancestro/base de integración es la punta vigente de `dev` | `git merge-base --is-ancestor origin/dev HEAD` → código 0 | TODO |
+| H1.S2.M1 | Integrar la punta actual de `origin/dev` en la rama del PR y resolver conflictos, si aparecen | El ancestro/base de integración es la punta vigente de `dev` | `git merge-base --is-ancestor origin/dev HEAD` → código 0 | HECHO |
+| H1.S2.M2 | Mover la autorización clínica de `profiles` tras su puerto local, preservando llamada y rechazo | El controller usa el puerto de aplicación y el adaptador resuelve `ClinicalReadService` sin cambiar `assertCanReadHistory` | `corepack yarn test src/modules/profiles/presentation/controllers/profiles-patients.controller.spec.ts --runInBand --silent` y guard de capas → código 0 | HECHO |
 
 ### H1.S3 — Revalidar los gates del PR
 **CA:** Dado el código reparado y la base vigente, cuando se ejecutan los gates del módulo, entonces todos terminan en código 0.
@@ -38,8 +39,9 @@
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
-| H1.S3.M1 | Ejecutar gates locales dirigidos y lint global | Los cuatro gates concluyen sin fallos | comandos en H1 → salidas literales en `evidencia/` | TODO |
+| H1.S3.M1 | Ejecutar gates locales dirigidos y lint global | Los cuatro gates concluyen sin fallos | comandos en H1 → salidas literales en `evidencia/` | HECHO |
 | H1.S3.M2 | Actualizar y revisar el reporte de reparación | Reporte lista resultados literales y límites restantes | revisión del `REPORTE.md` → todas las secciones obligatorias presentes | TODO |
+| H1.S3.M3 | Corregir errores mecánicos de lint del merge de `dev` | ESLint deja de reportar los cuatro errores adicionales identificados | `corepack yarn lint --max-warnings=0` → código 0 | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
