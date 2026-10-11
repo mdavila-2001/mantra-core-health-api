@@ -73,13 +73,13 @@
 ### H1.S5 — Regresión y entrega en `dev`/`test`
 **CA:** Dadas las bases `dev` y `test`, cuando se ejecutan las suites y gates del módulo, entonces ambas conservan sus contratos y pasan todas las pruebas aplicables.
 **DoD:** suites dirigidas, guard, typecheck, lint dirigido, regresión completa en `dev`, reporte, PRs contra ambas bases y revisión `mergeable`/checks; sin merge.
-**Estado:** TODO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
 | H1.S5.M1 | Ejecutar los gates dirigidos y la suite completa en `dev` | Todos los gates salen con código 0 | comandos indicados + salida en `evidencia/dev-full-test.txt`, `evidencia/s4-final.txt` | HECHO |
 | H1.S5.M2 | Portar el commit a base fresca `test` y repetir gates dirigidos | `test` conserva el mismo diff funcional y gates dirigidos verdes | specs + guard + typecheck + lint |
-| H1.S5.M3 | Escribir reporte y abrir PR por base con límites y no cubierto explícitos | Reporte enlazado, PRs abiertos y sin merge | `gh pr view` con estado, base, mergeabilidad y checks |
+| H1.S5.M3 | Escribir reporte y abrir PR por base con límites y no cubierto explícitos | Reporte enlazado, PRs abiertos y sin merge | `gh pr view` con estado, base, mergeabilidad y checks | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

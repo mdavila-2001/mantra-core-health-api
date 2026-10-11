@@ -27,3 +27,11 @@ Las salidas literales se guardan en `evidencia/`.
 - El baseline completo previo no quedó capturado; la comparación previa disponible corresponde al módulo y guard, arriba.
 - La suite completa reportó una suite/test omitido. No se modificaron ni desactivaron tests para ocultarlo.
 - La preparación de la rama `test` y sus gates todavía está pendiente.
+
+
+## Pull requests
+
+- [#641 contra `dev`](https://github.com/mdavila-2001/mantra-core-health-api/pull/641)
+- [#642 contra `test`](https://github.com/mdavila-2001/mantra-core-health-api/pull/642)
+
+Estado observado y checks: `evidencia/pr-status.txt`.
