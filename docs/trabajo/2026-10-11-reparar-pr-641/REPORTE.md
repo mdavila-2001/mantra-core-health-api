@@ -20,9 +20,9 @@
 
 ### H1.S3.M5 — Confirmar CI remoto y mergeabilidad
 
-- Qué anda: el PR remoto quedó `MERGEABLE` con base `ce2910eb`; CI pasó build, tipos, lint, auditoría, guardrails y DDL. El fallo de la suite se reprodujo: faltaba `findAddresses` en el fixture, ya corregido localmente y probado 5/5.
-- Qué no anda: la suite remota completa anterior falló en ese spec y la cobertura quedó en 68,92%, bajo el 69% exigido. La corrección del fixture todavía no está en la rama remota.
-- Qué falta exactamente: publicar el spec corregido y consultar `gh pr checks 641` más `gh pr view 641 --json mergeable,mergeStateStatus` después de esa corrida.
+- Qué anda: el spec corregido pasó 5/5 y el commit `f836ffbb` está en la rama remota; el PR remoto había quedado `MERGEABLE` con base `ce2910eb`.
+- Qué no anda: la API del PR sigue apuntando al SHA anterior `805c6c0d`, conserva el check fallido y no creó una nueva ejecución para `f836ffbb`. `gh pr update-branch` responde `head sha didn't match the current head ref`.
+- Qué falta exactamente: lograr que GitHub sincronice la punta del PR con la rama, y luego consultar `gh pr checks 641` más `gh pr view 641 --json mergeable,mergeStateStatus`.
 - Dónde quedó: rama `justin/ddd-pharmacy-inventory-dev`, repositorio `mantra-core-health-api`; typecheck y pruebas dirigidas locales pasaron.
 
 ## Pendiente
@@ -53,7 +53,7 @@
 
 ## Riesgos residuales
 
-- La cobertura global debe alcanzar al menos 69% en la nueva ejecución de CI.
+- GitHub mantiene un desajuste entre la referencia de la rama (`f836ffbb`) y el SHA de la PR (`805c6c0d`); hasta que sincronice, no se puede atribuir a la última versión el resultado de CI.
 
 ## Decisiones y ambigüedades
 

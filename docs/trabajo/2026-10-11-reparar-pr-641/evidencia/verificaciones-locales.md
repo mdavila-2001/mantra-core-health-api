@@ -72,4 +72,4 @@ Se incorporó `findAddresses` al fixture del spec y se verifican las coordenadas
 
 ## Estado remoto antes de publicar la integración
 
-Tras publicar `805c6c0d`, GitHub informó `mergeable=MERGEABLE`, base `ce2910eb`, `mergeStateStatus=BLOCKED` por requerir revisión humana. El check `docs` falló por la spec de direcciones anterior y el umbral global de cobertura; el fixture se corrigió localmente y falta publicarlo y volver a consultar el PR.
+Tras publicar `805c6c0d`, GitHub informó `mergeable=MERGEABLE`, base `ce2910eb`, `mergeStateStatus=BLOCKED` por requerir revisión humana. El check `docs` falló por la spec de direcciones anterior y el umbral global de cobertura. Luego se publicó `f836ffbb`, con el spec corregido, y la referencia de rama apunta a ese SHA. Sin embargo, el API del PR sigue informando `head.sha=805c6c0d`, no generó un workflow nuevo y `gh pr update-branch 641` devolvió `GraphQL: head sha didn't match the current head ref. (updatePullRequestBranch)`. La nueva corrida y la sincronización del objeto PR siguen pendientes.
