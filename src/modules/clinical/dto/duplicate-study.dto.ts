@@ -71,8 +71,14 @@ export class CheckDuplicateStudyDto {
 
 /** El estudio previo que satisface (o casi satisface) el pedido nuevo. */
 export class PreviousStudyDto {
-  @ApiProperty({ format: 'uuid' })
-  reportId!: string;
+  @ApiProperty({
+    format: 'uuid',
+    nullable: true,
+    type: String,
+    description:
+      'null cuando lo que consta es una orden activa que aún no tiene informe',
+  })
+  reportId!: string | null;
 
   @ApiProperty({ nullable: true, type: String, format: 'uuid' })
   serviceRequestId!: string | null;
