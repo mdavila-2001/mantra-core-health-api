@@ -27,6 +27,8 @@ import {
   AccessLogged,
   type AuthenticatedUser,
 } from '../../../../common';
+import { ModuleRef } from '@nestjs/core';
+import { ClinicalReadService } from '../../../clinical/services';
 import { ProfilesPatientsService } from '../../application/services';
 import {
   CreatePatientDto,
@@ -75,7 +77,13 @@ export class ProfilesPatientsController {
    *
    * @param patientsService - Valor de patients service requerido por la operación.
    */
-  constructor(private readonly patientsService: ProfilesPatientsService) {}
+  constructor(
+    private readonly patientsService: ProfilesPatientsService,
+    // Se resuelve perezosamente y no se importa `ClinicalModule` en
+    // `ProfilesModule`: `Profiles → Directory → Community → Clinical` ya existe
+    // y cerrar el ciclo rompería el arranque.
+    private readonly moduleRef: ModuleRef,
+  ) {}
 
   /**
    * Resumen del propio paciente. No exige identidad verificada: verificarse es
@@ -415,13 +423,21 @@ export class ProfilesPatientsController {
    */
   @Get('patients/:profileId')
   @AccessLogged({ resourceType: 'PATIENT_PROFILE', patient: 'param:profileId' })
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'CLINICIAN', 'PRACTITIONER')
   @ApiOperation({
     summary: 'UC-05-14: ficha de filiación de un paciente (F-01)',
+    description:
+      'SECURITY_ADMIN siempre. Quien atiende (CLINICIAN, PRACTITIONER) sólo si está atendiendo a esa persona: consulta en curso, turno de hoy o relación asistencial vigente.',
   })
-  getPatient(
+  async getPatient(
     @Param('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PatientDetailResponseDto> {
+    if (!actor.roles.includes('SECURITY_ADMIN')) {
+      await this.moduleRef
+        .get(ClinicalReadService, { strict: false })
+        .assertCanReadHistory(profileId, actor);
+    }
     return this.patientsService.getPatientById(profileId);
   }
 
