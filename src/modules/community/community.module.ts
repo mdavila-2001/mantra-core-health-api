@@ -46,6 +46,7 @@ import {
   CommunitySocialService,
   CommunityChatAutoReplyService,
   CommunityMessagingService,
+  CommunityBookingChatService,
   CommunityModerationService,
   CommunityReviewsService,
   CommunityGroupsService,
@@ -183,6 +184,7 @@ import {
     CommunitySocialService,
     CommunityChatAutoReplyService,
     CommunityMessagingService,
+    CommunityBookingChatService,
     CommunityMessagingGateway,
     CommunityMessageNotificationsService,
     // F4.2 · presencia del chat sobre el Redis compartido del módulo.
@@ -229,6 +231,8 @@ import {
     // sistema de chat. No hay ciclo — `community` no importa `scheduling`.
     CommunityChatAutoReplyService,
     CommunityMessagingService,
+    // La agenda deja la confirmación de una cita en el chat (hilo profesional-paciente).
+    CommunityBookingChatService,
   ],
 })
 export class CommunityModule {}

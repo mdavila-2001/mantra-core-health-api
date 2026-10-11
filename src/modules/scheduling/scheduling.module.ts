@@ -111,6 +111,8 @@ import { InsuranceReadAdapter } from './infrastructure/adapters/insurance-read.a
 import { ProfilesPatientRepresentationAdapter } from './infrastructure/adapters/profiles-patient-representation.adapter';
 import { schedulingPersistenceProviders } from './infrastructure/persistence/scheduling.persistence';
 import { AGENDA_NOTICE_PORT } from './application/ports/agenda-notice.port';
+import { BOOKING_CHAT_PORT } from './application/ports/booking-chat.port';
+import { CommunityBookingChatAdapter } from './infrastructure/adapters/community-booking-chat.adapter';
 import { MessagingAgendaNoticeAdapter } from './infrastructure/adapters/messaging-agenda-notice.adapter';
 import { SupportAdminNoticeAdapter } from './infrastructure/adapters/support-admin-notice.adapter';
 // P43 — la reconsulta puede declarar de qué formulario médico cerrado sale.
@@ -195,6 +197,8 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SupportAdminNoticeAdapter,
     MessagingAgendaNoticeAdapter,
     { provide: AGENDA_NOTICE_PORT, useExisting: MessagingAgendaNoticeAdapter },
+    CommunityBookingChatAdapter,
+    { provide: BOOKING_CHAT_PORT, useExisting: CommunityBookingChatAdapter },
     // Puertos hacia otros contextos (audit, profiles, clinical, insurance,
     // forms): los casos de uso dependen del token; el adaptador es el único que
     // conoce al otro módulo.
