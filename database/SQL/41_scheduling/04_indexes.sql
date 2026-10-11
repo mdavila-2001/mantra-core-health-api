@@ -71,6 +71,7 @@ CREATE INDEX IF NOT EXISTS "ix_schedule_rules_schedule_template_id" ON "scheduli
 CREATE INDEX IF NOT EXISTS "ix_schedule_rules_created_by_user_id" ON "scheduling"."schedule_rules" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_schedule_rules_updated_by_user_id" ON "scheduling"."schedule_rules" ("updated_by_user_id");
+CREATE INDEX IF NOT EXISTS "ix_schedule_rules_booking_mode_concept_id" ON "scheduling"."schedule_rules" ("booking_mode_concept_id");
 
 CREATE INDEX IF NOT EXISTS "gist_schedule_rules_effective_period" ON "scheduling"."schedule_rules" USING gist (daterange(valid_from, valid_to, '[)'));
 
