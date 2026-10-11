@@ -9,7 +9,6 @@ import {
   sumarDecimales,
   type AuthenticatedUser,
 } from '../../../../common';
-import { InventoryReservationLines } from '../../../pharmacy_inventory/entities';
 import {
   PriorAuthRepository,
   CoverageRepository,
@@ -158,13 +157,10 @@ export class PriorAuthService {
           );
         if (snapshot.origin === 'PHARMACY') {
           providerType = INS.ELIG_PROVIDER_TYPE_PHARMACY;
-          const portions = await tx.find(InventoryReservationLines, {
-            id: {
-              $in: snapshot.lines.map(
-                (line) => line.inventoryReservationLineId!,
-              ),
-            },
-          });
+          const portions = await this.repo.findReservationProducts(
+            tx,
+            snapshot.lines.map((line) => line.inventoryReservationLineId!),
+          );
           const byId = new Map(
             portions.map((line) => [line.id, line.pharmacyProductId]),
           );

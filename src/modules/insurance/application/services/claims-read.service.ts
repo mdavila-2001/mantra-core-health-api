@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   decodeKeysetCursor,
@@ -6,13 +6,15 @@ import {
   requireTenantId,
   sumarDecimales,
 } from '../../../../common';
-import { CatalogConcepts } from '../../../terminology/entities';
-import { Persons, PatientProfiles } from '../../../profiles/entities';
-import { PracticeTenantLookupService } from '../../../practice/services';
-import { ServiceRequests } from '../../../clinical/entities';
-import { DuplicateStudyDetector } from '../../../clinical/services/duplicate-study-detector';
-import { DiagnosticUnits } from '../../../diagnostic_units/entities';
 import { DUNIT } from '../../../diagnostic_units/diagnostic_units.concepts';
+import {
+  INSURANCE_PRACTICE_TENANT_LOOKUP_PORT,
+  type InsurancePracticeTenantLookupPort,
+} from '../ports/practice-tenant-lookup.port';
+import {
+  DUPLICATE_STUDY_DESCRIPTION_PORT,
+  type DuplicateStudyDescriptionPort,
+} from '../ports/duplicate-study-description.port';
 import type {
   ClaimAdjudicationVersions,
   ClaimDisputes,
@@ -102,8 +104,10 @@ export class ClaimsReadService {
   constructor(
     private readonly em: EntityManager,
     private readonly claimRepo: ClaimReadRepository,
-    private readonly practiceLookup: PracticeTenantLookupService,
-    private readonly duplicateStudyDetector: DuplicateStudyDetector,
+    @Inject(INSURANCE_PRACTICE_TENANT_LOOKUP_PORT)
+    private readonly practiceLookup: InsurancePracticeTenantLookupPort,
+    @Inject(DUPLICATE_STUDY_DESCRIPTION_PORT)
+    private readonly duplicateStudyDetector: DuplicateStudyDescriptionPort,
     private readonly catalogRepo: CatalogRepository,
   ) {}
 
@@ -327,10 +331,11 @@ export class ClaimsReadService {
     }
     const [practiceIds, units] = await Promise.all([
       this.practiceLookup.findActivePracticeIdsForTenant(tenantId),
-      em.find(DiagnosticUnits, {
+      this.claimRepo.findDiagnosticUnitsByTenant(
+        em,
         tenantId,
-        statusConceptId: DUNIT.UNIT_ACTIVE,
-      }),
+        DUNIT.UNIT_ACTIVE,
+      ),
     ]);
     const diagnosticUnitIds = units.map((unit) => unit.id);
     if (practiceIds.length === 0 && diagnosticUnitIds.length === 0) {
@@ -387,12 +392,8 @@ export class ClaimsReadService {
     );
 
     const [persons, profiles, brokers] = await Promise.all([
-      personIds.length > 0
-        ? em.find(Persons, { id: { $in: personIds } })
-        : Promise.resolve([]),
-      personIds.length > 0
-        ? em.find(PatientProfiles, { profileId: { $in: personIds } })
-        : Promise.resolve([]),
+      this.claimRepo.findPersonsByIds(em, personIds),
+      this.claimRepo.findPatientProfilesByProfileIds(em, personIds),
       brokerIds.length > 0
         ? em.find(InsuranceBrokersEntity, { id: { $in: brokerIds } })
         : Promise.resolve([]),
@@ -522,9 +523,10 @@ export class ClaimsReadService {
     claim: InsuranceClaims,
   ): Promise<ClaimLineDuplicateStudyDto | null> {
     if (!claim.serviceRequestId) return null;
-    const order = await em.findOne(ServiceRequests, {
-      id: claim.serviceRequestId,
-    });
+    const order = await this.claimRepo.findSourceRequest(
+      em,
+      claim.serviceRequestId,
+    );
     if (!order?.previousDiagnosticReportId) return null;
 
     const tenantId = requireTenantId();
@@ -671,7 +673,7 @@ export class ClaimsReadService {
   ): Promise<Map<string, InsuranceConceptDto>> {
     const clean = unique(ids);
     if (clean.length === 0) return new Map();
-    const concepts = await em.find(CatalogConcepts, { id: { $in: clean } });
+    const concepts = await this.claimRepo.findConceptsByIds(em, clean);
     return new Map(
       concepts.map((concept) => [
         concept.id,

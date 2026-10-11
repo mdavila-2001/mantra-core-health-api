@@ -2,10 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { IsolationLevel } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
-  PatientProfilesRepository,
-  PersonAccountLinksRepository,
-} from '../../../profiles/infrastructure/repositories';
-import {
   unavailableSettlement,
   type PatientSettlementProjection,
 } from '../../presentation/dto/patient-settlement.dto';
@@ -13,6 +9,7 @@ import {
   PatientSettlementRepository,
   type SettlementOrigin,
 } from '../../infrastructure/repositories/patient-settlement.repository';
+import { InsurancePatientAccountRepository } from '../../infrastructure/repositories/insurance-patient-account.repository';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { projectPatientSettlement } from './patient-settlement-projection';
 
@@ -21,8 +18,7 @@ export class PatientSettlementService {
   constructor(
     private readonly repository: PatientSettlementRepository,
     private readonly orders: LinkedClaimOrderService,
-    private readonly accountLinks: PersonAccountLinksRepository,
-    private readonly patients: PatientProfilesRepository,
+    private readonly patientAccounts: InsurancePatientAccountRepository,
   ) {}
 
   /** El actor se resuelve desde el vínculo persistente, nunca desde un pid declarado. */
@@ -36,9 +32,15 @@ export class PatientSettlementService {
     if (!orderIds.length) return result;
     return em.transactional(
       async (tx) => {
-        const link = await this.accountLinks.findActiveByUser(tx, actorUserId);
+        const link = await this.patientAccounts.findActiveAccountLink(
+          tx,
+          actorUserId,
+        );
         if (!link) return result;
-        const patient = await this.patients.findById(tx, link.personId);
+        const patient = await this.patientAccounts.findPatientProfile(
+          tx,
+          link.personId,
+        );
         if (!patient) return result;
         const authorizedIds = await this.repository.ownedOrders(
           tx,

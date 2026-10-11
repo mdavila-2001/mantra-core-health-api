@@ -1,14 +1,15 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   requireTenantId,
   sumarDecimales,
   type AuthenticatedUser,
 } from '../../../../common';
-import { PracticeTenantLookupService } from '../../../practice/services';
-import { DiagnosticUnits } from '../../../diagnostic_units/entities';
+import {
+  INSURANCE_PRACTICE_TENANT_LOOKUP_PORT,
+  type InsurancePracticeTenantLookupPort,
+} from '../ports/practice-tenant-lookup.port';
 import { DUNIT } from '../../../diagnostic_units/diagnostic_units.concepts';
-import { Pharmacies } from '../../../pharmacy/entities';
 import {
   ClaimAdjudicationVersions,
   ClaimLineAdjudications,
@@ -19,7 +20,6 @@ import {
   InsuranceReconciliationItems,
   PatientExplanationsOfBenefit,
 } from '../../entities';
-import { CatalogConcepts } from '../../../terminology/entities';
 import {
   CatalogRepository,
   SettlementRepository,
@@ -74,7 +74,8 @@ export class PractitionerSettlementBatchesService {
     private readonly repo: SettlementRepository,
     private readonly catalog: CatalogRepository,
     private readonly linkedAccess: LinkedClaimAccessService,
-    private readonly practiceLookup: PracticeTenantLookupService,
+    @Inject(INSURANCE_PRACTICE_TENANT_LOOKUP_PORT)
+    private readonly practiceLookup: InsurancePracticeTenantLookupPort,
   ) {}
 
   /**
@@ -421,11 +422,8 @@ export class PractitionerSettlementBatchesService {
   ): Promise<string[]> {
     const [practiceIds, units, pharmacies] = await Promise.all([
       this.practiceLookup.findActivePracticeIdsForTenant(tenantId),
-      em.find(DiagnosticUnits, {
-        tenantId,
-        statusConceptId: DUNIT.UNIT_ACTIVE,
-      }) as Promise<DiagnosticUnits[]>,
-      em.find(Pharmacies, { tenantId }) as Promise<Pharmacies[]>,
+      this.repo.findActiveDiagnosticUnitIds(em, tenantId, DUNIT.UNIT_ACTIVE),
+      this.repo.findPharmacyIdsByTenant(em, tenantId),
     ]);
     return [
       ...practiceIds,
@@ -439,10 +437,8 @@ export class PractitionerSettlementBatchesService {
     currencyConceptId: string | null,
   ): Promise<string | null> {
     if (!currencyConceptId) return null;
-    const concept = await em.findOne(CatalogConcepts, {
-      id: currencyConceptId,
-    });
-    return resolveInsuranceCurrencyCode(currencyConceptId, concept?.code);
+    const code = await this.repo.findCurrencyCode(em, currencyConceptId);
+    return resolveInsuranceCurrencyCode(currencyConceptId, code);
   }
 
   private async reversalAdjustmentsWithBatch(

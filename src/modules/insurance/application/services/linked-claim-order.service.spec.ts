@@ -15,6 +15,7 @@ import { PINV } from '../../../pharmacy_inventory/pharmacy_inventory.concepts';
 import { InsuranceClaims, InsuranceClaimLines } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
+import { LinkedOrderDataRepository } from '../../infrastructure/repositories/linked-order-data.repository';
 
 const fn = (implementation?: any): any => (jest.fn as any)(implementation);
 function fixture() {
@@ -112,7 +113,7 @@ function fixture() {
   };
   return {
     em,
-    service: new LinkedClaimOrderService(),
+    service: new LinkedClaimOrderService(new LinkedOrderDataRepository()),
     tables,
     order,
     portions,

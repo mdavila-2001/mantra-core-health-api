@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -8,9 +8,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
-import { OutboxService } from '../../../messaging/services';
-import { PatientProfiles, Persons } from '../../../profiles/entities';
-import { CatalogConcepts } from '../../../terminology/entities';
+import {
+  CLAIM_DECISION_PUBLISHER_PORT,
+  type ClaimDecisionPublisherPort,
+} from '../ports/claim-decision-publisher.port';
 import type {
   ClaimAdjudicationVersions,
   InsuranceClaimLines,
@@ -181,7 +182,8 @@ export class InsurerReceivedClaimsService {
     private readonly claimReadRepo: ClaimReadRepository,
     private readonly claimRepo: ClaimRepository,
     private readonly linkedOrders: LinkedClaimOrderService,
-    private readonly outbox: OutboxService,
+    @Inject(CLAIM_DECISION_PUBLISHER_PORT)
+    private readonly outbox: ClaimDecisionPublisherPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(InsurerReceivedClaimsService.name);
@@ -542,7 +544,7 @@ export class InsurerReceivedClaimsService {
     actor: AuthenticatedUser,
   ): Promise<void> {
     if (plan.outcome === 'REJECTED') return;
-    await this.outbox.publishDomainEvent(tx, {
+    await this.outbox.publish(tx, {
       tenantId,
       eventType: CLAIM_DECIDED_EVENT,
       aggregateType: CLAIM_AGGREGATE,
@@ -660,12 +662,11 @@ export class InsurerReceivedClaimsService {
       claims.filter((claim) => claim.billingProviderTypeConceptId === id);
     const [persons, profiles, plans, specialties, practices, units, users] =
       await Promise.all([
-        em.find(Persons, {
-          id: { $in: unique([...patientIds, ...practitionerIds]) },
-        }),
-        patientIds.length === 0
-          ? Promise.resolve([])
-          : em.find(PatientProfiles, { profileId: { $in: patientIds } }),
+        this.claimReadRepo.findPersonsByIds(
+          em,
+          unique([...patientIds, ...practitionerIds]),
+        ),
+        this.claimReadRepo.findPatientProfilesByProfileIds(em, patientIds),
         this.claimReadRepo.findPlansByIds(
           em,
           unique(coverages.map((c) => c.insurancePlanId)),
@@ -886,7 +887,7 @@ export class InsurerReceivedClaimsService {
   ): Promise<Map<string, InsuranceConceptDto>> {
     const clean = unique(ids);
     if (clean.length === 0) return new Map();
-    const concepts = await em.find(CatalogConcepts, { id: { $in: clean } });
+    const concepts = await this.claimReadRepo.findConceptsByIds(em, clean);
     return new Map(
       concepts.map((concept) => [
         concept.id,

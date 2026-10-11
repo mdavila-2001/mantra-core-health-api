@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -11,7 +11,10 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
-import { PracticeTenantLookupService } from '../../../practice/services';
+import {
+  INSURANCE_PRACTICE_TENANT_LOOKUP_PORT,
+  type InsurancePracticeTenantLookupPort,
+} from '../ports/practice-tenant-lookup.port';
 import {
   ClaimRepository,
   CoverageRepository,
@@ -61,7 +64,8 @@ export class ClaimsService {
     private readonly repo: ClaimRepository,
     private readonly coverage: CoverageRepository,
     private readonly catalog: CatalogRepository,
-    private readonly practiceLookup: PracticeTenantLookupService,
+    @Inject(INSURANCE_PRACTICE_TENANT_LOOKUP_PORT)
+    private readonly practiceLookup: InsurancePracticeTenantLookupPort,
     private readonly logger: PinoLogger,
     private readonly linkedOrders: LinkedClaimOrderService,
     private readonly linkedAccess: LinkedClaimAccessService,

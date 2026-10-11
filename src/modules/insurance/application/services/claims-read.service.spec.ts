@@ -65,6 +65,11 @@ function repo(over: Record<string, unknown> = {}) {
     findLineAdjudications: mockFn().mockResolvedValue([]),
     findDisputesByClaimIds: mockFn().mockResolvedValue([]),
     findEobsByVersionIds: mockFn().mockResolvedValue([]),
+    findPersonsByIds: mockFn().mockResolvedValue([]),
+    findPatientProfilesByProfileIds: mockFn().mockResolvedValue([]),
+    findSourceRequest: mockFn().mockResolvedValue(null),
+    findDiagnosticUnitsByTenant: mockFn().mockResolvedValue([]),
+    findConceptsByIds: mockFn().mockResolvedValue([]),
     ...over,
   };
 }
@@ -707,19 +712,12 @@ describe('ClaimsReadService', () => {
     const ORDER = 'sr-1';
     const REPORT = 'report-1';
 
-    /** `em()` con una unidad diagnóstica activa del tenant. */
-    function emWithUnit() {
-      return em((name) => (name === 'DiagnosticUnits' ? [{ id: UNIT }] : []));
-    }
-
     it('amplía el alcance a las unidades diagnósticas activas del tenant', async () => {
-      const r = repo();
+      const r = repo({
+        findDiagnosticUnitsByTenant: mockFn().mockResolvedValue([{ id: UNIT }]),
+      });
 
-      await withTenant(() =>
-        serviceWith(r, [], duplicateStudyDetector(), emWithUnit()).listClaims(
-          {},
-        ),
-      );
+      await withTenant(() => serviceWith(r, []).listClaims({}));
 
       expect(r.findClaimsPage).toHaveBeenCalledWith(
         expect.anything(),
@@ -741,20 +739,15 @@ describe('ClaimsReadService', () => {
     });
 
     it('resuelve duplicateStudy cuando la orden de origen está enlazada a un informe previo', async () => {
-      const orderById = (name: string, where: any) =>
-        name === 'ServiceRequests' && where.id === ORDER
-          ? {
-              id: ORDER,
-              previousDiagnosticReportId: REPORT,
-              duplicateOverrideReason: 'Control post-quirúrgico inmediato',
-              createdAt: new Date('2026-09-10T09:00:00.000Z'),
-            }
-          : undefined;
-
       const r = repo({
         findClaimInScope: mockFn().mockResolvedValue(
           claim({ serviceRequestId: ORDER }),
         ),
+        findSourceRequest: mockFn().mockResolvedValue({
+          previousDiagnosticReportId: REPORT,
+          duplicateOverrideReason: 'Control post-quirúrgico inmediato',
+          createdAt: new Date('2026-09-10T09:00:00.000Z'),
+        }),
         findLinesByClaimIds: mockFn().mockResolvedValue([
           {
             id: 'l1',
@@ -780,12 +773,7 @@ describe('ClaimsReadService', () => {
       });
 
       const detail = await withTenant(() =>
-        serviceWith(
-          r,
-          [PRACTICE],
-          detector,
-          em(() => [], orderById),
-        ).getClaim(CLAIM),
+        serviceWith(r, [PRACTICE], detector, em()).getClaim(CLAIM),
       );
 
       expect(detail.lines[0].duplicateStudy).toEqual({
@@ -804,6 +792,9 @@ describe('ClaimsReadService', () => {
         findClaimInScope: mockFn().mockResolvedValue(
           claim({ serviceRequestId: ORDER }),
         ),
+        findSourceRequest: mockFn().mockResolvedValue({
+          previousDiagnosticReportId: undefined,
+        }),
         findLinesByClaimIds: mockFn().mockResolvedValue([
           {
             id: 'l1',
@@ -813,18 +804,10 @@ describe('ClaimsReadService', () => {
           },
         ]),
       });
-      const orderWithoutLink = (name: string, where: any) =>
-        name === 'ServiceRequests' && where.id === ORDER
-          ? { id: ORDER, previousDiagnosticReportId: undefined }
-          : undefined;
-
       const detail = await withTenant(() =>
-        serviceWith(
-          r,
-          [PRACTICE],
-          duplicateStudyDetector(),
-          em(() => [], orderWithoutLink),
-        ).getClaim(CLAIM),
+        serviceWith(r, [PRACTICE], duplicateStudyDetector(), em()).getClaim(
+          CLAIM,
+        ),
       );
 
       expect(detail.lines[0].duplicateStudy).toBeNull();
@@ -848,20 +831,15 @@ describe('ClaimsReadService', () => {
     });
 
     it('marca reused=true cuando la orden reutilizó el informe (sin justificación)', async () => {
-      const orderReused = (name: string, where: any) =>
-        name === 'ServiceRequests' && where.id === ORDER
-          ? {
-              id: ORDER,
-              previousDiagnosticReportId: REPORT,
-              duplicateOverrideReason: undefined,
-              createdAt: new Date('2026-09-10T09:00:00.000Z'),
-            }
-          : undefined;
-
       const r = repo({
         findClaimInScope: mockFn().mockResolvedValue(
           claim({ serviceRequestId: ORDER }),
         ),
+        findSourceRequest: mockFn().mockResolvedValue({
+          previousDiagnosticReportId: REPORT,
+          duplicateOverrideReason: undefined,
+          createdAt: new Date('2026-09-10T09:00:00.000Z'),
+        }),
         findLinesByClaimIds: mockFn().mockResolvedValue([
           {
             id: 'l1',
@@ -887,12 +865,7 @@ describe('ClaimsReadService', () => {
       });
 
       const detail = await withTenant(() =>
-        serviceWith(
-          r,
-          [PRACTICE],
-          detector,
-          em(() => [], orderReused),
-        ).getClaim(CLAIM),
+        serviceWith(r, [PRACTICE], detector, em()).getClaim(CLAIM),
       );
 
       expect(detail.lines[0].duplicateStudy?.reused).toBe(true);

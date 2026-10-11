@@ -164,6 +164,11 @@ function build(options: Options = {}) {
         startAt: new Date('2026-09-18T02:00:00.000Z'),
       },
     ]),
+    findPersonsByIds: mockFn().mockResolvedValue(rows.Persons),
+    findPatientProfilesByProfileIds: mockFn().mockResolvedValue(
+      rows.PatientProfiles,
+    ),
+    findConceptsByIds: mockFn().mockResolvedValue(rows.CatalogConcepts),
     findPlansByIds: mockFn().mockResolvedValue([
       { id: 'plan-1', name: 'Plan Oro' },
     ]),
@@ -205,7 +210,7 @@ function build(options: Options = {}) {
   const linkedOrders = {
     lockAndResolve: mockFn().mockResolvedValue(null),
   };
-  const outbox = { publishDomainEvent: mockFn().mockResolvedValue({}) };
+  const outbox = { publish: mockFn().mockResolvedValue(undefined) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
   const service = new InsurerReceivedClaimsService(
@@ -576,7 +581,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
       expect(r.status).toEqual({ code: 'APPROVED', display: 'Aprobada' });
       expect(r.approvedTotal?.amount).toBe('400.00');
       expect(r.invoice).toBeNull();
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           tenantId: TENANT,
@@ -622,7 +627,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
         outcome: 'PARTIAL',
         reason: 'El plan cubre la mitad',
       });
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledTimes(1);
+      expect(d.outbox.publish).toHaveBeenCalledTimes(1);
     });
 
     it('rechazar: todo denegado, con motivo, y no se publica evento de facturación', async () => {
@@ -646,7 +651,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
         });
       }
       expect(r.status).toEqual({ code: 'REJECTED', display: 'Rechazada' });
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('el evento lleva ids e importes, nunca datos del paciente', async () => {
@@ -654,7 +659,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
 
       await decide(d, { outcome: 'APPROVED' });
 
-      const event = d.outbox.publishDomainEvent.mock.calls[0][1];
+      const event = d.outbox.publish.mock.calls[0][1];
       expect(event.payloadJson).toEqual({
         claimId: CLAIM_ID,
         insuranceCarrierId: CARRIER,
@@ -763,7 +768,7 @@ describe('InsurerReceivedClaimsService.decide', () => {
     const nothing = (d: ReturnType<typeof build>) => {
       expect(d.claimRepo.createVersion).not.toHaveBeenCalled();
       expect(d.claimRepo.createLineAdjudication).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     };
 
     it('sin permiso responde 403 antes de tocar la solicitud', async () => {

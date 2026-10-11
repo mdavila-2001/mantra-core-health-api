@@ -4,12 +4,12 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
 } from '../../../../common';
+import { normalizeSearchText } from '../../../../common/text/normalize-search-text';
 import {
   containsPattern,
-  normalizeSearchText,
   sqlSearchKey,
   sqlSortKey,
-} from '../../../terminology/repositories/glossary-search.sql';
+} from '../../domain/insurer-patient-search-sql';
 import type {
   InsurerPatientInsuranceStatus,
   InsurerPatientSortField,

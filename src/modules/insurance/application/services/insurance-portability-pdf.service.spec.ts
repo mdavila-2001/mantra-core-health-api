@@ -4,6 +4,7 @@ import {
   draw,
   InsurancePortabilityPdfService,
 } from './insurance-portability-pdf.service';
+import { InsurancePdfAssetsAdapter } from '../../infrastructure/adapters/insurance-pdf-assets.adapter';
 import type { InsurancePortabilityReportDto } from '../../presentation/dto/insurance-portability.dto';
 import PDFDocument from 'pdfkit';
 
@@ -289,7 +290,9 @@ describe('buildCertificate', () => {
 
 describe('InsurancePortabilityPdfService.render', () => {
   it('devuelve un Buffer que empieza por %PDF- y lleva el sello en los metadatos', async () => {
-    const service = new InsurancePortabilityPdfService();
+    const service = new InsurancePortabilityPdfService(
+      new InsurancePdfAssetsAdapter(),
+    );
     const buffer = await service.render(reportFixture(), HASH, QR_URL);
 
     expect(buffer.subarray(0, 5).toString('latin1')).toBe('%PDF-');
@@ -297,7 +300,9 @@ describe('InsurancePortabilityPdfService.render', () => {
   });
 
   it('genera el PDF cuando no hay reclamos ni destacados', async () => {
-    const service = new InsurancePortabilityPdfService();
+    const service = new InsurancePortabilityPdfService(
+      new InsurancePdfAssetsAdapter(),
+    );
     const buffer = await service.render(
       reportFixture({ claims: [] }),
       HASH,
@@ -323,14 +328,17 @@ describe('draw', () => {
   it('propaga un Error producido mientras dibuja el contenido', async () => {
     const expected = new Error('falló el contenido');
 
-    await expect(draw(sheetWithThrowingMember(expected))).rejects.toBe(
-      expected,
-    );
+    await expect(
+      draw(sheetWithThrowingMember(expected), new InsurancePdfAssetsAdapter()),
+    ).rejects.toBe(expected);
   });
 
   it('normaliza a Error un valor no Error producido durante el dibujo', async () => {
     await expect(
-      draw(sheetWithThrowingMember('falló el contenido')),
+      draw(
+        sheetWithThrowingMember('falló el contenido'),
+        new InsurancePdfAssetsAdapter(),
+      ),
     ).rejects.toThrow('falló el contenido');
   });
 
@@ -352,7 +360,10 @@ describe('draw', () => {
 
     try {
       await expect(
-        draw(buildCertificate(reportFixture(), HASH, QR_URL)),
+        draw(
+          buildCertificate(reportFixture(), HASH, QR_URL),
+          new InsurancePdfAssetsAdapter(),
+        ),
       ).rejects.toBe(expected);
     } finally {
       onSpy.mockRestore();

@@ -1,11 +1,51 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { createdBy } from '../../../../common';
+import { Persons, PatientProfiles } from '../../../profiles/entities';
+import { PharmacyProducts } from '../../../pharmacy/entities';
+import { DiagnosticStudyOfferings } from '../../../diagnostic_units/entities';
+import { CatalogConcepts } from '../../../terminology/entities';
+import { InventoryReservationLines } from '../../../pharmacy_inventory/entities';
 import {
   PriorAuthorizationRequests,
   PriorAuthorizationItems,
   PriorAuthorizationDeterminations,
 } from '../../entities';
+
+export interface PriorAuthPersonRecord {
+  readonly id: string;
+  readonly displayName?: string | null;
+}
+
+export interface PriorAuthPatientRecord {
+  readonly profileId: string;
+  readonly patientCode: string | null;
+}
+
+export interface PriorAuthPharmacyProductRecord {
+  readonly id: string;
+  readonly brandName?: string | null;
+  readonly genericName?: string | null;
+  readonly productCode: string;
+  readonly strengthText?: string | null;
+}
+
+export interface PriorAuthDiagnosticOfferingRecord {
+  readonly id: string;
+  readonly studyConceptId: string;
+  readonly studyCode: string;
+}
+
+export interface PriorAuthConceptRecord {
+  readonly id: string;
+  readonly code: string;
+  readonly display: string;
+}
+
+export interface PriorAuthReservationProductRecord {
+  readonly id: string;
+  readonly pharmacyProductId: string;
+}
 
 /**
  * Acceso a datos de autorización previa: solicitudes (mutables, con estado y
@@ -13,6 +53,54 @@ import {
  */
 @Injectable()
 export class PriorAuthRepository {
+  findReservationProducts(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<PriorAuthReservationProductRecord[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(InventoryReservationLines, { id: { $in: [...ids] } });
+  }
+
+  findPeople(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<PriorAuthPersonRecord[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(Persons, { id: { $in: ids } });
+  }
+
+  findPatientRecords(
+    em: EntityManager,
+    profileIds: readonly string[],
+  ): Promise<PriorAuthPatientRecord[]> {
+    if (profileIds.length === 0) return Promise.resolve([]);
+    return em.find(PatientProfiles, { profileId: { $in: profileIds } });
+  }
+
+  findPharmacyProducts(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<PriorAuthPharmacyProductRecord[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(PharmacyProducts, { id: { $in: ids } });
+  }
+
+  findDiagnosticOfferings(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<PriorAuthDiagnosticOfferingRecord[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(DiagnosticStudyOfferings, { id: { $in: ids } });
+  }
+
+  findConcepts(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<PriorAuthConceptRecord[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(CatalogConcepts, { id: { $in: ids } });
+  }
+
   /**
    * Obtiene find request.
    *

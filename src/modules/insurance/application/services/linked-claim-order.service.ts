@@ -1,26 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager, LockMode } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/postgresql';
 import {
   PreconditionFailedException,
   sumarDecimales,
   mismosDecimales,
+  multiplyDecimalsToMoney,
 } from '../../../../common';
-import { ServiceRequests } from '../../../clinical/entities';
 import { CLIN } from '../../../clinical/clinical.concepts';
-import {
-  DiagnosticStudyOfferings,
-  DiagnosticUnits,
-} from '../../../diagnostic_units/entities';
-import { Pharmacies, PharmacyProducts } from '../../../pharmacy/entities';
-import {
-  InventoryReservations,
-  InventoryReservationLines,
-  PharmacyOrderSubstitutions,
-} from '../../../pharmacy_inventory/entities';
 import { PINV } from '../../../pharmacy_inventory/pharmacy_inventory.concepts';
-import { multiplyAmounts } from '../../../pharmacy_inventory/services/pharmacy-pricing';
 import { InsuranceClaimLines, type InsuranceClaims } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
+import {
+  LinkedOrderDataRepository,
+  type LinkedOfferingRow,
+  type LinkedPharmacyOrderRow,
+  type LinkedProductRow,
+  type LinkedProviderRow,
+  type LinkedReservationLineRow,
+  type LinkedServiceRequestRow,
+} from '../../infrastructure/repositories/linked-order-data.repository';
 import {
   type LinkedOrderLine,
   type LinkedOrderSnapshot,
@@ -39,23 +37,17 @@ type OrderInputWithId = LinkedOrderInput & { id: string };
 /** Resolución canónica en lotes; los comandos bloquean antes el pedido. */
 @Injectable()
 export class LinkedClaimOrderService {
+  constructor(private readonly repository: LinkedOrderDataRepository) {}
+
   async lockAndResolve(
     em: EntityManager,
     input: LinkedOrderInput,
   ): Promise<LinkedOrderSnapshot | null> {
     this.assertSingleOrigin(input);
     if (input.inventoryReservationId) {
-      await em.findOne(
-        InventoryReservations,
-        { id: input.inventoryReservationId },
-        { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true },
-      );
+      await this.repository.lockPharmacyOrder(em, input.inventoryReservationId);
     } else if (input.serviceRequestId) {
-      await em.findOne(
-        ServiceRequests,
-        { id: input.serviceRequestId },
-        { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true },
-      );
+      await this.repository.lockServiceRequest(em, input.serviceRequestId);
     }
     return this.loadSnapshot(em, input);
   }
@@ -117,60 +109,48 @@ export class LinkedClaimOrderService {
     const [orders, portions, proposals, diagnosticOrders, offerings, units] =
       await Promise.all([
         pharmacyIds.length
-          ? em.find(
-              InventoryReservations,
-              { id: { $in: pharmacyIds } },
-              { refresh: true },
-            )
+          ? this.repository.findPharmacyOrders(em, pharmacyIds)
           : [],
         pharmacyIds.length
-          ? em.find(
-              InventoryReservationLines,
-              {
-                inventoryReservationId: { $in: pharmacyIds },
-                statusConceptId: {
-                  $in: [PINV.RES_LINE_CONFIRMED, PINV.RES_LINE_FULFILLED],
-                },
-              },
-              { refresh: true },
-            )
+          ? this.repository.findReservationLines(em, pharmacyIds, [
+              PINV.RES_LINE_CONFIRMED,
+              PINV.RES_LINE_FULFILLED,
+            ])
           : [],
         pharmacyIds.length
-          ? em.find(PharmacyOrderSubstitutions, {
-              inventoryReservationId: { $in: pharmacyIds },
-              statusConceptId: PINV.SUBSTITUTION_PROPUESTA,
-            })
+          ? this.repository.findProposedSubstitutions(
+              em,
+              pharmacyIds,
+              PINV.SUBSTITUTION_PROPUESTA,
+            )
           : [],
         diagnosticIds.length
-          ? em.find(
-              ServiceRequests,
-              { id: { $in: diagnosticIds } },
-              { refresh: true },
-            )
+          ? this.repository.findServiceRequests(em, diagnosticIds)
           : [],
         offeringIds.length
-          ? em.find(DiagnosticStudyOfferings, { id: { $in: offeringIds } })
+          ? this.repository.findOfferings(em, offeringIds)
           : [],
         diagnosticIds.length
-          ? em.find(DiagnosticUnits, {
-              id: {
-                $in: inputs
-                  .filter((input) => input.serviceRequestId)
-                  .map((input) => input.billingProviderEntityId),
-              },
-            })
+          ? this.repository.findDiagnosticUnits(
+              em,
+              inputs
+                .filter((input) => input.serviceRequestId)
+                .map((input) => input.billingProviderEntityId),
+            )
           : [],
       ]);
     const [pharmacies, products] = await Promise.all([
       orders.length
-        ? em.find(Pharmacies, {
-            id: { $in: orders.map((order) => order.pharmacyId) },
-          })
+        ? this.repository.findPharmacies(
+            em,
+            orders.map((order) => order.pharmacyId),
+          )
         : [],
       portions.length
-        ? em.find(PharmacyProducts, {
-            id: { $in: portions.map((line) => line.pharmacyProductId) },
-          })
+        ? this.repository.findProducts(
+            em,
+            portions.map((line) => line.pharmacyProductId),
+          )
         : [],
     ]);
     const orderById = new Map(orders.map((row) => [row.id, row]));
@@ -184,7 +164,7 @@ export class LinkedClaimOrderService {
     const pendingOrders = new Set(
       proposals.map((row) => row.inventoryReservationId),
     );
-    const portionsByOrder = new Map<string, InventoryReservationLines[]>();
+    const portionsByOrder = new Map<string, LinkedReservationLineRow[]>();
     for (const line of portions) {
       const group = portionsByOrder.get(line.inventoryReservationId) ?? [];
       group.push(line);
@@ -221,10 +201,10 @@ export class LinkedClaimOrderService {
 }
 
 function pharmacySnapshot(
-  order: InventoryReservations,
-  pharmacy: Pharmacies,
-  portions: readonly InventoryReservationLines[],
-  products: ReadonlyMap<string, PharmacyProducts>,
+  order: LinkedPharmacyOrderRow,
+  pharmacy: LinkedProviderRow,
+  portions: readonly LinkedReservationLineRow[],
+  products: ReadonlyMap<string, LinkedProductRow>,
   pending: boolean,
 ): LinkedOrderSnapshot {
   const validStatus = [
@@ -262,9 +242,10 @@ function pharmacySnapshot(
       serviceConceptId: products.get(line.pharmacyProductId)
         ?.medicationConceptId,
       quantity: line.reservedQuantity,
-      billedAmount: line.unitPriceAmount
-        ? multiplyAmounts(line.unitPriceAmount, line.reservedQuantity)
-        : undefined,
+      billedAmount:
+        line.unitPriceAmount && line.reservedQuantity
+          ? multiplyDecimalsToMoney(line.unitPriceAmount, line.reservedQuantity)
+          : undefined,
     };
   });
   if (
@@ -297,9 +278,9 @@ function pharmacySnapshot(
 
 function diagnosticSnapshot(
   input: LinkedOrderInput,
-  order: ServiceRequests,
-  unit: DiagnosticUnits,
-  offering: DiagnosticStudyOfferings,
+  order: LinkedServiceRequestRow,
+  unit: LinkedProviderRow,
+  offering: LinkedOfferingRow,
 ): LinkedOrderSnapshot {
   const line = input.lines[0];
   // Antiduplicación de estudios (subtarea 3.2, T-26): una orden que nació

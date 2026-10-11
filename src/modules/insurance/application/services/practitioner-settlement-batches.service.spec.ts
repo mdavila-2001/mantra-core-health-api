@@ -9,9 +9,6 @@ import {
   InsuranceClaims,
   PatientExplanationsOfBenefit,
 } from '../../entities';
-import { CatalogConcepts } from '../../../terminology/entities';
-import { DiagnosticUnits } from '../../../diagnostic_units/entities';
-import { Pharmacies } from '../../../pharmacy/entities';
 import { INS } from '../../domain/insurance.concepts';
 import { PractitionerSettlementBatchesService } from './practitioner-settlement-batches.service';
 
@@ -124,6 +121,9 @@ function service(
     })),
     findBatch: fn().mockResolvedValue(null),
     findSettlementBatches: fn().mockResolvedValue([]),
+    findActiveDiagnosticUnitIds: fn().mockResolvedValue([]),
+    findPharmacyIdsByTenant: fn().mockResolvedValue([]),
+    findCurrencyCode: fn().mockResolvedValue(null),
     ...overrides.repo,
   };
   const catalog = {
@@ -167,11 +167,13 @@ describe('PractitionerSettlementBatchesService.generate', () => {
       if (entity === ClaimReversals) return [];
       if (entity === ClaimLineAdjudications) return [a1];
       if (entity === PatientExplanationsOfBenefit) return [e1];
-      if (entity === CatalogConcepts) return [{ id: 'bob', code: 'BOB' }];
       return [];
     };
     const { svc, repo } = service({
-      repo: { findClaimsByCarrierAndProvider: fn().mockResolvedValue([c1]) },
+      repo: {
+        findClaimsByCarrierAndProvider: fn().mockResolvedValue([c1]),
+        findCurrencyCode: fn().mockResolvedValue('BOB'),
+      },
       emDouble: em(byEntity),
     });
 
@@ -372,7 +374,11 @@ describe('PractitionerSettlementBatchesService.getById', () => {
   it('un prestador ajeno al lote recibe el mismo 403 que un id inexistente', async () => {
     const { svc } = await runWithTenant(TENANT, async () => {
       return service({
-        repo: { findBatch: fn().mockResolvedValue(batch) },
+        repo: {
+          findBatch: fn().mockResolvedValue(batch),
+          findActiveDiagnosticUnitIds: fn().mockResolvedValue([]),
+          findPharmacyIdsByTenant: fn().mockResolvedValue([]),
+        },
         linkedAccess: {
           assertInsurer: fn().mockRejectedValue(
             new ForbiddenException('No hay acceso a esa solicitud de seguro'),
@@ -381,11 +387,6 @@ describe('PractitionerSettlementBatchesService.getById', () => {
         practiceLookup: {
           findActivePracticeIdsForTenant: fn().mockResolvedValue([]),
         },
-        emDouble: em((entity: unknown) => {
-          if (entity === DiagnosticUnits) return [];
-          if (entity === Pharmacies) return [];
-          return [];
-        }),
       });
     });
 
@@ -407,17 +408,17 @@ describe('PractitionerSettlementBatchesService.getById', () => {
 
   it('el prestador dueño del lote (por unidad diagnóstica activa) puede leerlo', async () => {
     const { svc } = service({
-      repo: { findBatch: fn().mockResolvedValue(batch) },
+      repo: {
+        findBatch: fn().mockResolvedValue(batch),
+        findActiveDiagnosticUnitIds: fn().mockResolvedValue([
+          { id: PROVIDER, tenantId: TENANT },
+        ]),
+      },
       linkedAccess: {
         assertInsurer: fn().mockRejectedValue(
           new ForbiddenException('No hay acceso a esa solicitud de seguro'),
         ),
       },
-      emDouble: em((entity: unknown) => {
-        if (entity === DiagnosticUnits)
-          return [{ id: PROVIDER, tenantId: TENANT }];
-        return [];
-      }),
     });
 
     const result = await runWithTenant(TENANT, () =>

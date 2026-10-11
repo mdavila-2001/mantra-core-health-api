@@ -2,16 +2,50 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import {
-  patientCoverageReferenceDate,
-  patientCoverageValidity,
-} from '../../../profiles/domain/patient-coverage-validity';
-import type {
-  CoverageBenefitSummaryDto,
-  OwnCoverageDto,
-} from '../../../profiles/presentation/dto/read-patients.dto';
+  coverageReferenceDate,
+  coverageValidity,
+  type CoverageValidity,
+} from '../../domain/coverage-validity';
 import { isPublicCarrierId } from '../../../../common/seed/bolivia-insurance.catalog';
 import { resolveInsuranceCurrencyCode } from '../../domain/insurance-currency';
 import { INS } from '../../domain/insurance.concepts';
+
+interface CoverageBenefitSummaryDto {
+  id: string;
+  categoryCode?: string;
+  categoryName?: string;
+  serviceConceptId?: string;
+  serviceName?: string;
+  coveragePercent?: string;
+  copayAmount?: string;
+  deductibleAmount?: string;
+  statusCode?: string;
+  validityStatus: CoverageValidity;
+  effectiveFrom?: string;
+  effectiveTo?: string;
+}
+
+interface OwnCoverageDto {
+  id: string;
+  carrierName: string;
+  planName?: string;
+  isPublic: boolean;
+  policyIdentifier?: string;
+  memberIdentifier?: string;
+  verified: boolean;
+  status?: string;
+  statusCode?: string;
+  validityStatus: CoverageValidity;
+  referenceDate: string;
+  effectiveFrom?: string;
+  effectiveTo?: string;
+  currencyCode?: string;
+  carrierWhatsappNumber?: string;
+  carrierCallCenterPhone?: string;
+  benefits: CoverageBenefitSummaryDto[];
+  planId?: string;
+  coverageOrder: number;
+}
 
 /** El mismo objeto sin las claves `null`/`undefined` (patrón de `profiles-patients.service.ts`). */
 function withoutAbsentFields<T extends object>(response: T): T {
@@ -62,7 +96,7 @@ export class DeclaredCoveragesReader {
     em: EntityManager,
     patientProfileId: string,
   ): Promise<OwnCoverageDto[]> {
-    const referenceDate = patientCoverageReferenceDate();
+    const referenceDate = coverageReferenceDate();
     const rows = await em.getConnection().execute<
       {
         coverage_id: string;
@@ -177,7 +211,7 @@ export class DeclaredCoveragesReader {
         verified: row.verification_status_concept_id === INS.VERIFY_VERIFIED,
         status: row.status_display,
         statusCode: row.status_code,
-        validityStatus: patientCoverageValidity(referenceDate, periods),
+        validityStatus: coverageValidity(referenceDate, periods),
         referenceDate,
         effectiveFrom: row.effective_from,
         effectiveTo: row.effective_to,
@@ -201,7 +235,7 @@ export class DeclaredCoveragesReader {
               deductibleAmount: benefit.deductible_amount,
               effectiveFrom: benefit.effective_from,
               effectiveTo: benefit.effective_to,
-              validityStatus: patientCoverageValidity(referenceDate, [
+              validityStatus: coverageValidity(referenceDate, [
                 ...periods,
                 {
                   statusConceptId: benefit.status_concept_id,

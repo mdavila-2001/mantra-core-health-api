@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import PDFDocument from 'pdfkit';
 import {
-  drawBrandAlovida,
-  brandHeight,
-} from '../../../clinical/services/alovida-mark';
-import { drawQr } from '../../../clinical/services/prescription-qr';
+  INSURANCE_PDF_ASSETS_PORT,
+  type InsurancePdfAssetsPort,
+} from '../ports/insurance-pdf-assets.port';
 import type { InsurancePortabilityReportDto } from '../../presentation/dto/insurance-portability.dto';
 
 /**
@@ -146,7 +145,10 @@ export function buildCertificate(
 }
 
 /** Dibuja el papel armado con `pdfkit` y devuelve el PDF como `Buffer`. */
-export function draw(sheet: PortabilitySheet): Promise<Buffer> {
+export function draw(
+  sheet: PortabilitySheet,
+  assets: InsurancePdfAssetsPort,
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'LETTER',
@@ -164,7 +166,7 @@ export function draw(sheet: PortabilitySheet): Promise<Buffer> {
 
     try {
       const markWidth = 28;
-      drawBrandAlovida(doc, {
+      assets.drawBrand(doc, {
         x: PAGE_MARGIN,
         y: PAGE_MARGIN,
         ancho: markWidth,
@@ -184,7 +186,9 @@ export function draw(sheet: PortabilitySheet): Promise<Buffer> {
         );
 
       doc.y =
-        PAGE_MARGIN + Math.max(brandHeight(markWidth), TITLE_FONT_SIZE) + 24;
+        PAGE_MARGIN +
+        Math.max(assets.brandHeight(markWidth), TITLE_FONT_SIZE) +
+        24;
       doc.x = PAGE_MARGIN;
 
       section(doc, 'Afiliado', sheet.member);
@@ -223,7 +227,7 @@ export function draw(sheet: PortabilitySheet): Promise<Buffer> {
       const qrSide = 70;
       const qrX = doc.page.width - PAGE_MARGIN - qrSide;
       const qrY = doc.page.height - PAGE_MARGIN - 90;
-      drawQr(doc, sheet.qrUrl, qrX, qrY, qrSide);
+      assets.drawQr(doc, sheet.qrUrl, qrX, qrY, qrSide);
 
       doc
         .font('Courier')
@@ -281,12 +285,17 @@ function table(
  */
 @Injectable()
 export class InsurancePortabilityPdfService {
+  constructor(
+    @Inject(INSURANCE_PDF_ASSETS_PORT)
+    private readonly assets: InsurancePdfAssetsPort,
+  ) {}
+
   render(
     report: InsurancePortabilityReportDto,
     manifestHash: string,
     qrUrl: string,
   ): Promise<Buffer> {
     const sheet = buildCertificate(report, manifestHash, qrUrl);
-    return draw(sheet);
+    return draw(sheet, this.assets);
   }
 }

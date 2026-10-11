@@ -76,6 +76,9 @@ function fixture() {
   const repo = {
     createRequest: fn().mockReturnValue(request),
     createItem: fn(),
+    findReservationProducts: fn().mockResolvedValue([
+      { id: 'portion', pharmacyProductId: 'product' },
+    ]),
     findRequest: fn().mockResolvedValue(request),
     findItemsByRequestIds: fn().mockResolvedValue([
       {
@@ -155,6 +158,9 @@ describe('PriorAuthService linked orders', () => {
         requestingProviderTypeConceptId: INS.ELIG_PROVIDER_TYPE_PHARMACY,
       }),
     );
+    expect(f.repo.findReservationProducts).toHaveBeenCalledWith(f.tx, [
+      'portion',
+    ]);
     expect(f.repo.createItem).toHaveBeenCalledWith(
       f.tx,
       expect.objectContaining({

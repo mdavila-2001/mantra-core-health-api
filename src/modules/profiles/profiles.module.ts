@@ -69,6 +69,8 @@ import { PERSON_RECORDS_PORT } from './application/ports/person-records.port';
 import { PersonRecordsAdapter } from './infrastructure/adapters/person-records.adapter';
 import { PATIENT_COVERAGES_PORT } from './application/ports/patient-coverages.port';
 import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-coverages.adapter';
+import { ClinicalPatientHistoryAdapter } from './infrastructure/adapters/clinical-patient-history.adapter';
+import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-patient-history.port';
 
 /**
  * Módulo Profiles (05): personas, pacientes y fuerza laboral de salud. Cubre alta
@@ -134,6 +136,11 @@ import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-cover
     },
     PersonRecordsAdapter,
     PatientCoveragesAdapter,
+    ClinicalPatientHistoryAdapter,
+    {
+      provide: CLINICAL_PATIENT_HISTORY_PORT,
+      useExisting: ClinicalPatientHistoryAdapter,
+    },
     {
       provide: PERSON_RECORDS_PORT,
       useExisting: PersonRecordsAdapter,

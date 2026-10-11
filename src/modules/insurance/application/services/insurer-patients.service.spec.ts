@@ -386,7 +386,7 @@ describe('directory authorization, options and conversations', () => {
       conversationId: 'conversation',
     });
     expect(d.messaging.createConversation).toHaveBeenCalledWith(
-      { participantProfileIds: ['initiator', 'recipient'] },
+      ['initiator', 'recipient'],
       actor,
     );
     expect(d.insurerContext.resolve).toHaveBeenCalledTimes(2);

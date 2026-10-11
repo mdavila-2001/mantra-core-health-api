@@ -1,11 +1,10 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { createHash, randomUUID } from 'node:crypto';
 import {
   CONCEPTS,
   ResourceNotFoundException,
-  SEED,
   type AuthenticatedUser,
 } from '../../../../common';
 import { addDecimals } from '../../../../common/money/decimal-money';
@@ -19,23 +18,10 @@ import type {
 } from '../../infrastructure/repositories/insurance-portability.repository';
 import { INS } from '../../domain/insurance.concepts';
 import { resolveInsuranceCurrencyCode } from '../../domain/insurance-currency';
-import { ProfileOwnershipService } from '../../../profiles/application/services/profile-ownership.service';
 import {
-  PatientProfilesRepository,
-  PersonsRepository,
-} from '../../../profiles/infrastructure/repositories';
-import { IdentifiersRepository } from '../../../common/repositories';
-import { composePersonDisplayName } from '../../../profiles/domain/person-name';
-import { CatalogConcepts } from '../../../terminology/entities';
-import { FileUploadService } from '../../../common/services';
-import { FileCategory, FileSensitivity } from '../../../common/dto';
-import { DataReleaseRepository } from '../../../health_data/repositories/data-release.repository';
-import { HealthProvenanceRepository } from '../../../health_data/repositories/health-provenance.repository';
-import { DsarRequestsRepository } from '../../../audit/repositories/dsar-requests.repository';
-import { DataAccessLogRepository } from '../../../audit/repositories/data-access-log.repository';
-import { AuditTrailService } from '../../../audit/services';
-import { AUD } from '../../../audit/audit.concepts';
-import { loadAgendaNoticesEnv } from '../../../scheduling/infrastructure/config/agenda-notices.env';
+  INSURANCE_PORTABILITY_SUPPORT_PORT,
+  type InsurancePortabilitySupportPort,
+} from '../ports/insurance-portability-support.port';
 import { InsurancePortabilityPdfService } from './insurance-portability-pdf.service';
 import {
   PortabilityExportFormat,
@@ -106,16 +92,8 @@ export class InsurancePortabilityService {
     private readonly em: EntityManager,
     private readonly portabilityRepo: InsurancePortabilityRepository,
     private readonly catalogRepo: CatalogRepository,
-    private readonly profileOwnership: ProfileOwnershipService,
-    private readonly patientsRepo: PatientProfilesRepository,
-    private readonly personsRepo: PersonsRepository,
-    private readonly identifiersRepo: IdentifiersRepository,
-    private readonly fileUpload: FileUploadService,
-    private readonly releaseRepo: DataReleaseRepository,
-    private readonly provenanceRepo: HealthProvenanceRepository,
-    private readonly dsarRepo: DsarRequestsRepository,
-    private readonly dataAccessRepo: DataAccessLogRepository,
-    private readonly auditTrail: AuditTrailService,
+    @Inject(INSURANCE_PORTABILITY_SUPPORT_PORT)
+    private readonly portabilitySupport: InsurancePortabilitySupportPort,
     private readonly pdfService: InsurancePortabilityPdfService,
     private readonly logger: PinoLogger,
   ) {
@@ -241,14 +219,9 @@ export class InsurancePortabilityService {
       .digest('hex');
     const buffer = Buffer.from(canonicalJson, 'utf8');
 
-    const storedFile = await this.fileUpload.storeGenerated(
-      {
-        buffer,
-        originalName: `portabilidad-${certificateId}.json`,
-        mimeType: 'application/json',
-        category: FileCategory.DOCUMENT,
-        sensitivity: FileSensitivity.PHI,
-      },
+    const storedFile = await this.portabilitySupport.storeGeneratedFile(
+      buffer,
+      `portabilidad-${certificateId}.json`,
       actor,
     );
 
@@ -261,92 +234,21 @@ export class InsurancePortabilityService {
     // archivo, `common.file_versions`, no en `common.files`).
 
     await this.em.transactional(async (tx) => {
-      const job = this.releaseRepo.createExportJob(tx, {
-        id: certificateId,
-        tenantId: SEED.tenantId,
-        exportTypeConceptId: CONCEPTS.EXPORT_TYPE_INSURANCE_PORTABILITY,
-        requestedByUserId: actor.id,
-        purposeOfUseConceptId: AUD.PURPOSE_PATIENT_REQUEST,
+      await this.portabilitySupport.persistExport(tx, {
+        certificateId,
+        actor,
         patientProfileId: dto.patientProfileId,
-        statusConceptId: CONCEPTS.EXPORT_COMPLETED,
-        // Mismo instante que se selló en `report.generatedAt` (:206): el
-        // verify público lo devuelve tal cual, y sin esto `requestedAt`
-        // tomaría otro `new Date()` después de escribir el archivo.
-        requestedAt: generatedAt,
-        deliveryDestinationJson: {
-          channel: 'PATIENT_SELF_SERVICE',
-          format,
-          targetInsurerTenantId: dto.targetInsurerTenantId ?? null,
-        },
-      });
-      // `health_export_manifests.health_export_job_id` es una columna uuid
-      // plana, no una relación que MikroORM pueda ordenar por sí solo: sin
-      // este flush, el manifiesto puede insertarse antes que el job y la FK
-      // (`fk_health_export_manifests_health_export_job_id`) lo rechaza.
-      // Mismo patrón que el flush de más abajo, para `provenance`/`manifest`.
-      await tx.flush();
-
-      const manifest = this.releaseRepo.createExportManifest(tx, {
-        healthExportJobId: job.id,
-        manifestVersion: 1,
+        generatedAt,
         fileId: storedFile.id,
-        contentHash: manifestHash,
+        manifestHash,
         recordCount: String(claims.length),
         sizeBytes: String(buffer.byteLength),
-      });
-
-      const provenance = this.provenanceRepo.createProvenanceRecord(tx, {
-        // NOT NULL sin default en el esquema (HealthProvenanceRecords
-        // .custodianTenantId). Un export de portabilidad es un trámite del
-        // paciente, no de un tenant asistencial: el custodio es la
-        // plataforma, mismo tenant que ya usa `createExportJob` arriba.
-        custodianTenantId: SEED.tenantId,
-        activityConceptId: CONCEPTS.PROV_EXPORT,
-        occurredStartAt: generatedAt,
-        responsibleAgentId: actor.id,
-        contentHash: manifestHash,
-        policyUrisJson: { purposeOfUseConceptId: AUD.PURPOSE_PATIENT_REQUEST },
-      });
-      // Mismo patrón que `DataReleaseService.exportBundle`: sin este flush,
-      // el objetivo de procedencia referenciaría un registro que todavía no
-      // llegó a la base.
-      await tx.flush();
-      this.provenanceRepo.createProvenanceTarget(tx, {
-        healthProvenanceRecordId: provenance.id,
-        targetTypeConceptId: CONCEPTS.HD_ENTITY_MANIFEST,
-        targetId: manifest.id,
-      });
-
-      const dsar = this.dsarRepo.create(tx, {
-        userId: actor.id,
-        typeConceptId: AUD.DSAR_TYPE_PORTABILITY,
-        statusConceptId: AUD.DSAR_COMPLETED,
-        actorUserId: actor.id,
-      });
-      // La solicitud se resuelve en el mismo instante en que se emite: no
-      // hay ventana "en curso" que gestionar aparte.
-      dsar.completedAt = generatedAt;
-      dsar.resultFileId = storedFile.id;
-
-      this.dataAccessRepo.record(tx, {
-        userId: actor.id,
-        actionConceptId: AUD.ACTION_EXPORT,
-        patientProfileId: dto.patientProfileId,
-        purpose: 'insurance-portability-export',
-        legalBasisConceptId: AUD.LEGAL_BASIS_CONSENT,
-        resourceType: 'insurance.portability_certificate',
-        resourceId: certificateId,
-        recordedByUserId: actor.id,
-      });
-
-      await this.auditTrail.record(tx, actor, {
-        action: 'INSURANCE_PORTABILITY_EXPORTED',
-        entity: 'insurance.portability_certificate',
-        entityId: certificateId,
+        format,
+        targetInsurerTenantId: dto.targetInsurerTenantId ?? null,
       });
     });
 
-    const { webAppBaseUrl } = loadAgendaNoticesEnv();
+    const webAppBaseUrl = this.portabilitySupport.webAppBaseUrl();
     return {
       certificateId,
       manifestHash,
@@ -370,7 +272,7 @@ export class InsurancePortabilityService {
     actor: AuthenticatedUser,
   ): Promise<{ buffer: Buffer; fileName: string }> {
     const { manifest } = await this.loadCertificate(certificateId, actor);
-    const content = await this.fileUpload.downloadForAuthorizedContext(
+    const content = await this.portabilitySupport.downloadFile(
       manifest.fileId,
       'insurance.portability.download-json',
     );
@@ -386,14 +288,14 @@ export class InsurancePortabilityService {
     actor: AuthenticatedUser,
   ): Promise<{ buffer: Buffer; fileName: string }> {
     const { manifest } = await this.loadCertificate(certificateId, actor);
-    const content = await this.fileUpload.downloadForAuthorizedContext(
+    const content = await this.portabilitySupport.downloadFile(
       manifest.fileId,
       'insurance.portability.download-pdf',
     );
     const report = JSON.parse(
       content.buffer.toString('utf8'),
     ) as InsurancePortabilityReportDto;
-    const { webAppBaseUrl } = loadAgendaNoticesEnv();
+    const webAppBaseUrl = this.portabilitySupport.webAppBaseUrl();
     const qrUrl = `${webAppBaseUrl}/verify/portability/${manifest.contentHash}`;
     const buffer = await this.pdfService.render(
       report,
@@ -411,7 +313,7 @@ export class InsurancePortabilityService {
     manifestHash: string,
   ): Promise<PortabilityVerificationResponseDto> {
     const em = this.em.fork();
-    const manifest = await this.releaseRepo.findManifestByContentHash(
+    const manifest = await this.portabilitySupport.findManifestByContentHash(
       em,
       manifestHash,
     );
@@ -420,7 +322,7 @@ export class InsurancePortabilityService {
         manifestHash,
       });
     }
-    const job = await this.releaseRepo.findExportJobById(
+    const job = await this.portabilitySupport.findExportJobById(
       em,
       manifest.healthExportJobId,
     );
@@ -457,7 +359,7 @@ export class InsurancePortabilityService {
   ): Promise<void> {
     const em = this.em.fork();
     try {
-      await this.profileOwnership.assertOwnsPatientProfile(
+      await this.portabilitySupport.assertOwnsPatientProfile(
         em,
         patientProfileId,
         actor,
@@ -465,7 +367,7 @@ export class InsurancePortabilityService {
     } catch (error) {
       if (error instanceof ForbiddenException) {
         await this.em.transactional((tx) =>
-          this.auditTrail.record(tx, actor, {
+          this.portabilitySupport.recordAudit(tx, actor, {
             action: 'INSURANCE_PORTABILITY_DENIED',
             entity: 'patient_profile',
             entityId: patientProfileId,
@@ -490,7 +392,10 @@ export class InsurancePortabilityService {
     actor: AuthenticatedUser,
   ) {
     const em = this.em.fork();
-    const job = await this.releaseRepo.findExportJobById(em, certificateId);
+    const job = await this.portabilitySupport.findExportJobById(
+      em,
+      certificateId,
+    );
     if (
       !job ||
       job.exportTypeConceptId !== CONCEPTS.EXPORT_TYPE_INSURANCE_PORTABILITY ||
@@ -501,7 +406,7 @@ export class InsurancePortabilityService {
       });
     }
     await this.assertOwnership(job.patientProfileId, actor);
-    const manifest = await this.releaseRepo.findManifest(em, job.id, 1);
+    const manifest = await this.portabilitySupport.findManifest(em, job.id, 1);
     if (!manifest) {
       throw new ResourceNotFoundException('Certificado no encontrado', {
         certificateId,
@@ -520,35 +425,7 @@ export class InsurancePortabilityService {
     issuerAdministrativeAreaConceptId?: string;
     birthDate: string | null;
   }> {
-    const patientProfile = await this.patientsRepo.findById(
-      em,
-      patientProfileId,
-    );
-    if (!patientProfile) {
-      throw new ResourceNotFoundException('Paciente no encontrado', {
-        patientProfileId,
-      });
-    }
-    const person = await this.personsRepo.findById(
-      em,
-      patientProfile.profileId,
-    );
-    const identifiers = await this.identifiersRepo.findCurrentByOwner(
-      em,
-      patientProfile.profileId,
-    );
-    const nationalIdentifier = identifiers.find(
-      (identifier) => identifier.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
-    );
-    return {
-      fullName: person ? (composePersonDisplayName(person) ?? '') : '',
-      nationalId: nationalIdentifier?.value ?? null,
-      issuerAdministrativeAreaConceptId:
-        nationalIdentifier?.issuerAdministrativeAreaConceptId,
-      birthDate: person?.birthDate
-        ? person.birthDate.toISOString().slice(0, 10)
-        : null,
-    };
+    return this.portabilitySupport.resolvePatientParts(em, patientProfileId);
   }
 
   private buildPatient(
@@ -909,7 +786,7 @@ export class InsurancePortabilityService {
   ): Promise<ConceptMap> {
     const clean = unique(ids);
     if (clean.length === 0) return new Map();
-    const concepts = await em.find(CatalogConcepts, { id: { $in: clean } });
+    const concepts = await this.portabilityRepo.findConceptsByIds(em, clean);
     return new Map(
       concepts.map((concept) => [
         concept.id,

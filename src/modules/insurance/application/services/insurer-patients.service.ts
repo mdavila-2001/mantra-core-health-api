@@ -1,5 +1,6 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,15 +13,19 @@ import {
   roleAuthorizesInTenant,
   type AuthenticatedUser,
 } from '../../../../common';
-import { CommunityMessagingService } from '../../../community/services/community-messaging.service';
-import { DataAccessLogRepository } from '../../../audit/repositories/data-access-log.repository';
+import {
+  PATIENT_DIRECTORY_ACCESS_AUDIT_PORT,
+  PATIENT_DIRECTORY_CONVERSATION_PORT,
+  type PatientDirectoryAccessAuditPort,
+  type PatientDirectoryConversationPort,
+} from '../ports/patient-directory.port';
 import { AUD } from '../../../audit/audit.concepts';
 import { DIR } from '../../../directory/directory.concepts';
 import { COMM } from '../../../community/community.concepts';
 import {
-  patientCoverageReferenceDate,
-  patientCoverageValidity,
-} from '../../../profiles/domain/patient-coverage-validity';
+  coverageReferenceDate,
+  coverageValidity,
+} from '../../domain/coverage-validity';
 import { PROF } from '../../../profiles/profiles.concepts';
 import type {
   InsurerPatientCarrierDto,
@@ -96,8 +101,10 @@ export class InsurerPatientsService {
   constructor(
     private readonly em: EntityManager,
     private readonly insurerContext: InsurerContextService,
-    private readonly messaging: CommunityMessagingService,
-    private readonly dataAccess: DataAccessLogRepository,
+    @Inject(PATIENT_DIRECTORY_CONVERSATION_PORT)
+    private readonly messaging: PatientDirectoryConversationPort,
+    @Inject(PATIENT_DIRECTORY_ACCESS_AUDIT_PORT)
+    private readonly dataAccess: PatientDirectoryAccessAuditPort,
   ) {}
 
   /**
@@ -120,7 +127,7 @@ export class InsurerPatientsService {
 
     const criteria: InsurerPatientCriteria = {
       carrierId,
-      referenceDate: patientCoverageReferenceDate(now),
+      referenceDate: coverageReferenceDate(now),
       limit: query.limit ?? DEFAULT_PAGE_SIZE,
       cursor: query.cursor,
       search: query.search?.trim() || undefined,
@@ -318,7 +325,7 @@ export class InsurerPatientsService {
     const current = coverages
       .map((row) => ({
         row,
-        validity: patientCoverageValidity(referenceDate, [
+        validity: coverageValidity(referenceDate, [
           {
             statusConceptId: row.status_concept_id,
             activeConceptId: INS.COVERAGE_ACTIVE,
@@ -406,7 +413,7 @@ export class InsurerPatientsService {
     const query = buildInsurerPatientPageQuery({
       carrierId,
       patientProfileId: dto.patientProfileId,
-      referenceDate: patientCoverageReferenceDate(now),
+      referenceDate: coverageReferenceDate(now),
       limit: 10,
       insuranceStatus: 'ALL',
       sortBy: 'fullName',
@@ -437,9 +444,7 @@ export class InsurerPatientsService {
       );
     }
     const conversation = await this.messaging.createConversation(
-      {
-        participantProfileIds: [initiator.id, recipient.community_profile_id],
-      },
+      [initiator.id, recipient.community_profile_id],
       actor,
     );
     this.recordAccess(em, [dto.patientProfileId], actor, tenantId);

@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { sumarDecimales, type AuthenticatedUser } from '../../../../common';
-import { CatalogConcepts } from '../../../terminology/entities';
-import { Persons, PatientProfiles } from '../../../profiles/entities';
-import { PharmacyProducts } from '../../../pharmacy/entities';
-import { DiagnosticStudyOfferings } from '../../../diagnostic_units/entities';
 import {
   CatalogRepository,
   PriorAuthRepository,
 } from '../../infrastructure/repositories';
+import type {
+  PriorAuthDiagnosticOfferingRecord,
+  PriorAuthPharmacyProductRecord,
+} from '../../infrastructure/repositories/prior-auth.repository';
 import {
   InsurancePlans,
   PatientCoverages,
@@ -155,16 +155,10 @@ export class PriorAuthReadService {
       em.find(InsurancePlans, {
         id: { $in: unique(coverages.map((c) => c.insurancePlanId)) },
       }),
-      personIds.length ? em.find(Persons, { id: { $in: personIds } }) : [],
-      personIds.length
-        ? em.find(PatientProfiles, { profileId: { $in: personIds } })
-        : [],
-      productIds.length
-        ? em.find(PharmacyProducts, { id: { $in: productIds } })
-        : [],
-      offeringIds.length
-        ? em.find(DiagnosticStudyOfferings, { id: { $in: offeringIds } })
-        : [],
+      this.repo.findPeople(em, personIds),
+      this.repo.findPatientRecords(em, personIds),
+      this.repo.findPharmacyProducts(em, productIds),
+      this.repo.findDiagnosticOfferings(em, offeringIds),
     ]);
     const concepts = await this.conceptMap(em, [
       ...items.map((item) => item.serviceConceptId),
@@ -285,7 +279,7 @@ export class PriorAuthReadService {
   ): Promise<Map<string, { code: string; display: string }>> {
     const clean = unique(ids);
     if (clean.length === 0) return new Map();
-    const concepts = await em.find(CatalogConcepts, { id: { $in: clean } });
+    const concepts = await this.repo.findConcepts(em, clean);
     return new Map(
       concepts.map((c) => [c.id, { code: c.code, display: c.display }]),
     );
@@ -295,8 +289,8 @@ export class PriorAuthReadService {
 /** Nombre legible del ítem: producto, estudio o servicio, en ese orden. */
 function describe(
   item: PriorAuthorizationItems,
-  products: ReadonlyMap<string, PharmacyProducts>,
-  offerings: ReadonlyMap<string, DiagnosticStudyOfferings>,
+  products: ReadonlyMap<string, PriorAuthPharmacyProductRecord>,
+  offerings: ReadonlyMap<string, PriorAuthDiagnosticOfferingRecord>,
   concepts: ReadonlyMap<string, { display: string }>,
 ): string {
   const product = item.pharmacyProductId

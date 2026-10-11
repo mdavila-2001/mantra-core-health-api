@@ -27,13 +27,16 @@ function build() {
     findActiveByUser: mockFn(() => Promise.resolve(null)),
   };
   const patientProfilesRepo = { findById: mockFn() };
+  const patientAccounts = {
+    findActiveAccountLink: accountLinksRepo.findActiveByUser,
+    findPatientProfile: patientProfilesRepo.findById,
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   const service = new CoverageService(
     em as any,
     repo as any,
     catalog as any,
-    accountLinksRepo as any,
-    patientProfilesRepo as any,
+    patientAccounts as any,
     logger as any,
   );
   return { service, repo, accountLinksRepo, patientProfilesRepo };

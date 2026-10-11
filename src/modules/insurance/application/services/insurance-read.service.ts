@@ -9,7 +9,6 @@ import {
   DIRECTORY_TENANT_ADMINISTRATION_PORT,
   type DirectoryTenantAdministrationPort,
 } from '../ports/directory-tenant-administration.port';
-import type { CatalogConcepts } from '../../../terminology/entities';
 import type {
   BrokerCarrierAgreements,
   InsuranceBrokers,
@@ -37,6 +36,12 @@ import type {
   ProviderNetworkDto,
 } from '../../presentation/dto';
 import { InsuranceReadRepository } from '../../infrastructure/repositories';
+
+interface InsuranceReadConcept {
+  readonly id: string;
+  readonly code: string;
+  readonly display: string;
+}
 
 /**
  * Lecturas del módulo 26: catálogo de la aseguradora y brokers del tenant
@@ -359,7 +364,7 @@ export class InsuranceReadService {
   private async conceptMap(
     em: EntityManager,
     ids: readonly (string | undefined)[],
-  ): Promise<ReadonlyMap<string, CatalogConcepts>> {
+  ): Promise<ReadonlyMap<string, InsuranceReadConcept>> {
     const concepts = await this.readRepo.findConcepts(
       em,
       unique(ids.filter((id): id is string => Boolean(id))),
@@ -369,7 +374,7 @@ export class InsuranceReadService {
 
   private toCarrierSummary(
     carrier: InsuranceCarriers,
-    concepts: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, InsuranceReadConcept>,
     canAdminister: boolean,
     counts: {
       /** Productos activos. */
@@ -401,7 +406,7 @@ export class InsuranceReadService {
 
   private toBrokerSummary(
     broker: InsuranceBrokers,
-    concepts: ReadonlyMap<string, CatalogConcepts>,
+    concepts: ReadonlyMap<string, InsuranceReadConcept>,
     currentCarrierCount: number,
   ): BrokerSummaryDto {
     return {
@@ -447,7 +452,7 @@ function isCurrent(agreement: BrokerCarrierAgreements, now: Date): boolean {
 function toAgreement(
   agreement: BrokerCarrierAgreements,
   carrierNameById: ReadonlyMap<string, string>,
-  concepts: ReadonlyMap<string, CatalogConcepts>,
+  concepts: ReadonlyMap<string, InsuranceReadConcept>,
   now: Date,
 ): BrokerAgreementDto {
   return {
@@ -473,7 +478,7 @@ function toProduct(
   product: InsuranceProducts,
   plans: readonly InsurancePlans[],
   benefitsByPlan: ReadonlyMap<string, InsurancePlanBenefits[]>,
-  concepts: ReadonlyMap<string, CatalogConcepts>,
+  concepts: ReadonlyMap<string, InsuranceReadConcept>,
 ): ProductDto {
   return {
     id: product.id,
@@ -491,7 +496,7 @@ function toProduct(
 function toPlan(
   plan: InsurancePlans,
   benefits: readonly InsurancePlanBenefits[],
-  concepts: ReadonlyMap<string, CatalogConcepts>,
+  concepts: ReadonlyMap<string, InsuranceReadConcept>,
 ): PlanDto {
   return {
     id: plan.id,
@@ -510,7 +515,7 @@ function toPlan(
 
 function toBenefit(
   benefit: InsurancePlanBenefits,
-  concepts: ReadonlyMap<string, CatalogConcepts>,
+  concepts: ReadonlyMap<string, InsuranceReadConcept>,
 ): PlanBenefitDto {
   return {
     id: benefit.id,
@@ -552,7 +557,7 @@ function normalizeApprovalRules(
 function toNetwork(
   network: ProviderNetworks,
   memberCount: number,
-  concepts: ReadonlyMap<string, CatalogConcepts>,
+  concepts: ReadonlyMap<string, InsuranceReadConcept>,
 ): ProviderNetworkDto {
   return {
     id: network.id,
@@ -574,7 +579,7 @@ function toNetwork(
  * que el dato no existía.
  */
 function concept(
-  concepts: ReadonlyMap<string, CatalogConcepts>,
+  concepts: ReadonlyMap<string, InsuranceReadConcept>,
   id: string | undefined,
 ): InsuranceConceptDto {
   const value = id === undefined ? undefined : concepts.get(id);
@@ -584,7 +589,7 @@ function concept(
 }
 
 function optionalConcept(
-  concepts: ReadonlyMap<string, CatalogConcepts>,
+  concepts: ReadonlyMap<string, InsuranceReadConcept>,
   id: string | undefined,
 ): InsuranceConceptDto | null {
   return id === undefined ? null : concept(concepts, id);

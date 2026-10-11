@@ -7,9 +7,8 @@ import { EntityManager, QueryOrder } from '@mikro-orm/postgresql';
 import { isUUID } from 'class-validator';
 import { PinoLogger } from 'nestjs-pino';
 import { runWithTenant, type AuthenticatedUser } from '../../../../common';
-import { Encounters } from '../../../clinical/entities';
-import { DiagnosticUnits } from '../../../diagnostic_units/entities';
 import { DUNIT } from '../../../diagnostic_units/diagnostic_units.concepts';
+import { ClaimReadRepository } from '../../infrastructure/repositories';
 import { InsuranceClaims, PatientCoverages } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
 import type {
@@ -27,6 +26,7 @@ export class MyClaimsService {
   constructor(
     private readonly em: EntityManager,
     private readonly receivedClaims: InsurerReceivedClaimsService,
+    private readonly claimReadRepo: ClaimReadRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(MyClaimsService.name);
@@ -40,9 +40,10 @@ export class MyClaimsService {
     const tenantId = this.selectedTenant(actor, declaredTenantId);
     const em = this.em.fork();
     if (actor.practitionerProfileId) {
-      const encounters = await em.find(Encounters, {
-        primaryPractitionerId: actor.practitionerProfileId,
-      });
+      const encounters = await this.claimReadRepo.findEncountersByPractitioner(
+        em,
+        actor.practitionerProfileId,
+      );
       return this.readClaims(em, actor, 'PRACTITIONER', {
         encounterId: { $in: encounters.map((encounter) => encounter.id) },
       });
@@ -102,13 +103,12 @@ export class MyClaimsService {
     actor: AuthenticatedUser,
     tenantId: string,
   ): Promise<MyClaimListDto | null> {
-    const units = await em.find(DiagnosticUnits, {
+    const units = await this.claimReadRepo.findActiveDiagnosticUnitsForTenant(
+      em,
       tenantId,
-      statusConceptId: DUNIT.UNIT_ACTIVE,
-      diagnosticUnitTypeConceptId: {
-        $in: [DUNIT.UNIT_TYPE_LABORATORY, DUNIT.UNIT_TYPE_IMAGING],
-      },
-    });
+      DUNIT.UNIT_ACTIVE,
+      [DUNIT.UNIT_TYPE_LABORATORY, DUNIT.UNIT_TYPE_IMAGING],
+    );
     if (units.length === 0) return null;
     const laboratory = units.filter(
       (unit) => unit.diagnosticUnitTypeConceptId === DUNIT.UNIT_TYPE_LABORATORY,

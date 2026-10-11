@@ -1,5 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { CatalogConcepts } from '../../../terminology/entities';
+
+export interface PortabilityConceptRow {
+  readonly id: string;
+  readonly code: string;
+  readonly display: string;
+}
 
 /** Una atención (encuentro clínico) del titular, cruda de la base. */
 export interface PortabilityEncounterRow {
@@ -99,6 +106,14 @@ export interface PortabilityConditionRow {
  */
 @Injectable()
 export class InsurancePortabilityRepository {
+  findConceptsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<PortabilityConceptRow[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(CatalogConcepts, { id: { $in: [...ids] } });
+  }
+
   /** Las pólizas/coberturas que el paciente declaró, vigentes o no. */
   async policiesOfPatient(
     em: EntityManager,

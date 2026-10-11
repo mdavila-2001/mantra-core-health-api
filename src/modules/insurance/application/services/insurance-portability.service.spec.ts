@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
 import { CONCEPTS, ResourceNotFoundException } from '../../../../common';
 import { INS } from '../../domain/insurance.concepts';
+import { InsurancePortabilitySupportAdapter } from '../../infrastructure/adapters/insurance-portability-support.adapter';
 import { InsurancePortabilityService } from './insurance-portability.service';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -32,6 +33,7 @@ function build() {
     encountersOfPatient: mockFn().mockResolvedValue([]),
     claimsOfPatient: mockFn().mockResolvedValue([]),
     conditionsOfPatient: mockFn().mockResolvedValue([]),
+    findConceptsByIds: mockFn().mockResolvedValue([]),
   };
   const catalogRepo = { findCarrierByTenantId: mockFn() };
   const profileOwnership = {
@@ -80,13 +82,7 @@ function build() {
   };
   const dataAccessRepo = { record: mockFn() };
   const auditTrail = { record: mockFn().mockResolvedValue(undefined) };
-  const pdfService = { render: mockFn() };
-  const logger = { setContext: mockFn(), error: mockFn() };
-
-  const service = new InsurancePortabilityService(
-    em as never,
-    portabilityRepo as never,
-    catalogRepo as never,
+  const support = new InsurancePortabilitySupportAdapter(
     profileOwnership as never,
     patientsRepo as never,
     personsRepo as never,
@@ -97,6 +93,15 @@ function build() {
     dsarRepo as never,
     dataAccessRepo as never,
     auditTrail as never,
+  );
+  const pdfService = { render: mockFn() };
+  const logger = { setContext: mockFn(), error: mockFn() };
+
+  const service = new InsurancePortabilityService(
+    em as never,
+    portabilityRepo as never,
+    catalogRepo as never,
+    support as never,
     pdfService as never,
     logger as never,
   );
@@ -256,7 +261,7 @@ describe('InsurancePortabilityService.export — atenciones (CA-01)', () => {
       },
     ] as never);
 
-    // El servicio resuelve los códigos vía `em.find(CatalogConcepts, …)`;
+    // El servicio resuelve los códigos vía el repositorio del módulo;
     // acá el `EntityManager` está doblado en `build()` con `find` → `[]`
     // por defecto, así que el status cae a 'UNKNOWN' — lo que importa es
     // que la fila llegue al reporte, no la resolución del concepto (ya

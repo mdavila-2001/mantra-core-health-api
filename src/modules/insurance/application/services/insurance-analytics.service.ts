@@ -11,7 +11,7 @@ import {
   DIRECTORY_TENANT_ADMINISTRATION_PORT,
   type DirectoryTenantAdministrationPort,
 } from '../ports/directory-tenant-administration.port';
-import { patientCoverageReferenceDate } from '../../../profiles/domain/patient-coverage-validity';
+import { coverageReferenceDate } from '../../domain/coverage-validity';
 import { CatalogRepository } from '../../infrastructure/repositories';
 import {
   InsuranceAnalyticsRepository,
@@ -269,11 +269,11 @@ export class InsuranceAnalyticsService {
   /**
    * Resuelve el periodo: por defecto, los últimos {@link DEFAULT_PERIOD_MONTHS}
    * meses hasta hoy en La Paz (mismo "hoy" que usa el resto del módulo de
-   * coberturas, vía {@link patientCoverageReferenceDate}). `startDate > endDate`
+   * coberturas, vía {@link coverageReferenceDate}). `startDate > endDate`
    * — con o sin defaults de por medio — es un rango inválido: 422.
    */
   private resolvePeriod(query: InsuranceAnalyticsQueryDto): AnalyticsPeriod {
-    const today = patientCoverageReferenceDate();
+    const today = coverageReferenceDate();
     const hiDate = query.endDate ?? today;
     const loDate =
       query.startDate ?? monthsBefore(hiDate, DEFAULT_PERIOD_MONTHS);

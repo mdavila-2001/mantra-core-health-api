@@ -202,4 +202,5 @@ export type { StickerPackEntry } from './constants/sticker-pack';
 export {
   addDecimals as sumarDecimales,
   sameDecimals as mismosDecimales,
+  multiplyDecimalsToMoney,
 } from './money/decimal-money';

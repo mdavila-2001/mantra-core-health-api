@@ -2,9 +2,6 @@ import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
 import { PriorAuthReadService } from './prior-auth-read.service';
 import { InsurancePlans, PatientCoverages } from '../../entities';
-import { Persons, PatientProfiles } from '../../../profiles/entities';
-import { PharmacyProducts } from '../../../pharmacy/entities';
-import { CatalogConcepts } from '../../../terminology/entities';
 import { INS } from '../../domain/insurance.concepts';
 
 const fn = (implementation?: any): any => (jest.fn as any)(implementation);
@@ -91,16 +88,6 @@ function fixture() {
           },
         ];
       if (entity === InsurancePlans) return [{ id: 'plan', name: 'Plan Oro' }];
-      if (entity === Persons) return [{ id: 'person', displayName: 'Ana' }];
-      if (entity === PatientProfiles)
-        return [{ profileId: 'person', patientCode: 'P-1' }];
-      if (entity === PharmacyProducts)
-        return [{ id: 'product', brandName: 'Amoxil', strengthText: '500 mg' }];
-      if (entity === CatalogConcepts)
-        return [
-          { id: 'bob', code: 'BOB', display: 'Boliviano' },
-          { id: 'service', code: 'X', display: 'Consulta' },
-        ];
       return [];
     }),
   };
@@ -110,6 +97,18 @@ function fixture() {
     findRequest: fn().mockResolvedValue(request),
     findItemsByRequestIds: fn().mockResolvedValue(items),
     findDeterminationsByRequestIds: fn().mockResolvedValue(determinations),
+    findPeople: fn().mockResolvedValue([{ id: 'person', displayName: 'Ana' }]),
+    findPatientRecords: fn().mockResolvedValue([
+      { profileId: 'person', patientCode: 'P-1' },
+    ]),
+    findPharmacyProducts: fn().mockResolvedValue([
+      { id: 'product', brandName: 'Amoxil', strengthText: '500 mg' },
+    ]),
+    findDiagnosticOfferings: fn().mockResolvedValue([]),
+    findConcepts: fn().mockResolvedValue([
+      { id: 'bob', code: 'BOB', display: 'Boliviano' },
+      { id: 'service', code: 'X', display: 'Consulta' },
+    ]),
   };
   const catalog = {
     findCarrierByTenantId: fn().mockResolvedValue({ id: 'carrier' }),

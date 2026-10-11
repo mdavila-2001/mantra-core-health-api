@@ -5,6 +5,7 @@ import {
   PersonAccountLinksRepository,
 } from '../../../profiles/infrastructure/repositories';
 import { PatientSettlementRepository } from '../../infrastructure/repositories/patient-settlement.repository';
+import type { InsurancePatientAccountRepository } from '../../infrastructure/repositories/insurance-patient-account.repository';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { PatientSettlementService } from './patient-settlement.service';
 
@@ -41,11 +42,14 @@ function fixture() {
     ) => callback(tx),
   );
   const em = { transactional } as unknown as EntityManager;
+  const patientAccounts = {
+    findActiveAccountLink: links.findActiveByUser,
+    findPatientProfile: patients.findById,
+  };
   const service = new PatientSettlementService(
     repository as PatientSettlementRepository,
     orders as unknown as LinkedClaimOrderService,
-    links as unknown as PersonAccountLinksRepository,
-    patients as unknown as PatientProfilesRepository,
+    patientAccounts as unknown as InsurancePatientAccountRepository,
   );
   return {
     service,

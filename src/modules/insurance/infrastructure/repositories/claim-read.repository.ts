@@ -17,7 +17,43 @@ import { Encounters } from '../../../clinical/entities';
 import { DiagnosticUnits } from '../../../diagnostic_units/entities';
 import { Users } from '../../../iam/entities';
 import { Practices } from '../../../practice/entities';
-import { PractitionerSpecialties } from '../../../profiles/entities';
+import {
+  PatientProfiles,
+  Persons,
+  PractitionerSpecialties,
+} from '../../../profiles/entities';
+import { ServiceRequests } from '../../../clinical/entities';
+
+export interface ClaimReadPersonRecord {
+  readonly id: string;
+  readonly displayName?: string | null;
+}
+
+export interface ClaimReadPatientProfileRecord {
+  readonly profileId: string;
+  readonly patientCode?: string | null;
+}
+
+export interface ClaimSourceRequestRecord {
+  readonly previousDiagnosticReportId?: string | null;
+  readonly createdAt: Date;
+  readonly duplicateOverrideReason?: string | null;
+}
+
+export interface ClaimReadConceptRecord {
+  readonly id: string;
+  readonly code: string;
+  readonly display: string;
+}
+
+export interface ClaimReadEncounterRecord {
+  readonly id: string;
+}
+
+export interface ClaimReadDiagnosticUnitRecord {
+  readonly id: string;
+  readonly diagnosticUnitTypeConceptId: string;
+}
 
 /**
  * Lo mínimo de una solicitud para nombrarla desde afuera del módulo: la agenda
@@ -89,6 +125,67 @@ export interface ClaimCursor {
  */
 @Injectable()
 export class ClaimReadRepository {
+  findEncountersByPractitioner(
+    em: EntityManager,
+    practitionerProfileId: string,
+  ): Promise<ClaimReadEncounterRecord[]> {
+    return em.find(Encounters, {
+      primaryPractitionerId: practitionerProfileId,
+    });
+  }
+
+  findActiveDiagnosticUnitsForTenant(
+    em: EntityManager,
+    tenantId: string,
+    statusConceptId: string,
+    typeConceptIds: readonly string[],
+  ): Promise<ClaimReadDiagnosticUnitRecord[]> {
+    return em.find(DiagnosticUnits, {
+      tenantId,
+      statusConceptId,
+      diagnosticUnitTypeConceptId: { $in: [...typeConceptIds] },
+    });
+  }
+
+  findPersonsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<ClaimReadPersonRecord[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(Persons, { id: { $in: [...ids] } });
+  }
+
+  findPatientProfilesByProfileIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<ClaimReadPatientProfileRecord[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(PatientProfiles, { profileId: { $in: [...ids] } });
+  }
+
+  findSourceRequest(
+    em: EntityManager,
+    id: string,
+  ): Promise<ClaimSourceRequestRecord | null> {
+    return em.findOne(ServiceRequests, { id });
+  }
+
+  findDiagnosticUnitsByTenant(
+    em: EntityManager,
+    tenantId: string,
+    statusConceptId: string,
+  ): Promise<DiagnosticUnits[]> {
+    return em.find(DiagnosticUnits, { tenantId, statusConceptId });
+  }
+
+  findConceptsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<ClaimReadConceptRecord[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(CatalogConcepts, { id: { $in: [...ids] } });
+  }
+
   /**
    * Página de solicitudes, por keyset descendente.
    *

@@ -10,11 +10,8 @@ import {
 import {
   CoverageRepository,
   CatalogRepository,
+  InsurancePatientAccountRepository,
 } from '../../infrastructure/repositories';
-import {
-  PatientProfilesRepository,
-  PersonAccountLinksRepository,
-} from '../../../profiles/infrastructure/repositories';
 import { INS } from '../../domain/insurance.concepts';
 import {
   CreateCoverageDto,
@@ -49,8 +46,7 @@ export class CoverageService {
     private readonly em: EntityManager,
     private readonly repo: CoverageRepository,
     private readonly catalog: CatalogRepository,
-    private readonly accountLinksRepo: PersonAccountLinksRepository,
-    private readonly patientProfilesRepo: PatientProfilesRepository,
+    private readonly patientAccounts: InsurancePatientAccountRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CoverageService.name);
@@ -64,9 +60,12 @@ export class CoverageService {
    */
   async listMine(actor: AuthenticatedUser): Promise<MyCoverageDto[]> {
     const em = this.em.fork();
-    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    const link = await this.patientAccounts.findActiveAccountLink(em, actor.id);
     if (!link) return [];
-    const patient = await this.patientProfilesRepo.findById(em, link.personId);
+    const patient = await this.patientAccounts.findPatientProfile(
+      em,
+      link.personId,
+    );
     if (!patient) return [];
     const coverages = await this.repo.findByPatient(em, patient.profileId);
     return coverages.map((c) => ({

@@ -23,9 +23,15 @@ import {
   DIRECTORY_TENANT_ADMINISTRATION_PORT,
   type DirectoryTenantAdministrationPort,
 } from '../ports/directory-tenant-administration.port';
-import { AuditTrailService } from '../../../audit/services';
-import { ProfileOwnershipService } from '../../../profiles/application/services/profile-ownership.service';
-import { patientCoverageReferenceDate } from '../../../profiles/domain/patient-coverage-validity';
+import {
+  INSURANCE_AUDIT_TRAIL_PORT,
+  type InsuranceAuditTrailPort,
+} from '../ports/audit-trail.port';
+import {
+  PATIENT_OWNERSHIP_PORT,
+  type PatientOwnershipPort,
+} from '../ports/patient-ownership.port';
+import { coverageReferenceDate } from '../../domain/coverage-validity';
 import { CatalogRepository } from '../../infrastructure/repositories';
 import {
   InsuranceCampaignsRepository,
@@ -183,8 +189,10 @@ export class InsuranceCampaignsService {
     private readonly catalog: CatalogRepository,
     @Inject(DIRECTORY_TENANT_ADMINISTRATION_PORT)
     private readonly tenantAdministration: DirectoryTenantAdministrationPort,
-    private readonly profileOwnership: ProfileOwnershipService,
-    private readonly auditTrail: AuditTrailService,
+    @Inject(PATIENT_OWNERSHIP_PORT)
+    private readonly profileOwnership: PatientOwnershipPort,
+    @Inject(INSURANCE_AUDIT_TRAIL_PORT)
+    private readonly auditTrail: InsuranceAuditTrailPort,
   ) {}
 
   /** Crea una campaña; nace `DRAFT`, o `ACTIVE` si `activate` es true. */
@@ -200,7 +208,7 @@ export class InsuranceCampaignsService {
           'validTo debe ser igual o posterior a validFrom',
         );
       }
-      const today = patientCoverageReferenceDate();
+      const today = coverageReferenceDate();
       if (dto.activate === true && dto.validTo < today) {
         throw new BadRequestException(
           'No se puede activar una campaña cuya vigencia ya terminó',
@@ -307,7 +315,7 @@ export class InsuranceCampaignsService {
         }
         if (target === 'ACTIVE') {
           const row = await this.repo.getRowForCarrier(tx, carrier.id, id);
-          if (row && row.valid_to < patientCoverageReferenceDate()) {
+          if (row && row.valid_to < coverageReferenceDate()) {
             throw new PreconditionFailedException(
               'La campaña ya venció: no se puede activar',
               { validTo: row.valid_to },
@@ -444,7 +452,7 @@ export class InsuranceCampaignsService {
       statusConceptId: query.status ? STATUS_CONCEPTS[query.status] : undefined,
       after: query.cursor ? this.decodeCursor(query.cursor) : undefined,
       limit: limit + 1,
-      referenceDate: patientCoverageReferenceDate(),
+      referenceDate: coverageReferenceDate(),
     });
 
     const page = rows.slice(0, limit);
@@ -485,7 +493,7 @@ export class InsuranceCampaignsService {
     await this.assertOwnership(patientProfileId, actor);
 
     const em = this.em.fork();
-    const referenceDate = patientCoverageReferenceDate();
+    const referenceDate = coverageReferenceDate();
     const carrierIds = await this.repo.findCurrentCarrierIdsForPatient(
       em,
       patientProfileId,
@@ -526,7 +534,7 @@ export class InsuranceCampaignsService {
     const em = this.em.fork();
     const rows = await this.repo.listPublicActiveRows(
       em,
-      patientCoverageReferenceDate(),
+      coverageReferenceDate(),
       query.carrierId,
     );
     return rows.map((row) => this.toPatientResponse(row));
@@ -794,7 +802,7 @@ export class InsuranceCampaignsService {
       effectiveStatus: effectiveStatusOf(
         must(STATUS_BY_CONCEPT, row.status_concept_id, 'estado de campaña'),
         row.valid_to,
-        patientCoverageReferenceDate(),
+        coverageReferenceDate(),
       ),
       targetCondition: this.toCondition(row),
       copayBonusPercentage: Number(row.copay_bonus_percentage),

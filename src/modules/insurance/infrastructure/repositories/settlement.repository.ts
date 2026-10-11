@@ -8,6 +8,9 @@ import {
   InsuranceClaims,
 } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
+import { DiagnosticUnits } from '../../../diagnostic_units/entities';
+import { Pharmacies } from '../../../pharmacy/entities';
+import { CatalogConcepts } from '../../../terminology/entities';
 
 /**
  * Acceso a datos de liquidación: lotes/ítems de conciliación (UC-26-13) y
@@ -15,6 +18,37 @@ import { INS } from '../../domain/insurance.concepts';
  */
 @Injectable()
 export class SettlementRepository {
+  findActiveDiagnosticUnitIds(
+    em: EntityManager,
+    tenantId: string,
+    statusConceptId: string,
+  ): Promise<{ id: string }[]> {
+    return em.find(
+      DiagnosticUnits,
+      { tenantId, statusConceptId },
+      { fields: ['id'] },
+    );
+  }
+
+  findPharmacyIdsByTenant(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<{ id: string }[]> {
+    return em.find(Pharmacies, { tenantId }, { fields: ['id'] });
+  }
+
+  async findCurrencyCode(
+    em: EntityManager,
+    currencyConceptId: string,
+  ): Promise<string | null> {
+    const concept = await em.findOne(
+      CatalogConcepts,
+      { id: currencyConceptId },
+      { fields: ['code'] },
+    );
+    return concept?.code ?? null;
+  }
+
   /**
    * Obtiene find batch.
    *

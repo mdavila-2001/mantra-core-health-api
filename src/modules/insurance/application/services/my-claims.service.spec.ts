@@ -51,12 +51,26 @@ function build(
       Promise.resolve(claims.map((claim) => ({ id: claim.id }))),
     ),
   };
+  const claimReadRepo = {
+    findEncountersByPractitioner: mockFn(() =>
+      Promise.resolve(options.encounters ?? [{ id: 'e-own' }]),
+    ),
+    findActiveDiagnosticUnitsForTenant: mockFn(() =>
+      Promise.resolve(options.units ?? []),
+    ),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   return {
     em,
     received,
     logger,
-    service: new MyClaimsService(em, received as never, logger as never),
+    claimReadRepo,
+    service: new MyClaimsService(
+      em,
+      received as never,
+      claimReadRepo as never,
+      logger as never,
+    ),
   };
 }
 
@@ -94,9 +108,10 @@ describe('MyClaimsService', () => {
         (await d.service.list({ ...actor, practitionerProfileId: 'hp-own' }))
           .view,
       ).toBe('PRACTITIONER');
-      expect(d.em.find).toHaveBeenCalledWith(Encounters, {
-        primaryPractitionerId: 'hp-own',
-      });
+      expect(d.claimReadRepo.findEncountersByPractitioner).toHaveBeenCalledWith(
+        d.em,
+        'hp-own',
+      );
       expect(d.em.find).toHaveBeenCalledWith(
         InsuranceClaims,
         { encounterId: { $in: ['e-own'] } },
@@ -120,13 +135,12 @@ describe('MyClaimsService', () => {
         });
         const session = { ...actor, tenantIds: [TENANT] };
         expect((await d.service.list(session, TENANT)).view).toBe(view);
-        expect(d.em.find).toHaveBeenCalledWith(DiagnosticUnits, {
-          tenantId: TENANT,
-          statusConceptId: DUNIT.UNIT_ACTIVE,
-          diagnosticUnitTypeConceptId: {
-            $in: [DUNIT.UNIT_TYPE_LABORATORY, DUNIT.UNIT_TYPE_IMAGING],
-          },
-        });
+        expect(
+          d.claimReadRepo.findActiveDiagnosticUnitsForTenant,
+        ).toHaveBeenCalledWith(d.em, TENANT, DUNIT.UNIT_ACTIVE, [
+          DUNIT.UNIT_TYPE_LABORATORY,
+          DUNIT.UNIT_TYPE_IMAGING,
+        ]);
         expect(d.em.find).toHaveBeenCalledWith(
           InsuranceClaims,
           {

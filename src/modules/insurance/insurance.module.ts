@@ -74,6 +74,8 @@ import {
   InsuranceAnalyticsRepository,
   InsurancePortabilityRepository,
   InsuranceCampaignsRepository,
+  InsurancePatientAccountRepository,
+  LinkedOrderDataRepository,
 } from './infrastructure/repositories';
 // Portabilidad de póliza y siniestralidad (subtarea 3.3): el certificado se
 // autoriza contra el titular (`ProfileOwnershipService`, mismo criterio que
@@ -101,6 +103,25 @@ import { PractitionerInsuranceNetworksController } from './presentation/controll
 import { PractitionerInsuranceNetworksService } from './application/services/practitioner-insurance-networks.service';
 import { DirectoryTenantAdministrationAdapter } from './infrastructure/adapters/directory-tenant-administration.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
+import { PracticeTenantLookupAdapter } from './infrastructure/adapters/practice-tenant-lookup.adapter';
+import { INSURANCE_PRACTICE_TENANT_LOOKUP_PORT } from './application/ports/practice-tenant-lookup.port';
+import { DuplicateStudyDescriptionAdapter } from './infrastructure/adapters/duplicate-study-description.adapter';
+import { DUPLICATE_STUDY_DESCRIPTION_PORT } from './application/ports/duplicate-study-description.port';
+import { ClaimDecisionPublisherAdapter } from './infrastructure/adapters/claim-decision-publisher.adapter';
+import { CLAIM_DECISION_PUBLISHER_PORT } from './application/ports/claim-decision-publisher.port';
+import { PatientOwnershipAdapter } from './infrastructure/adapters/patient-ownership.adapter';
+import { PATIENT_OWNERSHIP_PORT } from './application/ports/patient-ownership.port';
+import { AuditTrailAdapter } from './infrastructure/adapters/audit-trail.adapter';
+import { INSURANCE_AUDIT_TRAIL_PORT } from './application/ports/audit-trail.port';
+import { InsurancePortabilitySupportAdapter } from './infrastructure/adapters/insurance-portability-support.adapter';
+import { INSURANCE_PORTABILITY_SUPPORT_PORT } from './application/ports/insurance-portability-support.port';
+import { InsurancePdfAssetsAdapter } from './infrastructure/adapters/insurance-pdf-assets.adapter';
+import { INSURANCE_PDF_ASSETS_PORT } from './application/ports/insurance-pdf-assets.port';
+import { PatientDirectoryAdapter } from './infrastructure/adapters/patient-directory.adapter';
+import {
+  PATIENT_DIRECTORY_ACCESS_AUDIT_PORT,
+  PATIENT_DIRECTORY_CONVERSATION_PORT,
+} from './application/ports/patient-directory.port';
 
 /**
  * Módulo Insurance (26): redes, coberturas, elegibilidad, autorización previa,
@@ -145,6 +166,44 @@ import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/direct
     InsurerPatientsController,
   ],
   providers: [
+    PracticeTenantLookupAdapter,
+    {
+      provide: INSURANCE_PRACTICE_TENANT_LOOKUP_PORT,
+      useExisting: PracticeTenantLookupAdapter,
+    },
+    DuplicateStudyDescriptionAdapter,
+    {
+      provide: DUPLICATE_STUDY_DESCRIPTION_PORT,
+      useExisting: DuplicateStudyDescriptionAdapter,
+    },
+    ClaimDecisionPublisherAdapter,
+    {
+      provide: CLAIM_DECISION_PUBLISHER_PORT,
+      useExisting: ClaimDecisionPublisherAdapter,
+    },
+    PatientOwnershipAdapter,
+    { provide: PATIENT_OWNERSHIP_PORT, useExisting: PatientOwnershipAdapter },
+    AuditTrailAdapter,
+    { provide: INSURANCE_AUDIT_TRAIL_PORT, useExisting: AuditTrailAdapter },
+    InsurancePortabilitySupportAdapter,
+    {
+      provide: INSURANCE_PORTABILITY_SUPPORT_PORT,
+      useExisting: InsurancePortabilitySupportAdapter,
+    },
+    InsurancePdfAssetsAdapter,
+    {
+      provide: INSURANCE_PDF_ASSETS_PORT,
+      useExisting: InsurancePdfAssetsAdapter,
+    },
+    PatientDirectoryAdapter,
+    {
+      provide: PATIENT_DIRECTORY_CONVERSATION_PORT,
+      useExisting: PatientDirectoryAdapter,
+    },
+    {
+      provide: PATIENT_DIRECTORY_ACCESS_AUDIT_PORT,
+      useExisting: PatientDirectoryAdapter,
+    },
     DirectoryTenantAdministrationAdapter,
     {
       provide: DIRECTORY_TENANT_ADMINISTRATION_PORT,
@@ -164,6 +223,8 @@ import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/direct
     InsuranceAnalyticsRepository,
     InsurancePortabilityRepository,
     InsuranceCampaignsRepository,
+    InsurancePatientAccountRepository,
+    LinkedOrderDataRepository,
     LinkedClaimOrderService,
     LinkedClaimAccessService,
     DuplicateStudyDetector,
