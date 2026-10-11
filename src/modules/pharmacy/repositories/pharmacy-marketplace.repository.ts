@@ -3,7 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS } from '../../../common';
 import { COMM } from '../../community/community.concepts';
 import { PHARM } from '../pharmacy.concepts';
-import { PINV } from '../../pharmacy_inventory/pharmacy_inventory.concepts';
+import { PINV } from '../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
 
 /** Una oferta publicada: un producto de una farmacia, con precio y stock. */
 export interface PublishedOffer {

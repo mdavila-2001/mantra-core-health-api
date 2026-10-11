@@ -20,7 +20,7 @@ import { ORGANIZATION_EXTENSIONS_CONCEPT_SEEDS } from '../../modules/organizatio
 import { DIAGNOSTIC_UNITS_CONCEPT_SEEDS } from '../../modules/diagnostic_units/diagnostic_units.concepts';
 import { PHARMACY_CONCEPT_SEEDS } from '../../modules/pharmacy/pharmacy.concepts';
 import { DIAGNOSTICS_CONCEPT_SEEDS } from '../../modules/diagnostics/diagnostics.concepts';
-import { PHARMACY_INVENTORY_CONCEPT_SEEDS } from '../../modules/pharmacy_inventory/pharmacy_inventory.concepts';
+import { PHARMACY_INVENTORY_CONCEPT_SEEDS } from '../../modules/pharmacy_inventory/domain/pharmacy_inventory.concepts';
 import { INSURANCE_CONCEPT_SEEDS } from '../../modules/insurance/insurance.concepts';
 import { IDENTITY_ASSURANCE_CONCEPT_SEEDS } from '../../modules/identity_assurance/identity_assurance.concepts';
 import { TELEMETRY_CONCEPT_SEEDS } from '../../modules/telemetry/telemetry.concepts';

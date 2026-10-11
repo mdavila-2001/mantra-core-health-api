@@ -10,7 +10,7 @@ import type {
   CopaysPharmacyScenario,
   CopaysPharmacyOrder,
 } from '../support/copays-pharmacy-scenario';
-import { multiplyAmounts } from '../../src/modules/pharmacy_inventory/services/pharmacy-pricing';
+import { multiplyAmounts } from '../../src/modules/pharmacy_inventory/domain/pricing/pharmacy-pricing';
 import { MedicationDispensations } from '../../src/modules/pharmacy_inventory/entities';
 
 const isolated =
