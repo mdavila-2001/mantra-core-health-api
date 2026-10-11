@@ -35,13 +35,14 @@
 ### H1.S3 — Revalidar los gates del PR
 **CA:** Dado el código reparado y la base vigente, cuando se ejecutan los gates del módulo, entonces todos terminan en código 0.
 **DoD:** lint, typecheck, tests dirigidos del módulo y guard de capas → salidas 0; CI del PR verde.
-**Estado:** TODO
+**Estado:** EN CURSO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
 | H1.S3.M1 | Ejecutar gates locales dirigidos y lint global | Los cuatro gates concluyen sin fallos | comandos en H1 → salidas literales en `evidencia/` | HECHO |
-| H1.S3.M2 | Actualizar y revisar el reporte de reparación | Reporte lista resultados literales y límites restantes | revisión del `REPORTE.md` → todas las secciones obligatorias presentes | TODO |
+| H1.S3.M2 | Actualizar y revisar el reporte de reparación | Reporte lista resultados literales y límites restantes | revisión del `REPORTE.md` → todas las secciones obligatorias presentes | HECHO |
 | H1.S3.M3 | Corregir errores mecánicos de lint del merge de `dev` | ESLint deja de reportar los cuatro errores adicionales identificados | `corepack yarn lint --max-warnings=0` → código 0 | HECHO |
+| H1.S3.M4 | Confirmar los checks remotos y la mergeabilidad del PR | GitHub informa checks verdes y estado `MERGEABLE`/`CLEAN` | `gh pr checks 641` y `gh pr view 641 --json mergeable,mergeStateStatus` → sin fallos | TODO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
