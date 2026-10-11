@@ -20,16 +20,16 @@
 
 ### H1.S3.M5 — Abrir y verificar PR de seguimiento
 
-- Qué anda: el spec corregido pasó 5/5 y el cambio está en la rama remota. `dev` ya contiene el merge commit `afe559eb` de #641; comparada con esa base, la rama tiene únicamente los dos commits posteriores `f836ffbb` y `2849d22f`.
+- Qué anda: el spec corregido pasó 5/5. El PR de seguimiento [#643](https://github.com/mdavila-2001/mantra-core-health-api/pull/643) está abierto como draft contra `dev`, SHA `6734fcdc`.
 - Qué no anda: #641 se mergeó a las 21:08:56 con su CI todavía en curso y luego fallido; el test corregido no formó parte de ese merge. La API del PR quedó en el SHA `805c6c0d`, aunque la referencia remota ya avanzó.
-- Qué falta exactamente: abrir un PR nuevo de seguimiento desde esta rama y esperar su workflow completo de cobertura.
+- Qué falta exactamente: esperar el workflow completo de #643 y corregir cualquier falla nueva.
 - Dónde quedó: rama `justin/ddd-pharmacy-inventory-dev`, repositorio `mantra-core-health-api`; typecheck y pruebas dirigidas locales pasaron.
 
 ## Pendiente
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H1.S3.M5 | TODO | Abrir el PR de seguimiento y esperar el workflow `Documentación` de GitHub. |
+| H1.S3.M5 | IN_PROGRESS | #643 abierto; esperar el workflow completo de GitHub. |
 
 ## Evidencia
 
@@ -57,4 +57,4 @@
 
 ## Decisiones y ambigüedades
 
-- #641 se mergeó durante la ejecución de CI sin incluir el test corregido. Se conserva la rama y sus dos commits posteriores para abrir un PR de seguimiento; el PR #642 contra `test` no se modificó.
+- #641 se mergeó durante la ejecución de CI sin incluir el test corregido. El seguimiento es #643; el PR #642 contra `test` no se modificó.

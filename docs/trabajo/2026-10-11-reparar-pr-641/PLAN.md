@@ -43,7 +43,7 @@
 | H1.S3.M2 | Actualizar y revisar el reporte de reparación | Reporte lista resultados literales y límites restantes | revisión del `REPORTE.md` → todas las secciones obligatorias presentes | HECHO |
 | H1.S3.M3 | Corregir errores mecánicos de lint del merge de `dev` | ESLint deja de reportar los cuatro errores adicionales identificados | `corepack yarn lint --max-warnings=0` → código 0 | HECHO |
 | H1.S3.M4 | Actualizar el fixture de direcciones del spec de unidades diagnósticas | El spec cubre la lectura de direcciones y coordenadas del servicio actualizado | `corepack yarn test src/modules/diagnostic_units/services/diagnostic-units-read.service.spec.ts --runInBand --silent` → PASS | HECHO |
-| H1.S3.M5 | Abrir PR de seguimiento y confirmar sus checks | El cambio posterior al merge queda revisable y la cobertura global pasa | `gh pr checks <PR>` y `gh pr view <PR> --json mergeable,mergeStateStatus` → sin fallos | TODO |
+| H1.S3.M5 | Abrir PR de seguimiento y confirmar sus checks | El cambio posterior al merge queda revisable y la cobertura global pasa | `gh pr checks 643` y `gh pr view 643 --json mergeable,mergeStateStatus` → sin fallos | IN_PROGRESS |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

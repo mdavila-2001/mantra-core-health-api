@@ -72,4 +72,4 @@ Se incorporó `findAddresses` al fixture del spec y se verifican las coordenadas
 
 ## Estado remoto antes de publicar la integración
 
-PR #641 se mergeó a las `2026-10-11T21:08:56Z` con commit `afe559eb`; el check `docs` correspondiente al SHA `805c6c0d` terminó en FAIL a las `21:13:36Z`. La rama remota avanzó a `2849d22f`, cuya diferencia contra `dev` (`afe559eb`) contiene solo los commits `f836ffbb` (spec de direcciones) y `2849d22f` (reporte). El test dirigido actualizado pasó 5/5. Falta abrir el PR de seguimiento y ejecutar CI sobre esos commits.
+PR #641 se mergeó a las `2026-10-11T21:08:56Z` con commit `afe559eb`; el check `docs` correspondiente al SHA `805c6c0d` terminó en FAIL a las `21:13:36Z`. El test dirigido actualizado pasó 5/5. Se abrió el PR de seguimiento [#643](https://github.com/mdavila-2001/mantra-core-health-api/pull/643), draft contra `dev`, SHA `6734fcdc`; `Documentación/docs` estaba `IN_PROGRESS` al consultar GitHub. Pendiente esperar CI completo.
