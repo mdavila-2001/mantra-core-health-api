@@ -136,22 +136,36 @@ export class TenantContextInterceptor implements NestInterceptor {
     this.assertInputStaysInTenant(request.body, 'cuerpo', tenantId);
     this.assertInputStaysInTenant(request.query, 'query', tenantId);
 
+    // Un paciente (sin rol de farmacia ni de plataforma) navega el mercado de
+    // farmacias de todas las organizaciones; ver `marketplaceTenantScope`.
+    const marketplaceViewer =
+      user.roles.includes('PATIENT') &&
+      !user.roles.some((role) =>
+        ['PHARMACY_STAFF', 'SECURITY_ADMIN', 'SUPERADMIN'].includes(role),
+      );
+    const options = { marketplaceViewer };
+
     if (!this.enforceRls) {
-      return from(runWithTenant(tenantId, () => lastValueFrom(next.handle())));
+      return from(
+        runWithTenant(tenantId, () => lastValueFrom(next.handle()), options),
+      );
     }
 
     return from(
-      runWithTenant(tenantId, () =>
-        this.em.transactional(async () => {
-          await this.em.execute(
-            "select set_config('app.system_context', 'false', true)",
-          );
-          await this.em.execute(
-            "select set_config('app.current_tenant_id', ?, true)",
-            [tenantId],
-          );
-          return lastValueFrom(next.handle());
-        }),
+      runWithTenant(
+        tenantId,
+        () =>
+          this.em.transactional(async () => {
+            await this.em.execute(
+              "select set_config('app.system_context', 'false', true)",
+            );
+            await this.em.execute(
+              "select set_config('app.current_tenant_id', ?, true)",
+              [tenantId],
+            );
+            return lastValueFrom(next.handle());
+          }),
+        options,
       ),
     );
   }

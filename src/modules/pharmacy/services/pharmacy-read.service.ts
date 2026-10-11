@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   CONCEPTS,
+  marketplaceTenantScope,
   requireTenantId,
   ResourceNotFoundException,
 } from '../../../common';
@@ -56,7 +57,7 @@ export class PharmacyReadService {
 
   /** El directorio: farmacias publicadas del tenant, con sus números. */
   async listPharmacies(): Promise<PharmacyDirectoryResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) return { items: [], count: 0 };
@@ -94,7 +95,7 @@ export class PharmacyReadService {
 
   /** El perfil de una farmacia: su ficha y sus sedes con dirección resuelta. */
   async getPharmacy(id: string): Promise<PharmacyDetailDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacy = await this.readRepo.findVisibleById(em, tenantId, id);
     // 404 también para la de otro tenant o la no publicada: confirmar que ese
@@ -220,7 +221,7 @@ export class PharmacyReadService {
     origin?: GeoPoint;
     limit: number;
   }): Promise<PharmacySiteListResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) return { items: [], count: 0 };
@@ -295,7 +296,7 @@ export class PharmacyReadService {
     filter: ProductSearchFilter & { pharmacyId?: string },
     limit: number,
   ): Promise<PharmacyProductSearchResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) {
@@ -364,7 +365,7 @@ export class PharmacyReadService {
     siteId: string,
     productId?: string,
   ): Promise<PharmacySitePricesResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
 
     const site = await this.readRepo.findActiveSiteById(em, siteId);

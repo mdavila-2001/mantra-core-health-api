@@ -40,12 +40,12 @@ export class PharmacyReadRepository {
   /** Farmacias activas y verificadas del tenant activo. */
   findVisibleByTenant(
     em: EntityManager,
-    tenantId: string,
+    tenantId: string | undefined,
   ): Promise<Pharmacies[]> {
     return em.find(
       Pharmacies,
       {
-        tenantId,
+        ...(tenantId === undefined ? {} : { tenantId }),
         statusConceptId: PHARM.PHARMACY_ACTIVE,
         verificationStatusConceptId: PHARM.VERIFICATION_VERIFIED,
       },
@@ -56,12 +56,12 @@ export class PharmacyReadRepository {
   /** Detalle con el mismo filtro de publicación y aislamiento que el listado. */
   findVisibleById(
     em: EntityManager,
-    tenantId: string,
+    tenantId: string | undefined,
     id: string,
   ): Promise<Pharmacies | null> {
     return em.findOne(Pharmacies, {
       id,
-      tenantId,
+      ...(tenantId === undefined ? {} : { tenantId }),
       statusConceptId: PHARM.PHARMACY_ACTIVE,
       verificationStatusConceptId: PHARM.VERIFICATION_VERIFIED,
     });

@@ -8,13 +8,17 @@ import {
 import type { CatalogConcepts } from '../../terminology/entities';
 import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
 import { DirectoryReadService } from '../../directory/services/directory-read.service';
+import { PharmacyProducts } from '../entities';
 import type { Pharmacies, PharmacyLicenses, PharmacySites } from '../entities';
+import { PHARM } from '../pharmacy.concepts';
 import type {
   PharmacyConceptDto,
   PharmacyContactPersonDto,
   PharmacyContactsResponseDto,
   PharmacyLicenseDto,
+  PharmacyCategoryListDto,
   PharmacyLicenseListResponseDto,
+  PharmacySummaryDto,
 } from '../dto';
 import { PharmacyReadRepository } from '../repositories';
 
@@ -128,6 +132,55 @@ export class PharmacyStaffReadService {
         : null,
       executives: (representation.executives ?? []).map(toContactPerson),
     };
+  }
+
+  /**
+   * Los números del resumen del portal (P47). Lo que el modelo ya guarda se
+   * cuenta de verdad —productos publicados y retirados—; lo que todavía no
+   * tiene dónde vivir (borradores, existencias, valor del inventario,
+   * categorías) sale en cero y vacío en vez de inventarse.
+   *
+   * @param pharmacyId - La farmacia.
+   * @param actor - Quien pide la lectura.
+   */
+  async getSummary(
+    pharmacyId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacySummaryDto> {
+    const em = this.em.fork();
+    const pharmacy = await this.requireStaffPharmacy(em, pharmacyId, actor);
+    const products = await em.find(PharmacyProducts, {
+      pharmacyId: pharmacy.id,
+    });
+    return {
+      published: products.filter(
+        (product) => product.statusConceptId === PHARM.PRODUCT_ACTIVE,
+      ).length,
+      drafts: 0,
+      withdrawn: products.filter(
+        (product) => product.statusConceptId === PHARM.PRODUCT_RETIRED,
+      ).length,
+      outOfStock: 0,
+      lowStock: 0,
+      inventoryValue: '0.00',
+      byCategory: [],
+      recentActivity: [],
+    };
+  }
+
+  /**
+   * Las categorías de la farmacia: el modelo todavía no las guarda, así que la
+   * lista es vacía (verdadera) y no un 404 que el portal leería como error.
+   *
+   * @param pharmacyId - La farmacia.
+   * @param actor - Quien pide la lectura.
+   */
+  async listCategories(
+    pharmacyId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyCategoryListDto> {
+    await this.requireStaffPharmacy(this.em.fork(), pharmacyId, actor);
+    return { items: [] };
   }
 
   /**

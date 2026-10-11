@@ -674,3 +674,43 @@ export class PharmacySiteListResponseDto {
   @ApiProperty()
   count!: number;
 }
+
+/** Una actividad reciente del catálogo de la farmacia. */
+export class PharmacyRecentActivityDto {
+  @ApiProperty() id!: string;
+  @ApiProperty() at!: string;
+  @ApiProperty() kind!: string;
+  @ApiProperty() text!: string;
+}
+
+/** Cuántos productos hay por categoría. */
+export class PharmacyCategoryCountDto {
+  @ApiProperty() category!: string;
+  @ApiProperty() count!: number;
+}
+
+/**
+ * Los números del resumen del portal de la farmacia (P47). Lo que el modelo ya
+ * guarda se cuenta de verdad —productos publicados y retirados—; lo que todavía
+ * no tiene dónde vivir (categorías, borradores, existencias, valor del
+ * inventario) sale en cero y vacío en vez de inventarse.
+ */
+export class PharmacySummaryDto {
+  @ApiProperty() published!: number;
+  @ApiProperty() drafts!: number;
+  @ApiProperty() withdrawn!: number;
+  @ApiProperty() outOfStock!: number;
+  @ApiProperty() lowStock!: number;
+  @ApiProperty({ description: 'Valor del inventario, decimal en texto' })
+  inventoryValue!: string;
+  @ApiProperty({ type: [PharmacyCategoryCountDto] })
+  byCategory!: PharmacyCategoryCountDto[];
+  @ApiProperty({ type: [PharmacyRecentActivityDto] })
+  recentActivity!: PharmacyRecentActivityDto[];
+}
+
+/** Las categorías de la farmacia (el modelo todavía no las guarda). */
+export class PharmacyCategoryListDto {
+  @ApiProperty({ type: [String] })
+  items!: never[];
+}
