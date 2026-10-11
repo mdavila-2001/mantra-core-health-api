@@ -82,13 +82,13 @@ import {
 // como archivo (`CommonModule`) y deja constancia en auditoría (`AuditModule`
 // + los dos repos de `audit` y `health_data` que ninguno de los dos módulos
 // exporta).
-import { ProfileOwnershipService } from '../profiles/services/profile-ownership.service';
+import { ProfileOwnershipService } from '../profiles/application/services/profile-ownership.service';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
   HealthPractitionerProfilesRepository,
   PersonsRepository,
-} from '../profiles/repositories';
+} from '../profiles/infrastructure/repositories';
 import { CommonModule } from '../common/common.module';
 import { AuditModule } from '../audit/audit.module';
 import { DataReleaseRepository } from '../health_data/repositories/data-release.repository';

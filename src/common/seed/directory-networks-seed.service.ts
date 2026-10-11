@@ -14,7 +14,7 @@ import { SEED } from '../constants/concepts';
 import { runWithTenant } from '../tenant/tenant-context';
 import { IamPractitionerSelfRegistrationService } from '../../modules/iam/services';
 import type { RegisterPractitionerDto } from '../../modules/iam/dto';
-import { ProfilesPractitionersService } from '../../modules/profiles/services';
+import { ProfilesPractitionersService } from '../../modules/profiles/application/services';
 import { PractitionerSitesService } from '../../modules/practice/services';
 import { InsuranceBackboneService } from '../../modules/insurance/services';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../../modules/insurance/entities';
 import { CatalogConcepts } from '../../modules/terminology/entities';
 import { ValueSetsRepository } from '../../modules/terminology/repositories';
-import { MEDICAL_SPECIALTY_VALUE_SET } from '../../modules/profiles/services/medical-specialty-catalog.service';
+import { MEDICAL_SPECIALTY_VALUE_SET } from '../../modules/profiles/application/services/medical-specialty-catalog.service';
 import { SPANISH_DESIGNATIONS } from './terminology-designations.es';
 import {
   syntheticBirthDate,

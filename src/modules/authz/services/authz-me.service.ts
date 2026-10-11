@@ -10,7 +10,7 @@ import {
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { Persons } from '../../profiles/entities';
 import { AUTHZ } from '../authz.concepts';
 import {

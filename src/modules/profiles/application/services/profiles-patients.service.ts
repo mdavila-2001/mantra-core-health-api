@@ -1,0 +1,2569 @@
+import { randomUUID } from 'node:crypto';
+import { Inject, Injectable } from '@nestjs/common';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { PinoLogger } from 'nestjs-pino';
+import {
+  CONCEPTS,
+  ConflictException,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  UPLOAD_MIME_ALLOWLIST,
+  decodeKeysetCursor,
+  encodeKeysetCursor,
+  touch,
+  SEED,
+  type AuthenticatedUser,
+} from '../../../../common';
+import {
+  ATTACHABLE_FILES_PORT,
+  type AttachableFilesPort,
+} from '../ports/attachable-files.port';
+import { AdministrativeAreaCatalogService } from './administrative-area-catalog.service';
+import {
+  searchRequiresCriterion,
+  resolvePatientSearchScope,
+} from './patient-search-scope';
+import {
+  BIRTH_SEX_CODE_BY_CONCEPT,
+  BIRTH_SEX_CONCEPT_BY_CODE,
+  PROF,
+} from '../../profiles.concepts';
+import { composePersonDisplayName } from '../../domain/person-name';
+import { describeDependentRelationship } from '../../domain/dependent-relationship';
+import type { Persons, PatientProfiles } from '../../entities';
+import {
+  PersonsRepository,
+  PersonProfilesRepository,
+  PatientProfilesRepository,
+  PersonAccountLinksRepository,
+  PatientIdentityLinksRepository,
+  PatientMergeEventsRepository,
+  RelatedPersonsRepository,
+  PatientPortalProxiesRepository,
+  type DependentRow,
+} from '../../infrastructure/repositories';
+import {
+  CreatePatientDto,
+  PatientProfileResponseDto,
+  LinkAccountDto,
+  AccountLinkResponseDto,
+  AddIdentityLinkDto,
+  IdentityLinkResponseDto,
+  MergePatientsDto,
+  ReverseMergeDto,
+  MergeEventResponseDto,
+  ListMergeEventsQueryDto,
+  ListMergeEventsResponseDto,
+  MERGE_EVENTS_DEFAULT_LIMIT,
+  AddRelatedPersonDto,
+  RelatedPersonResponseDto,
+  GrantPortalProxyDto,
+  PortalProxyResponseDto,
+  DeceasePersonDto,
+  DeceaseResponseDto,
+  PatientSummaryResponseDto,
+  SearchPatientsResponseDto,
+  PatientDetailResponseDto,
+  OwnPatientProfileResponseDto,
+  OwnAddressDto,
+  OwnCoverageDto,
+  OwnGuardianDto,
+  UpdateOwnPatientProfileDto,
+  SetOwnPatientPhotoDto,
+  CreateDependentDto,
+  DependentSummaryDto,
+} from '../../presentation/dto';
+import { createGuardianRelatedPerson } from './guardian-related-person';
+import type { InsuranceSector } from '../../../../common/seed/bolivia-insurance.catalog';
+import { ProfileOwnershipService } from './profile-ownership.service';
+import {
+  optionalText,
+  applyOccupation,
+  applyCompany,
+} from '../../domain/person-work-fields';
+import {
+  PERSON_RECORDS_PORT,
+  type PersonRecordsPort,
+} from '../ports/person-records.port';
+import {
+  PATIENT_COVERAGES_PORT,
+  type PatientCoveragesPort,
+} from '../ports/patient-coverages.port';
+
+interface PatientContactRecord {
+  readonly value: string;
+}
+
+interface PatientAddressRecord {
+  readonly lines?: string;
+  readonly city?: string;
+  readonly municipalityConceptId?: string;
+  readonly latitude?: number | string | null;
+  readonly longitude?: number | string | null;
+}
+
+interface PatientIdentifierRecord {
+  readonly typeConceptId: string;
+  value: string;
+  issuerAdministrativeAreaConceptId?: string;
+  holderName?: string;
+  validTo?: Date | null;
+  updatedAt: Date;
+  updatedByUserId?: string;
+}
+import { ProfilesErrorReason } from '../../profiles.error-reasons';
+
+/**
+ * Deja fuera de la respuesta los campos sin valor.
+ *
+ * El contrato de las lecturas propias dice que lo opcional viaja **ausente, no
+ * `null`**, y hace falta traducir: el ORM hidrata una columna `NULL` como `null`,
+ * así que devolver la entidad tal cual pondría un `null` donde el contrato
+ * promete que no hay nada. La distinción importa: `null` se lee como «este dato
+ * está vacío» y la ausencia como «esta persona no lo declaró», y un formulario
+ * que los confunde pinta un campo borrado donde nunca hubo uno.
+ *
+ * @param response - La respuesta armada, con sus huecos.
+ * @returns La misma respuesta sin las claves nulas ni indefinidas.
+ */
+function withoutAbsentFields<T extends object>(response: T): T {
+  return Object.fromEntries(
+    Object.entries(response).filter(
+      ([, value]) => value !== null && value !== undefined,
+    ),
+  ) as T;
+}
+
+/**
+ * Una columna `numeric` mapeada como string, de vuelta a número.
+ *
+ * `common.addresses.latitude`/`longitude` viajan como texto en la entidad
+ * —ver {@link createResidenceAddress}— y el DTO del `PATCH` los recibe como
+ * número. Comparar «lo que ya había» contra «lo que llegó» exige que los dos
+ * lados hablen el mismo tipo.
+ *
+ * @param value - El texto de la columna, o `undefined` si no hay fila vigente.
+ * @returns El número, o `undefined`.
+ */
+function columnNumber(
+  value: string | number | null | undefined,
+): number | undefined {
+  return value === undefined || value === null ? undefined : Number(value);
+}
+
+/** Las cuatro partes del nombre, que son las que recomponen `display_name`. */
+const NAME_PARTS = [
+  'name',
+  'middleName',
+  'lastName',
+  'motherLastName',
+] as const satisfies readonly (keyof UpdateOwnPatientProfileDto)[];
+
+/**
+ * Los campos del cuerpo que se escriben en `profiles.persons`.
+ *
+ * Las partes del nombre salen de {@link NAME_PARTS} en vez de repetirse:
+ * dos listas de campos acaban divergiendo, y la que se olvide de una hará que
+ * editar ese campo no marque la fila como modificada —o al revés—.
+ *
+ * El teléfono y el domicilio quedan **fuera** a propósito: no viven en esta
+ * tabla, y sus filas llevan su propia auditoría al crearse o cerrarse.
+ */
+const PERSON_FIELDS = [
+  ...NAME_PARTS,
+  'birthDate',
+  'sexAtBirth',
+  'occupationConceptId',
+  'occupationFreeText',
+  'workEmployerConceptId',
+  'workEmployerFreeText',
+] as const satisfies readonly (keyof UpdateOwnPatientProfileDto)[];
+
+/**
+ * Si el cuerpo declara alguno de los campos indicados.
+ *
+ * Se pregunta por la **presencia** del campo y no por si el valor cambió: un
+ * `PATCH` que reenvía el mismo apellido sigue siendo una declaración de cómo se
+ * llama la persona.
+ *
+ * @param dto - Los campos que llegaron en el cuerpo.
+ * @param fields - Los campos por los que se pregunta.
+ * @returns `true` si el cuerpo trae al menos uno.
+ */
+function declaresAny(
+  dto: UpdateOwnPatientProfileDto,
+  fields: readonly (keyof UpdateOwnPatientProfileDto)[],
+): boolean {
+  return fields.some((field) => dto[field] !== undefined);
+}
+
+/**
+ * Si la edición toca alguna de las cuatro partes del nombre.
+ *
+ * Decide si hay que recomponer el nombre visible.
+ *
+ * @param dto - Los campos que llegaron en el cuerpo.
+ * @returns `true` si el cuerpo declara alguna parte del nombre.
+ */
+function anyNamePartChanges(dto: UpdateOwnPatientProfileDto): boolean {
+  return declaresAny(dto, NAME_PARTS);
+}
+
+/**
+ * Si la edición escribe algo en `profiles.persons`.
+ *
+ * Decide si la fila de la persona se marca como modificada. Un `PATCH` que no
+ * trae ninguno de estos campos —el cuerpo vacío, o uno que sólo cambia el
+ * teléfono o el domicilio— **no la toca**: mover `updated_at`,
+ * `updated_by_user_id` y `row_version` sin haber cambiado ni una columna
+ * convierte la auditoría en ruido y hace fallar por conflicto de versión a
+ * quien tuviera la fila leída.
+ *
+ * @param dto - Los campos que llegaron en el cuerpo.
+ * @returns `true` si el cuerpo declara algún campo de la persona.
+ */
+function personChanges(dto: UpdateOwnPatientProfileDto): boolean {
+  return declaresAny(dto, PERSON_FIELDS);
+}
+
+/**
+ * Casos de uso del ciclo de vida de personas y pacientes: alta (UC-05-01),
+ * vinculación de cuenta de portal (UC-05-02), vínculos de identidad MPI
+ * (UC-05-07), fusión y reversión (UC-05-08/09), personas relacionadas (UC-05-10),
+ * proxies de portal (UC-05-11) y defunción/anonimización (UC-05-12).
+ *
+ * El servicio posee la unidad de trabajo (`em.transactional`) y hace `flush` del
+ * padre antes de crear hijos, porque las FK son columnas uuid planas y MikroORM
+ * no ordena inserts entre entidades no relacionadas.
+ */
+/**
+ * Una fila de `common.addresses` como la ve el perfil.
+ *
+ * Devuelve `undefined` —y no un objeto vacío— cuando no hay dirección: la
+ * pantalla distingue «no la declaró» de «la declaró sin datos», y un objeto con
+ * todo ausente pintaría una tarjeta vacía.
+ */
+function toAddress(
+  row?: {
+    lines?: string;
+    city?: string;
+    municipalityConceptId?: string;
+    latitude?: number | string | null;
+    longitude?: number | string | null;
+  } | null,
+): OwnAddressDto | undefined {
+  if (!row) return undefined;
+  return {
+    ...(row.lines === undefined ? {} : { lines: row.lines }),
+    ...(row.city === undefined ? {} : { city: row.city }),
+    ...(row.municipalityConceptId === undefined
+      ? {}
+      : { municipalityConceptId: row.municipalityConceptId }),
+    // Las coordenadas viajan juntas o no viajan: media coordenada no ubica nada.
+    //
+    // Se compara con `== null` y no con `=== undefined`: la columna es nullable y
+    // la base devuelve **null**, que no es `undefined`. Con la comparación
+    // estricta el ternario tomaba la rama de «sí hay coordenadas» y emitía
+    // `Number(null)` — que es **0**. Una dirección sin ubicar salía en el mapa
+    // en el golfo de Guinea. Se vio con una dirección de trabajo cargada sin GPS.
+    ...(row.latitude == null || row.longitude == null
+      ? {}
+      : { latitude: Number(row.latitude), longitude: Number(row.longitude) }),
+  };
+}
+
+/**
+ * Edad cumplida, en años, a partir de una fecha `YYYY-MM-DD`.
+ *
+ * La calcula el servidor y no el navegador: es lo que decide si la tarjeta dice
+ * «3 años» o «78 años», y dejarlo del lado del cliente haría que la misma
+ * persona tuviera edades distintas según la hora del aparato.
+ *
+ * Cuenta cumpleaños, no divide días: restar milisegundos y dividir por un año
+ * medio se equivoca con quien cumple años esta semana y con todo bisiesto.
+ *
+ * @param date - Fecha de nacimiento en `YYYY-MM-DD`, o nada.
+ * @returns Los años cumplidos, o `undefined` si no hay fecha o no es válida.
+ */
+function ageInYears(date?: string | null): number | undefined {
+  if (!date) return undefined;
+  const birth = new Date(date);
+  if (Number.isNaN(birth.getTime())) return undefined;
+  const today = new Date();
+  let years = today.getUTCFullYear() - birth.getUTCFullYear();
+  const month = today.getUTCMonth() - birth.getUTCMonth();
+  if (month < 0 || (month === 0 && today.getUTCDate() < birth.getUTCDate())) {
+    years -= 1;
+  }
+  return years < 0 ? undefined : years;
+}
+
+@Injectable()
+export class ProfilesPatientsService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param personsRepo - Valor de persons repo requerido por la operación.
+   * @param personProfilesRepo - Valor de person profiles repo requerido por la operación.
+   * @param patientProfilesRepo - Valor de patient profiles repo requerido por la operación.
+   * @param accountLinksRepo - Valor de account links repo requerido por la operación.
+   * @param identityLinksRepo - Valor de identity links repo requerido por la operación.
+   * @param mergeEventsRepo - Valor de merge events repo requerido por la operación.
+   * @param relatedPersonsRepo - Valor de related persons repo requerido por la operación.
+   * @param portalProxiesRepo - Valor de portal proxies repo requerido por la operación.
+   * @param contactPointsRepo - Teléfono del paciente (`common.contact_points`).
+   * @param addressesRepo - Domicilio del paciente (`common.addresses`).
+   * @param attachableFiles - La regla compartida de qué archivo se puede referenciar.
+   * @param insuranceCatalogRepo - Catálogo de planes de salud (`insurance.insurance_plans`).
+   * @param coverageRepo - Coberturas declaradas (`insurance.patient_coverages`).
+   * @param declaredCoverages - Lectura compartida de coberturas declaradas, con aseguradora y plan en palabras.
+   * @param logger - Valor de logger requerido por la operación.
+   */
+  constructor(
+    private readonly em: EntityManager,
+    private readonly personsRepo: PersonsRepository,
+    private readonly personProfilesRepo: PersonProfilesRepository,
+    private readonly patientProfilesRepo: PatientProfilesRepository,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
+    private readonly identityLinksRepo: PatientIdentityLinksRepository,
+    private readonly mergeEventsRepo: PatientMergeEventsRepository,
+    private readonly relatedPersonsRepo: RelatedPersonsRepository,
+    private readonly portalProxiesRepo: PatientPortalProxiesRepository,
+    // El teléfono y el domicilio del paciente no viven en `profiles`: son un
+    // punto de contacto y una dirección de `common`, y el módulo ya los exporta
+    // para que quien da de alta a la persona los escriba en su transacción.
+    @Inject(PERSON_RECORDS_PORT)
+    private readonly personRecords: PersonRecordsPort,
+    private readonly ownership: ProfileOwnershipService,
+    @Inject(ATTACHABLE_FILES_PORT)
+    private readonly attachableFiles: AttachableFilesPort,
+    // Quién decide si un uuid es un departamento boliviano. La FK acepta
+    // cualquier concepto del catálogo, así que la regla es de dominio.
+    private readonly administrativeAreas: AdministrativeAreaCatalogService,
+    // El seguro declarado por autoservicio (PATCH) usa los mismos dos
+    // repositorios que ya usa el alta: catálogo de planes y coberturas.
+    @Inject(PATIENT_COVERAGES_PORT)
+    private readonly patientCoverages: PatientCoveragesPort,
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(ProfilesPatientsService.name);
+  }
+
+  /** UC-05-01: alta de persona + perfil de paciente en una sola transacción. */
+  async registerPatient(
+    dto: CreatePatientDto,
+    actor: AuthenticatedUser,
+  ): Promise<PatientProfileResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.create', actorId: actor.id },
+      'Registering patient',
+    );
+    return this.em.transactional(async (tx) => {
+      const clash = await this.patientProfilesRepo.findByPatientCode(
+        tx,
+        dto.patientCode,
+      );
+      if (clash) {
+        this.logger.warn(
+          {
+            operation: 'profiles.patient.create',
+            reason: 'patient-code-in-use',
+          },
+          'Rejected patient creation: patient_code already exists',
+        );
+        throw new ConflictException(
+          'El patient_code ya está en uso',
+          {
+            patientCode: dto.patientCode,
+          },
+          ProfilesErrorReason.PATIENT_CODE_ALREADY_IN_USE,
+        );
+      }
+
+      const person = this.personsRepo.create(tx, {
+        personStatusConceptId: PROF.PERSON_ACTIVE,
+        vitalStatusConceptId: PROF.VITAL_ALIVE,
+        displayName: dto.displayName,
+        birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
+        administrativeGenderConceptId: dto.administrativeGenderConceptId,
+        sexAtBirthConceptId: dto.sexAtBirthConceptId,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      // person_profiles clasifica a la persona (uq_person_profiles_person_type),
+      // pero NO es el destino de la FK del subtipo: patient_profiles.profile_id
+      // referencia profiles.persons(id), así que el perfil de paciente usa person.id.
+      this.personProfilesRepo.create(tx, {
+        personId: person.id,
+        profileTypeConceptId: PROF.PROFILE_TYPE_PATIENT,
+        statusConceptId: PROF.PROFILE_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      const patient = this.patientProfilesRepo.create(tx, {
+        profileId: person.id,
+        patientCode: dto.patientCode,
+        masterPatientIndexCode: dto.masterPatientIndexCode,
+        recordLinkageStatusConceptId: PROF.LINKAGE_UNLINKED,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.logger.info(
+        { operation: 'profiles.patient.create', profileId: patient.profileId },
+        'Patient registered',
+      );
+      return {
+        profileId: patient.profileId,
+        personId: person.id,
+        patientCode: patient.patientCode,
+        recordLinkageStatus: patient.recordLinkageStatusConceptId!,
+        createdAt: patient.createdAt,
+      };
+    });
+  }
+
+  /**
+   * Resumen del propio paciente, verificada su identidad o no.
+   *
+   * Verificarse es un trámite posterior e independiente del alta, así que el
+   * titular ve desde el primer día lo que él mismo declaró al registrarse. Lo
+   * único que la verificación habilita es el **código de paciente**: mientras no
+   * haya aserción vigente, `patientCode` no viaja —ausente, no `null`— y
+   * `identityVerified` dice por qué. Es el servidor quien decide qué ve cada
+   * sesión; el cliente no oculta campos por su cuenta.
+   *
+   * No es la ficha médica: es filiación, nunca dato clínico.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Datos básicos del paciente.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  async getOwnSummary(
+    actor: AuthenticatedUser,
+  ): Promise<PatientSummaryResponseDto> {
+    const em = this.em.fork();
+    const { person, patient } = await this.resolveOwnPatient(em, actor);
+
+    const identityVerified =
+      await this.personRecords.hasCurrentIdentityAssertion(em, person.id);
+
+    return {
+      personId: person.id,
+      patientProfileId: patient.profileId,
+      identityVerified,
+      displayName: person.displayName,
+      birthDate: person.birthDate,
+      personStatus: person.personStatusConceptId,
+      // Ausente mientras no esté verificado: quien no puede verlo tampoco tiene
+      // que distinguir «no lo tiene» de «todavía no puede verlo».
+      ...(identityVerified ? { patientCode: patient.patientCode } : {}),
+    };
+  }
+
+  /**
+   * El propio perfil del paciente, con las partes del nombre y el contacto.
+   *
+   * Es la lectura que sostiene la pantalla de «mis datos»: {@link getOwnSummary}
+   * devuelve el nombre ya compuesto, y con eso un formulario no puede corregir un
+   * apellido —no hay forma de saber dónde termina uno y empieza el otro—. Acá
+   * viajan las cuatro partes, la fecha de nacimiento, el sexo al nacer como
+   * código, el teléfono vigente y el municipio del domicilio vigente: exactamente
+   * el conjunto que la persona declaró al registrarse y el mismo que puede
+   * editar con `PATCH`.
+   *
+   * No trae nada clínico ni de terceros: es filiación propia.
+   *
+   * @param actor - Usuario autenticado, que es también el sujeto.
+   * @returns El perfil propio, con los campos no declarados ausentes.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  async getOwnProfile(
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    const em = this.em.fork();
+    const { person, patient } = await this.resolveOwnPatient(em, actor);
+
+    // Las tres lecturas son independientes entre sí y ninguna depende del
+    // resultado de otra: encadenarlas sólo sumaría latencia.
+    // Todas son independientes entre sí: se piden juntas porque encadenarlas
+    // sólo sumaría latencia a una pantalla que se abre en cada visita.
+    const [
+      assertion,
+      phone,
+      homeAddress,
+      work,
+      mail,
+      identifiers,
+      coverages,
+      guardians,
+    ] = await Promise.all([
+      this.personRecords.hasCurrentIdentityAssertion(em, person.id),
+      this.personRecords.findCurrentContact<PatientContactRecord>(
+        em,
+        person.id,
+        CONCEPTS.CONTACT_PHONE,
+      ),
+      this.personRecords.findCurrentAddress<PatientAddressRecord>(
+        em,
+        person.id,
+        CONCEPTS.ADDR_USE_HOME,
+      ),
+      this.personRecords.findCurrentAddress<PatientAddressRecord>(
+        em,
+        person.id,
+        CONCEPTS.ADDR_USE_WORK,
+      ),
+      this.personRecords.findCurrentContact<PatientContactRecord>(
+        em,
+        person.id,
+        CONCEPTS.CONTACT_EMAIL,
+      ),
+      this.readIdentifiers(em, person.id),
+      this.readCoverages(em, patient.profileId),
+      this.readGuardians(em, patient.profileId),
+    ]);
+    const identityVerified = Boolean(assertion);
+
+    return withoutAbsentFields({
+      personId: person.id,
+      patientProfileId: patient.profileId,
+      name: person.name,
+      middleName: person.middleName,
+      lastName: person.lastName,
+      motherLastName: person.motherLastName,
+      displayName: person.displayName,
+      birthDate: person.birthDate,
+      // El camino inverso del alta: la columna guarda el concepto y el
+      // formulario habla en códigos. Un concepto que no esté en el mapa —una
+      // fila anterior a este catálogo— llega ausente en vez de como un uuid
+      // suelto que el cliente no sabría interpretar.
+      sexAtBirth: person.sexAtBirthConceptId
+        ? BIRTH_SEX_CODE_BY_CONCEPT[person.sexAtBirthConceptId]
+        : undefined,
+      // Las dos formas de declarar la ocupación viajan juntas y sólo una tiene
+      // valor: el formulario no puede pintar el desplegable con el texto libre,
+      // y quien eligió del catálogo veía su ocupación vacía mientras acá sólo
+      // salía el texto.
+      occupationConceptId: person.occupationConceptId,
+      occupationFreeText: person.occupationFreeText,
+      // Mismo criterio que la ocupación, para la empresa.
+      workEmployerConceptId: person.workEmployerConceptId,
+      workEmployerFreeText: person.workEmployerFreeText,
+      phone: phone?.value,
+      photoFileId: person.photoFileId,
+      residenceMunicipalityConceptId: homeAddress?.municipalityConceptId,
+      identityVerified,
+      // Mismo criterio que el resumen: ausente mientras no esté verificado.
+      ...(identityVerified ? { patientCode: patient.patientCode } : {}),
+      nationalId: identifiers.nationalId,
+      issuerAdministrativeAreaConceptId: identifiers.issuerArea,
+      taxId: identifiers.taxId,
+      taxHolderName: identifiers.taxHolderName,
+      email: mail?.value,
+      homeAddress: toAddress(homeAddress),
+      workAddress: toAddress(work),
+      // Listas siempre presentes, aunque vengan vacías: quien las pinta
+      // distingue «no declaró ninguna» de «esta respuesta no las trae».
+      coverages: coverages,
+      guardians: guardians,
+    });
+  }
+
+  /**
+   * Edita los datos que el paciente dio al registrarse.
+   *
+   * ## El hueco que cierra
+   *
+   * El auto-registro escribía la filiación una sola vez y nadie podía volver a
+   * tocarla. Un apellido mal tipeado, un teléfono que cambió o una mudanza
+   * quedaban así para siempre, salvo que alguien escribiera en la base. El
+   * titular es quien mejor conoce estos datos y era el único que no podía
+   * corregirlos.
+   *
+   * ## Qué se toca y qué no
+   *
+   * El sujeto sale de la sesión —vía `person_account_links`, nunca de un claim
+   * del token—, así que no hay forma de editar el de otro. Y lo editable es lo
+   * que la persona **declara** sobre sí misma: nombre, nacimiento, sexo al
+   * nacer, ocupación, teléfono y municipio. El documento de identidad, el correo,
+   * la contraseña, el código de paciente y los estados quedan fuera: tienen su
+   * propio circuito, y moverlos por autoservicio convertiría el perfil en una
+   * declaración jurada de uno mismo.
+   *
+   * `PATCH`: lo que no viene no se toca. Un cuerpo vacío es válido y devuelve el
+   * perfil sin cambios.
+   *
+   * ## Por qué el teléfono y el domicilio no se pisan
+   *
+   * Porque son historia. Por el número anterior se llamó a esta persona y en la
+   * dirección anterior vivía: sobrescribir la fila dejaría al sistema afirmando
+   * que nunca existieron. Se les pone fin de vigencia y se crea la nueva, que es
+   * lo que ya hacen el resto de los datos con vigencia del modelo.
+   *
+   * @param dto - Los campos a cambiar.
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El perfil completo releído, ya actualizado.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  async updateOwnProfile(
+    dto: UpdateOwnPatientProfileDto,
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.updateOwn', actorId: actor.id },
+      'Updating own patient profile',
+    );
+
+    await this.em.transactional(async (tx) => {
+      // `patient.profileId` hace falta para el tutor y el seguro declarado,
+      // que cuelgan del PERFIL de paciente, no de la persona.
+      const { person, patient } = await this.resolveOwnPatient(tx, actor);
+      const now = new Date();
+
+      // Campo por campo y con `!== undefined`: un `??` trataría `''` como «no
+      // vino», y el segundo nombre o el apellido materno son justamente los
+      // campos que alguien vacía cuando descubre que no tiene.
+      //
+      // `name` y `lastName` se asignan tal cual: el DTO les exige `@MinLength(1)`,
+      // así que no se pueden vaciar por acá. Los otros dos sí, y por eso pasan
+      // por {@link textoOpcional}, que traduce el blanco a `NULL`.
+      if (dto.name !== undefined) person.name = dto.name;
+      if (dto.middleName !== undefined) {
+        person.middleName = optionalText(dto.middleName);
+      }
+      if (dto.lastName !== undefined) person.lastName = dto.lastName;
+      if (dto.motherLastName !== undefined) {
+        person.motherLastName = optionalText(dto.motherLastName);
+      }
+      if (anyNamePartChanges(dto)) {
+        this.rebuildDisplayName(person);
+      }
+
+      if (dto.birthDate !== undefined) {
+        // `new Date(null)` es el 1/1/1970, no «sin fecha»: mandar `null` para
+        // borrarla dejaba a la persona nacida en la época Unix. Es el mismo
+        // defecto que se corrigió en el perfil del profesional; vivía también acá.
+        person.birthDate = dto.birthDate ? new Date(dto.birthDate) : undefined;
+      }
+      if (dto.sexAtBirth !== undefined) {
+        // El mismo mapeo del alta: el formulario manda un código y la columna
+        // guarda el concepto.
+        person.sexAtBirthConceptId = BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth];
+      }
+      // Las dos columnas de la ocupación se deciden juntas: ver
+      // {@link aplicarOcupacion}, porque cuál gana depende de la otra.
+      applyOccupation(person, dto);
+      // Misma regla, para la empresa: ver {@link aplicarEmpresa}.
+      applyCompany(person, dto);
+      // Sólo si de verdad se escribió algo en la fila: ver {@link cambiaLaPersona}.
+      if (personChanges(dto)) {
+        touch(person, actor.id);
+      }
+
+      if (dto.phone !== undefined) {
+        await this.replacePhone(tx, person.id, dto.phone, actor.id, now);
+      }
+
+      // El NIT y las dos direcciones: se declaraban al registrarse y después no
+      // había forma de corregirlos. El perfil los mostraba y el editor no los
+      // ofrecía, que es la peor combinación —ves el dato viejo y no podés tocarlo—.
+      // La razón social viaja CON el NIT: son el mismo hecho —a nombre de quién
+      // factura esta persona—, y separarlos permitiría dejar una razón social
+      // colgada de un NIT que ya no existe. Si sólo llega una de las dos, la
+      // otra se conserva de la fila vigente.
+      if (dto.taxId !== undefined || dto.taxHolderName !== undefined) {
+        await this.replaceNit(
+          tx,
+          person.id,
+          dto.taxId,
+          dto.taxHolderName,
+          actor.id,
+          now,
+        );
+      }
+
+      // Domicilio: municipio, calle y GPS fundidos en una sola escritura — ver
+      // {@link reemplazarDireccion}. Se llama sólo si el cuerpo trae al menos
+      // uno de los tres, para no tocar la fila por nada.
+      if (
+        dto.residenceMunicipalityConceptId !== undefined ||
+        dto.homeAddressLines !== undefined ||
+        // `null` también cuenta: quitar el punto es un cambio.
+        dto.homeLatitude !== undefined ||
+        dto.homeLongitude !== undefined
+      ) {
+        await this.replaceAddress(
+          tx,
+          person.id,
+          CONCEPTS.ADDR_USE_HOME,
+          {
+            municipio: dto.residenceMunicipalityConceptId,
+            lines: dto.homeAddressLines,
+            latitude: dto.homeLatitude,
+            longitude: dto.homeLongitude,
+          },
+          actor.id,
+          now,
+        );
+      }
+      // Trabajo: mismo criterio, con su propio municipio.
+      if (
+        dto.workMunicipalityConceptId !== undefined ||
+        dto.workAddressLines !== undefined ||
+        dto.workLatitude !== undefined ||
+        dto.workLongitude !== undefined
+      ) {
+        await this.replaceAddress(
+          tx,
+          person.id,
+          CONCEPTS.ADDR_USE_WORK,
+          {
+            municipio: dto.workMunicipalityConceptId,
+            lines: dto.workAddressLines,
+            latitude: dto.workLatitude,
+            longitude: dto.workLongitude,
+          },
+          actor.id,
+          now,
+        );
+      }
+
+      // El departamento que emitió el documento: metadato de la fila vigente
+      // `ID_TYPE_NATIONAL`, no del número en sí — ver el JSDoc del campo en el
+      // DTO sobre por qué esto NO toca la identidad de login.
+      if (dto.issuerAdministrativeAreaConceptId !== undefined) {
+        await this.replaceIssuance(
+          tx,
+          person.id,
+          dto.issuerAdministrativeAreaConceptId,
+          actor.id,
+        );
+      }
+
+      // El tutor o persona autorizada: ver el JSDoc de
+      // `guardianName` en el DTO sobre por qué esto declara o corrige, y nunca
+      // quita.
+      if (
+        dto.guardianName !== undefined ||
+        dto.guardianPhone !== undefined ||
+        dto.guardianRelationshipConceptId !== undefined
+      ) {
+        await this.replaceTutor(tx, patient.profileId, dto, actor.id);
+      }
+
+      // El seguro declarado: sólo agrega si el sector no tenía ninguno — ver
+      // el JSDoc de `privateInsurancePlanId` en el DTO.
+      if (dto.privateInsurancePlanId) {
+        await this.declareCoverage(
+          tx,
+          patient.profileId,
+          person.id,
+          dto.privateInsurancePlanId,
+          'private',
+          1,
+          actor.id,
+        );
+      }
+      if (dto.publicInsurancePlanId) {
+        await this.declareCoverage(
+          tx,
+          patient.profileId,
+          person.id,
+          dto.publicInsurancePlanId,
+          'public',
+          2,
+          actor.id,
+        );
+      }
+
+      await tx.flush();
+    });
+
+    // Se relee entero en vez de armar la respuesta con lo que se acaba de
+    // escribir: así quien edita ve lo mismo que vería al recargar, incluido el
+    // `displayName` recompuesto y el teléfono que quedó vigente.
+    return this.getOwnProfile(actor);
+  }
+
+  /**
+   * Fija la foto de perfil de la persona.
+   *
+   * Escribe `profiles.persons.photo_file_id`, no una columna de
+   * `patient_profiles`: la foto es de la **persona**, igual que decidió
+   * v4.0.11 al declarar la columna —identifica a quien entra por la puerta
+   * cualquiera sea su rol—. Un médico que además tenga un vínculo de paciente
+   * activo comparte la misma foto en los dos perfiles, y es lo esperado, no
+   * un cruce accidental.
+   *
+   * ## La tensión que esto no resuelve
+   *
+   * El perfil profesional tiene su propia
+   * `profiles.health_practitioner_profiles.photo_file_id`
+   * ({@link ProfilesPractitionersService.setPractitionerPhoto}), y encima
+   * `community.public_profiles.avatar_file_id` es una tercera columna para la
+   * vitrina pública. Las tres coexisten hoy sin sincronizarse: este método no
+   * las unifica ni escribe en cascada —eso acoplaría tres dominios distintos
+   * detrás de un solo botón—. Si el día de mañana se decide que
+   * `health_practitioner_profiles` deje de tener su propia foto, la salida
+   * natural es que su lectura haga *fallback* a esta columna, no que este
+   * método escriba en las otras.
+   *
+   * @param dto - El archivo ya subido que pasa a ser la foto.
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El perfil completo releído, ya con su foto.
+   * @throws PreconditionFailedException si la cuenta no tiene persona
+   *   vinculada, o si el archivo está borrado, sin versión vigente,
+   *   infectado o no es una imagen.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de
+   *   paciente, o si el archivo no existe o no es del titular.
+   */
+  async setOwnPhoto(
+    dto: SetOwnPatientPhotoDto,
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.setOwnPhoto', actorId: actor.id },
+      'Setting own patient photo',
+    );
+
+    await this.em.transactional(async (tx) => {
+      const { person } = await this.resolveOwnPatient(tx, actor);
+      // Dentro de la misma transacción que la escritura: comprobar contra un
+      // estado y escribir sobre otro no comprueba nada.
+      await this.attachableFiles.assertUsableBy(
+        tx,
+        dto.fileId,
+        actor,
+        {
+          allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
+          operation: 'profiles.patient.setOwnPhoto',
+        },
+        {
+          subject: 'El archivo de la foto',
+          notFound: 'El archivo de la foto no existe',
+        },
+      );
+      person.photoFileId = dto.fileId;
+      touch(person, actor.id);
+      await tx.flush();
+    });
+
+    return this.getOwnProfile(actor);
+  }
+
+  /**
+   * Quita la foto de perfil de la persona.
+   *
+   * Deja `photo_file_id` en nulo y no toca el archivo: quitar la foto de la
+   * ficha es una decisión de presentación, borrar un archivo del
+   * almacenamiento es otra cosa y tiene su propio camino. Es idempotente
+   * —quitar la foto de un perfil que ya no la tiene no es un error—.
+   *
+   * @param actor - La sesión, que es también el sujeto.
+   * @returns El perfil completo releído, ya sin foto.
+   * @throws PreconditionFailedException si la cuenta no tiene persona
+   *   vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de
+   *   paciente.
+   */
+  async removeOwnPhoto(
+    actor: AuthenticatedUser,
+  ): Promise<OwnPatientProfileResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.removeOwnPhoto', actorId: actor.id },
+      'Removing own patient photo',
+    );
+
+    await this.em.transactional(async (tx) => {
+      const { person } = await this.resolveOwnPatient(tx, actor);
+      person.photoFileId = undefined;
+      touch(person, actor.id);
+      await tx.flush();
+    });
+
+    return this.getOwnProfile(actor);
+  }
+
+  /**
+   * Documento, departamento emisor y NIT, de una sola lectura.
+   *
+   * Los tres viven en `common.identifiers` distinguidos por tipo, así que
+   * pedirlos por separado serían tres viajes por la misma fila-vecina.
+   */
+  /**
+   * Los dependientes del titular: a quiénes representa en el portal.
+   *
+   * ## Por qué la pregunta es «a quién representa» y no «quién está a su cargo»
+   *
+   * Porque lo que habilita a pedir un turno o a abrir una historia es el
+   * apoderamiento (`patient_portal_proxies`), no el parentesco. Una fila de
+   * `related_persons` dice quién es quién —y cualquiera puede declarar a su
+   * madre como contacto de emergencia—; el apoderamiento dice quién puede
+   * actuar. Listar por parentesco mostraría gente sobre la que el titular no
+   * puede hacer nada.
+   *
+   * El parentesco sí se lee, pero para **nombrar** al dependiente, y sale de la
+   * fila que el propio apoderamiento nombra.
+   *
+   * @param actor - Usuario autenticado, que es quien representa.
+   * @returns Sus dependientes, del más reciente al más viejo; vacío si no tiene.
+   */
+  async getOwnDependents(
+    actor: AuthenticatedUser,
+  ): Promise<DependentSummaryDto[]> {
+    const em = this.em.fork();
+    const rows = await this.portalProxiesRepo.listActiveDependentsOfUser(
+      em,
+      actor.id,
+      new Date(),
+    );
+    return rows.map((row) => this.toDependentSummary(row));
+  }
+
+  /**
+   * Registra a un dependiente y deja al titular como su representante.
+   *
+   * ## Qué escribe, y por qué en una sola transacción
+   *
+   * Cinco filas en cuatro tablas: la persona, su clasificación, su perfil de
+   * paciente, su documento —si lo tiene— y el parentesco, más el apoderamiento.
+   * Van juntas o no va ninguna: un perfil de paciente sin apoderamiento sería
+   * una historia clínica que nadie puede abrir, ni siquiera quien la creó, y
+   * ningún camino de la API la podría reclamar después.
+   *
+   * Es la misma secuencia que el auto-registro público, sin la parte de la
+   * cuenta: el dependiente no inicia sesión. Los `flush` intermedios no son
+   * decorativos — las FK del modelo son columnas uuid planas y MikroORM no
+   * ordena inserts entre entidades que no se referencian como relación.
+   *
+   * ## Por qué la tutela se afirma acá y no en el alta propia
+   *
+   * `createGuardianRelatedPerson` deja `is_legal_guardian` en `false` a
+   * propósito: ahí el tutor es un nombre que el paciente escribió, y nadie
+   * verificó nada. Acá la dirección es la contraria — quien registra es el
+   * titular autenticado, y está declarando hacerse cargo —, así que la fila lo
+   * afirma. No lo hace verdadero ante la ley; lo hace **atribuible**: queda
+   * quién lo declaró y cuándo.
+   *
+   * @param dto - Los datos de filiación y el parentesco declarado.
+   * @param actor - Usuario autenticado, que pasa a representarlo.
+   * @returns El dependiente recién creado.
+   * @throws PreconditionFailedException si la fecha de nacimiento es futura o el
+   *   departamento de expedición no es uno.
+   * @throws ConflictException si el documento ya es de otra persona.
+   */
+  async registerOwnDependent(
+    dto: CreateDependentDto,
+    actor: AuthenticatedUser,
+  ): Promise<DependentSummaryDto> {
+    this.logger.info(
+      { operation: 'profiles.dependent.create', actorId: actor.id },
+      'Registering dependent',
+    );
+
+    const birthDate = new Date(dto.birthDate);
+    if (Number.isNaN(birthDate.getTime())) {
+      throw new PreconditionFailedException(
+        'La fecha de nacimiento no es una fecha válida',
+        { birthDate: dto.birthDate },
+      );
+    }
+    // Nadie nace mañana. Sin este freno, la edad saldría negativa y la tarjeta
+    // diría «-1 años» sobre un dato que el formulario dejó pasar.
+    if (birthDate.getTime() > Date.now()) {
+      throw new PreconditionFailedException(
+        'La fecha de nacimiento no puede ser futura',
+        { birthDate: dto.birthDate },
+      );
+    }
+
+    return this.em.transactional(async (tx) => {
+      // Quien registra tiene que ser un paciente él mismo: el apoderamiento
+      // cuelga de su cuenta, y el parentesco de su persona.
+      const { person: titular } = await this.resolveOwnPatient(tx, actor);
+
+      // La FK del documento acepta cualquier concepto, así que quién es un
+      // departamento boliviano lo decide el catálogo, no la base.
+      if (dto.issuerAdministrativeAreaConceptId !== undefined) {
+        await this.administrativeAreas.assertIsAdministrativeArea(
+          tx,
+          dto.issuerAdministrativeAreaConceptId,
+        );
+      }
+
+      if (dto.nationalId !== undefined) {
+        const duplicate = await this.personRecords.findActiveDuplicate(tx, {
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: dto.nationalId,
+        });
+        if (duplicate) {
+          this.logger.warn(
+            {
+              operation: 'profiles.dependent.create',
+              reason: 'national-id-in-use',
+            },
+            'Rejected dependent creation: national id already registered',
+          );
+          throw new ConflictException(
+            'Ese documento ya está registrado en la plataforma',
+            { nationalId: dto.nationalId },
+          );
+        }
+      }
+
+      const dependent = this.personsRepo.create(tx, {
+        personStatusConceptId: PROF.PERSON_ACTIVE,
+        vitalStatusConceptId: PROF.VITAL_ALIVE,
+        name: dto.name,
+        middleName: dto.middleName,
+        lastName: dto.lastName,
+        motherLastName: dto.motherLastName,
+        birthDate,
+        sexAtBirthConceptId: dto.sexAtBirth
+          ? BIRTH_SEX_CONCEPT_BY_CODE[dto.sexAtBirth]
+          : undefined,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.personProfilesRepo.create(tx, {
+        personId: dependent.id,
+        profileTypeConceptId: PROF.PROFILE_TYPE_PATIENT,
+        statusConceptId: PROF.PROFILE_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      // `patient_profiles.profile_id` ES `persons.id`, igual que en el alta.
+      const patient = this.patientProfilesRepo.create(tx, {
+        profileId: dependent.id,
+        patientCode: `PAT-${randomUUID()}`,
+        recordLinkageStatusConceptId: PROF.LINKAGE_UNLINKED,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      if (dto.nationalId !== undefined) {
+        this.personRecords.createIdentifier(tx, {
+          ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+          ownerId: dependent.id,
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: dto.nationalId,
+          useConceptId: CONCEPTS.USE_OFFICIAL,
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+          issuerAdministrativeAreaConceptId:
+            dto.issuerAdministrativeAreaConceptId,
+          actorUserId: actor.id,
+        });
+      }
+
+      // La fila cuelga del DEPENDIENTE y nombra al TITULAR, como todas las de
+      // esta tabla: «la persona relacionada con este paciente es su madre».
+      const kinship = this.relatedPersonsRepo.create(tx, {
+        patientProfileId: patient.profileId,
+        personId: titular.id,
+        relationshipConceptId: dto.relationshipConceptId,
+        isEmergencyContact: true,
+        isLegalGuardian: true,
+        statusConceptId: PROF.RELATED_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      const now = new Date();
+      const powerOfAttorney = this.portalProxiesRepo.create(tx, {
+        patientProfileId: patient.profileId,
+        proxyUserId: actor.id,
+        relatedPersonId: kinship.id,
+        // Las dos filas que el modelo exige y la plataforma siembra: sin ellas
+        // estas dos FK NOT NULL no tendrían a qué apuntar.
+        scopeValueSetId: SEED.patientPortalProxyScopeValueSetId,
+        legalBasisRecordId: SEED.guardianProxyLegalBasisId,
+        statusConceptId: PROF.PROXY_ACTIVE,
+        // Sin `validTo`: la representación de un padre sobre su hijo no tiene
+        // fecha de fin conocida. Se revoca, no se vence.
+        validFrom: now,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'profiles.dependent.create',
+          patientProfileId: patient.profileId,
+        },
+        'Dependent registered',
+      );
+
+      const relation = describeDependentRelationship(dto.relationshipConceptId);
+      return {
+        id: powerOfAttorney.id,
+        patientProfileId: patient.profileId,
+        personId: dependent.id,
+        fullName: dependent.displayName ?? `${dto.name} ${dto.lastName}`,
+        name: dto.name,
+        lastName: dto.lastName,
+        birthDate: dto.birthDate,
+        ageYears: ageInYears(dto.birthDate),
+        ...(dto.nationalId === undefined ? {} : { nationalId: dto.nationalId }),
+        relationshipCode: relation.code,
+        relationshipDisplay: relation.display,
+        isLegalGuardian: true,
+      };
+    });
+  }
+
+  /**
+   * Traduce una fila del listado de dependientes al contrato del cliente.
+   *
+   * La consulta devuelve `snake_case` y `null` —es SQL cruda, no pasa por el
+   * mapeo del ORM—, y el contrato de cara al cliente omite lo que no hay en vez
+   * de mandarlo vacío, como el resto de las lecturas propias.
+   *
+   * @param row - Lo que devolvió la consulta.
+   * @returns El dependiente tal como lo ve quien lo representa.
+   */
+  private toDependentSummary(row: DependentRow): DependentSummaryDto {
+    const relation = describeDependentRelationship(
+      row.relationship_concept_id ?? '',
+    );
+    const age = ageInYears(row.birth_date);
+    return {
+      id: row.proxy_id,
+      patientProfileId: row.patient_profile_id,
+      personId: row.person_id,
+      // El nombre compuesto es derivado y la base lo tiene; si una fila vieja no
+      // lo tuviera, se recompone antes que mostrar una tarjeta sin nombre.
+      fullName:
+        row.display_name ??
+        composePersonDisplayName({
+          name: row.name ?? undefined,
+          middleName: row.middle_name ?? undefined,
+          lastName: row.last_name ?? undefined,
+          motherLastName: row.mother_last_name ?? undefined,
+        }) ??
+        '',
+      ...(row.name === null ? {} : { name: row.name }),
+      ...(row.last_name === null ? {} : { lastName: row.last_name }),
+      ...(row.birth_date === null ? {} : { birthDate: row.birth_date }),
+      ...(age === undefined ? {} : { ageYears: age }),
+      ...(row.national_id === null ? {} : { nationalId: row.national_id }),
+      relationshipCode: relation.code,
+      relationshipDisplay: relation.display,
+      isLegalGuardian: row.is_legal_guardian ?? false,
+    };
+  }
+
+  private async readIdentifiers(
+    em: EntityManager,
+    personId: string,
+  ): Promise<{
+    nationalId?: string;
+    issuerArea?: string;
+    taxId?: string;
+    taxHolderName?: string;
+  }> {
+    const rows = await this.personRecords.findCurrentIdentifiers<{
+      typeConceptId: string;
+      value: string;
+      issuerAdministrativeAreaConceptId?: string;
+      holderName?: string;
+    }>(em, personId);
+    const document = rows.find(
+      (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    );
+    const fiscal = rows.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
+    return {
+      nationalId: document?.value,
+      issuerArea: document?.issuerAdministrativeAreaConceptId,
+      taxId: fiscal?.value,
+      taxHolderName: fiscal?.holderName,
+    };
+  }
+
+  /**
+   * Los seguros declarados, con la aseguradora y el plan EN PALABRAS.
+   *
+   * Se resuelven acá y no en la pantalla porque son dos catálogos más que el
+   * cliente tendría que pedir para pintar una línea de texto.
+   *
+   * `isPublic` se deriva del catálogo sembrado y no de una columna: el modelo
+   * todavía no persiste el tipo de pagador —deuda declarada en el DTO del alta
+   * (PR #258)—, así que una aseguradora cargada por otra vía cae en «privada»
+   * hasta que eso exista.
+   */
+  /**
+   * Los seguros declarados, con la aseguradora y el plan EN PALABRAS.
+   *
+   * Delegado en `DeclaredCoveragesReader` (`insurance/services/`): es la
+   * misma consulta que necesita el PDF oficial de receta (`clinical`,
+   * subtarea B.3), y duplicarla en dos módulos es la clase de regla que
+   * diverge el día que sólo se corrige en un lado.
+   */
+  private async readCoverages(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<OwnCoverageDto[]> {
+    return this.patientCoverages.read<OwnCoverageDto>(em, patientProfileId);
+  }
+  /** Tutores y personas autorizadas, con su nombre y su teléfono. */
+  private async readGuardians(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<OwnGuardianDto[]> {
+    const rows = await em.getConnection().execute<
+      {
+        display_name: string | null;
+        relationship_concept_id: string | null;
+        is_emergency_contact: boolean;
+        is_legal_guardian: boolean;
+        phone: string | null;
+      }[]
+    >(
+      `select p.display_name,
+              r.relationship_concept_id,
+              r.is_emergency_contact,
+              r.is_legal_guardian,
+              (select cp.value from common.contact_points cp
+                where cp.owner_id = r.person_id
+                  and cp.system_concept_id = ?
+                  and cp.valid_to is null
+                order by cp.rank nulls last limit 1) as phone
+         from profiles.related_persons r
+         join profiles.persons p on p.id = r.person_id
+        where r.patient_profile_id = ?`,
+      [CONCEPTS.CONTACT_PHONE, patientProfileId],
+    );
+    return rows.map((f) => ({
+      ...(f.display_name === null ? {} : { displayName: f.display_name }),
+      ...(f.relationship_concept_id === null
+        ? {}
+        : { relationshipConceptId: f.relationship_concept_id }),
+      isEmergencyContact: f.is_emergency_contact,
+      isLegalGuardian: f.is_legal_guardian,
+      ...(f.phone === null ? {} : { phone: f.phone }),
+    }));
+  }
+
+  /**
+   * Resuelve a qué paciente corresponde una sesión.
+   *
+   * El sujeto sale **siempre** de `person_account_links` y nunca de un claim del
+   * token: `pid` es un dato de identificación que no participa de ninguna
+   * decisión, y usarlo acá lo convertiría en una credencial. Este es el mismo
+   * camino que recorre el resumen propio, extraído para que las tres lecturas
+   * propias no puedan divergir en a quién consideran el titular.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param actor - Usuario autenticado.
+   * @returns La persona y su perfil de paciente.
+   * @throws PreconditionFailedException si la cuenta no tiene persona vinculada.
+   * @throws ResourceNotFoundException si la persona no tiene perfil de paciente.
+   */
+  private async resolveOwnPatient(
+    em: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<{
+    /** La persona titular de la cuenta. */
+    person: Persons;
+    /** Su perfil de paciente. */
+    patient: PatientProfiles;
+  }> {
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene una persona vinculada',
+        {},
+        ProfilesErrorReason.ACCOUNT_WITHOUT_LINKED_PERSON,
+      );
+    }
+
+    const person = await this.personsRepo.findById(em, link.personId);
+    const patient = await this.patientProfilesRepo.findById(em, link.personId);
+    if (!person || !patient) {
+      throw new ResourceNotFoundException(
+        'Paciente no encontrado',
+        {
+          personId: link.personId,
+        },
+        ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+      );
+    }
+
+    return { person, patient };
+  }
+
+  /**
+   * Recompone el nombre para mostrar con la misma regla del alta.
+   *
+   * `displayName` es derivado, no editable: quien corrige su apellido espera
+   * verlo corregido en toda pantalla que lo muestre, y dejarlo intacto haría que
+   * el perfil dijera una cosa y el nombre visible otra.
+   *
+   * Si la persona se quedara sin ninguna parte del nombre, conserva el que
+   * tenía: es el caso de quien se registró con la forma anterior —sólo
+   * `displayName`— y edita otro campo. Vaciarle el nombre visible sería un
+   * efecto colateral que nadie pidió.
+   *
+   * @param person - La persona con las partes ya actualizadas.
+   */
+  private rebuildDisplayName(person: Persons): void {
+    const rebuilt = composePersonDisplayName(person);
+    if (rebuilt !== undefined) {
+      person.displayName = rebuilt;
+    }
+  }
+
+  /**
+   * Deja vigente el teléfono indicado, cerrando el anterior.
+   *
+   * Si el número es el que ya estaba vigente no escribe nada: crear una fila
+   * idéntica ensuciaría el historial con un cambio que no ocurrió.
+   *
+   * En blanco significa **quitar** el teléfono: se cierra el vigente y no nace
+   * ninguno. Quedarse sin teléfono es un dato —ya no hay por dónde llamar a esta
+   * persona—, y escribir una fila con el valor vacío lo contaría como si tuviera
+   * uno.
+   *
+   * @param tx - Transacción de la edición.
+   * @param personId - Dueño del punto de contacto.
+   * @param phone - El número nuevo, o en blanco para quedarse sin teléfono.
+   * @param actorUserId - Quién edita.
+   * @param now - Instante de la edición, fin de vigencia del anterior.
+   */
+  private async replacePhone(
+    tx: EntityManager,
+    personId: string,
+    phone: string,
+    actorUserId: string,
+    now: Date,
+  ): Promise<void> {
+    const fresh = optionalText(phone);
+    const current =
+      await this.personRecords.findCurrentContact<PatientContactRecord>(
+        tx,
+        personId,
+        CONCEPTS.CONTACT_PHONE,
+      );
+
+    if (fresh === undefined) {
+      if (current) {
+        this.personRecords.closeContact(current, now, actorUserId);
+      }
+      return;
+    }
+    if (current?.value === fresh) return;
+
+    if (current) {
+      this.personRecords.closeContact(current, now, actorUserId);
+    }
+    // Mismo dueño, mismo sistema y mismo uso que escribe el alta: el número
+    // cambió, no la clase de contacto que es.
+    this.personRecords.createContact(tx, {
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      ownerId: personId,
+      systemConceptId: CONCEPTS.CONTACT_PHONE,
+      value: fresh,
+      useConceptId: CONCEPTS.CONTACT_USE_HOME,
+      actorUserId,
+    });
+  }
+
+  /**
+   * Deja vigente el domicilio del municipio indicado, cerrando el anterior.
+   *
+   * La dirección nueva la arma el mismo ayudante que usa el alta, que es quien
+   * deriva el departamento del código del INE y valida el municipio contra el
+   * catálogo: duplicar esa regla acá abriría la puerta a que las dos vías
+   * escribieran direcciones distintas para el mismo municipio.
+   *
+   * @param tx - Transacción de la edición.
+   * @param personId - Dueño de la dirección.
+   * @param municipalityConceptId - El municipio nuevo.
+   * @param actorUserId - Quién edita.
+   * @param ahora - Instante de la edición, fin de vigencia de la anterior.
+   */
+  /**
+   * Deja vigente una dirección —domicilio o trabajo— que **funde** lo que llega
+   * en el `PATCH` con lo que ya había, en vez de exigir el par completo.
+   *
+   * ## Por qué existe, y qué reemplaza
+   *
+   * Antes había dos funciones: una para el municipio
+   * (`reemplazarDomicilio`, sólo domicilio) y otra para el texto
+   * (`reemplazarTextoDeDireccion`, domicilio y trabajo). Cambiar sólo el
+   * municipio **perdía** la calle y el GPS que ya estaban cargados —creaba la
+   * fila nueva con nada más que el municipio—, porque cada función sólo sabía
+   * de su propio campo. Fundir los tres en una sola escritura es lo que evita
+   * that alguien que corrige el municipio se quede sin la calle que ya había
+   * escrito.
+   *
+   * ## Por qué cierra y vuelve a crear, y no edita la fila
+   *
+   * `common.addresses` lleva `valid_to`: mudarse no debe borrar dónde vivía la
+   * persona cuando la atendieron. Se cierra la vigente y se abre otra con el
+   * estado fundido — mismo criterio que ya regía acá.
+   *
+   * ## Por qué usa `createResidenceAddress`/`createWorkAddress` y no un `create`
+   * directo
+   *
+   * Esas funciones son las mismas que usa el alta: derivan el departamento del
+   * municipio, copian el nombre de la ciudad y usan `CONCEPTS.COUNTRY_BO` — el
+   * código anterior escribía `CONCEPTS.COUNTRY_BOLIVIA`, que **no existe** en
+   * `CONCEPT_DEFS` (la constante real es `COUNTRY_BO`); como el mapa está
+   * tipado `Record<string, ConceptDef>`, TypeScript no lo marcaba, y en
+   * runtime la fila se habría escrito con `country_concept_id: undefined` —
+   * columna no-nulable— para cualquiera que mudara la calle de trabajo sin
+   * tener antes una dirección de trabajo vigente. Pasar por el helper
+   * compartido cierra ese hueco de raíz en vez de corregir el literal acá.
+   *
+   * @param tx - Transacción activa.
+   * @param personId - Persona dueña de la dirección.
+   * @param usageConceptId - `ADDR_USE_HOME` o `ADDR_USE_WORK`.
+   * @param changes - Lo que el cuerpo trae de esta dirección. `undefined` en
+   *   cualquiera de los tres es «no vino en este cuerpo», no «se borra»: acá se
+   *   completa con lo que ya estaba vigente. Sólo `lines` tiene una forma
+   *   explícita de vaciarse —cadena vacía—, porque es el único cuya ausencia
+   *   total tiene sentido (una dirección sin calle, con sólo el municipio,
+   *   sigue siendo un dato).
+   * @param actorUserId - Quién edita.
+   * @param now - Instante de la edición, fin de vigencia de la anterior.
+   */
+  private async replaceAddress(
+    tx: EntityManager,
+    personId: string,
+    usageConceptId: string,
+    changes: {
+      municipio?: string;
+      lines?: string;
+      /**
+       * `undefined` no toca el punto; `null` en los dos lo **quita**.
+       *
+       * La distinción hace falta desde que el perfil deja mover la ubicación:
+       * sin ella, el punto sólo se puede cambiar por otro y una ubicación mal
+       * puesta se queda para siempre —abajo, `tieneGps` conserva la anterior
+       * cuando no llega ninguna—.
+       */
+      latitude?: number | null;
+      longitude?: number | null;
+    },
+    actorUserId: string,
+    now: Date,
+  ): Promise<void> {
+    const current =
+      await this.personRecords.findCurrentAddress<PatientAddressRecord>(
+        tx,
+        personId,
+        usageConceptId,
+      );
+
+    const municipality = changes.municipio ?? current?.municipalityConceptId;
+    const lines =
+      changes.lines === undefined
+        ? current?.lines
+        : changes.lines.trim() === ''
+          ? undefined
+          : changes.lines.trim();
+    // Quitar el punto: los dos extremos en `null`. `undefined` a undefined
+    // porque la columna es nullable y es lo que la escritura espera para
+    // «sin dato»; el DTO ya rechazó los `null` a medias.
+    const removesGps = changes.latitude === null && changes.longitude === null;
+    const hasGps =
+      !removesGps &&
+      changes.latitude !== undefined &&
+      changes.longitude !== undefined;
+    const latitude = removesGps
+      ? undefined
+      : hasGps
+        ? (changes.latitude ?? undefined)
+        : columnNumber(current?.latitude);
+    const longitude = removesGps
+      ? undefined
+      : hasGps
+        ? (changes.longitude ?? undefined)
+        : columnNumber(current?.longitude);
+
+    const withoutChanges =
+      (current?.municipalityConceptId ?? undefined) === municipality &&
+      (current?.lines ?? undefined) === lines &&
+      columnNumber(current?.latitude) === latitude &&
+      columnNumber(current?.longitude) === longitude;
+    if (withoutChanges) return;
+
+    if (current) {
+      this.personRecords.closeAddress(current, now, actorUserId);
+    }
+
+    await this.personRecords.createAddress(tx, {
+      personId,
+      useConceptId: usageConceptId,
+      municipalityConceptId: municipality,
+      lines,
+      latitude,
+      longitude,
+      actorUserId,
+      work: usageConceptId === CONCEPTS.ADDR_USE_WORK,
+    });
+  }
+
+  /**
+   * El NIT de facturación, que vive en `common.identifiers` como un tipo más.
+   *
+   * Se cierra el vigente y se abre otro en vez de sobrescribir el valor: la
+   * tabla lleva `valid_to`, y una factura emitida con el NIT anterior tiene que
+   * seguir explicándose. Cadena vacía cierra sin abrir: es quedarse sin NIT.
+   */
+  private async replaceNit(
+    tx: EntityManager,
+    personId: string,
+    nit: string | undefined,
+    legalName: string | undefined,
+    actorUserId: string,
+    now: Date,
+  ): Promise<void> {
+    const rows = await this.personRecords.findCurrentIdentifiers<{
+      typeConceptId: string;
+      value: string;
+      issuerAdministrativeAreaConceptId?: string;
+      holderName?: string;
+      validTo?: Date | null;
+      updatedAt: Date;
+      updatedByUserId?: string;
+    }>(tx, personId);
+    const current = rows.find((f) => f.typeConceptId === CONCEPTS.ID_TYPE_TAX);
+    // Lo que no llegó se conserva de la fila vigente: editar sólo la razón
+    // social no puede borrar el NIT, ni al revés.
+    const nitValue = (nit ?? current?.value ?? '').trim();
+    const titular = (legalName ?? current?.holderName ?? '').trim();
+    if (
+      current?.value === nitValue &&
+      (current?.holderName ?? '') === titular
+    ) {
+      return;
+    }
+
+    if (current) {
+      current.validTo = now;
+      touch(current, actorUserId);
+    }
+    // Sin número no hay identificador que abrir: una razón social sola no es un
+    // NIT, y guardarla suelta dejaría una fila fiscal sin valor.
+    if (nitValue === '') return;
+
+    this.personRecords.createIdentifier(tx, {
+      ownerId: personId,
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      typeConceptId: CONCEPTS.ID_TYPE_TAX,
+      value: nitValue,
+      holderName: titular === '' ? undefined : titular,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+      actorUserId,
+    });
+  }
+
+  /**
+   * Corrige el departamento que emitió el documento, sin tocar el número.
+   *
+   * Edita la fila vigente `ID_TYPE_NATIONAL` **en el lugar** — a diferencia del
+   * NIT o el teléfono, esto no cierra y reabre: el documento con el que la
+   * cuenta entra sigue siendo el mismo, sólo se corrige de qué departamento es.
+   * Cerrar y reabrir la fila habría exigido repetir el número, que este
+   * `PATCH` no recibe ni debe recibir.
+   *
+   * No hace nada si la persona no tiene documento vigente: no hay a qué
+   * departamento atarlo (mismo caso que el alta, donde la expedición viaja
+   * siempre junto al documento).
+   *
+   * @param tx - Transacción activa.
+   * @param personId - Persona dueña del documento.
+   * @param issuerAdministrativeAreaConceptId - El departamento nuevo.
+   * @param actorUserId - Quién edita.
+   */
+  private async replaceIssuance(
+    tx: EntityManager,
+    personId: string,
+    issuerAdministrativeAreaConceptId: string,
+    actorUserId: string,
+  ): Promise<void> {
+    const rows =
+      await this.personRecords.findCurrentIdentifiers<PatientIdentifierRecord>(
+        tx,
+        personId,
+      );
+    const document = rows.find(
+      (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    );
+    if (!document) return;
+    if (
+      document.issuerAdministrativeAreaConceptId ===
+      issuerAdministrativeAreaConceptId
+    ) {
+      return;
+    }
+
+    document.issuerAdministrativeAreaConceptId =
+      issuerAdministrativeAreaConceptId;
+    touch(document, actorUserId);
+  }
+
+  /**
+   * Declara o corrige al tutor o persona autorizada (registro · PACIENTE §1.7).
+   *
+   * ## Por qué corrige en el lugar y no cierra y recrea
+   *
+   * `profiles.related_persons` no lleva `valid_to` como `contact_points` o
+   * `addresses`: sólo tiene `RELATED_ACTIVE`. Cerrar la fila del tutor
+   * declarado y abrir una nueva —el patrón que sí sirve para teléfono y
+   * dirección— dejaría DOS filas activas sin un estado que distinga cuál es la
+   * vigente, porque ese estado no existe. Corregir el nombre, el teléfono y el
+   * parentesco de la misma fila declarada evita ese problema sin inventar un
+   * concepto que el modelo no declara (regla 00.1/00.4 del proyecto).
+   *
+   * ## Por qué usa {@link findActiveDeclaredGuardian} y no `findActiveGuardian`
+   *
+   * Ver el JSDoc de ese método: el tutor declarado por autoservicio nace con
+   * `isLegalGuardian: false`, así que `findActiveGuardian` —que filtra por
+   * `true`— nunca lo encuentra.
+   *
+   * @param tx - Transacción activa.
+   * @param patientProfileId - Perfil de paciente que declara al tutor.
+   * @param dto - Los campos del tutor que llegaron en el cuerpo.
+   * @param actorUserId - Quién edita.
+   */
+  private async replaceTutor(
+    tx: EntityManager,
+    patientProfileId: string,
+    dto: UpdateOwnPatientProfileDto,
+    actorUserId: string,
+  ): Promise<void> {
+    const declared = await this.relatedPersonsRepo.findActiveDeclaredGuardian(
+      tx,
+      patientProfileId,
+    );
+
+    if (!declared) {
+      // Nadie declarado todavía: se crea con el mismo helper del alta.
+      await createGuardianRelatedPerson(
+        {
+          persons: this.personsRepo,
+          relatedPersons: this.relatedPersonsRepo,
+          contactPoints: {
+            create: (em, data) => this.personRecords.createContact(em, data),
+          },
+        },
+        tx,
+        {
+          patientProfileId,
+          name: dto.guardianName,
+          phone: dto.guardianPhone,
+          relationshipConceptId: dto.guardianRelationshipConceptId,
+          actorUserId,
+        },
+      );
+      return;
+    }
+
+    if (dto.guardianRelationshipConceptId !== undefined) {
+      declared.relationshipConceptId = dto.guardianRelationshipConceptId;
+      touch(declared, actorUserId);
+    }
+
+    if (dto.guardianName) {
+      const persona = await this.personsRepo.findById(tx, declared.personId);
+      if (persona) {
+        persona.displayName = dto.guardianName;
+        touch(persona, actorUserId);
+      }
+    }
+
+    if (dto.guardianPhone) {
+      const current =
+        await this.personRecords.findCurrentContact<PatientContactRecord>(
+          tx,
+          declared.personId,
+          CONCEPTS.CONTACT_PHONE,
+        );
+      if (current?.value !== dto.guardianPhone) {
+        if (current) {
+          this.personRecords.closeContact(current, new Date(), actorUserId);
+        }
+        this.personRecords.createContact(tx, {
+          ownerTypeConceptId: CONCEPTS.OWNER_PERSON,
+          ownerId: declared.personId,
+          systemConceptId: CONCEPTS.CONTACT_PHONE,
+          value: dto.guardianPhone,
+          useConceptId: CONCEPTS.CONTACT_USE_HOME,
+          actorUserId,
+        });
+      }
+    }
+  }
+
+  /**
+   * Declara el seguro que el paciente dice tener, en un sector que no tenía
+   * declarado todavía (registro · PACIENTE §1.13-§1.14).
+   *
+   * **No reemplaza una cobertura ya declarada.** `insurance.patient_coverages`
+   * no tiene una baja modelada —sólo `COVERAGE_ACTIVE`—, así que si el paciente
+   * ya tenía una del mismo sector (orden 1 o 2), esta función no hace nada: ni
+   * la pisa, ni la duplica, ni inventa un estado de baja que el modelo no
+   * declara. Cambiar de aseguradora por autoservicio queda fuera de este
+   * `PATCH` hasta que exista esa baja.
+   *
+   * @param tx - Transacción activa.
+   * @param patientProfileId - Perfil de paciente que declara la cobertura.
+   * @param personId - Persona dueña del documento, para el número de afiliado
+   *   provisional.
+   * @param insurancePlanId - Plan elegido.
+   * @param sector - `'private'` o `'public'`, según el campo que lo trajo.
+   * @param coverageOrder - 1 para la privada, 2 para la pública.
+   * @param actorUserId - Quién declara.
+   */
+  private async declareCoverage(
+    tx: EntityManager,
+    patientProfileId: string,
+    personId: string,
+    insurancePlanId: string,
+    sector: InsuranceSector,
+    coverageOrder: number,
+    actorUserId: string,
+  ): Promise<void> {
+    const alreadyDeclared = await this.patientCoverages.isDeclared(
+      tx,
+      patientProfileId,
+      coverageOrder,
+    );
+    if (alreadyDeclared) return;
+
+    const { nationalId } = await this.readIdentifiers(tx, personId);
+    // No debería pasar —el alta exige documento—, pero sin él no hay número de
+    // afiliado provisional que anotar, y declarar sin identificador dejaría
+    // una fila que nadie puede buscar después.
+    if (!nationalId) return;
+
+    await this.patientCoverages.create(tx, {
+      patientProfileId,
+      insurancePlanId,
+      expectedSector: sector,
+      coverageOrder,
+      memberIdentifier: nationalId,
+      actorUserId,
+    });
+  }
+
+  /**
+   * UC-05-13: listado paginado de pacientes para el personal administrativo.
+   *
+   * Es la cara de lectura que faltaba del módulo: hasta ahora sólo se podían
+   * dar de alta pacientes y consultarse a sí mismo el titular, así que ninguna
+   * pantalla podía mostrar "los pacientes" ni encontrar el `profileId` que el
+   * resto del contrato exige. Sin esto, dar de alta un paciente y después
+   * agendarle una cita eran dos operaciones que sólo se podían encadenar si
+   * quien las hacía se guardaba el id devuelto en el momento del alta.
+   *
+   * Devuelve datos de filiación, nunca clínicos.
+   *
+   * @param options - Texto de búsqueda, cursor de continuación y tope de página.
+   * @returns Página de pacientes con el cursor de la siguiente.
+   */
+  async searchPatients(
+    options: {
+      /** Texto libre sobre código de paciente y nombre. */
+      query?: string;
+      /**
+       * Documento de identidad exacto. Junto con
+       * {@link issuerAdministrativeAreaConceptId} es el camino que abre
+       * AC-07-1/AC-07-2: encontrar a alguien aunque su código o su nombre no
+       * contengan el texto buscado.
+       */
+      nationalId?: string;
+      /** Departamento que expidió el documento (`VS_BO_DEPARTMENT`). */
+      issuerAdministrativeAreaConceptId?: string;
+      /** Cursor opaco devuelto por la página anterior. */
+      cursor?: string;
+      /** Tope de filas de la página. */
+      limit: number;
+    },
+    actor: AuthenticatedUser,
+  ): Promise<SearchPatientsResponseDto> {
+    // P-07-10: el padrón ya no está acotado por actividad (ver
+    // `patient-search-scope.ts`), así que sin este freno un rol clínico sin
+    // texto ni documento recibiría la primera página del padrón entero — es
+    // enumeración, no búsqueda. `SECURITY_ADMIN`/`SUPERADMIN` administran el
+    // padrón y siguen listando sin criterio, como siempre.
+    if (
+      searchRequiresCriterion(actor) &&
+      !options.query &&
+      !options.nationalId
+    ) {
+      throw new PreconditionFailedException(
+        'Busque por nombre, código o documento: no se puede listar el padrón completo de pacientes',
+        {},
+        ProfilesErrorReason.PATIENT_SEARCH_CRITERIA_REQUIRED,
+      );
+    }
+
+    const em = this.em.fork();
+
+    if (options.issuerAdministrativeAreaConceptId) {
+      await this.administrativeAreas.assertIsAdministrativeArea(
+        em,
+        options.issuerAdministrativeAreaConceptId,
+      );
+    }
+
+    const after = options.cursor
+      ? decodeKeysetCursor(options.cursor)
+      : undefined;
+    const afterPatientCode =
+      typeof after?.patientCode === 'string' ? after.patientCode : undefined;
+
+    // Se pide una fila de más para saber si hay página siguiente sin pagar un
+    // COUNT sobre toda la tabla en cada página.
+    const rows = await this.patientProfilesRepo.searchPage(
+      em,
+      {
+        query: options.query,
+        nationalId: options.nationalId,
+        issuerAdministrativeAreaConceptId:
+          options.issuerAdministrativeAreaConceptId,
+        scope: resolvePatientSearchScope(actor),
+        afterPatientCode,
+      },
+      options.limit + 1,
+    );
+    const hasMore = rows.length > options.limit;
+    const page = hasMore ? rows.slice(0, options.limit) : rows;
+
+    const persons = await this.personsRepo.findByIds(
+      em,
+      page.map((row) => row.profileId),
+    );
+
+    const items = page.map((row) => {
+      const person = persons.get(row.profileId);
+      return {
+        profileId: row.profileId,
+        personId: row.profileId,
+        patientCode: row.patientCode,
+        displayName: person?.displayName,
+        birthDate: person?.birthDate,
+        personStatusConceptId: person?.personStatusConceptId,
+        deceased: Boolean(person?.deceasedAt),
+      };
+    });
+
+    const last = page.at(-1);
+    return {
+      items,
+      count: items.length,
+      limit: options.limit,
+      nextCursor:
+        hasMore && last
+          ? encodeKeysetCursor({ patientCode: last.patientCode })
+          : null,
+    };
+  }
+
+  /**
+   * UC-05-14: ficha de filiación de un paciente (F-01).
+   *
+   * Reúne `persons` + `patient_profiles` + contactos activos, que es lo que la
+   * pantalla de filiación necesita para pintarse completa. No trae nada
+   * clínico: eso se lee de `clinical` y `chart`, que responden a otro rol.
+   *
+   * @param profileId - Perfil de paciente a leer.
+   * @returns Ficha completa de filiación.
+   * @throws ResourceNotFoundException si el perfil no existe.
+   */
+  async getPatientById(profileId: string): Promise<PatientDetailResponseDto> {
+    const em = this.em.fork();
+
+    const patient = await this.patientProfilesRepo.findById(em, profileId);
+    if (!patient) {
+      throw new ResourceNotFoundException(
+        'Paciente no encontrado',
+        {
+          profileId,
+        },
+        ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+      );
+    }
+    // `person_profiles.id` es el mismo uuid que `patient_profiles.profile_id`
+    // (1:1), y ese id es a su vez el de la persona: por eso se busca la persona
+    // por el propio `profileId` y no hace falta un salto más.
+    const person = await this.personsRepo.findById(em, patient.profileId);
+    if (!person) {
+      // Un perfil sin persona es una FK rota, no un "no encontrado" del
+      // cliente: se registra para que no pase inadvertido.
+      this.logger.error(
+        { operation: 'profiles.patient.read', profileId },
+        'Perfil de paciente sin persona en el catálogo',
+      );
+      throw new ResourceNotFoundException(
+        'Paciente no encontrado',
+        {
+          profileId,
+        },
+        ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+      );
+    }
+
+    const related = await this.relatedPersonsRepo.findActiveByPatient(
+      em,
+      profileId,
+    );
+    // El nombre del contacto vive en `persons`, no en el vínculo: se resuelve
+    // en bloque. Un contacto de emergencia sin nombre no sirve de nada, que es
+    // justo lo que quedaría si esto se dejara sin resolver.
+    const relatedPersons = await this.personsRepo.findByIds(
+      em,
+      related.map((row) => row.personId),
+    );
+
+    return {
+      profileId: patient.profileId,
+      personId: person.id,
+      patientCode: patient.patientCode,
+      masterPatientIndexCode: patient.masterPatientIndexCode,
+      displayName: person.displayName,
+      birthDate: person.birthDate,
+      administrativeGenderConceptId: person.administrativeGenderConceptId,
+      sexAtBirthConceptId: person.sexAtBirthConceptId,
+      genderIdentityConceptId: person.genderIdentityConceptId,
+      nationalityConceptId: person.nationalityConceptId,
+      preferredLanguageConceptId: person.preferredLanguageConceptId,
+      personStatusConceptId: person.personStatusConceptId,
+      vitalStatusConceptId: person.vitalStatusConceptId,
+      deceasedAt: person.deceasedAt,
+      aboGroupConceptId: patient.aboGroupConceptId,
+      rhFactorConceptId: patient.rhFactorConceptId,
+      insuranceStatusConceptId: patient.insuranceStatusConceptId,
+      clinicalLanguageConceptId: patient.clinicalLanguageConceptId,
+      recordLinkageStatusConceptId: patient.recordLinkageStatusConceptId,
+      relatedPersons: related.map((row) => ({
+        id: row.id,
+        displayName: relatedPersons.get(row.personId)?.displayName,
+        relationshipConceptId: row.relationshipConceptId,
+        isEmergencyContact: row.isEmergencyContact,
+        isLegalGuardian: row.isLegalGuardian,
+      })),
+      createdAt: patient.createdAt,
+      updatedAt: patient.updatedAt,
+    };
+  }
+
+  /** UC-05-02: vincula una cuenta de portal a la persona (supersede el vínculo previo). */
+  async linkAccount(
+    personId: string,
+    dto: LinkAccountDto,
+    actor: AuthenticatedUser,
+  ): Promise<AccountLinkResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.account.link', personId },
+      'Linking portal account',
+    );
+    return this.em.transactional(async (tx) => {
+      const person = await this.personsRepo.findById(tx, personId);
+      if (!person)
+        throw new ResourceNotFoundException(
+          'Persona no encontrada',
+          {
+            personId,
+          },
+          ProfilesErrorReason.PERSON_NOT_FOUND,
+        );
+      if (person.personStatusConceptId !== PROF.PERSON_ACTIVE) {
+        throw new PreconditionFailedException(
+          'La persona no está activa',
+          {
+            personId,
+          },
+          ProfilesErrorReason.PERSON_NOT_ACTIVE,
+        );
+      }
+
+      const now = new Date();
+      // Respeta uq_person_account_links_active_user: solo un vínculo activo por usuario.
+      await this.accountLinksRepo.supersedeActiveForUser(tx, dto.userId, now);
+
+      const link = this.accountLinksRepo.create(tx, {
+        personId,
+        userId: dto.userId,
+        linkTypeConceptId: dto.linkTypeConceptId ?? PROF.ACCOUNT_LINK_SELF,
+        verificationStatusConceptId: PROF.ACCOUNT_LINK_VERIFIED,
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+        validFrom: now,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      return {
+        id: link.id,
+        personId,
+        userId: dto.userId,
+        status: link.statusConceptId,
+        validFrom: link.validFrom,
+      };
+    });
+  }
+
+  /** UC-05-07: vincula (upsert) una identidad externa de paciente y marca el registro como linked. */
+  async addIdentityLink(
+    profileId: string,
+    dto: AddIdentityLinkDto,
+    actor: AuthenticatedUser,
+  ): Promise<IdentityLinkResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.identity.link', profileId },
+      'Adding patient identity link',
+    );
+    return this.em.transactional(async (tx) => {
+      const patient = await this.patientProfilesRepo.findById(tx, profileId);
+      if (!patient)
+        throw new ResourceNotFoundException(
+          'Paciente no encontrado',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+        );
+
+      const verificationStatus = dto.verified
+        ? PROF.IDENTITY_VERIFIED
+        : PROF.IDENTITY_UNVERIFIED;
+      const existing = await this.identityLinksRepo.findBySource(
+        tx,
+        dto.sourceTenantId,
+        dto.sourceSystemUri,
+        dto.sourcePatientIdentifier,
+      );
+
+      let linkId: string;
+      let created: boolean;
+      if (existing) {
+        // ON CONFLICT → conserva la mayor confianza y actualiza verificación.
+        existing.confidenceScore = String(dto.confidenceScore);
+        existing.verificationStatusConceptId = verificationStatus;
+        existing.verifiedByUserId = dto.verified ? actor.id : undefined;
+        existing.verifiedAt = dto.verified ? new Date() : undefined;
+        touch(existing, actor.id);
+        linkId = existing.id;
+        created = false;
+      } else {
+        const link = this.identityLinksRepo.create(tx, {
+          patientProfileId: profileId,
+          sourceTenantId: dto.sourceTenantId,
+          sourcePatientIdentifier: dto.sourcePatientIdentifier,
+          sourceSystemUri: dto.sourceSystemUri,
+          linkTypeConceptId: dto.linkTypeConceptId ?? PROF.IDENTITY_LINK_MPI,
+          confidenceScore: String(dto.confidenceScore),
+          verificationStatusConceptId: verificationStatus,
+          verifiedByUserId: dto.verified ? actor.id : undefined,
+          verifiedAt: dto.verified ? new Date() : undefined,
+          actorUserId: actor.id,
+        });
+        await tx.flush();
+        linkId = link.id;
+        created = true;
+      }
+
+      patient.recordLinkageStatusConceptId = PROF.LINKAGE_LINKED;
+      touch(patient, actor.id);
+      await tx.flush();
+
+      return {
+        id: linkId,
+        patientProfileId: profileId,
+        verificationStatus,
+        created,
+      };
+    });
+  }
+
+  /** UC-05-08: fusiona un paciente perdedor sobre el sobreviviente (evento IMMUTABLE + reasignación). */
+  async mergePatients(
+    dto: MergePatientsDto,
+    actor: AuthenticatedUser,
+  ): Promise<MergeEventResponseDto> {
+    this.logger.info(
+      {
+        operation: 'profiles.patient.merge',
+        surviving: dto.survivingPatientProfileId,
+        merged: dto.mergedPatientProfileId,
+      },
+      'Merging patients',
+    );
+    return this.em.transactional(async (tx) => {
+      if (dto.survivingPatientProfileId === dto.mergedPatientProfileId) {
+        throw new PreconditionFailedException(
+          'No se puede fusionar un paciente consigo mismo',
+          {
+            profileId: dto.survivingPatientProfileId,
+          },
+          ProfilesErrorReason.MERGE_SAME_PATIENT,
+        );
+      }
+      const surviving = await this.patientProfilesRepo.findById(
+        tx,
+        dto.survivingPatientProfileId,
+      );
+      if (!surviving) {
+        throw new ResourceNotFoundException(
+          'Paciente sobreviviente no encontrado',
+          {
+            profileId: dto.survivingPatientProfileId,
+          },
+          ProfilesErrorReason.MERGE_SURVIVING_PATIENT_NOT_FOUND,
+        );
+      }
+      const merged = await this.patientProfilesRepo.findById(
+        tx,
+        dto.mergedPatientProfileId,
+      );
+      if (!merged) {
+        throw new ResourceNotFoundException(
+          'Paciente a fusionar no encontrado',
+          {
+            profileId: dto.mergedPatientProfileId,
+          },
+          ProfilesErrorReason.MERGE_TARGET_PATIENT_NOT_FOUND,
+        );
+      }
+      if (merged.recordLinkageStatusConceptId === PROF.LINKAGE_MERGED) {
+        throw new ConflictException(
+          'El paciente ya fue fusionado',
+          {
+            profileId: dto.mergedPatientProfileId,
+          },
+          ProfilesErrorReason.PATIENT_ALREADY_MERGED,
+        );
+      }
+
+      const now = new Date();
+      const event = this.mergeEventsRepo.create(tx, {
+        survivingPatientProfileId: dto.survivingPatientProfileId,
+        mergedPatientProfileId: dto.mergedPatientProfileId,
+        reasonConceptId: dto.reasonConceptId ?? PROF.MERGE_REASON_DUPLICATE,
+        decisionStatusConceptId: PROF.MERGE_APPROVED,
+        approvedByUserId: actor.id,
+        recordedAt: now,
+        recordedByUserId: actor.id,
+      });
+      await tx.flush();
+
+      // Estado del paciente perdedor.
+      merged.recordLinkageStatusConceptId = PROF.LINKAGE_MERGED;
+      touch(merged, actor.id);
+
+      // patient_profiles.profile_id ES persons.id (FK a profiles.persons), así que
+      // el id de perfil del perdedor identifica directamente a su persona.
+      const mergedPerson = await this.personsRepo.findById(
+        tx,
+        merged.profileId,
+      );
+      if (mergedPerson) {
+        mergedPerson.mergeSurvivorPersonId = surviving.profileId;
+        mergedPerson.personStatusConceptId = PROF.PERSON_MERGED;
+        touch(mergedPerson, actor.id);
+      }
+
+      // Reasigna referencias del perdedor al sobreviviente.
+      await this.identityLinksRepo.reassignPatientProfile(
+        tx,
+        merged.profileId,
+        surviving.profileId,
+        now,
+      );
+      await this.relatedPersonsRepo.reassignPatientProfile(
+        tx,
+        merged.profileId,
+        surviving.profileId,
+        now,
+      );
+      await this.portalProxiesRepo.reassignPatientProfile(
+        tx,
+        merged.profileId,
+        surviving.profileId,
+        now,
+      );
+      await tx.flush();
+
+      return this.toEventDto(event);
+    });
+  }
+
+  /**
+   * UC-05-09·L: los eventos de fusión, para poder revertir uno más tarde.
+   *
+   * `reverseMerge` exige el `eventId`, y hasta ahora ese identificador sólo
+   * existía en la respuesta del `POST` que lo creaba: en cuanto esa respuesta se
+   * perdía de vista, unir dos historias clínicas dejaba de tener vuelta atrás
+   * desde la aplicación. Esta lectura es lo que convierte «revertir» en algo que
+   * se puede hacer al día siguiente.
+   *
+   * @param query - Paciente involucrado y tope, ambos opcionales.
+   * @returns Los eventos, del más reciente al más antiguo.
+   */
+  async listMergeEvents(
+    query: ListMergeEventsQueryDto,
+  ): Promise<ListMergeEventsResponseDto> {
+    const limit = query.limit ?? MERGE_EVENTS_DEFAULT_LIMIT;
+    const em = this.em.fork();
+    const rows = await this.mergeEventsRepo.findEvents(
+      em,
+      query.patientProfileId === undefined
+        ? {}
+        : { patientProfileId: query.patientProfileId },
+      limit,
+    );
+
+    return {
+      items: rows.map((event) => ({
+        id: event.id,
+        survivingPatientProfileId: event.survivingPatientProfileId,
+        mergedPatientProfileId: event.mergedPatientProfileId,
+        decisionStatus: event.decisionStatusConceptId,
+        ...(event.reversalOfEventId === undefined
+          ? {}
+          : { reversalOfEventId: event.reversalOfEventId }),
+        recordedAt: event.recordedAt,
+      })),
+      count: rows.length,
+      limit,
+    };
+  }
+
+  /** UC-05-09: revierte una fusión previa aprobada (nuevo evento IMMUTABLE de reversión). */
+  async reverseMerge(
+    eventId: string,
+    dto: ReverseMergeDto,
+    actor: AuthenticatedUser,
+  ): Promise<MergeEventResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.patient.merge.reverse', eventId },
+      'Reversing patient merge',
+    );
+    return this.em.transactional(async (tx) => {
+      const original = await this.mergeEventsRepo.findById(tx, eventId);
+      if (!original)
+        throw new ResourceNotFoundException(
+          'Evento de fusión no encontrado',
+          {
+            eventId,
+          },
+          ProfilesErrorReason.MERGE_EVENT_NOT_FOUND,
+        );
+      if (original.decisionStatusConceptId !== PROF.MERGE_APPROVED) {
+        throw new PreconditionFailedException(
+          'Solo se puede revertir una fusión aprobada',
+          {
+            eventId,
+          },
+          ProfilesErrorReason.MERGE_NOT_APPROVED,
+        );
+      }
+      const alreadyReversed = await this.mergeEventsRepo.findByReversalOf(
+        tx,
+        eventId,
+      );
+      if (alreadyReversed) {
+        throw new ConflictException(
+          'La fusión ya fue revertida',
+          { eventId },
+          ProfilesErrorReason.MERGE_ALREADY_REVERSED,
+        );
+      }
+
+      const now = new Date();
+      const reversal = this.mergeEventsRepo.create(tx, {
+        survivingPatientProfileId: original.survivingPatientProfileId,
+        mergedPatientProfileId: original.mergedPatientProfileId,
+        reasonConceptId: dto.reasonConceptId ?? original.reasonConceptId,
+        decisionStatusConceptId: PROF.MERGE_REVERSED,
+        approvedByUserId: actor.id,
+        reversalOfEventId: eventId,
+        recordedAt: now,
+        recordedByUserId: actor.id,
+      });
+      await tx.flush();
+
+      // Restaura el estado del paciente y la persona del perdedor.
+      const merged = await this.patientProfilesRepo.findById(
+        tx,
+        original.mergedPatientProfileId,
+      );
+      if (merged) {
+        merged.recordLinkageStatusConceptId = PROF.LINKAGE_LINKED;
+        touch(merged, actor.id);
+        const mergedPerson = await this.personsRepo.findById(
+          tx,
+          merged.profileId,
+        );
+        if (mergedPerson) {
+          mergedPerson.mergeSurvivorPersonId = undefined;
+          mergedPerson.personStatusConceptId = PROF.PERSON_ACTIVE;
+          touch(mergedPerson, actor.id);
+        }
+      }
+      await tx.flush();
+
+      return this.toEventDto(reversal);
+    });
+  }
+
+  /** UC-05-10: registra una persona relacionada / contacto de emergencia del paciente. */
+  async addRelatedPerson(
+    profileId: string,
+    dto: AddRelatedPersonDto,
+    actor: AuthenticatedUser,
+  ): Promise<RelatedPersonResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.related.add', profileId },
+      'Adding related person',
+    );
+    return this.em.transactional(async (tx) => {
+      // El titular administra lo suyo: sin esto, un profesional auto-registrado no
+      // podía crear la matrícula que su propia verificación exige.
+      await this.ownership.assertOwnsPatientProfile(tx, profileId, actor);
+      const patient = await this.patientProfilesRepo.findById(tx, profileId);
+      if (!patient)
+        throw new ResourceNotFoundException(
+          'Paciente no encontrado',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+        );
+
+      if (dto.isLegalGuardian) {
+        const guardian = await this.relatedPersonsRepo.findActiveGuardian(
+          tx,
+          profileId,
+        );
+        if (guardian) {
+          throw new ConflictException(
+            'El paciente ya tiene un tutor legal activo',
+            { profileId },
+            ProfilesErrorReason.PATIENT_ALREADY_HAS_LEGAL_GUARDIAN,
+          );
+        }
+      }
+
+      let personId = dto.personId;
+      if (personId) {
+        const existing = await this.personsRepo.findById(tx, personId);
+        if (!existing) {
+          throw new ResourceNotFoundException(
+            'Persona relacionada no encontrada',
+            { personId },
+            ProfilesErrorReason.RELATED_PERSON_NOT_FOUND,
+          );
+        }
+      } else {
+        const person = this.personsRepo.create(tx, {
+          personStatusConceptId: PROF.PERSON_ACTIVE,
+          vitalStatusConceptId: PROF.VITAL_ALIVE,
+          displayName: dto.displayName,
+          birthDate: dto.birthDate ? new Date(dto.birthDate) : undefined,
+          actorUserId: actor.id,
+        });
+        await tx.flush();
+        personId = person.id;
+      }
+
+      const related = this.relatedPersonsRepo.create(tx, {
+        patientProfileId: profileId,
+        personId,
+        relationshipConceptId:
+          dto.relationshipConceptId ?? PROF.RELATIONSHIP_GUARDIAN,
+        isEmergencyContact: dto.isEmergencyContact ?? false,
+        isLegalGuardian: dto.isLegalGuardian ?? false,
+        statusConceptId: PROF.RELATED_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      return {
+        id: related.id,
+        patientProfileId: profileId,
+        personId,
+        status: related.statusConceptId,
+        createdAt: related.createdAt,
+      };
+    });
+  }
+
+  /** UC-05-11: otorga un proxy de portal a un representante (revoca el proxy previo del mismo usuario). */
+  async grantPortalProxy(
+    profileId: string,
+    dto: GrantPortalProxyDto,
+    actor: AuthenticatedUser,
+  ): Promise<PortalProxyResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.proxy.grant', profileId },
+      'Granting portal proxy',
+    );
+    return this.em.transactional(async (tx) => {
+      const patient = await this.patientProfilesRepo.findById(tx, profileId);
+      if (!patient)
+        throw new ResourceNotFoundException(
+          'Paciente no encontrado',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.PATIENT_PROFILE_NOT_FOUND,
+        );
+
+      if (dto.relatedPersonId) {
+        const related = await this.relatedPersonsRepo.findById(
+          tx,
+          dto.relatedPersonId,
+        );
+        if (!related || related.patientProfileId !== profileId) {
+          throw new PreconditionFailedException(
+            'La persona relacionada no pertenece al paciente',
+            { relatedPersonId: dto.relatedPersonId },
+            ProfilesErrorReason.RELATED_PERSON_MISMATCH,
+          );
+        }
+      }
+
+      const now = new Date();
+      await this.portalProxiesRepo.revokeActiveForProxyUser(
+        tx,
+        profileId,
+        dto.proxyUserId,
+        now,
+      );
+
+      const proxy = this.portalProxiesRepo.create(tx, {
+        patientProfileId: profileId,
+        proxyUserId: dto.proxyUserId,
+        relatedPersonId: dto.relatedPersonId,
+        scopeValueSetId: dto.scopeValueSetId,
+        legalBasisRecordId: dto.legalBasisRecordId,
+        statusConceptId: PROF.PROXY_ACTIVE,
+        validFrom: dto.validFrom ? new Date(dto.validFrom) : now,
+        validTo: dto.validTo ? new Date(dto.validTo) : undefined,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      return {
+        id: proxy.id,
+        patientProfileId: profileId,
+        proxyUserId: dto.proxyUserId,
+        status: proxy.statusConceptId,
+        createdAt: proxy.createdAt,
+      };
+    });
+  }
+
+  /** UC-05-12: registra defunción y revoca los accesos activos de la persona. */
+  async decease(
+    personId: string,
+    dto: DeceasePersonDto,
+    actor: AuthenticatedUser,
+  ): Promise<DeceaseResponseDto> {
+    this.logger.info(
+      { operation: 'profiles.person.decease', personId },
+      'Recording decease',
+    );
+    return this.em.transactional(async (tx) => {
+      const person = await this.personsRepo.findById(tx, personId);
+      if (!person)
+        throw new ResourceNotFoundException(
+          'Persona no encontrada',
+          {
+            personId,
+          },
+          ProfilesErrorReason.PERSON_NOT_FOUND,
+        );
+      if (person.vitalStatusConceptId === PROF.VITAL_DECEASED) {
+        throw new ConflictException(
+          'La persona ya está registrada como fallecida',
+          { personId },
+          ProfilesErrorReason.PERSON_ALREADY_DECEASED,
+        );
+      }
+
+      const now = new Date();
+      person.vitalStatusConceptId = PROF.VITAL_DECEASED;
+      person.deceasedAt = dto.deceasedAt ? new Date(dto.deceasedAt) : now;
+      person.personStatusConceptId = PROF.PERSON_INACTIVE;
+      if (dto.anonymize) {
+        person.anonymizedAt = now;
+        person.displayName = 'ANONYMIZED';
+      }
+      touch(person, actor.id);
+
+      const revokedAccountLinks =
+        await this.accountLinksRepo.revokeActiveForPerson(tx, personId, now);
+
+      // patient_profiles.profile_id ES persons.id: los proxies del posible perfil
+      // de paciente de esta persona se revocan usando su propio id (0 si no es paciente).
+      const revokedProxies =
+        await this.portalProxiesRepo.revokeActiveForPatient(tx, personId, now);
+      await tx.flush();
+
+      return {
+        id: person.id,
+        vitalStatus: person.vitalStatusConceptId,
+        personStatus: person.personStatusConceptId,
+        deceasedAt: person.deceasedAt,
+        revokedAccountLinks,
+        revokedProxies,
+      };
+    });
+  }
+
+  /**
+   * Transforma to event dto.
+   *
+   * @param event - Valor de event requerido por la operación.
+   * @returns Resultado de to event dto conforme al contrato `MergeEventResponseDto`.
+   */
+  private toEventDto(event: {
+    /**
+     * Identificador único de la instancia.
+     */
+    id: string;
+    /**
+     * Identificador asociado a surviving patient profile.
+     */
+    survivingPatientProfileId: string;
+    /**
+     * Identificador asociado a merged patient profile.
+     */
+    mergedPatientProfileId: string;
+    /**
+     * Identificador asociado a decision status concept.
+     */
+    decisionStatusConceptId: string;
+    /**
+     * Identificador asociado a reversal of event.
+     */
+    reversalOfEventId?: string;
+    /**
+     * Valor de recorded at mantenido por la instancia.
+     */
+    recordedAt: Date;
+  }): MergeEventResponseDto {
+    return {
+      id: event.id,
+      survivingPatientProfileId: event.survivingPatientProfileId,
+      mergedPatientProfileId: event.mergedPatientProfileId,
+      decisionStatus: event.decisionStatusConceptId,
+      reversalOfEventId: event.reversalOfEventId,
+      recordedAt: event.recordedAt,
+    };
+  }
+}

@@ -14,8 +14,8 @@ import {
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
-import { findPractitionerNames } from '../../profiles/read/practitioner-names';
+} from '../../profiles/infrastructure/repositories';
+import { findPractitionerNames } from '../../profiles/infrastructure/read-models/practitioner-names';
 import {
   CareRelationshipsRepository,
   ResourceScopeGrantsRepository,

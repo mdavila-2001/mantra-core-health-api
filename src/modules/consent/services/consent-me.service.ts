@@ -8,7 +8,7 @@ import {
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import {
   Consents,
   HipaaAuthorizations,

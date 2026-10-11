@@ -9,8 +9,8 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
-import { composeAccountDisplayName } from '../../profiles/person-name';
 import { IamErrorReason } from '../iam.error-reasons';
+import { composeAccountDisplayName } from '../../profiles/domain/person-name';
 import {
   UsersRepository,
   CredentialsRepository,

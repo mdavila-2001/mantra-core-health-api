@@ -1,5 +1,5 @@
 import { ProfilesModule } from './profiles.module';
-import { ProfilesPractitionersController } from './controllers';
+import { ProfilesPractitionersController } from './presentation/controllers';
 
 /**
  * Que el controlador exista y esté importado no publica sus rutas: si no entra

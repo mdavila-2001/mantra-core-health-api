@@ -19,7 +19,7 @@ import { AUTHZ } from '../../authz/authz.concepts';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { AuditTrailService } from '../../audit/services';
 import { CONS } from '../consent.concepts';
 import {

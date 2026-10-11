@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PractitionerAffiliations } from '../../../profiles/entities';
-import { isStatus } from '../../../profiles/services/profiles-affiliations.service';
+import { isStatus } from '../../../profiles/application/services/profiles-affiliations.service';
 import type {
   AffiliationStatus,
   PractitionerAffiliationFact,

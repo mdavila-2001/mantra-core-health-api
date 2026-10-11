@@ -1,3 +1,6 @@
+import { normalizeSearchText } from '../../../common/text/normalize-search-text';
+export { normalizeSearchText } from '../../../common/text/normalize-search-text';
+
 /**
  * Piezas de SQL de la lectura paginada del glosario.
  *
@@ -51,9 +54,6 @@ export function sqlSortKey(column: string): string {
  * @param text - Lo que escribió la persona.
  * @returns El texto sin tildes, en minúsculas y sin espacios en los bordes.
  */
-export function normalizeSearchText(text: string): string {
-  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
-}
 
 /**
  * Patrón `LIKE` de «contiene», con los comodines del usuario escapados.
