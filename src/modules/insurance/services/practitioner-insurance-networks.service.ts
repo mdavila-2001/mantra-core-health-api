@@ -76,16 +76,16 @@ export class PractitionerInsuranceNetworksService {
       carrierId: row.carrier_id,
       carrierName: row.carrier_name,
       networkName: row.network_name,
-      effectiveFrom: soloDate(row.effective_from),
-      effectiveTo: soloDate(row.effective_to),
+      effectiveFrom: onlyDate(row.effective_from),
+      effectiveTo: onlyDate(row.effective_to),
     }));
   }
 }
 
 /** `YYYY-MM-DD` de una columna `date`, o `null`. */
-function soloDate(valor: Date | string | null): string | null {
-  if (valor === null) return null;
-  return typeof valor === 'string'
-    ? valor.slice(0, 10)
-    : valor.toISOString().slice(0, 10);
+function onlyDate(value: Date | string | null): string | null {
+  if (value === null) return null;
+  return typeof value === 'string'
+    ? value.slice(0, 10)
+    : value.toISOString().slice(0, 10);
 }

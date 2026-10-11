@@ -18,10 +18,10 @@ describe('DiagnosticsModule', () => {
   });
 
   it('la ruta de contenido del resultado propio está declarada', () => {
-    const rutas = Object.getOwnPropertyNames(
+    const routes = Object.getOwnPropertyNames(
       DiagnosticsPatientResultsController.prototype,
     );
-    expect(rutas).toContain('getOwnResultFileContent');
+    expect(routes).toContain('getOwnResultFileContent');
     expect(
       Reflect.getMetadata(
         'path',
@@ -34,11 +34,11 @@ describe('DiagnosticsModule', () => {
   });
 
   it('CL-47: las lecturas de acesión y espécimen están declaradas', () => {
-    const rutas = Object.getOwnPropertyNames(
+    const routes = Object.getOwnPropertyNames(
       DiagnosticsSpecimensController.prototype,
     );
-    expect(rutas).toContain('getAccession');
-    expect(rutas).toContain('getSpecimen');
+    expect(routes).toContain('getAccession');
+    expect(routes).toContain('getSpecimen');
     expect(
       Reflect.getMetadata(
         'path',

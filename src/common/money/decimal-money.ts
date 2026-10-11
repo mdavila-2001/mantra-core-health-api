@@ -45,9 +45,9 @@ function escalate(text: string): DecimalScale {
   }
   const negative = clean.startsWith('-');
   const withoutSign = clean.replace(/^[+-]/, '');
-  const [entera, fraccion = ''] = withoutSign.split('.');
-  const valor = BigInt(`${entera}${fraccion}`);
-  return { valor: negative ? -valor : valor, decimales: fraccion.length };
+  const [whole, fraction = ''] = withoutSign.split('.');
+  const value = BigInt(`${whole}${fraction}`);
+  return { valor: negative ? -value : value, decimales: fraction.length };
 }
 
 /**
@@ -109,14 +109,14 @@ export function sameDecimals(
 /**
  * Vuelve a poner el punto decimal en un entero escalado.
  *
- * @param valor - Entero escalado, con signo.
+ * @param value - Entero escalado, con signo.
  * @param decimals - Posiciones decimales a restituir.
  * @returns La cadena decimal.
  */
-function formatEscalado(valor: bigint, decimals: number): string {
-  if (decimals === 0) return valor.toString();
-  const negative = valor < 0n;
-  const digits = (negative ? -valor : valor)
+function formatEscalado(value: bigint, decimals: number): string {
+  if (decimals === 0) return value.toString();
+  const negative = value < 0n;
+  const digits = (negative ? -value : value)
     .toString()
     .padStart(decimals + 1, '0');
   const cut = digits.length - decimals;

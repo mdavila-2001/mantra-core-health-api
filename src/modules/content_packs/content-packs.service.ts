@@ -161,7 +161,7 @@ export class ContentPacksService {
         // devolvía `undefined`, que aguas abajo se cuenta como cero filas y se
         // anuncia como «ya estaba cargado». Este `never` lo vuelve un error de
         // compilación.
-        return packageWithoutRama(code);
+        return packageWithoutBranch(code);
     }
   }
 
@@ -206,6 +206,6 @@ export class ContentPacksService {
  *
  * @param code - El código que no tiene rama; su tipo es `never` si están todas.
  */
-function packageWithoutRama(code: never): never {
+function packageWithoutBranch(code: never): never {
   throw new Error(`Paquete de contenido sin implementación: ${String(code)}`);
 }

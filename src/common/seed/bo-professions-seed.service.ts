@@ -143,14 +143,14 @@ export class BoProfessionsSeedService {
 
   /** Rompe si dos entradas comparten código: colapsarían en el mismo id. */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
+    const seen = new Set<string>();
     for (const profession of BO_PROFESSIONS) {
-      if (vistos.has(profession.code)) {
+      if (seen.has(profession.code)) {
         throw new Error(
           `El catálogo de profesiones declara el código "${profession.code}" más de una vez`,
         );
       }
-      vistos.add(profession.code);
+      seen.add(profession.code);
     }
   }
 

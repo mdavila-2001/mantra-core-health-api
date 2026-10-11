@@ -20,9 +20,9 @@ import {
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-const SECRETO_A = 'a'.repeat(40);
-const SECRETO_TO_NEW = 'n'.repeat(40);
-const SECRETO_B = 'b'.repeat(40);
+const SECRET_A = 'a'.repeat(40);
+const SECRET_TO_NEW = 'n'.repeat(40);
+const SECRET_B = 'b'.repeat(40);
 
 interface Scenario {
   /** Conexión que referencia la intención (o ninguna). */
@@ -99,9 +99,9 @@ function sign(secret: string): string {
 describe('applyCallback · secreto por conexión (MCH-019)', () => {
   const previous = { ...process.env };
   beforeEach(() => {
-    process.env.WEBHOOK_SECRET_TEST_A = SECRETO_A;
-    process.env.WEBHOOK_SECRET_TEST_A_V2 = SECRETO_TO_NEW;
-    process.env.WEBHOOK_SECRET_TEST_B = SECRETO_B;
+    process.env.WEBHOOK_SECRET_TEST_A = SECRET_A;
+    process.env.WEBHOOK_SECRET_TEST_A_V2 = SECRET_TO_NEW;
+    process.env.WEBHOOK_SECRET_TEST_B = SECRET_B;
   });
   afterEach(() => {
     process.env = { ...previous };
@@ -123,7 +123,7 @@ describe('applyCallback · secreto por conexión (MCH-019)', () => {
 
     const res = await d.service.applyCallback('gw', {
       ...body,
-      signature: sign(SECRETO_A),
+      signature: sign(SECRET_A),
     });
 
     expect(res.duplicate).toBe(false);
@@ -148,20 +148,20 @@ describe('applyCallback · secreto por conexión (MCH-019)', () => {
     await expect(
       d.service.applyCallback('gw', {
         ...body,
-        signature: sign(SECRETO_B),
+        signature: sign(SECRET_B),
       }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
     expect(d.transaction.statusConceptId).toBe(CONCEPTS.TXN_PROCESSING);
   });
 
   it('AC02 · rotación: durante la ventana valen ambas versiones; después sólo la nueva', async () => {
-    const ventana = build(
+    const window = build(
       twoConnections('env:WEBHOOK_SECRET_TEST_A_V2,env:WEBHOOK_SECRET_TEST_A'),
     );
     await expect(
-      ventana.service.applyCallback('gw', {
+      window.service.applyCallback('gw', {
         ...body,
-        signature: sign(SECRETO_A),
+        signature: sign(SECRET_A),
       }),
     ).resolves.toMatchObject({ duplicate: false });
 
@@ -169,13 +169,13 @@ describe('applyCallback · secreto por conexión (MCH-019)', () => {
     await expect(
       rotated.service.applyCallback('gw', {
         ...body,
-        signature: sign(SECRETO_A),
+        signature: sign(SECRET_A),
       }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
     await expect(
       rotated.service.applyCallback('gw', {
         ...body,
-        signature: sign(SECRETO_TO_NEW),
+        signature: sign(SECRET_TO_NEW),
       }),
     ).resolves.toMatchObject({ duplicate: false });
   });
@@ -190,7 +190,7 @@ describe('applyCallback · secreto por conexión (MCH-019)', () => {
     await expect(
       d.service.applyCallback('gw', {
         ...body,
-        signature: sign(SECRETO_B),
+        signature: sign(SECRET_B),
       }),
     ).resolves.toMatchObject({ duplicate: false });
   });
@@ -243,7 +243,7 @@ describe('applyCallback · secreto por conexión (MCH-019)', () => {
     ],
   ] as Array<[string, Scenario]>)(
     'fail-closed: rechaza aunque la firma sea del esquema anterior cuando %s',
-    async (_caso, esc) => {
+    async (_case, esc) => {
       const d = build(esc);
 
       await expect(

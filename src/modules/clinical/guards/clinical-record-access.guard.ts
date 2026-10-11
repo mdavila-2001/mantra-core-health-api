@@ -32,8 +32,8 @@ const MUTATING_METHODS: ReadonlySet<string> = new Set(['POST', 'PUT', 'PATCH']);
  */
 function bodyPatient(body: unknown): string | undefined {
   if (typeof body !== 'object' || body === null) return undefined;
-  const valor = (body as Record<string, unknown>).patientProfileId;
-  return typeof valor === 'string' && valor.length > 0 ? valor : undefined;
+  const value = (body as Record<string, unknown>).patientProfileId;
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
 /**
@@ -105,8 +105,8 @@ export class ClinicalRecordAccessGuard implements CanActivate {
 
     // El cuerpo sólo se mira en los métodos que escriben. Un `GET` se sigue
     // decidiendo con la ruta y nada más.
-    const escribe = MUTATING_METHODS.has(request.method);
-    const ofBody = escribe ? bodyPatient(request.body) : undefined;
+    const writes = MUTATING_METHODS.has(request.method);
+    const ofBody = writes ? bodyPatient(request.body) : undefined;
 
     // Ruta primero, cuerpo después, y sin repetir: cuando los dos traen el
     // mismo paciente se pregunta una sola vez —preguntar dos veces por la misma
@@ -134,7 +134,7 @@ export class ClinicalRecordAccessGuard implements CanActivate {
       // puede tocar corta la petición sin lanzar la consulta del segundo.
       // MCH-007: una escritura se decide con la política de escritura —un
       // grant de sólo lectura no alcanza—, también para el paciente de la ruta.
-      if (escribe) {
+      if (writes) {
         await this.readService.assertCanWriteHistory(patientProfileId, actor);
       } else {
         await this.readService.assertCanReadHistory(patientProfileId, actor);

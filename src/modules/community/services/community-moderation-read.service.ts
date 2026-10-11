@@ -130,7 +130,7 @@ export class CommunityModerationReadService {
     const hasMore = rows.length > limit;
     const page = hasMore ? rows.slice(0, limit) : rows;
 
-    const [reportes, recuentos] = await Promise.all([
+    const [reports, counts] = await Promise.all([
       this.moderationRepo.listReportsByIds(
         em,
         page
@@ -143,8 +143,8 @@ export class CommunityModerationReadService {
       ),
     ]);
 
-    const reportById = new Map(reportes.map((r) => [r.id, r]));
-    const countByContent = new Map(recuentos.map((r) => [r.targetId, r.count]));
+    const reportById = new Map(reports.map((r) => [r.id, r]));
+    const countByContent = new Map(counts.map((r) => [r.targetId, r.count]));
 
     const last = page.at(-1);
     return {
@@ -371,12 +371,12 @@ export class CommunityModerationReadService {
       ? sorted.findIndex((d) => d.id === decodeKeysetCursor(query.cursor!).id)
       : -1;
     const from = indexCursor >= 0 ? indexCursor + 1 : 0;
-    const ventana = sorted.slice(from, from + limit + 1);
-    const hasMore = ventana.length > limit;
-    const page = hasMore ? ventana.slice(0, limit) : ventana;
+    const window = sorted.slice(from, from + limit + 1);
+    const hasMore = window.length > limit;
+    const page = hasMore ? window.slice(0, limit) : window;
     const last = page.at(-1);
 
-    const abiertas = await Promise.all(
+    const open = await Promise.all(
       page.map((decision) =>
         this.moderationRepo.findOpenAppealForDecision(
           em,
@@ -393,7 +393,7 @@ export class CommunityModerationReadService {
         decisionConceptId: decision.decisionConceptId,
         rationaleText: decision.rationaleText ?? null,
         decidedAt: decision.decidedAt ?? null,
-        appealable: !abiertas[i],
+        appealable: !open[i],
       })),
       count: page.length,
       limit,

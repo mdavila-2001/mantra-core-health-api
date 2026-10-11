@@ -132,13 +132,13 @@ export class LabWorkRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param custodianTenantId - Tenant custodio, obligatorio.
-   * @param filtros - Acotaciones opcionales y paginación.
+   * @param filters - Acotaciones opcionales y paginación.
    * @returns Las órdenes que cumplen el filtro, de la más reciente a la más antigua.
    */
   findWorkOrders(
     em: EntityManager,
     custodianTenantId: string,
-    filtros: {
+    filters: {
       /** Accesión de laboratorio a la que pertenece. */
       laboratoryAccessionId?: string;
       /** Estado de la orden. */
@@ -152,16 +152,16 @@ export class LabWorkRepository {
     },
   ): Promise<LaboratoryWorkOrders[]> {
     const where: Record<string, unknown> = { custodianTenantId };
-    if (filtros.laboratoryAccessionId)
-      where.laboratoryAccessionId = filtros.laboratoryAccessionId;
-    if (filtros.statusConceptId)
-      where.statusConceptId = filtros.statusConceptId;
-    if (filtros.assignedProfileId)
-      where.assignedProfileId = filtros.assignedProfileId;
+    if (filters.laboratoryAccessionId)
+      where.laboratoryAccessionId = filters.laboratoryAccessionId;
+    if (filters.statusConceptId)
+      where.statusConceptId = filters.statusConceptId;
+    if (filters.assignedProfileId)
+      where.assignedProfileId = filters.assignedProfileId;
     return em.find(LaboratoryWorkOrders, where, {
       orderBy: { createdAt: 'DESC', id: 'ASC' },
-      limit: filtros.limit,
-      offset: filtros.offset,
+      limit: filters.limit,
+      offset: filters.offset,
     });
   }
 

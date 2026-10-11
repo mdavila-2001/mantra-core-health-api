@@ -1997,7 +1997,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_URGENT,
     {
-      display: 'Prioridad urgente',
+      display: 'Urgente',
       definition:
         'Se necesita antes que las órdenes de rutina, sin llegar a ser una emergencia.',
     },
@@ -2005,7 +2005,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_ASAP,
     {
-      display: 'Prioridad cuanto antes',
+      display: 'Lo antes posible',
       definition:
         'Se realiza en cuanto haya disponibilidad, por delante de lo urgente programado.',
     },
@@ -2013,7 +2013,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_STAT,
     {
-      display: 'Prioridad inmediata',
+      display: 'Inmediata',
       definition: 'Emergencia: se realiza de inmediato e interrumpe la cola.',
     },
   ],
@@ -2718,7 +2718,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_ROUTINE,
     {
-      display: 'Prioridad de rutina',
+      display: 'De rutina',
       definition:
         'Se realiza en el turno normal del prestador, sin adelantarse a otras órdenes.',
     },

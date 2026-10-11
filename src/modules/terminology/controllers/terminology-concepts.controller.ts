@@ -313,6 +313,18 @@ export class TerminologyConceptsController {
     );
   }
 
+  /** Devuelve el documento enciclopédico guardado como propiedad del concepto. */
+  @Get(':conceptId/glossary-article')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Lee el artículo enciclopédico de un término del glosario',
+  })
+  readGlossaryArticle(
+    @Param('conceptId', ParseUUIDPipe) conceptId: string,
+  ): Promise<unknown> {
+    return this.conceptsService.readGlossaryArticle(conceptId);
+  }
+
   /**
    * La ficha de un término: sus textos, sus etiquetas y sus sinónimos.
    *

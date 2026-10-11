@@ -280,7 +280,7 @@ export class ConversationsRepository {
     directTypeConceptId: string,
     activeStatusConceptId: string,
   ): Promise<Conversations | null> {
-    const [deA, deB] = await Promise.all([
+    const [membersOfA, membersOfB] = await Promise.all([
       em.find(ConversationParticipants, {
         participantProfileId: profileA,
         statusConceptId: activeStatusConceptId,
@@ -292,9 +292,9 @@ export class ConversationsRepository {
     ]);
 
     const bByConversation = new Set(
-      deB.map((participation) => participation.conversationId),
+      membersOfB.map((participation) => participation.conversationId),
     );
-    const shared = deA
+    const shared = membersOfA
       .map((participation) => participation.conversationId)
       .filter((conversationId) => bByConversation.has(conversationId));
     if (shared.length === 0) return null;

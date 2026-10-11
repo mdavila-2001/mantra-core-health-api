@@ -11,7 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 const CARRIER = 'carrier-1';
 const actor = { id: 'u-op', roles: ['USER', 'INSURANCE_OPERATOR'] } as any;
 // 2026-10-04 15:00 en La Paz (UTC-4).
-const AHORA = new Date('2026-10-04T19:00:00Z');
+const NOW = new Date('2026-10-04T19:00:00Z');
 
 function persona(id: string, extra: Record<string, unknown> = {}) {
   return {
@@ -88,7 +88,7 @@ describe('InsurerPatientsService', () => {
     const d = build([]);
     d.insurerContext.resolve.mockRejectedValue(new ForbiddenException('no'));
 
-    await expect(d.service.list({}, actor, AHORA)).rejects.toBeInstanceOf(
+    await expect(d.service.list({}, actor, NOW)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
     expect(d.insurerContext.resolve).toHaveBeenCalledWith(
@@ -102,7 +102,7 @@ describe('InsurerPatientsService', () => {
   it('pagina de a 25 por omisión y acota la página por la aseguradora del tenant', async () => {
     const d = build([[]]);
 
-    const page = await d.service.list({}, actor, AHORA);
+    const page = await d.service.list({}, actor, NOW);
 
     expect(page).toEqual({ items: [], total: 0, limit: 25, nextCursor: null });
     const [, params] = d.execute.mock.calls[0];
@@ -115,7 +115,7 @@ describe('InsurerPatientsService', () => {
   it('normaliza filtros compuestos sólo por espacios a sus valores por omisión', async () => {
     const d = build([[]]);
 
-    await d.service.list({ search: '   ', occupation: '   ' }, actor, AHORA);
+    await d.service.list({ search: '   ', occupation: '   ' }, actor, NOW);
 
     const [sql, params] = d.execute.mock.calls[0];
     expect(sql).not.toContain('common.contact_points cp');
@@ -130,7 +130,7 @@ describe('InsurerPatientsService', () => {
       [coverage('p1')],
     ]);
 
-    const page = await d.service.list({}, actor, AHORA);
+    const page = await d.service.list({}, actor, NOW);
 
     expect(page.items).toEqual([
       {
@@ -162,7 +162,7 @@ describe('InsurerPatientsService', () => {
     const page = await d.service.list(
       {},
       { id: 'admin', roles: ['SUPERADMIN'] },
-      AHORA,
+      NOW,
     );
 
     expect(page.items.map((item) => item.insurers)).toEqual([[], []]);
@@ -175,7 +175,7 @@ describe('InsurerPatientsService', () => {
       [],
     ]);
 
-    const [item] = (await d.service.list({}, actor, AHORA)).items;
+    const [item] = (await d.service.list({}, actor, NOW)).items;
 
     expect(item.messaging).toEqual({ channel: 'internal', available: false });
     expect(item).not.toHaveProperty('communityProfileSlug');
@@ -189,7 +189,7 @@ describe('InsurerPatientsService', () => {
       [],
     ]);
 
-    const [item] = (await d.service.list({}, actor, AHORA)).items;
+    const [item] = (await d.service.list({}, actor, NOW)).items;
 
     expect(item).not.toHaveProperty('birthDate');
     expect(item).not.toHaveProperty('age');
@@ -203,7 +203,7 @@ describe('InsurerPatientsService', () => {
       [],
     ]);
 
-    const page = await d.service.list({}, actor, AHORA);
+    const page = await d.service.list({}, actor, NOW);
 
     expect(page).toEqual({ items: [], total: 1, limit: 25, nextCursor: null });
     expect(d.dataAccess.record).not.toHaveBeenCalled();
@@ -217,7 +217,7 @@ describe('InsurerPatientsService', () => {
       [],
     ]);
 
-    await d.service.list({}, actor, AHORA);
+    await d.service.list({}, actor, NOW);
 
     const [peopleSql] = d.execute.mock.calls[1];
     expect(peopleSql).toContain('pub.target_type_concept_id = ?');
@@ -238,7 +238,7 @@ describe('InsurerPatientsService', () => {
       [],
     ]);
 
-    const page = await d.service.list({ limit: 10 }, actor, AHORA);
+    const page = await d.service.list({ limit: 10 }, actor, NOW);
 
     expect(page.items).toHaveLength(10);
     expect(page.nextCursor).toEqual(expect.any(String));
@@ -260,7 +260,7 @@ describe('directory authorization, options and conversations', () => {
     await d.service.list(
       { search: 'Persona sintetica', occupation: 'Docente' },
       actor,
-      AHORA,
+      NOW,
     );
     const queries = d.dbExecute.mock.calls.filter(([sql]: [string]) =>
       sql.includes('from profiles.patient_profiles'),
@@ -276,14 +276,14 @@ describe('directory authorization, options and conversations', () => {
   it('denies revoked membership before reading patient data', async () => {
     const d = build([]);
     d.dbExecute.mockResolvedValueOnce([]);
-    await expect(d.service.list({}, actor, AHORA)).rejects.toBeInstanceOf(
+    await expect(d.service.list({}, actor, NOW)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
     expect(d.execute).not.toHaveBeenCalled();
   });
   it('lets platform administrators read the roster without an insurer tenant', async () => {
     const d = build([[]]);
-    await d.service.list({}, { id: 'admin', roles: ['SECURITY_ADMIN'] }, AHORA);
+    await d.service.list({}, { id: 'admin', roles: ['SECURITY_ADMIN'] }, NOW);
     expect(d.insurerContext.resolve).not.toHaveBeenCalled();
     expect(d.execute.mock.calls[0][0]).not.toContain('patient_coverages');
   });
@@ -296,7 +296,7 @@ describe('directory authorization, options and conversations', () => {
         roles: ['SECURITY_ADMIN'],
         scopedRoles: { 'tenant-1': ['SECURITY_ADMIN'] },
       },
-      AHORA,
+      NOW,
     );
     expect(d.insurerContext.resolve).toHaveBeenCalled();
     expect(d.execute.mock.calls[0][1]).toContain(CARRIER);
@@ -334,7 +334,7 @@ describe('directory authorization, options and conversations', () => {
       [persona('p1')],
       [coverage('p1'), coverage('p1')],
     ]);
-    const result = await d.service.list({}, actor, AHORA);
+    const result = await d.service.list({}, actor, NOW);
     expect(result.items[0].insurers).toEqual([
       { id: CARRIER, name: 'Seguro de prueba' },
     ]);
@@ -365,7 +365,7 @@ describe('directory authorization, options and conversations', () => {
       d.service.openConversation(
         { patientProfileId: 'foreign', channel: 'internal' },
         actor,
-        AHORA,
+        NOW,
       ),
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(d.execute).toHaveBeenCalledTimes(1);
@@ -379,10 +379,10 @@ describe('directory authorization, options and conversations', () => {
     ];
     const d = build([...responses, ...responses]);
     const dto = { patientProfileId: 'p1', channel: 'internal' as const };
-    expect(await d.service.openConversation(dto, actor, AHORA)).toEqual({
+    expect(await d.service.openConversation(dto, actor, NOW)).toEqual({
       conversationId: 'conversation',
     });
-    expect(await d.service.openConversation(dto, actor, AHORA)).toEqual({
+    expect(await d.service.openConversation(dto, actor, NOW)).toEqual({
       conversationId: 'conversation',
     });
     expect(d.messaging.createConversation).toHaveBeenCalledWith(
@@ -401,7 +401,7 @@ describe('directory authorization, options and conversations', () => {
       d.service.openConversation(
         { patientProfileId: 'p1', channel: 'internal' },
         actor,
-        AHORA,
+        NOW,
       ),
     ).rejects.toThrow('mensajería');
     expect(d.messaging.createConversation).not.toHaveBeenCalled();
@@ -417,7 +417,7 @@ describe('directory authorization, options and conversations', () => {
       blocked.service.openConversation(
         { patientProfileId: 'p1', channel: 'internal' },
         actor,
-        AHORA,
+        NOW,
       ),
     ).rejects.toThrow('blocked');
   });

@@ -6,7 +6,7 @@ import { PROF } from '../../profiles/profiles.concepts';
 import {
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { TenantsRepository } from '../../directory/repositories';
 import { DIR } from '../../directory/directory.concepts';
 import { CommunityVerificationService } from '../../community/services';

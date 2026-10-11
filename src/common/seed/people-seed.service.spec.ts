@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { PeopleSeedService } from './people-seed.service';
 import { ConflictException } from '../errors/domain.exception';
 
-const MEDICOS = `# USUARIO MEDICOS 1
+const DOCTORS = `# USUARIO MEDICOS 1
 
 | NUMERO | NOMBRE | NOMBRE 2 | APELLIDO PATERNO | APELLIDO MATERNO | MATRICULA MINISTERIO DE SALUD Y DEPORTES | SEDES GOBERNACION SANTA CRUZ | REGISTRO COLEGIO ODONTOLOGOS | OCUPACION |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -54,7 +54,7 @@ describe('PeopleSeedService', () => {
 
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), 'people-seed-'));
-    writeFileSync(join(dir, 'USUARIO_MEDICOS_1.md'), MEDICOS, 'utf-8');
+    writeFileSync(join(dir, 'USUARIO_MEDICOS_1.md'), DOCTORS, 'utf-8');
     writeFileSync(join(dir, 'USUARIO_PACIENTES_1.md'), PATIENTS, 'utf-8');
   });
 

@@ -130,7 +130,7 @@ export class PracticeOrganizationReadService {
 
     const unitsBySite = countBy(units, (unit) => unit.practiceSiteId);
     const spacesBySite = countBy(spaces, (space) => space.practiceSiteId);
-    const hoy = new Date();
+    const today = new Date();
 
     return {
       organization: this.header(practice, byId),
@@ -154,7 +154,7 @@ export class PracticeOrganizationReadService {
           practitionerNames.get(row.practitionerProfileId),
         ),
       ),
-      legalDocuments: documents.map((doc) => this.document(doc, byId, hoy)),
+      legalDocuments: documents.map((doc) => this.document(doc, byId, today)),
       inventory: inventory.map((item) => this.supply(item, byId)),
     };
   }
@@ -276,8 +276,8 @@ export class PracticeOrganizationReadService {
       role: concept(concepts, row.roleConceptId),
       specialty: optionalConcept(concepts, row.specialtyConceptId),
       isPrimary: row.isPrimary ?? null,
-      validFrom: soloDate(row.validFrom),
-      validTo: soloDate(row.validTo),
+      validFrom: onlyDate(row.validFrom),
+      validTo: onlyDate(row.validTo),
       status: concept(concepts, row.statusConceptId),
     };
   }
@@ -285,7 +285,7 @@ export class PracticeOrganizationReadService {
   private document(
     doc: PracticeAccreditations,
     concepts: ReadonlyMap<string, CatalogConcepts>,
-    hoy: Date,
+    today: Date,
   ): OrganizationLegalDocumentDto {
     return {
       id: doc.id,
@@ -294,9 +294,9 @@ export class PracticeOrganizationReadService {
       number: doc.accreditationNumber ?? null,
       issuerName: doc.issuerName ?? null,
       evidenceFileId: doc.evidenceFileId ?? null,
-      validFrom: soloDate(doc.validFrom),
-      validTo: soloDate(doc.validTo),
-      daysToExpiry: daysUntil(doc.validTo, hoy),
+      validFrom: onlyDate(doc.validFrom),
+      validTo: onlyDate(doc.validTo),
+      daysToExpiry: daysUntil(doc.validTo, today),
       verificationStatus: concept(concepts, doc.verificationStatusConceptId),
     };
   }
@@ -309,7 +309,7 @@ export class PracticeOrganizationReadService {
       id: item.id,
       name: item.name,
       lotNumber: item.lotNumber ?? null,
-      expiryDate: soloDate(item.expiryDate),
+      expiryDate: onlyDate(item.expiryDate),
       quantityOnHand: item.quantityOnHand,
       unit: optionalConcept(concepts, item.unitConceptId),
       reorderLevel: item.reorderLevel ?? null,
@@ -333,9 +333,9 @@ function concept(
   concepts: ReadonlyMap<string, CatalogConcepts>,
   id: string | undefined,
 ): PracticeConceptDto {
-  const valor = id === undefined ? undefined : concepts.get(id);
-  return valor
-    ? { code: valor.code, display: valor.display }
+  const value = id === undefined ? undefined : concepts.get(id);
+  return value
+    ? { code: value.code, display: value.display }
     : { code: 'UNKNOWN', display: 'Sin registrar' };
 }
 
@@ -346,8 +346,8 @@ function optionalConcept(
   return id === undefined ? null : concept(concepts, id);
 }
 
-function soloDate(valor: Date | undefined): string | null {
-  return valor?.toISOString().slice(0, 10) ?? null;
+function onlyDate(value: Date | undefined): string | null {
+  return value?.toISOString().slice(0, 10) ?? null;
 }
 
 /**
@@ -357,17 +357,17 @@ function soloDate(valor: Date | undefined): string | null {
  * no `-1` por unas horas de diferencia: la alerta la lee una persona que piensa
  * en días de calendario, no en instantes.
  */
-function daysUntil(valor: Date | undefined, hoy: Date): number | null {
-  if (valor === undefined) return null;
+function daysUntil(value: Date | undefined, today: Date): number | null {
+  if (value === undefined) return null;
   const expires = Date.UTC(
-    valor.getUTCFullYear(),
-    valor.getUTCMonth(),
-    valor.getUTCDate(),
+    value.getUTCFullYear(),
+    value.getUTCMonth(),
+    value.getUTCDate(),
   );
   const reference = Date.UTC(
-    hoy.getUTCFullYear(),
-    hoy.getUTCMonth(),
-    hoy.getUTCDate(),
+    today.getUTCFullYear(),
+    today.getUTCMonth(),
+    today.getUTCDate(),
   );
   return Math.round((expires - reference) / ONE_DAY_MS);
 }
@@ -385,9 +385,9 @@ function restockPointLow(
 ): boolean {
   if (reorderLevel === undefined) return false;
   const stock = Number(quantityOnHand);
-  const umbral = Number(reorderLevel);
-  if (Number.isNaN(stock) || Number.isNaN(umbral)) return false;
-  return stock <= umbral;
+  const threshold = Number(reorderLevel);
+  if (Number.isNaN(stock) || Number.isNaN(threshold)) return false;
+  return stock <= threshold;
 }
 
 function unique(values: readonly string[]): string[] {
@@ -396,13 +396,13 @@ function unique(values: readonly string[]): string[] {
 
 function countBy<T>(
   rows: readonly T[],
-  keyOf: (fila: T) => string | undefined,
+  keyOf: (row: T) => string | undefined,
 ): Map<string, number> {
   const result = new Map<string, number>();
   for (const row of rows) {
-    const clave = keyOf(row);
-    if (clave !== undefined) {
-      result.set(clave, (result.get(clave) ?? 0) + 1);
+    const key = keyOf(row);
+    if (key !== undefined) {
+      result.set(key, (result.get(key) ?? 0) + 1);
     }
   }
   return result;

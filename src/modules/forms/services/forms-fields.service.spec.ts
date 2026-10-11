@@ -63,7 +63,7 @@ function inTenantA<T>(fn: () => Promise<T>): Promise<T> {
 describe('FormsFieldsService', () => {
   // CL-61 / CL-69 — corregir un campo propio sin reescribir la historia.
   describe('updateFieldDefinition (CL-69)', () => {
-    const campo = () => ({
+    const fieldRecord = () => ({
       id: 'f1',
       name: 'Fuma',
       dataType: 'string',
@@ -72,7 +72,7 @@ describe('FormsFieldsService', () => {
 
     it('renombra un campo colgado sólo del tenant del actor', async () => {
       const d = build();
-      const field = campo();
+      const field = fieldRecord();
       d.fieldsRepo.findFieldById.mockResolvedValue(field);
       d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
         { id: 'as1', tenantId: 'tenant-a' },
@@ -86,7 +86,7 @@ describe('FormsFieldsService', () => {
 
     it('un campo colgado del estándar (asignación global) responde 403', async () => {
       const d = build();
-      d.fieldsRepo.findFieldById.mockResolvedValue(campo());
+      d.fieldsRepo.findFieldById.mockResolvedValue(fieldRecord());
       d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
         { id: 'as-global', tenantId: undefined },
       ]);
@@ -99,7 +99,7 @@ describe('FormsFieldsService', () => {
 
     it('un campo colgado de otro tenant responde 403', async () => {
       const d = build();
-      d.fieldsRepo.findFieldById.mockResolvedValue(campo());
+      d.fieldsRepo.findFieldById.mockResolvedValue(fieldRecord());
       d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
         { id: 'as1', tenantId: 'tenant-a' },
         { id: 'as2', tenantId: 'tenant-b' },
@@ -113,7 +113,7 @@ describe('FormsFieldsService', () => {
 
     it('cambiar el tipo con valores capturados responde 409 y no toca el campo', async () => {
       const d = build();
-      const field = campo();
+      const field = fieldRecord();
       d.fieldsRepo.findFieldById.mockResolvedValue(field);
       d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
         { id: 'as1', tenantId: 'tenant-a' },
@@ -133,7 +133,7 @@ describe('FormsFieldsService', () => {
 
     it('cambia el tipo cuando no hay valores capturados', async () => {
       const d = build();
-      const field = campo();
+      const field = fieldRecord();
       d.fieldsRepo.findFieldById.mockResolvedValue(field);
       d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
         { id: 'as1', tenantId: 'tenant-a' },
@@ -150,7 +150,7 @@ describe('FormsFieldsService', () => {
 
     it('quien gobierna edita cualquier campo sin mirar sus asignaciones', async () => {
       const d = build();
-      const field = campo();
+      const field = fieldRecord();
       d.fieldsRepo.findFieldById.mockResolvedValue(field);
       const admin = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
       await d.service.updateFieldDefinition('f1', { name: 'Tabaco' }, admin);

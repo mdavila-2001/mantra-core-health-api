@@ -15,8 +15,8 @@ describe('el padrón de establecimientos', () => {
   const facilities = (dataset as { datos: BoliviaFacilitySeed[] }).datos;
 
   /** Cómo se decide que dos nombres son el mismo lugar. */
-  function clave(nombre: string): string {
-    const withoutAccents = nombre
+  function key(name: string): string {
+    const withoutAccents = name
       .normalize('NFD')
       .replace(/[̀-ͯ]/g, '')
       .toUpperCase();
@@ -46,10 +46,10 @@ describe('el padrón de establecimientos', () => {
    * «CLINICA AOD» no tiene qué elegir.
    */
   it('los consultorios que las redes nombran son elegibles', () => {
-    const names = new Set(facilities.map((f) => clave(f.nombre)));
+    const names = new Set(facilities.map((f) => key(f.nombre)));
 
     for (const expected of ['CLINICA AOD', 'NUTRICOR', 'NEOMEDIC']) {
-      expect(names.has(clave(expected))).toBe(true);
+      expect(names.has(key(expected))).toBe(true);
     }
   });
 
@@ -68,11 +68,11 @@ describe('el padrón de establecimientos', () => {
     const official = new Set(
       facilities
         .filter((f) => f.naturaleza !== 'RED_ASEGURADORA')
-        .map((f) => clave(f.nombre)),
+        .map((f) => key(f.nombre)),
     );
     const repeated = facilities
       .filter((f) => f.naturaleza === 'RED_ASEGURADORA')
-      .filter((f) => official.has(clave(f.nombre)))
+      .filter((f) => official.has(key(f.nombre)))
       .map((f) => f.nombre);
 
     expect(repeated).toEqual([]);
@@ -80,11 +80,11 @@ describe('el padrón de establecimientos', () => {
 
   /** Y entre ellos tampoco: el mismo consultorio nombrado por las dos redes es uno. */
   it('los consultorios de red no se repiten entre sí', () => {
-    const claves = facilities
+    const keys = facilities
       .filter((f) => f.naturaleza === 'RED_ASEGURADORA')
-      .map((f) => clave(f.nombre));
+      .map((f) => key(f.nombre));
 
-    expect(new Set(claves).size).toBe(claves.length);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 
   it('cada código es único: es la identidad del lugar', () => {

@@ -33,7 +33,7 @@ function build(responses: unknown[][] = []) {
 
 describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
   it('dominantCurrency: acota por carrier, rango y estado ≠ revertido; null sin filas', async () => {
-    const { em, llamadas, repo } = build([[]]);
+    const { em, llamadas: calls, repo } = build([[]]);
 
     const result = await repo.dominantCurrency(
       em,
@@ -44,10 +44,10 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
     );
 
     expect(result).toBeNull();
-    expect(llamadas[0]!.sql).toContain('insurance.insurance_claims c');
-    expect(llamadas[0]!.sql).toContain('c.insurance_carrier_id = ?');
-    expect(llamadas[0]!.sql).toContain('c.status_concept_id <> ?');
-    expect(llamadas[0]!.params).toEqual([
+    expect(calls[0]!.sql).toContain('insurance.insurance_claims c');
+    expect(calls[0]!.sql).toContain('c.insurance_carrier_id = ?');
+    expect(calls[0]!.sql).toContain('c.status_concept_id <> ?');
+    expect(calls[0]!.params).toEqual([
       CARRIER,
       PERIOD.lo,
       PERIOD.hi,
@@ -73,7 +73,11 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
   });
 
   it('kpis: una sola consulta con las CTEs de reclamos, afiliados, meses y primas', async () => {
-    const { em, llamadas, repo } = build([
+    const {
+      em,
+      llamadas: calls,
+      repo,
+    } = build([
       [
         {
           total_claims: 4,
@@ -108,7 +112,7 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
 
     expect(result.total_claims).toBe(4);
     expect(result.loss_ratio_percent).toBe('62.76');
-    const sql = llamadas[0]!.sql;
+    const sql = calls[0]!.sql;
     expect(sql).toContain('WITH claims AS');
     expect(sql).toContain('DISTINCT ON (v.insurance_claim_id)');
     expect(sql).toContain('generate_series(');
@@ -117,11 +121,15 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
       'CASE WHEN ct.adjudicated_claims = 0 OR ct.total_billed_adjudicated_n = 0 THEN NULL',
     );
     // Nunca se filtra un carrier ajeno: el primer parámetro es siempre el carrier pedido.
-    expect(llamadas[0]!.params[0]).toBe(CARRIER);
+    expect(calls[0]!.params[0]).toBe(CARRIER);
   });
 
   it('monthlyTrends: un mes por fila, agrupado en La Paz', async () => {
-    const { em, llamadas, repo } = build([
+    const {
+      em,
+      llamadas: calls,
+      repo,
+    } = build([
       [
         {
           period: '2026-03',
@@ -135,16 +143,16 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
     const result = await repo.monthlyTrends(em, CARRIER, PERIOD, REVERSED, BOB);
 
     expect(result).toHaveLength(1);
-    expect(llamadas[0]!.sql).toContain("AT TIME ZONE 'America/La_Paz'");
-    expect(llamadas[0]!.sql).toContain('generate_series(');
+    expect(calls[0]!.sql).toContain("AT TIME ZONE 'America/La_Paz'");
+    expect(calls[0]!.sql).toContain('generate_series(');
   });
 
   it('topMedications: sólo vía medication_dispensation_line_id (inventory_reservation_line_id ausente en esta base)', async () => {
-    const { em, llamadas, repo } = build([[]]);
+    const { em, llamadas: calls, repo } = build([[]]);
 
     await repo.topMedications(em, CARRIER, PERIOD, REVERSED);
 
-    const sql = llamadas[0]!.sql;
+    const sql = calls[0]!.sql;
     expect(sql).toContain('medication_dispensation_lines mdl');
     expect(sql).toContain('l.medication_dispensation_line_id IS NOT NULL');
     expect(sql).not.toContain('inventory_reservation_line_id');
@@ -152,7 +160,7 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
   });
 
   it('specialties: encuentros de la población afiliada, con LATERAL para no duplicar por especialidad', async () => {
-    const { em, llamadas, repo } = build([[]]);
+    const { em, llamadas: calls, repo } = build([[]]);
 
     await repo.specialties(
       em,
@@ -162,7 +170,7 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
       DEPENDENT_ACTIVE,
     );
 
-    const sql = llamadas[0]!.sql;
+    const sql = calls[0]!.sql;
     expect(sql).toContain('clinical.encounters e');
     expect(sql).toContain('LEFT JOIN LATERAL');
     expect(sql).toContain('ps.is_primary IS TRUE');
@@ -170,7 +178,7 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
   });
 
   it('prevalentPathologies: sólo code system icd10cm, top 10 por casos', async () => {
-    const { em, llamadas, repo } = build([[]]);
+    const { em, llamadas: calls, repo } = build([[]]);
 
     await repo.prevalentPathologies(
       em,
@@ -180,16 +188,18 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
       DEPENDENT_ACTIVE,
     );
 
-    const sql = llamadas[0]!.sql;
+    const sql = calls[0]!.sql;
     expect(sql).toContain("cs.internal_code = 'icd10cm'");
     expect(sql).toContain('coalesce(cd.onset_at, cd.created_at)');
     expect(sql).toContain('LIMIT 10');
   });
 
   it('immunization: tasa calculada en SQL, null sin afiliados (nunca NaN)', async () => {
-    const { em, llamadas, repo } = build([
-      [{ vaccinated: 2, total: 3, rate_percent: '66.67' }],
-    ]);
+    const {
+      em,
+      llamadas: calls,
+      repo,
+    } = build([[{ vaccinated: 2, total: 3, rate_percent: '66.67' }]]);
 
     const result = await repo.immunization(
       em,
@@ -201,13 +211,13 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
     );
 
     expect(result).toEqual({ vaccinated: 2, total: 3, rate_percent: '66.67' });
-    expect(llamadas[0]!.sql).toContain(
+    expect(calls[0]!.sql).toContain(
       'CASE WHEN (SELECT count(*) FROM affiliates) = 0 THEN NULL',
     );
   });
 
   it('todas las consultas de afiliados aceptan planId null para no filtrar por plan', async () => {
-    const { em, llamadas, repo } = build([[]]);
+    const { em, llamadas: calls, repo } = build([[]]);
 
     await repo.immunization(
       em,
@@ -218,6 +228,6 @@ describe('InsuranceAnalyticsRepository (subtarea 3.1, v4.2.14)', () => {
       IMM_COMPLETED,
     );
 
-    expect(llamadas[0]!.params).toContain('plan-a');
+    expect(calls[0]!.params).toContain('plan-a');
   });
 });

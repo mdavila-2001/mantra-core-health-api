@@ -28,7 +28,7 @@ import {
 } from '../repositories';
 import {
   IMPORT_PARSERS,
-  type LectorImportFiles,
+  type ReaderImportFiles,
 } from './import-parsers.provider';
 import { validateRows } from './row-validator';
 import type {
@@ -144,7 +144,7 @@ export class ConceptFileImportService {
    * @param versionsRepo - Versiones del sistema de codificación.
    * @param codeSystemsRepo - Sistemas de codificación, para resolver la fuente.
    * @param conceptsRepo - Conceptos del catálogo.
-   * @param lector - Qué formatos se reconocen y con qué se leen.
+   * @param reader - Qué formatos se reconocen y con qué se leen.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -153,7 +153,7 @@ export class ConceptFileImportService {
     private readonly codeSystemsRepo: CodeSystemsRepository,
     private readonly conceptsRepo: CatalogConceptsRepository,
     @Inject(IMPORT_PARSERS)
-    private readonly lector: LectorImportFiles,
+    private readonly reader: ReaderImportFiles,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ConceptFileImportService.name);
@@ -189,7 +189,7 @@ export class ConceptFileImportService {
     }
 
     const format = this.requireFormat(buffer, versionId);
-    const parser = this.lector.parseadorDe(format);
+    const parser = this.reader.parseadorDe(format);
     if (parser === undefined) {
       throw new ImportFileRejectedException(
         ErrorCode.IMPORT_FORMAT_UNSUPPORTED,
@@ -279,7 +279,7 @@ export class ConceptFileImportService {
    * @returns El perfil con sus columnas.
    */
   private requireProfile(id: string): PerfilDeImportacion {
-    const profile = this.lector.perfil(id);
+    const profile = this.reader.perfil(id);
     if (profile === undefined) {
       throw new ImportFileRejectedException(
         ErrorCode.IMPORT_PROFILE_UNKNOWN,
@@ -303,7 +303,7 @@ export class ConceptFileImportService {
    */
   private requireFormat(buffer: Buffer, versionId: string): FormatoDeArchivo {
     try {
-      return this.lector.detectarFormato(buffer);
+      return this.reader.detectarFormato(buffer);
     } catch (error) {
       if (error instanceof FormatoNoAdmitidoError) {
         throw new ImportFileRejectedException(
@@ -515,7 +515,7 @@ export class ConceptFileImportService {
     actor: AuthenticatedUser;
   }): Promise<string> {
     const forked = this.em.fork();
-    const lote = forked.create(
+    const batch = forked.create(
       CatalogImportBatches,
       {
         sourceId: data.sourceId,
@@ -533,7 +533,7 @@ export class ConceptFileImportService {
       { partial: true },
     );
     await forked.flush();
-    return lote.id;
+    return batch.id;
   }
 
   /**
@@ -551,10 +551,10 @@ export class ConceptFileImportService {
     figures: { totalRead: number; inserted: number; errores: number },
   ): Promise<void> {
     const forked = this.em.fork();
-    const lote = await forked.findOne(CatalogImportBatches, { id: batchId });
-    if (!lote) return;
+    const batch = await forked.findOne(CatalogImportBatches, { id: batchId });
+    if (!batch) return;
 
-    forked.assign(lote, {
+    forked.assign(batch, {
       totalRead: String(figures.totalRead),
       totalInserted: String(figures.inserted),
       totalErrors: String(figures.errores),
@@ -597,12 +597,12 @@ function countReadRows(
   rows: readonly FilaLeida[],
   problems: readonly ProblemaDeFila[],
 ): number {
-  const numeros = new Set(rows.map((row) => row.numero));
+  const numbers = new Set(rows.map((row) => row.numero));
   for (const problem of problems) {
     if (format !== 'ndjson' && problem.fila === HEADER_ROW) continue;
-    numeros.add(problem.fila);
+    numbers.add(problem.fila);
   }
-  return numeros.size;
+  return numbers.size;
 }
 
 /**

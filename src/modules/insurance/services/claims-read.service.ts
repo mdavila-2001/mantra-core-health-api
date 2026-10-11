@@ -538,7 +538,8 @@ export class ClaimsReadService {
     if (!description) return null;
 
     return {
-      previousDiagnosticReportId: description.reportId,
+      previousDiagnosticReportId:
+        description.reportId ?? order.previousDiagnosticReportId,
       studyName: description.studyName,
       performedAt: description.performedAt,
       daysAgo: description.daysAgo,

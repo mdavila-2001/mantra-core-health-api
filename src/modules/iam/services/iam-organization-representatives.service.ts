@@ -13,9 +13,9 @@ import {
   TenantLegalRepresentativesService,
   type RegistrationExecutive,
 } from '../../directory/services';
-import { PersonsRepository } from '../../profiles/repositories';
-import type { DeclaredPersonName } from '../../profiles/person-name';
-import { createContactPerson } from '../../profiles/services';
+import { PersonsRepository } from '../../profiles/infrastructure/repositories';
+import type { DeclaredPersonName } from '../../profiles/domain/person-name';
+import { createContactPerson } from '../../profiles/application/services';
 import type {
   RegisterOrganizationExecutivesDto,
   RegisterOrganizationLegalRepresentativeDto,

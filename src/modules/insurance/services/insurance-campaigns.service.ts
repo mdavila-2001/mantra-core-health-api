@@ -20,8 +20,8 @@ import {
 } from '../../../common/pagination/keyset-cursor';
 import { TenantAdministrationService } from '../../directory/services';
 import { AuditTrailService } from '../../audit/services';
-import { ProfileOwnershipService } from '../../profiles/services/profile-ownership.service';
-import { patientCoverageReferenceDate } from '../../profiles/patient-coverage-validity';
+import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
+import { patientCoverageReferenceDate } from '../../profiles/domain/patient-coverage-validity';
 import { CatalogRepository } from '../repositories';
 import {
   InsuranceCampaignsRepository,

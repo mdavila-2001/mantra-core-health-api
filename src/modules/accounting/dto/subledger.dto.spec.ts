@@ -27,7 +27,7 @@ describe('CreateClearingDto', () => {
     return pipe.transform(body, metadata) as Promise<CreateClearingDto>;
   }
 
-  const completo = {
+  const complete = {
     practiceId: '0b1f6a3e-5d2c-4c8e-9a7b-1e2d3c4b5a69',
     bankAccountId: '1c2f6a3e-5d2c-4c8e-9a7b-1e2d3c4b5a70',
     clearingDate: '2026-10-09',
@@ -40,12 +40,12 @@ describe('CreateClearingDto', () => {
   };
 
   it('acepta el cuerpo sin tenantId', async () => {
-    await expect(parse(completo)).resolves.toBeInstanceOf(CreateClearingDto);
+    await expect(parse(complete)).resolves.toBeInstanceOf(CreateClearingDto);
   });
 
   it('sigue aceptando un tenantId declarado', async () => {
     const tenantId = '3e4f6a3e-5d2c-4c8e-9a7b-1e2d3c4b5a72';
-    await expect(parse({ ...completo, tenantId })).resolves.toMatchObject({
+    await expect(parse({ ...complete, tenantId })).resolves.toMatchObject({
       tenantId,
     });
   });
@@ -58,9 +58,9 @@ describe('CreateClearingDto', () => {
 
   it.each(['practiceId', 'bankAccountId', 'clearingDate', 'items'] as const)(
     'sigue exigiendo %s',
-    async (clave) => {
-      const { [clave]: _omitida, ...resto } = completo;
-      await expect(parse(resto)).rejects.toBeInstanceOf(BadRequestException);
+    async (key) => {
+      const { [key]: _skipped, ...rest } = complete;
+      await expect(parse(rest)).rejects.toBeInstanceOf(BadRequestException);
     },
   );
 });

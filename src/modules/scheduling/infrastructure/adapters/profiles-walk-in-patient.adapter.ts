@@ -8,7 +8,7 @@ import {
   PersonProfilesRepository,
   PersonsRepository,
   RelatedPersonsRepository,
-} from '../../../profiles/repositories';
+} from '../../../profiles/infrastructure/repositories';
 import type {
   WalkInPatientData,
   WalkInPatientRegistryPort,

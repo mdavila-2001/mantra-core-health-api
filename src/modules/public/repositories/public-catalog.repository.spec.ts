@@ -25,7 +25,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
     return { em, execute, repo: new PublicCatalogRepository() };
   }
 
-  const sqlDe = (execute: any): string =>
+  const sqlOf = (execute: any): string =>
     String(execute.mock.calls[0][0]).replace(/\s+/g, ' ');
 
   it('resuelve el slug sólo entre perfiles visibles y activos', async () => {
@@ -37,7 +37,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
     );
 
     expect(profile).toBeNull();
-    expect(sqlDe(execute)).toContain('FROM community.public_profiles prof');
+    expect(sqlOf(execute)).toContain('FROM community.public_profiles prof');
     expect(execute.mock.calls[0][1]).toEqual([
       'clinica-norte',
       COMM.PROFILE_VISIBILITY_PUBLIC,
@@ -51,7 +51,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
 
       await repo.findOfferedServices(em as any, TENANT, null, 21);
 
-      const sql = sqlDe(execute);
+      const sql = sqlOf(execute);
       expect(sql).toContain('FROM billing.service_catalog sc');
       expect(sql).toContain('AND pr.tenant_id = ?');
       expect(sql).toContain('sc.default_price::text AS price');
@@ -77,7 +77,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
         6,
       );
 
-      expect(sqlDe(execute)).toContain(
+      expect(sqlOf(execute)).toContain(
         '(sc.code, sc.id) > (CAST(? AS text), CAST(? AS uuid))',
       );
       expect(execute.mock.calls[0][1].slice(2)).toEqual([
@@ -95,7 +95,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
 
       await repo.findPharmacyProducts(em as any, TENANT, null, 21);
 
-      const sql = sqlDe(execute);
+      const sql = sqlOf(execute);
       expect(sql).toContain('AND ph.tenant_id = ?');
       expect(sql).toContain('AND list.public_visibility = true');
       expect(sql).toContain('AND list.insurer_tenant_id IS NULL');
@@ -117,7 +117,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
 
       await repo.findPharmacyProducts(em as any, TENANT, null, 21);
 
-      const sql = sqlDe(execute);
+      const sql = sqlOf(execute);
       expect(sql).toContain(
         'COALESCE(stock.available, 0)::text AS "availableQuantity"',
       );
@@ -131,7 +131,7 @@ describe('PublicCatalogRepository (M4 · H2)', () => {
 
       await repo.findPharmacyProducts(em as any, TENANT, null, 21);
 
-      expect(sqlDe(execute)).toContain(
+      expect(sqlOf(execute)).toContain(
         'COALESCE(pp.patient_amount, pp.unit_amount)::text AS price',
       );
     });

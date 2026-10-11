@@ -15,7 +15,7 @@ import {
 } from '../repositories';
 import { AuditTrailService } from '../../audit/services';
 import { NotificationsService, OutboxService } from '../../messaging/services';
-import { PersonAccountLinksRepository } from '../../profiles/repositories';
+import { PersonAccountLinksRepository } from '../../profiles/infrastructure/repositories';
 import {
   CreateCareRelationshipDto,
   CreateLegalRepresentationDto,
@@ -121,12 +121,12 @@ export class AuthzCareRelationshipsService {
           { patientProfileId: dto.patientProfileId, practitionerProfileId },
         );
       }
-      const pendiente = await this.careRepo.findPending(
+      const pending = await this.careRepo.findPending(
         tx,
         dto.patientProfileId,
         practitionerProfileId,
       );
-      if (pendiente) {
+      if (pending) {
         throw new ConflictException(
           'Ya hay una solicitud pendiente de respuesta para ese paciente',
           { patientProfileId: dto.patientProfileId, practitionerProfileId },

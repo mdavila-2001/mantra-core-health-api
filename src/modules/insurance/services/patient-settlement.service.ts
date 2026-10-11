@@ -4,7 +4,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import {
   unavailableSettlement,
   type PatientSettlementProjection,

@@ -146,7 +146,7 @@ describe('ClaimsService.openDispute', () => {
         findClaimForUpdate: mockFn().mockResolvedValue(null),
       });
 
-      const unRechazo = await rejection(() =>
+      const oneRejection = await rejection(() =>
         withTenant(() => serviceWith(foreign).openDispute(CLAIM, dto, actor)),
       );
       const otherRejection = await rejection(() =>
@@ -157,8 +157,8 @@ describe('ClaimsService.openDispute', () => {
 
       // AC-16-14 también acá: reclamar no puede servir para averiguar qué
       // identificadores existen.
-      expect(unRechazo.getStatus()).toBe(otherRejection.getStatus());
-      expect(unRechazo.getResponse()).toEqual(otherRejection.getResponse());
+      expect(oneRejection.getStatus()).toBe(otherRejection.getStatus());
+      expect(oneRejection.getResponse()).toEqual(otherRejection.getResponse());
     });
 
     it('no consulta el reclamo si la organización no tiene prácticas', async () => {
@@ -231,7 +231,7 @@ describe('ClaimsService.openDispute', () => {
  * cual, sin alterar los importes ya cubiertos por otras pruebas.
  */
 describe('ClaimsService.adjudicate', () => {
-  const LINEA = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+  const LINE = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 
   function claimSubmitted(over: Record<string, unknown> = {}) {
     return claim({ statusConceptId: INS.CLAIM_SUBMITTED, ...over });
@@ -242,7 +242,7 @@ describe('ClaimsService.adjudicate', () => {
       findClaim: mockFn().mockResolvedValue(claimSubmitted()),
       findClaimForUpdate: mockFn().mockResolvedValue(null),
       findLine: mockFn().mockResolvedValue({
-        id: LINEA,
+        id: LINE,
         insuranceClaimId: CLAIM,
       }),
       latestVersion: mockFn().mockResolvedValue(null),
@@ -258,7 +258,7 @@ describe('ClaimsService.adjudicate', () => {
       outcome: 'DENIED',
       lineAdjudications: [
         {
-          insuranceClaimLineId: LINEA,
+          insuranceClaimLineId: LINE,
           decision: 'DENIED',
           policyClauseReference: 'Cláusula 12.3: Fármaco fuera de vademécum',
           denialRationale: 'Requiere autorización previa según la póliza.',
@@ -274,7 +274,7 @@ describe('ClaimsService.adjudicate', () => {
     expect(r.createLineAdjudication).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        insuranceClaimLineId: LINEA,
+        insuranceClaimLineId: LINE,
         decisionConceptId: INS.LINE_DECISION_DENIED,
         policyClauseReference: 'Cláusula 12.3: Fármaco fuera de vademécum',
         denialRationale: 'Requiere autorización previa según la póliza.',
@@ -291,7 +291,7 @@ describe('ClaimsService.adjudicate', () => {
       outcome: 'APPROVED',
       lineAdjudications: [
         {
-          insuranceClaimLineId: LINEA,
+          insuranceClaimLineId: LINE,
           decision: 'APPROVED',
           approvedAmount: '120.00',
           patientAmount: '0.00',
@@ -314,7 +314,7 @@ describe('ClaimsService.adjudicate', () => {
       outcome: 'APPROVED',
       lineAdjudications: [
         {
-          insuranceClaimLineId: LINEA,
+          insuranceClaimLineId: LINE,
           decision: 'APPROVED',
           approvedAmount: '120.00',
         },

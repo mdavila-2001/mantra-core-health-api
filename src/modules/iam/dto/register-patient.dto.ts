@@ -1,5 +1,21 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  EMPLOYER_FREE_TEXT_MAX_LENGTH,
+  OCCUPATION_FREE_TEXT_MAX_LENGTH,
+  PERSON_NAME_PART_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
+  PHONE_PATTERN,
+  PHONE_PATTERN_MESSAGE,
+} from '../../../common/constants/person-field-limits';
+export {
+  EMPLOYER_FREE_TEXT_MAX_LENGTH,
+  OCCUPATION_FREE_TEXT_MAX_LENGTH,
+  PERSON_NAME_PART_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
+  PHONE_PATTERN,
+  PHONE_PATTERN_MESSAGE,
+} from '../../../common/constants/person-field-limits';
+import {
   IsEmail,
   IsIn,
   IsISO8601,
@@ -34,13 +50,11 @@ import {
 /**
  * Tope de cada parte del nombre (`profiles.persons.name` y sus hermanas).
  */
-export const PERSON_NAME_PART_MAX_LENGTH = 100;
 
 /**
  * Tope de la ocupación en texto libre
  * (`profiles.persons.occupation_free_text`).
  */
-export const OCCUPATION_FREE_TEXT_MAX_LENGTH = 200;
 
 /**
  * Largo máximo del nombre de empresa escrito a mano.
@@ -48,21 +62,16 @@ export const OCCUPATION_FREE_TEXT_MAX_LENGTH = 200;
  * El mismo que el de la ocupación: es una razón social, no una descripción, y
  * doscientos caracteres cubren hasta las más largas con su sigla.
  */
-export const EMPLOYER_FREE_TEXT_MAX_LENGTH = 200;
 
 /** Tope del teléfono, tal como lo guarda `common.contact_points.value`. */
-export const PHONE_MAX_LENGTH = 40;
 
 /**
  * Forma admitida de un teléfono: E.164 o nacional, con los separadores que la
  * gente escribe. Deliberadamente laxo — no valida que el número exista, sólo
  * impide que el campo se use para meter texto libre.
  */
-export const PHONE_PATTERN = /^[+]?[0-9 ()-]{6,}$/;
 
 /** Mensaje de {@link PHONE_PATTERN}, para que los dos formularios digan lo mismo. */
-export const PHONE_PATTERN_MESSAGE =
-  'El teléfono sólo admite dígitos, espacios, paréntesis, + y guion';
 
 /**
  * Cuerpo de `POST /iam/auth/register-patient`.

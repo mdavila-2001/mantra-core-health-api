@@ -184,7 +184,7 @@ describe('CommunityMessagingService', () => {
         targetTypeConceptId: COMM.PROFILE_TARGET_USER,
       },
     ],
-  ])('rechaza un destinatario %s', async (_caso, profile) => {
+  ])('rechaza un destinatario %s', async (_case, profile) => {
     const d = build();
     d.profilesRepo.findById.mockResolvedValue(profile);
 

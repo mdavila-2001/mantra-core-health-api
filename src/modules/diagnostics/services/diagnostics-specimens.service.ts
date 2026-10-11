@@ -312,7 +312,7 @@ export class DiagnosticsSpecimensService {
 
     const items = await this.repo.findAccessionSpecimens(em, id);
     const specimenIds = items.map((item) => item.specimenId);
-    const [specimenes, contenedores, custodia] = await Promise.all([
+    const [specimenes, containers, custody] = await Promise.all([
       this.repo.findSpecimensByIds(em, specimenIds),
       this.repo.findContainersBySpecimenIds(em, specimenIds),
       this.repo.findCustodyEventsBySpecimenIds(em, specimenIds),
@@ -329,8 +329,8 @@ export class DiagnosticsSpecimensService {
         statusConceptId: item.statusConceptId,
         specimen: toSpecimenDetail(
           specimen,
-          contenedores.filter((c) => c.specimenId === specimen.id),
-          custodia.filter((c) => c.specimenId === specimen.id),
+          containers.filter((c) => c.specimenId === specimen.id),
+          custody.filter((c) => c.specimenId === specimen.id),
         ),
       });
     }
@@ -364,11 +364,11 @@ export class DiagnosticsSpecimensService {
     if (!specimen) {
       throw new ResourceNotFoundException('Espécimen no encontrado', { id });
     }
-    const [contenedores, custodia] = await Promise.all([
+    const [containers, custody] = await Promise.all([
       this.repo.findContainersBySpecimenIds(em, [id]),
       this.repo.findCustodyEventsBySpecimenIds(em, [id]),
     ]);
-    return toSpecimenDetail(specimen, contenedores, custodia);
+    return toSpecimenDetail(specimen, containers, custody);
   }
 
   /** Resuelve el tenant custodio del espécimen para acesiones sin tenant explícito. */

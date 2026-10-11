@@ -11,7 +11,7 @@ import * as ts from 'typescript';
  * **sólo** a los módulos de `MIGRATED_MODULES`; cada módulo que se migre se
  * suma a la lista en su mismo PR, sin romper el CI de los demás.
  */
-export const MIGRATED_MODULES: readonly string[] = ['scheduling'];
+export const MIGRATED_MODULES: readonly string[] = ['scheduling', 'profiles'];
 
 const MODULES_DIR = join(process.cwd(), 'src', 'modules');
 

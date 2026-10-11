@@ -11,7 +11,7 @@ import {
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { TenantMembershipsRepository } from '../../directory/repositories';
 import { DIR } from '../../directory/directory.concepts';
 import { IDA } from '../identity_assurance.concepts';

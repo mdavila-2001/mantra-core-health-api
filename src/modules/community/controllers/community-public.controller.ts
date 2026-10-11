@@ -574,16 +574,16 @@ export class CommunityPublicController {
    * `limit` fuera de rango se **recorta**, y «abc» es tan fuera de rango como
    * 9999. La única excepción son las coordenadas de `nearby`, que sí fallan.
    */
-  private toInt(valor?: string): number | undefined {
-    if (valor === undefined) return undefined;
-    const n = Number.parseInt(valor, 10);
+  private toInt(value?: string): number | undefined {
+    if (value === undefined) return undefined;
+    const n = Number.parseInt(value, 10);
     return Number.isFinite(n) ? n : undefined;
   }
 
   /** Decimal de un parámetro de consulta, o `undefined`. */
-  private toFloat(valor?: string): number | undefined {
-    if (valor === undefined) return undefined;
-    const n = Number.parseFloat(valor);
+  private toFloat(value?: string): number | undefined {
+    if (value === undefined) return undefined;
+    const n = Number.parseFloat(value);
     return Number.isFinite(n) ? n : undefined;
   }
 
@@ -594,13 +594,13 @@ export class CommunityPublicController {
    * Mismo criterio que `toInt`/`toBool`: un vertical inventado se ignora —el
    * buscador cae a «todos»— en vez de romper la consulta con 400.
    */
-  private toNearbyKind(valor?: string): PublicResultKind | undefined {
-    return NEARBY_KINDS.find((kind) => kind === valor);
+  private toNearbyKind(value?: string): PublicResultKind | undefined {
+    return NEARBY_KINDS.find((kind) => kind === value);
   }
 
   /** Booleano de un parámetro; sólo `'true'` afirma. */
-  private toBool(valor?: string): boolean | undefined {
-    if (valor === undefined) return undefined;
-    return valor === 'true';
+  private toBool(value?: string): boolean | undefined {
+    if (value === undefined) return undefined;
+    return value === 'true';
   }
 }

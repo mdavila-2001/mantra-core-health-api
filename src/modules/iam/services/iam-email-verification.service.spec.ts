@@ -100,7 +100,7 @@ describe('IamEmailVerificationService', () => {
       (d: ReturnType<typeof build>) =>
         d.emailVerificationsRepo.findLatestByUser.mockResolvedValue(null),
     ],
-  ])('responde lo mismo ante %s, y no emite token', async (_caso, prepare) => {
+  ])('responde lo mismo ante %s, y no emite token', async (_case, prepare) => {
     const d = build();
     prepare(d);
 

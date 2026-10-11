@@ -93,23 +93,23 @@ export class CommunityProfileStatsService {
    *
    * @param tenantId - Tenant del perfil.
    * @param profileId - Perfil del que se piden las estadísticas.
-   * @param hoy - Día de referencia (inyectable para las pruebas).
+   * @param today - Día de referencia (inyectable para las pruebas).
    * @returns Totales de la ventana y su desglose diario.
    */
   async read(
     tenantId: string,
     profileId: string,
-    hoy: Date = new Date(),
+    today: Date = new Date(),
   ): Promise<ProfileStatsDto> {
-    const days = this.lastDays(hoy);
-    const claves = [
+    const days = this.lastDays(today);
+    const keys = [
       ...days.map((day) => this.key(profileId, 'view', day)),
       ...days.map((day) => this.key(profileId, 'impression', day)),
     ];
 
     let values: Map<string, number>;
     try {
-      values = await this.redis.getCounters(tenantId, claves);
+      values = await this.redis.getCounters(tenantId, keys);
     } catch (error) {
       // Sin Redis no hay estadísticas, pero tampoco un 500: la pantalla del
       // profesional muestra ceros y un rótulo, no un error.
@@ -173,10 +173,10 @@ export class CommunityProfileStatsService {
   }
 
   /** Los últimos `WINDOW_DAYS` días, del más viejo al más nuevo. */
-  private lastDays(hoy: Date): string[] {
+  private lastDays(today: Date): string[] {
     const days: string[] = [];
     for (let i = WINDOW_DAYS - 1; i >= 0; i -= 1) {
-      const date = new Date(hoy.getTime() - i * 24 * 3_600_000);
+      const date = new Date(today.getTime() - i * 24 * 3_600_000);
       days.push(this.day(date));
     }
     return days;

@@ -65,26 +65,26 @@ describe('LegalEntityTypesSeedService', () => {
     const result = await service.run();
 
     expect(result.properties).toBe(QUANTITY * 2);
-    const propiedades = created.filter(
+    const properties = created.filter(
       (row) => row.entity === 'ConceptProperties',
     );
-    expect(propiedades).toHaveLength(QUANTITY * 2);
+    expect(properties).toHaveLength(QUANTITY * 2);
 
-    const paisSrl = propiedades.find(
+    const countrySrl = properties.find(
       (row) =>
         row.data.conceptId ===
           LEGAL_ENTITY_TYPES.find((e) => e.code === 'SRL')!.conceptId &&
         row.data.propertyCode === 'legal-entity-country',
     );
-    expect(paisSrl?.data.valueJson).toBe('BO');
+    expect(countrySrl?.data.valueJson).toBe('BO');
 
-    const categoriaLlc = propiedades.find(
+    const categoryLlc = properties.find(
       (row) =>
         row.data.conceptId ===
           LEGAL_ENTITY_TYPES.find((e) => e.code === 'US_LLC')!.conceptId &&
         row.data.propertyCode === 'legal-entity-canonical-category',
     );
-    expect(categoriaLlc?.data.valueJson).toBe('LIMITED_LIABILITY');
+    expect(categoryLlc?.data.valueJson).toBe('LIMITED_LIABILITY');
   });
 
   it('no inserta nada en una segunda corrida: todo ya existe', async () => {

@@ -60,9 +60,9 @@ import { TerminologyModule } from '../terminology/terminology.module';
 // PDF. `*_profiles.profile_id` es FK directa a `profiles.persons(id)` (CTI):
 // sin paso intermedio por `person_profiles`. Mismo criterio: clases sin
 // estado con `EntityManager` por parámetro.
-import { PatientProfilesRepository } from '../profiles/repositories/patient-profiles.repository';
-import { HealthPractitionerProfilesRepository } from '../profiles/repositories/health-practitioner-profiles.repository';
-import { PersonsRepository } from '../profiles/repositories/persons.repository';
+import { PatientProfilesRepository } from '../profiles/infrastructure/repositories/patient-profiles.repository';
+import { HealthPractitionerProfilesRepository } from '../profiles/infrastructure/repositories/health-practitioner-profiles.repository';
+import { PersonsRepository } from '../profiles/infrastructure/repositories/persons.repository';
 // BR-15 (N-04): toda lectura/descarga de `charts/me` deja rastro en
 // `audit.data_access_log`. Clase sin estado por `EntityManager`, mismo
 // criterio que ya usa `ClinicalModule` (no se importa `AuditModule` entero:

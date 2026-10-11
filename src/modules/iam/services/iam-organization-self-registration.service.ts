@@ -10,13 +10,17 @@ import {
 import {
   CONCEPTS,
   ConflictException,
+  createdBy,
   PreconditionFailedException,
   TokenService,
   type AuthenticatedUser,
 } from '../../../common';
+import { Pharmacies } from '../../pharmacy/entities/pharmacies.entity';
+import { PHARM } from '../../pharmacy/pharmacy.concepts';
 import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
 import { NotificationsService } from '../../messaging/services';
 import {
+  BRANCH_TYPE_CONCEPT_BY_CODE,
   DIR,
   TENANT_TYPE_CONCEPT_BY_CODE,
 } from '../../directory/directory.concepts';
@@ -25,6 +29,7 @@ import {
   resolveLegalEntityType,
 } from '../../directory/legal-entity-types';
 import {
+  BranchesRepository,
   TenantMembershipsRepository,
   TenantsRepository,
 } from '../../directory/repositories';
@@ -32,7 +37,7 @@ import {
   TenantAffiliationDocumentsService,
   TenantTypeProfileService,
 } from '../../directory/services';
-import { composeAccountDisplayName } from '../../profiles/person-name';
+import { composeAccountDisplayName } from '../../profiles/domain/person-name';
 import {
   CredentialsRepository,
   EmailVerificationsRepository,
@@ -123,6 +128,7 @@ export class IamOrganizationSelfRegistrationService {
    * @param emailVerificationsRepo - Valor de email verifications repo requerido por la operación.
    * @param tenantsRepo - Valor de tenants repo requerido por la operación.
    * @param membershipsRepo - Valor de memberships repo requerido por la operación.
+   * @param branchesRepo - Casa central y sucursales que declara el alta de una farmacia.
    * @param notificationsService - Valor de notifications service requerido por la operación.
    * @param affiliationDocuments - Vincula los documentos legales declarados (subtarea 1.2).
    * @param representatives - Registra al representante legal y a las gerencias (subtarea 1.4).
@@ -139,6 +145,7 @@ export class IamOrganizationSelfRegistrationService {
     private readonly emailVerificationsRepo: EmailVerificationsRepository,
     private readonly tenantsRepo: TenantsRepository,
     private readonly membershipsRepo: TenantMembershipsRepository,
+    private readonly branchesRepo: BranchesRepository,
     private readonly notificationsService: NotificationsService,
     private readonly typeProfile: TenantTypeProfileService,
     private readonly affiliationDocuments: TenantAffiliationDocumentsService,
@@ -305,6 +312,31 @@ export class IamOrganizationSelfRegistrationService {
         user.id,
       );
 
+      // 2b) Farmacia: la casa central y las sucursales declaradas en el alta
+      // (P50) y la fila de `pharmacy.pharmacies`, que nace en borrador y sin
+      // verificar: la plataforma la activa al verificar el tenant
+      // (`DirectoryTenantsService.verify`). Sin esto el alta descartaba las
+      // sedes y la farmacia nacía invisible para su propio portal.
+      if (dto.organization.tenantType === 'PHARMACY') {
+        this.createPharmacyBranches(tx, tenant.id, dto, user.id);
+        tx.create(
+          Pharmacies,
+          {
+            tenantId: tenant.id,
+            code: dto.organization.code,
+            legalName: dto.organization.legalName,
+            tradeName: dto.organization.tradeName,
+            pharmacyTypeConceptId: PHARM.PHARMACY_TYPE_RETAIL,
+            ownershipTypeConceptId: PHARM.OWNERSHIP_PRIVATE,
+            defaultCurrencyConceptId: PHARM.CURRENCY_USD,
+            verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
+            statusConceptId: PHARM.PHARMACY_DRAFT,
+            ...createdBy(user.id),
+          },
+          { partial: true },
+        );
+      }
+
       // 3) La membresía OWNER, que es lo que convierte a esa cuenta en dueña de
       // esta organización y lo único que la hace utilizable: sin esta fila,
       // `TenantContextInterceptor` rechaza con 403 cualquier request posterior.
@@ -453,6 +485,66 @@ export class IamOrganizationSelfRegistrationService {
       legalDocumentsRegistered: created.legalDocumentsRegistered,
       representativesRegistered: created.representativesRegistered,
     };
+  }
+
+  /**
+   * Crea la casa central (si el alta trae su punto) y cada sucursal declarada.
+   * El código sale del nombre, en mayúsculas y sin repetirse dentro del alta.
+   */
+  private createPharmacyBranches(
+    tx: EntityManager,
+    tenantId: string,
+    dto: RegisterOrganizationDto,
+    actorUserId: string,
+  ): void {
+    const block = dto.organization.pharmacy;
+    if (!block) return;
+    const used = new Set<string>();
+    const codeOf = (name: string): string => {
+      const base =
+        name
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toUpperCase()
+          .replace(/[^A-Z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 90) || 'SUCURSAL';
+      let code = base;
+      for (let n = 2; used.has(code); n += 1) code = `${base}-${n}`;
+      used.add(code);
+      return code;
+    };
+    const add = (item: {
+      name: string;
+      latitude?: number;
+      longitude?: number;
+      description?: string;
+      locationUrl?: string;
+    }): void => {
+      this.branchesRepo.create(tx, {
+        tenantId,
+        code: codeOf(item.name),
+        name: item.name,
+        branchTypeConceptId: BRANCH_TYPE_CONCEPT_BY_CODE.OFFICE,
+        statusConceptId: DIR.BRANCH_ACTIVE,
+        timeZone: dto.organization.timeZone,
+        latitude:
+          item.latitude !== undefined ? String(item.latitude) : undefined,
+        longitude:
+          item.longitude !== undefined ? String(item.longitude) : undefined,
+        description: item.description,
+        locationUrl: item.locationUrl,
+        actorUserId,
+      });
+    };
+    if (block.latitude !== undefined && block.longitude !== undefined) {
+      add({
+        name: 'Casa central',
+        latitude: block.latitude,
+        longitude: block.longitude,
+      });
+    }
+    for (const branch of block.branches ?? []) add(branch);
   }
 
   /**

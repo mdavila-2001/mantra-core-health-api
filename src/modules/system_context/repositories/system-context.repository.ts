@@ -12,7 +12,8 @@ import {
   SystemContextRefreshRuns,
   SystemContextBindings,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, CONCEPTS } from '../../../common';
+import { ConceptDesignations } from '../../terminology/entities';
 
 /**
  * Describe el contrato estructural de create enum definition data.
@@ -437,6 +438,28 @@ export class SystemContextRepository {
       { dynamicEnumVersionId },
       { orderBy: { ordinal: 'ASC' } },
     );
+  }
+
+  /**
+   * El nombre en castellano (designación `ES` preferida) de cada concepto que lo
+   * tenga. Los que no, no aparecen en el mapa.
+   *
+   * @param em - Contexto de persistencia.
+   * @param conceptIds - Conceptos a rotular.
+   */
+  async findSpanishDisplays(
+    em: EntityManager,
+    conceptIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const out = new Map<string, string>();
+    if (conceptIds.length === 0) return out;
+    const rows = await em.find(ConceptDesignations, {
+      conceptId: { $in: [...conceptIds] },
+      languageConceptId: CONCEPTS.LANG_ES,
+      preferred: true,
+    });
+    for (const row of rows) out.set(row.conceptId, row.value);
+    return out;
   }
 
   /**

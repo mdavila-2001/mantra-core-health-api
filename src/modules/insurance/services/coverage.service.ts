@@ -11,7 +11,7 @@ import { CoverageRepository, CatalogRepository } from '../repositories';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { INS } from '../insurance.concepts';
 import {
   CreateCoverageDto,

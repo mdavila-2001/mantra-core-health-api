@@ -10,9 +10,9 @@ import { FileVersions } from '../../src/modules/common/entities/file_versions.en
 import { JurisdictionAuthorizations } from '../../src/modules/profiles/entities/jurisdiction_authorizations.entity';
 import { FilesRepository } from '../../src/modules/common/repositories/files.repository';
 import { FileVersionsRepository } from '../../src/modules/common/repositories/file-versions.repository';
-import { JurisdictionAuthorizationsRepository } from '../../src/modules/profiles/repositories/jurisdiction-authorizations.repository';
+import { JurisdictionAuthorizationsRepository } from '../../src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository';
 import { AttachableFileService } from '../../src/modules/common/services/attachable-file.service';
-import { ProfilesPractitionersService } from '../../src/modules/profiles/services/profiles-practitioners.service';
+import { ProfilesPractitionersService } from '../../src/modules/profiles/application/services/profiles-practitioners.service';
 import { CONCEPTS, type AuthenticatedUser } from '../../src/common';
 
 export const PATCH = '2026-09-13_v4212_jurisdiction_authorizations_file_id.sql';
@@ -165,9 +165,6 @@ export function api(orm: MikroORM): ProfilesPractitionersService {
     } as never,
     unused,
     new AttachableFileService(files, versions, logger as never),
-    unused,
-    unused,
-    unused,
     unused,
     unused,
     unused,

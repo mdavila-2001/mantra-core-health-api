@@ -79,9 +79,9 @@ export class ClamdClient {
       socket.write('zINSTREAM\0');
       for (let start = 0; start < content.length; start += chunk) {
         const part = content.subarray(start, start + chunk);
-        const longitud = Buffer.alloc(4);
-        longitud.writeUInt32BE(part.length, 0);
-        socket.write(longitud);
+        const longitude = Buffer.alloc(4);
+        longitude.writeUInt32BE(part.length, 0);
+        socket.write(longitude);
         socket.write(part);
       }
       // Longitud cero: fin del flujo. Sin esto clamd espera para siempre.

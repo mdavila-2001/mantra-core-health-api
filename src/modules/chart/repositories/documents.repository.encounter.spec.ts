@@ -14,8 +14,8 @@ describe('DocumentsRepository.findByEncounter', () => {
       em: {
         find: (...args: unknown[]) => {
           calls.push(args);
-          const [entidad] = args;
-          if (entidad === DocumentRecords) {
+          const [entity] = args;
+          if (entity === DocumentRecords) {
             return Promise.resolve([{ id: 'doc-1', createdAt: new Date() }]);
           }
           return Promise.resolve(files);
@@ -25,11 +25,11 @@ describe('DocumentsRepository.findByEncounter', () => {
   }
 
   it('filtra los documentos por el encuentro y ordena por createdAt, id', async () => {
-    const { em, llamadas } = rememberingEm();
+    const { em, llamadas: calls } = rememberingEm();
 
     await new DocumentsRepository().findByEncounter(em, 'enc-1');
 
-    expect(llamadas[0]).toEqual([
+    expect(calls[0]).toEqual([
       DocumentRecords,
       { encounterId: 'enc-1' },
       { orderBy: { createdAt: 'ASC', id: 'ASC' } },
@@ -40,11 +40,11 @@ describe('DocumentsRepository.findByEncounter', () => {
     const file = { fileId: 'f-1', documentRecordId: 'doc-1' };
     const { em } = rememberingEm([file]);
 
-    const [documento] = await new DocumentsRepository().findByEncounter(
+    const [document] = await new DocumentsRepository().findByEncounter(
       em,
       'enc-1',
     );
 
-    expect(documento.files).toEqual([file]);
+    expect(document.files).toEqual([file]);
   });
 });

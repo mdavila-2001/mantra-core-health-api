@@ -24,9 +24,9 @@
 // (idioma, tipos de designación, estado, tipos de relación). Si faltan, aborta.
 //
 // Uso:
-//   node tools/terminology-import/load-glossary-es.mjs --dry-run      # sin base: plan y conteos
-//   node tools/terminology-import/load-glossary-es.mjs                # carga real (.env DB_*)
-//   node tools/terminology-import/load-glossary-es.mjs --layers cima,medlineplus-es
+//   node tools/terminology-import/load-glossary-es.mjs                # dry-run por defecto, sin base
+//   node tools/terminology-import/load-glossary-es.mjs --apply         # carga explícita (.env DB_*)
+//   node tools/terminology-import/load-glossary-es.mjs --layers cima,medlineplus-es --apply
 // =============================================================================
 
 import 'dotenv/config';
@@ -39,7 +39,10 @@ import {
 } from './lib/glossary-es/load-plan.mjs';
 
 const args = process.argv.slice(2);
-const DRY_RUN = args.includes('--dry-run');
+if (args.includes('--dry-run') && args.includes('--apply')) {
+  throw new Error('Use --dry-run o --apply, no ambos.');
+}
+const DRY_RUN = !args.includes('--apply');
 const layersArg = args.includes('--layers') ? args[args.indexOf('--layers') + 1].split(',') : TERM_LAYERS;
 const BATCH = 1000;
 
@@ -112,7 +115,7 @@ function buildPlan(rows) {
 
 async function main() {
   const t0 = Date.now();
-  console.log(`=== Carga del glosario ES a terminology.* ${DRY_RUN ? '(DRY-RUN, sin base)' : ''} ===`);
+  console.log(`=== Carga del glosario ES a terminology.* ${DRY_RUN ? '(DRY-RUN por defecto, sin base)' : '(APPLY explícito)'} ===`);
   const { rows, perLayer, orphanRelations } = loadCorpus({ layers: layersArg });
   const plan = buildPlan(rows);
   const valueSetCodes = new Set(rows.flatMap(valueSetCodesFor));

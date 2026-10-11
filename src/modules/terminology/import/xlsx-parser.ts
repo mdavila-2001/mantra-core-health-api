@@ -108,7 +108,7 @@ export class XlsxParser implements FileParser {
     // seguir, y el problema que generan viaja aparte porque apunta a una
     // celda concreta, no a la fila entera.
     const completeRecords = records.map((record, recordIndex) =>
-      completeFormulasWithoutValor(record, sheet, recordIndex, cellProblems),
+      completeFormulasWithoutValue(record, sheet, recordIndex, cellProblems),
     );
 
     const header = completeRecords[0];
@@ -156,8 +156,8 @@ export class XlsxParser implements FileParser {
 
       const values: Record<string, string> = {};
       record.forEach((cell, indexColumn) => {
-        const nombre = columns[indexColumn];
-        if (nombre !== undefined) values[nombre] = cellText(cell);
+        const name = columns[indexColumn];
+        if (name !== undefined) values[name] = cellText(cell);
       });
       rows.push({ numero: index + 2, valores: values });
     });
@@ -194,14 +194,14 @@ function readRecordsMore(records: unknown[], sheet: WorkSheet): boolean {
  * @param problems - Acumulador de problemas de celda.
  * @returns El registro con las fórmulas sin valor marcadas.
  */
-function completeFormulasWithoutValor(
+function completeFormulasWithoutValue(
   record: unknown[],
   sheet: WorkSheet,
   recordIndex: number,
   problems: RowProblem[],
 ): unknown[] {
   const logicRow = recordIndex + 1; // 1-based, igual que la numeración del contrato
-  return record.map((valor, columnIndex) => {
+  return record.map((value, columnIndex) => {
     const cell = readCell(sheet, recordIndex, columnIndex);
     if (cell?.f !== undefined && cell.v === undefined) {
       if (recordIndex > 0) {
@@ -213,7 +213,7 @@ function completeFormulasWithoutValor(
       }
       return '';
     }
-    return valor;
+    return value;
   });
 }
 
@@ -243,27 +243,27 @@ function readCell(
  * Convierte el valor crudo de una celda al texto sin recortar que espera el
  * contrato, igual que hace `csv-parser.ts` con cada celda de texto.
  *
- * @param valor - El valor devuelto por `sheet_to_json`.
+ * @param value - El valor devuelto por `sheet_to_json`.
  * @returns El texto de la celda.
  */
-function cellText(valor: unknown): string {
-  if (valor === undefined || valor === null) return '';
-  if (typeof valor === 'string') return valor;
-  if (typeof valor === 'boolean') return valor ? 'true' : 'false';
-  if (valor instanceof Date) {
+function cellText(value: unknown): string {
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  if (value instanceof Date) {
     const isMidnightUtc =
-      valor.getUTCHours() === 0 &&
-      valor.getUTCMinutes() === 0 &&
-      valor.getUTCSeconds() === 0 &&
-      valor.getUTCMilliseconds() === 0;
+      value.getUTCHours() === 0 &&
+      value.getUTCMinutes() === 0 &&
+      value.getUTCSeconds() === 0 &&
+      value.getUTCMilliseconds() === 0;
     return isMidnightUtc
-      ? valor.toISOString().slice(0, 10)
-      : valor.toISOString();
+      ? value.toISOString().slice(0, 10)
+      : value.toISOString();
   }
-  if (typeof valor === 'number') {
-    return Number.isInteger(valor) ? BigInt(valor).toString() : String(valor);
+  if (typeof value === 'number') {
+    return Number.isInteger(value) ? BigInt(value).toString() : String(value);
   }
-  if (typeof valor === 'bigint') return valor.toString();
+  if (typeof value === 'bigint') return value.toString();
   /*
    * `sheet_to_json` devuelve cadena, número, booleano o fecha para una celda
    * con valor, y un **objeto** cuando la celda trae un error de fórmula
@@ -273,6 +273,6 @@ function cellText(valor: unknown): string {
    * Se serializa para que el error viaje visible y la revisión de la
    * importación lo encuentre.
    */
-  if (typeof valor === 'symbol') return valor.toString();
-  return JSON.stringify(valor) ?? '';
+  if (typeof value === 'symbol') return value.toString();
+  return JSON.stringify(value) ?? '';
 }

@@ -468,7 +468,7 @@ export class ModerationRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param tenantId - Organización cuya cola se lee.
-   * @param filtros - Estado, prioridad, tipo de contenido y antigüedad mínima.
+   * @param filters - Estado, prioridad, tipo de contenido y antigüedad mínima.
    * @param after - Clave de continuación `(queuedAt, id)`.
    * @param limit - Tope de filas.
    * @returns Página de entradas de cola.
@@ -476,7 +476,7 @@ export class ModerationRepository {
   async listQueuePage(
     em: EntityManager,
     tenantId: string,
-    filtros: {
+    filters: {
       /** Estados admitidos; vacío o ausente significa todos. */
       statusConceptIds?: string[];
       /** Prioridades admitidas; vacío o ausente significa todas. */
@@ -490,17 +490,17 @@ export class ModerationRepository {
     limit: number,
   ): Promise<ModerationQueue[]> {
     const where: Record<string, unknown> = { tenantId };
-    if (filtros.statusConceptIds?.length) {
-      where.statusConceptId = { $in: filtros.statusConceptIds };
+    if (filters.statusConceptIds?.length) {
+      where.statusConceptId = { $in: filters.statusConceptIds };
     }
-    if (filtros.priorityConceptIds?.length) {
-      where.priorityConceptId = { $in: filtros.priorityConceptIds };
+    if (filters.priorityConceptIds?.length) {
+      where.priorityConceptId = { $in: filters.priorityConceptIds };
     }
-    if (filtros.contentTypeConceptIds?.length) {
-      where.contentTypeConceptId = { $in: filtros.contentTypeConceptIds };
+    if (filters.contentTypeConceptIds?.length) {
+      where.contentTypeConceptId = { $in: filters.contentTypeConceptIds };
     }
-    if (filtros.queuedBefore) {
-      where.queuedAt = { $lte: filtros.queuedBefore };
+    if (filters.queuedBefore) {
+      where.queuedAt = { $lte: filters.queuedBefore };
     }
     if (after) {
       // Keyset sobre `(queuedAt, id)` ascendente: lo más viejo primero.
@@ -570,14 +570,14 @@ export class ModerationRepository {
    * Página de decisiones tomadas, de la más reciente hacia atrás.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Cola concreta o decisión concreta, si se acota.
+   * @param filters - Cola concreta o decisión concreta, si se acota.
    * @param after - Clave de continuación `(decidedAt, id)`.
    * @param limit - Tope de filas.
    * @returns Página de decisiones.
    */
   listDecisionsPage(
     em: EntityManager,
-    filtros: {
+    filters: {
       /** Acota a una entrada de cola. */
       moderationQueueId?: string;
       /** Acota a un tipo de decisión. */
@@ -587,11 +587,11 @@ export class ModerationRepository {
     limit: number,
   ): Promise<ModerationDecisions[]> {
     const where: Record<string, unknown> = {};
-    if (filtros.moderationQueueId) {
-      where.moderationQueueId = filtros.moderationQueueId;
+    if (filters.moderationQueueId) {
+      where.moderationQueueId = filters.moderationQueueId;
     }
-    if (filtros.decisionConceptIds?.length) {
-      where.decisionConceptId = { $in: filtros.decisionConceptIds };
+    if (filters.decisionConceptIds?.length) {
+      where.decisionConceptId = { $in: filters.decisionConceptIds };
     }
     if (after) {
       // Descendente: lo último decidido es lo que un moderador quiere revisar.
@@ -629,14 +629,14 @@ export class ModerationRepository {
    * **pendiente**, y el trabajo pendiente se atiende por orden de llegada.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Estado y apelante, si se acota.
+   * @param filters - Estado y apelante, si se acota.
    * @param after - Clave de continuación `(createdAt, id)`.
    * @param limit - Tope de filas.
    * @returns Página de apelaciones.
    */
   listAppealsPage(
     em: EntityManager,
-    filtros: {
+    filters: {
       /** Estados admitidos; vacío o ausente significa todos. */
       statusConceptIds?: string[];
       /** Acota a un apelante concreto. */
@@ -646,11 +646,11 @@ export class ModerationRepository {
     limit: number,
   ): Promise<ModerationAppeals[]> {
     const where: Record<string, unknown> = {};
-    if (filtros.statusConceptIds?.length) {
-      where.statusConceptId = { $in: filtros.statusConceptIds };
+    if (filters.statusConceptIds?.length) {
+      where.statusConceptId = { $in: filters.statusConceptIds };
     }
-    if (filtros.appellantProfileId) {
-      where.appellantProfileId = filtros.appellantProfileId;
+    if (filters.appellantProfileId) {
+      where.appellantProfileId = filters.appellantProfileId;
     }
     if (after) {
       where.$or = [

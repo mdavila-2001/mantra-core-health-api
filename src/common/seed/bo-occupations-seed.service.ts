@@ -199,7 +199,7 @@ export class BoOccupationsSeedService {
     counters.memberships += await this.seedMemberships(em, now);
 
     const total = Object.values(counters).reduce(
-      (sum, valor) => sum + valor,
+      (sum, value) => sum + value,
       0,
     );
     if (total > 0) {
@@ -219,14 +219,14 @@ export class BoOccupationsSeedService {
    * `BoGeographySeedService.assertUniqueCodes`.
    */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
+    const seen = new Set<string>();
     for (const occupation of BO_OCCUPATIONS) {
-      if (vistos.has(occupation.code)) {
+      if (seen.has(occupation.code)) {
         throw new Error(
           `El catálogo de ocupaciones declara el código "${occupation.code}" más de una vez`,
         );
       }
-      vistos.add(occupation.code);
+      seen.add(occupation.code);
     }
   }
 

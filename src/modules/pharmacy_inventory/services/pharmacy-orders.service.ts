@@ -200,7 +200,10 @@ const DEFAULT_INBOX_LIMIT = 100;
  * Cuando E2 defina su rol de farmacia, se añade acá — la titularidad del
  * paciente no cambia.
  */
-const STAFF_READ_ROLES: readonly string[] = ['SECURITY_ADMIN'];
+const STAFF_READ_ROLES: readonly string[] = [
+  'SECURITY_ADMIN',
+  'PHARMACY_STAFF',
+];
 
 /**
  *`{code, display}` de los conceptos propios del módulo, resuelto desde su
@@ -342,7 +345,6 @@ export class PharmacyOrdersService {
     dto: CreatePharmacyOrderDto,
     actor: AuthenticatedUser,
   ): Promise<PharmacyOrderDto> {
-    const tenantId = requireTenantId();
     const patientProfileId = this.requirePatientProfile(actor);
     this.assertNoDuplicateProducts(dto);
     const deliveryModeConceptId = this.resolveDeliveryMode(dto.deliveryMode);
@@ -360,7 +362,11 @@ export class PharmacyOrdersService {
 
       const site = await this.pharmacyRepo.findActiveSiteById(tx, dto.siteId);
       const pharmacy = site
-        ? await this.pharmacyRepo.findVisibleById(tx, tenantId, site.pharmacyId)
+        ? await this.pharmacyRepo.findVisibleById(
+            tx,
+            undefined,
+            site.pharmacyId,
+          )
         : null;
       if (!site || !pharmacy) {
         throw new ResourceNotFoundException('Sede de farmacia no encontrada', {
@@ -439,7 +445,7 @@ export class PharmacyOrdersService {
       );
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId,
+        tenantId: pharmacy.tenantId,
         eventType: 'PharmacyOrderSubmitted',
         aggregateType: 'pharmacy_inventory.inventory_reservations',
         aggregateId: reservation.id,
@@ -468,7 +474,7 @@ export class PharmacyOrdersService {
       return reservation.id;
     });
 
-    return this.readOwnOrder(orderId, tenantId, patientProfileId);
+    return this.readOwnOrder(orderId, undefined, patientProfileId);
   }
 
   /**
@@ -481,7 +487,6 @@ export class PharmacyOrdersService {
   async listMine(
     actor: AuthenticatedUser,
   ): Promise<PharmacyOrderListResponseDto> {
-    const tenantId = requireTenantId();
     const patientProfileId = this.requirePatientProfile(actor);
 
     let em = this.em.fork();
@@ -505,7 +510,7 @@ export class PharmacyOrdersService {
       );
     }
 
-    const items = await this.composeOrders(em, tenantId, orders, 'owner');
+    const items = await this.composeOrders(em, undefined, orders, 'owner');
     const settlements = await this.settlements.forOrders(
       em,
       actor.id,
@@ -575,7 +580,7 @@ export class PharmacyOrdersService {
     // el pedido cae en el mismo 404 que uno inexistente.
     const [dto] = await this.composeOrders(
       em,
-      tenantId,
+      isOwner ? undefined : tenantId,
       [order],
       isOwner ? 'owner' : 'staff',
     );
@@ -605,7 +610,6 @@ export class PharmacyOrdersService {
     id: string,
     actor: AuthenticatedUser,
   ): Promise<PharmacyOrderDto> {
-    const tenantId = requireTenantId();
     const patientProfileId = this.requirePatientProfile(actor);
 
     await this.em.transactional(async (tx) => {
@@ -619,7 +623,7 @@ export class PharmacyOrdersService {
       }
       const [pharmacy] = await this.ordersRepo.findPharmaciesByIdsInTenant(
         tx,
-        tenantId,
+        undefined,
         [order.pharmacyId],
       );
       if (!pharmacy) throw orderNotFound(id);
@@ -639,7 +643,7 @@ export class PharmacyOrdersService {
       await this.reservationsService.releaseConfirmedLines(tx, order, actor);
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId,
+        tenantId: pharmacy.tenantId,
         eventType: 'PharmacyOrderCancelled',
         aggregateType: 'pharmacy_inventory.inventory_reservations',
         aggregateId: order.id,
@@ -659,7 +663,7 @@ export class PharmacyOrdersService {
       );
     });
 
-    return this.readOwnOrder(id, tenantId, patientProfileId);
+    return this.readOwnOrder(id, undefined, patientProfileId);
   }
 
   /**
@@ -934,14 +938,13 @@ export class PharmacyOrdersService {
     id: string,
     actor: AuthenticatedUser,
   ): Promise<PharmacyOrderDto> {
-    const tenantId = requireTenantId();
     const patientProfileId = this.requirePatientProfile(actor);
 
     await this.em.transactional(async (tx) => {
       const order = await this.loadOwnOrderForUpdate(
         tx,
         id,
-        tenantId,
+        undefined,
         patientProfileId,
       );
       const pending = await this.pendingProposalsOf(tx, order);
@@ -1017,12 +1020,17 @@ export class PharmacyOrdersService {
         await this.ordersRepo.findLinesByReservationIds(tx, [order.id]),
       );
 
-      await this.publishStaffEvent(tx, tenantId, order, {
-        eventType: 'PharmacyOrderSubstitutionsAccepted',
-        statusCode: 'PINV_ORDER_ACEPTADO',
-        actor,
-        extra: { acceptedCount: pending.length },
-      });
+      await this.publishStaffEvent(
+        tx,
+        await this.tenantOfPharmacy(tx, order.pharmacyId),
+        order,
+        {
+          eventType: 'PharmacyOrderSubstitutionsAccepted',
+          statusCode: 'PINV_ORDER_ACEPTADO',
+          actor,
+          extra: { acceptedCount: pending.length },
+        },
+      );
       await tx.flush();
 
       this.logger.info(
@@ -1035,7 +1043,7 @@ export class PharmacyOrdersService {
       );
     });
 
-    return this.readOwnOrder(id, tenantId, patientProfileId);
+    return this.readOwnOrder(id, undefined, patientProfileId);
   }
 
   /**
@@ -1049,14 +1057,13 @@ export class PharmacyOrdersService {
     id: string,
     actor: AuthenticatedUser,
   ): Promise<PharmacyOrderDto> {
-    const tenantId = requireTenantId();
     const patientProfileId = this.requirePatientProfile(actor);
 
     await this.em.transactional(async (tx) => {
       const order = await this.loadOwnOrderForUpdate(
         tx,
         id,
-        tenantId,
+        undefined,
         patientProfileId,
       );
       const pending = await this.pendingProposalsOf(tx, order);
@@ -1070,12 +1077,17 @@ export class PharmacyOrdersService {
       order.reservationStatusConceptId = PINV.ORDER_CONFIRMADO;
       touch(order, actor.id);
 
-      await this.publishStaffEvent(tx, tenantId, order, {
-        eventType: 'PharmacyOrderOriginalPreferred',
-        statusCode: 'PINV_ORDER_CONFIRMADO',
-        actor,
-        extra: { declinedCount: pending.length },
-      });
+      await this.publishStaffEvent(
+        tx,
+        await this.tenantOfPharmacy(tx, order.pharmacyId),
+        order,
+        {
+          eventType: 'PharmacyOrderOriginalPreferred',
+          statusCode: 'PINV_ORDER_CONFIRMADO',
+          actor,
+          extra: { declinedCount: pending.length },
+        },
+      );
       await tx.flush();
 
       this.logger.info(
@@ -1088,7 +1100,7 @@ export class PharmacyOrdersService {
       );
     });
 
-    return this.readOwnOrder(id, tenantId, patientProfileId);
+    return this.readOwnOrder(id, undefined, patientProfileId);
   }
 
   /**
@@ -1695,7 +1707,7 @@ export class PharmacyOrdersService {
   private async loadOwnOrderForUpdate(
     tx: EntityManager,
     id: string,
-    tenantId: string,
+    _tenantId: string | undefined,
     patientProfileId: string,
   ): Promise<InventoryReservations> {
     const order = await this.ordersRepo.findOrderByIdForUpdate(
@@ -1708,7 +1720,7 @@ export class PharmacyOrdersService {
     }
     const [pharmacy] = await this.ordersRepo.findPharmaciesByIdsInTenant(
       tx,
-      tenantId,
+      undefined,
       [order.pharmacyId],
     );
     if (!pharmacy) throw orderNotFound(id);
@@ -2209,9 +2221,23 @@ export class PharmacyOrdersService {
   }
 
   /** La lectura del propio pedido tras crear o cancelar (el titular siempre ve). */
+  /** El tenant dueño de una farmacia: los eventos del mostrador viajan a él. */
+  private async tenantOfPharmacy(
+    tx: EntityManager,
+    pharmacyId: string,
+  ): Promise<string> {
+    const [pharmacy] = await this.ordersRepo.findPharmaciesByIdsInTenant(
+      tx,
+      undefined,
+      [pharmacyId],
+    );
+    if (!pharmacy) throw orderNotFound(pharmacyId);
+    return pharmacy.tenantId;
+  }
+
   private async readOwnOrder(
     id: string,
-    tenantId: string,
+    tenantId: string | undefined,
     patientProfileId: string,
   ): Promise<PharmacyOrderDto> {
     const em = this.em.fork();
@@ -2232,7 +2258,7 @@ export class PharmacyOrdersService {
    */
   private async composeOrders(
     em: EntityManager,
-    tenantId: string,
+    tenantId: string | undefined,
     orders: readonly InventoryReservations[],
     viewer: OrderViewer = 'staff',
   ): Promise<PharmacyOrderDto[]> {

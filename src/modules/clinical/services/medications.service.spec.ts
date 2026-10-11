@@ -955,7 +955,7 @@ describe('MedicationsService · MCH-007', () => {
     ['renew', (d: any) => d.service.renew('mr1', {}, otherDoctor)],
   ])(
     '%s pregunta por el paciente de la receta y, sin permiso, no escribe',
-    async (_nombre, operate) => {
+    async (_name, operate) => {
       const d = build();
       const request = draft();
       d.requestsRepo.findById.mockResolvedValue(request);

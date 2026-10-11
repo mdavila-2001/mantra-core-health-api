@@ -63,11 +63,11 @@ function slugName(text: string): string {
  * pisen sin volver el correo irreconocible.
  */
 export function syntheticEmail(
-  nombre: string,
+  name: string,
   surname: string,
   disambiguator?: string,
 ): string {
-  const n = slugName(nombre) || 'persona';
+  const n = slugName(name) || 'persona';
   const a = slugName(surname) || 'alovida';
   const suffix = disambiguator ? `.${disambiguator}` : '';
   return `${n}.${a}${suffix}@alovida.test`;

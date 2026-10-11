@@ -74,7 +74,7 @@ export class AppointmentsRepository {
    * @returns La cita creada, sin persistir todavía.
    */
   create(em: EntityManager, data: CreateAppointmentData): Appointments {
-    const ahora = new Date();
+    const now = new Date();
     return em.create(
       Appointments,
       {
@@ -87,8 +87,8 @@ export class AppointmentsRepository {
         reasonText: data.reasonText,
         channelConceptId: data.channelConceptId,
         typeConceptId: data.typeConceptId,
-        createdAt: ahora,
-        updatedAt: ahora,
+        createdAt: now,
+        updatedAt: now,
         createdByUserId: data.actorUserId,
         updatedByUserId: data.actorUserId,
       },

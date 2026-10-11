@@ -11,11 +11,11 @@ import { ReceivedClaimDecisionDto } from './received-claims.dto';
  */
 async function errors(body: unknown): Promise<string[]> {
   const dto = plainToInstance(ReceivedClaimDecisionDto, body);
-  const errores = await validate(dto, {
+  const validationErrors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return errores.map((e) => e.property).sort();
+  return validationErrors.map((e) => e.property).sort();
 }
 
 describe('ReceivedClaimDecisionDto', () => {
@@ -65,7 +65,7 @@ describe('ReceivedClaimDecisionDto', () => {
       ['un resultado fuera del set', { outcome: 'DENIED' }],
       ['un resultado ausente', {}],
       ['un resultado en minúsculas', { outcome: 'approved' }],
-    ])('rechaza %s', async (_caso, body) => {
+    ])('rechaza %s', async (_case, body) => {
       expect(await errors(body)).toEqual(['outcome']);
     });
 

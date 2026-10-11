@@ -144,8 +144,8 @@ node tools/terminology-import/import-medlineplus-es.mjs   # ~6 min (1 pedido/s)
 node tools/terminology-import/import-wikidata-anatomy.mjs
 node tools/terminology-import/import-wikidata-images.mjs  # ~25 min (13 500 archivos, 50 por pedido, 1 pedido/s)
 node tools/terminology-import/build-glossary-shards.mjs   # sin red
-node tools/terminology-import/load-glossary-es.mjs --dry-run   # sin base: plan y conteos
-node tools/terminology-import/load-glossary-es.mjs             # carga real (.env DB_*; exige el stack arriba)
+node tools/terminology-import/load-glossary-es.mjs             # dry-run por defecto: plan y conteos, sin conexión a base
+node tools/terminology-import/load-glossary-es.mjs --apply      # carga explícita (.env DB_*; exige el stack arriba)
 node --test "tools/terminology-import/test/*.test.mjs"          # parseo con fixtures reales
 ```
 

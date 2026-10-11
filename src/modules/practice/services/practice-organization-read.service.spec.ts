@@ -84,9 +84,9 @@ describe('PracticeOrganizationReadService', () => {
         { id: 'c-bob', code: 'DU_CUR_BOB', display: 'Boliviano' },
       ]);
 
-      const consola = await d.service.getConsole('prac-1', 'tenant-1');
+      const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-      expect(consola.organization).toEqual({
+      expect(console.organization).toEqual({
         id: 'prac-1',
         code: 'HOSP-CENTRAL',
         name: 'Hospital Central',
@@ -100,9 +100,9 @@ describe('PracticeOrganizationReadService', () => {
     it('marca el concepto que el catálogo no conoce, sin esconder la fila', async () => {
       const d = build();
 
-      const consola = await d.service.getConsole('prac-1', 'tenant-1');
+      const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-      expect(consola.organization.type).toEqual({
+      expect(console.organization.type).toEqual({
         code: 'UNKNOWN',
         display: 'Sin registrar',
       });
@@ -157,14 +157,14 @@ describe('PracticeOrganizationReadService', () => {
         },
       ]);
 
-      const consola = await d.service.getConsole('prac-1', 'tenant-1');
+      const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-      expect(consola.sites[0]).toMatchObject({
+      expect(console.sites[0]).toMatchObject({
         id: 'sede-1',
         clinicalUnitCount: 1,
         careSpaceCount: 2,
       });
-      expect(consola.sites[1]).toMatchObject({
+      expect(console.sites[1]).toMatchObject({
         id: 'sede-2',
         clinicalUnitCount: 0,
         careSpaceCount: 0,
@@ -221,12 +221,12 @@ describe('PracticeOrganizationReadService', () => {
         new Map([['perfil-1', 'Dra. Valeria Fuentes']]),
       );
 
-      const consola = await d.service.getConsole('prac-1', 'tenant-1');
+      const console = await d.service.getConsole('prac-1', 'tenant-1');
 
       expect(d.readRepo.findPractitionerNames).toHaveBeenCalledWith(d.em, [
         'perfil-1',
       ]);
-      expect(consola.staff.map((row) => row.practitionerName)).toEqual([
+      expect(console.staff.map((row) => row.practitionerName)).toEqual([
         'Dra. Valeria Fuentes',
         'Dra. Valeria Fuentes',
       ]);
@@ -243,11 +243,11 @@ describe('PracticeOrganizationReadService', () => {
         },
       ]);
 
-      const consola = await d.service.getConsole('prac-1', 'tenant-1');
+      const console = await d.service.getConsole('prac-1', 'tenant-1');
 
       // `null` y no el uuid: el uuid en una columna «Profesional» no le dice
       // nada a nadie, y la pantalla tiene que poder decir que falta el dato.
-      expect(consola.staff[0].practitionerName).toBeNull();
+      expect(console.staff[0].practitionerName).toBeNull();
     });
 
     it('normaliza las fechas de vigencia a fecha sola', async () => {
@@ -263,10 +263,10 @@ describe('PracticeOrganizationReadService', () => {
         },
       ]);
 
-      const consola = await d.service.getConsole('prac-1', 'tenant-1');
+      const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-      expect(consola.staff[0].validFrom).toBe('2026-03-01');
-      expect(consola.staff[0].validTo).toBeNull();
+      expect(console.staff[0].validFrom).toBe('2026-03-01');
+      expect(console.staff[0].validTo).toBeNull();
     });
   });
 
@@ -284,9 +284,9 @@ describe('PracticeOrganizationReadService', () => {
           },
         ]);
 
-        const consola = await d.service.getConsole('prac-1', 'tenant-1');
+        const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-        expect(consola.legalDocuments[0].daysToExpiry).toBe(10);
+        expect(console.legalDocuments[0].daysToExpiry).toBe(10);
       } finally {
         jest.useRealTimers();
       }
@@ -305,9 +305,9 @@ describe('PracticeOrganizationReadService', () => {
           },
         ]);
 
-        const consola = await d.service.getConsole('prac-1', 'tenant-1');
+        const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-        expect(consola.legalDocuments[0].daysToExpiry).toBe(0);
+        expect(console.legalDocuments[0].daysToExpiry).toBe(0);
       } finally {
         jest.useRealTimers();
       }
@@ -326,9 +326,9 @@ describe('PracticeOrganizationReadService', () => {
           },
         ]);
 
-        const consola = await d.service.getConsole('prac-1', 'tenant-1');
+        const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-        expect(consola.legalDocuments[0].daysToExpiry).toBe(-14);
+        expect(console.legalDocuments[0].daysToExpiry).toBe(-14);
       } finally {
         jest.useRealTimers();
       }
@@ -344,10 +344,10 @@ describe('PracticeOrganizationReadService', () => {
         },
       ]);
 
-      const consola = await d.service.getConsole('prac-1', 'tenant-1');
+      const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-      expect(consola.legalDocuments[0].daysToExpiry).toBeNull();
-      expect(consola.legalDocuments[0].validTo).toBeNull();
+      expect(console.legalDocuments[0].daysToExpiry).toBeNull();
+      expect(console.legalDocuments[0].validTo).toBeNull();
     });
   });
 
@@ -371,10 +371,10 @@ describe('PracticeOrganizationReadService', () => {
         },
       ]);
 
-      const consola = await d.service.getConsole('prac-1', 'tenant-1');
+      const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-      expect(consola.inventory[0].belowReorderLevel).toBe(true);
-      expect(consola.inventory[1].belowReorderLevel).toBe(false);
+      expect(console.inventory[0].belowReorderLevel).toBe(true);
+      expect(console.inventory[1].belowReorderLevel).toBe(false);
     });
 
     it('no inventa un faltante cuando no hay umbral configurado', async () => {
@@ -388,9 +388,9 @@ describe('PracticeOrganizationReadService', () => {
         },
       ]);
 
-      const consola = await d.service.getConsole('prac-1', 'tenant-1');
+      const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-      expect(consola.inventory[0].belowReorderLevel).toBe(false);
+      expect(console.inventory[0].belowReorderLevel).toBe(false);
     });
 
     it('conserva la cantidad como cadena, sin perder precisión', async () => {
@@ -404,9 +404,9 @@ describe('PracticeOrganizationReadService', () => {
         },
       ]);
 
-      const consola = await d.service.getConsole('prac-1', 'tenant-1');
+      const console = await d.service.getConsole('prac-1', 'tenant-1');
 
-      expect(consola.inventory[0].quantityOnHand).toBe('1234.5670');
+      expect(console.inventory[0].quantityOnHand).toBe('1234.5670');
     });
   });
 

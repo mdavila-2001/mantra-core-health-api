@@ -20,7 +20,7 @@ import { COMM } from '../../community/community.concepts';
 import {
   patientCoverageReferenceDate,
   patientCoverageValidity,
-} from '../../profiles/patient-coverage-validity';
+} from '../../profiles/domain/patient-coverage-validity';
 import { PROF } from '../../profiles/profiles.concepts';
 import type {
   InsurerPatientCarrierDto,

@@ -161,8 +161,8 @@ export class DiagnosticUnitProvisioningService {
     const declaredAddress = profile.primarySite?.address;
     if (declaredAddress) {
       const lines = declaredAddress.lines
-        .map((linea) => linea.trim())
-        .filter((linea) => linea.length > 0);
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
       const address = this.addressesRepo.create(tx, {
         ownerTypeConceptId: CONCEPTS.OWNER_USER,
         ownerId: owner.ownerUserId,

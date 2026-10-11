@@ -137,14 +137,14 @@ export class BoliviaInsuranceSeedService {
    * Mismo criterio que el catálogo geográfico.
    */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
+    const seen = new Set<string>();
     for (const code of this.allCarriers().map((c) => c.code)) {
-      if (vistos.has(code)) {
+      if (seen.has(code)) {
         throw new Error(
           `El catálogo de aseguradoras declara el código "${code}" más de una vez`,
         );
       }
-      vistos.add(code);
+      seen.add(code);
     }
   }
 

@@ -9,33 +9,33 @@ describe('PublicCacheStore', () => {
 
   it('devuelve lo guardado mientras no venza', () => {
     const store = new PublicCacheStore();
-    const valor = {
+    const value = {
       etag: 'W/"a"',
       body: { x: 1 },
       cacheControl: 'public, max-age=60',
     };
 
-    store.set('clave', valor, 60_000);
+    store.set('clave', value, 60_000);
 
-    expect(store.get('clave')).toEqual(expect.objectContaining(valor));
+    expect(store.get('clave')).toEqual(expect.objectContaining(value));
     expect(store.size).toBe(1);
   });
 
   it('una entrada vencida no se sirve, y se borra al pedirla', () => {
     const store = new PublicCacheStore();
-    const ahora = jest.spyOn(Date, 'now');
-    ahora.mockReturnValue(1_000);
+    const now = jest.spyOn(Date, 'now');
+    now.mockReturnValue(1_000);
     store.set(
       'clave',
       { etag: 'W/"a"', body: {}, cacheControl: 'public' },
       1_000,
     );
 
-    ahora.mockReturnValue(1_000 + 1_000 + 1); // un milisegundo después del vencimiento
+    now.mockReturnValue(1_000 + 1_000 + 1); // un milisegundo después del vencimiento
     expect(store.get('clave')).toBeUndefined();
     expect(store.size).toBe(0); // limpiar en el propio get evita que crezca sin límite
 
-    ahora.mockRestore();
+    now.mockRestore();
   });
 
   it('clear() vacía todo, no sólo una clave', () => {

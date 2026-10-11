@@ -11,7 +11,7 @@ import { ClamdClient } from './clamd.client';
  * El servidor devuelve además lo que recibió, así que el marco se verifica
  * contra bytes reales.
  */
-interface Emulador {
+interface Emulator {
   server: Server;
   puerto: number;
   /** Lo que el último cliente envió, ya concatenado. */
@@ -25,7 +25,7 @@ interface Emulador {
  *   simular un demonio que corta sin decir nada.
  * @returns El emulador con su puerto efímero.
  */
-async function emular(responder: string | 'cortar'): Promise<Emulador> {
+async function emulate(responder: string | 'cortar'): Promise<Emulator> {
   const parts: Buffer[] = [];
   const server = createServer((socket: Socket) => {
     socket.on('data', (part) => {
@@ -41,53 +41,53 @@ async function emular(responder: string | 'cortar'): Promise<Emulador> {
   });
   await new Promise<void>((ready) => server.listen(0, '127.0.0.1', ready));
   const address = server.address();
-  const puerto = typeof address === 'object' && address ? address.port : 0;
-  return { server, puerto, recibido: () => Buffer.concat(parts) };
+  const port = typeof address === 'object' && address ? address.port : 0;
+  return { server, puerto: port, recibido: () => Buffer.concat(parts) };
 }
 
 describe('ClamdClient', () => {
-  let emulador: Emulador | undefined;
+  let emulator: Emulator | undefined;
 
   afterEach(async () => {
-    if (emulador) {
-      await new Promise<void>((ready) => emulador!.server.close(() => ready()));
-      emulador = undefined;
+    if (emulator) {
+      await new Promise<void>((ready) => emulator!.server.close(() => ready()));
+      emulator = undefined;
     }
   });
 
   /** Cliente apuntando al emulador levantado. */
-  function client(puerto: number): ClamdClient {
+  function client(port: number): ClamdClient {
     return new ClamdClient({
       host: '127.0.0.1',
-      port: puerto,
+      port: port,
       timeoutMs: 2_000,
     });
   }
 
   it('responde limpio cuando clamd dice OK', async () => {
-    emulador = await emular('stream: OK');
+    emulator = await emulate('stream: OK');
 
-    const verdict = await client(emulador.puerto).scan(Buffer.from('hola'));
+    const verdict = await client(emulator.puerto).scan(Buffer.from('hola'));
 
     expect(verdict.clean).toBe(true);
   });
 
   it('devuelve la firma cuando clamd encuentra algo', async () => {
-    emulador = await emular('stream: Win.Test.EICAR_HDB-1 FOUND');
+    emulator = await emulate('stream: Win.Test.EICAR_HDB-1 FOUND');
 
-    const verdict = await client(emulador.puerto).scan(Buffer.from('x'));
+    const verdict = await client(emulator.puerto).scan(Buffer.from('x'));
 
     expect(verdict.clean).toBe(false);
     expect(verdict.signature).toBe('Win.Test.EICAR_HDB-1');
   });
 
   it('enmarca el contenido como exige el protocolo INSTREAM', async () => {
-    emulador = await emular('stream: OK');
+    emulator = await emulate('stream: OK');
     const content = Buffer.from('doce  bytes!');
 
-    await client(emulador.puerto).scan(content);
+    await client(emulator.puerto).scan(content);
 
-    const sent = emulador.recibido();
+    const sent = emulator.recibido();
     // `zINSTREAM\0`, longitud en big-endian, contenido, y cuatro ceros de cierre.
     expect(sent.subarray(0, 10).toString('latin1')).toBe('zINSTREAM\0');
     expect(sent.readUInt32BE(10)).toBe(content.length);
@@ -98,24 +98,24 @@ describe('ClamdClient', () => {
   it('parte el contenido en trozos y los enmarca todos', async () => {
     // Sin el troceo, un archivo grande supera el `StreamMaxLength` de clamd y
     // el demonio corta la conexión a mitad de camino.
-    emulador = await emular('stream: OK');
-    const cliente8 = new ClamdClient({
+    emulator = await emulate('stream: OK');
+    const client8 = new ClamdClient({
       host: '127.0.0.1',
-      port: emulador.puerto,
+      port: emulator.puerto,
       timeoutMs: 2_000,
       chunkBytes: 8,
     });
 
-    await cliente8.scan(Buffer.alloc(20, 0x41));
+    await client8.scan(Buffer.alloc(20, 0x41));
 
-    const sent = emulador.recibido();
+    const sent = emulator.recibido();
     const longitudes: number[] = [];
     let cursor = 10;
     while (cursor + 4 <= sent.length) {
-      const longitud = sent.readUInt32BE(cursor);
-      longitudes.push(longitud);
-      if (longitud === 0) break;
-      cursor += 4 + longitud;
+      const longitude = sent.readUInt32BE(cursor);
+      longitudes.push(longitude);
+      if (longitude === 0) break;
+      cursor += 4 + longitude;
     }
     expect(longitudes).toEqual([8, 8, 4, 0]);
   });
@@ -124,18 +124,18 @@ describe('ClamdClient', () => {
     // Es la diferencia entre «lo miré y está bien» y «no lo pude mirar». Un
     // `clean: true` por defecto acá sería el modo permisivo que el carril
     // prohíbe.
-    emulador = await emular('ERROR: fuera de memoria');
+    emulator = await emulate('ERROR: fuera de memoria');
 
     await expect(
-      client(emulador.puerto).scan(Buffer.from('x')),
+      client(emulator.puerto).scan(Buffer.from('x')),
     ).rejects.toThrow(/no es un veredicto/);
   });
 
   it('falla cuando el demonio corta sin contestar', async () => {
-    emulador = await emular('cortar');
+    emulator = await emulate('cortar');
 
     await expect(
-      client(emulador.puerto).scan(Buffer.from('x')),
+      client(emulator.puerto).scan(Buffer.from('x')),
     ).rejects.toThrow(/no es un veredicto/);
   });
 
@@ -151,8 +151,8 @@ describe('ClamdClient', () => {
   });
 
   it('confirma que el demonio está vivo con PING', async () => {
-    emulador = await emular('PONG');
+    emulator = await emulate('PONG');
 
-    await expect(client(emulador.puerto).ping()).resolves.toBe(true);
+    await expect(client(emulator.puerto).ping()).resolves.toBe(true);
   });
 });

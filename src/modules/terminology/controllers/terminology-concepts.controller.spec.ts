@@ -20,6 +20,7 @@ describe('TerminologyConceptsController', () => {
       readGlossaryNeighborhood: jest.fn(() =>
         Promise.resolve({ focus: {}, groups: [] }),
       ),
+      readGlossaryArticle: jest.fn(),
       readGlossaryGraph: jest.fn(() =>
         Promise.resolve({ nodes: [], edges: [], count: 0, limit: 500 }),
       ),
@@ -46,6 +47,17 @@ describe('TerminologyConceptsController', () => {
 
     expect(service.addDesignation).toHaveBeenCalledWith('c-1', dto, user);
     expect(result).toBe(expected);
+  });
+
+  it('readGlossaryArticle delega con el id de concepto', async () => {
+    const { controller, service } = build();
+    const expected = { conceptRef: { code: 'x' }, sections: [] };
+    service.readGlossaryArticle.mockResolvedValue(expected);
+
+    await expect(controller.readGlossaryArticle('concept-1')).resolves.toBe(
+      expected,
+    );
+    expect(service.readGlossaryArticle).toHaveBeenCalledWith('concept-1');
   });
 
   it('addRelationship delega con el id de concepto', async () => {

@@ -59,11 +59,11 @@ export class CodeSystemsReadService {
       .fork()
       .find(CodeSystems, {}, { orderBy: { internalCode: 'asc' }, limit: TOPE });
 
-    return rows.map((sistema) => ({
-      id: sistema.id,
-      internalCode: sistema.internalCode,
-      name: sistema.name,
-      canonicalUrl: sistema.canonicalUrl,
+    return rows.map((system) => ({
+      id: system.id,
+      internalCode: system.internalCode,
+      name: system.name,
+      canonicalUrl: system.canonicalUrl,
     }));
   }
 
@@ -108,7 +108,7 @@ export class CodeSystemsReadService {
     return rows.map((version) => ({
       id: version.id,
       version: version.version,
-      state: estadoLegible(version.stateConceptId),
+      state: readableStatus(version.stateConceptId),
       isDefault: version.isDefault === true,
       publishedAt: version.publishedAt ?? null,
       acceptsConcepts: acceptsConcepts(version.stateConceptId),
@@ -126,7 +126,7 @@ export class CodeSystemsReadService {
  * @param stateConceptId - El estado tal como está guardado.
  * @returns La palabra que la pantalla puede mostrar.
  */
-function estadoLegible(
+function readableStatus(
   stateConceptId: string | null | undefined,
 ): 'DRAFT' | 'ACTIVE' | 'RETIRED' | 'DEPRECATED' | 'UNKNOWN' {
   if (stateConceptId === CONCEPTS.TERM_ACTIVE) return 'ACTIVE';

@@ -45,9 +45,9 @@ describe('ConsentMeService (BR-20)', () => {
     await d.service.listHipaaAuthorizations(ACTOR);
     await d.service.listObjections(ACTOR);
     await d.service.listTreatmentConsents(ACTOR);
-    const filtros = d.em.find.mock.calls.map((call: any[]) => call[1]);
-    expect(filtros.length).toBe(4);
-    for (const filter of filtros) {
+    const filters = d.em.find.mock.calls.map((call: any[]) => call[1]);
+    expect(filters.length).toBe(4);
+    for (const filter of filters) {
       expect(filter.patientProfileId).toBe(PATIENT);
     }
   });

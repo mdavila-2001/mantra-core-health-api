@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { NotificationsService } from '../../messaging/services';
-import { PersonAccountLinksRepository } from '../../profiles/repositories';
+import { PersonAccountLinksRepository } from '../../profiles/infrastructure/repositories';
 import { PublicProfilesRepository } from '../repositories';
 
 /**

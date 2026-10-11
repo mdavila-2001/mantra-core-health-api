@@ -117,8 +117,8 @@ function looksLikeText(bytes: Buffer): boolean {
  */
 function firstLineWithContent(buffer: Buffer): string | undefined {
   const text = buffer.toString('utf8').replace(BOM, '');
-  for (const linea of text.split(/\r?\n/)) {
-    const clean = linea.trim();
+  for (const line of text.split(/\r?\n/)) {
+    const clean = line.trim();
     if (clean !== '') return clean;
   }
   return undefined;
@@ -130,14 +130,14 @@ function firstLineWithContent(buffer: Buffer): string | undefined {
  * Un arreglo o un número sueltos son JSON válido pero no son un concepto, así
  * que no cuentan: el formato es «un objeto por línea».
  *
- * @param linea - La primera línea con contenido.
+ * @param line - La primera línea con contenido.
  * @returns Si es un objeto JSON.
  */
-function isObjectJson(linea: string): boolean {
-  if (!linea.startsWith('{')) return false;
+function isObjectJson(line: string): boolean {
+  if (!line.startsWith('{')) return false;
   try {
-    const valor: unknown = JSON.parse(linea);
-    return typeof valor === 'object' && valor !== null && !Array.isArray(valor);
+    const value: unknown = JSON.parse(line);
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
   } catch {
     return false;
   }

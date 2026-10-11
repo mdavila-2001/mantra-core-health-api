@@ -20,7 +20,7 @@ const CLAIM = '33333333-3333-3333-3333-333333333333';
 const COVERAGE = '44444444-4444-4444-4444-444444444444';
 const PERSON = '55555555-5555-5555-5555-555555555555';
 const CURRENCY = '66666666-6666-6666-6666-666666666666';
-const ESTADO = '77777777-7777-7777-7777-777777777777';
+const STATUS = '77777777-7777-7777-7777-777777777777';
 const PRACTICE = '88888888-8888-8888-8888-888888888888';
 
 /** Un reclamo mínimo, con lo que la lectura mira de verdad. */
@@ -32,7 +32,7 @@ function claim(over: Record<string, unknown> = {}) {
     patientCoverageId: COVERAGE,
     billingProviderTypeConceptId: INS.BILLING_PROVIDER_TYPE_PRACTICE,
     billingProviderEntityId: PRACTICE,
-    statusConceptId: ESTADO,
+    statusConceptId: STATUS,
     currencyConceptId: CURRENCY,
     totalAmount: '1615.125',
     submittedAt: new Date('2026-05-01T12:00:00.000Z'),
@@ -83,8 +83,8 @@ function practiceLookup(practiceIds: string[] = [PRACTICE]) {
 
 /** Doble del `EntityManager`: `fork`, `find` y `findOne`. */
 function em(
-  byEntity: (nombre: string) => unknown[] = () => [],
-  byEntityOne: (nombre: string, where: any) => unknown = () => undefined,
+  byEntity: (name: string) => unknown[] = () => [],
+  byEntityOne: (name: string, where: any) => unknown = () => undefined,
 ) {
   const fork = {
     find: jest.fn((entity: { name?: string }) =>
@@ -255,12 +255,12 @@ describe('ClaimsReadService', () => {
       );
       const r = repo({ findClaimsPage: mockFn().mockResolvedValue(rows) });
 
-      const pagina = await withTenant(() =>
+      const page = await withTenant(() =>
         serviceWith(r).listClaims({ limit: 2 }),
       );
 
-      expect(pagina.items).toHaveLength(2);
-      expect(pagina.nextCursor).not.toBeNull();
+      expect(page.items).toHaveLength(2);
+      expect(page.nextCursor).not.toBeNull();
       // Se pide una de más: es lo que responde «hay siguiente» sin un COUNT.
       expect(r.findClaimsPage).toHaveBeenCalledWith(
         expect.anything(),
@@ -277,11 +277,11 @@ describe('ClaimsReadService', () => {
         findClaimsPage: mockFn().mockResolvedValue([claim()]),
       });
 
-      const pagina = await withTenant(() =>
+      const page = await withTenant(() =>
         serviceWith(r).listClaims({ limit: 25 }),
       );
 
-      expect(pagina.nextCursor).toBeNull();
+      expect(page.nextCursor).toBeNull();
     });
 
     it('la página vacía es una lista vacía, no un rechazo', async () => {
@@ -289,17 +289,17 @@ describe('ClaimsReadService', () => {
       // pantalla es suya y todavía no presentó nada.
       const r = repo({ findClaimsPage: mockFn().mockResolvedValue([]) });
 
-      const pagina = await withTenant(() => serviceWith(r).listClaims({}));
+      const page = await withTenant(() => serviceWith(r).listClaims({}));
 
-      expect(pagina).toEqual({ items: [], nextCursor: null });
+      expect(page).toEqual({ items: [], nextCursor: null });
     });
 
     it('deja el total aprobado en null cuando no hay dictamen', async () => {
-      const pagina = await withTenant(() => serviceWith(repo()).listClaims({}));
+      const page = await withTenant(() => serviceWith(repo()).listClaims({}));
 
       // No es cero: «todavía no contestaron» y «denegaron todo» son cosas
       // distintas, y esta es la línea que lo fija.
-      expect(pagina.items[0].approvedTotal).toBeNull();
+      expect(page.items[0].approvedTotal).toBeNull();
     });
 
     it('marca reclamada sólo mientras la disputa no está resuelta', async () => {
@@ -309,9 +309,9 @@ describe('ClaimsReadService', () => {
         ]),
       });
 
-      const pagina = await withTenant(() => serviceWith(r).listClaims({}));
+      const page = await withTenant(() => serviceWith(r).listClaims({}));
 
-      expect(pagina.items[0].hasOpenDispute).toBe(true);
+      expect(page.items[0].hasOpenDispute).toBe(true);
     });
   });
 
@@ -322,13 +322,13 @@ describe('ClaimsReadService', () => {
       // AC-16-14: 403, y sin `details` — si el id viajara ahí, «no es tuya» y
       // «no existe» dejarían de ser indistinguibles. Se mira el cuerpo que el
       // filtro va a serializar, no la instancia.
-      const rechazo = await rejection(() =>
+      const rejectionError = await rejection(() =>
         withTenant(() => serviceWith(r).getClaim(CLAIM)),
       );
 
-      expect(rechazo.getStatus()).toBe(403);
-      expect(rechazo.getResponse()).not.toHaveProperty('details');
-      expect(JSON.stringify(rechazo.getResponse())).not.toContain(CLAIM);
+      expect(rejectionError.getStatus()).toBe(403);
+      expect(rejectionError.getResponse()).not.toHaveProperty('details');
+      expect(JSON.stringify(rejectionError.getResponse())).not.toContain(CLAIM);
     });
 
     it('el rechazo de una ajena y el de una inexistente son el mismo cuerpo', async () => {
@@ -709,9 +709,7 @@ describe('ClaimsReadService', () => {
 
     /** `em()` con una unidad diagnóstica activa del tenant. */
     function emWithUnit() {
-      return em((nombre) =>
-        nombre === 'DiagnosticUnits' ? [{ id: UNIT }] : [],
-      );
+      return em((name) => (name === 'DiagnosticUnits' ? [{ id: UNIT }] : []));
     }
 
     it('amplía el alcance a las unidades diagnósticas activas del tenant', async () => {
@@ -743,8 +741,8 @@ describe('ClaimsReadService', () => {
     });
 
     it('resuelve duplicateStudy cuando la orden de origen está enlazada a un informe previo', async () => {
-      const orderById = (nombre: string, where: any) =>
-        nombre === 'ServiceRequests' && where.id === ORDER
+      const orderById = (name: string, where: any) =>
+        name === 'ServiceRequests' && where.id === ORDER
           ? {
               id: ORDER,
               previousDiagnosticReportId: REPORT,
@@ -815,8 +813,8 @@ describe('ClaimsReadService', () => {
           },
         ]),
       });
-      const orderWithoutEnlace = (nombre: string, where: any) =>
-        nombre === 'ServiceRequests' && where.id === ORDER
+      const orderWithoutLink = (name: string, where: any) =>
+        name === 'ServiceRequests' && where.id === ORDER
           ? { id: ORDER, previousDiagnosticReportId: undefined }
           : undefined;
 
@@ -825,7 +823,7 @@ describe('ClaimsReadService', () => {
           r,
           [PRACTICE],
           duplicateStudyDetector(),
-          em(() => [], orderWithoutEnlace),
+          em(() => [], orderWithoutLink),
         ).getClaim(CLAIM),
       );
 
@@ -850,8 +848,8 @@ describe('ClaimsReadService', () => {
     });
 
     it('marca reused=true cuando la orden reutilizó el informe (sin justificación)', async () => {
-      const orderReused = (nombre: string, where: any) =>
-        nombre === 'ServiceRequests' && where.id === ORDER
+      const orderReused = (name: string, where: any) =>
+        name === 'ServiceRequests' && where.id === ORDER
           ? {
               id: ORDER,
               previousDiagnosticReportId: REPORT,

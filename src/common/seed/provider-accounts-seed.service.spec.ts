@@ -25,9 +25,9 @@ const PHARMACY = 'farmacia.demo@alovida.test';
 function build(memberships: Record<string, string> = {}) {
   const userId = (email: string) => `user:${email}`;
   const rows = new Map(
-    Object.entries(memberships).map(([email, rol]) => [
+    Object.entries(memberships).map(([email, role]) => [
       userId(email),
-      { userId: userId(email), tenantRoleConceptId: rol } as any,
+      { userId: userId(email), tenantRoleConceptId: role } as any,
     ]),
   );
   const created: { entity: string; data: any }[] = [];
@@ -68,13 +68,13 @@ function build(memberships: Record<string, string> = {}) {
     service,
     /** Rol de tenant con el que quedó (o se creó) la membresía de la cuenta. */
     rolDe: (email: string): string | undefined => {
-      const creada = created.find(
+      const createdAccount = created.find(
         (row) =>
           row.entity === 'TenantMemberships' &&
           row.data.userId === userId(email),
       );
       return (
-        creada?.data.tenantRoleConceptId ??
+        createdAccount?.data.tenantRoleConceptId ??
         rows.get(userId(email))?.tenantRoleConceptId
       );
     },
@@ -90,25 +90,25 @@ describe('ProviderAccountsSeedService · rol en la organización', () => {
   });
 
   it('una base nueva crea la membresía con el rol que declara el catálogo', async () => {
-    const { service, rolDe } = build();
+    const { service, rolDe: roleOf } = build();
 
     await service.run('demo-password', 'development');
 
-    expect(rolDe(INSURER)).toBe(DIR.ROLE_ADMIN);
-    expect(rolDe(PHARMACY)).toBe(DIR.ROLE_STAFF);
+    expect(roleOf(INSURER)).toBe(DIR.ROLE_ADMIN);
+    expect(roleOf(PHARMACY)).toBe(DIR.ROLE_STAFF);
   });
 
   it('una base ya sembrada sube a la aseguradora de STAFF a ADMIN', async () => {
     const todasStaff = Object.fromEntries(
       PROVIDER_ACCOUNTS.map((c) => [c.email, DIR.ROLE_STAFF]),
     );
-    const { service, row: fila } = build(todasStaff);
+    const { service, row: row } = build(todasStaff);
 
     await service.run('demo-password', 'development');
 
-    expect(fila(INSURER).tenantRoleConceptId).toBe(DIR.ROLE_ADMIN);
-    expect(fila(INSURER).updatedAt).toBeInstanceOf(Date);
-    expect(fila(PHARMACY).tenantRoleConceptId).toBe(DIR.ROLE_STAFF);
-    expect(fila(PHARMACY).updatedAt).toBeUndefined();
+    expect(row(INSURER).tenantRoleConceptId).toBe(DIR.ROLE_ADMIN);
+    expect(row(INSURER).updatedAt).toBeInstanceOf(Date);
+    expect(row(PHARMACY).tenantRoleConceptId).toBe(DIR.ROLE_STAFF);
+    expect(row(PHARMACY).updatedAt).toBeUndefined();
   });
 });

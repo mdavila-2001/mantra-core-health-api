@@ -14,7 +14,7 @@ import {
   PeriopPreopRepository,
   PeriopIntraopRepository,
 } from '../repositories';
-import { ProfessionalCredentialsRepository } from '../../profiles/repositories';
+import { ProfessionalCredentialsRepository } from '../../profiles/infrastructure/repositories';
 import { AuditTrailService } from '../../audit/services';
 import { OutboxService } from '../../messaging/services';
 // La historia clínica sigue siendo de `clinical`: el caso quirúrgico pide que
@@ -902,7 +902,7 @@ export class PeriopCasesService {
     tenantId: string,
     query: ListCasesQueryDto,
   ): Promise<CaseListResponseDto> {
-    const filtros = {
+    const filters = {
       patientProfileId: query.patientProfileId,
       operatingRoomId: query.operatingRoomId,
       primarySurgeonProfileId: query.primarySurgeonProfileId,
@@ -912,11 +912,11 @@ export class PeriopCasesService {
     };
     const [cases, total] = await Promise.all([
       this.casesRepo.findCases(this.em, tenantId, {
-        ...filtros,
+        ...filters,
         limit: query.limit ?? 50,
         offset: query.offset ?? 0,
       }),
-      this.casesRepo.countCasesMatching(this.em, tenantId, filtros),
+      this.casesRepo.countCasesMatching(this.em, tenantId, filters),
     ]);
     return { items: cases.map((c) => this.toSummary(c)), total };
   }

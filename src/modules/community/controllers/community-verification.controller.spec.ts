@@ -95,8 +95,8 @@ describe('CommunityVerificationController', () => {
         { id: 'admin-1' } as any,
       );
 
-      const [[, , , motivo]] = d.service.applyRevoked.mock.calls;
-      expect(motivo).toBe('REVOKED');
+      const [[, , , reason]] = d.service.applyRevoked.mock.calls;
+      expect(reason).toBe('REVOKED');
     });
   });
 });

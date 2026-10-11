@@ -164,7 +164,7 @@ export class DirectoryTenantLegalRepository {
     ids: readonly string[],
   ): Promise<Map<string, Persons>> {
     if (ids.length === 0) return new Map();
-    const personas = await em.find(Persons, { id: { $in: [...ids] } });
-    return new Map(personas.map((persona) => [persona.id, persona]));
+    const persons = await em.find(Persons, { id: { $in: [...ids] } });
+    return new Map(persons.map((persona) => [persona.id, persona]));
   }
 }

@@ -156,13 +156,13 @@ describe('CommunityModerationReadService', () => {
       const d = build();
       await listQueueInTenant(d, { minAgeHours: 24 } as any, 20);
 
-      const filtros = d.moderationRepo.listQueuePage.mock.calls[0][2];
-      expect(filtros.queuedBefore).toBeInstanceOf(Date);
-      const horas =
-        (Date.now() - (filtros.queuedBefore as Date).getTime()) /
+      const filters = d.moderationRepo.listQueuePage.mock.calls[0][2];
+      expect(filters.queuedBefore).toBeInstanceOf(Date);
+      const hours =
+        (Date.now() - (filters.queuedBefore as Date).getTime()) /
         (60 * 60 * 1000);
-      expect(horas).toBeGreaterThanOrEqual(23.9);
-      expect(horas).toBeLessThanOrEqual(24.1);
+      expect(hours).toBeGreaterThanOrEqual(23.9);
+      expect(hours).toBeLessThanOrEqual(24.1);
     });
 
     it('no emite cursor cuando la página no está llena', async () => {

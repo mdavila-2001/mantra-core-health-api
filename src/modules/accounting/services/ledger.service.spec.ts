@@ -296,12 +296,12 @@ describe('LedgerService', () => {
     // MCH-018: `classify` sólo cambiaba el estado, así que el asiento quedaba
     // marcado como auto-clasificado sin que ninguna regla se hubiera evaluado.
     describe('MCH-018 · la auto-clasificación exige reglas', () => {
-      function draft(d: ReturnType<typeof build>, origen?: string) {
+      function draft(d: ReturnType<typeof build>, origin?: string) {
         const txn: any = {
           id: 't1',
           transactionNumber: 'JT-1',
           statusConceptId: ACCT.TXN_DRAFT,
-          sourceDocumentType: origen,
+          sourceDocumentType: origin,
         };
         d.journalRepo.findTransactionById.mockResolvedValue(txn);
         return txn;

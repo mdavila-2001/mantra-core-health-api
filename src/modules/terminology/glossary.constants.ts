@@ -74,6 +74,9 @@ export const GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE = 'glossary-sources';
  */
 export const GLOSSARY_IMAGE_PROPERTY_CODE = 'glossary-image';
 
+/** Documento enciclopédico completo serializado en `concept_properties.value_json`. */
+export const GLOSSARY_ARTICLE_PROPERTY_CODE = 'glossary-article';
+
 // --- Ficha de medicamento (FND-25-02) ---------------------------------------
 //
 // Los cuatro códigos de acá abajo son EXACTAMENTE los que ya escribe

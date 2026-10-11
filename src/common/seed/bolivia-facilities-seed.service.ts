@@ -178,14 +178,14 @@ export class BoliviaFacilitiesSeedService {
 
   /** Rompe si el catálogo declara dos veces el mismo código. */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
+    const seen = new Set<string>();
     for (const facility of BOLIVIA_FACILITIES) {
-      if (vistos.has(facility.code)) {
+      if (seen.has(facility.code)) {
         throw new Error(
           `El directorio declara el código "${facility.code}" más de una vez`,
         );
       }
-      vistos.add(facility.code);
+      seen.add(facility.code);
     }
   }
 
@@ -278,7 +278,7 @@ export class BoliviaFacilitiesSeedService {
    * sabemos» de «está vacía».
    */
   private propertiesOf(facility: BoliviaFacilitySeed): [string, string][] {
-    const pares: [string, string | null][] = [
+    const pairs: [string, string | null][] = [
       [BO_FACILITY_PROPERTY_CODES.tipo, facility.tipo],
       [
         BO_FACILITY_PROPERTY_CODES.nivel,
@@ -290,7 +290,7 @@ export class BoliviaFacilitiesSeedService {
       [BO_FACILITY_PROPERTY_CODES.telefono, facility.telefonos[0] ?? null],
       [BO_FACILITY_PROPERTY_CODES.nit, facility.nit],
     ];
-    return pares.filter((par): par is [string, string] => Boolean(par[1]));
+    return pairs.filter((par): par is [string, string] => Boolean(par[1]));
   }
 
   /** La expansión, en el orden del listado. */

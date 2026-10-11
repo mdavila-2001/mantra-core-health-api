@@ -79,7 +79,7 @@ describe('CommunityChatAutoReplyService', () => {
     // suite. Corrida a las 22:36, «hoy a las 21:00» caía ANTES de una actividad
     // de «hace dos horas» y la resta daba negativo: no había ausencia, y el
     // rojo culpaba a la franja horaria.
-    let ahora = new Date();
+    let now = new Date();
 
     const conversationRow =
       options.participacion === undefined
@@ -102,13 +102,13 @@ describe('CommunityChatAutoReplyService', () => {
               options.ausenciaMinutos === null
                 ? null
                 : participation({
-                    updatedAt: new Date(ahora.getTime() - minutes * 60_000),
+                    updatedAt: new Date(now.getTime() - minutes * 60_000),
                   }),
             );
           }
           if (options.avisoHaceHoras !== undefined && conversationRow) {
             conversationRow.lastAutoReplyAt = new Date(
-              ahora.getTime() - options.avisoHaceHoras * 3_600_000,
+              now.getTime() - options.avisoHaceHoras * 3_600_000,
             );
           }
           return Promise.resolve(conversationRow);
@@ -121,18 +121,18 @@ describe('CommunityChatAutoReplyService', () => {
       em,
       filaConversacion: conversationRow,
       fijarAhora: (when: Date) => {
-        ahora = when;
+        now = when;
       },
     };
   };
 
-  const responder = (d: ReturnType<typeof build>, ahora = new Date()) => {
-    d.fijarAhora(ahora);
+  const responder = (d: ReturnType<typeof build>, now = new Date()) => {
+    d.fijarAhora(now);
     return d.service.textForResponder(
       d.em as never,
       CONVERSATION,
       RECIPIENT,
-      ahora,
+      now,
     );
   };
 
@@ -226,11 +226,11 @@ describe('CommunityChatAutoReplyService', () => {
     // Si el envío falla, la marca se revierte con la transacción y el próximo
     // mensaje vuelve a intentarlo, en vez de dejar la conversación muda.
     const d = build({});
-    const ahora = new Date();
+    const now = new Date();
 
-    await responder(d, ahora);
+    await responder(d, now);
 
-    expect(d.filaConversacion?.lastAutoReplyAt).toBe(ahora);
+    expect(d.filaConversacion?.lastAutoReplyAt).toBe(now);
   });
 
   it('no anota nada cuando decide no contestar', async () => {

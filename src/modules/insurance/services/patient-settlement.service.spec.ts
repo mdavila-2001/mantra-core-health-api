@@ -3,7 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { PatientSettlementRepository } from '../repositories/patient-settlement.repository';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { PatientSettlementService } from './patient-settlement.service';

@@ -80,8 +80,8 @@ describe('BoOccupationsSeedService', () => {
         memberships: OCCUPATIONS,
       });
 
-      const [conjunto] = rowsOf('ValueSets');
-      expect(conjunto).toMatchObject({
+      const [set] = rowsOf('ValueSets');
+      expect(set).toMatchObject({
         id: boOccupationValueSetId(),
         internalCode: BO_OCCUPATION_VALUE_SET,
       });
@@ -144,9 +144,9 @@ describe('BoOccupationsSeedService', () => {
 
       await service.run();
 
-      const propiedades = rowsOf('ConceptProperties');
-      expect(propiedades).toHaveLength(OCCUPATIONS);
-      expect(propiedades[0]).toMatchObject({
+      const properties = rowsOf('ConceptProperties');
+      expect(properties).toHaveLength(OCCUPATIONS);
+      expect(properties[0]).toMatchObject({
         conceptId: boOccupationConceptId('ABOGADO'),
         propertyCode: BO_OCCUPATION_GROUP_PROPERTY_CODE,
         valueJson: 'Profesionales',

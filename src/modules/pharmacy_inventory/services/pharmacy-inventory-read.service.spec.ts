@@ -345,17 +345,17 @@ describe('PharmacyInventoryReadService', () => {
       const listIds = d.pharmacyRepo.findCurrentPrices.mock.calls[0][1];
       expect(listIds).toEqual(['list-pharm', 'list-sede']);
 
-      const lejos = result.items.find((item) => item.siteId === 'site-lejos')!;
+      const far = result.items.find((item) => item.siteId === 'site-lejos')!;
       const nearby = result.items.find((item) => item.siteId === 'site-cerca')!;
 
       // En la sede con lista propia gana esa lista.
-      const prod1Far = lejos.products.find(
+      const prod1Far = far.products.find(
         (product) => product.productId === 'prod-1',
       )!;
       expect(prod1Far.price?.priceListCode).toBe('SEDE-LEJOS');
       expect(prod1Far.price?.patientAmount).toBe('17.00');
       // prod-2 no tiene precio → el total de la sede no se inventa.
-      expect(lejos.totalAmount).toBeNull();
+      expect(far.totalAmount).toBeNull();
       // La cercana sólo tiene prod-1, con precio: su total sí existe.
       expect(nearby.totalAmount).toBe('20.00');
       expect(nearby.currency).toEqual({
@@ -394,11 +394,11 @@ describe('PharmacyInventoryReadService', () => {
         d.service.availability(['prod-1', 'prod-2'], undefined),
       );
 
-      const lejos = result.items.find((item) => item.siteId === 'site-lejos')!;
+      const far = result.items.find((item) => item.siteId === 'site-lejos')!;
       const nearby = result.items.find((item) => item.siteId === 'site-cerca')!;
       // Suma exacta en decimal, redondeada half-up a los 2 decimales del
       // contrato: 3.015 → 3.02, no el 3.01 del punto flotante.
-      expect(lejos.totalAmount).toBe('3.02');
+      expect(far.totalAmount).toBe('3.02');
       expect(nearby.totalAmount).toBe('1.01');
     });
   });

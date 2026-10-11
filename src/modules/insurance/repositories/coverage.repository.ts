@@ -161,14 +161,14 @@ export class CoverageRepository {
     const planById = new Map(planes.map((p) => [p.id, p]));
 
     const productIds = [...new Set(planes.map((p) => p.insuranceProductId))];
-    const productos = await em.find(InsuranceProducts, {
+    const products = await em.find(InsuranceProducts, {
       id: { $in: productIds },
     });
     const carrierIdByProductId = new Map(
-      productos.map((p) => [p.id, p.insuranceCarrierId]),
+      products.map((p) => [p.id, p.insuranceCarrierId]),
     );
 
-    const carrierIds = [...new Set(productos.map((p) => p.insuranceCarrierId))];
+    const carrierIds = [...new Set(products.map((p) => p.insuranceCarrierId))];
     const carriers = await em.find(InsuranceCarriers, {
       id: { $in: carrierIds },
     });
@@ -179,9 +179,9 @@ export class CoverageRepository {
       if (!plan) continue;
       const carrierId = carrierIdByProductId.get(plan.insuranceProductId);
       if (!carrierId) continue;
-      const nombre = nameByCarrierId.get(carrierId);
-      if (!nombre) continue;
-      byPatient.set(coverage.patientProfileId, nombre);
+      const name = nameByCarrierId.get(carrierId);
+      if (!name) continue;
+      byPatient.set(coverage.patientProfileId, name);
     }
     return byPatient;
   }

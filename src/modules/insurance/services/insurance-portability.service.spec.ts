@@ -411,12 +411,12 @@ describe('InsurancePortabilityService · resumen por periodo (Hito 4 §A)', () =
       ['denegada', INS.ADJ_OUTCOME_DENIED],
       ['sin-dictamen', null],
     ]);
-    const solicitudes = ['aprobada', 'parcial', 'denegada', 'sin-dictamen'].map(
+    const requests = ['aprobada', 'parcial', 'denegada', 'sin-dictamen'].map(
       request,
     );
 
     const stats = (service as any).periodStats(
-      solicitudes,
+      requests,
       null,
       [],
       new Date('2026-10-01T00:00:00.000Z'),

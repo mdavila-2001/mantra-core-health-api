@@ -10,28 +10,28 @@ import { CreateAdjudicationDto } from './claims.dto';
  * @param prefix - Ruta acumulada de las llamadas recursivas.
  * @returns Las rutas de las propiedades con error, ordenadas y sin repetidos.
  */
-function rutasWithError(
+function routesWithError(
   errors: readonly ValidationError[],
   prefix = '',
 ): string[] {
-  const rutas: string[] = [];
+  const routes: string[] = [];
   for (const error of errors) {
-    const ruta = prefix ? `${prefix}.${error.property}` : error.property;
-    if (error.constraints) rutas.push(ruta);
+    const route = prefix ? `${prefix}.${error.property}` : error.property;
+    if (error.constraints) routes.push(route);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasWithError(error.children, ruta));
+      routes.push(...routesWithError(error.children, route));
     }
   }
-  return [...new Set(rutas)].sort();
+  return [...new Set(routes)].sort();
 }
 
-const LINEA_ID = '11111111-1111-4111-8111-111111111111';
+const LINE_ID = '11111111-1111-4111-8111-111111111111';
 
 /** Un `CreateAdjudicationDto` mínimo, con una sola línea. */
-function dto(linea: Record<string, unknown>): Record<string, unknown> {
+function dto(line: Record<string, unknown>): Record<string, unknown> {
   return {
     outcome: 'DENIED',
-    lineAdjudications: [{ insuranceClaimLineId: LINEA_ID, ...linea }],
+    lineAdjudications: [{ insuranceClaimLineId: LINE_ID, ...line }],
   };
 }
 
@@ -43,7 +43,7 @@ async function propertiesWithError(
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasWithError(errors);
+  return routesWithError(errors);
 }
 
 /**

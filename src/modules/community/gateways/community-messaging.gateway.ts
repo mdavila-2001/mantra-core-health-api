@@ -442,7 +442,7 @@ export class CommunityMessagingGateway
 
   /** A la sala del hilo y a la bandeja de cada destinatario; nunca lanza. */
   private issueA(
-    evento: string,
+    event: string,
     payload: unknown,
     conversationId: string,
     recipientProfileIds: string[],
@@ -452,10 +452,10 @@ export class CommunityMessagingGateway
         this.conversationRoom(conversationId),
         ...recipientProfileIds.map((id) => this.profileRoom(id)),
       ];
-      this.server.to(rooms).emit(evento, payload);
+      this.server.to(rooms).emit(event, payload);
     } catch (error) {
       this.logger.warn(
-        { operation: `community.gateway.${evento}`, err: error },
+        { operation: `community.gateway.${event}`, err: error },
         'No se pudo empujar por WS; el REST ya lo guardó',
       );
     }

@@ -35,19 +35,19 @@ const MINIMAL_REGISTRATION = {
  * @param prefix - La ruta acumulada hasta este nivel.
  * @returns Las rutas de las propiedades con error, ordenadas y sin repetidos.
  */
-function rutasWithError(
+function routesWithError(
   errors: readonly ValidationError[],
   prefix = '',
 ): string[] {
-  const rutas: string[] = [];
+  const routes: string[] = [];
   for (const error of errors) {
-    const ruta = prefix ? `${prefix}.${error.property}` : error.property;
-    if (error.constraints) rutas.push(ruta);
+    const route = prefix ? `${prefix}.${error.property}` : error.property;
+    if (error.constraints) routes.push(route);
     if (error.children && error.children.length > 0) {
-      rutas.push(...rutasWithError(error.children, ruta));
+      routes.push(...routesWithError(error.children, route));
     }
   }
-  return [...new Set(rutas)].sort();
+  return [...new Set(routes)].sort();
 }
 
 /**
@@ -67,7 +67,7 @@ async function propertiesWithError(
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return rutasWithError(errors);
+  return routesWithError(errors);
 }
 
 describe('RegisterOrganizationDto · alta mínima', () => {
@@ -221,7 +221,7 @@ describe('RegisterOrganizationDto · legalEntityType (1.1)', () => {
  * `TenantAffiliationDocumentsService`, no este DTO.
  */
 describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
-  const LEGAL_DOCUMENTS_COMPLETOS = {
+  const LEGAL_DOCUMENTS_COMPLETE = {
     constitutionFileId: '11111111-1111-4111-8111-111111111111',
     taxIdentifierFileId: '22222222-2222-4222-8222-222222222222',
     commerceRegistryFileId: '33333333-3333-4333-8333-333333333333',
@@ -235,15 +235,15 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
         ...MINIMAL_REGISTRATION,
         organization: {
           ...MINIMAL_REGISTRATION.organization,
-          legalDocuments: LEGAL_DOCUMENTS_COMPLETOS,
+          legalDocuments: LEGAL_DOCUMENTS_COMPLETE,
         },
       }),
     ).toEqual([]);
   });
 
   it('el bloque es todo o nada: falta uno solo es 400, no 422', async () => {
-    const { healthAuthorityCertificateFileId, ...incompleto } =
-      LEGAL_DOCUMENTS_COMPLETOS;
+    const { healthAuthorityCertificateFileId, ...incomplete } =
+      LEGAL_DOCUMENTS_COMPLETE;
     void healthAuthorityCertificateFileId;
 
     expect(
@@ -251,7 +251,7 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
         ...MINIMAL_REGISTRATION,
         organization: {
           ...MINIMAL_REGISTRATION.organization,
-          legalDocuments: incompleto,
+          legalDocuments: incomplete,
         },
       }),
     ).toEqual(['organization.legalDocuments.healthAuthorityCertificateFileId']);
@@ -264,7 +264,7 @@ describe('RegisterOrganizationDto · legalDocuments (1.2)', () => {
         organization: {
           ...MINIMAL_REGISTRATION.organization,
           legalDocuments: {
-            ...LEGAL_DOCUMENTS_COMPLETOS,
+            ...LEGAL_DOCUMENTS_COMPLETE,
             constitutionFileId: 'no-es-un-uuid',
           },
         },

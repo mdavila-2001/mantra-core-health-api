@@ -195,10 +195,10 @@ describe('GlossarySeedService', () => {
       expect(concept.stateConceptId).toEqual(expect.any(String));
     }
     // Todos comparten el mismo estado: el activo.
-    const estados = new Set(
+    const states = new Set(
       g.rowsOf('CatalogConcepts').map((concept) => concept.stateConceptId),
     );
-    expect(estados.size).toBe(1);
+    expect(states.size).toBe(1);
   });
 
   it('no siembra ninguna propiedad `glossary-image`: decisión deliberada, no una omisión', async () => {
@@ -302,7 +302,7 @@ describe('GlossarySeedService', () => {
 
   describe('reconciliación de una base sembrada con el catálogo anterior', () => {
     const PT = 'tiempo-de-protrombina';
-    const HEMOGRAMA = 'hemograma-completo';
+    const BLOODCOUNT = 'hemograma-completo';
 
     /**
      * La base tal como la dejó el catálogo de antes de la auditoría del
@@ -311,24 +311,24 @@ describe('GlossarySeedService', () => {
      * nombre en inglés viejo, el resumen viejo de la warfarina y una relación
      * entre curados que el catálogo ya no declara.
      */
-    async function baseAnterior(): Promise<Store> {
+    async function basePrevious(): Promise<Store> {
       const store = await seeded();
       const rows = (entity: string) => store.get(entity)!;
       const put = (entity: string, row: any) => rows(entity).set(row.id, row);
 
-      const hemograma = glossaryTermConceptId(HEMOGRAMA);
+      const bloodCount = glossaryTermConceptId(BLOODCOUNT);
       rows('ValueSetMembers').delete(
-        glossaryValueSetMemberId('glossary-category-lab', hemograma),
+        glossaryValueSetMemberId('glossary-category-lab', bloodCount),
       );
       put('ValueSetMembers', {
         id: glossaryValueSetMemberId(
           'glossary-category-diagnostic-test',
-          hemograma,
+          bloodCount,
         ),
         valueSetVersionId: glossaryValueSetVersionId(
           'glossary-category-diagnostic-test',
         ),
-        conceptId: hemograma,
+        conceptId: bloodCount,
       });
 
       put('ConceptDesignations', {
@@ -365,16 +365,16 @@ describe('GlossarySeedService', () => {
     }
 
     it('mueve la categoría, corrige textos y quita sinónimos y relaciones que ya no van', async () => {
-      const g = build(await baseAnterior());
+      const g = build(await basePrevious());
 
       const result = await g.service.run();
 
-      const hemograma = glossaryTermConceptId(HEMOGRAMA);
+      const bloodCount = glossaryTermConceptId(BLOODCOUNT);
       const categories = g
         .rowsIn('ValueSetMembers')
         .filter(
           (m) =>
-            m.conceptId === hemograma &&
+            m.conceptId === bloodCount &&
             [
               glossaryValueSetVersionId('glossary-category-lab'),
               glossaryValueSetVersionId('glossary-category-diagnostic-test'),
@@ -431,7 +431,7 @@ describe('GlossarySeedService', () => {
     });
 
     it('una segunda corrida sobre la base reconciliada no escribe nada', async () => {
-      const first = build(await baseAnterior());
+      const first = build(await basePrevious());
       await first.service.run();
 
       const second = build(first.store);

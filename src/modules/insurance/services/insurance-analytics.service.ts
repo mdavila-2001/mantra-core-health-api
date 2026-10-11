@@ -8,7 +8,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { TenantAdministrationService } from '../../directory/services';
-import { patientCoverageReferenceDate } from '../../profiles/patient-coverage-validity';
+import { patientCoverageReferenceDate } from '../../profiles/domain/patient-coverage-validity';
 import { CatalogRepository } from '../repositories';
 import {
   InsuranceAnalyticsRepository,

@@ -9,8 +9,8 @@ import { XlsxParser } from './xlsx-parser';
 
 const FIXTURES = join(process.cwd(), 'test', 'fixtures', 'terminology-import');
 
-function leer(nombre: string): Buffer {
-  return readFileSync(join(FIXTURES, nombre));
+function read(name: string): Buffer {
+  return readFileSync(join(FIXTURES, name));
 }
 
 const csv = new CsvParser();
@@ -41,15 +41,15 @@ const TWINS = [
 ];
 
 describe('XlsxParser · igualdad contra el CsvParser sobre los gemelos', () => {
-  it.each(TWINS)('%s.xlsx produce el mismo resultado que %s.csv', (nombre) => {
-    const resultCsv = csv.parse(leer(`${nombre}.csv`), profile);
-    const resultXlsx = xlsx.parse(leer(`${nombre}.xlsx`), profile);
+  it.each(TWINS)('%s.xlsx produce el mismo resultado que %s.csv', (name) => {
+    const resultCsv = csv.parse(read(`${name}.csv`), profile);
+    const resultXlsx = xlsx.parse(read(`${name}.xlsx`), profile);
     expect(resultXlsx).toEqual(resultCsv);
   });
 });
 
 describe('XlsxParser · celda-numerica (sólo XLSX, sin gemelo CSV)', () => {
-  const result = xlsx.parse(leer('celda-numerica.xlsx'), profile);
+  const result = xlsx.parse(read('celda-numerica.xlsx'), profile);
 
   it('convierte un code numérico a texto sin notación científica', () => {
     expect(result.filas[0]?.valores['code']).toBe('10');
@@ -92,9 +92,9 @@ describe('XlsxParser · hoja preferida', () => {
 
 describe('XlsxParser · límite de filas', () => {
   it('parsea 10 000 filas en menos de 5 segundos', () => {
-    const antes = process.memoryUsage().heapUsed;
+    const before = process.memoryUsage().heapUsed;
     const start = performance.now();
-    const result = xlsx.parse(leer('grande-10k.xlsx'), profile);
+    const result = xlsx.parse(read('grande-10k.xlsx'), profile);
     const durationMs = performance.now() - start;
     const after = process.memoryUsage().heapUsed;
 
@@ -102,7 +102,7 @@ describe('XlsxParser · límite de filas', () => {
     expect(durationMs).toBeLessThan(5_000);
 
     console.log(
-      `grande-10k: ${durationMs.toFixed(0)} ms, heapUsed antes=${antes} después=${after} (+${after - antes} bytes)`,
+      `grande-10k: ${durationMs.toFixed(0)} ms, heapUsed antes=${before} después=${after} (+${after - before} bytes)`,
     );
   });
 

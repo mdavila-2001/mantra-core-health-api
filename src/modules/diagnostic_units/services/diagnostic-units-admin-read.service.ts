@@ -202,7 +202,7 @@ export class DiagnosticUnitsAdminReadService {
       schedules.map((schedule) => [schedule.id, schedule]),
     );
     const pricesByStudy = this.pricesByStudy(prices, scheduleById, byId);
-    const ahora = new Date();
+    const now = new Date();
 
     return {
       ...this.summary(
@@ -213,12 +213,12 @@ export class DiagnosticUnitsAdminReadService {
         equipment.length,
       ),
       sites: sites.map((site) => this.site(site, siteById, byId)),
-      equipment: equipment.map((item) => this.team(item, byId, ahora)),
+      equipment: equipment.map((item) => this.team(item, byId, now)),
       studies: offerings.map((offering) =>
         this.study(offering, byId, pricesByStudy.get(offering.id) ?? []),
       ),
       accreditations: accreditations.map((doc) =>
-        this.accreditation(doc, byId, ahora),
+        this.accreditation(doc, byId, now),
       ),
       staff: assignments.map((assignment) =>
         this.member(
@@ -282,7 +282,7 @@ export class DiagnosticUnitsAdminReadService {
   private team(
     item: DiagnosticEquipment,
     concepts: ReadonlyMap<string, CatalogConcepts>,
-    ahora: Date,
+    now: Date,
   ): DiagnosticUnitAdminEquipmentDto {
     return {
       id: item.id,
@@ -295,7 +295,7 @@ export class DiagnosticUnitsAdminReadService {
       operationalStatus: concept(concepts, item.operationalStatusConceptId),
       lastCalibrationAt: item.lastCalibrationAt?.toISOString() ?? null,
       nextCalibrationDueAt: item.nextCalibrationDueAt?.toISOString() ?? null,
-      daysToCalibration: daysUntil(item.nextCalibrationDueAt, ahora),
+      daysToCalibration: daysUntil(item.nextCalibrationDueAt, now),
     };
   }
 
@@ -326,7 +326,7 @@ export class DiagnosticUnitsAdminReadService {
   private accreditation(
     doc: DiagnosticUnitAccreditations,
     concepts: ReadonlyMap<string, CatalogConcepts>,
-    ahora: Date,
+    now: Date,
   ): DiagnosticUnitAdminAccreditationDto {
     return {
       id: doc.id,
@@ -334,9 +334,9 @@ export class DiagnosticUnitsAdminReadService {
       type: concept(concepts, doc.accreditationConceptId),
       number: doc.accreditationNumber ?? null,
       evidenceFileId: doc.evidenceFileId ?? null,
-      validFrom: soloDate(doc.validFrom),
-      validTo: soloDate(doc.validTo),
-      daysToExpiry: daysUntil(doc.validTo, ahora),
+      validFrom: onlyDate(doc.validFrom),
+      validTo: onlyDate(doc.validTo),
+      daysToExpiry: daysUntil(doc.validTo, now),
       verificationStatus: concept(concepts, doc.verificationStatusConceptId),
     };
   }
@@ -363,8 +363,8 @@ export class DiagnosticUnitsAdminReadService {
       specialty: optionalConcept(concepts, assignment.specialtyConceptId),
       mayValidateResults: assignment.mayValidateResults ?? null,
       maySignReports: assignment.maySignReports ?? null,
-      validFrom: soloDate(assignment.validFrom),
-      validTo: soloDate(assignment.validTo),
+      validFrom: onlyDate(assignment.validFrom),
+      validTo: onlyDate(assignment.validTo),
       status: concept(concepts, assignment.statusConceptId),
     };
   }
@@ -416,9 +416,9 @@ function concept(
   concepts: ReadonlyMap<string, CatalogConcepts>,
   id: string | undefined,
 ): DiagnosticConceptDto {
-  const valor = id === undefined ? undefined : concepts.get(id);
-  return valor
-    ? { code: valor.code, display: valor.display }
+  const value = id === undefined ? undefined : concepts.get(id);
+  return value
+    ? { code: value.code, display: value.display }
     : { code: 'UNKNOWN', display: 'Sin registrar' };
 }
 
@@ -429,8 +429,8 @@ function optionalConcept(
   return id === undefined ? null : concept(concepts, id);
 }
 
-function soloDate(valor: Date | undefined): string | null {
-  return valor?.toISOString().slice(0, 10) ?? null;
+function onlyDate(value: Date | undefined): string | null {
+  return value?.toISOString().slice(0, 10) ?? null;
 }
 
 /**
@@ -440,36 +440,36 @@ function soloDate(valor: Date | undefined): string | null {
  * `0` y no `-1` por unas horas: quien lee la alerta piensa en días, no en
  * milisegundos.
  */
-function daysUntil(valor: Date | undefined, ahora: Date): number | null {
-  if (valor === undefined) return null;
+function daysUntil(value: Date | undefined, now: Date): number | null {
+  if (value === undefined) return null;
   const target = Date.UTC(
-    valor.getUTCFullYear(),
-    valor.getUTCMonth(),
-    valor.getUTCDate(),
+    value.getUTCFullYear(),
+    value.getUTCMonth(),
+    value.getUTCDate(),
   );
   const reference = Date.UTC(
-    ahora.getUTCFullYear(),
-    ahora.getUTCMonth(),
-    ahora.getUTCDate(),
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate(),
   );
   return Math.round((target - reference) / ONE_DAY_MS);
 }
 
 function unique(values: readonly (string | undefined)[]): string[] {
   return [
-    ...new Set(values.filter((valor): valor is string => valor !== undefined)),
+    ...new Set(values.filter((value): value is string => value !== undefined)),
   ];
 }
 
 function countBy<T>(
   rows: readonly T[],
-  keyOf: (fila: T) => string | undefined,
+  keyOf: (row: T) => string | undefined,
 ): Map<string, number> {
   const result = new Map<string, number>();
   for (const row of rows) {
-    const clave = keyOf(row);
-    if (clave !== undefined) {
-      result.set(clave, (result.get(clave) ?? 0) + 1);
+    const key = keyOf(row);
+    if (key !== undefined) {
+      result.set(key, (result.get(key) ?? 0) + 1);
     }
   }
   return result;

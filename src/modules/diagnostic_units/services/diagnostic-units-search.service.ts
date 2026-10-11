@@ -120,15 +120,15 @@ export class DiagnosticUnitsSearchService {
       restrictToUnitIds,
     };
 
-    const [unidades, total] = await Promise.all([
+    const [units, total] = await Promise.all([
       this.readRepo.searchVisible(em, criteria, limit, offset),
       this.readRepo.countVisible(em, criteria),
     ]);
-    if (unidades.length === 0) {
+    if (units.length === 0) {
       return { items: [], total, limit, offset };
     }
 
-    const items = await this.project(em, unidades);
+    const items = await this.project(em, units);
 
     // Precio y calificación se filtran **después** de proyectar porque los dos
     // son agregados de otras tablas —el mínimo de una tarifa, la media de unas
@@ -156,15 +156,15 @@ export class DiagnosticUnitsSearchService {
     units: readonly DiagnosticUnits[],
   ): Promise<DiagnosticUnitSearchItemDto[]> {
     const ids = units.map((unit) => unit.id);
-    const ahora = new Date();
+    const now = new Date();
 
-    const [sitios, ofertas, conceptos, cronogramas, notas] = await Promise.all([
+    const [sites, offers, concepts, schedules, notes] = await Promise.all([
       this.readRepo.findActiveSites(em, ids),
       this.readRepo.findActiveOfferings(em, ids),
       this.readRepo.findConcepts(em, [
         ...new Set(units.map((u) => u.diagnosticUnitTypeConceptId)),
       ]),
-      this.readRepo.findCurrentPublicSchedulesFor(em, ids, ahora),
+      this.readRepo.findCurrentPublicSchedulesFor(em, ids, now),
       this.ratings.ratingsByProfiles(
         em,
         units
@@ -175,12 +175,12 @@ export class DiagnosticUnitsSearchService {
 
     const teams = await this.readRepo.findEquipment(
       em,
-      sitios.map((sitio) => sitio.id),
+      sites.map((site) => site.id),
     );
     const prices = await this.readRepo.findCurrentPricesForSchedules(
       em,
-      cronogramas.map((schedule) => schedule.id),
-      ahora,
+      schedules.map((schedule) => schedule.id),
+      now,
     );
 
     // CL-45/CL-51: ciudad de cada sede, siguiendo el mismo salto que ya usa la
@@ -188,7 +188,7 @@ export class DiagnosticUnitsSearchService {
     // dirección de `common`.
     const practiceSites = await this.readRepo.findPracticeSites(
       em,
-      sitios.map((sitio) => sitio.practiceSiteId),
+      sites.map((site) => site.practiceSiteId),
     );
     const addressIds = practiceSites
       .map((ps) => ps.addressId)
@@ -212,31 +212,31 @@ export class DiagnosticUnitsSearchService {
     );
 
     const conceptById = new Map(
-      conceptos.map((concept) => [concept.id, concept]),
+      concepts.map((concept) => [concept.id, concept]),
     );
     const unitBySite = new Map(
-      sitios.map((sitio) => [sitio.id, sitio.diagnosticUnitId]),
+      sites.map((site) => [site.id, site.diagnosticUnitId]),
     );
     const unitBySchedule = new Map(
-      cronogramas.map((schedule) => [schedule.id, schedule.diagnosticUnitId]),
+      schedules.map((schedule) => [schedule.id, schedule.diagnosticUnitId]),
     );
     const currencyBySchedule = new Map(
-      cronogramas.map((schedule) => [schedule.id, schedule.currencyConceptId]),
+      schedules.map((schedule) => [schedule.id, schedule.currencyConceptId]),
     );
 
-    const sitesByUnit = countBy(sitios, (s) => s.diagnosticUnitId);
-    const studiesByUnit = countBy(ofertas, (o) => o.diagnosticUnitId);
+    const sitesByUnit = countBy(sites, (s) => s.diagnosticUnitId);
+    const studiesByUnit = countBy(offers, (o) => o.diagnosticUnitId);
     const teamsByUnit = countBy(teams, (e) =>
       unitBySite.get(e.diagnosticUnitSiteId),
     );
 
     const citiesByUnit = new Map<string, Set<string>>();
-    for (const sitio of sitios) {
-      const city = cityByPracticeSiteId.get(sitio.practiceSiteId);
+    for (const site of sites) {
+      const city = cityByPracticeSiteId.get(site.practiceSiteId);
       if (city === undefined) continue;
-      const set = citiesByUnit.get(sitio.diagnosticUnitId) ?? new Set();
+      const set = citiesByUnit.get(site.diagnosticUnitId) ?? new Set();
       set.add(city);
-      citiesByUnit.set(sitio.diagnosticUnitId, set);
+      citiesByUnit.set(site.diagnosticUnitId, set);
     }
 
     const minimumByUnit = new Map<string, number>();
@@ -247,7 +247,7 @@ export class DiagnosticUnitsSearchService {
       // Se compara el importe **base publicado**, que es el que el centro
       // muestra en su tarifa. `patient_amount` puede no estar fijado y usar uno
       // u otro según la fila haría comparar peras con manzanas entre centros.
-      const amount = numero(price.baseAmount);
+      const amount = parseAmount(price.baseAmount);
       if (amount === undefined) continue;
       const previous = minimumByUnit.get(unitId);
       if (previous === undefined || amount < previous) {
@@ -271,7 +271,7 @@ export class DiagnosticUnitsSearchService {
       const note =
         unit.publicProfileId === undefined
           ? undefined
-          : notas.get(unit.publicProfileId);
+          : notes.get(unit.publicProfileId);
       const conceptCurrencyId = minimumCurrencyByUnit.get(unit.id);
       return {
         id: unit.id,
@@ -351,7 +351,7 @@ function booleanValue(value: string | undefined): boolean | undefined {
  * segura. Se hace en la frontera y no en la pantalla: cada consumidor
  * convirtiendo por su cuenta es cómo se cuela un `NaN` en un precio.
  */
-function numero(value: string | undefined): number | undefined {
+function parseAmount(value: string | undefined): number | undefined {
   if (value === undefined) return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;

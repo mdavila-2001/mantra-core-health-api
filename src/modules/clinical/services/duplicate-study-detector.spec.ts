@@ -122,11 +122,11 @@ describe('DuplicateStudyDetector', () => {
       const { detector, em, execute } = build({});
       await detector.findDuplicate(em, PATIENT, CODE, 30, NOW);
 
-      const [consulta, parametros] = execute.mock.calls[0];
-      expect(consulta).toMatch(/LIMIT 1/);
-      expect(consulta).toMatch(/created_at/);
-      expect(consulta).not.toMatch(/updated_at/);
-      expect(parametros).toEqual([
+      const [query, params] = execute.mock.calls[0];
+      expect(query).toMatch(/LIMIT 1/);
+      expect(query).toMatch(/created_at/);
+      expect(query).not.toMatch(/updated_at/);
+      expect(params).toEqual([
         PATIENT,
         CODE,
         CLIN.RELEASE_RELEASED,

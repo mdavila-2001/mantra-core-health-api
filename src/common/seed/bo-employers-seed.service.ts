@@ -201,7 +201,7 @@ export class BoEmployersSeedService {
     counters.memberships += await this.seedMemberships(em, now);
 
     const total = Object.values(counters).reduce(
-      (sum, valor) => sum + valor,
+      (sum, value) => sum + value,
       0,
     );
     if (total > 0) {
@@ -223,14 +223,14 @@ export class BoEmployersSeedService {
    * código sin querer.
    */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
+    const seen = new Set<string>();
     for (const employer of BO_EMPLOYERS) {
-      if (vistos.has(employer.code)) {
+      if (seen.has(employer.code)) {
         throw new Error(
           `El catálogo de empresas declara el código "${employer.code}" más de una vez`,
         );
       }
-      vistos.add(employer.code);
+      seen.add(employer.code);
     }
   }
 

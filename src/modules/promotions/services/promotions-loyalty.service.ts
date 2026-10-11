@@ -126,7 +126,7 @@ const CONCEPT_CODE: Readonly<Record<string, string>> = Object.freeze(
         'REASON_REFERRAL',
         'REASON_MANUAL',
       ] as const
-    ).map((nombre) => [CONCEPTS[nombre], CONCEPT_DEFS[nombre].code]),
+    ).map((name) => [CONCEPTS[name], CONCEPT_DEFS[name].code]),
   ),
 );
 
@@ -1384,16 +1384,16 @@ export class PromotionsLoyaltyService {
       after,
     );
     const hasMore = rows.length > limit;
-    const pagina = hasMore ? rows.slice(0, limit) : rows;
-    const ultima = pagina.at(-1);
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
 
     return {
-      entries: pagina.map((entry) => this.myLedgerEntry(entry)),
-      ...(hasMore && ultima
+      entries: page.map((entry) => this.myLedgerEntry(entry)),
+      ...(hasMore && last
         ? {
             nextCursor: encodeKeysetCursor({
-              recordedAt: ultima.recordedAt.toISOString(),
-              id: ultima.id,
+              recordedAt: last.recordedAt.toISOString(),
+              id: last.id,
             }),
           }
         : {}),
@@ -1529,9 +1529,9 @@ export class PromotionsLoyaltyService {
    * ordena, porque un cursor a medias produciría una ventana arbitraria.
    */
   private decodeLedgerCursor(cursor: string): { recordedAt: Date; id: string } {
-    const clave = decodeKeysetCursor(cursor);
-    const recordedAt = clave['recordedAt'];
-    const id = clave['id'];
+    const key = decodeKeysetCursor(cursor);
+    const recordedAt = key['recordedAt'];
+    const id = key['id'];
     if (typeof recordedAt !== 'string' || typeof id !== 'string') {
       throw new PreconditionFailedException('Cursor de movimientos inválido');
     }

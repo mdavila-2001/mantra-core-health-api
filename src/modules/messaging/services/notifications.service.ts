@@ -842,7 +842,7 @@ export class NotificationsService implements InAppNotificationEmitter {
     actor: AuthenticatedUser,
   ): Promise<MarkAllInAppReadResponseDto> {
     return this.em.transactional(async (tx) => {
-      const pendientes = await this.notificationsRepo.findUnreadInApp(
+      const pending = await this.notificationsRepo.findUnreadInApp(
         tx,
         actor.id,
         CONCEPTS.INAPP_UNREAD,
@@ -850,7 +850,7 @@ export class NotificationsService implements InAppNotificationEmitter {
       );
 
       const readAt = new Date();
-      for (const notification of pendientes) {
+      for (const notification of pending) {
         notification.statusConceptId = CONCEPTS.INAPP_READ;
         notification.readAt ??= readAt;
         notification.openedAt ??= readAt;
@@ -863,7 +863,7 @@ export class NotificationsService implements InAppNotificationEmitter {
         actor.id,
         CONCEPTS.INAPP_UNREAD,
       );
-      return { marked: pendientes.length, unreadCount };
+      return { marked: pending.length, unreadCount };
     });
   }
 
@@ -978,13 +978,13 @@ export class NotificationsService implements InAppNotificationEmitter {
 
       // `undefined` significa «no la toques»; `null`, «quitala».
       if (dto.quietHours !== undefined) {
-        const valor =
+        const value =
           dto.quietHours === null
             ? undefined
             : { start: dto.quietHours.start, end: dto.quietHours.end };
         const row = rows.find((candidate) => !candidate.categoryConceptId);
         if (row) {
-          row.quietHoursJson = valor;
+          row.quietHoursJson = value;
           touch(row, actor.id);
         } else {
           this.notificationsRepo.createPreference(tx, {
@@ -992,7 +992,7 @@ export class NotificationsService implements InAppNotificationEmitter {
             channelId: channel.id,
             // Sin categoría: gobierna el canal entero.
             optedIn: true,
-            quietHoursJson: valor,
+            quietHoursJson: value,
             actorUserId: actor.id,
           });
         }
@@ -1091,28 +1091,28 @@ export class NotificationsService implements InAppNotificationEmitter {
     channelId: string,
     categoryConceptId: string,
   ): Promise<Date> {
-    const ahora = new Date();
+    const now = new Date();
     const preferences = await this.notificationsRepo.findPreferences(
       tx,
       recipientUserId,
       channelId,
     );
-    const ventana =
+    const window =
       preferences.find(
         (preference) => preference.categoryConceptId === categoryConceptId,
       )?.quietHoursJson ??
       preferences.find((preference) => !preference.categoryConceptId)
         ?.quietHoursJson;
 
-    if (!this.inQuietHours(ventana, ahora)) return ahora;
+    if (!this.inQuietHours(window, now)) return now;
 
-    const fin = this.windowEnd(ventana);
-    if (fin === undefined) return ahora;
+    const fin = this.windowEnd(window);
+    if (fin === undefined) return now;
 
-    const available = new Date(ahora);
+    const available = new Date(now);
     available.setUTCHours(Math.floor(fin / 60), fin % 60, 0, 0);
     // Si el fin ya pasó hoy, la ventana cruza la medianoche: termina mañana.
-    if (available <= ahora) {
+    if (available <= now) {
       available.setUTCDate(available.getUTCDate() + 1);
     }
     return available;

@@ -75,18 +75,18 @@ export class AddressesRepository {
    * @param useConceptId - Uso de la dirección (`CONCEPTS.ADDR_USE_HOME`…).
    * @returns La dirección vigente, o `null` si no tiene ninguna.
    */
-  async findVigenteByOwnerAndUse(
+  async findCurrentByOwnerAndUse(
     em: EntityManager,
     ownerId: string,
     useConceptId: string,
   ): Promise<Addresses | null> {
-    const ahora = new Date();
+    const now = new Date();
     return em.findOne(
       Addresses,
       {
         ownerId,
         useConceptId,
-        $or: [{ validTo: null }, { validTo: { $gt: ahora } }],
+        $or: [{ validTo: null }, { validTo: { $gt: now } }],
       },
       { orderBy: { createdAt: 'desc' } },
     );
@@ -99,18 +99,18 @@ export class AddressesRepository {
    * antes. `valid_to` es una columna `date`, así que con la fecha de hoy la
    * dirección deja de ser vigente en la misma petición.
    *
-   * @param direccion - La dirección a cerrar.
+   * @param address - La dirección a cerrar.
    * @param validTo - Fecha de fin de vigencia (normalmente hoy).
    * @param actorUserId - Quién la cierra, para la auditoría.
    * @returns La misma dirección, ya cerrada.
    */
-  closeVigente(
-    direccion: Addresses,
+  closeCurrent(
+    address: Addresses,
     validTo: Date,
     actorUserId?: string,
   ): Addresses {
-    direccion.validTo = validTo;
-    return touch(direccion, actorUserId);
+    address.validTo = validTo;
+    return touch(address, actorUserId);
   }
 
   /** Construye la entidad en la unidad de trabajo (sin flush). */

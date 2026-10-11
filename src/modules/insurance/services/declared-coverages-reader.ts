@@ -4,11 +4,11 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   patientCoverageReferenceDate,
   patientCoverageValidity,
-} from '../../profiles/patient-coverage-validity';
+} from '../../profiles/domain/patient-coverage-validity';
 import type {
   CoverageBenefitSummaryDto,
   OwnCoverageDto,
-} from '../../profiles/dto/read-patients.dto';
+} from '../../profiles/presentation/dto/read-patients.dto';
 import { isPublicCarrierId } from '../../../common/seed/bolivia-insurance.catalog';
 import { resolveInsuranceCurrencyCode } from '../insurance-currency';
 import { INS } from '../insurance.concepts';
@@ -17,7 +17,7 @@ import { INS } from '../insurance.concepts';
 function withoutAbsentFields<T extends object>(response: T): T {
   return Object.fromEntries(
     Object.entries(response).filter(
-      ([, valor]) => valor !== null && valor !== undefined,
+      ([, value]) => value !== null && value !== undefined,
     ),
   ) as T;
 }

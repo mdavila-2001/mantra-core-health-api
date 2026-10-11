@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { CONCEPTS } from '../../../../common';
+import { CONCEPTS, runWithTenant } from '../../../../common';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { SchedulingServiceBookingService } from './scheduling-service-booking.service';
 
@@ -242,6 +242,87 @@ describe('SchedulingServiceBookingService', () => {
 
       expect(res.items).toEqual([]);
     });
+
+    it('filtra por sede y conserva la sede aunque no declare zona horaria', async () => {
+      const d = build();
+      d.offeringsRepo.findResourcesOfProfessional.mockResolvedValue([
+        site({ timeZone: undefined }),
+        site({ id: 'other-site' }),
+      ]);
+
+      await d.service.availability({ ...query, resourceId: SITE }, patient);
+
+      expect(d.agenda.bandsOfServices.mock.calls[0][2]).toEqual([
+        { id: SITE, name: 'Consultorio central', timeZone: undefined },
+      ]);
+    });
+
+    it('permite al superadministrador consultar una sede fuera de sus tenants', async () => {
+      const d = build();
+      d.offeringsRepo.findResourcesOfProfessional.mockResolvedValue([
+        site({ tenantId: 'other-tenant' }),
+      ]);
+
+      await d.service.availability(query, {
+        id: 'root',
+        roles: ['SUPERADMIN'],
+        tenantIds: [],
+      } as any);
+
+      expect(d.agenda.bandsOfServices.mock.calls[0][2]).toHaveLength(1);
+    });
+
+    it('respeta el tenant activo entre las membresías del paciente', async () => {
+      const d = build();
+      const actor = {
+        id: 'multi-tenant',
+        roles: ['PATIENT'],
+        tenantIds: [TENANT, 'active-tenant'],
+      } as any;
+
+      await runWithTenant('active-tenant', () =>
+        d.service.availability(query, actor),
+      );
+
+      expect(d.agenda.bandsOfServices.mock.calls[0][2]).toEqual([]);
+    });
+
+    it('sin tenant activo ni membresías no expone sedes', async () => {
+      const d = build();
+
+      await d.service.availability(query, {
+        id: 'no-tenant',
+        roles: ['PATIENT'],
+      } as any);
+
+      expect(d.agenda.bandsOfServices.mock.calls[0][2]).toEqual([]);
+    });
+
+    it('oculta la oferta inactiva o sin catálogo visible con 404', async () => {
+      const inactive = build();
+      inactive.offeringsRepo.findOfferingById.mockResolvedValue(
+        offering({ statusConceptId: 'offering-inactive' }),
+      );
+      await expect(
+        inactive.service.availability(query, patient),
+      ).rejects.toThrow(/Servicio no encontrado/);
+
+      const missingCatalog = build();
+      missingCatalog.offeringsRepo.findCatalogItem.mockResolvedValue(null);
+      await expect(
+        missingCatalog.service.availability(query, patient),
+      ).rejects.toThrow(/Servicio no encontrado/);
+
+      const inactiveCatalog = build();
+      inactiveCatalog.offeringsRepo.findCatalogItem.mockResolvedValue({
+        id: 'cat-1',
+        isActive: false,
+        serviceConceptId: 'service-concept',
+      });
+      await expect(
+        inactiveCatalog.service.availability(query, patient),
+      ).rejects.toThrow(/Servicio no encontrado/);
+    });
   });
 
   describe('placeHold', () => {
@@ -395,6 +476,95 @@ describe('SchedulingServiceBookingService', () => {
         /demasiado pronto/,
       );
       expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+    });
+
+    it('no une bandas consecutivas de políticas distintas para retener un turno', async () => {
+      const d = build();
+      d.agenda.bandsOfServices.mockResolvedValue([
+        {
+          ...morningBand(),
+          bands: [{ startAt: t(1, 8), endAt: t(1, 8, 30) }],
+        },
+        {
+          ...morningBand(),
+          bands: [{ startAt: t(1, 8, 30), endAt: t(1, 9) }],
+        },
+      ]);
+
+      await expect(
+        d.service.placeHold(
+          OFFERING,
+          {
+            ...dto,
+            startAt: t(1, 8).toISOString(),
+          },
+          patient,
+        ),
+      ).rejects.toThrow(/ya no está disponible/);
+      expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+    });
+
+    it('rechaza una sede que no existe o no pertenece a un profesional', async () => {
+      const missing = build();
+      missing.catalogRepo.findResourceById.mockResolvedValue(null);
+      await expect(
+        missing.service.placeHold(OFFERING, dto, patient),
+      ).rejects.toThrow(/Agenda no encontrada/);
+
+      const wrongType = build();
+      wrongType.catalogRepo.findResourceById.mockResolvedValue(
+        site({ resourceRefType: 'users' }),
+      );
+      await expect(
+        wrongType.service.placeHold(OFFERING, dto, patient),
+      ).rejects.toThrow(/Agenda no encontrada/);
+    });
+
+    it('acepta sólo dentro del máximo de anticipación definido por la política', async () => {
+      const inRange = build();
+      inRange.agenda.bandsOfServices.mockResolvedValue([
+        { ...morningBand(), maxAdvanceDays: 7 },
+      ]);
+      await expect(
+        inRange.service.placeHold(OFFERING, dto, patient),
+      ).resolves.toMatchObject({ bookableSlotId: 'slot-nuevo' });
+
+      const outOfRange = build();
+      outOfRange.agenda.bandsOfServices.mockResolvedValue([
+        { ...morningBand(), maxAdvanceDays: 0 },
+      ]);
+      await expect(
+        outOfRange.service.placeHold(OFFERING, dto, patient),
+      ).rejects.toThrow(/hasta 0 días de anticipación/);
+    });
+
+    it('permite a un agente de agenda retener sin representación del paciente', async () => {
+      const d = build();
+      const schedulingAgent = {
+        id: 'scheduling-agent',
+        roles: ['SCHEDULING_AGENT'],
+        tenantIds: [TENANT],
+      } as any;
+
+      await expect(
+        d.service.placeHold(
+          OFFERING,
+          { resourceId: SITE, startAt: dto.startAt },
+          schedulingAgent,
+        ),
+      ).resolves.toMatchObject({ bookableSlotId: 'slot-nuevo' });
+      expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+      expect(d.affiliations.evaluate).not.toHaveBeenCalled();
+    });
+
+    it('acepta una sede cuando coincide con el tenant activo', async () => {
+      const d = build();
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.placeHold(OFFERING, dto, patient),
+        ),
+      ).resolves.toMatchObject({ bookableSlotId: 'slot-nuevo' });
     });
   });
 });

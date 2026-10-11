@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { Pharmacies } from '../../pharmacy/entities/pharmacies.entity';
+import { PHARM } from '../../pharmacy/pharmacy.concepts';
 import { PinoLogger } from 'nestjs-pino';
 import { TenantTypeProfileService } from './tenant-type-profile.service';
 import {
@@ -231,7 +233,7 @@ export class DirectoryTenantsService {
       // El sujeto de la vitrina de una organización es su propio tenant: es lo
       // que escribe `verify()` (`targetId: tenant.id`) y lo que lee la ficha
       // pública. Si eso cambiara, cambia en los dos lados o en ninguno.
-      await this.publicProfiles.updateOrganizationVitrina(tx, {
+      await this.publicProfiles.updateOrganizationShowcase(tx, {
         targetId: tenant.id,
         displayName: dto.displayName,
         headline: dto.headline,
@@ -290,18 +292,38 @@ export class DirectoryTenantsService {
       // El slug lleva el identificador y no el nombre a propósito: dos clínicas
       // pueden llamarse igual y el slug es único; el nombre bonito es el
       // `displayName`, que sí se puede repetir.
-      await this.publicProfiles.projectOrganization(tx, {
-        tenantId: tenant.id,
-        targetId: tenant.id,
-        slug: `organization-${tenant.id}`,
-        displayName: tenant.tradeName ?? tenant.legalName,
-        actorUserId: actor.id,
-        // Una farmacia verificada tiene que aparecer en la vertical de
-        // farmacias, no en la de organizaciones. Proyectarlas todas como
-        // organización dejaba `/public/search/pharmacies` en cero para siempre,
-        // y el buscador público con una vertical muerta.
-        targetTypeConceptId: showcaseByKind(tenant.tenantTypeConceptId),
-      });
+      const publicProfileId = await this.publicProfiles.projectOrganization(
+        tx,
+        {
+          tenantId: tenant.id,
+          targetId: tenant.id,
+          slug: `organization-${tenant.id}`,
+          displayName: tenant.tradeName ?? tenant.legalName,
+          actorUserId: actor.id,
+          // Una farmacia verificada tiene que aparecer en la vertical de
+          // farmacias, no en la de organizaciones. Proyectarlas todas como
+          // organización dejaba `/public/search/pharmacies` en cero para siempre,
+          // y el buscador público con una vertical muerta.
+          targetTypeConceptId: showcaseByKind(tenant.tenantTypeConceptId),
+        },
+      );
+
+      // Una farmacia verificada pasa a operar: su fila de `pharmacy.pharmacies`
+      // (nacida en borrador al registrarse) se activa, se marca verificada y se
+      // enlaza a la vitrina. Sin esto el portal de la farmacia decía «todavía no
+      // tiene una farmacia publicada» para siempre (P50).
+      if (tenant.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY) {
+        const pharmacies = await tx.find(Pharmacies, {
+          tenantId: tenant.id,
+          statusConceptId: PHARM.PHARMACY_DRAFT,
+        });
+        for (const pharmacy of pharmacies) {
+          pharmacy.statusConceptId = PHARM.PHARMACY_ACTIVE;
+          pharmacy.verificationStatusConceptId = PHARM.VERIFICATION_VERIFIED;
+          pharmacy.publicProfileId = publicProfileId;
+          touch(pharmacy, actor.id);
+        }
+      }
 
       this.logger.info(
         { operation: 'directory.tenant.verify', tenantId },
