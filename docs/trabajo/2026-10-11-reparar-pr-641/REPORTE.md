@@ -1,8 +1,8 @@
-# Reporte — Reparar PR #641 de capas DDD en pharmacy_inventory
+# Reporte — Corregir CI posterior al merge de PR #641
 
 > **AVANCE: 7 / 8 — 87,5 %.**
 
-- Fecha: 2026-10-11 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/ddd-pharmacy-inventory-dev`
+- Fecha: 2026-10-11 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/ddd-pharmacy-inventory-dev` · Base actual: `dev` (`afe559eb`)
 - Peldaño de evidencia alcanzado: TESTED localmente; falta confirmar CI y mergeabilidad remotos.
 
 ## Completado
@@ -18,18 +18,18 @@
 
 ## A medias
 
-### H1.S3.M5 — Confirmar CI remoto y mergeabilidad
+### H1.S3.M5 — Abrir y verificar PR de seguimiento
 
-- Qué anda: el spec corregido pasó 5/5 y el commit `f836ffbb` está en la rama remota; el PR remoto había quedado `MERGEABLE` con base `ce2910eb`.
-- Qué no anda: la API del PR sigue apuntando al SHA anterior `805c6c0d`, conserva el check fallido y no creó una nueva ejecución para `f836ffbb`. `gh pr update-branch` responde `head sha didn't match the current head ref`.
-- Qué falta exactamente: lograr que GitHub sincronice la punta del PR con la rama, y luego consultar `gh pr checks 641` más `gh pr view 641 --json mergeable,mergeStateStatus`.
+- Qué anda: el spec corregido pasó 5/5 y el cambio está en la rama remota. `dev` ya contiene el merge commit `afe559eb` de #641; comparada con esa base, la rama tiene únicamente los dos commits posteriores `f836ffbb` y `2849d22f`.
+- Qué no anda: #641 se mergeó a las 21:08:56 con su CI todavía en curso y luego fallido; el test corregido no formó parte de ese merge. La API del PR quedó en el SHA `805c6c0d`, aunque la referencia remota ya avanzó.
+- Qué falta exactamente: abrir un PR nuevo de seguimiento desde esta rama y esperar su workflow completo de cobertura.
 - Dónde quedó: rama `justin/ddd-pharmacy-inventory-dev`, repositorio `mantra-core-health-api`; typecheck y pruebas dirigidas locales pasaron.
 
 ## Pendiente
 
 | ID | Estado | Qué lo destraba |
 |---|---|---|
-| H1.S3.M5 | TODO | Publicar el fixture corregido y esperar el workflow `Documentación` de GitHub. |
+| H1.S3.M5 | TODO | Abrir el PR de seguimiento y esperar el workflow `Documentación` de GitHub. |
 
 ## Evidencia
 
@@ -43,7 +43,7 @@
 
 - La suite completa se ejecutó en CI y falló antes de la corrección de `findAddresses`; falta una nueva ejecución completa con el fixture actualizado.
 - No se ejecutaron pruebas con simulador o Docker.
-- No se declaró CI verde: falta la respuesta del workflow después del último cambio.
+- No se declaró CI verde para el fixture corregido: el último workflow corresponde al SHA anterior del PR #641.
 
 ## Desvíos del plan
 
@@ -53,8 +53,8 @@
 
 ## Riesgos residuales
 
-- GitHub mantiene un desajuste entre la referencia de la rama (`f836ffbb`) y el SHA de la PR (`805c6c0d`); hasta que sincronice, no se puede atribuir a la última versión el resultado de CI.
+- La cobertura global debe alcanzar al menos 69% en el workflow del PR de seguimiento.
 
 ## Decisiones y ambigüedades
 
-- Se mantuvo el destino `dev` y el nombre de rama existente del PR #641. No se alteró el PR paralelo #642 contra `test`.
+- #641 se mergeó durante la ejecución de CI sin incluir el test corregido. Se conserva la rama y sus dos commits posteriores para abrir un PR de seguimiento; el PR #642 contra `test` no se modificó.
