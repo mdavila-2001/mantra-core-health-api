@@ -1,8 +1,8 @@
 # Reporte — Migración DDD de profiles
 
-- Fecha: 2026-10-10 · Repo: `mantra-core-health-api` · Rama: `justin/ddd-profiles-api-dev`
+- Fecha: 2026-10-10 · Repo: `mantra-core-health-api` · Rama: `justin/ddd-profiles-api-dev` · PR: [#634](https://github.com/mdavila-2001/mantra-core-health-api/pull/634)
 - Plan: [PLAN.md](./PLAN.md) · Peldaño: TESTED en la base `dev`.
-- Avance del módulo: 4/4 microtareas en `dev`; réplica de `test` y sus PRs pendientes.
+- Avance del módulo: 4/4 microtareas ejecutadas en ambas bases; PRs #634 (`dev`) y #635 (`test`) abiertos, no mergeados.
 
 ## Completado en `dev`
 
@@ -46,8 +46,8 @@ Jest mostró avisos preexistentes de importación de JSON sin `with { type: 'jso
 
 | Estado | Qué falta |
 |---|---|
-| Pendiente | Revisar/actualizar la rama contra `origin/dev` reciente y abrir PR a `dev` |
-| Pendiente | Replicar el commit en un worktree basado en `origin/test`, ejecutar los gates dirigidos y abrir PR a `test` |
+| Abierto | PR #634 contra `dev`; revisión y merge corresponden al propietario |
+| Abierto | PR #635 contra `test`; revisión y merge corresponden al propietario |
 | No corrido | Integración y pruebas E2E, porque exigen stack/servicios; no se autorizó iniciarlos |
 
 ## Revisión de código propia
@@ -60,4 +60,4 @@ Jest mostró avisos preexistentes de importación de JSON sin `with { type: 'jso
 ## Limitaciones
 
 - El resultado completo de la tarea 2.4 del handoff sigue abierto: después de `profiles` quedan `pharmacy_inventory`, `insurance`, `iam` y los otros módulos pendientes.
-- No se creó aún ningún PR ni se mergeó nada.
+- La migración del módulo `profiles` está publicada en los PR #634 y #635; no se mergeó nada.
