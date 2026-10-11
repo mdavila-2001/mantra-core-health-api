@@ -494,25 +494,28 @@ services:
       - mantra-redesa-network
 
   minio:
-    # Última release de MinIO community con consola de administración completa.
-    # RELEASE.2025-05-24 en adelante reduce la consola a un navegador de objetos
-    # y el proyecto fue archivado en 2026 — no actualizar más allá de esta versión.
-    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    # RustFS 1.0.1 es S3-compatible y publica imagen multi-arquitectura.
+    # El nombre del servicio y los puertos siguen estables para los clientes S3 locales.
+    image: rustfs/rustfs:1.0.1
     restart: always
-    command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      RUSTFS_VOLUMES: /data
+      RUSTFS_ADDRESS: "0.0.0.0:9000"
+      RUSTFS_CONSOLE_ADDRESS: "0.0.0.0:9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${MINIO_SECRET_KEY}
     ports:
       - "${MINIO_PORT:-9002}:9000"
       - "${MINIO_CONSOLE_PORT:-9003}:9001"
     volumes:
       - minio_data:/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/health/ready"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 12
+      start_period: 20s
     networks:
       - mantra-redesa-network
 
