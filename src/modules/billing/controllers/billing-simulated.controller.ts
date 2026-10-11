@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { BillingSimulatedService } from '../services/billing-simulated.service';
 import {
   SimulatedAnnulDto,
@@ -58,6 +58,11 @@ export class BillingSimulatedController {
     return this.service.listCharges(user, patientProfileId);
   }
 
+  @Audited({
+    action: 'SIMULATED_CHARGE_PAID',
+    entity: 'simulated_charge',
+    entityId: 'param:chargeId',
+  })
   @Post('charges/:chargeId/payment')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar el pago real de un cobro' })
@@ -69,6 +74,11 @@ export class BillingSimulatedController {
     return this.service.registerPayment(user, chargeId, dto.methodCode);
   }
 
+  @Audited({
+    action: 'SIMULATED_INSTANCE_PAYMENT_ATTEMPTED',
+    entity: 'simulated_charge',
+    entityId: 'param:chargeId',
+  })
   @Post('charges/:chargeId/instances/:instanceId/payments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -88,6 +98,11 @@ export class BillingSimulatedController {
     );
   }
 
+  @Audited({
+    action: 'SIMULATED_INVOICE_ISSUED',
+    entity: 'simulated_charge',
+    entityId: 'param:chargeId',
+  })
   @Post('charges/:chargeId/invoices')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -112,6 +127,11 @@ export class BillingSimulatedController {
     return this.service.invoice(user, invoiceId);
   }
 
+  @Audited({
+    action: 'SIMULATED_INVOICE_ANNULLED',
+    entity: 'simulated_invoice',
+    entityId: 'param:invoiceId',
+  })
   @Post('invoices/:invoiceId/annulment')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Anular la factura (sólo administración)' })
@@ -123,6 +143,11 @@ export class BillingSimulatedController {
     return this.service.annul(user, invoiceId, dto);
   }
 
+  @Audited({
+    action: 'SIMULATED_ANNULMENT_REVERTED',
+    entity: 'simulated_invoice',
+    entityId: 'param:invoiceId',
+  })
   @Post('invoices/:invoiceId/annulment-reversal')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Revertir la anulación (sólo administración)' })
@@ -133,6 +158,11 @@ export class BillingSimulatedController {
     return this.service.revertAnnulment(user, invoiceId);
   }
 
+  @Audited({
+    action: 'SIMULATED_INVOICE_EMAILED',
+    entity: 'simulated_invoice',
+    entityId: 'param:invoiceId',
+  })
   @Post('invoices/:invoiceId/email')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

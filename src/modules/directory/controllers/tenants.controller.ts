@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -234,6 +235,11 @@ export class TenantsController {
   }
 
   /** Edición de una sucursal (P54): nombre, descripción, enlace y punto. */
+  @Audited({
+    action: 'BRANCH_UPDATED',
+    entity: 'branch',
+    entityId: 'param:branchId',
+  })
   @Patch(':tenantId/branches/:branchId')
   @ApiOperation({ summary: 'Editar una sucursal' })
   updateBranch(
