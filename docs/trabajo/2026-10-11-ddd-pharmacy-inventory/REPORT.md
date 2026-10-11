@@ -27,4 +27,12 @@ Las salidas literales se guardan en `evidencia/`.
 
 - El baseline completo previo no quedó capturado; la comparación previa disponible corresponde al módulo y guard, arriba.
 - La suite completa reportó una suite/test omitido. No se modificaron ni desactivaron tests para ocultarlo.
-- Los gates dirigidos de `test` pasaron; su PR separado está en preparación.
+- Los gates dirigidos de `test` pasaron y se abrieron los dos PR separados. PR #641 (`dev`) y PR #642 (`test`) están `OPEN` y `MERGEABLE`; ninguno está mergeado. Al capturar `evidencia/pr-status.txt`, el check `docs` de #641 seguía `IN_PROGRESS` y #642 aún no reportaba checks. Ese estado externo puede cambiar después de este reporte.
+
+
+## Pull requests
+
+- [#641 contra `dev`](https://github.com/mdavila-2001/mantra-core-health-api/pull/641)
+- [#642 contra `test`](https://github.com/mdavila-2001/mantra-core-health-api/pull/642)
+
+Estado observado y checks: `evidencia/pr-status.txt`.
