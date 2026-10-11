@@ -1,12 +1,12 @@
 # Reporte — Teléfono del médico por lugar de atención
 
-Fecha: 2026-10-11. Estado: implementación escrita; frontend compilado y observado con simulador. Integración real con API y base pendiente.
+Fecha: 2026-10-11. Estado: implementación y pruebas dirigidas del frontend completas; CI de la API en curso. Integración real con API y base pendiente.
 
 ## Alcance realizado
 
-- Modelo M14: `contact_phone` nullable en `practice.practitioner_role_assignments`; DDL regenerado y parche aditivo para bases existentes.
+- Modelo M14: `contact_phone` nullable en `practice.practitioner_role_assignments`; DDL regenerado y parche aditivo para bases existentes. El DDL y el parche se copiaron también a `database/SQL/` de la API, que usa su propia copia para materializar bases de CI y despliegue.
 - API: el alta de consultorio propio, incluida en el registro público del médico, conserva `ownSite.contactPhone` en la asignación. `GET /practitioners/:profileId/sites` lo devuelve por sede, incluidas sedes ajenas de otros tenants cuando el profesional tiene una asignación activa. `PUT /practitioners/me/sites/:siteId/contact-phone` permite guardarlo o quitarlo sólo con una asignación activa del actor, sin modificar la sede compartida.
-- Frontend: campo opcional en «Su consultorio propio» del registro, captura al crear un lugar propio, teléfono visible en cada fila de «Dónde atiendo» y editor para una sede vinculada propia o ajena. El simulador contiene números diferentes para consultorio y clínica.
+- Frontend: campo opcional en «Su consultorio propio» del registro, captura al crear un lugar propio, teléfono visible en cada fila de «Dónde atiendo» y editor para una sede vinculada propia o ajena. Contacto y ubicación del consultorio ocupan dos páginas para respetar el máximo de cuatro preguntas por página. El simulador contiene números diferentes para consultorio y clínica.
 - El contacto general `workLandline` / `workMobilePhone` queda independiente. Las afiliaciones a establecimientos del padrón que no tienen una asignación `practice_site_id` siguen el flujo existente y no aparecen como sede editable en la API real.
 
 ## Evidencia obtenida
@@ -14,6 +14,7 @@ Fecha: 2026-10-11. Estado: implementación escrita; frontend compilado y observa
 - `python3 -S salud-db/gen_ddl.py 14`: salida 0.
 - `python3 -S salud-db/check_ddl_sources.py --quiet`: salida 0.
 - `corepack yarn typecheck` del frontend: salida 0, después de generar `env.generated.ts` local.
+- Pruebas dirigidas del frontend (`register-practitioner`, `work-history`, `practice-sites.client`): **229/229 pasan**. Cubren teléfono opcional en el alta, persistencia del número por sede, borrado con `null` y conservación del número de otra sede.
 - `corepack yarn ngc -p tsconfig.app.json --noEmit`: salida 0; sólo advertencias NG8113 de componentes ajenos al cambio.
 - ESLint dirigido a los cinco archivos TypeScript editados del frontend: salida 0.
 - `tsc --noEmit -p tsconfig.build.json` de la API: salida 0 con un archivo temporal de tipos para `@opentelemetry/instrumentation`, ausente en el manifiesto actual; el archivo temporal se retiró. La compilación ordinaria de la API sigue fallando en ese import ajeno al cambio.
@@ -27,10 +28,10 @@ Fecha: 2026-10-11. Estado: implementación escrita; frontend compilado y observa
 
 ## Pendiente para afirmar funcionamiento real
 
-- La compilación normal de API no queda verde: el intento con `node-modules` agotó el espacio al enlazar dependencias; una instalación temporal PnP permitió revisar el código, pero `corepack yarn typecheck` encontró faltantes de `@jest/globals` en specs y el build encuentra `@opentelemetry/instrumentation` no declarado directamente. Los artefactos PnP del worktree se retiraron al terminar.
+- La compilación normal de API no se pudo repetir localmente: el intento con `node-modules` agotó el espacio al enlazar dependencias; una instalación temporal PnP permitió revisar el código, pero `corepack yarn typecheck` encontró faltantes de `@jest/globals` en specs y el build encuentra `@opentelemetry/instrumentation` no declarado directamente. Los artefactos PnP del worktree se retiraron al terminar. El CI remoto sí completó build, tipos y lint en la primera revisión del PR; su suite de pruebas y generación de documentos seguían en curso al actualizar este reporte.
 - El parche SQL está escrito y no se aplicó a una base local; tampoco se regeneró OpenAPI.
-- No se ejecutaron suites de tests: la instrucción de la sesión prohíbe añadir o correr tests salvo pedido explícito. Tampoco se recorrió navegador → API real → PostgreSQL. Las capturas usan el simulador.
-- No hay captura del campo del registro en el paso «Su consultorio propio»: el asistente público tiene 16 pasos con validación previa. El campo sí quedó en el esquema de la página y la compilación de plantilla terminó en 0.
+- No se recorrió navegador → API real → PostgreSQL. Las capturas usan el simulador. La prueba de frontend valida el cuerpo HTTP del alta y las operaciones de contacto por sede.
+- No hay captura del campo del registro en el paso «Su consultorio propio»: el asistente público tiene 16 pasos con validación previa. El campo sí quedó en el esquema de la página, su prueba pasa y la compilación de plantilla terminó en 0.
 - En 375 px, el teléfono largo se parte en dos líneas dentro de la columna Nombre; no se observó desborde lateral nuevo. El encabezado fijo se superpone a la parte superior de la captura del elemento, sin tapar las filas visibles.
 
 ## Cambios no realizados

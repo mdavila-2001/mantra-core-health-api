@@ -55,19 +55,19 @@
 
 **CA:** Dado un consultorio propio en el alta o una sede ya vinculada, cuando el médico registra un teléfono opcional, entonces la interfaz lo muestra en su fila al volver a cargar.
 **DoD:** specs dirigidos frontend, typecheck y lint de archivos tocados; Playwright contra API local con captura a 375, 768 y 1440 px.
-**Estado:** frontend compilado; captura de tabla y editor realizada
+**Estado:** frontend compilado; 229 pruebas dirigidas verdes; captura de tabla y editor realizada
 
 ### H3.S1 — Captura y presentación
 
 **CA:** Dado un número válido, cuando se guarda, entonces el payload y la tabla usan el contacto de esa sede.
 **DoD:** specs de registro, cliente de sedes y `work-history` pasan.
-**Estado:** campos, cliente, tabla y simulador escritos y compilados
+**Estado:** campos, cliente, tabla y simulador escritos; pruebas dirigidas verdes
 
 | ID | Microtarea | CA (dado/cuando/entonces) | DoD | Estado |
 |---|---|---|---|---|
-| H3.S1.M1 | Agregar teléfono a «Su consultorio propio» en el alta | Dado un número, cuando se registra, entonces viaja como `ownSite.contactPhone` | `corepack yarn test --include=**/register-practitioner.spec.ts` → payload correcto | COMPILA |
-| H3.S1.M2 | Actualizar tipos y cliente de sedes | Dada respuesta de API, cuando se lee, entonces `contactPhone` llega a la vista | `corepack yarn test --include=**/practice-sites.client.spec.ts` → contrato HTTP correcto | COMPILA |
-| H3.S1.M3 | Permitir cambiar el número en cualquier sede vinculada | Dada una sede propia o ajena, cuando se guarda el número, entonces la lista se actualiza | `corepack yarn test --include=**/work-history.spec.ts` → propia, ajena, vacío y error | COMPILA |
+| H3.S1.M1 | Agregar teléfono a «Su consultorio propio» en el alta | Dado un número, cuando se registra, entonces viaja como `ownSite.contactPhone` | `corepack yarn test --include=**/register-practitioner.spec.ts` → payload correcto | PRUEBA VERDE |
+| H3.S1.M2 | Actualizar tipos y cliente de sedes | Dada respuesta de API, cuando se lee, entonces `contactPhone` llega a la vista | `corepack yarn test --include=**/practice-sites.client.spec.ts` → contrato HTTP correcto | PRUEBA VERDE |
+| H3.S1.M3 | Permitir cambiar el número en cualquier sede vinculada | Dada una sede propia o ajena, cuando se guarda el número, entonces la lista se actualiza | `corepack yarn test --include=**/work-history.spec.ts` → propia, ajena, vacío y error | PRUEBA VERDE |
 | H3.S1.M4 | Mostrar teléfono por fila y actualizar simulador | Dadas dos sedes, cuando se muestra «Dónde atiendo», entonces cada fila tiene su propio número o «Sin registrar» | Playwright 375/768/1440 → filas legibles sin scroll lateral nuevo; mocks coherentes | FOTO |
 
 ## H4 — Verificación integrada
