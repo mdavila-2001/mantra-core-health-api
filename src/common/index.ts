@@ -35,6 +35,7 @@ export {
   runWithTenant,
   getCurrentTenantId,
   requireTenantId,
+  marketplaceTenantScope,
 } from './tenant/tenant-context';
 export type { TenantContext } from './tenant/tenant-context';
 export { TenantContextInterceptor } from './tenant/tenant-context.interceptor';

@@ -33,6 +33,7 @@ import {
   PharmacyDirectoryResponseDto,
   PharmacyProductSearchResponseDto,
   PharmacySiteListResponseDto,
+  PharmacySummaryDto,
   PharmacySitePricesResponseDto,
 } from '../dto';
 
@@ -98,6 +99,19 @@ export class PharmacyReadController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmacyLicenseListResponseDto> {
     return this.staffReadService.listLicenses(id, actor);
+  }
+
+  /** P47: los números del resumen del portal de la farmacia (sólo su personal). */
+  @Get('pharmacies/:id/summary')
+  @ApiOperation({
+    summary: 'Resumen del catálogo de la farmacia (sólo su personal)',
+  })
+  @ApiOkResponse({ type: PharmacySummaryDto })
+  getSummary(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacySummaryDto> {
+    return this.staffReadService.getSummary(id, actor);
   }
 
   /**

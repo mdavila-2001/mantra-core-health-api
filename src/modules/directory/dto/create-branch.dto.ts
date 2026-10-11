@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsIn,
+  Matches,
   IsNumber,
   IsOptional,
   IsString,
@@ -85,4 +86,23 @@ export class CreateBranchDto {
   @Min(-180)
   @Max(180)
   longitude?: number;
+
+  @ApiPropertyOptional({
+    description: 'Descripción: horario, piso…',
+    maxLength: 1000,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Enlace de ubicación (http/https)',
+    maxLength: 2000,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  @Matches(/^https?:\/\//i, { message: 'locationUrl debe ser http o https' })
+  locationUrl?: string;
 }

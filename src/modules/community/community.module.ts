@@ -17,6 +17,8 @@ import { PersonAccountLinksRepository } from '../profiles/infrastructure/reposit
 // `ProfilesModule` importa `DirectoryModule`, que importa este módulo. La clase
 // no tiene estado —no cachea, y su propio TSDoc explica por qué— así que una
 // segunda instancia responde exactamente lo mismo que la de `profiles`.
+import { ProfilesTerminologyAdapter } from '../profiles/infrastructure/adapters/profiles-terminology.adapter';
+import { PROFILES_TERMINOLOGY_PORT } from '../profiles/application/ports/profiles-terminology.port';
 import { MedicalSpecialtyCatalogService } from '../profiles/application/services/medical-specialty-catalog.service';
 // De acá sale `ValueSetsRepository`, que es de donde el servicio de arriba lee
 // los 36 conceptos, y `CatalogConceptsRepository`, que da el rótulo con el que
@@ -46,6 +48,7 @@ import {
   CommunitySocialService,
   CommunityChatAutoReplyService,
   CommunityMessagingService,
+  CommunityBookingChatService,
   CommunityModerationService,
   CommunityReviewsService,
   CommunityGroupsService,
@@ -172,6 +175,12 @@ import {
     // La regla de «qué uuid es una especialidad médica», compartida con el alta
     // de profesional. Ver la nota del import.
     MedicalSpecialtyCatalogService,
+    // El servicio de arriba lee el catálogo por el puerto de terminología de
+    // `profiles`; se provee su adaptador por la misma razón que la clase.
+    {
+      provide: PROFILES_TERMINOLOGY_PORT,
+      useClass: ProfilesTerminologyAdapter,
+    },
     // Filtro territorial en dos pasos del directorio (subtarea 2.3); lee los
     // mismos repositorios de `TerminologyModule`.
     PublicTerritoryFilterService,
@@ -183,6 +192,7 @@ import {
     CommunitySocialService,
     CommunityChatAutoReplyService,
     CommunityMessagingService,
+    CommunityBookingChatService,
     CommunityMessagingGateway,
     CommunityMessageNotificationsService,
     // F4.2 · presencia del chat sobre el Redis compartido del módulo.
@@ -229,6 +239,8 @@ import {
     // sistema de chat. No hay ciclo — `community` no importa `scheduling`.
     CommunityChatAutoReplyService,
     CommunityMessagingService,
+    // La agenda deja la confirmación de una cita en el chat (hilo profesional-paciente).
+    CommunityBookingChatService,
   ],
 })
 export class CommunityModule {}

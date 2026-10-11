@@ -1,8 +1,11 @@
+import { jest } from '@jest/globals';
 import {
   buildCertificate,
+  draw,
   InsurancePortabilityPdfService,
 } from './insurance-portability-pdf.service';
 import type { InsurancePortabilityReportDto } from '../dto/insurance-portability.dto';
+import PDFDocument from 'pdfkit';
 
 const HASH = 'e404be51f92fcabebab7b829051cb2522d940ec09c3f5ef8f63ee122d1beedb7';
 const QR_URL = `http://localhost:4200/verify/portability/${HASH}`;
@@ -176,6 +179,112 @@ describe('buildCertificate', () => {
       'Siniestralidad estimada: no calculable (ningún plan declaró prima)',
     );
   });
+
+  it('explicita cada dato opcional ausente sin dejar texto ambiguo', () => {
+    const base = reportFixture();
+    const sheet = buildCertificate(
+      reportFixture({
+        patient: {
+          ...base.patient,
+          nationalId: null,
+          nationalIdArea: null,
+        },
+        policies: [
+          {
+            ...base.policies[0]!,
+            planName: null,
+            policyIdentifier: null,
+            verified: false,
+            startDate: null,
+            endDate: '2026-12-31',
+          },
+        ],
+        encounters: [
+          {
+            ...base.encounters[0]!,
+            startAt: null,
+            organizationName: null,
+            branchName: 'Sucursal Norte',
+          },
+        ],
+        claims: [
+          {
+            ...base.claims[0]!,
+            submittedAt: null,
+            providerName: null,
+            currencyCode: null,
+            billedTotal: '1500.00',
+            approvedTotal: null,
+            patientTotal: null,
+          },
+        ],
+        summary: {
+          ...base.summary,
+          currencyCode: null,
+        },
+      }),
+      HASH,
+      QR_URL,
+    );
+
+    expect(sheet.member).toContain('Documento: no declarado');
+    expect(sheet.policies).toEqual([
+      'Seguros Andina S.A. — Plan sin nombre · póliza s/n · COVERAGE_ACTIVE (… a 2026-12-31)',
+    ]);
+    expect(sheet.encounters).toEqual([
+      's/f · No identificado (Sucursal Norte) · ENCOUNTER_FINISHED',
+    ]);
+    expect(sheet.claimRows).toEqual([
+      {
+        columns: [
+          's/f',
+          'Seguros Andina S.A.',
+          'No identificado',
+          '1500.00',
+          '—',
+          '—',
+          'CLAIM_PAID',
+        ],
+      },
+    ]);
+    expect(sheet.summary).toContain('Total cubierto: 2200.00');
+    expect(sheet.highlights).toEqual([]);
+  });
+
+  it('con documento sin área no agrega un sufijo vacío', () => {
+    const base = reportFixture();
+    const sheet = buildCertificate(
+      reportFixture({
+        patient: {
+          ...base.patient,
+          nationalIdArea: null,
+        },
+      }),
+      HASH,
+      QR_URL,
+    );
+
+    expect(sheet.member).toContain('Documento: 4872190');
+  });
+
+  it('mantiene legible un reclamo destacado sin fecha ni moneda', () => {
+    const base = reportFixture();
+    const sheet = buildCertificate(
+      reportFixture({
+        claims: [
+          {
+            ...base.claims[0]!,
+            submittedAt: null,
+            currencyCode: null,
+          },
+        ],
+      }),
+      HASH,
+      QR_URL,
+    );
+
+    expect(sheet.highlights).toEqual(['CLM-2026-0891 · s/f · 2450.00']);
+  });
 });
 
 describe('InsurancePortabilityPdfService.render', () => {
@@ -185,5 +294,68 @@ describe('InsurancePortabilityPdfService.render', () => {
 
     expect(buffer.subarray(0, 5).toString('latin1')).toBe('%PDF-');
     expect(buffer.includes(`sello:${HASH}`)).toBe(true);
+  });
+
+  it('genera el PDF cuando no hay reclamos ni destacados', async () => {
+    const service = new InsurancePortabilityPdfService();
+    const buffer = await service.render(
+      reportFixture({ claims: [] }),
+      HASH,
+      QR_URL,
+    );
+
+    expect(buffer.subarray(0, 5).toString('latin1')).toBe('%PDF-');
+  });
+});
+
+describe('draw', () => {
+  function sheetWithThrowingMember(error: unknown) {
+    const sheet = buildCertificate(reportFixture(), HASH, QR_URL);
+    const member = {
+      [Symbol.iterator](): Iterator<string> {
+        throw error;
+      },
+    } as unknown as readonly string[];
+
+    return { ...sheet, member };
+  }
+
+  it('propaga un Error producido mientras dibuja el contenido', async () => {
+    const expected = new Error('falló el contenido');
+
+    await expect(draw(sheetWithThrowingMember(expected))).rejects.toBe(
+      expected,
+    );
+  });
+
+  it('normaliza a Error un valor no Error producido durante el dibujo', async () => {
+    await expect(
+      draw(sheetWithThrowingMember('falló el contenido')),
+    ).rejects.toThrow('falló el contenido');
+  });
+
+  it('propaga el error emitido por el documento PDF', async () => {
+    const expected = new Error('falló el stream PDF');
+    const originalOn = PDFDocument.prototype.on;
+    const onSpy = jest.spyOn(PDFDocument.prototype, 'on');
+    onSpy.mockImplementation(function (
+      this: PDFKit.PDFDocument,
+      event: string | symbol,
+      listener: (...args: unknown[]) => void,
+    ) {
+      const result = originalOn.call(this, event, listener);
+      if (event === 'error') {
+        listener(expected);
+      }
+      return result;
+    } as never);
+
+    try {
+      await expect(
+        draw(buildCertificate(reportFixture(), HASH, QR_URL)),
+      ).rejects.toBe(expected);
+    } finally {
+      onSpy.mockRestore();
+    }
   });
 });

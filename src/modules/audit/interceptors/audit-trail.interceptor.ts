@@ -350,8 +350,9 @@ export class AuditTrailInterceptor implements NestInterceptor {
     }
     const candidate = readUuidParam(options.patient, params);
     if (!candidate) return undefined;
-    const rows = await tx.execute<{ id: string }[]>(
-      'SELECT id FROM profiles.patient_profiles WHERE id = ? LIMIT 1',
+    // La PK de `patient_profiles` es `profile_id` (el id de la persona).
+    const rows = await tx.execute<{ profile_id: string }[]>(
+      'SELECT profile_id FROM profiles.patient_profiles WHERE profile_id = ? LIMIT 1',
       [candidate],
     );
     return rows.length > 0 ? candidate : undefined;

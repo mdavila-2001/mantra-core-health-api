@@ -94,6 +94,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
       emailVerificationsRepo as never,
       tenantsRepo as never,
       membershipsRepo as never,
+      { create: () => undefined } as never,
       notificationsService as never,
       typeProfile as never,
       affiliationDocuments as never,
