@@ -5,7 +5,7 @@
 - Kill-test: `corepack yarn lint --max-warnings=0` reproduce el fallo en `src/modules/terminology/repositories/glossary-search.sql.ts`.
 
 ## Alcance
-- IN: resolver el import sin uso que hace fallar el check; incorporar los commits nuevos de `dev` en la rama del PR; reponer como puerto local la consulta clínica directa nueva de `profiles`, que hace fallar el guard de capas al sincronizar; corregir los errores mecánicos de lint que aparecieron al integrar `dev` y bloquean el workflow global; revalidar gates afectados y actualizar este reporte.
+- IN: resolver el import sin uso que hace fallar el check; incorporar los commits nuevos de `dev` en la rama del PR; reponer como puerto local la consulta clínica directa nueva de `profiles`, que hace fallar el guard de capas al sincronizar; corregir los errores mecánicos de lint y adaptar el spec roto que aparecieron al integrar `dev`, manteniendo el umbral de cobertura; revalidar gates afectados y actualizar este reporte.
 - OUT: cambios de comportamiento, cambios de esquema/modelo, reparación de errores ajenos a los gates que bloquean este PR.
 - Ambigüedades registradas: ninguna. El CI identifica un import directo no usado; la corrección conserva la exportación pública.
 
@@ -42,7 +42,8 @@
 | H1.S3.M1 | Ejecutar gates locales dirigidos y lint global | Los cuatro gates concluyen sin fallos | comandos en H1 → salidas literales en `evidencia/` | HECHO |
 | H1.S3.M2 | Actualizar y revisar el reporte de reparación | Reporte lista resultados literales y límites restantes | revisión del `REPORTE.md` → todas las secciones obligatorias presentes | HECHO |
 | H1.S3.M3 | Corregir errores mecánicos de lint del merge de `dev` | ESLint deja de reportar los cuatro errores adicionales identificados | `corepack yarn lint --max-warnings=0` → código 0 | HECHO |
-| H1.S3.M4 | Confirmar los checks remotos y la mergeabilidad del PR | GitHub informa checks verdes y estado `MERGEABLE`/`CLEAN` | `gh pr checks 641` y `gh pr view 641 --json mergeable,mergeStateStatus` → sin fallos | TODO |
+| H1.S3.M4 | Actualizar el fixture de direcciones del spec de unidades diagnósticas | El spec cubre la lectura de direcciones y coordenadas del servicio actualizado | `corepack yarn test src/modules/diagnostic_units/services/diagnostic-units-read.service.spec.ts --runInBand --silent` → PASS | HECHO |
+| H1.S3.M5 | Confirmar los checks remotos y la mergeabilidad del PR | GitHub informa checks verdes y estado `MERGEABLE`/`CLEAN` | `gh pr checks 641` y `gh pr view 641 --json mergeable,mergeStateStatus` → sin fallos | TODO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

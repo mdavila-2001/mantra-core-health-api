@@ -53,6 +53,23 @@ exit code: 0
 
 La primera corrida de lint sobre la integración encontró cuatro errores adicionales en `billing-simulated.service.ts`, `pharmacy-read.service.ts` y el spec de `profiles`; se resolvieron con cambios de formato y quitando un import no usado. La corrida global final quedó limpia.
 
+## Suite completa de CI antes de actualizar el fixture
+
+Fuente: workflow `Documentación`, ejecución `38174316550`, paso de pruebas con cobertura.
+
+```text
+FAIL modules/diagnostic_units/services/diagnostic-units-read.service.spec.ts
+TypeError: this.readRepo.findAddresses is not a function
+Coverage summary
+Branches    : 68.92% (22371/32457)
+Jest: Coverage for branches (68.92%) does not meet "global" threshold (69%)
+Test Suites: 1 failed, 1 skipped, 842 passed, 843 of 844 total
+Tests:       1 failed, 1 skipped, 10267 passed, 10269 total
+Process completed with exit code 1.
+```
+
+Se incorporó `findAddresses` al fixture del spec y se verifican las coordenadas convertidas. El spec dirigido actualizado pasó 5/5; la cobertura global todavía requiere una nueva corrida remota.
+
 ## Estado remoto antes de publicar la integración
 
-Tras publicar `67f119c0`, GitHub informó `mergeable=CONFLICTING`, `mergeStateStatus=DIRTY` y todavía no reportó checks para el nuevo SHA. La sincronización local con `dev` y las correcciones de capas ya están preparadas; falta publicarlas y volver a consultar el PR.
+Tras publicar `805c6c0d`, GitHub informó `mergeable=MERGEABLE`, base `ce2910eb`, `mergeStateStatus=BLOCKED` por requerir revisión humana. El check `docs` falló por la spec de direcciones anterior y el umbral global de cobertura; el fixture se corrigió localmente y falta publicarlo y volver a consultar el PR.
