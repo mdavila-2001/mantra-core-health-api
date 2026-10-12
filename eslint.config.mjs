@@ -18,6 +18,7 @@ export default defineConfig([
       'src/orm/catalog/indexes/**',
       'src/orm/catalog/foreign-keys/**',
       'src/orm/catalog/schemas.catalog.ts',
+      'src/common/seed/glossary-articles.generated.ts',
     ],
   },
   eslint.configs.recommended,
