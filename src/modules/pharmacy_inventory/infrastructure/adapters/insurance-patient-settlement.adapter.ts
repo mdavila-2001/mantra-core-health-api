@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PatientSettlementService } from '../../../insurance/services/patient-settlement.service';
+import { PatientSettlementService } from '../../../insurance/application/services/patient-settlement.service';
 import type { InsurancePatientSettlementPort } from '../../application/ports/insurance-patient-settlement.port';
 import type { UnitOfWork } from '../../application/ports/unit-of-work';
 

@@ -4,7 +4,7 @@ import request from 'supertest';
 import { CONCEPTS, SEED, sumarDecimales } from '../../src/common';
 import { CLIN } from '../../src/modules/clinical/clinical.concepts';
 import { DUNIT } from '../../src/modules/diagnostic_units/diagnostic_units.concepts';
-import { INS } from '../../src/modules/insurance/insurance.concepts';
+import { INS } from '../../src/modules/insurance/domain/insurance.concepts';
 import type { TestContext } from './harness';
 import type {
   CopaysPharmacyScenario,

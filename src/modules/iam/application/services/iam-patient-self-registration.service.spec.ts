@@ -13,7 +13,7 @@ import {
 } from '../../../../common';
 import { PROF } from '../../../profiles/profiles.concepts';
 import { DIR } from '../../../directory/directory.concepts';
-import { INS } from '../../../insurance/insurance.concepts';
+import { INS } from '../../../insurance/domain/insurance.concepts';
 import {
   BOLIVIA_PUBLIC_INSURERS,
   carrierPlanId,

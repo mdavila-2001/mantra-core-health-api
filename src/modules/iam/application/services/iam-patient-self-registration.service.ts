@@ -58,11 +58,11 @@ import {
   createWorkAddress,
 } from '../../../common/services/residence-address';
 import { createGuardianRelatedPerson } from '../../../profiles/application/services/guardian-related-person';
-import { createDeclaredCoverage } from '../../../insurance/services/declared-coverage';
+import { createDeclaredCoverage } from '../../../insurance/application/services/declared-coverage';
 import {
   CatalogRepository,
   CoverageRepository,
-} from '../../../insurance/repositories';
+} from '../../../insurance/infrastructure/repositories';
 import { CatalogConceptsRepository } from '../../../terminology/repositories';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
