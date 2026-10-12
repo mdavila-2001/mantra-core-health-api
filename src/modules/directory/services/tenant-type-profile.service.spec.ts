@@ -3,7 +3,7 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { TenantTypeProfileService } from './tenant-type-profile.service';
 import { CONCEPTS, PreconditionFailedException } from '../../../common';
-import { INS } from '../../insurance/insurance.concepts';
+import { INS } from '../../insurance/domain/insurance.concepts';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import { TERRITORIAL_TENANT_TYPES } from '../directory.concepts';
 import { LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO } from '../legal-entity-types';

@@ -3,7 +3,7 @@ import { PROF } from '../../modules/profiles/profiles.concepts';
 import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
-import { INS } from '../../modules/insurance/insurance.concepts';
+import { INS } from '../../modules/insurance/domain/insurance.concepts';
 import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts';
 import {
   CONTAINER_TYPE_CONCEPTS,

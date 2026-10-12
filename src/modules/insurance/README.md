@@ -13,7 +13,7 @@ Entidades (31, `find src/modules/insurance -name '*.entity.ts' | wc -l`): `insur
   find src/modules/insurance -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **18 controllers, 60 rutas HTTP, 31 entidades y 23 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **19 controllers, 61 rutas HTTP, 31 entidad y 24 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -71,6 +71,7 @@ Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationM
 | `POST /insurance/patients/conversation` | sesión | `insurer-patients` |
 | `GET /insurance/received-claims` | sesión | `insurer-received-claims` |
 | `POST /insurance/received-claims/:id/decision` | sesión | `insurer-received-claims` |
+| `GET /insurance/my-claims` | sesión | `my-claims` |
 | `GET /practitioners/:profileId/insurance-networks` | SECURITY_ADMIN,
     SCHEDULING_ADMIN,
     SCHEDULING_AGENT,
@@ -95,7 +96,7 @@ del plan médico, `MED-E13..E16`). El contrato canónico —actores, vocabulario
 de importes, exclusiones formales, ciclo del reclamo e inmutabilidad,
 elegibilidad y calendario del lote, idempotencia, reversión y contención
 financiera— vive en
-[`docs/contracts/insurer-practitioner-settlement-batches.md`](../../../docs/contracts/insurer-practitioner-settlement-batches.md).
+[`docs/contracts/insurer-practitioner-settlement-batches.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/contracts/insurer-practitioner-settlement-batches.md).
 
 `GET /insurance-claims/:id` expone el desglose conciliado
 (`ClaimDetailDto.settlement`, `ClaimSettlementBreakdownDto`) construido por
@@ -233,7 +234,7 @@ Proceso 4 del cliente, «MODULO DE PROMOCIONES» (Tarea 4 · M-06): la asegurado
 publica campañas de prevención junto a importadoras, fabricantes y laboratorios,
 y el afiliado las ve en su portal. El contrato —actores, decisión D4, estados,
 errores, qué ve el afiliado y los desvíos— vive en
-[`docs/contracts/insurer-preventive-campaigns.md`](../../../docs/contracts/insurer-preventive-campaigns.md).
+[`docs/contracts/insurer-preventive-campaigns.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/contracts/insurer-preventive-campaigns.md).
 
 Cinco rutas bajo `/insurance-campaigns`, todas con `@Roles()` vacío: la
 autorización la resuelve `InsuranceCampaignsService` por membresía en el tenant
@@ -323,3 +324,12 @@ Reglas que no se deducen del código:
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+
+## Revisión backend 2026-10-05
+
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/insurance.md)
+identificó pendientes en el camino legacy de reclamos, conciliación, roles de
+lectura, cálculo de varianza y límites de lotes. La corrida dirigida actual
+deja 37 suites y 626 tests pasando, con un test rojo que espera una matriz de
+roles distinta de la que hoy declara el controlador. Esa discrepancia debe
+resolverse con una decisión de acceso y pruebas HTTP por tenant.

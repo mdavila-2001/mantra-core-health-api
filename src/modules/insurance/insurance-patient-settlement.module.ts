@@ -3,9 +3,9 @@ import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
 } from '../profiles/infrastructure/repositories';
-import { PatientSettlementRepository } from './repositories/patient-settlement.repository';
-import { LinkedClaimOrderService } from './services/linked-claim-order.service';
-import { PatientSettlementService } from './services/patient-settlement.service';
+import { PatientSettlementRepository } from './infrastructure/repositories/patient-settlement.repository';
+import { LinkedClaimOrderService } from './application/services/linked-claim-order.service';
+import { PatientSettlementService } from './application/services/patient-settlement.service';
 
 /** Puerto de lectura sin dependencias circulares con los módulos operativos. */
 @Module({

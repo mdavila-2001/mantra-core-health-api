@@ -4,7 +4,7 @@ import { CONCEPTS, TokenService, createdBy } from '../../src/common';
 import { DIR } from '../../src/modules/directory/directory.concepts';
 import { TenantMemberships } from '../../src/modules/directory/entities';
 import { Users } from '../../src/modules/iam/entities';
-import { INS } from '../../src/modules/insurance/insurance.concepts';
+import { INS } from '../../src/modules/insurance/domain/insurance.concepts';
 import {
   bootstrapTestApp,
   deleteRegisteredOrganizations,
