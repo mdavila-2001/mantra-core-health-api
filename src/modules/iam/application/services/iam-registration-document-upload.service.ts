@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { FileCategory, FileSensitivity } from '../../../../common/dto';
+import { FileCategory, FileSensitivity } from '../../../common/dto';
 import {
   FileUploadService,
   type UploadedFileBytes,
-} from '../../../../common/services';
+} from '../../../common/services';
 import { RegistrationDocumentUploadResponseDto } from '../../presentation/dto';
-import { PreconditionFailedException } from '../../../../common';
 
 /** Único formato admitido por esta vía: el registro de procesos pide PDF. */
 const REGISTRATION_DOCUMENT_ALLOWED_MIME_TYPES = ['application/pdf'] as const;
