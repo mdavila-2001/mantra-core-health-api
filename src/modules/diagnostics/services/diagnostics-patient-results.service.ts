@@ -1,5 +1,5 @@
-import { PatientSettlementService } from '../../insurance/services/patient-settlement.service';
-import { unavailableSettlement } from '../../insurance/dto/patient-settlement.dto';
+import { PatientSettlementService } from '../../insurance/application/services/patient-settlement.service';
+import { unavailableSettlement } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';

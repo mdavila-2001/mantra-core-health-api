@@ -9,7 +9,7 @@ import {
   InsurancePlans,
   InsuranceProducts,
 } from '../../modules/insurance/entities';
-import { INS } from '../../modules/insurance/insurance.concepts';
+import { INS } from '../../modules/insurance/domain/insurance.concepts';
 import { CONCEPTS, deterministicId } from '../constants/concepts';
 import {
   BOLIVIA_CARRIERS,

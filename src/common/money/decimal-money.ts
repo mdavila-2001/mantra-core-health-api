@@ -106,6 +106,24 @@ export function sameDecimals(
   return va === vb;
 }
 
+/** Producto decimal exacto redondeado a dos posiciones (half-up). */
+export function multiplyDecimalsToMoney(a: string, b: string): string {
+  const left = a.trim();
+  const right = b.trim();
+  if (!/^-?\d+(?:\.\d+)?$/.test(left) || !/^-?\d+(?:\.\d+)?$/.test(right))
+    return '0.00';
+  const first = escalate(left);
+  const second = escalate(right);
+  const product = first.valor * second.valor;
+  const scale = first.decimales + second.decimales;
+  if (scale <= 2) {
+    return formatEscalado(product * 10n ** BigInt(2 - scale), 2);
+  }
+  const factor = 10n ** BigInt(scale - 2);
+  const half = product < 0n ? -(factor / 2n) : factor / 2n;
+  return formatEscalado((product + half) / factor, 2);
+}
+
 /**
  * Vuelve a poner el punto decimal en un entero escalado.
  *

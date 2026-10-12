@@ -16,7 +16,7 @@ import { IamPractitionerSelfRegistrationService } from '../../modules/iam/applic
 import type { RegisterPractitionerDto } from '../../modules/iam/presentation/dto';
 import { ProfilesPractitionersService } from '../../modules/profiles/application/services';
 import { PractitionerSitesService } from '../../modules/practice/services';
-import { InsuranceBackboneService } from '../../modules/insurance/services';
+import { InsuranceBackboneService } from '../../modules/insurance/application/services';
 import {
   InsuranceCarriers,
   NetworkProviderMemberships,
