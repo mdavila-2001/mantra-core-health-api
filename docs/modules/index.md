@@ -8,7 +8,7 @@
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
 | [`insurance`](insurance.md) | 19 | 24 | 12 | 31 | 20 |
-| [`community`](community.md) | 13 | 29 | 18 | 40 | 32 |
+| [`community`](community.md) | 14 | 33 | 19 | 41 | 33 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`consent`](consent.md) | 11 | 11 | 9 | 10 | 16 |
 | [`accounting`](accounting.md) | 9 | 10 | 9 | 42 | 12 |
@@ -25,16 +25,16 @@
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 16 | 21 | 16 |
 | [`practice`](practice.md) | 6 | 10 | 12 | 11 | 17 |
+| [`billing`](billing.md) | 5 | 13 | 10 | 22 | 14 |
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 8 | 12 | 10 | 13 |
 | [`profiles`](profiles.md) | 5 | 11 | 14 | 19 | 30 |
 | [`audit`](audit.md) | 4 | 6 | 7 | 131 | 9 |
-| [`billing`](billing.md) | 4 | 12 | 10 | 22 | 13 |
 | [`geo`](geo.md) | 4 | 4 | 6 | 6 | 14 |
 | [`integrations`](integrations.md) | 4 | 4 | 9 | 10 | 9 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 5 | 6 | 8 |
 | [`telemetry`](telemetry.md) | 4 | 5 | 15 | 14 | 12 |
-| [`directory`](directory.md) | 3 | 10 | 5 | 7 | 19 |
+| [`directory`](directory.md) | 3 | 10 | 5 | 7 | 20 |
 | [`iam`](iam.md) | 3 | 15 | 13 | 14 | 24 |
 | [`messaging`](messaging.md) | 3 | 3 | 4 | 22 | 2 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
@@ -77,4 +77,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **273** | **412** | **410** | **1262** | **511** |
+| **Total** | **275** | **417** | **411** | **1263** | **514** |

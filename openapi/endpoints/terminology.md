@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `terminology`
 
-Referencia exhaustiva de 24 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 25 operación(es) del módulo `terminology`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `terminology`
 - **Controladores:** `TerminologyCodeSystemsController`, `TerminologyConceptsController`, `TerminologyFhirController`, `TerminologyImportTemplateController`, `TerminologyTenantCatalogController`, `TerminologyValueSetsController`, `TerminologyVersionsController`
@@ -21,20 +21,21 @@ Referencia exhaustiva de 24 operación(es) del módulo `terminology`, derivada d
 8. [GET /terminology/concepts/{conceptId}](#8-get-terminology-concepts-conceptid) — Lee la ficha de un concepto: textos en el idioma pedido, conjuntos de valores a los que pertenece y denominaciones alternativas
 9. [POST /terminology/concepts/{conceptId}/$deprecate](#9-post-terminology-concepts-conceptid-deprecate) — UC-03-10: retira el concepto y lo excluye de las expansiones
 10. [POST /terminology/concepts/{conceptId}/designations](#10-post-terminology-concepts-conceptid-designations) — UC-03-05: añade una designación (y opcionalmente propiedades)
-11. [GET /terminology/concepts/{conceptId}/glossary-neighborhood](#11-get-terminology-concepts-conceptid-glossary-neighborhood) — Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo
-12. [POST /terminology/concepts/{conceptId}/properties](#12-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
-13. [POST /terminology/concepts/{conceptId}/relationships](#13-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
-14. [GET /terminology/concepts/glossary-graph](#14-get-terminology-concepts-glossary-graph) — Lee el grafo de términos publicados del glosario médico
-15. [GET /terminology/import-template](#15-get-terminology-import-template) — UC-03-03: descarga la plantilla de importación de un perfil
-16. [PUT /terminology/tenants/{tenantId}/catalog-policies](#16-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
-17. [GET /terminology/value-sets](#17-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
-18. [POST /terminology/value-sets](#18-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
-19. [GET /terminology/value-sets/{id}/$expand](#19-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
-20. [GET /terminology/value-sets/$glossary-facets](#20-get-terminology-value-sets-glossary-facets) — Facetas del glosario: conteo por categoría y etiqueta
-21. [POST /terminology/ValueSet/{id}/$expand](#21-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
-22. [POST /terminology/versions/{versionId}/import](#22-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
-23. [POST /terminology/versions/{versionId}/import-file](#23-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
-24. [POST /terminology/versions/{versionId}/publish](#24-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
+11. [GET /terminology/concepts/{conceptId}/glossary-article](#11-get-terminology-concepts-conceptid-glossary-article) — Lee el artículo enciclopédico de un término del glosario
+12. [GET /terminology/concepts/{conceptId}/glossary-neighborhood](#12-get-terminology-concepts-conceptid-glossary-neighborhood) — Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo
+13. [POST /terminology/concepts/{conceptId}/properties](#13-post-terminology-concepts-conceptid-properties) — UC-03-05: alta o actualización de propiedades del concepto
+14. [POST /terminology/concepts/{conceptId}/relationships](#14-post-terminology-concepts-conceptid-relationships) — UC-03-06: crea una relación dirigida entre conceptos
+15. [GET /terminology/concepts/glossary-graph](#15-get-terminology-concepts-glossary-graph) — Lee el grafo de términos publicados del glosario médico
+16. [GET /terminology/import-template](#16-get-terminology-import-template) — UC-03-03: descarga la plantilla de importación de un perfil
+17. [PUT /terminology/tenants/{tenantId}/catalog-policies](#17-put-terminology-tenants-tenantid-catalog-policies) — UC-03-12: define la política de catálogo del tenant
+18. [GET /terminology/value-sets](#18-get-terminology-value-sets) — Listar conjuntos de valores por código interno o texto
+19. [POST /terminology/value-sets](#19-post-terminology-value-sets) — UC-03-07: crea un conjunto de valores con versión y reglas
+20. [GET /terminology/value-sets/{id}/$expand](#20-get-terminology-value-sets-id-expand) — UC-03-08: lee la expansión vigente de un conjunto de valores
+21. [GET /terminology/value-sets/$glossary-facets](#21-get-terminology-value-sets-glossary-facets) — Facetas del glosario: conteo por categoría y etiqueta
+22. [POST /terminology/ValueSet/{id}/$expand](#22-post-terminology-valueset-id-expand) — UC-03-08: materializa los miembros de la expansión
+23. [POST /terminology/versions/{versionId}/import](#23-post-terminology-versions-versionid-import) — UC-03-03: importa conceptos en una versión en borrador
+24. [POST /terminology/versions/{versionId}/import-file](#24-post-terminology-versions-versionid-import-file) — UC-03-03: importa filas desde un archivo, o las valida sin escribir
+25. [POST /terminology/versions/{versionId}/publish](#25-post-terminology-versions-versionid-publish) — UC-03-04: publica una versión (borrador → activa)
 
 ---
 
@@ -1505,7 +1506,102 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /terminology/concepts/{conceptId}/glossary-neighborhood
+## 11. GET /terminology/concepts/{conceptId}/glossary-article
+
+- **Módulo:** `terminology`
+- **Etiqueta OpenAPI:** `terminology`
+- **Nombre:** Lee el artículo enciclopédico de un término del glosario
+- **Operation ID:** `TerminologyConceptsController_readGlossaryArticle`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TerminologyConceptsController.readGlossaryArticle](../../src/modules/terminology/controllers/terminology-concepts.controller.ts)
+
+### Descripción de negocio
+
+Lee el artículo enciclopédico de un término del glosario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Devuelve el documento enciclopédico guardado como propiedad del concepto.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /terminology/concepts/{conceptId}/glossary-article` en `TerminologyConceptsController_readGlossaryArticle`. El controlador delega en `ConceptsService.readGlossaryArticle`. No recibe body. El tipo de retorno estático es `Promise<unknown>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conceptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /terminology/concepts/00000000-0000-4000-8000-000000000001/glossary-article HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conceptId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /terminology/concepts/00000000-0000-4000-8000-000000000001/glossary-article HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<unknown>` | No |
+| 400 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 401 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 403 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 404 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 429 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 500 | Consulta completada correctamente. | `Promise<unknown>` | No |
+
+El controlador declara `unknown`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Artículo del glosario no encontrado | Excepción explícita en src/modules/terminology/services/concepts.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/terminology/concepts/{conceptId}/glossary-article"
+}
+```
+
+---
+
+## 12. GET /terminology/concepts/{conceptId}/glossary-neighborhood
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1662,7 +1758,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /terminology/concepts/{conceptId}/properties
+## 13. POST /terminology/concepts/{conceptId}/properties
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1805,7 +1901,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /terminology/concepts/{conceptId}/relationships
+## 14. POST /terminology/concepts/{conceptId}/relationships
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -1946,7 +2042,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /terminology/concepts/glossary-graph
+## 15. GET /terminology/concepts/glossary-graph
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2088,7 +2184,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /terminology/import-template
+## 16. GET /terminology/import-template
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2182,7 +2278,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. PUT /terminology/tenants/{tenantId}/catalog-policies
+## 17. PUT /terminology/tenants/{tenantId}/catalog-policies
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2349,7 +2445,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /terminology/value-sets
+## 18. GET /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2481,7 +2577,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /terminology/value-sets
+## 19. POST /terminology/value-sets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2627,7 +2723,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /terminology/value-sets/{id}/$expand
+## 20. GET /terminology/value-sets/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2773,7 +2869,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /terminology/value-sets/$glossary-facets
+## 21. GET /terminology/value-sets/$glossary-facets
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -2917,7 +3013,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /terminology/ValueSet/{id}/$expand
+## 22. POST /terminology/ValueSet/{id}/$expand
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3059,7 +3155,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /terminology/versions/{versionId}/import
+## 23. POST /terminology/versions/{versionId}/import
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3203,7 +3299,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /terminology/versions/{versionId}/import-file
+## 24. POST /terminology/versions/{versionId}/import-file
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`
@@ -3369,7 +3465,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /terminology/versions/{versionId}/publish
+## 25. POST /terminology/versions/{versionId}/publish
 
 - **Módulo:** `terminology`
 - **Etiqueta OpenAPI:** `terminology`

@@ -30,3 +30,6 @@ export * from './community-group-notifications.service';
 // Carril P2: el enganche con el contrato de notificaciones de P1.
 export { CommunityMessageNotificationsService } from './community-message-notifications.service';
 export * from './community-booking-chat.service';
+export * from './rating-parties.service';
+export * from './party-ratings.service';
+export * from './party-ratings-read.service';

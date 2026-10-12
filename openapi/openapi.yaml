@@ -635,6 +635,38 @@ paths:
       summary: 'Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo'
       tags:
         - terminology
+  /terminology/concepts/{conceptId}/glossary-article:
+    get:
+      operationId: TerminologyConceptsController_readGlossaryArticle
+      parameters:
+        - name: conceptId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Lee el artículo enciclopédico de un término del glosario
+      tags:
+        - terminology
+      description: >-
+        Lee el artículo enciclopédico de un término del glosario. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /terminology/concepts/{conceptId}:
     get:
       operationId: TerminologyConceptsController_readConcept
@@ -2918,6 +2950,9 @@ paths:
         - profiles-patients
   /profiles/patients/{profileId}:
     get:
+      description: >-
+        SECURITY_ADMIN siempre. Quien atiende (CLINICIAN, PRACTITIONER) sólo si está atendiendo a esa persona: consulta
+        en curso, turno de hoy o relación asistencial vigente.
       operationId: ProfilesPatientsController_getPatient
       parameters:
         - name: profileId
@@ -2945,9 +2980,6 @@ paths:
       summary: 'UC-05-14: ficha de filiación de un paciente (F-01)'
       tags:
         - profiles-patients
-      description: >-
-        UC-05-14: ficha de filiación de un paciente (F-01). Requiere JWT y los roles o alcances declarados por el
-        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /profiles/persons/{personId}/account-links:
     post:
       operationId: ProfilesPatientsController_linkAccount
@@ -8147,6 +8179,55 @@ paths:
       description: >-
         Asignar la membresía a una branch. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /tenants/{tenantId}/branches/{branchId}:
+    patch:
+      operationId: TenantsController_updateBranch
+      parameters:
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: branchId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBranchDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Editar una sucursal
+      tags:
+        - directory-tenants
+      description: >-
+        Editar una sucursal. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
   /tenants/{tenantId}/memberships/{membershipId}/transfer:
     post:
       operationId: TenantsController_transfer
@@ -10500,6 +10581,162 @@ paths:
       summary: Calificar una atención recibida
       tags:
         - community-reviews
+  /community/ratings:
+    put:
+      description: >-
+        Exige una atención terminada cuando hay un paciente de por medio, y el vínculo de trabajo entre médico y
+        organización. Volver a calificar el mismo respaldo actualiza la calificación.
+      operationId: PartyRatingsController_rate
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunityRatePartyDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Calificar con estrellas a un médico, paciente u organización
+      tags:
+        - community-ratings
+    get:
+      operationId: PartyRatingsController_list
+      parameters:
+        - name: targetType
+          required: true
+          in: query
+          schema:
+            type: string
+            enum:
+              - PATIENT
+              - PRACTITIONER
+              - ORGANIZATION
+        - name: targetId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Calificaciones de un médico, paciente u organización
+      tags:
+        - community-ratings
+      description: >-
+        Calificaciones de un médico, paciente u organización. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /community/ratings/summary:
+    get:
+      operationId: PartyRatingsController_summary
+      parameters:
+        - name: targetType
+          required: true
+          in: query
+          schema:
+            type: string
+            enum:
+              - PATIENT
+              - PRACTITIONER
+              - ORGANIZATION
+        - name: targetId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Nota media de un médico, paciente u organización
+      tags:
+        - community-ratings
+      description: >-
+        Nota media de un médico, paciente u organización. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /community/ratings/mine:
+    get:
+      operationId: PartyRatingsController_mine
+      parameters:
+        - name: reviewerType
+          required: true
+          in: query
+          schema:
+            enum:
+              - PATIENT
+              - PRACTITIONER
+              - ORGANIZATION
+            type: string
+        - name: reviewerOrganizationId
+          required: false
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Mis calificaciones
+      tags:
+        - community-ratings
+      description: >-
+        Mis calificaciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
   /community/groups:
     post:
       operationId: CommunityGroupsController_createGroup
@@ -22214,6 +22451,461 @@ paths:
       description: >-
         Listar el nomenclador de procedimientos (arancel de referencia). Requiere JWT y los roles o alcances declarados
         por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/status:
+    get:
+      operationId: BillingSimulatedController_status
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: 'Estado fiscal simulado: emisores y credenciales sintéticas'
+      tags:
+        - billing-simulated
+      description: >-
+        Estado fiscal simulado: emisores y credenciales sintéticas. Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/catalogs:
+    get:
+      operationId: BillingSimulatedController_catalogs
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Catálogos paramétricos del SIAT simulado
+      tags:
+        - billing-simulated
+      description: >-
+        Catálogos paramétricos del SIAT simulado. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/charges:
+    get:
+      operationId: BillingSimulatedController_charges
+      parameters:
+        - name: patientProfileId
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Cobros de consultas (opcionalmente de una persona)
+      tags:
+        - billing-simulated
+      description: >-
+        Cobros de consultas (opcionalmente de una persona). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/charges/{chargeId}/payment:
+    post:
+      operationId: BillingSimulatedController_payment
+      parameters:
+        - name: chargeId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulatedRegisterPaymentDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registrar el pago real de un cobro
+      tags:
+        - billing-simulated
+      description: >-
+        Registrar el pago real de un cobro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments:
+    post:
+      operationId: BillingSimulatedController_instancePayment
+      parameters:
+        - name: chargeId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: instanceId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulatedInstancePaymentDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: 'Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)'
+      tags:
+        - billing-simulated
+      description: >-
+        Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN). Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/charges/{chargeId}/invoices:
+    post:
+      operationId: BillingSimulatedController_issue
+      parameters:
+        - name: chargeId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulatedIssueInvoiceDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Emitir la factura SIAT simulada de un cobro pagado
+      tags:
+        - billing-simulated
+      description: >-
+        Emitir la factura SIAT simulada de un cobro pagado. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/invoices/{invoiceId}:
+    get:
+      operationId: BillingSimulatedController_invoice
+      parameters:
+        - name: invoiceId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Una factura simulada, dentro del alcance de quien la pide
+      tags:
+        - billing-simulated
+      description: >-
+        Una factura simulada, dentro del alcance de quien la pide. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/invoices/{invoiceId}/annulment:
+    post:
+      operationId: BillingSimulatedController_annul
+      parameters:
+        - name: invoiceId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulatedAnnulDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Anular la factura (sólo administración)
+      tags:
+        - billing-simulated
+      description: >-
+        Anular la factura (sólo administración). Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/invoices/{invoiceId}/annulment-reversal:
+    post:
+      operationId: BillingSimulatedController_revert
+      parameters:
+        - name: invoiceId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Revertir la anulación (sólo administración)
+      tags:
+        - billing-simulated
+      description: >-
+        Revertir la anulación (sólo administración). Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/invoices/{invoiceId}/email:
+    post:
+      operationId: BillingSimulatedController_email
+      parameters:
+        - name: invoiceId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulatedEmailDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Encolar el envío (simulado, no se envía) de la factura
+      tags:
+        - billing-simulated
+      description: >-
+        Encolar el envío (simulado, no se envía) de la factura. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/outbox:
+    get:
+      operationId: BillingSimulatedController_outbox
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Bandeja de correo simulada (sólo administración)
+      tags:
+        - billing-simulated
+      description: >-
+        Bandeja de correo simulada (sólo administración). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/my-invoices:
+    get:
+      operationId: BillingSimulatedController_myInvoices
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: 'Mis facturas: recibidas (paciente) o emitidas (quien factura)'
+      tags:
+        - billing-simulated
+      description: >-
+        Mis facturas: recibidas (paciente) o emitidas (quien factura). Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/simulated/my-invoices/{invoiceId}:
+    get:
+      operationId: BillingSimulatedController_myInvoice
+      parameters:
+        - name: invoiceId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Una de mis facturas
+      tags:
+        - billing-simulated
+      description: >-
+        Una de mis facturas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
   /surveys/templates:
     post:
       operationId: SurveysTemplatesController_createTemplate
@@ -42269,6 +42961,42 @@ paths:
       description: >-
         Rentabilidad por producto y costos por proyecto del periodo. Requiere JWT y los roles o alcances declarados por
         el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/categories:
+    get:
+      operationId: PharmacyController_listCategories
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacyCategoryListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Categorías de la farmacia (sólo su personal)
+      tags:
+        - pharmacy
+      description: >-
+        Categorías de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /pharmacies:
     post:
       operationId: PharmacyController_createPharmacy
@@ -42901,6 +43629,42 @@ paths:
       description: >-
         Licencias de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacy/pharmacies/{id}/summary:
+    get:
+      operationId: PharmacyReadController_getSummary
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacySummaryDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Resumen del catálogo de la farmacia (sólo su personal)
+      tags:
+        - pharmacy-directory
+      description: >-
+        Resumen del catálogo de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /pharmacy/pharmacies/{id}/contacts:
     get:
       operationId: PharmacyReadController_getContacts
@@ -58270,6 +59034,10 @@ tags:
     description: >-
       Operaciones del dominio funcional billing service catalog. Consulte el catálogo Markdown de endpoints para
       payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: billing-simulated
+    description: >-
+      Operaciones del dominio funcional billing simulated. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: chart-care-plans
     description: >-
       Operaciones del dominio funcional chart care plans. Consulte el catálogo Markdown de endpoints para payloads
@@ -58409,6 +59177,10 @@ tags:
   - name: community-public
     description: >-
       Operaciones del dominio funcional community public. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: community-ratings
+    description: >-
+      Operaciones del dominio funcional community ratings. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: community-reviews
     description: >-
@@ -60430,6 +61202,46 @@ components:
         primarySite:
           $ref: '#/components/schemas/DiagnosticUnitPrimarySiteDto'
       additionalProperties: false
+    RegisterPharmacyBranchDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de la sucursal
+          maxLength: 300
+        latitude:
+          type: number
+          description: Latitud
+          example: -17.769
+        longitude:
+          type: number
+          description: Longitud
+          example: -63.196
+        description:
+          type: string
+          description: Descripción
+          maxLength: 1000
+        locationUrl:
+          type: string
+          description: Enlace de ubicación (http/https)
+          maxLength: 2000
+      required:
+        - name
+      additionalProperties: false
+    RegisterPharmacyBlockDto:
+      type: object
+      properties:
+        latitude:
+          type: number
+          description: Latitud de la casa central
+        longitude:
+          type: number
+          description: Longitud de la casa central
+        branches:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegisterPharmacyBranchDto'
+      additionalProperties: false
     RegisterOrganizationDetailsDto:
       type: object
       properties:
@@ -60517,6 +61329,8 @@ components:
           description: Zona horaria IANA
           maxLength: 100
           example: America/La_Paz
+        pharmacy:
+          $ref: '#/components/schemas/RegisterPharmacyBlockDto'
       required:
         - code
         - legalName
@@ -64427,9 +65241,42 @@ components:
           example: -77.0428
           minimum: -180
           maximum: 180
+        description:
+          type: string
+          description: 'Descripción: horario, piso…'
+          maxLength: 1000
+        locationUrl:
+          type: string
+          description: Enlace de ubicación (http/https)
+          maxLength: 2000
       required:
         - code
         - name
+      additionalProperties: false
+    UpdateBranchDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 300
+        description:
+          type: object
+          maxLength: 1000
+          nullable: true
+        locationUrl:
+          type: object
+          maxLength: 2000
+          nullable: true
+        latitude:
+          type: object
+          minimum: -90
+          maximum: 90
+          nullable: true
+        longitude:
+          type: object
+          minimum: -180
+          maximum: 180
+          nullable: true
       additionalProperties: false
     DirectoryCreateMembershipDto:
       type: object
@@ -65176,6 +66023,46 @@ components:
           maxLength: 4000
       required:
         - responseText
+      additionalProperties: false
+    CommunityRatePartyDto:
+      type: object
+      properties:
+        reviewerType:
+          type: string
+          enum:
+            - PATIENT
+            - PRACTITIONER
+            - ORGANIZATION
+        reviewerOrganizationId:
+          type: string
+          format: uuid
+        targetType:
+          type: string
+          enum:
+            - PATIENT
+            - PRACTITIONER
+            - ORGANIZATION
+        targetId:
+          type: string
+          format: uuid
+        encounterId:
+          type: string
+          format: uuid
+        roleAssignmentId:
+          type: string
+          format: uuid
+        overallRating:
+          type: number
+          minimum: 1
+          maximum: 5
+        commentText:
+          type: string
+          maxLength: 1000
+      required:
+        - reviewerType
+        - targetType
+        - targetId
+        - overallRating
       additionalProperties: false
     CreateGroupDto:
       type: object
@@ -70455,6 +71342,12 @@ components:
         imagingAvailable:
           type: object
           nullable: true
+        latitude:
+          type: object
+          nullable: true
+        longitude:
+          type: object
+          nullable: true
       required:
         - id
         - code
@@ -73627,6 +74520,85 @@ components:
         isActive:
           type: boolean
           description: Si el servicio sigue disponible para cotizar
+      additionalProperties: false
+    SimulatedRegisterPaymentDto:
+      type: object
+      properties:
+        methodCode:
+          type: number
+          description: Código del catálogo SIMULADO de métodos de pago
+          example: 1
+      required:
+        - methodCode
+      additionalProperties: false
+    SimulatedInstancePaymentDto:
+      type: object
+      properties:
+        methodCode:
+          type: number
+        amount:
+          type: string
+          description: Decimal en texto
+      required:
+        - methodCode
+        - amount
+      additionalProperties: false
+    SimulatedBuyerDto:
+      type: object
+      properties:
+        name:
+          type: string
+        documentTypeCode:
+          type: number
+        documentNumber:
+          type: string
+        complement:
+          type: object
+        email:
+          type: object
+      required:
+        - name
+        - documentTypeCode
+        - documentNumber
+      additionalProperties: false
+    SimulatedSimulationDto:
+      type: object
+      properties:
+        forceMessageCode:
+          type: number
+          description: 'Sólo simulador: forzar un mensaje del catálogo oficial'
+      additionalProperties: false
+    SimulatedIssueInvoiceDto:
+      type: object
+      properties:
+        buyer:
+          $ref: '#/components/schemas/SimulatedBuyerDto'
+        additionalDiscount:
+          type: object
+          description: Descuento adicional, decimal en texto
+        simulation:
+          $ref: '#/components/schemas/SimulatedSimulationDto'
+      required:
+        - buyer
+      additionalProperties: false
+    SimulatedAnnulDto:
+      type: object
+      properties:
+        reasonCode:
+          type: number
+          description: Motivo del catálogo SIMULADO de anulación
+          example: 1
+      required:
+        - reasonCode
+      additionalProperties: false
+    SimulatedEmailDto:
+      type: object
+      properties:
+        to:
+          type: string
+          example: paciente@correo.com
+      required:
+        - to
       additionalProperties: false
     CreateTemplateDto:
       type: object
@@ -85757,6 +86729,15 @@ components:
         - currencyConceptId
         - allocatedOn
       additionalProperties: false
+    PharmacyCategoryListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: string
+      required:
+        - items
     InitialLicenseDto:
       type: object
       properties:
@@ -86386,6 +87367,65 @@ components:
       required:
         - items
         - count
+    PharmacyCategoryCountDto:
+      type: object
+      properties:
+        category:
+          type: string
+        count:
+          type: number
+      required:
+        - category
+        - count
+    PharmacyRecentActivityDto:
+      type: object
+      properties:
+        id:
+          type: string
+        at:
+          type: string
+        kind:
+          type: string
+        text:
+          type: string
+      required:
+        - id
+        - at
+        - kind
+        - text
+    PharmacySummaryDto:
+      type: object
+      properties:
+        published:
+          type: number
+        drafts:
+          type: number
+        withdrawn:
+          type: number
+        outOfStock:
+          type: number
+        lowStock:
+          type: number
+        inventoryValue:
+          type: string
+          description: Valor del inventario, decimal en texto
+        byCategory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyCategoryCountDto'
+        recentActivity:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyRecentActivityDto'
+      required:
+        - published
+        - drafts
+        - withdrawn
+        - outOfStock
+        - lowStock
+        - inventoryValue
+        - byCategory
+        - recentActivity
     PharmacyContactPersonDto:
       type: object
       properties:
