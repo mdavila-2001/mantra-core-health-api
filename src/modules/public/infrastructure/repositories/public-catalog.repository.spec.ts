@@ -2,10 +2,10 @@ import { jest } from '@jest/globals';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { CONCEPTS } from '../../../common';
-import { COMM } from '../../community/community.concepts';
-import { PHARM } from '../../pharmacy/pharmacy.concepts';
-import { PRAC } from '../../practice/practice.concepts';
+import { CONCEPTS } from '../../../../common';
+import { COMM } from '../../../community/community.concepts';
+import { PHARM } from '../../../pharmacy/pharmacy.concepts';
+import { PRAC } from '../../../practice/practice.concepts';
 import { PublicCatalogRepository } from './public-catalog.repository';
 
 /**

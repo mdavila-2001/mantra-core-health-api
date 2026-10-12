@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { CONCEPTS } from '../../../common';
-import { COMM } from '../../community/community.concepts';
-import { PHARM } from '../../pharmacy/pharmacy.concepts';
-import { PINV } from '../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
-import { PRAC } from '../../practice/practice.concepts';
+import { CONCEPTS } from '../../../../common';
+import { COMM } from '../../../community/community.concepts';
+import { PHARM } from '../../../pharmacy/pharmacy.concepts';
+import { PINV } from '../../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
+import { PRAC } from '../../../practice/practice.concepts';
 
 /** Un perfil público visible, con lo justo para saber de quién es. */
 export interface PublicProfileRef {

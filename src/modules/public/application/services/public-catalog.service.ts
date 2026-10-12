@@ -4,27 +4,24 @@ import {
   ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
-} from '../../../common';
-import { COMM } from '../../community/community.concepts';
+} from '../../../../common';
+import { COMM } from '../../../community/community.concepts';
 import {
   PUBLIC_CATALOG_DEFAULT_LIMIT,
   PublicCatalogPageQueryDto,
-  PublicOfferedServiceDto,
   PublicOfferedServicePageDto,
-  PublicPharmacyProductDto,
   PublicPharmacyProductPageDto,
-} from '../dto/public-catalog.dto';
+} from '../../presentation/dto/public-catalog.dto';
 import {
   KeysetAfter,
-  OfferedServiceRow,
-  PharmacyProductRow,
   PublicCatalogRepository,
   PublicProfileRef,
-} from '../repositories/public-catalog.repository';
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-/** Un importe que es cero, con o sin decimales (`0`, `0.00`). */
-const ZERO_AMOUNT = /^0+(\.0+)?$/;
+} from '../../infrastructure/repositories/public-catalog.repository';
+import {
+  UUID_REGEX,
+  formatPublicProduct,
+  formatPublicService,
+} from '../../domain';
 
 /**
  * Lo que una clínica y una farmacia **ofrecen**, leído sin sesión desde su
@@ -76,7 +73,7 @@ export class PublicCatalogService {
     const pageRows = hasMore ? rows.slice(0, limit) : rows;
     const last = pageRows[pageRows.length - 1];
     return {
-      items: pageRows.map(toServiceDto),
+      items: pageRows.map(formatPublicService),
       nextCursor:
         hasMore && last
           ? encodeKeysetCursor({ k: last.code, i: last.id })
@@ -115,7 +112,7 @@ export class PublicCatalogService {
     const pageRows = hasMore ? rows.slice(0, limit) : rows;
     const last = pageRows[pageRows.length - 1];
     return {
-      items: pageRows.map(toProductDto),
+      items: pageRows.map(formatPublicProduct),
       nextCursor:
         hasMore && last
           ? encodeKeysetCursor({ k: last.sortName, i: last.id })
@@ -164,41 +161,12 @@ function afterFromCursor(cursor: string | undefined): KeysetAfter | null {
   const key = decodeKeysetCursor(cursor);
   const sortKey = key.k;
   const id = key.i;
-  if (typeof sortKey !== 'string' || typeof id !== 'string' || !UUID.test(id)) {
+  if (
+    typeof sortKey !== 'string' ||
+    typeof id !== 'string' ||
+    !UUID_REGEX.test(id)
+  ) {
     throw new BadRequestException('El cursor de paginación no es válido');
   }
   return { sortKey, id };
-}
-
-/** Proyección pública de un servicio: campo por campo, nada interno. */
-function toServiceDto(row: OfferedServiceRow): PublicOfferedServiceDto {
-  const withoutPrice = ZERO_AMOUNT.test(row.price);
-  return {
-    id: row.id,
-    code: row.code,
-    name: row.name,
-    description: row.descriptionText,
-    price: withoutPrice ? null : row.price,
-    currency: withoutPrice ? null : row.currency,
-    isActive: row.isActive,
-  };
-}
-
-/** Proyección pública de un producto: campo por campo, nada interno. */
-function toProductDto(row: PharmacyProductRow): PublicPharmacyProductDto {
-  const presentation = [row.strengthText, row.packageSizeText]
-    .map((part) => part?.trim())
-    .filter((part): part is string => Boolean(part))
-    .join(' · ');
-  return {
-    id: row.id,
-    genericName: row.sortName,
-    brandName: row.brandName,
-    presentation: presentation === '' ? null : presentation,
-    therapeuticGroup: null,
-    price: row.price,
-    currency: row.price === null ? null : row.currency,
-    inStock: Number(row.availableQuantity) > 0,
-    requiresPrescription: row.requiresPrescription === true,
-  };
 }
