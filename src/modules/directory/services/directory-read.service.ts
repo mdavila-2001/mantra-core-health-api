@@ -21,7 +21,7 @@ import {
   ContactPointsRepository,
   IdentifiersRepository,
 } from '../../common/repositories';
-import { CatalogRepository } from '../../insurance/repositories';
+import { CatalogRepository } from '../../insurance/infrastructure/repositories';
 import { DIR, TENANT_TYPE_CONCEPT_BY_CODE } from '../directory.concepts';
 import {
   EXECUTIVE_DTO_KEYS,

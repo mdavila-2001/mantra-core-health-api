@@ -23,7 +23,7 @@ import { PractitionerSpecialtiesRepository } from '../../profiles/infrastructure
 import { JurisdictionAuthorizationsRepository } from '../../profiles/infrastructure/repositories/jurisdiction-authorizations.repository';
 import type { Persons } from '../../profiles/entities';
 import { composePersonDisplayName } from '../../profiles/domain/person-name';
-import { DeclaredCoveragesReader } from '../../insurance/services/declared-coverages-reader';
+import { DeclaredCoveragesReader } from '../../insurance/application/services/declared-coverages-reader';
 import type { OwnCoverageDto } from '../../profiles/presentation/dto/read-patients.dto';
 import { loadAgendaNoticesEnv } from '../../scheduling/infrastructure/config/agenda-notices.env';
 import { drawBrandAlovida, brandHeight } from './alovida-mark';

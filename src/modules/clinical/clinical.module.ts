@@ -131,7 +131,7 @@ import {
 // tiene constructor (clase sin estado, `EntityManager` por parámetro), así
 // que se provee directo acá y en `InsuranceModule` sin importar ese módulo
 // entero — mismo criterio que el resto de este archivo.
-import { DeclaredCoveragesReader } from '../insurance/services/declared-coverages-reader';
+import { DeclaredCoveragesReader } from '../insurance/application/services/declared-coverages-reader';
 // N-04 (M3) — la lectura del resumen clínico asienta su acceso en
 // `audit.data_access_log`. `AuditModule` exporta sólo la cadena WORM de
 // mutaciones (`AuditTrailService`, `AuditLogRepository`, `HistoryRepository`),
