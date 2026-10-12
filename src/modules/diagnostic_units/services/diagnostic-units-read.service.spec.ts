@@ -71,6 +71,7 @@ function build() {
     findCurrentPrices: mockFn().mockResolvedValue([]),
     findCurrentAccreditations: mockFn().mockResolvedValue([]),
     findPracticeSites: mockFn().mockResolvedValue([]),
+    findAddresses: mockFn().mockResolvedValue([]),
     findConcepts: mockFn().mockResolvedValue([LAB]),
   };
   const service = new DiagnosticUnitsReadService(em as any, repo as any);

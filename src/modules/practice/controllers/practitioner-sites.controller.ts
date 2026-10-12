@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   requireTenantId,
@@ -170,6 +171,11 @@ export class PractitionerSitesController {
   }
 
   /** El contacto del profesional en una sede con vinculación activa. */
+  @Audited({
+    action: 'PRACTITIONER_SITE_CONTACT_PHONE_SET',
+    entity: 'practitioner_role_assignment',
+    entityId: 'param:siteId',
+  })
   @Put('me/sites/:siteId/contact-phone')
   @Roles('PRACTITIONER', 'CLINICIAN')
   @ApiOperation({ summary: 'Guardar o quitar mi teléfono en una sede' })
