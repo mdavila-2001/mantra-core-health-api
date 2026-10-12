@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { CLIN } from '../../src/modules/clinical/clinical.concepts';
 import type { ClaimLineDto } from '../../src/modules/insurance/presentation/dto';
-import type { PharmacyOrderDto } from '../../src/modules/pharmacy_inventory/dto';
+import type { PharmacyOrderDto } from '../../src/modules/pharmacy_inventory/presentation/dto';
 import { bearer, type TestContext } from '../integration/harness';
 
 interface ScenarioInput {

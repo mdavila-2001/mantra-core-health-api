@@ -1097,7 +1097,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "display": "valor-ejemplo"
       },
       "sampleCollectionAvailable": {},
-      "imagingAvailable": {}
+      "imagingAvailable": {},
+      "latitude": {},
+      "longitude": {}
     }
   ],
   "equipment": [
@@ -1182,7 +1184,7 @@ Campos de la respuesta:
 | `acceptsExternalOrders` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `walkInAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `homeCollectionAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
-| `sites` | Sí | `array<DiagnosticUnitSiteDetailDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","role":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"sampleCollectionAvailable":{},"imagingAvailable":{}}]` |
+| `sites` | Sí | `array<DiagnosticUnitSiteDetailDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","role":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"sampleCollectionAvailable":{},"imagingAvailable":{},"latitude":{},"longitude":{}}]` |
 | `sites[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `sites[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `sites[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -1191,6 +1193,8 @@ Campos de la respuesta:
 | `sites[].role.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `sites[].sampleCollectionAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `sites[].imagingAvailable` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sites[].latitude` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sites[].longitude` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `equipment` | Sí | `array<DiagnosticEquipmentDetailDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","siteId":"00000000-0000-4000-8000-000000000001","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"manufacturer":{},"model":{},"modality":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"operationalStatus":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"lastCalibrationAt":{},"nextCalibrationDueAt":{}}]` |
 | `equipment[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `equipment[].siteId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |

@@ -7,8 +7,10 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
-import { MedicationDispensationsService } from './medication-dispensations.service';
-import { PINV } from '../pharmacy_inventory.concepts';
+import { MedicationDispensationsService } from '../application/medication-dispensations/medication-dispensations.service';
+import { DispenseMedicationUseCase } from '../application/medication-dispensations/dispense-medication.use-case';
+import { ReverseMedicationDispensationUseCase } from '../application/medication-dispensations/reverse-medication-dispensation.use-case';
+import { PINV } from '../domain/pharmacy_inventory.concepts';
 import { PreconditionFailedException } from '../../../common';
 
 const actor = { id: 'pharm-1', roles: ['PHARMACIST'] } as any;
@@ -42,12 +44,25 @@ function build() {
     findEntryIdsBySource: mockFn(async () => []),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new MedicationDispensationsService(
+  const dispense = new DispenseMedicationUseCase(
     em as any,
     dispensationsRepo,
     reservationsRepo as any,
     stockRepo as any,
     ledgerRepo,
+    logger as any,
+  );
+  const reverse = new ReverseMedicationDispensationUseCase(
+    em as any,
+    dispensationsRepo,
+    reservationsRepo as any,
+    stockRepo as any,
+    ledgerRepo,
+    logger as any,
+  );
+  const service = new MedicationDispensationsService(
+    dispense,
+    reverse,
     logger as any,
   );
   return {
@@ -182,5 +197,44 @@ describe('MedicationDispensationsService', () => {
     expect(d.dispensationsRepo.create).not.toHaveBeenCalled();
     expect(d.stockRepo.findByKeyForUpdate).not.toHaveBeenCalled();
     expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+  });
+
+  it('reverse: appends a compensating entry and restores stock at the supplied location', async () => {
+    const d = build();
+    d.dispensationsRepo.findById.mockResolvedValue({
+      id: 'disp1',
+      pharmacyId: 'ph1',
+      pharmacySiteId: 'site1',
+      dispensationStatusConceptId: PINV.DISPENSE_DISPENSED,
+    });
+    d.dispensationsRepo.findLines.mockResolvedValue([
+      {
+        pharmacyProductId: 'product1',
+        inventoryLotId: 'lot1',
+        dispensedQuantity: '3',
+      },
+    ]);
+    const position = {
+      onHandQuantity: '4',
+      reservedQuantity: '1',
+      quarantineQuantity: '0',
+    };
+    d.stockRepo.findByKeyForUpdate.mockResolvedValue(position);
+
+    await expect(
+      d.service.reverse('disp1', { inventoryLocationId: 'loc1' } as any, actor),
+    ).resolves.toEqual({ id: 'disp1', status: 'REVERSED' });
+    expect(d.ledgerRepo.append).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        movementTypeConceptId: PINV.MV_DISPENSE_REVERSAL,
+        quantityDelta: '3',
+        inventoryLocationId: 'loc1',
+      }),
+    );
+    expect(position).toMatchObject({
+      onHandQuantity: '7',
+      availableQuantity: '6',
+    });
   });
 });

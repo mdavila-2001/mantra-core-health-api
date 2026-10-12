@@ -1,6 +1,5 @@
-import { TenantAdministrationService } from '../../directory/services/tenant-administration.service';
 import { DIR } from '../../directory/directory.concepts';
-import { PharmacyOrdersController } from '../controllers/pharmacy-orders.controller';
+import { PharmacyOrdersController } from '../presentation/controllers/pharmacy-orders.controller';
 import { ROLES_KEY } from '../../../common/auth/roles.decorator';
 import { IS_PUBLIC_KEY } from '../../../common/auth/public.decorator';
 import { jest } from '@jest/globals';
@@ -13,8 +12,9 @@ import {
 import {
   ORDER_TTL_HOURS,
   PharmacyOrdersService,
-} from './pharmacy-orders.service';
-import { PINV } from '../pharmacy_inventory.concepts';
+} from '../application/pharmacy-orders/pharmacy-orders.service';
+import { PharmacyOrdersUseCases } from '../application/pharmacy-orders/pharmacy-orders.use-cases';
+import { PINV } from '../domain/pharmacy_inventory.concepts';
 
 /**
  * Ejecuta la operación mock fn.
@@ -144,7 +144,7 @@ function build() {
     findCurrentPrices: mockFn(async () => []),
   };
   const reservationsService = { releaseConfirmedLines: mockFn(async () => 1) };
-  const outbox = { publishDomainEvent: mockFn(async () => ({})) };
+  const outbox = { publish: mockFn(async () => ({})) };
   const orderNotifications = {
     orderUnderReview: mockFn(async () => ({ suppressed: false })),
     orderConfirmed: mockFn(async () => ({ suppressed: false })),
@@ -159,12 +159,9 @@ function build() {
     forOrders: mockFn(async () => new Map()),
     activeClaimForDispensation: mockFn(async () => undefined),
   };
-  const membershipsRepo = { findActiveByUserTenant: mockFn(async () => null) };
-  const tenantAdministration = new TenantAdministrationService(
-    membershipsRepo as any,
-  );
+  const tenantAdministration = { canAdminister: mockFn(async () => false) };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new PharmacyOrdersService(
+  const useCases = new PharmacyOrdersUseCases(
     em as any,
     ordersRepo as any,
     reservationsRepo as any,
@@ -181,11 +178,11 @@ function build() {
     settlements as any,
     tenantAdministration as any,
   );
+  const service = new PharmacyOrdersService(useCases, logger as any);
   return {
     service,
     settlements,
     tenantAdministration,
-    membershipsRepo,
     tx,
     fork,
     em,
@@ -264,7 +261,7 @@ describe('PharmacyOrdersService', () => {
       expect(blocked.reservedQuantity).toBe('3');
       expect(blocked.availableQuantity).toBe('7');
       // El hecho se publica en la misma transacción.
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventType: 'PharmacyOrderSubmitted' }),
       );
@@ -305,7 +302,7 @@ describe('PharmacyOrdersService', () => {
         }),
       );
       expect(d.ledgerRepo.append).toHaveBeenCalledTimes(1);
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           payloadJson: expect.objectContaining({ outOfStockLineCount: 1 }),
@@ -354,7 +351,7 @@ describe('PharmacyOrdersService', () => {
       expect(res.id).toBe('order-9');
       expect(d.reservationsRepo.create).not.toHaveBeenCalled();
       expect(d.ledgerRepo.append).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('a foreign prescription and a missing one are the same 404', async () => {
@@ -569,9 +566,7 @@ describe('PharmacyOrdersService', () => {
       async ({ role }) => {
         const d = build();
         const provider = { id: 'user-provider', roles: ['USER'] };
-        d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
-          tenantRoleConceptId: role,
-        });
+        d.tenantAdministration.canAdminister.mockResolvedValue(true);
         withReading(d, order(), [
           {
             id: 'line-1',
@@ -589,11 +584,10 @@ describe('PharmacyOrdersService', () => {
           d.service.getOrder('order-1', provider),
         );
 
-        expect(d.membershipsRepo.findActiveByUserTenant).toHaveBeenCalledWith(
+        expect(d.tenantAdministration.canAdminister).toHaveBeenCalledWith(
           d.fork,
-          provider.id,
           'tenant-a',
-          DIR.MEMBERSHIP_ACTIVE,
+          provider,
         );
         expect(result.reservationLines).toEqual([
           expect.objectContaining({
@@ -609,52 +603,41 @@ describe('PharmacyOrdersService', () => {
     );
 
     it.each([
-      {
-        label: 'STAFF membership',
-        membership: { tenantRoleConceptId: DIR.ROLE_STAFF },
-      },
-      { label: 'inactive membership', membership: null },
-    ])(
-      'returns the same 404 for $label and a missing order',
-      async ({ membership }) => {
-        const d = build();
-        const provider = { id: 'user-provider', roles: ['USER'] };
-        d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(membership);
-        withReading(d, order({ expiresAt: new Date(Date.now() - 1_000) }), []);
-        const denied = await runWithTenant('tenant-a', () =>
-          d.service
-            .getOrder('order-1', provider)
-            .catch((error: unknown) => error),
-        );
-        d.ordersRepo.findOrderById.mockResolvedValue(null);
-        const missing = await runWithTenant('tenant-a', () =>
-          d.service
-            .getOrder('order-1', provider)
-            .catch((error: unknown) => error),
-        );
+      { label: 'non-admin STAFF membership' },
+      { label: 'inactive membership' },
+    ])('returns the same 404 for $label and a missing order', async () => {
+      const d = build();
+      const provider = { id: 'user-provider', roles: ['USER'] };
+      withReading(d, order({ expiresAt: new Date(Date.now() - 1_000) }), []);
+      const denied = await runWithTenant('tenant-a', () =>
+        d.service
+          .getOrder('order-1', provider)
+          .catch((error: unknown) => error),
+      );
+      d.ordersRepo.findOrderById.mockResolvedValue(null);
+      const missing = await runWithTenant('tenant-a', () =>
+        d.service
+          .getOrder('order-1', provider)
+          .catch((error: unknown) => error),
+      );
 
-        expect(denied).toBeInstanceOf(ResourceNotFoundException);
-        expect((denied as any).getResponse()).toEqual(
-          (missing as any).getResponse(),
-        );
-        expect(d.membershipsRepo.findActiveByUserTenant).toHaveBeenCalledWith(
-          d.fork,
-          provider.id,
-          'tenant-a',
-          DIR.MEMBERSHIP_ACTIVE,
-        );
-        expect(d.em.transactional).not.toHaveBeenCalled();
-        expect(d.ordersRepo.findLinesByReservationIds).not.toHaveBeenCalled();
-        expect(d.settlements.forOrders).not.toHaveBeenCalled();
-      },
-    );
+      expect(denied).toBeInstanceOf(ResourceNotFoundException);
+      expect((denied as any).getResponse()).toEqual(
+        (missing as any).getResponse(),
+      );
+      expect(d.tenantAdministration.canAdminister).toHaveBeenCalledWith(
+        d.fork,
+        'tenant-a',
+        provider,
+      );
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.ordersRepo.findLinesByReservationIds).not.toHaveBeenCalled();
+      expect(d.settlements.forOrders).not.toHaveBeenCalled();
+    });
 
     it('hides another tenant order before expiry, membership checks or private enrichment', async () => {
       const d = build();
       const provider = { id: 'user-provider', roles: ['USER'] };
-      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({
-        tenantRoleConceptId: DIR.ROLE_OWNER,
-      });
       withReading(d, order({ expiresAt: new Date(Date.now() - 1_000) }), []);
       d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue([]);
       const denied = await runWithTenant('tenant-b', () =>
@@ -678,7 +661,7 @@ describe('PharmacyOrdersService', () => {
         'tenant-b',
         ['ph-1'],
       );
-      expect(d.membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+      expect(d.tenantAdministration.canAdminister).not.toHaveBeenCalled();
       expect(d.em.transactional).not.toHaveBeenCalled();
       expect(d.ordersRepo.findLinesByReservationIds).not.toHaveBeenCalled();
       expect(d.settlements.forOrders).not.toHaveBeenCalled();
@@ -688,12 +671,21 @@ describe('PharmacyOrdersService', () => {
       'keeps %s detail access without consulting patient settlements',
       async (role) => {
         const d = build();
+        d.tenantAdministration.canAdminister.mockResolvedValue(true);
         withReading(d, order(), []);
         const result = await runWithTenant('tenant-a', () =>
           d.service.getOrder('order-1', { id: 'platform', roles: [role] }),
         );
         expect(result.id).toBe('order-1');
-        expect(d.membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+        if (role === 'SECURITY_ADMIN') {
+          expect(d.tenantAdministration.canAdminister).not.toHaveBeenCalled();
+        } else {
+          expect(d.tenantAdministration.canAdminister).toHaveBeenCalledWith(
+            d.fork,
+            'tenant-a',
+            { id: 'platform', roles: [role] },
+          );
+        }
         expect(d.settlements.forOrders).not.toHaveBeenCalled();
       },
     );
@@ -704,13 +696,10 @@ describe('PharmacyOrdersService', () => {
       await runWithTenant('tenant-a', () =>
         d.service.getOrder('order-1', patient),
       );
-      expect(d.settlements.forOrders).toHaveBeenCalledWith(
-        d.fork,
-        patient.id,
-        'PHARMACY',
-        ['order-1'],
-      );
-      expect(d.membershipsRepo.findActiveByUserTenant).not.toHaveBeenCalled();
+      expect(d.settlements.forOrders).toHaveBeenCalledWith(d.fork, patient.id, [
+        'order-1',
+      ]);
+      expect(d.tenantAdministration.canAdminister).not.toHaveBeenCalled();
     });
 
     it('exposes stable physical portions with exact frozen amounts after order authorization', async () => {
@@ -977,7 +966,7 @@ describe('PharmacyOrdersService', () => {
         live,
         patient,
       );
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ eventType: 'PharmacyOrderCancelled' }),
       );
@@ -996,7 +985,7 @@ describe('PharmacyOrdersService', () => {
       expect(
         d.reservationsService.releaseConfirmedLines,
       ).not.toHaveBeenCalled();
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
 
     it('a non-owner cancelling gets the indistinguishable 404', async () => {
@@ -1030,7 +1019,7 @@ describe('PharmacyOrdersService', () => {
         expirable,
         system,
       );
-      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+      expect(d.outbox.publish).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           eventType: 'PharmacyOrderExpired',
@@ -1043,7 +1032,7 @@ describe('PharmacyOrdersService', () => {
       const d = build();
       const res = await d.service.expireDue(system);
       expect(res.expiredCount).toBe(0);
-      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
     });
   });
 });

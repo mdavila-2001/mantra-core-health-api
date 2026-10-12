@@ -30,9 +30,9 @@ import {
 } from '../../../../common';
 import { ProfilesPatientsService } from '../../application/services';
 import {
-  CLINICAL_PATIENT_HISTORY_PORT,
-  type ClinicalPatientHistoryPort,
-} from '../../application/ports/clinical-patient-history.port';
+  CLINICAL_PATIENT_HISTORY_ACCESS_PORT,
+  type ClinicalPatientHistoryAccessPort,
+} from '../../application/ports/clinical-patient-history-access.port';
 import {
   CreatePatientDto,
   PatientProfileResponseDto,
@@ -82,8 +82,8 @@ export class ProfilesPatientsController {
    */
   constructor(
     private readonly patientsService: ProfilesPatientsService,
-    @Inject(CLINICAL_PATIENT_HISTORY_PORT)
-    private readonly clinicalPatientHistory: ClinicalPatientHistoryPort,
+    @Inject(CLINICAL_PATIENT_HISTORY_ACCESS_PORT)
+    private readonly clinicalHistoryAccess: ClinicalPatientHistoryAccessPort,
   ) {}
 
   /**
@@ -435,7 +435,7 @@ export class ProfilesPatientsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PatientDetailResponseDto> {
     if (!actor.roles.includes('SECURITY_ADMIN')) {
-      await this.clinicalPatientHistory.assertCanReadHistory(profileId, actor);
+      await this.clinicalHistoryAccess.assertCanReadHistory(profileId, actor);
     }
     return this.patientsService.getPatientById(profileId);
   }

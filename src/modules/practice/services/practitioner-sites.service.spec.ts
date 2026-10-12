@@ -143,10 +143,14 @@ describe('PractitionerSitesService', () => {
       ).resolves.toEqual([]);
     });
 
-    it('drops sites that belong to another organization', async () => {
+    it('includes another organization site when the practitioner has an active assignment there', async () => {
       const d = build();
       d.rolesRepo.findCurrentWithSite.mockResolvedValue([
-        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
+        {
+          practitionerProfileId: 'prac-1',
+          practiceSiteId: 'site-1',
+          contactPhone: '+591 70000001',
+        },
       ]);
       d.sitesRepo.findById.mockResolvedValue(siteRecord());
       d.practicesRepo.findById.mockResolvedValue({
@@ -156,8 +160,10 @@ describe('PractitionerSitesService', () => {
 
       const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
 
-      expect(res).toEqual([]);
-      expect(d.logger.warn).toHaveBeenCalled();
+      expect(res).toMatchObject([
+        { id: 'site-1', contactPhone: '+591 70000001' },
+      ]);
+      expect(d.logger.warn).not.toHaveBeenCalled();
     });
 
     it('composes the address in one line, skipping the empty pieces', async () => {
@@ -177,6 +183,62 @@ describe('PractitionerSitesService', () => {
       const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
 
       expect(res[0].addressText).toBe('Av. Brasil 1234, La Paz');
+    });
+  });
+
+  describe('setSiteContactPhone', () => {
+    const actor = { id: 'user-1', roles: ['PRACTITIONER'] } as any;
+
+    it('stores the phone on the active assignment, including a site of another tenant', async () => {
+      const d = build();
+      const assignment = { contactPhone: undefined } as any;
+      d.rolesRepo.findCurrentBySite.mockResolvedValue(assignment);
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: OTHER_TENANT,
+      });
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.setSiteContactPhone(actor, 'site-1', '  +591 72123456  '),
+      );
+
+      expect(d.rolesRepo.findCurrentBySite).toHaveBeenCalledWith(
+        d.fork,
+        'prac-1',
+        'site-1',
+        PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      );
+      expect(assignment.contactPhone).toBe('+591 72123456');
+      expect(d.fork.flush).toHaveBeenCalled();
+      expect(res.contactPhone).toBe('+591 72123456');
+    });
+
+    it('clears only this assignment phone when passed null', async () => {
+      const d = build();
+      const assignment = { contactPhone: '+591 72123456' } as any;
+      d.rolesRepo.findCurrentBySite.mockResolvedValue(assignment);
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
+
+      const res = await runWithTenant(TENANT, () =>
+        d.service.setSiteContactPhone(actor, 'site-1', null),
+      );
+
+      expect(assignment.contactPhone).toBeUndefined();
+      expect(res.contactPhone).toBeNull();
+    });
+
+    it('rejects a site without an active assignment owned by the actor', async () => {
+      const d = build();
+      d.sitesRepo.findById.mockResolvedValue(siteRecord());
+
+      await expect(
+        runWithTenant(TENANT, () =>
+          d.service.setSiteContactPhone(actor, 'site-1', '+591 72123456'),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.sitesRepo.findById).not.toHaveBeenCalled();
+      expect(d.fork.flush).not.toHaveBeenCalled();
     });
   });
 

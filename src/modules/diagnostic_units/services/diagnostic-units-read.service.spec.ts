@@ -71,6 +71,7 @@ function build() {
     findCurrentPrices: mockFn().mockResolvedValue([]),
     findCurrentAccreditations: mockFn().mockResolvedValue([]),
     findPracticeSites: mockFn().mockResolvedValue([]),
+    findAddresses: mockFn().mockResolvedValue([]),
     findConcepts: mockFn().mockResolvedValue([LAB]),
   };
   const service = new DiagnosticUnitsReadService(em as any, repo as any);
@@ -190,7 +191,15 @@ describe('DiagnosticUnitsReadService', () => {
       },
     ]);
     d.repo.findPracticeSites.mockResolvedValue([
-      { id: 'practice-site-1', code: 'CENTRO', name: 'Sede Centro' },
+      {
+        id: 'practice-site-1',
+        code: 'CENTRO',
+        name: 'Sede Centro',
+        addressId: 'address-1',
+      },
+    ]);
+    d.repo.findAddresses.mockResolvedValue([
+      { id: 'address-1', latitude: '-16.5', longitude: '-68.15' },
     ]);
     d.repo.findConcepts.mockResolvedValue([
       LAB,
@@ -207,6 +216,8 @@ describe('DiagnosticUnitsReadService', () => {
     );
 
     expect(result.sites[0].name).toBe('Sede Centro');
+    expect(result.sites[0].latitude).toBe(-16.5);
+    expect(result.sites[0].longitude).toBe(-68.15);
     expect(result.equipment[0].manufacturer).toBe('Demo');
     expect(result.studies[0].prices).toEqual([
       expect.objectContaining({ amount: '45.00', scheduleCode: 'PUBLIC' }),

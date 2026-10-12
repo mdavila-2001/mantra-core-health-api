@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `directory`
 
-Referencia exhaustiva de 22 operación(es) del módulo `directory`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 23 operación(es) del módulo `directory`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `directory-admin-tenants`, `directory-tenants`
 - **Controladores:** `AdminTenantsController`, `OrganizationLogoController`, `TenantsController`
@@ -20,19 +20,20 @@ Referencia exhaustiva de 22 operación(es) del módulo `directory`, derivada del
 7. [PATCH /tenants/{tenantId}](#7-patch-tenants-tenantid) — Editar los datos de la propia organización
 8. [GET /tenants/{tenantId}/branches](#8-get-tenants-tenantid-branches) — Sucursales de la organización
 9. [POST /tenants/{tenantId}/branches](#9-post-tenants-tenantid-branches) — Crear una branch / sede física con geolocalización
-10. [GET /tenants/{tenantId}/child-tenants](#10-get-tenants-tenantid-child-tenants) — Sub-organizaciones de una organización
-11. [POST /tenants/{tenantId}/child-tenants](#11-post-tenants-tenantid-child-tenants) — Crear una organización hija / sub-tenant
-12. [GET /tenants/{tenantId}/logo](#12-get-tenants-tenantid-logo) — Logo de la propia organización
-13. [PUT /tenants/{tenantId}/logo](#13-put-tenants-tenantid-logo) — Cambiar o quitar el logo como administrador de la organización
-14. [GET /tenants/{tenantId}/logo/content](#14-get-tenants-tenantid-logo-content) — Imagen del logo para miembros de la organización
-15. [GET /tenants/{tenantId}/memberships](#15-get-tenants-tenantid-memberships) — Plantilla de la organización
-16. [POST /tenants/{tenantId}/memberships](#16-post-tenants-tenantid-memberships) — Incorporar un usuario al tenant (membership)
-17. [GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#17-get-tenants-tenantid-memberships-membershipid-branch-assignments) — Sucursales asignadas a una membresía
-18. [POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#18-post-tenants-tenantid-memberships-membershipid-branch-assignments) — Asignar la membresía a una branch
-19. [POST /tenants/{tenantId}/memberships/{membershipId}/offboard](#19-post-tenants-tenantid-memberships-membershipid-offboard) — Revocar / offboarding de un miembro
-20. [PATCH /tenants/{tenantId}/memberships/{membershipId}/role](#20-patch-tenants-tenantid-memberships-membershipid-role) — Cambiar rol / scope de la membresía
-21. [POST /tenants/{tenantId}/memberships/{membershipId}/transfer](#21-post-tenants-tenantid-memberships-membershipid-transfer) — Transferir la membresía entre branches
-22. [GET /tenants/me](#22-get-tenants-me) — Las organizaciones del actor, con su rol en cada una
+10. [PATCH /tenants/{tenantId}/branches/{branchId}](#10-patch-tenants-tenantid-branches-branchid) — Editar una sucursal
+11. [GET /tenants/{tenantId}/child-tenants](#11-get-tenants-tenantid-child-tenants) — Sub-organizaciones de una organización
+12. [POST /tenants/{tenantId}/child-tenants](#12-post-tenants-tenantid-child-tenants) — Crear una organización hija / sub-tenant
+13. [GET /tenants/{tenantId}/logo](#13-get-tenants-tenantid-logo) — Logo de la propia organización
+14. [PUT /tenants/{tenantId}/logo](#14-put-tenants-tenantid-logo) — Cambiar o quitar el logo como administrador de la organización
+15. [GET /tenants/{tenantId}/logo/content](#15-get-tenants-tenantid-logo-content) — Imagen del logo para miembros de la organización
+16. [GET /tenants/{tenantId}/memberships](#16-get-tenants-tenantid-memberships) — Plantilla de la organización
+17. [POST /tenants/{tenantId}/memberships](#17-post-tenants-tenantid-memberships) — Incorporar un usuario al tenant (membership)
+18. [GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#18-get-tenants-tenantid-memberships-membershipid-branch-assignments) — Sucursales asignadas a una membresía
+19. [POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#19-post-tenants-tenantid-memberships-membershipid-branch-assignments) — Asignar la membresía a una branch
+20. [POST /tenants/{tenantId}/memberships/{membershipId}/offboard](#20-post-tenants-tenantid-memberships-membershipid-offboard) — Revocar / offboarding de un miembro
+21. [PATCH /tenants/{tenantId}/memberships/{membershipId}/role](#21-patch-tenants-tenantid-memberships-membershipid-role) — Cambiar rol / scope de la membresía
+22. [POST /tenants/{tenantId}/memberships/{membershipId}/transfer](#22-post-tenants-tenantid-memberships-membershipid-transfer) — Transferir la membresía entre branches
+23. [GET /tenants/me](#23-get-tenants-me) — Las organizaciones del actor, con su rol en cada una
 
 ---
 
@@ -1183,6 +1184,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "branchTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
       "timeZone": "America/La_Paz",
+      "description": "Texto descriptivo de ejemplo",
+      "locationUrl": "valor-ejemplo",
+      "latitude": 1,
+      "longitude": 1,
       "createdAt": "2026-07-31T12:00:00.000Z"
     }
   ],
@@ -1194,14 +1199,18 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<BranchListItemDto>` | Sin restricción adicional declarada | Sucursales, ordenadas por código. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","branchTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<BranchListItemDto>` | Sin restricción adicional declarada | Sucursales, ordenadas por código. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","branchTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo","latitude":1,"longitude":1,"createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la sucursal. | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código de la sucursal dentro de la organización. | `CODIGO_EJEMPLO` |
 | `items[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre de la sucursal. | `Nombre de ejemplo` |
 | `items[].branchTypeConceptId` | No | `string` | formato `uuid` | Tipo de sucursal. | `00000000-0000-4000-8000-000000000001` |
 | `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado de la sucursal. | `00000000-0000-4000-8000-000000000001` |
 | `items[].timeZone` | No | `string` | Sin restricción adicional declarada | Zona horaria de la sucursal. | `America/La_Paz` |
-| `items[].createdAt` | Sí | `string` | formato `date-time` | Alta de la sucursal. | `2026-07-31T12:00:00.000Z` |
+| `items[].description` | No | `string` | Sin restricción adicional declarada | Alta de la sucursal. | `Texto descriptivo de ejemplo` |
+| `items[].locationUrl` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].latitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].longitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas sucursales trae la respuesta. | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -1288,6 +1297,8 @@ Content-Type: application/json
 | `timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA | `America/La_Paz` |
 | `latitude` | No | `number` | mínimo -90; máximo 90 | Latitud geográfica | `-12.0464` |
 | `longitude` | No | `number` | mínimo -180; máximo 180 | Longitud geográfica | `-77.0428` |
+| `description` | No | `string` | longitud máxima 1000 | Descripción: horario, piso… | `Texto descriptivo de ejemplo` |
+| `locationUrl` | No | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Enlace de ubicación (http/https) | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -1305,7 +1316,9 @@ Content-Type: application/json
   "branchType": "CLINIC",
   "timeZone": "America/La_Paz",
   "latitude": -12.0464,
-  "longitude": -77.0428
+  "longitude": -77.0428,
+  "description": "Texto descriptivo de ejemplo",
+  "locationUrl": "valor-ejemplo"
 }
 ```
 
@@ -1333,7 +1346,14 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "code": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo",
   "status": "00000000-0000-4000-8000-000000000001",
-  "createdAt": "2026-07-31T12:00:00.000Z"
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "branchTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "timeZone": "America/La_Paz",
+  "description": "Texto descriptivo de ejemplo",
+  "locationUrl": "valor-ejemplo",
+  "latitude": 1,
+  "longitude": 1
 }
 ```
 
@@ -1347,6 +1367,13 @@ Campos de la respuesta:
 | `name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
 | `status` | Sí | `string` | formato `uuid` | Concept id del estado de la branch | `00000000-0000-4000-8000-000000000001` |
 | `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Mismo valor que `status`: la forma del listado, que el front reutiliza. | `00000000-0000-4000-8000-000000000001` |
+| `branchTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `timeZone` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `description` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `locationUrl` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `latitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `longitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1379,7 +1406,163 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /tenants/{tenantId}/child-tenants
+## 10. PATCH /tenants/{tenantId}/branches/{branchId}
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Editar una sucursal
+- **Operation ID:** `TenantsController_updateBranch`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TenantsController.updateBranch](../../src/modules/directory/controllers/tenants.controller.ts)
+
+### Descripción de negocio
+
+Editar una sucursal. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Edición de una sucursal (P54): nombre, descripción, enlace y punto.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /tenants/{tenantId}/branches/{branchId}` en `TenantsController_updateBranch`. El controlador delega en `DirectoryBranchesService.update`. Valida el body como `UpdateBranchDto` y consume `application/json`. El tipo de retorno estático es `Promise<BranchResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `branchId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateBranchDto`; los campos opcionales se omiten.
+
+```http
+PATCH /tenants/00000000-0000-4000-8000-000000000001/branches/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `tenantId`, `branchId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | No | `string` | longitud mínima 1; longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `description` | No | `object` | longitud máxima 1000; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `locationUrl` | No | `object` | longitud máxima 2000; patrón runtime `/^https?:\/\//i`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `latitude` | No | `object` | mínimo -90; máximo 90; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `longitude` | No | `object` | mínimo -180; máximo 180; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /tenants/00000000-0000-4000-8000-000000000001/branches/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "description": {},
+  "locationUrl": {},
+  "latitude": {},
+  "longitude": {}
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BranchResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<BranchResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<BranchResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<BranchResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<BranchResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<BranchResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<BranchResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<BranchResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<BranchResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<BranchResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BranchResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "branchTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "timeZone": "America/La_Paz",
+  "description": "Texto descriptivo de ejemplo",
+  "locationUrl": "valor-ejemplo",
+  "latitude": 1,
+  "longitude": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | Sí | `string` | formato `uuid` | Identificador asociado a tenant. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Valor de code mantenido por la instancia. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado de la branch | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Mismo valor que `status`: la forma del listado, que el front reutiliza. | `00000000-0000-4000-8000-000000000001` |
+| `branchTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `timeZone` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `description` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `locationUrl` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `latitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `longitude` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 404 | `NOT_FOUND` | Sucursal no encontrada | Excepción explícita en src/modules/directory/services/directory-branches.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/{tenantId}/branches/{branchId}"
+}
+```
+
+---
+
+## 11. GET /tenants/{tenantId}/child-tenants
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1516,7 +1699,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /tenants/{tenantId}/child-tenants
+## 12. POST /tenants/{tenantId}/child-tenants
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1777,7 +1960,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /tenants/{tenantId}/logo
+## 13. GET /tenants/{tenantId}/logo
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1872,7 +2055,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. PUT /tenants/{tenantId}/logo
+## 14. PUT /tenants/{tenantId}/logo
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -1992,7 +2175,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /tenants/{tenantId}/logo/content
+## 15. GET /tenants/{tenantId}/logo/content
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2095,7 +2278,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /tenants/{tenantId}/memberships
+## 16. GET /tenants/{tenantId}/memberships
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2233,7 +2416,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /tenants/{tenantId}/memberships
+## 17. POST /tenants/{tenantId}/memberships
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2372,7 +2555,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+## 18. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2497,7 +2680,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+## 19. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2636,7 +2819,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
+## 20. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2749,7 +2932,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
+## 21. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2886,7 +3069,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
+## 22. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3018,7 +3201,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /tenants/me
+## 23. GET /tenants/me
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`

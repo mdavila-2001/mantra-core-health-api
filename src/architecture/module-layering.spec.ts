@@ -14,6 +14,7 @@ import * as ts from 'typescript';
 export const MIGRATED_MODULES: readonly string[] = [
   'scheduling',
   'profiles',
+  'pharmacy_inventory',
   'insurance',
 ];
 

@@ -7,7 +7,7 @@ import {
   multiplyDecimalsToMoney,
 } from '../../../../common';
 import { CLIN } from '../../../clinical/clinical.concepts';
-import { PINV } from '../../../pharmacy_inventory/pharmacy_inventory.concepts';
+import { PINV } from '../../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
 import { InsuranceClaimLines, type InsuranceClaims } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
 import {

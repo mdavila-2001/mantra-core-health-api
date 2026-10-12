@@ -87,6 +87,7 @@ Los casos de uso dependen de un token Nest + interfaz propia (`application/ports
 | `TenantDirectoryPort` | directory + profiles | `DirectoryTenantDirectoryAdapter` |
 | `WalkInPatientRegistryPort` | profiles + common | `ProfilesWalkInPatientAdapter` |
 | `AgendaNoticePort` | messaging | `MessagingAgendaNoticeAdapter` |
+| `BookingChatPort` | community | `CommunityBookingChatAdapter` |
 | `WaitlistReadPort` / `WaitlistWritePort` | persistencia (Postgres) | `PostgresWaitlistAdapter` |
 
 ## Rutas (leídas de los controllers)

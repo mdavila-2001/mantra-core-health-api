@@ -25,6 +25,8 @@ export interface CreateRoleAssignmentData {
    * Identificador asociado a practice site.
    */
   practiceSiteId?: string;
+  /** Teléfono del profesional en esta sede. */
+  contactPhone?: string;
   /**
    * Identificador asociado a clinical unit.
    */
@@ -195,12 +197,20 @@ export class PractitionerRoleAssignmentsRepository {
     em: EntityManager,
     practitionerProfileId: string,
     practiceSiteId: string,
+    activeStatusConceptId?: string,
   ): Promise<PractitionerRoleAssignments | null> {
-    return em.findOne(PractitionerRoleAssignments, {
-      practitionerProfileId,
-      practiceSiteId,
-      validTo: null,
-    });
+    return em.findOne(
+      PractitionerRoleAssignments,
+      {
+        practitionerProfileId,
+        practiceSiteId,
+        validTo: null,
+        ...(activeStatusConceptId
+          ? { statusConceptId: activeStatusConceptId }
+          : {}),
+      },
+      { orderBy: { isPrimary: 'DESC' } },
+    );
   }
 
   /**
@@ -252,6 +262,7 @@ export class PractitionerRoleAssignmentsRepository {
         practitionerProfileId: data.practitionerProfileId,
         practiceId: data.practiceId,
         practiceSiteId: data.practiceSiteId,
+        contactPhone: data.contactPhone,
         clinicalUnitId: data.clinicalUnitId,
         healthcareServiceId: data.healthcareServiceId,
         roleConceptId: data.roleConceptId,

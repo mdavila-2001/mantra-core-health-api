@@ -1,0 +1,10 @@
+$ corepack yarn test src/modules/pharmacy_inventory --runInBand --silent
+Test Suites: 7 passed, 7 total
+Tests:       117 passed, 117 total
+Snapshots:   0 total
+
+$ corepack yarn typecheck
+typecheck passed
+
+$ git diff --check
+exit code 0

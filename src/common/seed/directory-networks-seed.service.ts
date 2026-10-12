@@ -12,8 +12,8 @@ import {
 import { PROF } from '../../modules/profiles/profiles.concepts';
 import { SEED } from '../constants/concepts';
 import { runWithTenant } from '../tenant/tenant-context';
-import { IamPractitionerSelfRegistrationService } from '../../modules/iam/services';
-import type { RegisterPractitionerDto } from '../../modules/iam/dto';
+import { IamPractitionerSelfRegistrationService } from '../../modules/iam/application/services';
+import type { RegisterPractitionerDto } from '../../modules/iam/presentation/dto';
 import { ProfilesPractitionersService } from '../../modules/profiles/application/services';
 import { PractitionerSitesService } from '../../modules/practice/services';
 import { InsuranceBackboneService } from '../../modules/insurance/application/services';

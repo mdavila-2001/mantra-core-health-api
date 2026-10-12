@@ -2,7 +2,7 @@ import { describe, expect, it } from '@jest/globals';
 import { CONCEPTS } from '../../../../common/constants/concepts';
 import { DUNIT } from '../../../diagnostic_units/diagnostic_units.concepts';
 import { PHARM } from '../../../pharmacy/pharmacy.concepts';
-import { PINV } from '../../../pharmacy_inventory/pharmacy_inventory.concepts';
+import { PINV } from '../../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
 import {
   ClaimAdjudicationVersions,
   ClaimLineAdjudications,
