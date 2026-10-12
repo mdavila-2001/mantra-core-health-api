@@ -165,6 +165,7 @@ export class PractitionerSitesService {
         addressText: dto.address ? ownSiteAddressText(dto.address) : null,
         latitude: dto.address?.latitude ?? null,
         longitude: dto.address?.longitude ?? null,
+        contactPhone: dto.contactPhone ?? null,
         isOwnSite: true,
         bankQrFileId: site.bankQrFileId ?? null,
         status: site.statusConceptId,
@@ -215,7 +216,14 @@ export class PractitionerSitesService {
         { operation: 'practice.sites.updateOwn', siteId },
         'Practitioner own site updated',
       );
-      return this.projectSite(tx, site, true);
+      const practitionerProfileId =
+        await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      const assignment = await this.rolesRepo.findCurrentBySite(
+        tx,
+        practitionerProfileId,
+        siteId,
+      );
+      return this.projectSite(tx, site, true, assignment?.contactPhone);
     });
   }
 
@@ -275,6 +283,47 @@ export class PractitionerSitesService {
         tx,
         site,
         await this.isOwnPractice(tx, site.practiceId, actor.id, tenantId),
+        assignment?.contactPhone,
+      );
+    });
+  }
+
+  /** Guarda el contacto de este médico en la vinculación con la sede. */
+  async setSiteContactPhone(
+    actor: AuthenticatedUser,
+    siteId: string,
+    contactPhone: string | null,
+  ): Promise<PractitionerSiteDto> {
+    const tenantId = requireTenantId();
+    return this.em.transactional(async (tx) => {
+      const practitionerProfileId =
+        await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      const assignment = await this.rolesRepo.findCurrentBySite(
+        tx,
+        practitionerProfileId,
+        siteId,
+        PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      );
+      const site = assignment
+        ? await this.sitesRepo.findById(tx, siteId)
+        : null;
+      const practice = site
+        ? await this.practicesRepo.findById(tx, site.practiceId)
+        : null;
+      if (!assignment || !site || !practice) {
+        throw new ResourceNotFoundException(
+          'No tiene una vinculación vigente con esa sede',
+          { siteId },
+        );
+      }
+      assignment.contactPhone = contactPhone?.trim() || undefined;
+      touch(assignment, actor.id);
+      await tx.flush();
+      return this.projectSite(
+        tx,
+        site,
+        await this.isOwnPractice(tx, site.practiceId, actor.id, tenantId),
+        assignment.contactPhone,
       );
     });
   }
@@ -345,12 +394,32 @@ export class PractitionerSitesService {
       em,
       practitionerProfileId,
     );
-    const sites = await this.loadSites(em, siteIds, tenantId, link?.userId);
+    const sites = await this.loadSites(
+      em,
+      siteIds,
+      tenantId,
+      link?.userId,
+      true,
+    );
+
+    const contactBySite = new Map<string, string | undefined>();
+    for (const assignment of assignments) {
+      if (
+        assignment.practiceSiteId &&
+        !contactBySite.has(assignment.practiceSiteId)
+      ) {
+        contactBySite.set(assignment.practiceSiteId, assignment.contactPhone);
+      }
+    }
 
     const resolved: PractitionerSiteDto[] = [];
     for (const siteId of siteIds) {
       const site = sites.get(siteId);
-      if (site) resolved.push(site);
+      if (site)
+        resolved.push({
+          ...site,
+          contactPhone: contactBySite.get(siteId) ?? null,
+        });
     }
     return resolved;
   }
@@ -430,6 +499,8 @@ export class PractitionerSitesService {
    *   prudente —ajeno mientras no conste lo contrario— y la que corresponde a
    *   las llamadas que no preguntan por una persona, como la resolución de
    *   recursos de la agenda.
+   * @param includeLinkedSites - Incluye sedes de otros tenants cuando los ids
+   *   provienen de asignaciones activas del profesional consultado.
    * @returns Un mapa de sede a proyección, sin entrada para lo descartado.
    */
   private async loadSites(
@@ -437,6 +508,7 @@ export class PractitionerSitesService {
     siteIds: readonly string[],
     tenantId: string,
     ownerUserId?: string,
+    includeLinkedSites = false,
   ): Promise<Map<string, PractitionerSiteDto>> {
     const result = new Map<string, PractitionerSiteDto>();
     if (siteIds.length === 0) return result;
@@ -445,7 +517,10 @@ export class PractitionerSitesService {
       const site = await this.sitesRepo.findById(em, siteId);
       if (!site) continue;
       const practice = await this.practicesRepo.findById(em, site.practiceId);
-      if (!practice || practice.tenantId !== tenantId) {
+      if (
+        !practice ||
+        (!includeLinkedSites && practice.tenantId !== tenantId)
+      ) {
         this.logger.warn(
           { operation: 'practice.sites.resolve', siteId },
           'Sede de otra organización referida por un recurso: se omite',
@@ -477,6 +552,7 @@ export class PractitionerSitesService {
     em: EntityManager,
     site: PracticeSites,
     isOwnSite: boolean,
+    contactPhone?: string,
   ): Promise<PractitionerSiteDto> {
     const address = site.addressId
       ? await em.findOne(Addresses, { id: site.addressId })
@@ -492,6 +568,7 @@ export class PractitionerSitesService {
         address?.latitude !== undefined ? Number(address.latitude) : null,
       longitude:
         address?.longitude !== undefined ? Number(address.longitude) : null,
+      contactPhone: contactPhone ?? null,
       isOwnSite,
       bankQrFileId: site.bankQrFileId ?? null,
       status: site.statusConceptId,

@@ -57,6 +57,26 @@ function build() {
 
 describe('OwnSiteProvisioningService', () => {
   describe('provision', () => {
+    it('persists the optional contact phone on the practitioner assignment', async () => {
+      const d = build();
+
+      await d.service.provision(
+        d.tx as any,
+        OWNER,
+        { name: 'Mi consultorio', contactPhone: '+591 72123456' } as any,
+        OWNER.userId,
+      );
+
+      expect(d.rolesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ contactPhone: '+591 72123456' }),
+      );
+      expect(d.sitesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.not.objectContaining({ contactPhone: '+591 72123456' }),
+      );
+    });
+
     it('creates a new personal practice, the site and the active role assignment', async () => {
       const d = build();
 
