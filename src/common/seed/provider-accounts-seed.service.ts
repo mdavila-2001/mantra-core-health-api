@@ -9,7 +9,7 @@ import {
   DIR,
   TENANT_ROLE_CONCEPT_BY_CODE,
 } from '../../modules/directory/directory.concepts';
-import { IamUsersService } from '../../modules/iam/services';
+import { IamUsersService } from '../../modules/iam/application/services';
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
 import { createdBy, touch } from '../persistence/audit-fields';
 import {
