@@ -3,7 +3,7 @@ import {
   IamAccountSecurityController,
   IamAuthController,
   IamUsersController,
-} from './controllers';
+} from './presentation/controllers';
 
 /**
  * Los controladores que el módulo declara, leídos de su metadata.

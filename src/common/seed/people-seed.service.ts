@@ -9,11 +9,11 @@ import { AuthenticationCredentials } from '../../modules/iam/entities';
 import {
   IamPractitionerSelfRegistrationService,
   IamPatientSelfRegistrationService,
-} from '../../modules/iam/services';
+} from '../../modules/iam/application/services';
 import type {
   RegisterPractitionerDto,
   RegisterPatientDto,
-} from '../../modules/iam/dto';
+} from '../../modules/iam/presentation/dto';
 import { tableRows, column, type MarkdownTableRow } from './markdown-table';
 import {
   syntheticNationalId,
