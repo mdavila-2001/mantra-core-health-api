@@ -21,7 +21,7 @@ import {
   IamUsersController,
   IamAuthController,
   IamAccountSecurityController,
-} from './controllers';
+} from './presentation/controllers';
 import {
   IamUsersService,
   IamUsersReadService,
@@ -38,7 +38,7 @@ import {
   IamPasswordResetService,
   IamEmailVerificationService,
   IamAccountSecurityService,
-} from './services';
+} from './application/services';
 import {
   UsersRepository,
   CredentialsRepository,
@@ -53,7 +53,7 @@ import {
   EmailVerificationsRepository,
   IamApiKeysRepository,
   PasswordResetsRepository,
-} from './repositories';
+} from './infrastructure/repositories';
 
 /**
  * Módulo IAM: identidad, credenciales, sesiones, MFA, dispositivos, roles
