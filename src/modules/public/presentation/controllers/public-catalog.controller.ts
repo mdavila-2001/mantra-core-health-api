@@ -1,13 +1,13 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { Public } from '../../../common';
+import { Public } from '../../../../common';
 import {
   PublicCatalogPageQueryDto,
   PublicOfferedServicePageDto,
   PublicPharmacyProductPageDto,
 } from '../dto/public-catalog.dto';
-import { PublicCatalogService } from '../services/public-catalog.service';
+import { PublicCatalogService } from '../../application/services/public-catalog.service';
 
 /** El mismo tope que el resto de la superficie pública (60 por minuto). */
 const PUBLIC_RATE_LIMIT = { default: { limit: 60, ttl: 60_000 } };
