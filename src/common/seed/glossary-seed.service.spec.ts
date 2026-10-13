@@ -10,6 +10,10 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { GlossarySeedService } from './glossary-seed.service';
 import { GLOSSARY_TERMS } from './glossary-terms.catalog';
+import {
+  GLOSSARY_ARTICLE_SLUGS,
+  glossaryArticleFor,
+} from './glossary-articles.catalog';
 import { GLOSSARY_SOURCE_REFERENCES } from './glossary-source-provenance';
 import {
   GLOSSARY_TAXONOMY,
@@ -149,13 +153,15 @@ const TOTAL_DESIGNATIONS = GLOSSARY_TERMS.reduce(
 /**
  * Cuántas propiedades declara el catálogo: 3 por término (slug, definición
  * clínica, resumen llano), fuentes editoriales cuando están curadas y 4 más
- * (`active_ingredients`/`dosage_form`/`route`/`manufacturer`) con `drugFacts`.
+ * (`active_ingredients`/`dosage_form`/`route`/`manufacturer`) con `drugFacts`,
+ * más el artículo enciclopédico (`glossary-article`) de los términos que lo tienen.
  */
 const TOTAL_PROPERTIES = GLOSSARY_TERMS.reduce(
   (total, term) =>
     total +
     3 +
     (GLOSSARY_SOURCE_REFERENCES[term.slug] !== undefined ? 1 : 0) +
+    (glossaryArticleFor(term.slug) !== undefined ? 1 : 0) +
     (term.drugFacts ? 4 : 0),
   0,
 );
@@ -219,6 +225,7 @@ describe('GlossarySeedService', () => {
       'glossary-clinical-definition',
       'glossary-plain-summary',
       'glossary-sources',
+      'glossary-article',
       'active_ingredients',
       'dosage_form',
       'route',
@@ -250,6 +257,31 @@ describe('GlossarySeedService', () => {
         dataType: 'json',
         valueJson: references,
       });
+    }
+  });
+
+  it('siembra el artículo enciclopédico propio, íntegro, sólo en los términos que lo tienen', async () => {
+    const g = build();
+
+    await g.service.run();
+
+    const articles = g
+      .rowsOf('ConceptProperties')
+      .filter((property) => property.propertyCode === 'glossary-article');
+    expect(articles.map((property) => property.conceptId).sort()).toEqual(
+      GLOSSARY_ARTICLE_SLUGS.map((slug) => glossaryTermConceptId(slug)).sort(),
+    );
+    for (const slug of GLOSSARY_ARTICLE_SLUGS) {
+      const property = articles.find(
+        (candidate) =>
+          candidate.id === glossaryPropertyId(slug, 'glossary-article'),
+      );
+      expect(property).toMatchObject({
+        conceptId: glossaryTermConceptId(slug),
+        dataType: 'json',
+      });
+      // Lo que se siembra es el documento tal cual: lo que el front dibuja.
+      expect(property.valueJson).toEqual(glossaryArticleFor(slug));
     }
   });
 
@@ -441,6 +473,26 @@ describe('GlossarySeedService', () => {
       expect(second.removed).toEqual([]);
       expect(result.updated).toBe(0);
       expect(result.removed).toBe(0);
+    });
+
+    it('un artículo desactualizado en la base se reescribe con el del catálogo', async () => {
+      const slug = GLOSSARY_ARTICLE_SLUGS[0];
+      const store = await seeded();
+      const property = store
+        .get('ConceptProperties')!
+        .get(glossaryPropertyId(slug, 'glossary-article'));
+      property.valueJson = { ...property.valueJson, sections: [] };
+
+      const g = build(store);
+      const result = await g.service.run();
+
+      expect(result.updated).toBe(1);
+      expect(
+        g
+          .rowsIn('ConceptProperties')
+          .find((row) => row.id === glossaryPropertyId(slug, 'glossary-article'))
+          .valueJson,
+      ).toEqual(glossaryArticleFor(slug));
     });
 
     it('no toca filas ajenas colgadas de un término curado', async () => {
