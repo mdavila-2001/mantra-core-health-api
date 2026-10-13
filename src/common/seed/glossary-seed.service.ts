@@ -15,6 +15,7 @@ import {
 } from '../../modules/terminology/entities';
 import { CONCEPTS } from '../constants/concepts';
 import {
+  GLOSSARY_ARTICLE_PROPERTY_CODE,
   GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
   GLOSSARY_DRUG_ACTIVE_INGREDIENTS_PROPERTY_CODE,
   GLOSSARY_DRUG_DOSAGE_FORM_PROPERTY_CODE,
@@ -52,6 +53,7 @@ import {
   GLOSSARY_TERMS,
   type GlossaryTermSeed,
 } from './glossary-terms.catalog';
+import { glossaryArticleFor } from './glossary-articles.catalog';
 
 /** Única versión que recibe cada value set de la taxonomía del glosario. */
 const GLOSSARY_VALUE_SET_VERSION = '1.0.0';
@@ -428,6 +430,9 @@ export class GlossarySeedService {
             glossaryPropertyId(term.slug, code),
           )
         : []),
+      ...(glossaryArticleFor(term.slug) !== undefined
+        ? [glossaryPropertyId(term.slug, GLOSSARY_ARTICLE_PROPERTY_CODE)]
+        : []),
     ]);
     const existing = await this.existingIds(em, ConceptProperties, ids);
 
@@ -504,6 +509,32 @@ export class GlossarySeedService {
         created += 1;
       }
 
+      // Artículo enciclopédico de autoría propia: sólo los términos que lo
+      // tienen (ver `glossary-articles.catalog.ts`). Es el documento que sirve
+      // `GET /terminology/concepts/:id/glossary-article`.
+      const article = glossaryArticleFor(term.slug);
+      if (article !== undefined) {
+        const articleId = glossaryPropertyId(
+          term.slug,
+          GLOSSARY_ARTICLE_PROPERTY_CODE,
+        );
+        if (!existing.has(articleId)) {
+          em.create(
+            ConceptProperties,
+            {
+              id: articleId,
+              conceptId,
+              propertyCode: GLOSSARY_ARTICLE_PROPERTY_CODE,
+              dataType: JSON_DATA_TYPE,
+              valueJson: article,
+              createdAt: now,
+              updatedAt: now,
+            },
+            { partial: true },
+          );
+          created += 1;
+        }
+      }
       // Ficha de medicamento (FND-25-02): mismos 4 códigos que escribe el
       // importador NDC, sólo en los términos que declaran `drugFacts`.
       if (term.drugFacts !== undefined) {
@@ -819,6 +850,13 @@ export class GlossarySeedService {
       for (const code of OWNED_PROPERTY_CODES) {
         ownedProperties.add(glossaryPropertyId(term.slug, code));
       }
+      // El artículo se adopta sólo donde el catálogo lo declara: un término sin
+      // artículo propio conserva el que le haya adjuntado otra canalización.
+      if (glossaryArticleFor(term.slug) !== undefined) {
+        ownedProperties.add(
+          glossaryPropertyId(term.slug, GLOSSARY_ARTICLE_PROPERTY_CODE),
+        );
+      }
       for (const [code, value] of this.declaredProperties(term)) {
         desiredProperties.set(glossaryPropertyId(term.slug, code), value);
       }
@@ -912,6 +950,10 @@ export class GlossarySeedService {
       [GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE, clinicalDefinition],
       [GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE, plainSummary],
     ];
+    const article = glossaryArticleFor(term.slug);
+    if (article !== undefined) {
+      rows.push([GLOSSARY_ARTICLE_PROPERTY_CODE, article]);
+    }
     if (term.drugFacts !== undefined) {
       rows.push(
         [
