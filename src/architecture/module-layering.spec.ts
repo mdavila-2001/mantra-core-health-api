@@ -16,6 +16,7 @@ export const MIGRATED_MODULES: readonly string[] = [
   'profiles',
   'pharmacy_inventory',
   'insurance',
+  'public',
 ];
 
 const MODULES_DIR = join(process.cwd(), 'src', 'modules');

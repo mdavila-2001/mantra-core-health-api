@@ -8,8 +8,8 @@ import {
   ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
-} from '../../../common';
-import { COMM } from '../../community/community.concepts';
+} from '../../../../common';
+import { COMM } from '../../../community/community.concepts';
 import { PublicCatalogService } from './public-catalog.service';
 
 const TENANT = '0a0a0a0a-0000-4000-8000-000000000001';
