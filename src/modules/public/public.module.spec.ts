@@ -3,8 +3,8 @@ import { RequestMethod } from '@nestjs/common';
 import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
 import { ArgumentMetadata, ValidationPipe } from '@nestjs/common';
 import { IS_PUBLIC_KEY } from '../../common/auth/public.decorator';
-import { PublicCatalogController } from './controllers/public-catalog.controller';
-import { PublicCatalogPageQueryDto } from './dto/public-catalog.dto';
+import { PublicCatalogController } from './presentation/controllers/public-catalog.controller';
+import { PublicCatalogPageQueryDto } from './presentation/dto/public-catalog.dto';
 import { PublicCatalogModule } from './public.module';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
