@@ -38,6 +38,7 @@ import {
   AssertionResponseDto,
   ExpireSweepResponseDto,
   CaseQueueResponseDto,
+  VerificationCaseDetailDto,
 } from '../dto';
 
 /**
@@ -83,6 +84,21 @@ export class IdentityCasesController {
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<CaseQueueResponseDto> {
     return this.casesService.listQueue(status, limit);
+  }
+
+  /** Lee expediente y evidencias; los bytes se descargan por Common Files con auditoría. */
+  @Audited({
+    action: 'VERIFICATION_CASE_VIEWED',
+    entity: 'identity_verification_case',
+    entityId: 'param:id',
+  })
+  @Get(':id')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Consultar expediente y evidencias de un caso' })
+  getCaseDetail(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<VerificationCaseDetailDto> {
+    return this.casesService.getCaseDetail(id);
   }
 
   /** UC-27-12 (barrido programado). Declarado antes que las rutas con `:id`. */

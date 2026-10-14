@@ -39,6 +39,7 @@ function build() {
   const evidenceRepo = {
     create: mockFn(),
     findLatestByCase: mockFn().mockResolvedValue(null),
+    findByCase: mockFn().mockResolvedValue([]),
   };
   const checksRepo = {
     create: mockFn(),
