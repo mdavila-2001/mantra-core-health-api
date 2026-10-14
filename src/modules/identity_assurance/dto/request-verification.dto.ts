@@ -14,11 +14,39 @@ export class RequestVerificationDto {
    * Archivo con la evidencia (`common.files`), p. ej. la foto con el carnet.
    */
   @ApiProperty({
+    required: false,
     format: 'uuid',
-    description: 'Archivo de evidencia ya subido a POST /common/files/upload',
+    description:
+      'Archivo único para clientes anteriores. Los clientes nuevos envían frente, reverso y tres capturas del reto de vida.',
   })
+  @IsOptional()
   @IsUUID()
-  evidenceFileId!: string;
+  evidenceFileId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  documentFrontFileId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  documentBackFileId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  livenessCenterFileId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  livenessTurnLeftFileId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  livenessTurnRightFileId?: string;
 }
 
 /** Cuerpo de la solicitud de verificación de matrícula profesional. */
@@ -59,6 +87,24 @@ export class VerificationRequestResponseDto {
     description: 'Estado del caso recién abierto',
   })
   status!: string;
+}
+
+/** Evidencia persistida de un caso; el contenido se sirve por Common Files. */
+export class VerificationEvidenceDto {
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  evidenceTypeConceptId!: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  evidenceFileId?: string;
+
+  @ApiProperty()
+  createdAt!: Date;
+
+  @ApiProperty({ minimum: 1 })
+  sequence!: number;
 }
 
 /**
@@ -124,6 +170,10 @@ export class VerificationStatusResponseDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   evidenceFileId?: string;
+
+  /** Evidencias asociadas al expediente, en el orden de captura. */
+  @ApiPropertyOptional({ type: [VerificationEvidenceDto] })
+  evidence?: VerificationEvidenceDto[];
 
   /**
    * Motivo registrado por quien decidió el caso en revisión manual, cuando lo
