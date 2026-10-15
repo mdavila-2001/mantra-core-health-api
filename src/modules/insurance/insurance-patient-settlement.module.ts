@@ -4,6 +4,8 @@ import {
   PersonAccountLinksRepository,
 } from '../profiles/infrastructure/repositories';
 import { PatientSettlementRepository } from './infrastructure/repositories/patient-settlement.repository';
+import { LinkedOrderDataRepository } from './infrastructure/repositories/linked-order-data.repository';
+import { InsurancePatientAccountRepository } from './infrastructure/repositories/insurance-patient-account.repository';
 import { LinkedClaimOrderService } from './application/services/linked-claim-order.service';
 import { PatientSettlementService } from './application/services/patient-settlement.service';
 
@@ -11,6 +13,8 @@ import { PatientSettlementService } from './application/services/patient-settlem
 @Module({
   providers: [
     PatientSettlementRepository,
+    LinkedOrderDataRepository,
+    InsurancePatientAccountRepository,
     LinkedClaimOrderService,
     PatientSettlementService,
     PatientProfilesRepository,
