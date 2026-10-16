@@ -306,20 +306,20 @@ export class EncountersRepository {
     em: EntityManager,
     appointmentIds: readonly string[],
   ): Promise<Map<string, string>> {
-    const mapa = new Map<string, string>();
-    if (appointmentIds.length === 0) return mapa;
-    const encuentros = await em.find(
+    const map = new Map<string, string>();
+    if (appointmentIds.length === 0) return map;
+    const encounters = await em.find(
       Encounters,
       { appointmentId: { $in: [...appointmentIds] } },
       { orderBy: { createdAt: 'DESC' } },
     );
-    for (const encuentro of encuentros) {
-      if (encuentro.appointmentId == null) continue;
-      if (!mapa.has(encuentro.appointmentId)) {
-        mapa.set(encuentro.appointmentId, encuentro.id);
+    for (const encounter of encounters) {
+      if (encounter.appointmentId == null) continue;
+      if (!map.has(encounter.appointmentId)) {
+        map.set(encounter.appointmentId, encounter.id);
       }
     }
-    return mapa;
+    return map;
   }
 
   /**
@@ -339,20 +339,20 @@ export class EncountersRepository {
     em: EntityManager,
     appointmentIds: readonly string[],
   ): Promise<Map<string, string[]>> {
-    const mapa = new Map<string, string[]>();
-    if (appointmentIds.length === 0) return mapa;
-    const encuentros = await em.find(
+    const map = new Map<string, string[]>();
+    if (appointmentIds.length === 0) return map;
+    const encounters = await em.find(
       Encounters,
       { appointmentId: { $in: [...appointmentIds] } },
       { orderBy: { createdAt: 'DESC' } },
     );
-    for (const encuentro of encuentros) {
-      if (encuentro.appointmentId == null) continue;
-      const ids = mapa.get(encuentro.appointmentId) ?? [];
-      ids.push(encuentro.id);
-      mapa.set(encuentro.appointmentId, ids);
+    for (const encounter of encounters) {
+      if (encounter.appointmentId == null) continue;
+      const ids = map.get(encounter.appointmentId) ?? [];
+      ids.push(encounter.id);
+      map.set(encounter.appointmentId, ids);
     }
-    return mapa;
+    return map;
   }
 
   /**

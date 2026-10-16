@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { PublicProjectionResponseDto } from '../dto';
@@ -20,6 +20,13 @@ const PUBLIC_DIRECTORY_FIELDS = [
 ] as const;
 /** Página fija: el directorio público nunca devuelve el catálogo completo. */
 const PUBLIC_DIRECTORY_PAGE_SIZE = 50;
+
+/** La proyección pública no se pudo leer: nunca se finge un resultado vacío. */
+function projectionUnavailable(): ServiceUnavailableException {
+  return new ServiceUnavailableException(
+    'El directorio público no está disponible en este momento',
+  );
+}
 
 const QUALIFIED_VIEW = `"${PUBLIC_DIRECTORY_SCHEMA}"."${PUBLIC_DIRECTORY_VIEW}"`;
 const SELECTED_COLUMNS = PUBLIC_DIRECTORY_FIELDS.map((c) => `"${c}"`).join(
@@ -70,12 +77,13 @@ export class PublicProjectionsService {
         generatedAt: now,
       };
     } catch (err) {
-      // La MV pública puede no estar materializada todavía: se degrada a vacío.
-      this.logger.warn(
+      // La MV pública puede no estar materializada todavía. Un 200 vacío sería
+      // indistinguible de «no existe»: se responde 503, sin el detalle.
+      this.logger.error(
         { operation: 'read_models.public.slug', slug, error: this.reason(err) },
         'Public projection unavailable',
       );
-      return { slug, records: [], refreshedAt: null, generatedAt: now };
+      throw projectionUnavailable();
     }
   }
 
@@ -130,14 +138,15 @@ export class PublicProjectionsService {
         generatedAt: now,
       };
     } catch (err) {
-      this.logger.warn(
+      // Un directorio vacío con 200 se lee como «no hay médicos»: 503.
+      this.logger.error(
         {
           operation: 'read_models.public.directory',
           error: this.reason(err),
         },
         'Public directory projection unavailable',
       );
-      return { slug, records: [], refreshedAt: null, generatedAt: now };
+      throw projectionUnavailable();
     }
   }
 

@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, ResourceNotFoundException } from '../../../common';
-import { CommunityErrorReason } from '../community.error-reasons';
 import type { PublicProfiles, VerifiedBadges } from '../entities';
 import {
   PublicProfilesRepository,
@@ -24,7 +23,7 @@ import type {
 // no el módulo porque `ProfilesModule` importa `DirectoryModule`, que importa
 // `CommunityModule`: importarlo acá cerraría el ciclo. Es el mismo criterio con
 // el que este módulo ya provee `PersonAccountLinksRepository` suelto.
-import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
+import { MedicalSpecialtyCatalogService } from '../../profiles/application/services/medical-specialty-catalog.service';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
 import {
   COMMUNITY_PUBLIC_PROFILES_INDEX,
@@ -277,7 +276,7 @@ export class CommunityPublicService {
    * @param params - Cuántas traer y desde dónde seguir.
    * @returns Página de publicaciones con su autor.
    */
-  async feedPublico(params: {
+  async feedPublic(params: {
     /** Tope pedido. */
     limit?: number;
     /** Cursor opaco de continuación. */
@@ -287,46 +286,46 @@ export class CommunityPublicService {
     const limit = this.clampLimit(params.limit);
 
     // Una de más para saber si hay página siguiente sin un `COUNT` aparte.
-    const filas = await this.repo.listFeedPublico(
+    const rows = await this.repo.listFeedPublic(
       em,
       limit + 1,
       this.decodeFeedCursor(params.cursor),
     );
-    const hayMas = filas.length > limit;
-    const pagina = hayMas ? filas.slice(0, limit) : filas;
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
 
     const engagement = await this.repo.engagementByPost(
       em,
-      pagina.map((fila) => fila.id),
+      page.map((row) => row.id),
     );
 
-    const ultima = pagina.at(-1);
+    const last = page.at(-1);
     return {
-      items: pagina.map((fila) => {
-        const extra = engagement.get(fila.id);
+      items: page.map((row) => {
+        const extra = engagement.get(row.id);
         return {
-          id: fila.id,
-          bodyText: fila.bodyText,
-          publishedAt: fila.publishedAt.toISOString(),
+          id: row.id,
+          bodyText: row.bodyText,
+          publishedAt: row.publishedAt.toISOString(),
           mediaUrls: (extra?.imageFileIds ?? [])
             .map((fileId) => this.fileUrl(fileId))
             .filter((url): url is string => url !== null),
           reactionCount: extra?.reactionCount ?? 0,
           commentCount: extra?.commentCount ?? 0,
-          authorSlug: fila.authorSlug,
-          authorDisplayName: fila.authorDisplayName,
-          authorHeadline: fila.authorHeadline,
-          authorAvatarUrl: this.fileUrl(fila.authorAvatarFileId ?? undefined),
+          authorSlug: row.authorSlug,
+          authorDisplayName: row.authorDisplayName,
+          authorHeadline: row.authorHeadline,
+          authorAvatarUrl: this.fileUrl(row.authorAvatarFileId ?? undefined),
           authorKind:
-            KIND_BY_TARGET_CONCEPT[fila.authorKindConceptId] ?? 'PRACTITIONER',
+            KIND_BY_TARGET_CONCEPT[row.authorKindConceptId] ?? 'PRACTITIONER',
         };
       }),
       nextCursor:
-        hayMas && ultima
+        hasMore && last
           ? Buffer.from(
               JSON.stringify({
-                p: ultima.publishedAt.toISOString(),
-                i: ultima.id,
+                p: last.publishedAt.toISOString(),
+                i: last.id,
               }),
             ).toString('base64url')
           : null,
@@ -341,18 +340,18 @@ export class CommunityPublicService {
   ): { publishedAt: Date; id: string } | undefined {
     if (!cursor) return undefined;
     try {
-      const crudo: unknown = JSON.parse(
+      const raw: unknown = JSON.parse(
         Buffer.from(cursor, 'base64url').toString(),
       );
       if (
-        typeof crudo === 'object' &&
-        crudo !== null &&
-        typeof (crudo as { p?: unknown }).p === 'string' &&
-        typeof (crudo as { i?: unknown }).i === 'string'
+        typeof raw === 'object' &&
+        raw !== null &&
+        typeof (raw as { p?: unknown }).p === 'string' &&
+        typeof (raw as { i?: unknown }).i === 'string'
       ) {
-        const fecha = new Date((crudo as { p: string }).p);
-        if (!Number.isNaN(fecha.getTime())) {
-          return { publishedAt: fecha, id: (crudo as { i: string }).i };
+        const date = new Date((raw as { p: string }).p);
+        if (!Number.isNaN(date.getTime())) {
+          return { publishedAt: date, id: (raw as { i: string }).i };
         }
       }
     } catch {
@@ -400,24 +399,24 @@ export class CommunityPublicService {
     const limit = this.clampLimit(params.limit);
     await this.assertPostPublic(em, postId);
 
-    const filas = await this.repo.listPostReactors(
+    const rows = await this.repo.listPostReactors(
       em,
       postId,
       // Una de más para saber si hay página siguiente sin un `COUNT` aparte.
       limit + 1,
       this.decodeCreatedAtCursor(params.cursor),
     );
-    const hayMas = filas.length > limit;
-    const pagina = hayMas ? filas.slice(0, limit) : filas;
-    const ultima = pagina.at(-1);
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
 
     return {
-      items: pagina.map((fila) => ({
-        ...this.toPublicActor(fila),
+      items: page.map((row) => ({
+        ...this.toPublicActor(row),
         reactionType:
-          REACTION_CODE_BY_CONCEPT[fila.reactionTypeConceptId] ?? null,
+          REACTION_CODE_BY_CONCEPT[row.reactionTypeConceptId] ?? null,
       })),
-      nextCursor: hayMas && ultima ? this.encodeCreatedAtCursor(ultima) : null,
+      nextCursor: hasMore && last ? this.encodeCreatedAtCursor(last) : null,
       totalHint: null,
       generatedAt: new Date().toISOString(),
     };
@@ -455,7 +454,7 @@ export class CommunityPublicService {
     const limit = this.clampLimit(params.limit);
     await this.assertPostPublic(em, postId);
 
-    return this.paginaDeComentarios(
+    return this.commentsPage(
       await this.repo.listPublicRootComments(
         em,
         postId,
@@ -506,16 +505,12 @@ export class CommunityPublicService {
     // que no es una publicación»: en esta superficie nada distingue una cosa de
     // la otra, y distinguirlas confirmaría qué uuids son reales.
     if (postId === null)
-      throw new ResourceNotFoundException(
-        'Comentario no encontrado',
-        {
-          commentId,
-        },
-        CommunityErrorReason.PUBLIC_COMMENT_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Comentario no encontrado', {
+        commentId,
+      });
     await this.assertPostPublic(em, postId);
 
-    return this.paginaDeComentarios(
+    return this.commentsPage(
       await this.repo.listPublicCommentReplies(
         em,
         commentId,
@@ -540,56 +535,52 @@ export class CommunityPublicService {
     postId: string,
   ): Promise<void> {
     if (!(await this.repo.isPostPublic(em, postId)))
-      throw new ResourceNotFoundException(
-        'Publicación no encontrada',
-        {
-          postId,
-        },
-        CommunityErrorReason.PUBLIC_POST_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Publicación no encontrada', {
+        postId,
+      });
   }
 
   /** Envuelve una página de comentarios ya leída, raíces o respuestas. */
-  private paginaDeComentarios(
-    filas: PublicCommentRow[],
+  private commentsPage(
+    rows: PublicCommentRow[],
     limit: number,
   ): PublicCommentPageDto {
-    const hayMas = filas.length > limit;
-    const pagina = hayMas ? filas.slice(0, limit) : filas;
-    const ultima = pagina.at(-1);
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
     return {
-      items: pagina.map((fila) => this.toPublicComment(fila)),
-      nextCursor: hayMas && ultima ? this.encodeCreatedAtCursor(ultima) : null,
+      items: page.map((row) => this.toPublicComment(row)),
+      nextCursor: hasMore && last ? this.encodeCreatedAtCursor(last) : null,
       totalHint: null,
       generatedAt: new Date().toISOString(),
     };
   }
 
   /** Proyecta un comentario, con su autor acotado a lo publicable. */
-  private toPublicComment(fila: PublicCommentRow): PublicCommentDto {
+  private toPublicComment(row: PublicCommentRow): PublicCommentDto {
     return {
-      id: fila.id,
-      bodyText: fila.bodyText,
-      createdAt: fila.createdAt.toISOString(),
-      replyCount: fila.replyCount,
-      author: this.toPublicActor(fila),
+      id: row.id,
+      bodyText: row.bodyText,
+      createdAt: row.createdAt.toISOString(),
+      replyCount: row.replyCount,
+      author: this.toPublicActor(row),
       // REQ-01-011: sólo la URL servida por la API y el tipo — nunca el
       // fileId ni el mediaRoleConceptId internos (mismo criterio que
       // `avatarUrl`, ver el encabezado de `PublicCommentMediaDto`).
-      media: (fila.media ?? [])
-        .map((adjunto) => ({
-          url: this.fileUrl(adjunto.fileId),
-          kind: COMMENT_MEDIA_KIND_BY_CONCEPT[adjunto.mediaRoleConceptId],
-          altText: adjunto.altText,
+      media: (row.media ?? [])
+        .map((attachment) => ({
+          url: this.fileUrl(attachment.fileId),
+          kind: COMMENT_MEDIA_KIND_BY_CONCEPT[attachment.mediaRoleConceptId],
+          altText: attachment.altText,
         }))
         .filter(
           (
-            adjunto,
-          ): adjunto is {
+            attachment,
+          ): attachment is {
             url: string;
             kind: 'IMAGE' | 'STICKER' | 'GIF';
             altText: string | null;
-          } => adjunto.url !== null && adjunto.kind !== undefined,
+          } => attachment.url !== null && attachment.kind !== undefined,
         ),
     };
   }
@@ -601,25 +592,25 @@ export class CommunityPublicService {
    * *spread* de la fila traería `actor_profile_id` o `author_profile_id` a una
    * respuesta anónima y nadie lo notaría hasta que alguien los usara.
    */
-  private toPublicActor(fila: PublicSocialActorRow): PublicSocialActorDto {
+  private toPublicActor(row: PublicSocialActorRow): PublicSocialActorDto {
     return {
-      slug: fila.authorSlug,
-      displayName: fila.authorDisplayName,
-      headline: fila.authorHeadline,
-      avatarUrl: this.fileUrl(fila.authorAvatarFileId ?? undefined),
-      kind: KIND_BY_TARGET_CONCEPT[fila.authorKindConceptId] ?? 'PRACTITIONER',
+      slug: row.authorSlug,
+      displayName: row.authorDisplayName,
+      headline: row.authorHeadline,
+      avatarUrl: this.fileUrl(row.authorAvatarFileId ?? undefined),
+      kind: KIND_BY_TARGET_CONCEPT[row.authorKindConceptId] ?? 'PRACTITIONER',
     };
   }
 
   /** Cursor `(createdAt, id)` de la última fila de una página social. */
-  private encodeCreatedAtCursor(fila: {
+  private encodeCreatedAtCursor(row: {
     /** Instante de la fila. */
     createdAt: Date;
     /** Identificador que desempata. */
     id: string;
   }): string {
     return Buffer.from(
-      JSON.stringify({ c: fila.createdAt.toISOString(), i: fila.id }),
+      JSON.stringify({ c: row.createdAt.toISOString(), i: row.id }),
     ).toString('base64url');
   }
 
@@ -635,20 +626,20 @@ export class CommunityPublicService {
   ): { createdAt: string; id: string } | undefined {
     if (!cursor) return undefined;
     try {
-      const crudo: unknown = JSON.parse(
+      const raw: unknown = JSON.parse(
         Buffer.from(cursor, 'base64url').toString(),
       );
       if (
-        typeof crudo === 'object' &&
-        crudo !== null &&
-        typeof (crudo as { c?: unknown }).c === 'string' &&
-        typeof (crudo as { i?: unknown }).i === 'string'
+        typeof raw === 'object' &&
+        raw !== null &&
+        typeof (raw as { c?: unknown }).c === 'string' &&
+        typeof (raw as { i?: unknown }).i === 'string'
       ) {
-        const fecha = new Date((crudo as { c: string }).c);
-        if (!Number.isNaN(fecha.getTime()))
+        const date = new Date((raw as { c: string }).c);
+        if (!Number.isNaN(date.getTime()))
           return {
-            createdAt: (crudo as { c: string }).c,
-            id: (crudo as { i: string }).i,
+            createdAt: (raw as { c: string }).c,
+            id: (raw as { i: string }).i,
           };
       }
     } catch {
@@ -672,18 +663,14 @@ export class CommunityPublicService {
    */
   async getPublicMedia(fileId: string): Promise<FileContentDto> {
     const em = this.em.fork();
-    const permitido =
+    const allowed =
       (await this.profiles.isPublicMedia(em, fileId)) ||
       (await this.repo.isPublicPostMedia(em, fileId)) ||
       // REQ-01-011: la tercera clase de imagen pública, junto al avatar/portada
       // y las fotos del cuerpo del post — un adjunto de comentario visible.
       (await this.repo.isPublicCommentMedia(em, fileId));
-    if (!permitido) {
-      throw new ResourceNotFoundException(
-        'Archivo no encontrado',
-        { fileId },
-        CommunityErrorReason.PUBLIC_FILE_NOT_FOUND,
-      );
+    if (!allowed) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
     }
     return this.files.downloadPublicMedia(fileId);
   }
@@ -691,10 +678,10 @@ export class CommunityPublicService {
   /**
    * Búsqueda unificada y sus verticales.
    *
-   * @param filtros - Texto, vertical, verificación, cursor y tope.
+   * @param filters - Texto, vertical, verificación, cursor y tope.
    * @returns Página de resultados públicos.
    */
-  async search(filtros: {
+  async search(filters: {
     /** Texto libre. */
     q?: string;
     /** Vertical al que acotar; ausente = búsqueda unificada. */
@@ -721,7 +708,7 @@ export class CommunityPublicService {
     limit?: number;
   }): Promise<PublicSearchPageDto> {
     const em = this.em.fork();
-    const limit = this.clampLimit(filtros.limit);
+    const limit = this.clampLimit(filters.limit);
 
     // La especialidad se valida **antes que nada**: es el único parámetro de
     // esta superficie sobre el que el cliente puede estar equivocado de forma no
@@ -729,7 +716,7 @@ export class CommunityPublicService {
     // ignora; una especialidad inventada no, porque ignorarla devolvería el
     // directorio entero y la pantalla diría, sin decirlo, que todos ésos son de
     // la especialidad pedida (AC-02-8).
-    const specialtyConceptId = filtros.specialtyConceptId?.trim() || undefined;
+    const specialtyConceptId = filters.specialtyConceptId?.trim() || undefined;
     let specialtyDisplay: string | undefined;
     if (specialtyConceptId) {
       await this.specialtyCatalog.assertIsMedicalSpecialty(
@@ -750,13 +737,13 @@ export class CommunityPublicService {
     // El lugar se valida con la misma regla que la especialidad: un uuid ajeno
     // al catálogo es 422, nunca un filtro que se cae en silencio (2.3).
     const territory = await this.territory.resolve(em, {
-      department: filtros.departmentConceptId,
-      municipality: filtros.municipalityConceptId,
+      department: filters.departmentConceptId,
+      municipality: filters.municipalityConceptId,
     });
 
-    const targetTypeConceptId = filtros.kind
+    const targetTypeConceptId = filters.kind
       ? Object.keys(KIND_BY_TARGET_CONCEPT).find(
-          (id) => KIND_BY_TARGET_CONCEPT[id] === filtros.kind,
+          (id) => KIND_BY_TARGET_CONCEPT[id] === filters.kind,
         )
       : undefined;
 
@@ -767,9 +754,9 @@ export class CommunityPublicService {
     // —vive en el catálogo de farmacia, no en `community.public_profiles`—, así
     // que acá no hay nada que devolver y la respuesta honesta es vacía, como ya
     // hace `nearby` mientras no existan las coordenadas.
-    if (filtros.kind !== undefined && targetTypeConceptId === undefined) {
+    if (filters.kind !== undefined && targetTypeConceptId === undefined) {
       this.logger.info(
-        { operation: 'community.public.search', kind: filtros.kind },
+        { operation: 'community.public.search', kind: filters.kind },
         'Vertical sin sujeto en el directorio: se sirve vacío en vez del directorio completo',
       );
       return {
@@ -780,47 +767,47 @@ export class CommunityPublicService {
       };
     }
 
-    const q = filtros.q?.trim().slice(0, MAX_QUERY_LENGTH) || undefined;
+    const q = filters.q?.trim().slice(0, MAX_QUERY_LENGTH) || undefined;
 
     // El índice primero; el SQL queda como red. Si OpenSearch no responde el
     // buscador **encuentra menos y peor**, que es un defecto; devolver 500
     // sería una caída de la portada pública.
-    const city = filtros.city?.trim().slice(0, MAX_QUERY_LENGTH) || undefined;
+    const city = filters.city?.trim().slice(0, MAX_QUERY_LENGTH) || undefined;
 
     // El índice no guarda departamento ni municipio: con un filtro territorial
     // la única respuesta honesta es la del SQL, igual que con una especialidad
     // sin rótulo. Servir la página del índice sin ese filtro sería mentir.
-    const desdeIndice = territory
+    const fromIndex = territory
       ? null
       : await this.searchFromIndex({
           q,
-          kind: filtros.kind,
-          verified: filtros.verified,
+          kind: filters.kind,
+          verified: filters.verified,
           city,
           specialtyConceptId,
           specialtyDisplay,
-          cursor: filtros.cursor,
+          cursor: filters.cursor,
           limit,
         });
-    if (desdeIndice) return desdeIndice;
+    if (fromIndex) return fromIndex;
 
     const rows = await this.repo.searchProfiles(
       em,
       {
         q,
         targetTypeConceptId,
-        verified: filtros.verified,
+        verified: filters.verified,
         city,
         territory,
         specialtyConceptId,
-        after: this.decodeSqlCursor(filtros.cursor),
+        after: this.decodeSqlCursor(filters.cursor),
       },
       limit + 1,
     );
 
     const hasMore = rows.length > limit;
     const page = hasMore ? rows.slice(0, limit) : rows;
-    const señales = await this.señalesDe(em, page);
+    const signals = await this.signals(em, page);
     const last = page.at(-1);
 
     // Aparecer no es lo mismo que ser abierto, y el profesional necesita ver
@@ -831,7 +818,7 @@ export class CommunityPublicService {
     }
 
     return {
-      items: page.map((row) => this.toResult(row, señales)),
+      items: page.map((row) => this.toResult(row, signals)),
       nextCursor: hasMore && last ? this.encodeCursor(last) : null,
       totalHint: null,
       generatedAt: new Date().toISOString(),
@@ -861,29 +848,24 @@ export class CommunityPublicService {
       (expectedTargetConceptId &&
         profile.targetTypeConceptId !== expectedTargetConceptId)
     )
-      throw new ResourceNotFoundException(
-        'No encontrado',
-        { slug },
-        CommunityErrorReason.PUBLIC_DIRECTORY_PROFILE_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('No encontrado', { slug });
 
     const kind = this.kindOf(profile) as PublicDirectoryProfileDto['kind'];
     // Sólo un profesional tiene especialidad, trayectoria laboral y sedes;
     // pedirlas para el resto sería un viaje que siempre vuelve vacío.
-    const [señales, posts, especialidades, trayectoria, sedes] =
-      await Promise.all([
-        this.señalesDe(em, [profile]),
-        this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
-        kind === 'PRACTITIONER'
-          ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
-          : Promise.resolve(new Map<string, string[]>()),
-        kind === 'PRACTITIONER'
-          ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
-          : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
-        kind === 'PRACTITIONER'
-          ? this.repo.practiceSitesByPractitioner(em, [profile.targetId])
-          : Promise.resolve(new Map<string, ProfilePracticeSite[]>()),
-      ]);
+    const [señales, posts, specialties, trajectory, sites] = await Promise.all([
+      this.signals(em, [profile]),
+      this.repo.listPublicPosts(em, profile.id, PROFILE_POSTS_LIMIT),
+      kind === 'PRACTITIONER'
+        ? this.repo.specialtiesByPractitioner(em, [profile.targetId])
+        : Promise.resolve(new Map<string, string[]>()),
+      kind === 'PRACTITIONER'
+        ? this.repo.affiliationsByPractitioner(em, [profile.targetId])
+        : Promise.resolve(new Map<string, ProfileAffiliation[]>()),
+      kind === 'PRACTITIONER'
+        ? this.repo.practiceSitesByPractitioner(em, [profile.targetId])
+        : Promise.resolve(new Map<string, ProfilePracticeSite[]>()),
+    ]);
     // La interacción de cada publicación: sus imágenes, y cuántas reacciones y
     // comentarios lleva. Un solo viaje para todo el lote.
     const engagement = await this.repo.engagementByPost(
@@ -897,7 +879,7 @@ export class CommunityPublicService {
       señales.badges.get(profile.id) ?? [],
     );
     const agenda = señales.agenda.get(profile.targetId);
-    const ubicacion = señales.locations.get(profile.targetId);
+    const location = señales.locations.get(profile.targetId);
 
     // ORG-PUB-005. No se espera: la ficha de un profesional no puede caerse
     // ni tardar más porque el contador esté ocupado.
@@ -912,26 +894,26 @@ export class CommunityPublicService {
       avatarUrl: this.fileUrl(profile.avatarFileId),
       coverUrl: this.fileUrl(profile.coverFileId),
       verified: badge.status === 'VERIFIED',
-      city: ubicacion?.city ?? null,
-      address: ubicacion?.address ?? null,
+      city: location?.city ?? null,
+      address: location?.address ?? null,
       location:
-        ubicacion?.lat != null && ubicacion?.lng != null
-          ? { lat: ubicacion.lat, lng: ubicacion.lng }
+        location?.lat != null && location?.lng != null
+          ? { lat: location.lat, lng: location.lng }
           : null,
-      specialties: especialidades.get(profile.targetId) ?? [],
-      trajectory: trayectoria.get(profile.targetId) ?? [],
+      specialties: specialties.get(profile.targetId) ?? [],
+      trajectory: trajectory.get(profile.targetId) ?? [],
       // Campo por campo y no el objeto de la lectura tal cual: es la misma
       // lista blanca que el resto de la ficha, bajando un nivel. Si la lectura
       // suma algo mañana, acá no llega solo.
-      practiceSites: (sedes.get(profile.targetId) ?? []).map((sede) => ({
-        id: sede.id,
-        name: sede.name,
-        addressText: sede.addressText,
+      practiceSites: (sites.get(profile.targetId) ?? []).map((site) => ({
+        id: site.id,
+        name: site.name,
+        addressText: site.addressText,
         location:
-          sede.location === null
+          site.location === null
             ? null
-            : { lat: sede.location.lat, lng: sede.location.lng },
-        isOwn: sede.isOwn,
+            : { lat: site.location.lat, lng: site.location.lng },
+        isOwn: site.isOwn,
       })),
       ratingAverage: rating?.average ?? null,
       ratingCount: rating?.count ?? 0,
@@ -1075,7 +1057,7 @@ export class CommunityPublicService {
         )
       : undefined;
 
-    const filas = await this.repo.nearbyProfiles(
+    const rows = await this.repo.nearbyProfiles(
       em,
       { ...punto, radiusKm, targetTypeConceptId },
       // Se piden de más porque la caja envolvente incluye esquinas que el
@@ -1083,24 +1065,24 @@ export class CommunityPublicService {
       limit * 4,
     );
 
-    const señales = await this.señalesDe(
+    const signals = await this.signals(
       em,
-      filas.map((fila) => fila.profile),
+      rows.map((row) => row.profile),
     );
 
-    const items = filas
-      .map((fila) => ({
-        fila,
-        distanceKm: haversineKm(punto, { lat: fila.lat, lng: fila.lng }),
+    const items = rows
+      .map((row) => ({
+        fila: row,
+        distanceKm: haversineKm(punto, { lat: row.lat, lng: row.lng }),
       }))
-      .filter((entrada) => entrada.distanceKm <= radiusKm)
+      .filter((entry) => entry.distanceKm <= radiusKm)
       .sort((a, b) => a.distanceKm - b.distanceKm)
       .slice(0, limit)
-      .map((entrada) => ({
-        ...this.toResult(entrada.fila.profile, señales),
-        city: entrada.fila.city,
-        distanceKm: entrada.distanceKm,
-        location: { lat: entrada.fila.lat, lng: entrada.fila.lng },
+      .map((entry) => ({
+        ...this.toResult(entry.fila.profile, signals),
+        city: entry.fila.city,
+        distanceKm: entry.distanceKm,
+        location: { lat: entry.fila.lat, lng: entry.fila.lng },
       }));
 
     return {
@@ -1112,11 +1094,11 @@ export class CommunityPublicService {
   }
 
   /** El `geo_point` de un documento, si es un punto utilizable. */
-  private pointOf(valor: unknown): { lat: number; lng: number } | null {
-    if (typeof valor !== 'object' || valor === null) return null;
-    const bruto = valor as { lat?: unknown; lon?: unknown; lng?: unknown };
-    const lat = bruto.lat;
-    const lng = bruto.lon ?? bruto.lng;
+  private pointOf(value: unknown): { lat: number; lng: number } | null {
+    if (typeof value !== 'object' || value === null) return null;
+    const gross = value as { lat?: unknown; lon?: unknown; lng?: unknown };
+    const lat = gross.lat;
+    const lng = gross.lon ?? gross.lng;
     if (typeof lat !== 'number' || typeof lng !== 'number') return null;
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
     return { lat, lng };
@@ -1129,10 +1111,10 @@ export class CommunityPublicService {
    * saber si hubo índice, sólo que tiene que seguir por SQL. Cualquier fallo
    * —cluster caído, índice todavía sin crear, timeout— cae por el mismo lado.
    *
-   * @param filtros - Texto, vertical, verificación, cursor y tope.
+   * @param filters - Texto, vertical, verificación, cursor y tope.
    * @returns La página, o `null` para que el llamador degrade a SQL.
    */
-  private async searchFromIndex(filtros: {
+  private async searchFromIndex(filters: {
     /** Texto libre, ya recortado. */
     q?: string;
     /** Vertical al que acotar. */
@@ -1154,29 +1136,29 @@ export class CommunityPublicService {
     // puede acotar por ella. Degradar a SQL —que filtra por el uuid— es lo
     // único honesto; servir la página sin el filtro sería el defecto que este
     // carril vino a cerrar.
-    if (filtros.specialtyConceptId && !filtros.specialtyDisplay) return null;
+    if (filters.specialtyConceptId && !filters.specialtyDisplay) return null;
 
     try {
-      const filtrosIndice: Array<{ field: string; values: string[] }> = [];
-      if (filtros.kind) {
-        filtrosIndice.push({ field: 'kind', values: [filtros.kind] });
+      const indexFilters: Array<{ field: string; values: string[] }> = [];
+      if (filters.kind) {
+        indexFilters.push({ field: 'kind', values: [filters.kind] });
       }
-      if (filtros.verified) {
-        filtrosIndice.push({ field: 'verified', values: ['true'] });
+      if (filters.verified) {
+        indexFilters.push({ field: 'verified', values: ['true'] });
       }
       // `city` está mapeada como `keyword` con el normalizador español, así
       // que compara sin tildes ni mayúsculas — igual que el camino SQL. Que
       // los dos acoten igual no es un detalle: si el índice se cae, la lista
       // tiene que seguir diciendo lo mismo.
-      if (filtros.city) {
-        filtrosIndice.push({ field: 'city', values: [filtros.city] });
+      if (filters.city) {
+        indexFilters.push({ field: 'city', values: [filters.city] });
       }
       // `specialties` está mapeada como `keyword` y es filtrable desde que se
       // creó el índice; lo que faltaba era que alguien la usara.
-      if (filtros.specialtyDisplay) {
-        filtrosIndice.push({
+      if (filters.specialtyDisplay) {
+        indexFilters.push({
           field: 'specialties',
-          values: [filtros.specialtyDisplay],
+          values: [filters.specialtyDisplay],
         });
       }
 
@@ -1184,15 +1166,15 @@ export class CommunityPublicService {
         COMMUNITY_PUBLIC_PROFILES_INDEX,
         {
           tenantId: PUBLIC_DIRECTORY_TENANT,
-          query: filtros.q,
-          filters: filtrosIndice,
-          size: filtros.limit + 1,
-          searchAfter: this.decodeIndexCursor(filtros.cursor),
+          query: filters.q,
+          filters: indexFilters,
+          size: filters.limit + 1,
+          searchAfter: this.decodeIndexCursor(filters.cursor),
           // Decisión D7: los no verificados se indexan y **rankean después**. Sin
           // texto no hay relevancia que ordenar, así que manda el alfabético —el
           // mismo orden que sirve el SQL, para que la primera página no cambie
           // según quién respondió.
-          sort: filtros.q
+          sort: filters.q
             ? [{ field: 'verified', direction: 'desc' }]
             : [
                 { field: 'verified', direction: 'desc' },
@@ -1201,8 +1183,8 @@ export class CommunityPublicService {
         },
       );
 
-      const hasMore = result.hits.length > filtros.limit;
-      const page = hasMore ? result.hits.slice(0, filtros.limit) : result.hits;
+      const hasMore = result.hits.length > filters.limit;
+      const page = hasMore ? result.hits.slice(0, filters.limit) : result.hits;
       const last = page.at(-1);
 
       return {
@@ -1234,31 +1216,31 @@ export class CommunityPublicService {
    */
   private hitToResult(hit: SearchHit): PublicSearchResultDto {
     const source = hit.source;
-    const texto = (clave: string): string | null => {
-      const valor = source[clave];
-      return typeof valor === 'string' && valor.length > 0 ? valor : null;
+    const text = (key: string): string | null => {
+      const value = source[key];
+      return typeof value === 'string' && value.length > 0 ? value : null;
     };
-    const numero = (clave: string): number | null => {
-      const valor = source[clave];
-      return typeof valor === 'number' && Number.isFinite(valor) ? valor : null;
+    const readNumber = (key: string): number | null => {
+      const value = source[key];
+      return typeof value === 'number' && Number.isFinite(value) ? value : null;
     };
 
     // El sello viaja al índice descompuesto en campos planos —OpenSearch no
     // gana nada indexando un objeto anidado que nadie filtra— y se recompone
     // acá en la MISMA forma que sirve el camino SQL. Si las dos formas
     // divergieran, el mismo perfil se vería distinto según quién respondió.
-    const estado = texto('verifiedBadgeStatus');
+    const status = text('verifiedBadgeStatus');
     const verifiedBadge: VerifiedBadgeDto = {
       status:
-        estado === 'VERIFIED' || estado === 'EXPIRED'
-          ? estado
+        status === 'VERIFIED' || status === 'EXPIRED'
+          ? status
           : source.verified === true
             ? 'VERIFIED'
             : 'NONE',
-      badgeTypeConceptId: texto('badgeTypeConceptId'),
-      verificationMethodConceptId: texto('verificationMethodConceptId'),
-      verifiedAt: texto('verifiedAt'),
-      validUntil: texto('validUntil'),
+      badgeTypeConceptId: text('badgeTypeConceptId'),
+      verificationMethodConceptId: text('verificationMethodConceptId'),
+      verifiedAt: text('verifiedAt'),
+      validUntil: text('validUntil'),
     };
 
     // El punto viaja al índice como `geo_point` —`{lat, lon}`, con la `lon` que
@@ -1279,20 +1261,20 @@ export class CommunityPublicService {
         : null;
 
     return {
-      kind: (texto('kind') ?? 'PRACTITIONER') as PublicResultKind,
-      slug: texto('slug') ?? '',
-      displayName: texto('displayName') ?? '',
-      headline: texto('headline'),
-      city: texto('city'),
-      avatarUrl: texto('avatarUrl'),
+      kind: (text('kind') ?? 'PRACTITIONER') as PublicResultKind,
+      slug: text('slug') ?? '',
+      displayName: text('displayName') ?? '',
+      headline: text('headline'),
+      city: text('city'),
+      avatarUrl: text('avatarUrl'),
       verified: verifiedBadge.status === 'VERIFIED',
-      ratingAverage: numero('ratingAverage'),
-      ratingCount: numero('ratingCount') ?? 0,
+      ratingAverage: readNumber('ratingAverage'),
+      ratingCount: readNumber('ratingCount') ?? 0,
       verifiedBadge,
       hasPublishedAgenda: source.hasPublishedAgenda === true,
-      nextAvailableDate: texto('nextAvailableDate'),
-      coverUrl: texto('coverUrl'),
-      address: texto('address'),
+      nextAvailableDate: text('nextAvailableDate'),
+      coverUrl: text('coverUrl'),
+      address: text('address'),
       location,
     };
   }
@@ -1312,11 +1294,11 @@ export class CommunityPublicService {
   private decodeIndexCursor(cursor?: string): unknown[] | undefined {
     if (!cursor) return undefined;
     try {
-      const crudo: unknown = JSON.parse(
+      const raw: unknown = JSON.parse(
         Buffer.from(cursor, 'base64url').toString(),
       );
-      const claves = (crudo as { s?: unknown })?.s;
-      return Array.isArray(claves) && claves.length > 0 ? claves : undefined;
+      const keys = (raw as { s?: unknown })?.s;
+      return Array.isArray(keys) && keys.length > 0 ? keys : undefined;
     } catch {
       return undefined;
     }
@@ -1327,13 +1309,13 @@ export class CommunityPublicService {
     lat?: number,
     lng?: number,
   ): { lat: number; lng: number } {
-    const valida = (valor: number | undefined, tope: number): boolean =>
-      valor !== undefined &&
-      Number.isFinite(valor) &&
-      valor >= -tope &&
-      valor <= tope;
+    const valid = (value: number | undefined, tope: number): boolean =>
+      value !== undefined &&
+      Number.isFinite(value) &&
+      value >= -tope &&
+      value <= tope;
 
-    if (!valida(lat, 90) || !valida(lng, 180))
+    if (!valid(lat, 90) || !valid(lng, 180))
       throw new BadRequestException(
         'Se requieren coordenadas válidas: lat en [-90,90] y lng en [-180,180]',
       );
@@ -1348,29 +1330,29 @@ export class CommunityPublicService {
    */
   private toResult(
     profile: PublicProfiles,
-    señales: ProfileSignals,
+    signals: ProfileSignals,
   ): PublicSearchResultDto {
-    const rating = señales.ratings.get(profile.id);
+    const rating = signals.ratings.get(profile.id);
     const badge = this.verification.readBadge(
       profile,
-      señales.badges.get(profile.id) ?? [],
+      signals.badges.get(profile.id) ?? [],
     );
-    const agenda = señales.agenda.get(profile.targetId);
-    const ubicacion = señales.locations.get(profile.targetId);
+    const agenda = signals.agenda.get(profile.targetId);
+    const location = signals.locations.get(profile.targetId);
     return {
       kind: this.kindOf(profile),
       slug: profile.slug,
       displayName: profile.displayName,
       headline: profile.headline ?? null,
-      city: ubicacion?.city ?? null,
+      city: location?.city ?? null,
       avatarUrl: this.fileUrl(profile.avatarFileId),
       coverUrl: this.fileUrl(profile.coverFileId),
-      address: ubicacion?.address ?? null,
+      address: location?.address ?? null,
       // El punto sólo cuando está completo: media coordenada no ubica nada y
       // `geo_point` la rechaza igual. Ver `locationsByOwner`.
       location:
-        ubicacion && ubicacion.lat !== null && ubicacion.lng !== null
-          ? { lat: ubicacion.lat, lng: ubicacion.lng }
+        location && location.lat !== null && location.lng !== null
+          ? { lat: location.lat, lng: location.lng }
           : null,
       // El booleano deriva del sello, no de la columna resumen: si las dos se
       // desincronizaran, manda el que tiene la evidencia detrás.
@@ -1390,12 +1372,12 @@ export class CommunityPublicService {
    * muestra reseñas, sello, ciudad y agenda, y un listado de cincuenta
    * prestadores no puede costar doscientos viajes.
    */
-  private async señalesDe(
+  private async signals(
     em: EntityManager,
     page: PublicProfiles[],
   ): Promise<ProfileSignals> {
-    const ids = page.map((perfil) => perfil.id);
-    const targetIds = page.map((perfil) => perfil.targetId);
+    const ids = page.map((profile) => profile.id);
+    const targetIds = page.map((profile) => profile.targetId);
 
     const [ratings, badges, agenda, locations] = await Promise.all([
       this.repo.ratingsByProfile(em, ids),
@@ -1461,18 +1443,18 @@ export class CommunityPublicService {
   ): { displayName: string; id: string } | undefined {
     if (!cursor) return undefined;
     try {
-      const crudo: unknown = JSON.parse(
+      const raw: unknown = JSON.parse(
         Buffer.from(cursor, 'base64url').toString(),
       );
       if (
-        typeof crudo === 'object' &&
-        crudo !== null &&
-        typeof (crudo as { d?: unknown }).d === 'string' &&
-        typeof (crudo as { i?: unknown }).i === 'string'
+        typeof raw === 'object' &&
+        raw !== null &&
+        typeof (raw as { d?: unknown }).d === 'string' &&
+        typeof (raw as { i?: unknown }).i === 'string'
       )
         return {
-          displayName: (crudo as { d: string }).d,
-          id: (crudo as { i: string }).i,
+          displayName: (raw as { d: string }).d,
+          id: (raw as { i: string }).i,
         };
       return undefined;
     } catch {
@@ -1491,7 +1473,7 @@ export function haversineKm(
   a: { lat: number; lng: number },
   b: { lat: number; lng: number },
 ): number {
-  const rad = (grados: number): number => (grados * Math.PI) / 180;
+  const rad = (degrees: number): number => (degrees * Math.PI) / 180;
   const dLat = rad(b.lat - a.lat);
   const dLng = rad(b.lng - a.lng);
   const h =

@@ -2,17 +2,17 @@ import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { loadStorageEnv } from '../../../common/storage/storage.env';
 import type {
-  AlcanceDeInventario,
-  InventarioDeObjetos,
+  InventoryScope,
+  ObjectInventory,
   ObjectStoreInventory,
-  ObjetoInventariado,
+  InventoriedObject,
 } from './object-store-inventory.port';
 
 /** Backends que hablan S3: MinIO en el stack local, S3/R2 en despliegue. */
 const S3_BACKENDS: ReadonlySet<string> = new Set(['s3', 'minio']);
 
 /** Objetos por página; el tope real lo pone `alcance.limit`. */
-const PAGINA = 1000;
+const PAGE = 1000;
 
 /**
  * Inventario S3 compatible, para reconciliar el almacén contra Postgres.
@@ -29,47 +29,47 @@ const PAGINA = 1000;
 export class S3ObjectStoreInventory implements ObjectStoreInventory {
   private client?: S3Client;
 
-  async listar(alcance: AlcanceDeInventario): Promise<InventarioDeObjetos> {
-    if (!S3_BACKENDS.has(alcance.backendCode)) {
+  async list(scope: InventoryScope): Promise<ObjectInventory> {
+    if (!S3_BACKENDS.has(scope.backendCode)) {
       return {
         estado: 'NO_DISPONIBLE',
-        motivo: `BACKEND_UNSUPPORTED:${alcance.backendCode}`,
+        motivo: `BACKEND_UNSUPPORTED:${scope.backendCode}`,
       };
     }
 
-    const objetos: ObjetoInventariado[] = [];
+    const objects: InventoriedObject[] = [];
     let continuationToken: string | undefined;
 
     try {
-      const client = this.cliente();
+      const client = this.createClient();
       do {
-        const restante = alcance.limit - objetos.length;
-        if (restante <= 0) return { estado: 'TRUNCADO', objetos };
+        const remaining = scope.limit - objects.length;
+        if (remaining <= 0) return { estado: 'TRUNCADO', objetos: objects };
 
-        const pagina = await client.send(
+        const page = await client.send(
           new ListObjectsV2Command({
-            Bucket: alcance.bucket,
-            Prefix: alcance.prefix || undefined,
-            MaxKeys: Math.min(PAGINA, restante),
+            Bucket: scope.bucket,
+            Prefix: scope.prefix || undefined,
+            MaxKeys: Math.min(PAGE, remaining),
             ContinuationToken: continuationToken,
           }),
         );
 
-        for (const objeto of pagina.Contents ?? []) {
-          if (objeto.Key === undefined) continue;
-          objetos.push({
-            key: objeto.Key,
-            sizeBytes: BigInt(objeto.Size ?? 0),
+        for (const obj of page.Contents ?? []) {
+          if (obj.Key === undefined) continue;
+          objects.push({
+            key: obj.Key,
+            sizeBytes: BigInt(obj.Size ?? 0),
           });
         }
 
         // Si el proveedor dice que hay más y ya llegamos al tope, el inventario
         // está truncado: lo que no se vio no se puede declarar ausente.
-        continuationToken = pagina.IsTruncated
-          ? pagina.NextContinuationToken
+        continuationToken = page.IsTruncated
+          ? page.NextContinuationToken
           : undefined;
-        if (continuationToken && objetos.length >= alcance.limit) {
-          return { estado: 'TRUNCADO', objetos };
+        if (continuationToken && objects.length >= scope.limit) {
+          return { estado: 'TRUNCADO', objetos: objects };
         }
       } while (continuationToken);
     } catch (error) {
@@ -82,7 +82,7 @@ export class S3ObjectStoreInventory implements ObjectStoreInventory {
       };
     }
 
-    return { estado: 'COMPLETO', objetos };
+    return { estado: 'COMPLETO', objetos: objects };
   }
 
   /**
@@ -90,7 +90,7 @@ export class S3ObjectStoreInventory implements ObjectStoreInventory {
    *
    * @returns Cliente conectado a la configuración de `FILE_STORAGE_S3_*`.
    */
-  private cliente(): S3Client {
+  private createClient(): S3Client {
     if (!this.client) {
       const { s3 } = loadStorageEnv();
       this.client = new S3Client({

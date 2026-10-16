@@ -1,0 +1,18 @@
+{
+ "slug": "wikidata-medicamento-q175901",
+ "code": "Q175901",
+ "codeSystem": "wikidata-medicamento",
+ "esName": "17-Hidroxiprogesterona",
+ "categoryKey": "pharmacology",
+ "imageUrl": null,
+ "imageOrigin": null,
+ "externalIds": {
+  "wikidata": "Q175901",
+  "atc": [
+   "G03DA03"
+  ],
+  "mesh": [
+   "D019326"
+  ]
+ }
+}

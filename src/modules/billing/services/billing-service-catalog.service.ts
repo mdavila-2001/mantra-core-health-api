@@ -149,6 +149,7 @@ export class BillingServiceCatalogService {
       },
       'Creating service catalog item',
     );
+    await this.assertRegistrationCanRegister(actor, dto.practiceId);
     return this.em.transactional(async (tx) => {
       const clash = await this.serviceCatalogRepo.findByCode(
         tx,
@@ -189,6 +190,32 @@ export class BillingServiceCatalogService {
         'Service catalog item created',
       );
       return toItemDto(item);
+    });
+  }
+
+  /**
+   * Quién puede dar de alta un servicio en una práctica.
+   *
+   * La administración de la organización, en cualquiera de las suyas; un profesional,
+   * **sólo en su consultorio propio**. En una organización ajena el catálogo es de la
+   * organización y el profesional sólo corrige precio y duraciones (ver `update`).
+   *
+   * Falla con 404 y no con 403 por el mismo motivo que `update`: el id de una
+   * práctica ajena responde igual que uno inventado.
+   */
+  private async assertRegistrationCanRegister(
+    actor: AuthenticatedUser,
+    practiceId: string,
+  ): Promise<void> {
+    const administra =
+      actor.roles.includes('SECURITY_ADMIN') ||
+      actor.roles.includes('SUPERADMIN');
+    if (administra) return;
+    if (await this.practiceTenantLookup.isOwnOffice(practiceId, actor.id)) {
+      return;
+    }
+    throw new ResourceNotFoundException('Práctica no encontrada', {
+      practiceId,
     });
   }
 
@@ -258,7 +285,7 @@ export class BillingServiceCatalogService {
     this.templatesRepo.createQuestion(tx, {
       surveyVersionId: version.id,
       position: 1,
-      questionText: '¿Qué tan satisfecho quedaste con la atención?',
+      questionText: '¿Qué tan satisfecho quedó con la atención?',
       answerTypeConceptId: SURVEYS.ANSWER_TYPE_SCALE,
       required: true,
       scaleMin: 1,
@@ -296,19 +323,19 @@ export class BillingServiceCatalogService {
     tx: EntityManager,
     practiceId: string,
   ): Promise<string | null> {
-    const candidatos = await tx.find(PractitionerRoleAssignments, {
+    const candidates = await tx.find(PractitionerRoleAssignments, {
       practiceId,
       statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
       validTo: null,
     });
-    if (candidatos.length === 0) return null;
-    candidatos.sort((a, b) => {
+    if (candidates.length === 0) return null;
+    candidates.sort((a, b) => {
       if (Boolean(a.isPrimary) !== Boolean(b.isPrimary)) {
         return Number(b.isPrimary ?? false) - Number(a.isPrimary ?? false);
       }
       return a.createdAt.getTime() - b.createdAt.getTime();
     });
-    return candidatos[0].practitionerProfileId;
+    return candidates[0].practitionerProfileId;
   }
 
   /**
@@ -343,7 +370,7 @@ export class BillingServiceCatalogService {
           BillingErrorReason.SERVICE_CATALOG_ITEM_NOT_FOUND,
         );
       }
-      await this.assertPuedeEditar(actor, item.practiceId, id);
+      await this.assertCanEdit(actor, item.practiceId, id);
 
       if (dto.name !== undefined) item.name = dto.name;
       if (dto.isActive !== undefined) item.isActive = dto.isActive;
@@ -385,28 +412,28 @@ export class BillingServiceCatalogService {
    * `LedgerReadService.verificarPracticaDelTenant`, donde quien pregunta ya tenía
    * el id de la práctica; acá el id es el del servicio.
    */
-  private async assertPuedeEditar(
+  private async assertCanEdit(
     actor: AuthenticatedUser,
     practiceId: string,
     serviceId: string,
   ): Promise<void> {
     if (actor.practitionerProfileId !== undefined) {
-      const propias =
+      const own =
         await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
           actor.practitionerProfileId,
         );
-      if (propias.includes(practiceId)) return;
+      if (own.includes(practiceId)) return;
     }
 
     if (actor.roles.includes('SECURITY_ADMIN')) {
       const tenantId = getCurrentTenantId();
-      const tenantDeLaPractica =
+      const tenantPractice =
         await this.practiceTenantLookup.findTenantOfPractice(practiceId);
       // Sin tenant en contexto son los carriles internos, que no pasan por la
       // cabecera: lo único que se exige es que la práctica exista.
       if (
-        tenantDeLaPractica !== null &&
-        (tenantId === undefined || tenantDeLaPractica === tenantId)
+        tenantPractice !== null &&
+        (tenantId === undefined || tenantPractice === tenantId)
       ) {
         return;
       }

@@ -177,12 +177,12 @@ describe('ClinicalRecordsController', () => {
 
   it('delega la verificación de un presuntivo (C3 / P41) con el id de la ruta', async () => {
     const d = build();
-    const fila = { id: 'cond-1', verification: { outcome: 'CONFIRMED' } };
-    d.conditionsService.verify.mockResolvedValue(fila);
+    const row = { id: 'cond-1', verification: { outcome: 'CONFIRMED' } };
+    d.conditionsService.verify.mockResolvedValue(row);
     const dto = { outcome: 'REFUTED' as const, reasonText: 'No compatible' };
     await expect(
       d.controller.verifyCondition('cond-1', dto, actor),
-    ).resolves.toBe(fila);
+    ).resolves.toBe(row);
     expect(d.conditionsService.verify).toHaveBeenCalledWith(
       'cond-1',
       dto,

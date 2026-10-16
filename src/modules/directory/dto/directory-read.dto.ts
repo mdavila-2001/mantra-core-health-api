@@ -262,6 +262,18 @@ export class BranchListItemDto {
   /**
    * Alta de la sucursal.
    */
+  @ApiPropertyOptional()
+  description?: string;
+
+  @ApiPropertyOptional()
+  locationUrl?: string;
+
+  @ApiPropertyOptional()
+  latitude?: number;
+
+  @ApiPropertyOptional()
+  longitude?: number;
+
   @ApiProperty()
   createdAt!: Date;
 }

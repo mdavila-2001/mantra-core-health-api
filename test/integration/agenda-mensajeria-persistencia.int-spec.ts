@@ -2,13 +2,13 @@ import { randomUUID } from 'node:crypto';
 import pg from 'pg';
 import { CONCEPTS } from '../../src/common';
 import { MESSAGING_SEED } from '../../src/common/seed/messaging-seed.service';
-import { MessagingAgendaNoticeAdapter } from '../../src/modules/scheduling/adapters/messaging-agenda-notice.adapter';
-import { AGENDA_NOTICE_PORT } from '../../src/modules/scheduling/ports/agenda-notice.port';
+import { MessagingAgendaNoticeAdapter } from '../../src/modules/scheduling/infrastructure/adapters/messaging-agenda-notice.adapter';
+import { AGENDA_NOTICE_PORT } from '../../src/modules/scheduling/application/ports/agenda-notice.port';
 import { bootstrapTestApp, type TestContext } from './harness';
 import type {
   AgendaNotice,
   AgendaNoticePort,
-} from '../../src/modules/scheduling/ports/agenda-notice.port';
+} from '../../src/modules/scheduling/application/ports/agenda-notice.port';
 
 /**
  * La relación `agenda → mensajería` contra **PostgreSQL real** (carril B,
@@ -76,7 +76,7 @@ function avisoDeCancelacion(debounceKey: string): AgendaNotice {
     kind: 'BOOKING_STATE_CHANGED',
     // Cuenta directa: mide la relación, no la resolución perfil → cuenta.
     recipient: { userId: destinatarioReal },
-    subject: 'Tu cita fue cancelada',
+    subject: 'Su cita fue cancelada',
     bodyText: 'El profesional canceló la cita.\nMotivo: agenda reprogramada.',
     relatedResourceType: 'scheduling.bookings',
     relatedResourceId: randomUUID(),

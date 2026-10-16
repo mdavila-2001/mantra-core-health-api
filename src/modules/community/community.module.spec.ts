@@ -10,8 +10,8 @@ import {
  *
  * @returns Las clases registradas en `controllers`.
  */
-function controladoresDe(modulo: unknown): readonly unknown[] {
-  return (Reflect.getMetadata('controllers', modulo as object) ??
+function controllers(module: unknown): readonly unknown[] {
+  return (Reflect.getMetadata('controllers', module as object) ??
     []) as readonly unknown[];
 }
 
@@ -28,14 +28,12 @@ function controladoresDe(modulo: unknown): readonly unknown[] {
  */
 describe('CommunityModule', () => {
   it('publica PatientReviewsController: importarlo no alcanza para mapear sus rutas', () => {
-    expect(controladoresDe(CommunityModule)).toContain(
-      PatientReviewsController,
-    );
+    expect(controllers(CommunityModule)).toContain(PatientReviewsController);
   });
 
   it('publica los controladores de reseñas, con sesión y sin ella', () => {
-    const controladores = controladoresDe(CommunityModule);
-    expect(controladores).toContain(CommunityReviewsController);
-    expect(controladores).toContain(CommunityPublicController);
+    const declaredControllers = controllers(CommunityModule);
+    expect(declaredControllers).toContain(CommunityReviewsController);
+    expect(declaredControllers).toContain(CommunityPublicController);
   });
 });

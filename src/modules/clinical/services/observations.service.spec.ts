@@ -39,7 +39,7 @@ function build() {
   const serviceRequestsRepo = { findById: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
   };
   // BR-14 (CL-07): por defecto no rechaza; el test que necesite un encuentro
   // sellado lo sobreescribe.
@@ -357,7 +357,7 @@ describe('ObservationsService · MCH-007, enmienda por id', () => {
       rowVersion: 1,
     };
     d.observationsRepo.findById.mockResolvedValue(observation);
-    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
       new ForbiddenException('sin permiso'),
     );
 
@@ -368,7 +368,7 @@ describe('ObservationsService · MCH-007, enmienda por id', () => {
         actor,
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
       'paciente-ajeno',
       actor,
     );

@@ -10,11 +10,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ChartTemplatesService } from './chart-templates.service';
 import { CHART } from '../chart.concepts';
 import { FORMS } from '../../forms/forms.concepts';
-import {
-  PreconditionFailedException,
-  ResourceNotFoundException,
-  runWithTenant,
-} from '../../../common';
+import { ResourceNotFoundException, runWithTenant } from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -157,78 +153,6 @@ describe('ChartTemplatesService', () => {
         code: 'ejercicio_tolerancia',
         required: true,
       });
-    });
-
-    it('creates a choice field with its own options and persists them', async () => {
-      const d = build();
-      d.templatesRepo.createTemplate.mockReturnValue({ id: 'tpl1' });
-      d.templatesRepo.createTemplateSection.mockReturnValue({ id: 'sec1' });
-      d.templatesRepo.createTemplateField.mockReturnValue({
-        id: 'field1',
-        code: 'habito_tabaquico',
-        name: '¿Fuma?',
-        options: ['Nunca', 'Ex fumador', 'Fumador'],
-        multiple: false,
-      });
-      d.templatesRepo.createTemplateFieldAssignment.mockReturnValue({
-        id: 'assign1',
-        required: true,
-        ordinal: 0,
-      });
-
-      const res = await d.service.createTemplate(
-        {
-          specialtyConceptId: 'sp1',
-          code: 'TPL',
-          name: 'N',
-          fields: [
-            {
-              code: 'habito_tabaquico',
-              name: '¿Fuma?',
-              dataType: 'code' as const,
-              options: ['Nunca', 'Ex fumador', 'Fumador'],
-              required: true,
-            },
-          ],
-        },
-        actor,
-      );
-
-      expect(d.templatesRepo.createTemplateField).toHaveBeenCalledWith(
-        d.tx,
-        expect.objectContaining({
-          options: ['Nunca', 'Ex fumador', 'Fumador'],
-        }),
-      );
-      expect(res.fields[0]).toMatchObject({
-        options: ['Nunca', 'Ex fumador', 'Fumador'],
-      });
-    });
-
-    it('rejects a "code" field with fewer than two options', async () => {
-      const d = build();
-      d.templatesRepo.createTemplate.mockReturnValue({ id: 'tpl1' });
-      d.templatesRepo.createTemplateSection.mockReturnValue({ id: 'sec1' });
-
-      await expect(
-        d.service.createTemplate(
-          {
-            specialtyConceptId: 'sp1',
-            code: 'TPL',
-            name: 'N',
-            fields: [
-              {
-                code: 'x',
-                name: 'X',
-                dataType: 'code' as const,
-                options: ['Sólo una'],
-              },
-            ],
-          },
-          actor,
-        ),
-      ).rejects.toBeInstanceOf(PreconditionFailedException);
-      expect(d.templatesRepo.createTemplateField).not.toHaveBeenCalled();
     });
   });
 
@@ -380,7 +304,7 @@ describe('ChartTemplatesService', () => {
     });
 
     /** Una plantilla del catálogo con «¿tiene alergias?» → «¿a qué?». */
-    function conPresentacion(d: ReturnType<typeof build>) {
+    function withPresentation(d: ReturnType<typeof build>) {
       d.templatesRepo.findTemplateById.mockResolvedValue({
         id: 'tpl1',
         specialtyConceptId: 'sp1',
@@ -449,12 +373,12 @@ describe('ChartTemplatesService', () => {
 
     it('pega a cada campo del catálogo su lista, su sección y su condición', async () => {
       const d = build();
-      conPresentacion(d);
+      withPresentation(d);
 
       const res = await d.service.getTemplate('tpl1');
 
-      const cual = res.fields.find((f) => f.fieldId === 'f-cual')!;
-      expect(cual).toMatchObject({
+      const which = res.fields.find((f) => f.fieldId === 'f-cual')!;
+      expect(which).toMatchObject({
         section: 'Antecedentes',
         options: ['Medicamentos', 'Alimentos'],
         multiple: true,
@@ -471,7 +395,7 @@ describe('ChartTemplatesService', () => {
 
     it('no sirve los campos que una versión nueva del catálogo retiró', async () => {
       const d = build();
-      conPresentacion(d);
+      withPresentation(d);
 
       const res = await d.service.getTemplate('tpl1');
 

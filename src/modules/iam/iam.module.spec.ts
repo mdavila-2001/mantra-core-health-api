@@ -3,15 +3,15 @@ import {
   IamAccountSecurityController,
   IamAuthController,
   IamUsersController,
-} from './controllers';
+} from './presentation/controllers';
 
 /**
  * Los controladores que el módulo declara, leídos de su metadata.
  *
  * @returns Las clases registradas en `controllers`.
  */
-function controladoresDe(modulo: unknown): readonly unknown[] {
-  return (Reflect.getMetadata('controllers', modulo as object) ??
+function controllers(module: unknown): readonly unknown[] {
+  return (Reflect.getMetadata('controllers', module as object) ??
     []) as readonly unknown[];
 }
 
@@ -21,9 +21,9 @@ function controladoresDe(modulo: unknown): readonly unknown[] {
  */
 describe('IamModule', () => {
   it('publica los controladores de sesión y cuenta', () => {
-    const controladores = controladoresDe(IamModule);
-    expect(controladores).toContain(IamAuthController);
-    expect(controladores).toContain(IamUsersController);
-    expect(controladores).toContain(IamAccountSecurityController);
+    const declaredControllers = controllers(IamModule);
+    expect(declaredControllers).toContain(IamAuthController);
+    expect(declaredControllers).toContain(IamUsersController);
+    expect(declaredControllers).toContain(IamAccountSecurityController);
   });
 });

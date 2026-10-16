@@ -55,8 +55,8 @@ function build() {
     isBlockedBetween: mockFn().mockResolvedValue(false),
     // El doble devuelve lo pedido, como haría el real tras comprobar que es
     // suyo; los casos de perfil ajeno se prueban haciéndolo rechazar.
-    resolveActorProfileId: mockFn((_em: any, _actor: any, pedido?: string) =>
-      Promise.resolve(pedido),
+    resolveActorProfileId: mockFn((_em: any, _actor: any, order?: string) =>
+      Promise.resolve(order),
     ),
   };
   // El doble devuelve un mapa vacío: el recuento en sí se prueba en
@@ -99,7 +99,7 @@ function build() {
   };
 }
 
-const perfil = {
+const profile = {
   id: 'p-1',
   tenantId: 't-1',
   targetTypeConceptId: 'tt',
@@ -121,7 +121,7 @@ describe('CommunitySocialReadService', () => {
   describe('getProfile', () => {
     it('devuelve la ficha con sellos y prestigio', async () => {
       const d = build();
-      d.profilesRepo.findById.mockResolvedValue(perfil);
+      d.profilesRepo.findById.mockResolvedValue(profile);
       d.profilesRepo.listBadgesBySubject.mockResolvedValue([
         {
           id: 'b-1',
@@ -146,7 +146,7 @@ describe('CommunitySocialReadService', () => {
       // de un uuid, o no ofrecer el enlace nunca.
       const d = build();
       d.profilesRepo.findById.mockResolvedValue({
-        ...perfil,
+        ...profile,
         targetTypeConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
       });
       d.profilesRepo.listBadgesBySubject.mockResolvedValue([]);
@@ -162,7 +162,7 @@ describe('CommunitySocialReadService', () => {
     it('el perfil de un paciente no declara vertical: no tiene ficha pública', async () => {
       const d = build();
       d.profilesRepo.findById.mockResolvedValue({
-        ...perfil,
+        ...profile,
         targetTypeConceptId: COMM.PROFILE_TARGET_USER,
       });
       d.profilesRepo.listBadgesBySubject.mockResolvedValue([]);
@@ -284,8 +284,8 @@ describe('CommunitySocialReadService', () => {
   });
 
   describe('getCommentMedia', () => {
-    const adjunto = { id: 'cm-1', commentId: 'c-1', fileId: 'f-1' };
-    const comentario = {
+    const attachment = { id: 'cm-1', commentId: 'c-1', fileId: 'f-1' };
+    const comment = {
       id: 'c-1',
       commentableTypeConceptId: COMM.CONTENT_TYPE_POST,
       commentableRefId: 'post-1',
@@ -293,8 +293,8 @@ describe('CommunitySocialReadService', () => {
 
     it('sirve los bytes cuando el post del comentario es visible para el lector', async () => {
       const d = build();
-      d.commentsRepo.findMediaByFileId.mockResolvedValue(adjunto);
-      d.commentsRepo.findById.mockResolvedValue(comentario);
+      d.commentsRepo.findMediaByFileId.mockResolvedValue(attachment);
+      d.commentsRepo.findById.mockResolvedValue(comment);
       d.postsRepo.findById.mockResolvedValue(post);
       d.files.downloadPublicMedia.mockResolvedValue({
         buffer: Buffer.from('img'),
@@ -323,8 +323,8 @@ describe('CommunitySocialReadService', () => {
 
     it('404 —y no 403— cuando el adjunto existe pero el post ya no es visible', async () => {
       const d = build();
-      d.commentsRepo.findMediaByFileId.mockResolvedValue(adjunto);
-      d.commentsRepo.findById.mockResolvedValue(comentario);
+      d.commentsRepo.findMediaByFileId.mockResolvedValue(attachment);
+      d.commentsRepo.findById.mockResolvedValue(comment);
       d.postsRepo.findById.mockResolvedValue(post);
       d.visibility.canViewPost.mockResolvedValue(false);
 

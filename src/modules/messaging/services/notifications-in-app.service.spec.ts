@@ -89,12 +89,12 @@ function build() {
  * @param overrides - Lo que la prueba quiera cambiar.
  * @returns La fila doblada.
  */
-function fila(overrides: Record<string, unknown> = {}): any {
+function row(overrides: Record<string, unknown> = {}): any {
   return {
     id: 'in-app-1',
     categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.CLINICAL,
-    subject: 'Tu receta está lista',
-    bodyText: 'Podés verla en tu historia clínica.',
+    subject: 'Su receta está lista',
+    bodyText: 'Puede verla en su historia clínica.',
     relatedResourceType: 'PRESCRIPTION',
     relatedResourceId: 'rx-1',
     statusConceptId: CONCEPTS.INAPP_UNREAD,
@@ -112,7 +112,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
         destination: { type: 'PRESCRIPTION', id: 'rx-1' },
       });
 
@@ -153,7 +153,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'SOCIAL',
-        subject: 'Le gustó tu publicación',
+        subject: 'Le gustó su publicación',
       });
 
       expect(res.suppressed).toBe(true);
@@ -212,7 +212,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
       });
 
       expect(res.failed).toBe(true);
@@ -225,8 +225,8 @@ describe('NotificationsService · carril P1 (campana)', () => {
       await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
-        bodyText: 'Podés verla en tu historia clínica.',
+        subject: 'Su receta está lista',
+        bodyText: 'Puede verla en su historia clínica.',
         destination: { type: 'PRESCRIPTION', id: 'rx-1' },
       });
 
@@ -237,7 +237,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       expect(payload).toMatchObject({
         id: 'in-app-1',
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
         destination: { type: 'PRESCRIPTION', id: 'rx-1' },
       });
     });
@@ -308,7 +308,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
       });
 
       expect(res.suppressed).toBe(false);
@@ -319,7 +319,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
   describe('listMine', () => {
     it('proyecta la fila al DTO de la campana, con la categoría resuelta y el destino navegable', async () => {
       const d = build();
-      d.notificationsRepo.listInAppPage.mockResolvedValue([fila()]);
+      d.notificationsRepo.listInAppPage.mockResolvedValue([row()]);
       d.notificationsRepo.countUnreadInApp.mockResolvedValue(3);
 
       const page = await d.service.listMine(actor as any, {});
@@ -330,8 +330,8 @@ describe('NotificationsService · carril P1 (campana)', () => {
       expect(page.items[0]).toEqual({
         id: 'in-app-1',
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
-        bodyText: 'Podés verla en tu historia clínica.',
+        subject: 'Su receta está lista',
+        bodyText: 'Puede verla en su historia clínica.',
         destination: { type: 'PRESCRIPTION', id: 'rx-1' },
         payloadJson: null,
         unread: true,
@@ -354,8 +354,8 @@ describe('NotificationsService · carril P1 (campana)', () => {
     it('devuelve cursor cuando hay más de las pedidas', async () => {
       const d = build();
       d.notificationsRepo.listInAppPage.mockResolvedValue([
-        fila({ id: 'a' }),
-        fila({ id: 'b' }),
+        row({ id: 'a' }),
+        row({ id: 'b' }),
       ]);
 
       const page = await d.service.listMine(actor as any, { limit: 1 });
@@ -368,21 +368,24 @@ describe('NotificationsService · carril P1 (campana)', () => {
   describe('markAllInAppRead', () => {
     it('marca las no leídas conservando la primera lectura de cada una', async () => {
       const d = build();
-      const yaLeida = fila({
+      const alreadyRead = row({
         id: 'vieja',
         readAt: new Date('2026-08-01T00:00:00.000Z'),
       });
-      const sinLeer = fila({ id: 'nueva' });
-      d.notificationsRepo.findUnreadInApp.mockResolvedValue([yaLeida, sinLeer]);
+      const withoutRead = row({ id: 'nueva' });
+      d.notificationsRepo.findUnreadInApp.mockResolvedValue([
+        alreadyRead,
+        withoutRead,
+      ]);
       d.notificationsRepo.countUnreadInApp.mockResolvedValue(0);
 
       const res = await d.service.markAllInAppRead(actor as any);
 
       expect(res.marked).toBe(2);
       expect(res.unreadCount).toBe(0);
-      expect(sinLeer.statusConceptId).toBe(CONCEPTS.INAPP_READ);
+      expect(withoutRead.statusConceptId).toBe(CONCEPTS.INAPP_READ);
       // `??=`: cuándo se enteró es un dato, y repisarlo lo perdería.
-      expect(yaLeida.readAt).toEqual(new Date('2026-08-01T00:00:00.000Z'));
+      expect(alreadyRead.readAt).toEqual(new Date('2026-08-01T00:00:00.000Z'));
     });
   });
 });

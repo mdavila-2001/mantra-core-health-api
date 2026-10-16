@@ -21,9 +21,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
+  AccessLogged,
   type AuthenticatedUser,
 } from '../../../common';
 import { DiagnosticsPatientResultsService } from '../services';
@@ -78,6 +80,7 @@ export class DiagnosticsPatientResultsController {
    * @returns Los resultados que la persona puede ver.
    */
   @Get('me')
+  @AccessLogged({ resourceType: 'DIAGNOSTIC_RESULTS', patient: 'actor' })
   @ApiOperation({
     summary: 'Resultados de laboratorio, informes e imagen del titular',
     description:
@@ -111,6 +114,7 @@ export class DiagnosticsPatientResultsController {
    * @returns Las órdenes de la persona, con preparación y resultado.
    */
   @Get('me/orders')
+  @AccessLogged({ resourceType: 'DIAGNOSTIC_ORDERS', patient: 'actor' })
   @ApiOperation({
     summary: 'Órdenes de laboratorio e imagen del titular',
     description:
@@ -138,6 +142,11 @@ export class DiagnosticsPatientResultsController {
    * @returns El resultado, con sus archivos descargables.
    */
   @Get('me/:reportId')
+  @AccessLogged({
+    resourceType: 'DIAGNOSTIC_REPORT',
+    patient: 'actor',
+    resourceId: 'param:reportId',
+  })
   @ApiOperation({
     summary: 'Un resultado del titular, con sus archivos',
     description:
@@ -162,6 +171,11 @@ export class DiagnosticsPatientResultsController {
    * @param res - Respuesta cruda: se envían bytes, no JSON.
    */
   @Get('me/:reportId/files/:fileId/content')
+  @AccessLogged({
+    resourceType: 'DIAGNOSTIC_REPORT_FILE',
+    patient: 'actor',
+    resourceId: 'param:fileId',
+  })
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar un archivo de un resultado del titular',
@@ -203,6 +217,11 @@ export class DiagnosticsPatientResultsController {
    * @param dto - Con quién y hasta cuándo.
    * @returns El compartido creado.
    */
+  @Audited({
+    action: 'DIAGNOSTIC_RESULT_SHARED',
+    entity: 'diagnostic_report',
+    entityId: 'param:reportId',
+  })
   @Post('me/:reportId/shares')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -226,6 +245,11 @@ export class DiagnosticsPatientResultsController {
    * @returns Los compartidos, vigentes y vencidos.
    */
   @Get('me/:reportId/shares')
+  @AccessLogged({
+    resourceType: 'DIAGNOSTIC_REPORT_SHARES',
+    patient: 'actor',
+    resourceId: 'param:reportId',
+  })
   @ApiOperation({ summary: 'Con quién está compartido un resultado' })
   listOwnResultShares(
     @CurrentUser() actor: AuthenticatedUser,
@@ -246,6 +270,11 @@ export class DiagnosticsPatientResultsController {
    * @param shareId - Compartido a cerrar.
    * @returns El compartido, ya cerrado.
    */
+  @Audited({
+    action: 'DIAGNOSTIC_RESULT_SHARE_REVOKED',
+    entity: 'diagnostic_report',
+    entityId: 'param:shareId',
+  })
   @Post('me/:reportId/shares/:shareId/revoke')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Dejar de compartir un resultado' })

@@ -26,7 +26,7 @@ import {
 } from '../dto';
 
 /** Roles que administran los campos sin techo de tenant (CL-69). */
-const ROLES_DE_GOBIERNO: readonly string[] = ['SECURITY_ADMIN', 'SUPERADMIN'];
+const ROLES_GOVERNMENT: readonly string[] = ['SECURITY_ADMIN', 'SUPERADMIN'];
 import {
   FORMS,
   DEPENDENCY_BEHAVIOR_BY_CODE,
@@ -173,19 +173,19 @@ export class FormsFieldsService {
         });
       }
 
-      const gobierna = actor.roles.some((rol) =>
-        ROLES_DE_GOBIERNO.includes(rol),
+      const governs = actor.roles.some((role) =>
+        ROLES_GOVERNMENT.includes(role),
       );
-      if (!gobierna) {
+      if (!governs) {
         const tenantId = requireTenantId();
         const assignments = await this.assignmentsRepo.findAssignmentsByField(
           tx,
           fieldId,
         );
-        const ajeno = assignments.some(
+        const foreign = assignments.some(
           (a) => !a.tenantId || a.tenantId !== tenantId,
         );
-        if (ajeno) {
+        if (foreign) {
           throw new ForbiddenException(
             'Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan desde acá',
           );

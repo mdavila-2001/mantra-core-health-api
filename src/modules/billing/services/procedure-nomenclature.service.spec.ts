@@ -12,101 +12,101 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
  * justamente **qué se le pide a la base**: el filtro por especialidad, el
  * `LIMIT` de una fila de más y el orden por código.
  *
- * @param respuestas - Resultados en el orden en que se van a pedir.
+ * @param responses - Resultados en el orden en que se van a pedir.
  * @returns El doble y el registro de llamadas.
  */
-function em(respuestas: unknown[][]) {
-  const llamadas: { sql: string; params: unknown[] }[] = [];
+function em(responses: unknown[][]) {
+  const calls: { sql: string; params: unknown[] }[] = [];
   let i = 0;
   const execute = mockFn((sql: string, params: unknown[]) => {
-    llamadas.push({ sql, params });
-    return Promise.resolve(respuestas[i++] ?? []);
+    calls.push({ sql, params });
+    return Promise.resolve(responses[i++] ?? []);
   });
   return {
     doble: { getConnection: () => ({ execute }) } as never,
-    llamadas,
+    llamadas: calls,
   };
 }
 
 describe('ProcedureNomenclatureService', () => {
   describe('listSpecialties', () => {
     it('agrupa en la base y devuelve el recuento como número', async () => {
-      const { doble, llamadas } = em([
+      const { doble: double, llamadas: calls } = em([
         [
           { especialidad: 'Cardiología', total: '98' },
           { especialidad: 'Cirugía General', total: '319' },
         ],
       ]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(double);
 
-      const resultado = await servicio.listSpecialties();
+      const result = await service.listSpecialties();
 
-      expect(resultado.items).toEqual([
+      expect(result.items).toEqual([
         { specialty: 'Cardiología', count: 98 },
         { specialty: 'Cirugía General', count: 319 },
       ]);
       // El GROUP BY va en SQL: traer las 4408 entradas para contarlas en
       // memoria es exactamente lo que este endpoint existe para evitar.
-      expect(llamadas[0].sql).toContain('GROUP BY');
-      expect(llamadas[0].params).toEqual(['procedure:specialty']);
+      expect(calls[0].sql).toContain('GROUP BY');
+      expect(calls[0].params).toEqual(['procedure:specialty']);
     });
   });
 
   describe('search', () => {
     it('pide una fila de más y no la devuelve', async () => {
-      const filas = Array.from({ length: 3 }, (_, n) => ({
+      const rows = Array.from({ length: 3 }, (_, n) => ({
         id: `c${n}`,
         code: `procedure:bo:X${n}`,
         display: `Procedimiento ${n}`,
       }));
-      const { doble, llamadas } = em([filas, []]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const { doble: double, llamadas: calls } = em([rows, []]);
+      const service = new ProcedureNomenclatureService(double);
 
-      const pagina = await servicio.search({ limit: 2 });
+      const page = await service.search({ limit: 2 });
 
-      expect(pagina.items).toHaveLength(2);
-      expect(pagina.nextCursor).not.toBeNull();
+      expect(page.items).toHaveLength(2);
+      expect(page.nextCursor).not.toBeNull();
       // La fila de sondeo responde «hay siguiente» sin pagar un COUNT.
-      expect(llamadas[0].params.at(-1)).toBe(3);
+      expect(calls[0].params.at(-1)).toBe(3);
     });
 
     it('no emite cursor en la última página', async () => {
-      const { doble } = em([
+      const { doble: double } = em([
         [{ id: 'c1', code: 'procedure:bo:A', display: 'Uno' }],
         [],
       ]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(double);
 
-      const pagina = await servicio.search({ limit: 25 });
+      const page = await service.search({ limit: 25 });
 
-      expect(pagina.nextCursor).toBeNull();
+      expect(page.nextCursor).toBeNull();
     });
 
     it('filtra por especialidad contra la propiedad, no contra el código', async () => {
-      const { doble, llamadas } = em([[], []]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const { doble: double, llamadas: calls } = em([[], []]);
+      const service = new ProcedureNomenclatureService(double);
 
-      await servicio.search({ specialty: 'Cardiología' });
+      await service.search({ specialty: 'Cardiología' });
 
       // El código del arancel no contiene la especialidad de forma fiable, así
       // que el filtro tiene que ir contra `concept_properties`.
-      expect(llamadas[0].sql).toContain('concept_properties');
-      expect(llamadas[0].params).toContain('Cardiología');
+      expect(calls[0].sql).toContain('concept_properties');
+      expect(calls[0].params).toContain('Cardiología');
     });
 
     it('ordena por código, que es único, y no por nombre', async () => {
-      const { doble, llamadas } = em([[], []]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const { doble: double, llamadas: calls } = em([[], []]);
+      const service = new ProcedureNomenclatureService(double);
 
-      await servicio.search({});
+      await service.search({});
 
       // Hay decenas de procedimientos llamados «General»: un cursor sobre el
       // nombre dejaría filas fuera al paginar.
-      expect(llamadas[0].sql).toContain('ORDER BY c.code');
+      expect(calls[0].sql).toContain('ORDER BY c.code');
     });
 
     it('resuelve las propiedades en una sola consulta para toda la página', async () => {
-      const { doble, llamadas } = em([
+      const { doble: double, llamadas: calls } = em([
         [
           { id: 'c1', code: 'procedure:bo:A', display: 'Uno' },
           { id: 'c2', code: 'procedure:bo:B', display: 'Dos' },
@@ -134,22 +134,22 @@ describe('ProcedureNomenclatureService', () => {
           },
         ],
       ]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(double);
 
-      const pagina = await servicio.search({});
+      const page = await service.search({});
 
       // Dos consultas en total: la página y sus propiedades. Pedirlas concepto
       // por concepto sería el N+1 que este servicio existe para evitar.
-      expect(llamadas).toHaveLength(2);
-      expect(pagina.items[0].specialty).toBe('Cardiología');
-      expect(pagina.items[0].referencePrice).toBe('150');
-      expect(pagina.items[0].priceUnit).toBe('UMA');
+      expect(calls).toHaveLength(2);
+      expect(page.items[0].specialty).toBe('Cardiología');
+      expect(page.items[0].referencePrice).toBe('150');
+      expect(page.items[0].priceUnit).toBe('UMA');
       // Sin propiedad, ausencia y no cadena vacía.
-      expect(pagina.items[1].referencePrice).toBeNull();
+      expect(page.items[1].referencePrice).toBeNull();
     });
 
     it('la marca de revisión ausente vale false, y presente vale true', async () => {
-      const { doble } = em([
+      const { doble: double } = em([
         [
           { id: 'c1', code: 'procedure:bo:A', display: 'Sano' },
           {
@@ -166,18 +166,18 @@ describe('ProcedureNomenclatureService', () => {
           },
         ],
       ]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(double);
 
-      const pagina = await servicio.search({});
+      const page = await service.search({});
 
       // El catálogo escribe la marca **sólo** donde hay daño de reconocimiento
       // óptico: la ausencia es el «no», no un dato faltante.
-      expect(pagina.items[0].ocrSuspect).toBe(false);
-      expect(pagina.items[1].ocrSuspect).toBe(true);
+      expect(page.items[0].ocrSuspect).toBe(false);
+      expect(page.items[1].ocrSuspect).toBe(true);
     });
 
     it('no convierte la UMA a moneda', async () => {
-      const { doble } = em([
+      const { doble: double } = em([
         [{ id: 'c1', code: 'procedure:bo:A', display: 'Uno' }],
         [
           {
@@ -192,14 +192,14 @@ describe('ProcedureNomenclatureService', () => {
           },
         ],
       ]);
-      const servicio = new ProcedureNomenclatureService(doble);
+      const service = new ProcedureNomenclatureService(double);
 
-      const pagina = await servicio.search({});
+      const page = await service.search({});
 
       // La UMA es la unidad de cuenta del arancel, no una moneda, y su factor
       // de conversión no está declarado en ninguna parte del producto.
-      expect(pagina.items[0].referencePrice).toBe('20');
-      expect(pagina.items[0].priceUnit).toBe('UMA');
+      expect(page.items[0].referencePrice).toBe('20');
+      expect(page.items[0].priceUnit).toBe('UMA');
     });
   });
 });

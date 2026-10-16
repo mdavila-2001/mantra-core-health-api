@@ -52,7 +52,7 @@ describe('NotificationsGateway (AG-22)', () => {
     d.gateway.notifyUser('user-9', {
       id: 'in-app-1',
       category: 'CLINICAL',
-      subject: 'Tu receta está lista',
+      subject: 'Su receta está lista',
       bodyText: null,
       destination: { type: 'PRESCRIPTION', id: 'rx-1' },
       availableAt: '2026-09-26T10:00:00.000Z',

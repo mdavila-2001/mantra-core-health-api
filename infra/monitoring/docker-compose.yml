@@ -11,6 +11,8 @@
 #   telegram-bot   → health, reinicios y OOM de cada contenedor (cAdvisor no
 #                    los da) + comandos /estado /ram /red /contenedores /alertas
 #   blackbox       → los sitios públicos responden y su certificado no vence
+#   coolify-proxy  → (Traefik, de Coolify) tráfico, latencia y 5xx por sitio
+#   otel-collector → trazas de la API → pedidos, latencia y errores POR ENDPOINT
 #   prometheus     → guarda 15 días y evalúa las reglas de `prometheus/rules/`
 #   alertmanager   → manda las alertas al grupo de Telegram y el latido
 #                    (Watchdog) a Healthchecks.io, que avisa si el VPS entero muere
@@ -53,6 +55,15 @@ services:
       - --web.enable-lifecycle
     volumes:
       - prometheus_data:/prometheus
+    # node-exporter corre con la red del host: se lo alcanza por el gateway.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # `coolify`: la red del proxy Traefik de Coolify, para leer sus métricas
+    # (coolify-proxy:8082, que no se publica afuera). Así salen el tráfico, la
+    # latencia y los errores 5xx de cada sitio.
+    networks:
+      - monitoring
+      - coolify
     deploy:
       resources:
         limits:
@@ -64,6 +75,22 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+
+  # Recibe las trazas de la API y las vuelve métricas por endpoint (spanmetrics).
+  # El puerto OTLP se publica SÓLO en la IP del bridge docker0 del host
+  # (OTLP_BIND_ADDRESS, 172.27.0.1 en el VPS): las APIs lo alcanzan desde sus
+  # redes de Coolify y desde internet no existe. Por defecto, 127.0.0.1.
+  otel-collector:
+    <<: *base
+    build:
+      context: ./otel-collector
+    ports:
+      - "${OTLP_BIND_ADDRESS:-127.0.0.1}:4318:4318"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
 
   alertmanager:
     <<: *base
@@ -106,6 +133,11 @@ services:
     # Prometheus y Alertmanager NO se exponen.
     expose:
       - "3000"
+    # Sólo en el loopback del servidor: se entra por túnel SSH
+    # (`ssh -L 3000:127.0.0.1:3000 root@<servidor>` → http://localhost:3000).
+    # Si Coolify le asigna un dominio, Traefik sigue llegando por la red interna.
+    ports:
+      - "127.0.0.1:3000:3000"
     deploy:
       resources:
         limits:
@@ -118,11 +150,19 @@ services:
       retries: 3
       start_period: 30s
 
+  # Red del HOST (no la de monitoring): con red propia, node-exporter mide el
+  # tráfico de su contenedor y no el del servidor (medía 0,00 Mbit/s).
+  # Prometheus llega por host.docker.internal:9100; el firewall sólo deja
+  # entrar a 9100 desde los bridges de Docker (ufw allow in on br+), nunca
+  # desde internet.
   node-exporter:
-    <<: *base
     image: prom/node-exporter:v1.9.1
+    restart: always
+    logging: *logging
+    network_mode: host
     pid: host
     command:
+      - --web.listen-address=:9100
       - --path.procfs=/host/proc
       - --path.sysfs=/host/sys
       - --path.rootfs=/host/root
@@ -140,7 +180,10 @@ services:
 
   cadvisor:
     <<: *base
-    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    # 0.55.1 y no 0.52.1: con el almacén de imágenes containerd de Docker 29
+    # la 0.52 no ve ningún contenedor («failed to identify the read-write layer
+    # ID»). Medido en 62.169.18.132 el 2026-10-08.
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
     privileged: true
     devices:
       - /dev/kmsg
@@ -183,6 +226,7 @@ services:
     image: tecnativa/docker-socket-proxy:0.3.0
     environment:
       CONTAINERS: "1"
+      EVENTS: "1"  # avisos de despliegue y caídas (sólo lectura del flujo de eventos)
       POST: "0"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -256,6 +300,14 @@ services:
       DOCKER_URL: http://docker-read-proxy:2375
       DAILY_SUMMARY_HOUR: "8"
       SUMMARY_TIMEZONE: America/La_Paz
+      # IPs del equipo: sus logins por SSH se marcan como conocidos.
+      KNOWN_IPS: ${KNOWN_IPS:-}
+    # Logs del servidor de sólo lectura para los avisos de seguridad (logins
+    # SSH y bloqueos de fail2ban). Grupo 4 = adm, el dueño de esos archivos.
+    volumes:
+      - /var/log:/host/log:ro
+    group_add:
+      - "4"
     depends_on:
       - docker-read-proxy
     networks:
@@ -264,8 +316,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.25"
-          memory: 96M
+          cpus: "0.5"
+          # matplotlib dibuja las gráficas de /graficas: ~60 MB extra al renderizar.
+          memory: 256M
     healthcheck:
       # 127.0.0.1 y no `localhost`: el wget de busybox resuelve `localhost` a ::1
       # y el exportador escucha sólo en IPv4 → el healthcheck fallaba siempre
@@ -289,3 +342,6 @@ networks:
     internal: true
   docker-restart:
     internal: true
+  # La crea Coolify; si no existe, el compose falla en vez de inventar una vacía.
+  coolify:
+    external: true

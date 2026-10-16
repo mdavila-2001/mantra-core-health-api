@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   LedgerService,
   ReconciliationService,
@@ -52,6 +57,11 @@ export class BillingOperationsController {
   ) {}
 
   /** UC-17-06. */
+  @Audited({
+    action: 'BILLING_DOCUMENT_POSTED_TO_LEDGER',
+    entity: 'billing_document_link',
+    entityId: 'param:id',
+  })
   @Post('documents/:id\\:post-to-ledger')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -65,6 +75,11 @@ export class BillingOperationsController {
   }
 
   /** UC-17-07. */
+  @Audited({
+    action: 'BILLING_RECONCILIATION_CLEARED',
+    entity: 'receivable_payment_allocation',
+    entityId: 'result.id',
+  })
   @Post('reconciliation\\:clear')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -77,6 +92,11 @@ export class BillingOperationsController {
   }
 
   /** UC-17-10. */
+  @Audited({
+    action: 'DUNNING_RUN_EXECUTED',
+    entity: 'dunning_run',
+    entityId: 'result.id',
+  })
   @Post('dunning-runs\\:execute')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -95,6 +115,11 @@ export class BillingOperationsController {
    * endpoint es lo que hace falta para que exista una corrida automática sin
    * que nadie tenga que armar la lista de facturas.
    */
+  @Audited({
+    action: 'DUE_DUNNING_RUNS_EXECUTED',
+    entity: 'dunning_run',
+    entityId: 'result.id',
+  })
   @Post('internal/dunning-runs/run-due')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -111,6 +136,11 @@ export class BillingOperationsController {
   }
 
   /** UC-17-12. */
+  @Audited({
+    action: 'BILLING_KPI_COMPUTED',
+    entity: 'financial_kpi_snapshot',
+    entityId: 'result.id',
+  })
   @Post('kpi-snapshots\\:compute')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

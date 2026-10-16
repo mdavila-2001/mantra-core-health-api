@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `diagnostics`
 
-Referencia exhaustiva de 27 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 31 operación(es) del módulo `diagnostics`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reports`, `diagnostics-specimens`
-- **Controladores:** `DiagnosticsImagingController`, `DiagnosticsLabController`, `DiagnosticsOrdersController`, `DiagnosticsPatientResultsController`, `DiagnosticsReportsController`, `DiagnosticsSpecimensController`
+- **Etiquetas OpenAPI:** `diagnostics-imaging`, `diagnostics-laboratory`, `diagnostics-orders`, `diagnostics-patient-results`, `diagnostics-reception`, `diagnostics-reports`, `diagnostics-specimens`
+- **Controladores:** `DiagnosticsImagingController`, `DiagnosticsLabController`, `DiagnosticsOrdersController`, `DiagnosticsPatientResultsController`, `DiagnosticsReceptionController`, `DiagnosticsReportsController`, `DiagnosticsSpecimensController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -13,31 +13,35 @@ Referencia exhaustiva de 27 operación(es) del módulo `diagnostics`, derivada d
 
 1. [GET /diagnostic-results/me](#1-get-diagnostic-results-me) — Resultados de laboratorio, informes e imagen del titular
 2. [GET /diagnostic-results/me/{reportId}](#2-get-diagnostic-results-me-reportid) — Un resultado del titular, con sus archivos
-3. [GET /diagnostic-results/me/{reportId}/shares](#3-get-diagnostic-results-me-reportid-shares) — Con quién está compartido un resultado
-4. [POST /diagnostic-results/me/{reportId}/shares](#4-post-diagnostic-results-me-reportid-shares) — Compartir temporalmente un resultado con un profesional
-5. [POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke](#5-post-diagnostic-results-me-reportid-shares-shareid-revoke) — Dejar de compartir un resultado
-6. [GET /diagnostic-results/me/orders](#6-get-diagnostic-results-me-orders) — Órdenes de laboratorio e imagen del titular
-7. [POST /diagnostics/accessions](#7-post-diagnostics-accessions) — Acesionar especímenes recibidos en laboratorio
-8. [POST /diagnostics/analyzer-runs](#8-post-diagnostics-analyzer-runs) — Abrir una corrida de analizador (soporte para ingesta)
-9. [POST /diagnostics/analyzer-runs/{id}/messages](#9-post-diagnostics-analyzer-runs-id-messages) — Ingerir mensaje de resultado de analizador (LIS/HL7/ASTM)
-10. [POST /diagnostics/clinical-media](#10-post-diagnostics-clinical-media) — Adjuntar media clínica / imagen al chart
-11. [POST /diagnostics/containers/{id}/custody-events](#11-post-diagnostics-containers-id-custody-events) — Registrar cadena de custodia / traslado de contenedor
-12. [POST /diagnostics/critical-results](#12-post-diagnostics-critical-results) — Detectar y notificar un resultado crítico
-13. [POST /diagnostics/critical-results/{id}/acknowledge](#13-post-diagnostics-critical-results-id-acknowledge) — Acusar recibo / escalar notificación crítica
-14. [POST /diagnostics/data-quality-events](#14-post-diagnostics-data-quality-events) — Registrar evento de calidad de datos + enlazar provenance
-15. [POST /diagnostics/imaging-endpoints](#15-post-diagnostics-imaging-endpoints) — Registrar un endpoint DICOM (soporte para STOW-RS)
-16. [POST /diagnostics/imaging-studies/{id}/dose-events](#16-post-diagnostics-imaging-studies-id-dose-events) — Registrar evento de dosis de radiación
-17. [GET /diagnostics/patients/{patientProfileId}/imaging-studies](#17-get-diagnostics-patients-patientprofileid-imaging-studies) — Listar los estudios de imagen del paciente
-18. [GET /diagnostics/patients/{patientProfileId}/orders](#18-get-diagnostics-patients-patientprofileid-orders) — Órdenes de laboratorio e imagenología del paciente, con sus informes
-19. [POST /diagnostics/reports/{reportId}/versions](#19-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
-20. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#20-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
-21. [POST /diagnostics/results/{observationId}/verifications](#21-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
-22. [POST /diagnostics/specimens](#22-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
-23. [POST /diagnostics/specimens/{id}/containers](#23-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
-24. [POST /diagnostics/specimens/{id}/rejection](#24-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
-25. [GET /diagnostics/work-orders](#25-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
-26. [POST /diagnostics/work-orders](#26-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
-27. [POST /dicomweb/studies](#27-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
+3. [GET /diagnostic-results/me/{reportId}/files/{fileId}/content](#3-get-diagnostic-results-me-reportid-files-fileid-content) — Descargar un archivo de un resultado del titular
+4. [GET /diagnostic-results/me/{reportId}/shares](#4-get-diagnostic-results-me-reportid-shares) — Con quién está compartido un resultado
+5. [POST /diagnostic-results/me/{reportId}/shares](#5-post-diagnostic-results-me-reportid-shares) — Compartir temporalmente un resultado con un profesional
+6. [POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke](#6-post-diagnostic-results-me-reportid-shares-shareid-revoke) — Dejar de compartir un resultado
+7. [GET /diagnostic-results/me/orders](#7-get-diagnostic-results-me-orders) — Órdenes de laboratorio e imagen del titular
+8. [POST /diagnostics/accessions](#8-post-diagnostics-accessions) — Acesionar especímenes recibidos en laboratorio
+9. [GET /diagnostics/accessions/{id}](#9-get-diagnostics-accessions-id) — Detalle de una acesión (especímenes, contenedores y custodia)
+10. [POST /diagnostics/analyzer-runs](#10-post-diagnostics-analyzer-runs) — Abrir una corrida de analizador (soporte para ingesta)
+11. [POST /diagnostics/analyzer-runs/{id}/messages](#11-post-diagnostics-analyzer-runs-id-messages) — Ingerir mensaje de resultado de analizador (LIS/HL7/ASTM)
+12. [POST /diagnostics/clinical-media](#12-post-diagnostics-clinical-media) — Adjuntar media clínica / imagen al chart
+13. [POST /diagnostics/containers/{id}/custody-events](#13-post-diagnostics-containers-id-custody-events) — Registrar cadena de custodia / traslado de contenedor
+14. [POST /diagnostics/critical-results](#14-post-diagnostics-critical-results) — Detectar y notificar un resultado crítico
+15. [POST /diagnostics/critical-results/{id}/acknowledge](#15-post-diagnostics-critical-results-id-acknowledge) — Acusar recibo / escalar notificación crítica
+16. [POST /diagnostics/data-quality-events](#16-post-diagnostics-data-quality-events) — Registrar evento de calidad de datos + enlazar provenance
+17. [POST /diagnostics/imaging-endpoints](#17-post-diagnostics-imaging-endpoints) — Registrar un endpoint DICOM (soporte para STOW-RS)
+18. [POST /diagnostics/imaging-studies/{id}/dose-events](#18-post-diagnostics-imaging-studies-id-dose-events) — Registrar evento de dosis de radiación
+19. [GET /diagnostics/patients/{patientProfileId}/imaging-studies](#19-get-diagnostics-patients-patientprofileid-imaging-studies) — Listar los estudios de imagen del paciente
+20. [GET /diagnostics/patients/{patientProfileId}/orders](#20-get-diagnostics-patients-patientprofileid-orders) — Órdenes de laboratorio e imagenología del paciente, con sus informes
+21. [POST /diagnostics/reports/{reportId}/versions](#21-post-diagnostics-reports-reportid-versions) — Crear/enmendar versión de informe diagnóstico
+22. [POST /diagnostics/reports/{reportId}/versions/{versionId}/release](#22-post-diagnostics-reports-reportid-versions-versionid-release) — Validar y liberar una versión del informe
+23. [POST /diagnostics/results/{observationId}/verifications](#23-post-diagnostics-results-observationid-verifications) — Verificar (técnica/facultativa) un resultado
+24. [POST /diagnostics/service-requests/inbox](#24-post-diagnostics-service-requests-inbox) — Bandeja de órdenes de laboratorio por recibir
+25. [POST /diagnostics/specimens](#25-post-diagnostics-specimens) — Registrar un espécimen (soporte para acesión)
+26. [GET /diagnostics/specimens/{id}](#26-get-diagnostics-specimens-id) — Detalle de un espécimen (con su cadena de custodia)
+27. [POST /diagnostics/specimens/{id}/containers](#27-post-diagnostics-specimens-id-containers) — Registrar un contenedor de espécimen (soporte para custodia)
+28. [POST /diagnostics/specimens/{id}/rejection](#28-post-diagnostics-specimens-id-rejection) — Rechazar espécimen y solicitar recolección
+29. [GET /diagnostics/work-orders](#29-get-diagnostics-work-orders) — Listar las órdenes de trabajo del laboratorio
+30. [POST /diagnostics/work-orders](#30-post-diagnostics-work-orders) — Abrir orden de trabajo y desglosar pruebas
+31. [POST /dicomweb/studies](#31-post-dicomweb-studies) — Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
 
 ---
 
@@ -209,7 +213,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Cada `fileId` se descarga por `GET /common/files/{id}/content`.
+Cada `fileId` se descarga por `GET /diagnostic-results/me/{reportId}/files/{fileId}/content`. La vía genérica `/common/files/{id}/content` es sólo para quien subió el archivo: el laboratorio lo subió, no el titular.
 
 Contexto declarado en el controlador: Un resultado concreto del titular.
 
@@ -349,7 +353,112 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. GET /diagnostic-results/me/{reportId}/shares
+## 3. GET /diagnostic-results/me/{reportId}/files/{fileId}/content
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-patient-results`
+- **Nombre:** Descargar un archivo de un resultado del titular
+- **Operation ID:** `DiagnosticsPatientResultsController_getOwnResultFileContent`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsPatientResultsController.getOwnResultFileContent](../../src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts)
+
+### Descripción de negocio
+
+Autoriza por titularidad y versión liberada y visible, no por autoría del archivo. Todo lo que no cumpla responde 404.
+
+Contexto declarado en el controlador: Los bytes de un archivo de un resultado del titular (CL-40).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostic-results/me/{reportId}/files/{fileId}/content` en `DiagnosticsPatientResultsController_getOwnResultFileContent`. El controlador delega en `DiagnosticsPatientResultsService.getOwnResultFileContent`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `reportId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `fileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostic-results/me/00000000-0000-4000-8000-000000000001/files/00000000-0000-4000-8000-000000000001/content HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `reportId`, `fileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostic-results/me/00000000-0000-4000-8000-000000000001/files/00000000-0000-4000-8000-000000000001/content HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Bytes del archivo | `Promise<void>` | No |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | Consulta completada correctamente. | `Promise<void>` | No |
+| 404 | No es del titular, no está liberado, o el archivo no cuelga del informe | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | La descarga de archivos no está disponible | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostic-results/me/{reportId}/files/{fileId}/content"
+}
+```
+
+---
+
+## 4. GET /diagnostic-results/me/{reportId}/shares
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-patient-results`
@@ -426,6 +535,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "id": "00000000-0000-4000-8000-000000000001",
       "reportId": "00000000-0000-4000-8000-000000000001",
       "practitionerUserId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
       "validFrom": "2026-07-31T12:00:00.000Z",
       "validTo": "2026-07-31T12:00:00.000Z",
       "active": true
@@ -439,10 +549,11 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `reportId` | Sí | `string` | formato `uuid` | Informe consultado. | `00000000-0000-4000-8000-000000000001` |
-| `items` | Sí | `array<DiagnosticResultShareDto>` | Sin restricción adicional declarada | Los compartidos, del más nuevo al más viejo. | `[{"id":"00000000-0000-4000-8000-000000000001","reportId":"00000000-0000-4000-8000-000000000001","practitionerUserId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","active":true}]` |
+| `items` | Sí | `array<DiagnosticResultShareDto>` | Sin restricción adicional declarada | Los compartidos, del más nuevo al más viejo. | `[{"id":"00000000-0000-4000-8000-000000000001","reportId":"00000000-0000-4000-8000-000000000001","practitionerUserId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","active":true}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador del grant. | `00000000-0000-4000-8000-000000000001` |
 | `items[].reportId` | Sí | `string` | formato `uuid` | Informe compartido. | `00000000-0000-4000-8000-000000000001` |
 | `items[].practitionerUserId` | Sí | `string` | formato `uuid` | Cuenta del profesional con quien se compartió. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerName` | No | `string` | Sin restricción adicional declarada | Nombre del profesional, para que «Compartido con» no muestre un uuid. Ausente si la cuenta perdió su vínculo con la persona. | `Nombre de ejemplo` |
 | `items[].validFrom` | Sí | `string` | formato `date-time` | Desde cuándo vale. | `2026-07-31T12:00:00.000Z` |
 | `items[].validTo` | No | `string` | formato `date-time` | Hasta cuándo vale. | `2026-07-31T12:00:00.000Z` |
 | `items[].active` | Sí | `boolean` | Sin restricción adicional declarada | Si el grant está vigente en este momento. | `true` |
@@ -477,7 +588,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /diagnostic-results/me/{reportId}/shares
+## 5. POST /diagnostic-results/me/{reportId}/shares
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-patient-results`
@@ -513,7 +624,7 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "practitionerUserId": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
   "validUntil": "2026-07-31T12:00:00.000Z"
 }
 ```
@@ -529,9 +640,8 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `practitionerUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `validUntil` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `reason` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -544,9 +654,8 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "practitionerUserId": "00000000-0000-4000-8000-000000000001",
-  "validUntil": "2026-07-31T12:00:00.000Z",
-  "reason": "Texto descriptivo de ejemplo"
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "validUntil": "2026-07-31T12:00:00.000Z"
 }
 ```
 
@@ -572,6 +681,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "reportId": "00000000-0000-4000-8000-000000000001",
   "practitionerUserId": "00000000-0000-4000-8000-000000000001",
+  "practitionerName": "Nombre de ejemplo",
   "validFrom": "2026-07-31T12:00:00.000Z",
   "validTo": "2026-07-31T12:00:00.000Z",
   "active": true
@@ -585,6 +695,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador del grant. | `00000000-0000-4000-8000-000000000001` |
 | `reportId` | Sí | `string` | formato `uuid` | Informe compartido. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerUserId` | Sí | `string` | formato `uuid` | Cuenta del profesional con quien se compartió. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerName` | No | `string` | Sin restricción adicional declarada | Nombre del profesional, para que «Compartido con» no muestre un uuid. Ausente si la cuenta perdió su vínculo con la persona. | `Nombre de ejemplo` |
 | `validFrom` | Sí | `string` | formato `date-time` | Desde cuándo vale. | `2026-07-31T12:00:00.000Z` |
 | `validTo` | No | `string` | formato `date-time` | Hasta cuándo vale. | `2026-07-31T12:00:00.000Z` |
 | `active` | Sí | `boolean` | Sin restricción adicional declarada | Si el grant está vigente en este momento. | `true` |
@@ -599,9 +710,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 401 | `UNAUTHENTICATED` | El informe no pertenece a esta cuenta | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El profesional no tiene una cuenta activa en el portal | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
 | 404 | `NOT_FOUND` | Informe no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El vencimiento del acceso compartido tiene que ser futuro | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una relación asistencial vigente con este paciente | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hace falta compartirse un resultado con uno mismo | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
 | 422 | `PRECONDITION_FAILED` | Sólo se puede compartir un resultado ya liberado | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/diagnostics/services/diagnostics-patient-results.service.ts |
@@ -623,7 +736,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke
+## 6. POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-patient-results`
@@ -700,6 +813,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "reportId": "00000000-0000-4000-8000-000000000001",
   "practitionerUserId": "00000000-0000-4000-8000-000000000001",
+  "practitionerName": "Nombre de ejemplo",
   "validFrom": "2026-07-31T12:00:00.000Z",
   "validTo": "2026-07-31T12:00:00.000Z",
   "active": true
@@ -713,6 +827,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador del grant. | `00000000-0000-4000-8000-000000000001` |
 | `reportId` | Sí | `string` | formato `uuid` | Informe compartido. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerUserId` | Sí | `string` | formato `uuid` | Cuenta del profesional con quien se compartió. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerName` | No | `string` | Sin restricción adicional declarada | Nombre del profesional, para que «Compartido con» no muestre un uuid. Ausente si la cuenta perdió su vínculo con la persona. | `Nombre de ejemplo` |
 | `validFrom` | Sí | `string` | formato `date-time` | Desde cuándo vale. | `2026-07-31T12:00:00.000Z` |
 | `validTo` | No | `string` | formato `date-time` | Hasta cuándo vale. | `2026-07-31T12:00:00.000Z` |
 | `active` | Sí | `boolean` | Sin restricción adicional declarada | Si el grant está vigente en este momento. | `true` |
@@ -749,7 +864,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. GET /diagnostic-results/me/orders
+## 7. GET /diagnostic-results/me/orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-patient-results`
@@ -933,7 +1048,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /diagnostics/accessions
+## 8. POST /diagnostics/accessions
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -976,7 +1091,6 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -1054,7 +1168,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Espécimen no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El espécimen está rechazado y no puede acesionarse | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
@@ -1075,7 +1189,186 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /diagnostics/analyzer-runs
+## 9. GET /diagnostics/accessions/{id}
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-specimens`
+- **Nombre:** Detalle de una acesión (especímenes, contenedores y custodia)
+- **Operation ID:** `DiagnosticsSpecimensController_getAccession`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsSpecimensController.getAccession](../../src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts)
+
+### Descripción de negocio
+
+Acotado al tenant del contexto: otro laboratorio recibe 404.
+
+Contexto declarado en el controlador: Lectura (CL-47): detalle de una acesión con sus especímenes, contenedores y cadena de custodia. Antes de esta ruta, `diagnostics` sólo tenía `POST` para el circuito de especímenes: abrir el detalle de una acesión concreta no tenía dónde ir.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/accessions/{id}` en `DiagnosticsSpecimensController_getAccession`. El controlador delega en `DiagnosticsSpecimensService.getAccession`. No recibe body. El tipo de retorno estático es `Promise<AccessionDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/accessions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/accessions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AccessionDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<AccessionDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AccessionDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AccessionDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<AccessionDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AccessionDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AccessionDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccessionDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "custodianTenantId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "accessionNumber": "valor-ejemplo",
+  "receivedAt": "2026-07-31T12:00:00.000Z",
+  "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "specimens": [
+    {
+      "accessionSpecimenId": "00000000-0000-4000-8000-000000000001",
+      "sequenceNumber": 1,
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "specimen": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "patientProfileId": "00000000-0000-4000-8000-000000000001",
+        "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+        "statusConceptId": "00000000-0000-4000-8000-000000000001",
+        "collectedAt": "2026-07-31T12:00:00.000Z",
+        "receivedAt": "2026-07-31T12:00:00.000Z",
+        "containers": [
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "containerIdentifier": "valor-ejemplo",
+            "containerTypeConceptId": "00000000-0000-4000-8000-000000000001",
+            "statusConceptId": "00000000-0000-4000-8000-000000000001"
+          }
+        ],
+        "custodyEvents": [
+          {
+            "id": "00000000-0000-4000-8000-000000000001",
+            "specimenContainerId": "00000000-0000-4000-8000-000000000001",
+            "custodyEventTypeConceptId": "00000000-0000-4000-8000-000000000001",
+            "occurredAt": "2026-07-31T12:00:00.000Z",
+            "fromPartyTypeConceptId": "00000000-0000-4000-8000-000000000001",
+            "toPartyTypeConceptId": "00000000-0000-4000-8000-000000000001",
+            "sealIdentifier": "valor-ejemplo",
+            "signedByUserId": "00000000-0000-4000-8000-000000000001"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la acesión. | `00000000-0000-4000-8000-000000000001` |
+| `custodianTenantId` | Sí | `string` | formato `uuid` | Tenant custodio (el laboratorio que la recibió). | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Paciente dueño de la acesión. | `00000000-0000-4000-8000-000000000001` |
+| `accessionNumber` | Sí | `string` | Sin restricción adicional declarada | Número de acesión. | `valor-ejemplo` |
+| `receivedAt` | Sí | `string` | formato `date-time` | Cuándo se recibió. | `2026-07-31T12:00:00.000Z` |
+| `priorityConceptId` | Sí | `string` | formato `uuid` | Prioridad (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Estado de la acesión (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `specimens` | Sí | `array<AccessionSpecimenDetailDto>` | Sin restricción adicional declarada | Los especímenes acesionados, con su contenedor y su custodia. | `[{"accessionSpecimenId":"00000000-0000-4000-8000-000000000001","sequenceNumber":1,"statusConceptId":"00000000-0000-4000-8000-000000000001","specimen":{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","collectedAt":"2026-07-31T12:00:00.000Z","receivedAt":"2026-07-31T12:00:00.000Z","containers":[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}],"custodyEvents":[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]}}]` |
+| `specimens[].accessionSpecimenId` | Sí | `string` | formato `uuid` | Identificador del item de acesión (`accession_specimens`). | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].sequenceNumber` | Sí | `number` | Sin restricción adicional declarada | Posición dentro de la acesión. | `1` |
+| `specimens[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del item dentro de la acesión (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen` | Sí | `SpecimenDetailDto` | Sin restricción adicional declarada | El espécimen, con sus contenedores y su custodia. | `{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","collectedAt":"2026-07-31T12:00:00.000Z","receivedAt":"2026-07-31T12:00:00.000Z","containers":[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}],"custodyEvents":[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]}` |
+| `specimens[].specimen.id` | Sí | `string` | formato `uuid` | Identificador del espécimen. | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.patientProfileId` | Sí | `string` | formato `uuid` | Paciente dueño del espécimen. | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.specimenTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de espécimen (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.statusConceptId` | Sí | `string` | formato `uuid` | Estado del espécimen (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.collectedAt` | No | `string` | formato `date-time` | Cuándo se recolectó, si ya ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `specimens[].specimen.receivedAt` | No | `string` | formato `date-time` | Cuándo se recibió en el laboratorio, si ya ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `specimens[].specimen.containers` | Sí | `array<SpecimenContainerDto>` | Sin restricción adicional declarada | Sus contenedores. | `[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specimens[].specimen.containers[].id` | Sí | `string` | formato `uuid` | Identificador del contenedor. | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.containers[].containerIdentifier` | Sí | `string` | Sin restricción adicional declarada | Identificador físico del contenedor (etiqueta/código). | `valor-ejemplo` |
+| `specimens[].specimen.containers[].containerTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de contenedor (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.containers[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del contenedor (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.custodyEvents` | Sí | `array<SpecimenCustodyEventDto>` | Sin restricción adicional declarada | Su cadena de custodia, del evento más viejo al más nuevo. | `[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `specimens[].specimen.custodyEvents[].id` | Sí | `string` | formato `uuid` | Identificador del evento. | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.custodyEvents[].specimenContainerId` | No | `string` | formato `uuid` | Contenedor al que se refiere el traslado, si el evento fue de un contenedor. | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.custodyEvents[].custodyEventTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de evento (concept id): recepción, traslado, almacenamiento, etc. | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.custodyEvents[].occurredAt` | Sí | `string` | formato `date-time` | Cuándo ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `specimens[].specimen.custodyEvents[].fromPartyTypeConceptId` | No | `string` | formato `uuid` | De qué tipo de parte salió (concept id), si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.custodyEvents[].toPartyTypeConceptId` | No | `string` | formato `uuid` | A qué tipo de parte llegó (concept id), si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `specimens[].specimen.custodyEvents[].sealIdentifier` | No | `string` | Sin restricción adicional declarada | Sello de custodia, si se usó uno. | `valor-ejemplo` |
+| `specimens[].specimen.custodyEvents[].signedByUserId` | No | `string` | formato `uuid` | Quién firmó el evento. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Acesión no encontrada | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/accessions/{id}"
+}
+```
+
+---
+
+## 10. POST /diagnostics/analyzer-runs
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -1117,7 +1410,6 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -1187,7 +1479,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant custodio de la corrida | Excepción explícita en src/modules/diagnostics/services/diagnostics-lab.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1207,7 +1499,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /diagnostics/analyzer-runs/{id}/messages
+## 11. POST /diagnostics/analyzer-runs/{id}/messages
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -1249,7 +1541,6 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -1323,7 +1614,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Corrida de analizador no encontrada | Excepción explícita en src/modules/diagnostics/services/diagnostics-lab.service.ts |
 | 409 | `CONFLICT` | El mensaje ya fue ingerido para esta corrida | Excepción explícita en src/modules/diagnostics/services/diagnostics-lab.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -1344,7 +1635,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /diagnostics/clinical-media
+## 12. POST /diagnostics/clinical-media
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -1501,7 +1792,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /diagnostics/containers/{id}/custody-events
+## 13. POST /diagnostics/containers/{id}/custody-events
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -1543,7 +1834,6 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -1623,7 +1913,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Contenedor no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1643,7 +1933,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /diagnostics/critical-results
+## 14. POST /diagnostics/critical-results
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -1779,7 +2069,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /diagnostics/critical-results/{id}/acknowledge
+## 15. POST /diagnostics/critical-results/{id}/acknowledge
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -1908,7 +2198,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /diagnostics/data-quality-events
+## 16. POST /diagnostics/data-quality-events
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -2047,7 +2337,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /diagnostics/imaging-endpoints
+## 17. POST /diagnostics/imaging-endpoints
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -2175,7 +2465,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /diagnostics/imaging-studies/{id}/dose-events
+## 18. POST /diagnostics/imaging-studies/{id}/dose-events
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -2313,7 +2603,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /diagnostics/patients/{patientProfileId}/imaging-studies
+## 19. GET /diagnostics/patients/{patientProfileId}/imaging-studies
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`
@@ -2426,7 +2716,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /diagnostics/patients/{patientProfileId}/orders
+## 20. GET /diagnostics/patients/{patientProfileId}/orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-orders`
@@ -2504,6 +2794,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "id": "00000000-0000-4000-8000-000000000001",
       "patientProfileId": "00000000-0000-4000-8000-000000000001",
       "encounterId": "00000000-0000-4000-8000-000000000001",
+      "formInstanceId": "00000000-0000-4000-8000-000000000001",
       "codeConceptId": "00000000-0000-4000-8000-000000000001",
       "categoryConceptId": "00000000-0000-4000-8000-000000000001",
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
@@ -2541,10 +2832,11 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `patientProfileId` | Sí | `string` | formato `uuid` | Paciente leído. | `00000000-0000-4000-8000-000000000001` |
-| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","duplicateOverrideReason":"Texto descriptivo de ejemplo"}]` |
+| `orders` | Sí | `array<DiagnosticOrderSummaryDto>` | Sin restricción adicional declarada | Órdenes de laboratorio e imagenología, de la más nueva a la más vieja. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","formInstanceId":"00000000-0000-4000-8000-000000000001","codeConceptId":"00000000-0000-4000-8000-000000000001","categoryConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z","previousDiagnosticReportId":"00000000-0000-4000-8000-000000000001","duplicateOverrideReason":"Texto descriptivo de ejemplo"}]` |
 | `orders[].id` | Sí | `string` | formato `uuid` | Identificador de la orden. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente al que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].encounterId` | No | `string` | formato `uuid` | Encuentro en el que se pidió, si se pidió durante uno. | `00000000-0000-4000-8000-000000000001` |
+| `orders[].formInstanceId` | No | `string` | formato `uuid` | P43: instancia del formulario médico de la que salió la orden, si salió de uno. | `00000000-0000-4000-8000-000000000001` |
 | `orders[].codeConceptId` | Sí | `string` | formato `uuid` | Qué se pidió (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `orders[].categoryConceptId` | No | `string` | formato `uuid` | Laboratorio o imagenología (concept id). | `00000000-0000-4000-8000-000000000001` |
 | `orders[].statusConceptId` | Sí | `string` | formato `uuid` | Estado de la orden (concept id). | `00000000-0000-4000-8000-000000000001` |
@@ -2594,7 +2886,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /diagnostics/reports/{reportId}/versions
+## 21. POST /diagnostics/reports/{reportId}/versions
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -2751,7 +3043,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
+## 22. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-reports`
@@ -2882,7 +3174,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /diagnostics/results/{observationId}/verifications
+## 23. POST /diagnostics/results/{observationId}/verifications
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -2925,7 +3217,6 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - Deben ser UUID válidos: `observationId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -2999,7 +3290,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Falta el tenant custodio de la verificación | Excepción explícita en src/modules/diagnostics/services/diagnostics-lab.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3019,7 +3310,214 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /diagnostics/specimens
+## 24. POST /diagnostics/service-requests/inbox
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-reception`
+- **Nombre:** Bandeja de órdenes de laboratorio por recibir
+- **Operation ID:** `DiagnosticsReceptionController_listInbox`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsReceptionController.listInbox](../../src/modules/diagnostics/controllers/diagnostics-reception.controller.ts)
+
+### Descripción de negocio
+
+Órdenes vigentes de laboratorio o anatomía patológica derivadas al laboratorio del tenant activo (`performer_tenant_id`) y todavía sin acesión, con las muestras ya recibidas. De la más vieja a la más nueva. Filtros en el cuerpo: la búsqueda por paciente no viaja en la URL.
+
+Contexto declarado en el controlador: Bandeja de recepción, paginada por cursor. `POST` y no `GET`: la búsqueda por paciente es PHI y no viaja en la URL.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /diagnostics/service-requests/inbox` en `DiagnosticsReceptionController_listInbox`. El controlador delega en `DiagnosticsReceptionService.listInbox`. Valida el body como `LabInboxQueryDto` y consume `application/json`. El tipo de retorno estático es `Promise<LabInboxPageDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `LabInboxQueryDto`; los campos opcionales se omiten.
+
+```http
+POST /diagnostics/service-requests/inbox HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `cursor` | No | `string` | longitud máxima 512 | Cursor opaco devuelto por la página anterior (`nextCursor`) | `valor-ejemplo` |
+| `limit` | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en el contrato OpenAPI. | `25` |
+| `patientQuery` | No | `string` | longitud mínima 2; longitud máxima 80 | Nombre o código del paciente (sin distinguir mayúsculas ni tildes) | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /diagnostics/service-requests/inbox HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "cursor": "valor-ejemplo",
+  "limit": 25,
+  "patientQuery": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LabInboxPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LabInboxPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "serviceRequestId": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "patientDisplayName": "Nombre de ejemplo",
+      "patientCode": "CODIGO_EJEMPLO",
+      "codeConceptId": "00000000-0000-4000-8000-000000000001",
+      "codeDisplay": "CODIGO_EJEMPLO",
+      "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+      "priorityConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "requesterProfileId": "00000000-0000-4000-8000-000000000001",
+      "requestingTenantId": "00000000-0000-4000-8000-000000000001",
+      "requestingTenantName": "Nombre de ejemplo",
+      "requestedAt": "2026-07-31T12:00:00.000Z",
+      "specimens": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "patientProfileId": "00000000-0000-4000-8000-000000000001",
+          "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+          "statusConceptId": "00000000-0000-4000-8000-000000000001",
+          "collectedAt": "2026-07-31T12:00:00.000Z",
+          "receivedAt": "2026-07-31T12:00:00.000Z",
+          "containers": [
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "containerIdentifier": "valor-ejemplo",
+              "containerTypeConceptId": "00000000-0000-4000-8000-000000000001",
+              "statusConceptId": "00000000-0000-4000-8000-000000000001"
+            }
+          ],
+          "custodyEvents": [
+            {
+              "id": "00000000-0000-4000-8000-000000000001",
+              "specimenContainerId": "00000000-0000-4000-8000-000000000001",
+              "custodyEventTypeConceptId": "00000000-0000-4000-8000-000000000001",
+              "occurredAt": "2026-07-31T12:00:00.000Z",
+              "fromPartyTypeConceptId": "00000000-0000-4000-8000-000000000001",
+              "toPartyTypeConceptId": "00000000-0000-4000-8000-000000000001",
+              "sealIdentifier": "valor-ejemplo",
+              "signedByUserId": "00000000-0000-4000-8000-000000000001"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<LabInboxItemDto>` | Sin restricción adicional declarada | Las órdenes de la página, de la más vieja a la más nueva. | `[{"serviceRequestId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","patientDisplayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","codeConceptId":"00000000-0000-4000-8000-000000000001","codeDisplay":"CODIGO_EJEMPLO","categoryConceptId":"00000000-0000-4000-8000-000000000001","priorityConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","requesterProfileId":"00000000-0000-4000-8000-000000000001","requestingTenantId":"00000000-0000-4000-8000-000000000001","requestingTenantName":"Nombre de ejemplo","requestedAt":"2026-07-31T12:00:00.000Z","specimens":[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","collectedAt":"2026-07-31T12:00:00.000Z","receivedAt":"2026-07-31T12:00:00.000Z","containers":[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}],"custodyEvents":[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]}]}]` |
+| `items[].serviceRequestId` | Sí | `string` | formato `uuid` | La orden de servicio (`clinical.service_requests`). | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente de la orden. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientDisplayName` | Sí | `string` | admite null | Nombre pintable del paciente, si se conoce. | `Nombre de ejemplo` |
+| `items[].patientCode` | Sí | `string` | admite null | Código de paciente (historia clínica), si se conoce. | `CODIGO_EJEMPLO` |
+| `items[].codeConceptId` | Sí | `string` | formato `uuid` | Estudio pedido (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].codeDisplay` | Sí | `string` | admite null | Nombre del estudio pedido, del catálogo. | `CODIGO_EJEMPLO` |
+| `items[].categoryConceptId` | Sí | `string` | formato `uuid`; admite null | Categoría de la orden (laboratorio o anatomía patológica). | `00000000-0000-4000-8000-000000000001` |
+| `items[].priorityConceptId` | Sí | `string` | formato `uuid`; admite null | Prioridad de la orden (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado de la orden (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].requesterProfileId` | Sí | `string` | formato `uuid`; admite null | Profesional que pidió el estudio, si consta. | `00000000-0000-4000-8000-000000000001` |
+| `items[].requestingTenantId` | Sí | `string` | formato `uuid` | Organización que emitió la orden (su custodio). | `00000000-0000-4000-8000-000000000001` |
+| `items[].requestingTenantName` | Sí | `string` | admite null | Nombre de la organización que emitió la orden. | `Nombre de ejemplo` |
+| `items[].requestedAt` | Sí | `string` | formato `date-time` | Cuándo se emitió la orden. | `2026-07-31T12:00:00.000Z` |
+| `items[].specimens` | Sí | `array<SpecimenDetailDto>` | Sin restricción adicional declarada | Muestras que este laboratorio ya recibió para la orden y todavía no acesionó, con sus contenedores y su cadena de custodia. Vacío mientras nadie recibió nada; un espécimen rechazado sigue acá con su estado, para que se vea por qué hace falta otra muestra. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","specimenTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","collectedAt":"2026-07-31T12:00:00.000Z","receivedAt":"2026-07-31T12:00:00.000Z","containers":[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}],"custodyEvents":[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]}]` |
+| `items[].specimens[].id` | Sí | `string` | formato `uuid` | Identificador del espécimen. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente dueño del espécimen. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].specimenTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de espécimen (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del espécimen (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].collectedAt` | No | `string` | formato `date-time` | Cuándo se recolectó, si ya ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `items[].specimens[].receivedAt` | No | `string` | formato `date-time` | Cuándo se recibió en el laboratorio, si ya ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `items[].specimens[].containers` | Sí | `array<SpecimenContainerDto>` | Sin restricción adicional declarada | Sus contenedores. | `[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].specimens[].containers[].id` | Sí | `string` | formato `uuid` | Identificador del contenedor. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].containers[].containerIdentifier` | Sí | `string` | Sin restricción adicional declarada | Identificador físico del contenedor (etiqueta/código). | `valor-ejemplo` |
+| `items[].specimens[].containers[].containerTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de contenedor (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].containers[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del contenedor (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].custodyEvents` | Sí | `array<SpecimenCustodyEventDto>` | Sin restricción adicional declarada | Su cadena de custodia, del evento más viejo al más nuevo. | `[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].specimens[].custodyEvents[].id` | Sí | `string` | formato `uuid` | Identificador del evento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].custodyEvents[].specimenContainerId` | No | `string` | formato `uuid` | Contenedor al que se refiere el traslado, si el evento fue de un contenedor. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].custodyEvents[].custodyEventTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de evento (concept id): recepción, traslado, almacenamiento, etc. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].custodyEvents[].occurredAt` | Sí | `string` | formato `date-time` | Cuándo ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `items[].specimens[].custodyEvents[].fromPartyTypeConceptId` | No | `string` | formato `uuid` | De qué tipo de parte salió (concept id), si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].custodyEvents[].toPartyTypeConceptId` | No | `string` | formato `uuid` | A qué tipo de parte llegó (concept id), si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `items[].specimens[].custodyEvents[].sealIdentifier` | No | `string` | Sin restricción adicional declarada | Sello de custodia, si se usó uno. | `valor-ejemplo` |
+| `items[].specimens[].custodyEvents[].signedByUserId` | No | `string` | formato `uuid` | Quién firmó el evento. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cuántas filas trae la página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor de la página siguiente, o `null` si no hay más. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/service-requests/inbox"
+}
+```
+
+---
+
+## 25. POST /diagnostics/specimens
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -3062,7 +3560,6 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -3138,7 +3635,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3157,7 +3654,158 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /diagnostics/specimens/{id}/containers
+## 26. GET /diagnostics/specimens/{id}
+
+- **Módulo:** `diagnostics`
+- **Etiqueta OpenAPI:** `diagnostics-specimens`
+- **Nombre:** Detalle de un espécimen (con su cadena de custodia)
+- **Operation ID:** `DiagnosticsSpecimensController_getSpecimen`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [DiagnosticsSpecimensController.getSpecimen](../../src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts)
+
+### Descripción de negocio
+
+Acotado al tenant del contexto: otro laboratorio recibe 404.
+
+Contexto declarado en el controlador: Lectura (CL-47): detalle de un espécimen con su cadena de custodia.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /diagnostics/specimens/{id}` en `DiagnosticsSpecimensController_getSpecimen`. El controlador delega en `DiagnosticsSpecimensService.getSpecimen`. No recibe body. El tipo de retorno estático es `Promise<SpecimenDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /diagnostics/specimens/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /diagnostics/specimens/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SpecimenDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SpecimenDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SpecimenDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SpecimenDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<SpecimenDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SpecimenDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SpecimenDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SpecimenDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "specimenTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "collectedAt": "2026-07-31T12:00:00.000Z",
+  "receivedAt": "2026-07-31T12:00:00.000Z",
+  "containers": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "containerIdentifier": "valor-ejemplo",
+      "containerTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "custodyEvents": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "specimenContainerId": "00000000-0000-4000-8000-000000000001",
+      "custodyEventTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-07-31T12:00:00.000Z",
+      "fromPartyTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "toPartyTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "sealIdentifier": "valor-ejemplo",
+      "signedByUserId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador del espécimen. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Paciente dueño del espécimen. | `00000000-0000-4000-8000-000000000001` |
+| `specimenTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de espécimen (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Estado del espécimen (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `collectedAt` | No | `string` | formato `date-time` | Cuándo se recolectó, si ya ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `receivedAt` | No | `string` | formato `date-time` | Cuándo se recibió en el laboratorio, si ya ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `containers` | Sí | `array<SpecimenContainerDto>` | Sin restricción adicional declarada | Sus contenedores. | `[{"id":"00000000-0000-4000-8000-000000000001","containerIdentifier":"valor-ejemplo","containerTypeConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `containers[].id` | Sí | `string` | formato `uuid` | Identificador del contenedor. | `00000000-0000-4000-8000-000000000001` |
+| `containers[].containerIdentifier` | Sí | `string` | Sin restricción adicional declarada | Identificador físico del contenedor (etiqueta/código). | `valor-ejemplo` |
+| `containers[].containerTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de contenedor (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `containers[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del contenedor (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `custodyEvents` | Sí | `array<SpecimenCustodyEventDto>` | Sin restricción adicional declarada | Su cadena de custodia, del evento más viejo al más nuevo. | `[{"id":"00000000-0000-4000-8000-000000000001","specimenContainerId":"00000000-0000-4000-8000-000000000001","custodyEventTypeConceptId":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-07-31T12:00:00.000Z","fromPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","toPartyTypeConceptId":"00000000-0000-4000-8000-000000000001","sealIdentifier":"valor-ejemplo","signedByUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `custodyEvents[].id` | Sí | `string` | formato `uuid` | Identificador del evento. | `00000000-0000-4000-8000-000000000001` |
+| `custodyEvents[].specimenContainerId` | No | `string` | formato `uuid` | Contenedor al que se refiere el traslado, si el evento fue de un contenedor. | `00000000-0000-4000-8000-000000000001` |
+| `custodyEvents[].custodyEventTypeConceptId` | Sí | `string` | formato `uuid` | Tipo de evento (concept id): recepción, traslado, almacenamiento, etc. | `00000000-0000-4000-8000-000000000001` |
+| `custodyEvents[].occurredAt` | Sí | `string` | formato `date-time` | Cuándo ocurrió. | `2026-07-31T12:00:00.000Z` |
+| `custodyEvents[].fromPartyTypeConceptId` | No | `string` | formato `uuid` | De qué tipo de parte salió (concept id), si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `custodyEvents[].toPartyTypeConceptId` | No | `string` | formato `uuid` | A qué tipo de parte llegó (concept id), si se registró. | `00000000-0000-4000-8000-000000000001` |
+| `custodyEvents[].sealIdentifier` | No | `string` | Sin restricción adicional declarada | Sello de custodia, si se usó uno. | `valor-ejemplo` |
+| `custodyEvents[].signedByUserId` | No | `string` | formato `uuid` | Quién firmó el evento. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Espécimen no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/diagnostics/specimens/{id}"
+}
+```
+
+---
+
+## 27. POST /diagnostics/specimens/{id}/containers
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -3201,7 +3849,6 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -3271,7 +3918,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Espécimen no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3291,7 +3938,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /diagnostics/specimens/{id}/rejection
+## 28. POST /diagnostics/specimens/{id}/rejection
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-specimens`
@@ -3333,7 +3980,6 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -3405,7 +4051,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Espécimen no encontrado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El espécimen ya está rechazado | Excepción explícita en src/modules/diagnostics/services/diagnostics-specimens.service.ts |
@@ -3426,7 +4072,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /diagnostics/work-orders
+## 29. GET /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -3468,7 +4114,6 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -3524,7 +4169,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3542,7 +4187,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /diagnostics/work-orders
+## 30. POST /diagnostics/work-orders
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-laboratory`
@@ -3588,7 +4233,6 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -3677,7 +4321,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Acesión no encontrada | Excepción explícita en src/modules/diagnostics/services/diagnostics-lab.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -3697,7 +4341,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /dicomweb/studies
+## 31. POST /dicomweb/studies
 
 - **Módulo:** `diagnostics`
 - **Etiqueta OpenAPI:** `diagnostics-imaging`

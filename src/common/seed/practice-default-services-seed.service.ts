@@ -47,7 +47,7 @@ export class PracticeDefaultServicesSeedService {
 
     // Una sola consulta para todas: preguntar práctica por práctica sería una
     // ida a la base por organización, y esto corre en cada arranque.
-    const existentes = await em.find(
+    const existing = await em.find(
       ServiceCatalog,
       {
         practiceId: { $in: practices.map((p) => p.id) },
@@ -55,12 +55,12 @@ export class PracticeDefaultServicesSeedService {
       },
       { fields: ['practiceId'] },
     );
-    const yaTienen = new Set(existentes.map((row) => row.practiceId));
-    const ahora = new Date();
+    const alreadyHave = new Set(existing.map((row) => row.practiceId));
+    const now = new Date();
 
     let inserted = 0;
     for (const practice of practices) {
-      if (yaTienen.has(practice.id)) continue;
+      if (alreadyHave.has(practice.id)) continue;
       em.create(
         ServiceCatalog,
         {
@@ -71,7 +71,7 @@ export class PracticeDefaultServicesSeedService {
           currencyConceptId: DEFAULT_APPOINTMENT_SERVICE.currencyConceptId,
           isActive: true,
           // Sin actor: lo sembró el arranque, no una persona.
-          ...createdBy(undefined, ahora),
+          ...createdBy(undefined, now),
         },
         { partial: true },
       );

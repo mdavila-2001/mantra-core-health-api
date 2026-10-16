@@ -31,17 +31,17 @@ describe('MCH-036 · el estado de la intención deriva de lo capturado (integrac
   });
 
   it('AC01/AC02 · 40 sobre 100 no satisface; +60 sí; el excedente se rechaza', async () => {
-    const intentId = await f.intencion('100.00');
+    const intentId = await f.intent('100.00');
 
     await cobrar(intentId, '40.00');
-    expect(await f.estadoIntencion(intentId)).toBe(CONCEPTS.PI_PROCESSING);
+    expect(await f.intentState(intentId)).toBe(CONCEPTS.PI_PROCESSING);
 
     // Excede el saldo de 60: ni siquiera se registra la solicitud.
     await f.operar(intentId, 'SALE', f.ref(), '60.01').expect(409);
     expect(await f.transacciones(intentId)).toHaveLength(1);
 
     await cobrar(intentId, '60.00');
-    expect(await f.estadoIntencion(intentId)).toBe(CONCEPTS.PI_SUCCEEDED);
+    expect(await f.intentState(intentId)).toBe(CONCEPTS.PI_SUCCEEDED);
 
     // Una captura más sobre una intención ya satisfecha no procede.
     await f.operar(intentId, 'SALE', f.ref(), '1.00').expect(409);
@@ -49,18 +49,18 @@ describe('MCH-036 · el estado de la intención deriva de lo capturado (integrac
   });
 
   it('AC03 · la reentrega del mismo callback no acumula dos veces', async () => {
-    const intentId = await f.intencion('100.00');
+    const intentId = await f.intent('100.00');
     const ref = await cobrar(intentId, '40.00');
 
     const res = await f.callback(ref, 'CAPTURED').expect(200);
     expect(res.body.duplicate).toBe(true);
 
-    expect(await f.estadoIntencion(intentId)).toBe(CONCEPTS.PI_PROCESSING);
+    expect(await f.intentState(intentId)).toBe(CONCEPTS.PI_PROCESSING);
     await f.operar(intentId, 'SALE', f.ref(), '60.01').expect(409);
   });
 
   it('sin importe explícito se cobra el saldo pendiente, no el total', async () => {
-    const intentId = await f.intencion('100.00');
+    const intentId = await f.intent('100.00');
     await cobrar(intentId, '40.00');
 
     const ref = f.ref();
@@ -68,11 +68,11 @@ describe('MCH-036 · el estado de la intención deriva de lo capturado (integrac
     expect(res.body.amount).toBe('60.00');
 
     await f.callback(ref, 'CAPTURED').expect(200);
-    expect(await f.estadoIntencion(intentId)).toBe(CONCEPTS.PI_SUCCEEDED);
+    expect(await f.intentState(intentId)).toBe(CONCEPTS.PI_SUCCEEDED);
   });
 
   it('una captura no puede exceder el importe autorizado', async () => {
-    const intentId = await f.intencion('100.00');
+    const intentId = await f.intent('100.00');
     const ref = f.ref();
     await f.operar(intentId, 'AUTHORIZE', ref, '40.00').expect(201);
     await f.callback(ref, 'AUTHORIZED').expect(200);

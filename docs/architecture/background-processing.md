@@ -74,7 +74,7 @@ colas y eventos: Fase 12 (AsyncAPI).
 
 ## Brecha operativa conocida
 
-`ESTADO-Y-PENDIENTES.md` (P0) documenta que la infraestructura base de los 21 workers ya existe,
+`docs/progress/ESTADO-Y-PENDIENTES.md` (P0) documenta que la infraestructura base de los 21 workers ya existe,
 pero varios jobs siguen dependiendo de completar llamadas externas periódicas (planificadores de
 `reporting`, `automation`, `qa_lab`, `health_context`; reconciliación de `cross_store_consistency`,
 `graph_intelligence`, `vector_rag`, `lakehouse`, `time_series`). No se documenta aquí como

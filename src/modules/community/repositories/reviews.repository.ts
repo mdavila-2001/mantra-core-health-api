@@ -192,19 +192,19 @@ export class ReviewsRepository {
     em: EntityManager,
     personIds: readonly string[],
   ): Promise<Map<string, string>> {
-    const salida = new Map<string, string>();
-    if (personIds.length === 0) return salida;
+    const output = new Map<string, string>();
+    if (personIds.length === 0) return output;
 
-    const personas = await em.find(
+    const persons = await em.find(
       Persons,
       { id: { $in: [...new Set(personIds)] } },
       { fields: ['id', 'displayName'] },
     );
-    for (const persona of personas) {
-      const nombre = persona.displayName?.trim();
-      if (nombre) salida.set(persona.id, nombre);
+    for (const persona of persons) {
+      const name = persona.displayName?.trim();
+      if (name) output.set(persona.id, name);
     }
-    return salida;
+    return output;
   }
 
   /** Puntuaciones por dimensión de un lote de reviews. */
@@ -296,12 +296,12 @@ export class ReviewsRepository {
       }
     >
   > {
-    const resultado = new Map<string, { average: number; count: number }>();
+    const result = new Map<string, { average: number; count: number }>();
     if (targetPublicProfileIds.length === 0) {
-      return resultado;
+      return result;
     }
 
-    const filas = await em.find(
+    const rows = await em.find(
       ServiceReviews,
       {
         targetPublicProfileId: { $in: [...targetPublicProfileIds] },
@@ -310,21 +310,21 @@ export class ReviewsRepository {
       { fields: ['targetPublicProfileId', 'overallRating'] },
     );
 
-    const acumulado = new Map<string, { total: number; count: number }>();
-    for (const fila of filas) {
-      const previo = acumulado.get(fila.targetPublicProfileId) ?? {
+    const accumulated = new Map<string, { total: number; count: number }>();
+    for (const row of rows) {
+      const previous = accumulated.get(row.targetPublicProfileId) ?? {
         total: 0,
         count: 0,
       };
-      acumulado.set(fila.targetPublicProfileId, {
-        total: previo.total + fila.overallRating,
-        count: previo.count + 1,
+      accumulated.set(row.targetPublicProfileId, {
+        total: previous.total + row.overallRating,
+        count: previous.count + 1,
       });
     }
-    for (const [profileId, { total, count }] of acumulado) {
-      resultado.set(profileId, { average: total / count, count });
+    for (const [profileId, { total, count }] of accumulated) {
+      result.set(profileId, { average: total / count, count });
     }
-    return resultado;
+    return result;
   }
 
   create(em: EntityManager, data: CreateReviewData): ServiceReviews {

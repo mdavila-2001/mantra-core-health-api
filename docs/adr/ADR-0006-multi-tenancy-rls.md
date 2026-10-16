@@ -42,7 +42,7 @@ producción" sin esa verificación operativa explícita.
 
 ## Evidencia
 `src/common/tenant/tenant-context.interceptor.ts`, `docker-compose.yml` (`RLS_ENFORCE`),
-`ESTADO-Y-PENDIENTES.md` §"Validar aislamiento por tenant en cada entorno".
+`docs/progress/ESTADO-Y-PENDIENTES.md` §"Validar aislamiento por tenant en cada entorno".
 
 ## Plan de revisión
 Obligatorio antes de cualquier declaración de "apto para producción" — ver Fase 18.

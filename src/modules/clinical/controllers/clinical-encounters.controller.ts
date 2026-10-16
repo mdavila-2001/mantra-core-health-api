@@ -9,7 +9,13 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  AccessLogged,
+  type AuthenticatedUser,
+} from '../../../common';
 import type { FileLinkResponseDto, LinkedFilePageDto } from '../../common/dto';
 import { CareEpisodesService, EncountersService } from '../services';
 import {
@@ -64,6 +70,11 @@ export class ClinicalEncountersController {
   ) {}
 
   /** UC-08-01. */
+  @Audited({
+    action: 'CARE_EPISODE_OPENED',
+    entity: 'care_episode',
+    entityId: 'result.id',
+  })
   @Post('care-episodes')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Abrir un episodio de cuidado' })
@@ -75,6 +86,11 @@ export class ClinicalEncountersController {
   }
 
   /** UC-08-02. */
+  @Audited({
+    action: 'ENCOUNTER_CHECKED_IN',
+    entity: 'encounter',
+    entityId: 'result.id',
+  })
   @Post('encounters/check-in')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -88,6 +104,11 @@ export class ClinicalEncountersController {
   }
 
   /** UC-08-14. */
+  @Audited({
+    action: 'ENCOUNTER_CLOSED',
+    entity: 'encounter',
+    entityId: 'param:id',
+  })
   @Post('encounters/:id/close')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -107,6 +128,11 @@ export class ClinicalEncountersController {
    * genérico `POST /common/files/:id/links`: acá el paciente sale de la fila y
    * la escritura pasa por la política de la historia (MCH-007).
    */
+  @Audited({
+    action: 'ENCOUNTER_FILE_ATTACHED',
+    entity: 'file',
+    entityId: 'result.id',
+  })
   @Post('encounters/:id/attachments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Adjuntar un archivo ya subido a un encuentro' })
@@ -123,6 +149,10 @@ export class ClinicalEncountersController {
    * lee (`PATIENT` en el handler): la política de lectura la aplica el servicio.
    */
   @Get('encounters/:id/attachments')
+  @AccessLogged({
+    resourceType: 'ENCOUNTER_ATTACHMENTS',
+    resourceId: 'param:id',
+  })
   @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
   @ApiOperation({ summary: 'Listar los adjuntos de un encuentro' })
   listEncounterAttachments(

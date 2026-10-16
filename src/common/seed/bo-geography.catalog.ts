@@ -1310,7 +1310,7 @@ export function boDepartmentCodeOfIne(ine: string): string | undefined {
  * módulo, así que el índice no puede quedar viejo; construirlo en la carga del
  * módulo, en cambio, costaría 340 UUIDv5 en todo arranque, lo pida alguien o no.
  */
-let indicePorConcepto: ReadonlyMap<string, BoMunicipalitySeed> | null = null;
+let indexByConcept: ReadonlyMap<string, BoMunicipalitySeed> | null = null;
 
 /**
  * El municipio cuyo concepto tiene ese id, o `undefined` si el id no es de un
@@ -1326,11 +1326,11 @@ let indicePorConcepto: ReadonlyMap<string, BoMunicipalitySeed> | null = null;
 export function boMunicipalityByConceptId(
   conceptId: string,
 ): BoMunicipalitySeed | undefined {
-  indicePorConcepto ??= new Map(
+  indexByConcept ??= new Map(
     BO_MUNICIPALITIES.map((municipality) => [
       boMunicipalityConceptId(municipality.ine),
       municipality,
     ]),
   );
-  return indicePorConcepto.get(conceptId);
+  return indexByConcept.get(conceptId);
 }

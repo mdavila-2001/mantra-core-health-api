@@ -91,10 +91,7 @@ export class ServiceRequestsService {
     actor: AuthenticatedUser,
   ): Promise<DuplicateStudyCheckResultDto> {
     const tenantId = requireTenantId();
-    await this.clinicalRead.assertPuedeLeerHistoria(
-      dto.patientProfileId,
-      actor,
-    );
+    await this.clinicalRead.assertCanReadHistory(dto.patientProfileId, actor);
 
     const em = this.em.fork();
     const encounter = await this.encountersRepo.findById(em, dto.encounterId);
@@ -130,6 +127,27 @@ export class ServiceRequestsService {
     ]);
 
     if (!match) {
+      // Sin informe, ¿hay una orden activa del mismo estudio esperando
+      // realizarse? Pedirlo otra vez es el mismo duplicado.
+      const activa =
+        await this.duplicateStudyDetector.findActiveOrderWithoutReport(
+          em,
+          dto.patientProfileId,
+          codeConceptId,
+          windowDays,
+          tenantId,
+          now,
+        );
+      if (activa) {
+        return {
+          isDuplicate: true,
+          previousStudy: activa,
+          warningMessage: this.duplicateStudyDetector.warningMessageFor(activa),
+          requiresJustification: true,
+          pendingReport: true,
+          windowDays,
+        };
+      }
       return {
         isDuplicate: false,
         previousStudy: null,
@@ -357,6 +375,44 @@ export class ServiceRequestsService {
           ? undefined
           : dto.duplicateOverrideReason,
       };
+    }
+
+    // Sin informe previo, una orden activa del mismo estudio también es
+    // duplicado. No hay informe que reutilizar ni al que enlazar: sólo se puede
+    // repetir con justificación. La columna `duplicate_override_reason` exige
+    // `previous_diagnostic_report_id` (CHECK), así que la justificación se
+    // valida (mín. 20 caracteres, en el DTO) y se registra la decisión en el
+    // log, pero no se persiste en la orden.
+    if (!dto.previousDiagnosticReportId) {
+      const activa =
+        await this.duplicateStudyDetector.findActiveOrderWithoutReport(
+          tx,
+          dto.patientProfileId,
+          dto.codeConceptId,
+          DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS,
+          dto.custodianTenantId,
+          new Date(),
+        );
+      if (activa) {
+        if (
+          dto.reusePreviousReport === true ||
+          dto.duplicateOverrideReason === undefined
+        ) {
+          throw new PreconditionFailedException(
+            'El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición',
+            { reason: 'DUPLICATE_STUDY_DETECTED', previousStudy: activa },
+          );
+        }
+        this.logger.info(
+          {
+            operation: 'clinical.service-request.duplicate-decision',
+            previousServiceRequestId: activa.serviceRequestId,
+            reused: false,
+          },
+          'Duplicate active order repeated with justification',
+        );
+        return { statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE };
+      }
     }
 
     if (dto.previousDiagnosticReportId) {

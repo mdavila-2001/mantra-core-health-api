@@ -1,0 +1,8 @@
+source_language	translation_language	subject_id	source_value	predicate_id	translation_value	translation_status
+en	es	HP:0000716	Depressivity	rdfs:label	Depresión	OFFICIAL
+en	es	HP:0000739	Anxiety	rdfs:label	Ansiedad	OFFICIAL
+en	es	HP:0000938	Osteopenia	rdfs:label	Osteopenia	OFFICIAL
+en	es	HP:0001392	Abnormality of the liver	rdfs:label	Anormalidad del hígado	OFFICIAL
+en	es	HP:0002020	Gastroesophageal reflux	rdfs:label	Reflujo gastroesofágico	OFFICIAL
+en	es	HP:0002035	Rectal prolapse	rdfs:label	Prolapso rectal	OFFICIAL
+en	es	HP:0040283	Occasional	rdfs:label	Ocasional	OFFICIAL

@@ -59,6 +59,9 @@ export const GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE =
 /** Resumen en lenguaje llano: jsonb `{ es: string, en?: string }`. */
 export const GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE = 'glossary-plain-summary';
 
+/** Fuentes editoriales con procedencia, licencia, idioma y fecha de consulta. */
+export const GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE = 'glossary-sources';
+
 /**
  * Imagen del término: jsonb `{ source, license, attribution, alt, status }`.
  *
@@ -70,6 +73,9 @@ export const GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE = 'glossary-plain-summary';
  * términos usan iconografía de categoría en el frontend en su lugar.
  */
 export const GLOSSARY_IMAGE_PROPERTY_CODE = 'glossary-image';
+
+/** Documento enciclopédico completo serializado en `concept_properties.value_json`. */
+export const GLOSSARY_ARTICLE_PROPERTY_CODE = 'glossary-article';
 
 // --- Ficha de medicamento (FND-25-02) ---------------------------------------
 //
@@ -132,6 +138,17 @@ export const GLOSSARY_RELATION_TYPES: readonly GlossaryRelationType[] = [
   'SYMPTOM',
   'SPECIALTY',
 ];
+
+/**
+ * De qué lado de la relación está el término consultado: `outgoing` si es el
+ * origen de la arista (la enfermedad que apunta al síntoma) e `incoming` si es
+ * el destino (el síntoma al que apuntan las enfermedades).
+ */
+export type GlossaryRelationDirection = 'outgoing' | 'incoming';
+
+/** Los dos sentidos, en el orden en que se publican los grupos de un vecindario. */
+export const GLOSSARY_RELATION_DIRECTIONS: readonly GlossaryRelationDirection[] =
+  ['outgoing', 'incoming'];
 
 /** Tipo de relación (API) -> concepto `terminology:relationship:*`. */
 const GLOSSARY_RELATION_TYPE_CONCEPT_ID: Readonly<

@@ -82,7 +82,7 @@ violando la regla de aislamiento. Es el **único** caso detectado por
   lectura (servicio expuesto por `practice`, o proyección de solo lectura) para que `billing` deje
   de leer la tabla ajena directamente.
 - **Seguimiento:** `docs/governance/traceability-matrix.md`, fila `ARCH-001`; acción trasladada a
-  `ESTADO-Y-PENDIENTES.md`.
+  `docs/progress/ESTADO-Y-PENDIENTES.md`.
 
 ## 6. Ausencia de ciclos de imports
 

@@ -1,0 +1,242 @@
+{
+ "Q2126468": {
+  "es": null,
+  "en": "radiosensitizer"
+ },
+ "Q215118": {
+  "es": "anticoagulante",
+  "en": "anticoagulant"
+ },
+ "Q221696": {
+  "es": "mutágeno",
+  "en": "mutagen"
+ },
+ "Q241549": {
+  "es": "antiarrítmico",
+  "en": "antiarrhythmic agent"
+ },
+ "Q249619": {
+  "es": "inmunosupresor",
+  "en": "immunosuppressive drug"
+ },
+ "Q2496749": {
+  "es": "agonista adrenérgico",
+  "en": "adrenergic agonist"
+ },
+ "Q2592323": {
+  "es": "Inhibidor de la colinesterasa",
+  "en": "acetylcholinesterase inhibitor"
+ },
+ "Q2742649": {
+  "es": null,
+  "en": "antidiarrhoeal"
+ },
+ "Q277954": {
+  "es": "estrógeno",
+  "en": "estrogen"
+ },
+ "Q281044": {
+  "es": null,
+  "en": "topoisomerase inhibitor"
+ },
+ "Q28208901": {
+  "es": null,
+  "en": "Glycinergic"
+ },
+ "Q2853144": {
+  "es": "antineoplásico",
+  "en": "antineoplastic"
+ },
+ "Q2853347": {
+  "es": "antipruriginoso",
+  "en": "antipruritic"
+ },
+ "Q288280": {
+  "es": "inhibidor de la enzima convertidora de angiotensina",
+  "en": "ACE inhibitor"
+ },
+ "Q2938102": {
+  "es": "cardiotónico",
+  "en": "cardiotonic"
+ },
+ "Q3001265": {
+  "es": "antagonista muscarínico",
+  "en": "muscarinic antagonist"
+ },
+ "Q3040305": {
+  "es": "inhibidor de aromatasa",
+  "en": "aromatase inhibitors"
+ },
+ "Q30715691": {
+  "es": "Vitamina B3",
+  "en": "vitamin B3"
+ },
+ "Q324089": {
+  "es": "antihistamínico",
+  "en": "histamine antagonist"
+ },
+ "Q3271533": {
+  "es": "Antagonista de la dopamina",
+  "en": "dopamine antagonist"
+ },
+ "Q3333419": {
+  "es": "metabolito primario",
+  "en": "primary metabolite"
+ },
+ "Q334477": {
+  "es": "inhibidor selectivo de la recaptación de serotonina",
+  "en": "selective serotonin reuptake inhibitor"
+ },
+ "Q3359124": {
+  "es": "agente vasoconstrictor",
+  "en": "vasoconstrictor agents"
+ },
+ "Q3363684": {
+  "es": "parasimpaticolítico",
+  "en": "parasympatholytic"
+ },
+ "Q34956": {
+  "es": "vitamina",
+  "en": "vitamin"
+ },
+ "Q35456": {
+  "es": "WHO medicamento esencial",
+  "en": "WHO essential medicines"
+ },
+ "Q3569101": {
+  "es": null,
+  "en": "histone deacetylase inhibitors"
+ },
+ "Q3579672": {
+  "es": "Antiparkinsonianos",
+  "en": "antiparkinson"
+ },
+ "Q3618576": {
+  "es": "antiasmático",
+  "en": "antiasthmatic"
+ },
+ "Q377458": {
+  "es": "Inhibidores selectivos de la COX-2",
+  "en": "COX-2 inhibitor"
+ },
+ "Q3774852": {
+  "es": "Catártica",
+  "en": "cathartic"
+ },
+ "Q4008956": {
+  "es": "vasodilatadores",
+  "en": "vasodilator agent"
+ },
+ "Q40207875": {
+  "es": "agente antiviral",
+  "en": "antiviral agent"
+ },
+ "Q407595": {
+  "es": "metabolito",
+  "en": "metabolite"
+ },
+ "Q409444": {
+  "es": "antagonista H2",
+  "en": "H2 antagonists"
+ },
+ "Q410954": {
+  "es": "Inhibidores de la monoaminooxidasa",
+  "en": "monoamine oxidase inhibitor"
+ },
+ "Q4118287": {
+  "es": "inhibidor de los ácidos nucleicos",
+  "en": "DNA polymerase inhibitors"
+ },
+ "Q414238": {
+  "es": "Inhibidores de la anhidrasa carbónica",
+  "en": "carbonic anhydrase inhibitor"
+ },
+ "Q41602594": {
+  "es": "antiulceroso",
+  "en": "anti-ulcer drug"
+ },
+ "Q418251": {
+  "es": "Inhibidor de la fosfodiesterasa",
+  "en": "phosphodiesterase inhibitor"
+ },
+ "Q421559": {
+  "es": "inhibidor de la transcriptasa inversa",
+  "en": "reverse-transcriptase inhibitor"
+ },
+ "Q421700": {
+  "es": "Bloqueador de los canales de calcio",
+  "en": "calcium channel blocker"
+ },
+ "Q421704": {
+  "es": "inhibidor de la bomba de protones",
+  "en": "proton-pump inhibitor"
+ },
+ "Q422248": {
+  "es": "anticuerpo monoclonal",
+  "en": "monoclonal antibody"
+ },
+ "Q422549": {
+  "es": "glucocorticoide",
+  "en": "glucocorticoid"
+ },
+ "Q422816": {
+  "es": null,
+  "en": "enzyme activator"
+ },
+ "Q423482": {
+  "es": null,
+  "en": "beta2-adrenergic agonist"
+ },
+ "Q427492": {
+  "es": "inhibidor enzimático",
+  "en": "enzyme inhibitor"
+ },
+ "Q427523": {
+  "es": "opioide",
+  "en": "opioid"
+ },
+ "Q4381760": {
+  "es": null,
+  "en": "antineoplastic antibiotics"
+ },
+ "Q1058719": {
+  "es": "tratamiento de aguas",
+  "en": "water treatment"
+ },
+ "Q1069596": {
+  "es": "fármaco inmunoconjugado",
+  "en": "antibody-drug conjugate"
+ },
+ "Q11364": {
+  "es": "hormona",
+  "en": "hormone"
+ },
+ "Q1138899": {
+  "es": "interruptor endocrino",
+  "en": "endocrine disruptor"
+ },
+ "Q11497468": {
+  "es": null,
+  "en": "antimanic agents"
+ },
+ "Q11872304": {
+  "es": "agente quelante",
+  "en": "chelating agent"
+ },
+ "Q12187": {
+  "es": "antibiótico",
+  "en": "antibiotic"
+ },
+ "Q12190": {
+  "es": "penicilina",
+  "en": "penicillin"
+ },
+ "Q12830468": {
+  "es": "psicotrópico",
+  "en": "psychotropic drug"
+ },
+ "Q1293337": {
+  "es": null,
+  "en": "miotic drugs"
+ }
+}

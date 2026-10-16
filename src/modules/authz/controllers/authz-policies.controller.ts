@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AuthzPoliciesService } from '../services';
 import { CreateAccessPolicyDto, AuthzIdResponseDto } from '../dto';
 
@@ -25,6 +30,11 @@ export class AuthzPoliciesController {
   constructor(private readonly policiesService: AuthzPoliciesService) {}
 
   /** UC-06-02. */
+  @Audited({
+    action: 'ACCESS_POLICY_CREATED',
+    entity: 'access_policy',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/access-policies')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

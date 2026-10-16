@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -150,6 +151,11 @@ export class BillingReceivablesController {
   }
 
   /** UC-17-01. */
+  @Audited({
+    action: 'INVOICE_ISSUED_FROM_ENCOUNTER',
+    entity: 'invoice',
+    entityId: 'result.id',
+  })
   @Post('invoices\\:issue-from-encounter')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -162,6 +168,11 @@ export class BillingReceivablesController {
   }
 
   /** UC-17-02. */
+  @Audited({
+    action: 'RECEIVED_PAYMENT_APPLIED',
+    entity: 'payments_received',
+    entityId: 'result.id',
+  })
   @Post('payments-received\\:apply')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -176,6 +187,11 @@ export class BillingReceivablesController {
   }
 
   /** UC-17-03. */
+  @Audited({
+    action: 'CREDIT_NOTE_ISSUED',
+    entity: 'invoice',
+    entityId: 'param:id',
+  })
   @Post('invoices/:id\\:credit-note')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -191,6 +207,11 @@ export class BillingReceivablesController {
   }
 
   /** UC-17-08. */
+  @Audited({
+    action: 'REIMBURSEMENT_LINKED',
+    entity: 'reimbursement',
+    entityId: 'result.id',
+  })
   @Post('reimbursements\\:link')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -205,6 +226,11 @@ export class BillingReceivablesController {
   }
 
   /** UC-17-09. */
+  @Audited({
+    action: 'PATIENT_STATEMENT_GENERATED',
+    entity: 'patient_statement',
+    entityId: 'result.id',
+  })
   @Post('patient-statements\\:generate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -217,6 +243,11 @@ export class BillingReceivablesController {
   }
 
   /** UC-17-11. */
+  @Audited({
+    action: 'PAYMENT_PLAN_CREATED',
+    entity: 'installment_plan',
+    entityId: 'result.id',
+  })
   @Post('payment-plans')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

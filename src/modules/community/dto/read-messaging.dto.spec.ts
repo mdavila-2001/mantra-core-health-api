@@ -28,12 +28,29 @@ describe('SearchChatContactsRequestDto', () => {
     ).resolves.toMatchObject({ q: 'María', limit: 12 });
   });
 
+  it('aplica un límite predeterminado de diez contactos', async () => {
+    await expect(
+      pipe.transform(
+        {
+          profileId: '33dc46df-4539-4e58-80b5-e03590ee4962',
+          q: 'Contacto',
+        },
+        metadata,
+      ),
+    ).resolves.toMatchObject({ limit: 10 });
+  });
+
   it.each([
     ['consulta de un carácter', { q: 'm' }],
+    ['perfil inválido', { profileId: 'no-es-uuid', q: 'contacto' }],
+    ['consulta demasiado larga', { q: 'x'.repeat(81) }],
+    ['límite cero', { q: 'contacto', limit: 0 }],
+    ['límite fraccionario', { q: 'contacto', limit: 1.5 }],
+    ['campo desconocido', { q: 'contacto', inesperado: true }],
     ['consulta vacía', { q: '   ' }],
     ['límite excesivo', { q: 'maria', limit: '21' }],
     ['consulta no textual', { q: ['maria'] }],
-  ])('rechaza %s', async (_caso, extra) => {
+  ])('rechaza %s', async (_case, extra) => {
     await expect(
       pipe.transform(
         {

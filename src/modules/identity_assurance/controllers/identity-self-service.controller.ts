@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { IdentitySelfServiceService } from '../services';
 import {
   RequestLicenseVerificationDto,
@@ -39,6 +39,11 @@ export class IdentitySelfServiceController {
   constructor(private readonly selfService: IdentitySelfServiceService) {}
 
   /** El paciente sube su foto con el carnet para verificar su identidad. */
+  @Audited({
+    action: 'PATIENT_IDENTITY_VERIFICATION_REQUESTED',
+    entity: 'identity_verification_case',
+    entityId: 'result.id',
+  })
   @Post('identity-verification')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -52,6 +57,11 @@ export class IdentitySelfServiceController {
   }
 
   /** El profesional verifica su identidad. */
+  @Audited({
+    action: 'PRACTITIONER_IDENTITY_VERIFICATION_REQUESTED',
+    entity: 'identity_verification_case',
+    entityId: 'result.id',
+  })
   @Post('practitioner/identity-verification')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -65,6 +75,11 @@ export class IdentitySelfServiceController {
   }
 
   /** El profesional verifica su matrícula. */
+  @Audited({
+    action: 'PRACTITIONER_LICENSE_VERIFICATION_REQUESTED',
+    entity: 'identity_verification_case',
+    entityId: 'result.id',
+  })
   @Post('practitioner/license-verification')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Solicitar la verificación de la propia matrícula' })
@@ -76,6 +91,11 @@ export class IdentitySelfServiceController {
   }
 
   /** El responsable de una institución pide verificarla. */
+  @Audited({
+    action: 'TENANT_VERIFICATION_REQUESTED',
+    entity: 'identity_verification_case',
+    entityId: 'result.id',
+  })
   @Post('tenants/:tenantId/verification')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

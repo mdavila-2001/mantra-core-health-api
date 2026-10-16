@@ -29,11 +29,11 @@ describe('CatalogConceptsRepository.searchGlossaryPage', () => {
     await repo.searchGlossaryPage(em, base, 24, 48);
 
     const [sql, params] = execute.mock.calls[0];
-    const orden = sql.slice(sql.indexOf('ORDER BY'));
-    expect(orden.indexOf('(es.value IS NULL)')).toBeLessThan(
-      orden.indexOf('translate(lower(coalesce(es.value, c.display))'),
+    const order = sql.slice(sql.indexOf('ORDER BY'));
+    expect(order.indexOf('(es.value IS NULL)')).toBeLessThan(
+      order.indexOf('translate(lower(coalesce(es.value, c.display))'),
     );
-    expect(orden).toContain('c.id');
+    expect(order).toContain('c.id');
     // idioma (del LATERAL), versión, estado, y al final limit y offset.
     expect(params).toEqual(['lang-es', 'vsv-cat', 'state-active', 24, 48]);
   });

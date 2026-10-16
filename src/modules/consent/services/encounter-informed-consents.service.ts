@@ -70,7 +70,7 @@ export class EncounterInformedConsentsService {
         encounterId,
       });
     }
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       encounter.patientProfileId,
       actor,
     );
@@ -105,7 +105,7 @@ export class EncounterInformedConsentsService {
         encounterId,
       });
     }
-    await this.clinicalRead.assertPuedeLeerHistoria(
+    await this.clinicalRead.assertCanReadHistory(
       encounter.patientProfileId,
       actor,
     );

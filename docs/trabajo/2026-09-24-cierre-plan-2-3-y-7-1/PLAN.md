@@ -1,6 +1,6 @@
 # Plan — Cierre de las subtareas 2.3 y 7.1 del plan de reparto
 
-- Fecha: 2026-09-24 · Repos afectados: `mantra-core-health-api` · Predecesor: `PLAN_REPARTO_TAREAS_ENDER_E_ITZAN.md` (auditoría de cumplimiento del 2026-09-24)
+- Fecha: 2026-09-24 · Repos afectados: `mantra-core-health-api` · Predecesor: `docs/progress/archive/PLAN_REPARTO_TAREAS_ENDER_E_ITZAN.md` (auditoría de cumplimiento del 2026-09-24)
 - Resultado observable: el directorio público de profesionales y organizaciones acota por departamento y municipio del catálogo; el alta de paciente con una cédula que otra alta simultánea está registrando responde el 409 de dominio.
 - Kill-test: `GET /public/search/organizations?department=<uuid ajeno>` devuelve 200 con el directorio entero en vez de 422.
 
@@ -8,7 +8,7 @@
 - IN:
   - 2.3: parámetros `department` y `municipality` en `GET /public/search/practitioners` y `GET /public/search/organizations`; validación contra `VS_BO_DEPARTMENT` / `VS_BO_MUNICIPALITY` y coherencia municipio ⊂ departamento; filtro por la vía SQL.
   - 7.1: cerrojo transaccional por documento en el auto-registro de paciente, antes de comprobar si el documento ya tiene cuenta.
-  - Actualizar la columna de estado de `PLAN_REPARTO_TAREAS_ENDER_E_ITZAN.md`.
+  - Actualizar la columna de estado de `docs/progress/archive/PLAN_REPARTO_TAREAS_ENDER_E_ITZAN.md`.
 - OUT:
   - Indexar departamento y municipio en OpenSearch (requiere reindexado): mientras tanto, con esos filtros la búsqueda degrada a SQL, igual que ya hace la especialidad sin rótulo.
   - Frontend (el desplegable en cascada).
@@ -42,7 +42,7 @@
 ## H3 — Plan de reparto al día
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
-| H3.S1.M1 | Estados reales en `PLAN_REPARTO_TAREAS_ENDER_E_ITZAN.md` | cada fila cita su PR | revisión del diff | HECHO |
+| H3.S1.M1 | Estados reales en `docs/progress/archive/PLAN_REPARTO_TAREAS_ENDER_E_ITZAN.md` | cada fila cita su PR | revisión del diff | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

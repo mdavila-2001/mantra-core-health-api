@@ -24,7 +24,7 @@ Una auditoría de solo lectura (6 lentes, 58 brechas candidatas, 2 refutadores p
 | 10 | Front: rutas `/administration/insurance-campaigns`, `/dashboard`, `/my-account?pestana=seguros` vs prompt; testid `btn-campaign-action`; rótulos «100% Cubierto por tu Seguro»/«Beneficios preventivos de tu seguro»; sin métricas por campaña. | `app.routes.ts:163,58,194`; `patient-campaigns-widget.html:3,62`; `insurance-campaign.labels.ts:83` |
 | 11 | E2E: archivo `carril-insurance-campaigns.spec.ts` (nombre distinto), **sin axe**, sin teclado/foco, sin tema oscuro, `@axe-core/playwright` no instalado; sin corrida contra API real; doble revisión «ACEPTABLE CON RESERVAS» sin tercera pasada (`VERIFIED_FUNCTIONAL_ONLY`). | `playwright/carril-insurance-campaigns.spec.ts:13,59-61`; `package.json:99`; `evidencia/doble-revision.md:47-58` |
 | 12 | **Sin PR a `mockup`**: `origin/mockup` (5e52dab1) no tiene ningún archivo de campañas. | `git ls-tree` |
-| 13 | Cierre documental: sin `evidencia/pr/`, PLAN previo con estados viejos, sin ficha en `REGISTRO-DEFECTOS.md` (CatalogConcepts, deuda T4, B-10 ya cerrado en la bóveda por `b660a187`), sin `docs/tareas/subtarea-4.*`. | ver H5 |
+| 13 | Cierre documental: sin `evidencia/pr/`, PLAN previo con estados viejos, sin ficha en `docs/progress/REGISTRO-DEFECTOS.md` (CatalogConcepts, deuda T4, B-10 ya cerrado en la bóveda por `b660a187`), sin `docs/tareas/subtarea-4.*`. | ver H5 |
 | 14 | **`dev` de la API no pasa `yarn typecheck`** (exit 2): `docs/trabajo/2026-09-25-auditoria-produccion-backend/reproducciones.spec.ts:113,184` usa `riskScore: 90` y `payment-flow.dto.ts:239` exige `string`. Del PR #468, no de campañas. | corrida propia, 6 min 19 s |
 
 **Decisiones tomadas con el usuario (26/09):** certificar, no re-implementar · **alinear todo** (rutas, endpoints, testid, rótulos) · entran **edición, métricas básicas y `/active` público** · **aplicar v4.2.23 a Neon** · CA-02 **403 + auditoría literal** (revierte contrato:78) · alta/edición **inline** (se registra el desvío del «modal»).
@@ -165,7 +165,7 @@ Plantillas: `SALUD/Entidades/E insurance.network_provider_memberships.md`, `E in
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H2.S5.M1 | Regenerar OpenAPI/endpoints/Postman/docs de módulos (`yarn docs:openapi:generate`, `postman:generate`, sync; requiere Neon) | `git diff --exit-code` sobre artefactos generados pasa **después** de commitear | comandos y `git status --short openapi docs/postman docs/modules` | TODO |
-| H2.S5.M2 | `REGISTRO-DEFECTOS.md`: fichas nuevas (MetadataError CatalogConcepts; deuda T4 cerrada/abierta) y B-10 **cerrado** citando `b660a187` | 3 entradas | `grep -n -E "CatalogConcepts\|insurance_campaign\|B-10" REGISTRO-DEFECTOS.md` | TODO |
+| H2.S5.M2 | `docs/progress/REGISTRO-DEFECTOS.md`: fichas nuevas (MetadataError CatalogConcepts; deuda T4 cerrada/abierta) y B-10 **cerrado** citando `b660a187` | 3 entradas | `grep -n -E "CatalogConcepts\|insurance_campaign\|B-10" REGISTRO-DEFECTOS.md` | TODO |
 | H2.S5.M3 | Commits atómicos, push, PR → dev con `--reviewer jsaldias39,PabloArauzCaballero` y cuerpo con evidencia + «cambio de contrato: alias deprecado» | `mergeable: MERGEABLE`, `mergeStateStatus` ≠ DIRTY | `gh pr view <n> --json number,url,isDraft,mergeable,mergeStateStatus,reviewDecision` + `gh pr checks <n>` → `evidencia/pr/` | TODO |
 
 ---

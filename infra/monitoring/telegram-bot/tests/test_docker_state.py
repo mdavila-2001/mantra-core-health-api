@@ -60,3 +60,17 @@ def test_fetch_inspects_every_listed_container():
     states = fetch_container_states("http://proxy", getter)
     assert len(states) == 2
     assert calls == ["/containers/json?all=1", "/containers/a/json", "/containers/b/json"]
+
+
+def test_a_stopped_container_is_never_unhealthy_even_with_old_health():
+    state = parse_inspect(inspect(Status="exited", Health={"Status": "unhealthy"}))
+    assert state.unhealthy is False
+
+
+def test_containers_stopped_more_than_an_hour_ago_are_stale():
+    from datetime import timedelta
+
+    state = parse_inspect(inspect(Status="exited", FinishedAt="2026-10-04T03:00:00Z"))
+    assert state.stale(state.finished_at + timedelta(hours=2)) is True
+    assert state.stale(state.finished_at + timedelta(minutes=10)) is False
+    assert parse_inspect(inspect()).stale(datetime(2030, 1, 1, tzinfo=timezone.utc)) is False

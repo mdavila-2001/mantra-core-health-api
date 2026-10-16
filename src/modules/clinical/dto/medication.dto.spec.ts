@@ -16,11 +16,11 @@ import {
 /**
  * Aplana los errores de `class-validator` a los nombres de propiedad con error.
  *
- * @param errores - Errores devueltos por `validate`.
+ * @param errors - Errores devueltos por `validate`.
  * @returns Las propiedades con error, sin repetidos.
  */
-function propiedadesConError(errores: readonly ValidationError[]): string[] {
-  return [...new Set(errores.map((e) => e.property))].sort();
+function propertiesWithError(errors: readonly ValidationError[]): string[] {
+  return [...new Set(errors.map((e) => e.property))].sort();
 }
 
 const TENANT = '11111111-1111-4111-8111-111111111111';
@@ -28,7 +28,7 @@ const PATIENT = '22222222-2222-4222-8222-222222222222';
 const MEDICATION = '33333333-3333-4333-8333-333333333333';
 
 /** El cuerpo del front sin `prescriberProfileId`: lo pone el servidor. */
-function cuerpoDelFront(over: Record<string, unknown> = {}) {
+function bodyFront(over: Record<string, unknown> = {}) {
   return {
     custodianTenantId: TENANT,
     patientProfileId: PATIENT,
@@ -38,31 +38,31 @@ function cuerpoDelFront(over: Record<string, unknown> = {}) {
   };
 }
 
-async function validar(
-  clase:
+async function validateDto(
+  classKey:
     typeof CreateMedicationRequestDto | typeof EditMedicationRequestDraftDto,
-  cuerpo: Record<string, unknown>,
+  body: Record<string, unknown>,
 ): Promise<string[]> {
-  const dto = plainToInstance(clase, cuerpo);
-  const errores = await validate(dto, {
+  const dto = plainToInstance(classKey, body);
+  const errors = await validate(dto, {
     whitelist: true,
     forbidNonWhitelisted: true,
   });
-  return propiedadesConError(errores);
+  return propertiesWithError(errors);
 }
 
 describe('CreateMedicationRequestDto — motivo escrito a mano (CL-03 / P24)', () => {
   it('acepta el cuerpo del front con indicationText y sin prescriptor', async () => {
-    expect(await validar(CreateMedicationRequestDto, cuerpoDelFront())).toEqual(
+    expect(await validateDto(CreateMedicationRequestDto, bodyFront())).toEqual(
       [],
     );
   });
 
   it(`acepta exactamente ${INDICATION_TEXT_MAX_LENGTH} caracteres`, async () => {
     expect(
-      await validar(
+      await validateDto(
         CreateMedicationRequestDto,
-        cuerpoDelFront({
+        bodyFront({
           indicationText: 'a'.repeat(INDICATION_TEXT_MAX_LENGTH),
         }),
       ),
@@ -71,9 +71,9 @@ describe('CreateMedicationRequestDto — motivo escrito a mano (CL-03 / P24)', (
 
   it(`rechaza ${INDICATION_TEXT_MAX_LENGTH + 1} caracteres (400)`, async () => {
     expect(
-      await validar(
+      await validateDto(
         CreateMedicationRequestDto,
-        cuerpoDelFront({
+        bodyFront({
           indicationText: 'a'.repeat(INDICATION_TEXT_MAX_LENGTH + 1),
         }),
       ),
@@ -82,9 +82,9 @@ describe('CreateMedicationRequestDto — motivo escrito a mano (CL-03 / P24)', (
 
   it('sigue rechazando una clave que el contrato no declara', async () => {
     expect(
-      await validar(
+      await validateDto(
         CreateMedicationRequestDto,
-        cuerpoDelFront({ otherReason: 'x' }),
+        bodyFront({ otherReason: 'x' }),
       ),
     ).toEqual(['otherReason']);
   });
@@ -93,7 +93,7 @@ describe('CreateMedicationRequestDto — motivo escrito a mano (CL-03 / P24)', (
 describe('EditMedicationRequestDraftDto — motivo escrito a mano (P24)', () => {
   it('acepta indicationText en la edición del borrador', async () => {
     expect(
-      await validar(EditMedicationRequestDraftDto, {
+      await validateDto(EditMedicationRequestDraftDto, {
         indicationText: 'dolor lumbar',
       }),
     ).toEqual([]);
@@ -101,7 +101,7 @@ describe('EditMedicationRequestDraftDto — motivo escrito a mano (P24)', () => 
 
   it(`rechaza ${INDICATION_TEXT_MAX_LENGTH + 1} caracteres en la edición`, async () => {
     expect(
-      await validar(EditMedicationRequestDraftDto, {
+      await validateDto(EditMedicationRequestDraftDto, {
         indicationText: 'a'.repeat(INDICATION_TEXT_MAX_LENGTH + 1),
       }),
     ).toEqual(['indicationText']);
@@ -113,24 +113,24 @@ describe('CreateMedicationRequestDto — formInstanceId (P43)', () => {
 
   it('acepta formInstanceId uuid (ya no es 400 por forbidNonWhitelisted)', async () => {
     expect(
-      await validar(
+      await validateDto(
         CreateMedicationRequestDto,
-        cuerpoDelFront({ formInstanceId: FORM }),
+        bodyFront({ formInstanceId: FORM }),
       ),
     ).toEqual([]);
   });
 
   it('sigue siendo opcional: sin formInstanceId también valida', async () => {
-    expect(await validar(CreateMedicationRequestDto, cuerpoDelFront())).toEqual(
+    expect(await validateDto(CreateMedicationRequestDto, bodyFront())).toEqual(
       [],
     );
   });
 
   it('rechaza un formInstanceId que no es uuid', async () => {
     expect(
-      await validar(
+      await validateDto(
         CreateMedicationRequestDto,
-        cuerpoDelFront({ formInstanceId: 'no-es-uuid' }),
+        bodyFront({ formInstanceId: 'no-es-uuid' }),
       ),
     ).toEqual(['formInstanceId']);
   });

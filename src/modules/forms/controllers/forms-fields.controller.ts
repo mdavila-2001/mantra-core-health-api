@@ -10,7 +10,12 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { FormsFieldsService } from '../services';
 import {
   CreateFieldDefinitionDto,
@@ -39,6 +44,11 @@ export class FormsFieldsController {
   constructor(private readonly fieldsService: FormsFieldsService) {}
 
   /** UC-09-02. */
+  @Audited({
+    action: 'FORM_FIELD_DEFINITION_CREATED',
+    entity: 'dynamic_field_definition',
+    entityId: 'result.id',
+  })
   @Post('field-definitions')
   // CL-68 (pedido de M3): sin `@Roles` cualquier sesión, incluido `PATIENT`, escribía acá.
   @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
@@ -58,6 +68,11 @@ export class FormsFieldsController {
    * el modelo ya tiene (D-D registra el resto). Cambiar el tipo con valores
    * capturados es 409: no se reescribe la historia clínica.
    */
+  @Audited({
+    action: 'FORM_FIELD_DEFINITION_UPDATED',
+    entity: 'dynamic_field_definition',
+    entityId: 'param:id',
+  })
   @Patch('field-definitions/:id')
   @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -71,6 +86,11 @@ export class FormsFieldsController {
   }
 
   /** UC-09-04. */
+  @Audited({
+    action: 'FORM_FIELD_DEPENDENCY_ADDED',
+    entity: 'field_dependency',
+    entityId: 'result.id',
+  })
   @Post('fields/:id/dependencies')
   // CL-68 (pedido de M3): sin `@Roles` cualquier sesión, incluido `PATIENT`, escribía acá.
   @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
@@ -85,6 +105,11 @@ export class FormsFieldsController {
   }
 
   /** UC-09-05. */
+  @Audited({
+    action: 'FORM_FIELD_LOCALIZATION_UPSERTED',
+    entity: 'field_definition_localization',
+    entityId: 'param:id',
+  })
   @Put('fields/:id/localizations/:lang')
   // CL-68 (pedido de M3): sin `@Roles` cualquier sesión, incluido `PATIENT`, escribía acá.
   @Roles('CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN')
@@ -100,6 +125,11 @@ export class FormsFieldsController {
   }
 
   /** UC-09-12. */
+  @Audited({
+    action: 'FORM_FIELD_ACCESS_RULE_CREATED',
+    entity: 'field_value_access_rule',
+    entityId: 'result.id',
+  })
   @Post('fields/:id/access-rules')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

@@ -16,7 +16,12 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
 import { EncounterPdfService } from '../services';
 
 /**
@@ -41,6 +46,7 @@ export class ChartEncountersController {
    * después de cerrar sesión.
    */
   @Get(':id/pdf')
+  @AccessLogged({ resourceType: 'ENCOUNTER_PDF', resourceId: 'param:id' })
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el PDF oficial de un encuentro cerrado',

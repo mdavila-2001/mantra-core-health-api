@@ -12,7 +12,7 @@
 | H1.S1.M3 | `PublicSearchRepository.targetIdsByTerritory`, intersectado con ciudad y especialidad | SQL renderizado con `PostgreSqlPlatform.formatQuery` y corrido en psql | CH → 14 sujetos, LP → 0, SC → 0 (`evidencia/sql-departamento-resultado.txt`) |
 | H1.S1.M4 | `department` y `municipality` en `GET /public/search/practitioners` y `/organizations`, al final de la firma | `jest … community-public.controller.spec.ts` | 2 casos PASSED |
 | H2.S1.M1 | `CredentialsRepository.lockSubjectForRegistration` (`pg_advisory_xact_lock`) antes de `findLivePasswordBySubject` en el alta de paciente | `jest … -t "locks the national id"` + dos transacciones reales en psql | PASSED; B esperó de 06.283 a 08.387, cuando A hizo commit (`evidencia/cerrojo-concurrencia.txt`) |
-| H3.S1.M1 | `PLAN_REPARTO_TAREAS_ENDER_E_ITZAN.md` con el estado real de cada fila y su PR | `git diff` | 12 filas actualizadas y una nota de estado |
+| H3.S1.M1 | `docs/progress/archive/PLAN_REPARTO_TAREAS_ENDER_E_ITZAN.md` con el estado real de cada fila y su PR | `git diff` | 12 filas actualizadas y una nota de estado |
 
 ## A medias
 Ninguna.

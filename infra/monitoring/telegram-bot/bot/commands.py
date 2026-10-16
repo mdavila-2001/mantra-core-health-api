@@ -5,12 +5,13 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable
 
-from . import reports
+from . import extra_reports, history, reports, traffic
 from .sources import Sources
 
 log = logging.getLogger(__name__)
 
-Report = Callable[[Sources], str]
+Reply = str | list[reports.Photo]
+Report = Callable[[Sources], Reply]
 
 _HELP: Report = lambda _: reports.HELP_TEXT
 _CONTAINERS: Report = lambda sources: reports.containers_report(*sources.containers())
@@ -26,22 +27,43 @@ COMMANDS: dict[str, Report] = {
     "/ram": reports.memory_report,
     "/memory": reports.memory_report,
     "/cpu": reports.cpu_report,
+    "/graficas": history.resource_charts,
+    "/gráficas": history.resource_charts,
+    "/charts": history.resource_charts,
+    "/disco": extra_reports.disk_report,
+    "/disk": extra_reports.disk_report,
+    "/top": extra_reports.top_report,
+    "/sitios": extra_reports.sites_report,
+    "/sites": extra_reports.sites_report,
+    "/uptime": extra_reports.uptime_report,
     "/red": reports.network_report,
     "/network": reports.network_report,
     "/contenedores": _CONTAINERS,
     "/containers": _CONTAINERS,
+    "/trafico": traffic.traffic_report,
+    "/tráfico": traffic.traffic_report,
+    "/traffic": traffic.traffic_report,
+    "/tablero": traffic.dashboard,
+    "/dashboard": traffic.dashboard,
     "/alertas": _ALERTS,
     "/alerts": _ALERTS,
 }
 
 # Lo que Telegram muestra en el menú al tocar «/» (setMyCommands).
 MENU: list[tuple[str, str]] = [
-    ("status", "Resumen: RAM, CPU, disco, red y contenedores"),
+    ("status", "Resumen: RAM, CPU, disco, red, contenedores y alertas"),
+    ("graficas", "Gráficas 24 h: RAM, CPU, disco, red y contenedores"),
     ("ram", "RAM del servidor y contenedores que más usan"),
-    ("cpu", "Uso por núcleo y carga"),
+    ("cpu", "Uso por núcleo, carga y contenedores que más CPU usan"),
+    ("disco", "Espacio por disco y cuánto creció en 24 h"),
     ("red", "Tráfico de red por interfaz y contenedor"),
+    ("top", "Los 10 contenedores que más CPU y RAM usan"),
+    ("tablero", "Tablero 24 h: tráfico, latencia, códigos y endpoints"),
+    ("trafico", "Pedidos, latencia p95 y errores 5xx por sitio"),
+    ("sitios", "Estado, latencia y certificado de cada sitio"),
     ("contenedores", "Estado y salud de cada contenedor"),
     ("alertas", "Alertas activas"),
+    ("uptime", "Hace cuánto está encendido el servidor y su carga"),
     ("ayuda", "Lista de comandos"),
 ]
 
@@ -53,7 +75,7 @@ def parse_command(text: str) -> str | None:
     return text.split()[0].split("@", 1)[0].lower()
 
 
-def reply_for(message: dict[str, Any], authorized_chat_id: int, sources: Sources) -> str | None:
+def reply_for(message: dict[str, Any], authorized_chat_id: int, sources: Sources) -> Reply | None:
     chat_id = (message.get("chat") or {}).get("id")
     command = parse_command(message.get("text") or "")
     if command is None:

@@ -97,11 +97,11 @@ export class PublicCacheInterceptor implements NestInterceptor {
       return next.handle().pipe(tap(() => this.store.clear()));
     }
 
-    const esPublico = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
-    if (!esPublico) return next.handle();
+    if (!isPublic) return next.handle();
 
     // B.3 — un handler que ya declaró su propio `Cache-Control` (el verify
     // de receta usa `no-store`: invalidar tiene que verse de inmediato) sabe
@@ -110,10 +110,10 @@ export class PublicCacheInterceptor implements NestInterceptor {
     // stale-while-revalidate=300` de acá pisaría el `no-store` del handler y
     // una receta invalidada seguiría viéndose "ISSUED" hasta un minuto
     // después. Estas respuestas tampoco se cachean en `PublicCacheStore`.
-    if (this.declaraSuPropioCacheControl(context)) return next.handle();
+    if (this.declaresOwnCacheControl(context)) return next.handle();
 
     const res = http.getResponse<Response>();
-    const clave = req.originalUrl ?? req.url;
+    const key = req.originalUrl ?? req.url;
 
     // MCH-028 — si ya hay una representación vigente, ni siquiera se llama a
     // `next.handle()`: eso es todo el controlador, el servicio y la consulta
@@ -121,17 +121,17 @@ export class PublicCacheInterceptor implements NestInterceptor {
     // una sin cabecera (o con una vieja) recibe el mismo cuerpo que ya se le
     // sirvió al primer cliente, dentro de la misma ventana que el propio
     // `Cache-Control` ya prometía.
-    const cacheado = this.store.get(clave);
-    if (cacheado) {
-      res.setHeader('ETag', cacheado.etag);
-      res.setHeader('Cache-Control', cacheado.cacheControl);
+    const cached = this.store.get(key);
+    if (cached) {
+      res.setHeader('ETag', cached.etag);
+      res.setHeader('Cache-Control', cached.cacheControl);
 
-      const pedido = req.headers['if-none-match'];
-      if (pedido && this.coincide(pedido, cacheado.etag)) {
+      const order = req.headers['if-none-match'];
+      if (order && this.matches(order, cached.etag)) {
         res.status(304);
         return of(undefined);
       }
-      return of(cacheado.body);
+      return of(cached.body);
     }
 
     return next.handle().pipe(
@@ -146,14 +146,14 @@ export class PublicCacheInterceptor implements NestInterceptor {
 
         res.setHeader('ETag', etag);
         res.setHeader('Cache-Control', cacheControl);
-        this.store.set(clave, { etag, body, cacheControl }, maxAge * 1000);
+        this.store.set(key, { etag, body, cacheControl }, maxAge * 1000);
 
         // `If-None-Match` puede traer varios ETags separados por coma, y `*`.
         // Compararlo con `===` contra el encabezado entero fallaría en cuanto
         // el cliente mandara más de uno, que es lo que hace cualquier navegador
         // que ya vio dos versiones de la página.
-        const pedido = req.headers['if-none-match'];
-        if (pedido && this.coincide(pedido, etag)) {
+        const order = req.headers['if-none-match'];
+        if (order && this.matches(order, etag)) {
           res.status(304);
           return undefined;
         }
@@ -172,7 +172,7 @@ export class PublicCacheInterceptor implements NestInterceptor {
    * metadata de `@Header()`, en cambio, ya está fija desde que Nest armó las
    * rutas.
    */
-  private declaraSuPropioCacheControl(context: ExecutionContext): boolean {
+  private declaresOwnCacheControl(context: ExecutionContext): boolean {
     const headers = this.reflector.getAllAndOverride<DeclaredHeader[]>(
       HEADERS_METADATA,
       [context.getHandler(), context.getClass()],
@@ -183,12 +183,12 @@ export class PublicCacheInterceptor implements NestInterceptor {
   }
 
   /** ¿Alguno de los ETags que el cliente declara es el que vamos a servir? */
-  private coincide(cabecera: string | string[], etag: string): boolean {
-    const crudos = Array.isArray(cabecera) ? cabecera : [cabecera];
-    return crudos
-      .flatMap((valor) => valor.split(','))
-      .map((valor) => valor.trim())
-      .some((valor) => valor === '*' || valor === etag);
+  private matches(header: string | string[], etag: string): boolean {
+    const raw = Array.isArray(header) ? header : [header];
+    return raw
+      .flatMap((value) => value.split(','))
+      .map((value) => value.trim())
+      .some((value) => value === '*' || value === etag);
   }
 
   /** Las fichas se cachean más que las búsquedas: cambian menos. */

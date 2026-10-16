@@ -39,7 +39,7 @@ Declarar afiliación entre organizaciones. Requiere JWT y los roles o alcances d
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /orgext/affiliations` en `OrgextAffiliationsController_declare`. El controlador delega en `OrgextAffiliationsService.declare`. Valida el body como `CreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
+NestJS resuelve `POST /orgext/affiliations` en `OrgextAffiliationsController_declare`. El controlador delega en `OrgextAffiliationsService.declare`. Valida el body como `OrganizationExtensionsCreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
 
 ### Parámetros
 
@@ -47,7 +47,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAffiliationDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `OrganizationExtensionsCreateAffiliationDto`; los campos opcionales se omiten.
 
 ```http
 POST /orgext/affiliations HTTP/1.1
@@ -127,6 +127,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "organizationName": "Nombre de ejemplo",
   "roleTitle": {},
   "practiceSiteId": {},
+  "healthFacilityConceptId": {},
   "affiliationTypeConceptId": {},
   "startDate": "2026-07-31",
   "endDate": "2026-07-31",
@@ -147,6 +148,7 @@ Campos de la respuesta:
 | `organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |

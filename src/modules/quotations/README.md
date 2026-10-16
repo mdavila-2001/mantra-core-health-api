@@ -8,6 +8,27 @@ conserva el suyo.
 No tiene entidades propias: persiste en `billing` (`Quotations` y sus cuotas),
 a través de los repositorios de este módulo.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/quotations -name '*.controller.ts' | wc -l
+  find src/modules/quotations -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/quotations -name '*.entity.ts' | wc -l
+  find src/modules/quotations -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 3 rutas HTTP, 0 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`PracticeModule`).
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /quotations` | PRACTITIONER, CLINICIAN | `quotations` |
+| `GET /quotations` | sesión | `quotations` |
+| `GET /quotations/:id` | sesión | `quotations` |
+
 ## Endpoints
 
 | Método | Ruta | Rol | Qué hace |
@@ -72,3 +93,14 @@ anticipo entre 0 y el precio, cuota mayor que cero.
   responde `422`.
 - Un plan que no cierra con el precio responde `422`, con el total de las
   cuotas en `details` para que la pantalla diga cuánto falta o sobra.
+
+## Auditoría vigente
+
+La práctica se valida al crear, pero la revisión de octubre de 2026 halló que se
+debe comprobar además el acceso clínico al paciente y validar las referencias
+clínicas que entran en la solicitud. El detalle y la matriz de pruebas están en
+[`docs/revision-backend-2026-10-04/modulos/quotations.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/quotations.md).
+
+```bash
+corepack yarn test src/modules/quotations --runInBand --silent
+```

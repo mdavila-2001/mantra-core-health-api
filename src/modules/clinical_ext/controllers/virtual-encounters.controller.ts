@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { VirtualEncountersService } from '../services';
 import {
   CreateVirtualEncounterDto,
@@ -36,6 +41,11 @@ export class VirtualEncountersController {
   ) {}
 
   /** UC-18-12 (alta). */
+  @Audited({
+    action: 'VIRTUAL_ENCOUNTER_CREATED',
+    entity: 'virtual_encounter',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Iniciar una sesión de telesalud' })
@@ -47,6 +57,11 @@ export class VirtualEncountersController {
   }
 
   /** UC-18-12 (join). */
+  @Audited({
+    action: 'VIRTUAL_ENCOUNTER_JOINED',
+    entity: 'virtual_encounter',
+    entityId: 'param:id',
+  })
   @Patch(':id/join')
   @Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
   @HttpCode(HttpStatus.OK)
@@ -59,6 +74,11 @@ export class VirtualEncountersController {
   }
 
   /** UC-18-12 (end). */
+  @Audited({
+    action: 'VIRTUAL_ENCOUNTER_ENDED',
+    entity: 'virtual_encounter',
+    entityId: 'param:id',
+  })
   @Patch(':id/end')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Finalizar una sesión de telesalud' })

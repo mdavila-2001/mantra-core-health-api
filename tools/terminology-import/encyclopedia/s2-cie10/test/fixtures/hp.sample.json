@@ -1,0 +1,53 @@
+{
+ "graphs": [
+  {
+   "id": "http://purl.obolibrary.org/obo/hp.json",
+   "meta": {
+    "version": "http://purl.obolibrary.org/obo/hp/releases/2026-09-01/hp.json",
+    "basicPropertyValues": [
+     {
+      "pred": "http://purl.org/dc/terms/license",
+      "val": "https://hpo.jax.org/app/license"
+     }
+    ]
+   },
+   "nodes": [
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0000716",
+     "lbl": "Depression",
+     "type": "CLASS"
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0000739",
+     "lbl": "Anxiety",
+     "type": "CLASS"
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0000938",
+     "lbl": "Osteopenia",
+     "type": "CLASS"
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0001392",
+     "lbl": "Abnormality of the liver",
+     "type": "CLASS"
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0002020",
+     "lbl": "Gastroesophageal reflux",
+     "type": "CLASS"
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0002035",
+     "lbl": "Rectal prolapse",
+     "type": "CLASS"
+    },
+    {
+     "id": "http://purl.obolibrary.org/obo/HP_0040283",
+     "lbl": "Occasional",
+     "type": "CLASS"
+    }
+   ]
+  }
+ ]
+}

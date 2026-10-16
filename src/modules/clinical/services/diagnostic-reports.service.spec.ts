@@ -31,7 +31,7 @@ function build() {
   const serviceRequestsRepo = { findById: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
   };
   const service = new DiagnosticReportsService(
     em as any,
@@ -107,7 +107,7 @@ describe('DiagnosticReportsService', () => {
     it('aceptado: un reporte liberable igual devuelve 422, sin tocar su estado', async () => {
       const d = build();
       const r = report();
-      const estadoAntes = r.lifecycleStatusConceptId;
+      const statusBefore = r.lifecycleStatusConceptId;
       d.reportsRepo.findById.mockResolvedValue(r);
 
       await expect(d.service.release('dr1', {}, actor)).rejects.toBeInstanceOf(
@@ -117,7 +117,7 @@ describe('DiagnosticReportsService', () => {
       // No liberó nada: ni cambió el estado ni escribió nada. Que este camino
       // parezca funcionar sin escribir el evento de liberación es exactamente
       // el bug (CV-02) que D-E cerró.
-      expect(r.lifecycleStatusConceptId).toBe(estadoAntes);
+      expect(r.lifecycleStatusConceptId).toBe(statusBefore);
       expect(d.tx.flush).not.toHaveBeenCalled();
     });
 
@@ -146,20 +146,20 @@ describe('DiagnosticReportsService · MCH-007, liberación por id', () => {
   it('pregunta por el paciente del informe y, sin permiso, no lo libera', async () => {
     const d = build();
     const dr = { ...report(), patientProfileId: 'paciente-ajeno' };
-    const estadoAntes = dr.lifecycleStatusConceptId;
+    const statusBefore = dr.lifecycleStatusConceptId;
     d.reportsRepo.findById.mockResolvedValue(dr);
-    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
       new ForbiddenException('sin permiso'),
     );
 
     await expect(
       d.service.release('dr1', {} as any, actor),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
       'paciente-ajeno',
       actor,
     );
-    expect(dr.lifecycleStatusConceptId).toBe(estadoAntes);
+    expect(dr.lifecycleStatusConceptId).toBe(statusBefore);
     expect(d.tx.flush).not.toHaveBeenCalled();
   });
 });

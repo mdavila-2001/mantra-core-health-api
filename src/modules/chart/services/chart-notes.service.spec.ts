@@ -54,7 +54,7 @@ function build() {
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const clinicalRead = {
-    assertPuedeEscribirHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
   };
   const service = new ChartNotesService(
     em as any,
@@ -105,7 +105,7 @@ describe('ChartNotesService', () => {
 
   // CL-20 (BR-13) — el autor sale de la sesión, nunca del cuerpo.
   describe('autor por sesión (CL-20)', () => {
-    const cabecera = () => ({
+    const noteHeader = () => ({
       id: 'h1',
       currentVersionId: 'v1',
       lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
@@ -119,7 +119,7 @@ describe('ChartNotesService', () => {
 
     it('createNote sin autor en el cuerpo usa el perfil de la sesión', async () => {
       const d = build();
-      d.notesRepo.createHeader.mockReturnValue(cabecera());
+      d.notesRepo.createHeader.mockReturnValue(noteHeader());
       d.notesRepo.createVersion.mockReturnValue({
         id: 'v1',
         versionNumber: 1,
@@ -156,7 +156,7 @@ describe('ChartNotesService', () => {
 
     it('addVersion con otro autor responde 403 y no crea la versión', async () => {
       const d = build();
-      d.notesRepo.findHeaderById.mockResolvedValue(cabecera());
+      d.notesRepo.findHeaderById.mockResolvedValue(noteHeader());
       await expect(
         d.service.addVersion('h1', { authorProfileId: 'hp-otro' }, actor),
       ).rejects.toBeInstanceOf(ForbiddenException);
@@ -165,7 +165,7 @@ describe('ChartNotesService', () => {
 
     it('addVersion sin autor en el cuerpo usa el perfil de la sesión', async () => {
       const d = build();
-      const header = cabecera();
+      const header = noteHeader();
       d.notesRepo.findHeaderById.mockResolvedValue(header);
       d.notesRepo.maxVersionNumber.mockResolvedValue(1);
       d.notesRepo.createVersion.mockReturnValue(version());
@@ -179,7 +179,7 @@ describe('ChartNotesService', () => {
     it('amendNote con otro autor responde 403 y no crea la enmienda', async () => {
       const d = build();
       d.notesRepo.findHeaderById.mockResolvedValue({
-        ...cabecera(),
+        ...noteHeader(),
         lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_SIGNED,
       });
       await expect(
@@ -194,7 +194,7 @@ describe('ChartNotesService', () => {
 
     it('SUPERADMIN escribe con el perfil que declare', async () => {
       const d = build();
-      d.notesRepo.createHeader.mockReturnValue(cabecera());
+      d.notesRepo.createHeader.mockReturnValue(noteHeader());
       d.notesRepo.createVersion.mockReturnValue({
         id: 'v1',
         versionNumber: 1,
@@ -361,9 +361,73 @@ describe('ChartNotesService', () => {
       );
       expect(version.statusConceptId).toBe(CHART.VERSION_SIGNED);
     });
+    it('C5: sin signerProfileId en el cuerpo, firma con el perfil de la sesión', async () => {
+      const d = build();
+      const version: any = {
+        id: 'v1',
+        clinicalNoteId: 'h1',
+        statusConceptId: CHART.VERSION_DRAFT,
+      };
+      const header: any = {
+        id: 'h1',
+        lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
+        updatedAt: new Date(),
+      };
+      d.notesRepo.findVersionById.mockResolvedValue(version);
+      d.notesRepo.findHeaderById.mockResolvedValue(header);
+
+      await d.service.signVersion('h1', 'v1', {}, actor);
+
+      expect(version.signedByProfileId).toBe('s1');
+      expect(d.notesRepo.createSignature).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ signerProfileId: 's1' }),
+      );
+    });
+
+    it('C5: sin perfil profesional en la sesión y sin cuerpo, 403 y no firma', async () => {
+      const d = build();
+      const withoutProfile = { id: 'u-9', roles: [] } as any;
+      await expect(
+        d.service.signVersion('h1', 'v1', {}, withoutProfile),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.notesRepo.createSignature).not.toHaveBeenCalled();
+    });
   });
 
   describe('cosignVersion (UC-15-04)', () => {
+    it('C5: sin signerProfileId en el cuerpo, cofirma con el perfil de la sesión', async () => {
+      const d = build();
+      const version: any = {
+        id: 'v1',
+        clinicalNoteId: 'h1',
+        statusConceptId: CHART.VERSION_SIGNED,
+        contentHash: 'h',
+      };
+      d.notesRepo.findVersionById.mockResolvedValue(version);
+      d.notesRepo.findHeaderById.mockResolvedValue({
+        id: 'h1',
+        lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_SIGNED,
+        updatedAt: new Date(),
+      });
+      d.notesRepo.findSignatures.mockResolvedValue([
+        {
+          signatureTypeConceptId: CHART.SIGNATURE_AUTHOR,
+          signerProfileId: 's1',
+        },
+      ]);
+
+      await d.service.cosignVersion('h1', 'v1', {}, actor2);
+
+      expect(d.notesRepo.createSignature).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          signerProfileId: 's2',
+          signatureTypeConceptId: CHART.SIGNATURE_COSIGN,
+        }),
+      );
+    });
+
     it('rejects a duplicate cosignature from the same signer', async () => {
       const d = build();
       d.notesRepo.findVersionById.mockResolvedValue({
@@ -612,7 +676,7 @@ describe('ChartNotesService', () => {
 });
 
 describe('ChartNotesService · MCH-007, mutaciones por id', () => {
-  const cabecera = () => ({
+  const header = () => ({
     id: 'n1',
     patientProfileId: 'paciente-ajeno',
     lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT,
@@ -625,11 +689,11 @@ describe('ChartNotesService · MCH-007, mutaciones por id', () => {
     releaseEligibilityConceptId: CHART.ELIGIBILITY_ELIGIBLE,
   });
 
-  function sinPermiso() {
+  function withoutPermission() {
     const d = build();
-    d.notesRepo.findHeaderById.mockResolvedValue(cabecera());
+    d.notesRepo.findHeaderById.mockResolvedValue(header());
     d.notesRepo.findVersionById.mockResolvedValue(version());
-    d.clinicalRead.assertPuedeEscribirHistoria.mockRejectedValue(
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
       new ForbiddenException('sin permiso'),
     );
     return d;
@@ -662,10 +726,10 @@ describe('ChartNotesService · MCH-007, mutaciones por id', () => {
     ],
   ])(
     '%s pregunta por el paciente de la nota y, sin permiso, no escribe',
-    async (_nombre, operar) => {
-      const d = sinPermiso();
-      await expect(operar(d)).rejects.toBeInstanceOf(ForbiddenException);
-      expect(d.clinicalRead.assertPuedeEscribirHistoria).toHaveBeenCalledWith(
+    async (_name, operate) => {
+      const d = withoutPermission();
+      await expect(operate(d)).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
         'paciente-ajeno',
         actor,
       );

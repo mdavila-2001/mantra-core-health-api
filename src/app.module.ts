@@ -37,6 +37,7 @@ import { ConsentModule } from './modules/consent/consent.module';
 import { AccountingModule } from './modules/accounting/accounting.module';
 import { AdsModule } from './modules/ads/ads.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { AuditTrailInterceptor } from './modules/audit/interceptors/audit-trail.interceptor';
 import { AudioAssetsModule } from './modules/audio_assets/audio-assets.module';
 import { audioEnvSchema } from './modules/audio_assets/audio.env';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
@@ -266,6 +267,12 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // Contexto de tenant por request: valida X-Tenant-Id contra la membresía del
     // actor y, con RLS_ENFORCE=true, fija app.current_tenant_id para las políticas.
     { provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },
+    // Bitácora transversal (informe C §8.4): sella en `audit.audit_log` toda
+    // ruta autenticada que muta y registra en `audit.data_access_log` las
+    // lecturas `@AccessLogged()`. Va DESPUÉS del de tenant a propósito: así
+    // corre dentro de su contexto y, con RLS_ENFORCE=true, dentro de su
+    // transacción, de modo que el sello de éxito se confirma con la mutación.
+    { provide: APP_INTERCEPTOR, useClass: AuditTrailInterceptor },
     // Cabecera `x-trace-id` en la respuesta: el identificador que un usuario
     // puede entregar a soporte para que localice la traza exacta en Jaeger.
     { provide: APP_INTERCEPTOR, useClass: TraceResponseInterceptor },

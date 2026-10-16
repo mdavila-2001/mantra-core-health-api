@@ -20,9 +20,9 @@ export class TerminologyImportTemplateController {
   /**
    * Inicializa la instancia y sus dependencias.
    *
-   * @param plantillas - Generador de plantillas de importación.
+   * @param templates - Generador de plantillas de importación.
    */
-  constructor(private readonly plantillas: ImportTemplateService) {}
+  constructor(private readonly templates: ImportTemplateService) {}
 
   /**
    * Descarga la plantilla del perfil pedido.
@@ -40,18 +40,18 @@ export class TerminologyImportTemplateController {
     @Query() query: ImportTemplateQueryDto,
     @Res({ passthrough: true }) response: Response,
   ): StreamableFile {
-    const plantilla = this.plantillas.generar(
+    const template = this.templates.generate(
       query.profile ?? 'conceptos',
       query.format ?? 'csv',
     );
 
-    response.setHeader('Content-Type', plantilla.tipo);
+    response.setHeader('Content-Type', template.tipo);
     // Con nombre: sin esto el navegador la guarda como «import-template», que
     // no dice de qué perfil es ni con qué abrirla.
     response.setHeader(
       'Content-Disposition',
-      `attachment; filename="${plantilla.nombre}"`,
+      `attachment; filename="${template.nombre}"`,
     );
-    return new StreamableFile(plantilla.contenido);
+    return new StreamableFile(template.contenido);
   }
 }

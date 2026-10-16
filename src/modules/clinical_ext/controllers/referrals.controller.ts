@@ -11,7 +11,13 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  AccessLogged,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ReferralsService } from '../services';
 import {
   CreateReferralDto,
@@ -37,6 +43,11 @@ export class ReferralsController {
   constructor(private readonly referralsService: ReferralsService) {}
 
   /** UC-18-07. */
+  @Audited({
+    action: 'REFERRAL_CREATED',
+    entity: 'referral',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Emitir una referencia desde un encuentro' })
@@ -48,6 +59,11 @@ export class ReferralsController {
   }
 
   /** UC-18-08. */
+  @Audited({
+    action: 'REFERRAL_RESPONDED',
+    entity: 'referral',
+    entityId: 'param:id',
+  })
   @Patch(':id/respond')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Responder / aceptar una referencia inter-tenant' })
@@ -65,6 +81,7 @@ export class ReferralsController {
    * no se podía volver a mirar — y ninguna pantalla podía mostrarlo.
    */
   @Get()
+  @AccessLogged({ resourceType: 'REFERRALS' })
   @ApiOperation({ summary: 'Listar derivaciones de un paciente' })
   listByPatient(
     @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,
@@ -78,6 +95,7 @@ export class ReferralsController {
    * `@Roles` de clase con uno propio en vez de reutilizar `listByPatient`.
    */
   @Get('me')
+  @AccessLogged({ resourceType: 'REFERRALS', patient: 'actor' })
   @Roles('PATIENT')
   @ApiOperation({ summary: 'Mis derivaciones' })
   listMine(@CurrentUser() actor: AuthenticatedUser) {

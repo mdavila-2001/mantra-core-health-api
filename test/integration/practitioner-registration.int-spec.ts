@@ -265,11 +265,13 @@ describe('registro de profesional (integración)', () => {
     it('rollback real: si el alta asistida falla después de provisionar el consultorio, no queda nada', async () => {
       const sufijo = `${marca}-4`;
       const nombreConsultorio = `Consultorio rollback ${marca}`;
+      const email = `p20-${sufijo}@example.test`;
       const res = await http()
         .post('/iam/users/assisted-practitioner-registration')
         .set(bearer(ctx.adminToken))
         .send({
-          email: `p20-${sufijo}@example.test`,
+          ...identidadProfesional(email),
+          email,
           name: 'Elena',
           lastName: 'Salas',
           licenseNumber: `LIC-P20-${sufijo}`,

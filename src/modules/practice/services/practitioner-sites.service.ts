@@ -15,8 +15,8 @@ import { Addresses } from '../../common/entities';
 import { AddressesRepository } from '../../common/repositories';
 // Mismo patrón que `clinical_ext` con `ProfileOwnershipService`: se importa la
 // clase puntual, no `ProfilesModule`, para no cerrar un ciclo entre módulos.
-import { ProfileOwnershipService } from '../../profiles/services/profile-ownership.service';
-import { PersonAccountLinksRepository } from '../../profiles/repositories';
+import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
+import { PersonAccountLinksRepository } from '../../profiles/infrastructure/repositories';
 import { PRAC } from '../practice.concepts';
 import {
   CareSpacesRepository,
@@ -165,6 +165,7 @@ export class PractitionerSitesService {
         addressText: dto.address ? ownSiteAddressText(dto.address) : null,
         latitude: dto.address?.latitude ?? null,
         longitude: dto.address?.longitude ?? null,
+        contactPhone: dto.contactPhone ?? null,
         isOwnSite: true,
         bankQrFileId: site.bankQrFileId ?? null,
         status: site.statusConceptId,
@@ -215,7 +216,14 @@ export class PractitionerSitesService {
         { operation: 'practice.sites.updateOwn', siteId },
         'Practitioner own site updated',
       );
-      return this.projectSite(tx, site, true);
+      const practitionerProfileId =
+        await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      const assignment = await this.rolesRepo.findCurrentBySite(
+        tx,
+        practitionerProfileId,
+        siteId,
+      );
+      return this.projectSite(tx, site, true, assignment?.contactPhone);
     });
   }
 
@@ -252,7 +260,7 @@ export class PractitionerSitesService {
         : null;
       if (!site) {
         throw new ResourceNotFoundException(
-          'No tenés una vinculación vigente con esa sede',
+          'No tiene una vinculación vigente con esa sede',
           { siteId },
         );
       }
@@ -275,6 +283,47 @@ export class PractitionerSitesService {
         tx,
         site,
         await this.isOwnPractice(tx, site.practiceId, actor.id, tenantId),
+        assignment?.contactPhone,
+      );
+    });
+  }
+
+  /** Guarda el contacto de este médico en la vinculación con la sede. */
+  async setSiteContactPhone(
+    actor: AuthenticatedUser,
+    siteId: string,
+    contactPhone: string | null,
+  ): Promise<PractitionerSiteDto> {
+    const tenantId = requireTenantId();
+    return this.em.transactional(async (tx) => {
+      const practitionerProfileId =
+        await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      const assignment = await this.rolesRepo.findCurrentBySite(
+        tx,
+        practitionerProfileId,
+        siteId,
+        PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      );
+      const site = assignment
+        ? await this.sitesRepo.findById(tx, siteId)
+        : null;
+      const practice = site
+        ? await this.practicesRepo.findById(tx, site.practiceId)
+        : null;
+      if (!assignment || !site || !practice) {
+        throw new ResourceNotFoundException(
+          'No tiene una vinculación vigente con esa sede',
+          { siteId },
+        );
+      }
+      assignment.contactPhone = contactPhone?.trim() || undefined;
+      touch(assignment, actor.id);
+      await tx.flush();
+      return this.projectSite(
+        tx,
+        site,
+        await this.isOwnPractice(tx, site.practiceId, actor.id, tenantId),
+        assignment.contactPhone,
       );
     });
   }
@@ -298,7 +347,7 @@ export class PractitionerSitesService {
       );
       if (!assignment) {
         throw new ResourceNotFoundException(
-          'No tenés una vinculación vigente con esa sede',
+          'No tiene una vinculación vigente con esa sede',
           { siteId },
         );
       }
@@ -345,14 +394,34 @@ export class PractitionerSitesService {
       em,
       practitionerProfileId,
     );
-    const sites = await this.loadSites(em, siteIds, tenantId, link?.userId);
+    const sites = await this.loadSites(
+      em,
+      siteIds,
+      tenantId,
+      link?.userId,
+      true,
+    );
 
-    const resueltas: PractitionerSiteDto[] = [];
+    const contactBySite = new Map<string, string | undefined>();
+    for (const assignment of assignments) {
+      if (
+        assignment.practiceSiteId &&
+        !contactBySite.has(assignment.practiceSiteId)
+      ) {
+        contactBySite.set(assignment.practiceSiteId, assignment.contactPhone);
+      }
+    }
+
+    const resolved: PractitionerSiteDto[] = [];
     for (const siteId of siteIds) {
       const site = sites.get(siteId);
-      if (site) resueltas.push(site);
+      if (site)
+        resolved.push({
+          ...site,
+          contactPhone: contactBySite.get(siteId) ?? null,
+        });
     }
-    return resueltas;
+    return resolved;
   }
 
   /**
@@ -366,8 +435,8 @@ export class PractitionerSitesService {
     refs: readonly ResourceSiteRef[],
     tenantId: string,
   ): Promise<Map<string, PractitionerSiteDto>> {
-    const resuelto = new Map<string, PractitionerSiteDto>();
-    if (refs.length === 0) return resuelto;
+    const resolved = new Map<string, PractitionerSiteDto>();
+    if (refs.length === 0) return resolved;
 
     const em = this.em.fork();
     const practitionerIds = unique(
@@ -378,7 +447,7 @@ export class PractitionerSitesService {
     );
 
     /** `refId` del recurso → sede que le corresponde. */
-    const sitePorRef = new Map<string, string>();
+    const siteByRef = new Map<string, string>();
 
     const assignments = await this.rolesRepo.findCurrentWithSite(
       em,
@@ -390,9 +459,9 @@ export class PractitionerSitesService {
       // profesional con dos consultorios tiene uno que es «el suyo».
       if (
         assignment.practiceSiteId &&
-        !sitePorRef.has(assignment.practitionerProfileId)
+        !siteByRef.has(assignment.practitionerProfileId)
       ) {
-        sitePorRef.set(
+        siteByRef.set(
           assignment.practitionerProfileId,
           assignment.practiceSiteId,
         );
@@ -401,19 +470,19 @@ export class PractitionerSitesService {
 
     for (const spaceId of spaceIds) {
       const space = await this.spacesRepo.findById(em, spaceId);
-      if (space) sitePorRef.set(spaceId, space.practiceSiteId);
+      if (space) siteByRef.set(spaceId, space.practiceSiteId);
     }
 
     const sites = await this.loadSites(
       em,
-      unique([...sitePorRef.values()]),
+      unique([...siteByRef.values()]),
       tenantId,
     );
-    for (const [refId, siteId] of sitePorRef) {
+    for (const [refId, siteId] of siteByRef) {
       const site = sites.get(siteId);
-      if (site) resuelto.set(refId, site);
+      if (site) resolved.set(refId, site);
     }
-    return resuelto;
+    return resolved;
   }
 
   /**
@@ -430,6 +499,8 @@ export class PractitionerSitesService {
    *   prudente —ajeno mientras no conste lo contrario— y la que corresponde a
    *   las llamadas que no preguntan por una persona, como la resolución de
    *   recursos de la agenda.
+   * @param includeLinkedSites - Incluye sedes de otros tenants cuando los ids
+   *   provienen de asignaciones activas del profesional consultado.
    * @returns Un mapa de sede a proyección, sin entrada para lo descartado.
    */
   private async loadSites(
@@ -437,15 +508,19 @@ export class PractitionerSitesService {
     siteIds: readonly string[],
     tenantId: string,
     ownerUserId?: string,
+    includeLinkedSites = false,
   ): Promise<Map<string, PractitionerSiteDto>> {
-    const resultado = new Map<string, PractitionerSiteDto>();
-    if (siteIds.length === 0) return resultado;
+    const result = new Map<string, PractitionerSiteDto>();
+    if (siteIds.length === 0) return result;
 
     for (const siteId of siteIds) {
       const site = await this.sitesRepo.findById(em, siteId);
       if (!site) continue;
       const practice = await this.practicesRepo.findById(em, site.practiceId);
-      if (!practice || practice.tenantId !== tenantId) {
+      if (
+        !practice ||
+        (!includeLinkedSites && practice.tenantId !== tenantId)
+      ) {
         this.logger.warn(
           { operation: 'practice.sites.resolve', siteId },
           'Sede de otra organización referida por un recurso: se omite',
@@ -456,9 +531,9 @@ export class PractitionerSitesService {
         ownerUserId !== undefined &&
         practice.typeConceptId === PRAC.PRACTICE_TYPE_OFFICE &&
         practice.adminUserId === ownerUserId;
-      resultado.set(site.id, await this.projectSite(em, site, isOwnSite));
+      result.set(site.id, await this.projectSite(em, site, isOwnSite));
     }
-    return resultado;
+    return result;
   }
 
   /**
@@ -477,6 +552,7 @@ export class PractitionerSitesService {
     em: EntityManager,
     site: PracticeSites,
     isOwnSite: boolean,
+    contactPhone?: string,
   ): Promise<PractitionerSiteDto> {
     const address = site.addressId
       ? await em.findOne(Addresses, { id: site.addressId })
@@ -492,6 +568,7 @@ export class PractitionerSitesService {
         address?.latitude !== undefined ? Number(address.latitude) : null,
       longitude:
         address?.longitude !== undefined ? Number(address.longitude) : null,
+      contactPhone: contactPhone ?? null,
       isOwnSite,
       bankQrFileId: site.bankQrFileId ?? null,
       status: site.statusConceptId,
@@ -518,12 +595,12 @@ export class PractitionerSitesService {
     tenantId: string,
   ): Promise<PracticeSites> {
     const site = await this.sitesRepo.findById(em, siteId);
-    const esPropia =
+    const isOwn =
       site !== null &&
       (await this.isOwnPractice(em, site.practiceId, actor.id, tenantId));
-    if (!site || !esPropia) {
+    if (!site || !isOwn) {
       throw new ResourceNotFoundException(
-        'Esa sede no es un consultorio propio tuyo',
+        'Esa sede no es un consultorio propio suyo',
         { siteId },
       );
     }
@@ -579,18 +656,18 @@ export class PractitionerSitesService {
     actorUserId: string,
   ): Promise<string> {
     if (site.addressId) {
-      const vigente = await em.findOne(Addresses, { id: site.addressId });
-      if (vigente) {
-        this.addressesRepo.closeVigente(vigente, new Date(), actorUserId);
+      const current = await em.findOne(Addresses, { id: site.addressId });
+      if (current) {
+        this.addressesRepo.closeCurrent(current, new Date(), actorUserId);
       }
     }
 
     // Una línea en blanco no es una dirección ausente: es una fila vacía.
     // Mismo criterio que el alta (`OwnSiteProvisioningService.provision`).
     const lines = address.lines
-      .map((linea) => linea.trim())
-      .filter((linea) => linea.length > 0);
-    const nueva = this.addressesRepo.create(em, {
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+    const fresh = this.addressesRepo.create(em, {
       ownerTypeConceptId: CONCEPTS.OWNER_USER,
       ownerId: actorUserId,
       lines: lines.length > 0 ? lines.join('\n') : undefined,
@@ -607,7 +684,7 @@ export class PractitionerSitesService {
       actorUserId,
     });
     await em.flush();
-    return nueva.id;
+    return fresh.id;
   }
 
   /**
@@ -644,10 +721,10 @@ function unique(ids: readonly string[]): string[] {
  * no como una cadena de comas.
  */
 function addressText(address: Addresses): string | null {
-  const partes = [address.lines, address.city, address.postalCode]
-    .map((parte) => parte?.trim())
-    .filter((parte): parte is string => Boolean(parte));
-  return partes.length === 0 ? null : partes.join(', ');
+  const parts = [address.lines, address.city, address.postalCode]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part));
+  return parts.length === 0 ? null : parts.join(', ');
 }
 
 /**
@@ -662,8 +739,8 @@ function ownSiteAddressText(address: {
   lines: string[];
   city?: string;
 }): string | null {
-  const partes = [address.lines.join('\n'), address.city]
-    .map((parte) => parte?.trim())
-    .filter((parte): parte is string => Boolean(parte));
-  return partes.length === 0 ? null : partes.join(', ');
+  const parts = [address.lines.join('\n'), address.city]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part));
+  return parts.length === 0 ? null : parts.join(', ');
 }

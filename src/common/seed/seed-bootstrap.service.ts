@@ -93,9 +93,9 @@ interface SeedStepDescriptor {
  * @param result - Lo que devolvió el seed.
  * @returns El total, o `null` si el seed no devolvió contadores.
  */
-export function contarInsertados(result: unknown): number | null {
+export function countInserted(result: unknown): number | null {
   if (typeof result !== 'object' || result === null) return null;
-  const numeros = Object.entries(result as Record<string, unknown>)
+  const numbers = Object.entries(result as Record<string, unknown>)
     // No todo contador numérico cuenta filas escritas: el glosario devuelve
     // `orphanRelationships`, que son relaciones declaradas cuyo destino no
     // existe y por eso NO se insertan. Sumarlas hacía que una corrida sin
@@ -104,13 +104,12 @@ export function contarInsertados(result: unknown): number | null {
     // reporta `...Existing` — filas que ya estaban, no filas nuevas de esta
     // pasada — y tampoco cuentan.
     .filter(
-      ([nombre]) =>
-        !nombre.startsWith('orphan') && !nombre.endsWith('Existing'),
+      ([name]) => !name.startsWith('orphan') && !name.endsWith('Existing'),
     )
-    .map(([, valor]) => valor)
-    .filter((valor): valor is number => typeof valor === 'number');
-  if (numeros.length === 0) return null;
-  return numeros.reduce((total, valor) => total + valor, 0);
+    .map(([, value]) => value)
+    .filter((value): value is number => typeof value === 'number');
+  if (numbers.length === 0) return null;
+  return numbers.reduce((total, value) => total + value, 0);
 }
 
 /** Ejecuta los seeds estructurales en un orden explícito y determinista. */
@@ -190,9 +189,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
-    const entorno = loadSeedBootEnv();
-    this.seedOnBoot = entorno.enabled;
-    this.contentOnBoot = entorno.contentEnabled;
+    const environment = loadSeedBootEnv();
+    this.seedOnBoot = environment.enabled;
+    this.contentOnBoot = environment.contentEnabled;
   }
 
   /**
@@ -227,42 +226,42 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @returns El resumen de la corrida, con un detalle por paso.
    */
   async run(): Promise<SeedRunSummary> {
-    const arranque = Date.now();
+    const startup = Date.now();
     const steps: SeedStepResult[] = [];
 
     // El catálogo de conceptos no es un paso más: es la precondición de todos
     // los demás. Si falla, seguir sería sembrar contra FKs que no existen —y el
     // error real quedaría sepultado bajo una cascada de fallos derivados.
-    const catalogo = await this.runStep('catálogo de conceptos', () =>
+    const catalog = await this.runStep('catálogo de conceptos', () =>
       this.terminology.run(),
     );
-    steps.push(catalogo);
+    steps.push(catalog);
 
-    if (catalogo.failed) {
-      const resumen = this.resumir(steps, arranque);
+    if (catalog.failed) {
+      const summary = this.summarize(steps, startup);
       this.logger.error(
-        { event: 'seed.aborted', ...resumen },
+        { event: 'seed.aborted', ...summary },
         'Seeds estructurales omitidos: el catálogo de terminología no quedó ' +
           'disponible, así que los seeds dependientes ni se intentaron.',
       );
-      return resumen;
+      return summary;
     }
 
     let skippedContent = 0;
-    for (const paso of this.pasosDependientes()) {
-      if (paso.kind === 'content' && !this.contentOnBoot) {
+    for (const step of this.dependentsSteps()) {
+      if (step.kind === 'content' && !this.contentOnBoot) {
         skippedContent += 1;
         this.logger.info(
-          { event: 'seed.step.skipped', name: paso.name },
+          { event: 'seed.step.skipped', name: step.name },
           'Seed de contenido salteado (SEED_CONTENT_ON_BOOT=false): ' +
-            paso.name,
+            step.name,
         );
         continue;
       }
-      steps.push(await this.runStep(paso.name, paso.run));
+      steps.push(await this.runStep(step.name, step.run));
     }
 
-    return this.resumir(steps, arranque, skippedContent);
+    return this.summarize(steps, startup, skippedContent);
   }
 
   /**
@@ -273,7 +272,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * clasificación es una decisión del orquestador y no de cada servicio,
    * porque «esto es núcleo» solo tiene sentido mirando la cadena entera.
    */
-  private pasosDependientes(): readonly SeedStepDescriptor[] {
+  private dependentsSteps(): readonly SeedStepDescriptor[] {
     return [
       // Va inmediatamente después del catálogo porque sus miembros y opciones son
       // FK a los conceptos que aquél acaba de materializar, y porque sin él ningún
@@ -501,35 +500,35 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     name: string,
     run: () => Promise<unknown>,
   ): Promise<SeedStepResult> {
-    const desde = Date.now();
+    const from = Date.now();
     try {
-      const resultado = await run();
-      const paso: SeedStepResult = {
+      const result = await run();
+      const step: SeedStepResult = {
         name,
-        inserted: contarInsertados(resultado),
-        tookMs: Date.now() - desde,
+        inserted: countInserted(result),
+        tookMs: Date.now() - from,
         failed: false,
       };
       // `detail` lleva los contadores tal como los devolvió el seed, incluidos
       // los que `inserted` deja afuera: el agregado es para leer de un vistazo,
       // el detalle es para no perder nada.
       this.logger.info(
-        { event: 'seed.step', ...paso, detail: resultado },
+        { event: 'seed.step', ...step, detail: result },
         'Seed: ' + name,
       );
-      return paso;
+      return step;
     } catch (error) {
-      const paso: SeedStepResult = {
+      const step: SeedStepResult = {
         name,
         inserted: null,
-        tookMs: Date.now() - desde,
+        tookMs: Date.now() - from,
         failed: true,
       };
       this.logger.warn(
-        { err: error, event: 'seed.step.failed', ...paso },
+        { err: error, event: 'seed.step.failed', ...step },
         'Seed omitido: ' + name,
       );
-      return paso;
+      return step;
     }
   }
 
@@ -537,28 +536,28 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * Cierra la corrida con una línea que se lee de un vistazo.
    *
    * @param steps - Los pasos ya medidos.
-   * @param arranque - Marca de tiempo del inicio de la cadena.
+   * @param startup - Marca de tiempo del inicio de la cadena.
    * @param skippedContent - Pasos de contenido que el entorno salteó.
    * @returns El resumen agregado.
    */
-  private resumir(
+  private summarize(
     steps: SeedStepResult[],
-    arranque: number,
+    startup: number,
     skippedContent = 0,
   ): SeedRunSummary {
-    const failed = steps.filter((paso) => paso.failed).length;
+    const failed = steps.filter((step) => step.failed).length;
     const summary: SeedRunSummary = {
       ok: steps.length - failed,
       failed,
-      inserted: steps.reduce((total, paso) => total + (paso.inserted ?? 0), 0),
-      tookMs: Date.now() - arranque,
+      inserted: steps.reduce((total, step) => total + (step.inserted ?? 0), 0),
+      tookMs: Date.now() - startup,
       steps,
       // Solo cuando hubo salteados: con el contenido encendido el resumen
       // conserva exactamente la forma que tenía antes de que el flag existiera.
       ...(skippedContent > 0 ? { skippedContent } : {}),
     };
 
-    const linea =
+    const line =
       'Seeds: ' +
       summary.ok +
       '/' +
@@ -575,9 +574,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       ' ms';
 
     if (failed > 0) {
-      this.logger.error({ event: 'seed.summary', ...summary }, linea);
+      this.logger.error({ event: 'seed.summary', ...summary }, line);
     } else {
-      this.logger.info({ event: 'seed.summary', ...summary }, linea);
+      this.logger.info({ event: 'seed.summary', ...summary }, line);
     }
 
     return summary;

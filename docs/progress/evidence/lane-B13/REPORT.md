@@ -65,7 +65,7 @@ ninguno dentro del encargo. Lo que queda afuera es de otras máquinas (§«Pedid
 
 ## Evidencia
 
-En [`evidencia/`](./evidencia/), con el comando en la primera línea y la salida literal:
+En [`evidencia/`](./evidencia/index.md), con el comando en la primera línea y la salida literal:
 
 - `gate-typecheck.txt`, `gate-lint.txt`, `gate-regresion.txt` (`--testPathPatterns="quotation|billing|accounting"`)
 - `H3.S1.M1-rojo.txt` → `H3.S1.M1-verde.txt` → `H3.S1.M1-guardado.txt`

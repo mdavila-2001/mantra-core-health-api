@@ -156,16 +156,16 @@ describe('ConnectionRegistry', () => {
 
     it('cierra todas aunque una falle', async () => {
       const registry = new ConnectionRegistry();
-      const buena = connection('buena', 'write', 'postgresql://a');
-      const mala = connection('mala', 'read', 'postgresql://b');
-      mala.close = jest.fn(async () => {
+      const good = connection('buena', 'write', 'postgresql://a');
+      const bad = connection('mala', 'read', 'postgresql://b');
+      bad.close = jest.fn(async () => {
         throw new Error('no cierra');
       }) as never;
-      registry.register(buena);
-      registry.register(mala);
+      registry.register(good);
+      registry.register(bad);
 
       await expect(registry.closeAll()).resolves.toBeUndefined();
-      expect(buena.closes).toBe(1);
+      expect(good.closes).toBe(1);
     });
 
     it('close(nombre) retira todos los alias de esa instancia', async () => {

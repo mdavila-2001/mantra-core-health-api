@@ -54,10 +54,10 @@ describe('DirectoryBranchesService', () => {
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
-    it('rejects when the tenant is not active (precondition)', async () => {
+    it('rejects when the tenant is suspended (precondition)', async () => {
       const d = build();
       d.tenantsRepo.findById.mockResolvedValue({
-        statusConceptId: DIR.TENANT_PENDING,
+        statusConceptId: DIR.TENANT_SUSPENDED,
       });
       await expect(
         d.service.create('t1', { code: 'B', name: 'Main' } as any, actor),

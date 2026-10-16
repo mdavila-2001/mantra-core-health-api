@@ -395,13 +395,13 @@ export class CommunitySocialController {
     @CurrentUser() actor: AuthenticatedUser,
     @Query('actorProfileId') actorProfileId?: string,
   ): Promise<void> {
-    const contenido = await this.readService.getCommentMedia(
+    const content = await this.readService.getCommentMedia(
       fileId,
       actor,
       actorProfileId,
     );
-    res.setHeader('Content-Type', contenido.mimeType);
-    res.send(contenido.buffer);
+    res.setHeader('Content-Type', content.mimeType);
+    res.send(content.buffer);
   }
 
   /** Resumen de reacciones de una publicación. */

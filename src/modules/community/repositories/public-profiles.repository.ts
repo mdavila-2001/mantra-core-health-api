@@ -259,25 +259,25 @@ export class PublicProfilesRepository {
    * el mismo agujero que tenía el mayor contable.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param filtros - Tenant obligatorio; tipo de sujeto y visibilidad opcionales.
+   * @param filters - Tenant obligatorio; tipo de sujeto y visibilidad opcionales.
    * @param limit - Tope de filas.
    * @returns Los perfiles, del más reciente al más antiguo.
    */
   findByTenant(
     em: EntityManager,
-    filtros: {
+    filters: {
       tenantId: string;
       targetTypeConceptId?: string;
       visibilityConceptId?: string;
     },
     limit: number,
   ): Promise<PublicProfiles[]> {
-    const where: Record<string, unknown> = { tenantId: filtros.tenantId };
-    if (filtros.targetTypeConceptId) {
-      where.targetTypeConceptId = filtros.targetTypeConceptId;
+    const where: Record<string, unknown> = { tenantId: filters.tenantId };
+    if (filters.targetTypeConceptId) {
+      where.targetTypeConceptId = filters.targetTypeConceptId;
     }
-    if (filtros.visibilityConceptId) {
-      where.visibilityConceptId = filtros.visibilityConceptId;
+    if (filters.visibilityConceptId) {
+      where.visibilityConceptId = filters.visibilityConceptId;
     }
     return em.find(PublicProfiles, where, {
       orderBy: { createdAt: 'DESC' },
@@ -330,14 +330,14 @@ export class PublicProfilesRepository {
    * @param fileId - El archivo a comprobar.
    */
   async isPublicMedia(em: EntityManager, fileId: string): Promise<boolean> {
-    const fila = await em.findOne(PublicProfiles, {
+    const row = await em.findOne(PublicProfiles, {
       $and: [
         { $or: [{ avatarFileId: fileId }, { coverFileId: fileId }] },
         { visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC },
         { statusConceptId: CONCEPTS.STATE_ACTIVE },
       ],
     });
-    return fila !== null;
+    return row !== null;
   }
 
   create(em: EntityManager, data: CreatePublicProfileData): PublicProfiles {

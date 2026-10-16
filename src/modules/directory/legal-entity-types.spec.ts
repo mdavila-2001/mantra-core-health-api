@@ -10,7 +10,7 @@ import {
 } from './legal-entity-types';
 
 /** El conjunto de ids de concepto que declara `CONCEPT_DEFS`, para chequear pertenencia. */
-const CONCEPT_IDS_SEMBRADOS = new Set(
+const CONCEPT_IDS_SEEDED = new Set(
   Object.values(CONCEPT_DEFS).map((def) => deterministicId(def.key)),
 );
 
@@ -28,16 +28,16 @@ describe('LEGAL_ENTITY_TYPES', () => {
 
   it('cada conceptId existe en el catálogo interno de conceptos', () => {
     for (const entry of LEGAL_ENTITY_TYPES) {
-      expect(CONCEPT_IDS_SEMBRADOS.has(entry.conceptId)).toBe(true);
+      expect(CONCEPT_IDS_SEEDED.has(entry.conceptId)).toBe(true);
     }
   });
 
   it('cada concepto de la enumeración legal-entity-type tiene entrada en el diccionario, y viceversa', () => {
-    const enDiccionario = new Set(LEGAL_ENTITY_TYPES.map((e) => e.conceptId));
-    const enEnumeracion = new Set(ENUM_LEGAL_ENTITY_TYPE.concepts);
+    const inDictionary = new Set(LEGAL_ENTITY_TYPES.map((e) => e.conceptId));
+    const inEnumeration = new Set(ENUM_LEGAL_ENTITY_TYPE.concepts);
 
-    expect([...enEnumeracion].every((id) => enDiccionario.has(id))).toBe(true);
-    expect([...enDiccionario].every((id) => enEnumeracion.has(id))).toBe(true);
+    expect([...inEnumeration].every((id) => inDictionary.has(id))).toBe(true);
+    expect([...inDictionary].every((id) => inEnumeration.has(id))).toBe(true);
   });
 
   it('el país de cada entrada es un ISO-2 con concepto de país declarado', () => {

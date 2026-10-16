@@ -75,7 +75,7 @@ function withTenant<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 /** Una versión en borrador de la plantilla de prueba. */
-function borrador(over: Record<string, unknown> = {}) {
+function draft(over: Record<string, unknown> = {}) {
   return {
     id: 'ver-1',
     surveyTemplateId: 'tpl-1',
@@ -88,7 +88,7 @@ function borrador(over: Record<string, unknown> = {}) {
 }
 
 /** Una pregunta del borrador `ver-1`. */
-function pregunta(
+function question(
   id: string,
   position: number,
   over: Record<string, unknown> = {},
@@ -113,8 +113,8 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
     it('cambia texto y tipo a elección con sus opciones enteras', async () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
-      d.templatesRepo.findLatestVersion.mockResolvedValue(borrador());
-      const q = pregunta('q1', 1);
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      const q = question('q1', 1);
       d.templatesRepo.findQuestionById.mockResolvedValue(q);
 
       const res = await withTenant(() =>
@@ -140,8 +140,8 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
     it('cambiar a texto descarta las opciones que el tipo no usa', async () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
-      d.templatesRepo.findLatestVersion.mockResolvedValue(borrador());
-      const q = pregunta('q1', 1, {
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      const q = question('q1', 1, {
         answerTypeConceptId: ANSWER_TYPE_BY_CODE.SINGLE_CHOICE,
         options: ['Sí', 'No'],
       });
@@ -157,8 +157,8 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
     it('cambiar a escala sin extremos toma los de por defecto y descarta opciones', async () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
-      d.templatesRepo.findLatestVersion.mockResolvedValue(borrador());
-      const q = pregunta('q1', 1, {
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      const q = question('q1', 1, {
         answerTypeConceptId: ANSWER_TYPE_BY_CODE.MULTIPLE_CHOICE,
         options: ['a', 'b'],
       });
@@ -174,8 +174,8 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
     it('pasar a elección sin mandar opciones responde 422 y no toca la pregunta', async () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
-      d.templatesRepo.findLatestVersion.mockResolvedValue(borrador());
-      const q = pregunta('q1', 1);
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      const q = question('q1', 1);
       d.templatesRepo.findQuestionById.mockResolvedValue(q);
 
       await expect(
@@ -195,7 +195,7 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
       d.templatesRepo.findLatestVersion.mockResolvedValue(
-        borrador({ publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED }),
+        draft({ publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED }),
       );
       await expect(
         withTenant(() =>
@@ -208,9 +208,9 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
     it('una pregunta de otra versión responde 404', async () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
-      d.templatesRepo.findLatestVersion.mockResolvedValue(borrador());
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
       d.templatesRepo.findQuestionById.mockResolvedValue(
-        pregunta('q9', 1, { surveyVersionId: 'ver-otra' }),
+        question('q9', 1, { surveyVersionId: 'ver-otra' }),
       );
       await expect(
         withTenant(() =>
@@ -236,12 +236,12 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
     it('quita la pregunta y renumera las que quedan 1..n', async () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
-      d.templatesRepo.findLatestVersion.mockResolvedValue(borrador());
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
       const [q1, q2, q3, q4] = [
-        pregunta('q1', 1),
-        pregunta('q2', 2),
-        pregunta('q3', 3),
-        pregunta('q4', 4),
+        question('q1', 1),
+        question('q2', 2),
+        question('q3', 3),
+        question('q4', 4),
       ];
       d.templatesRepo.findQuestionById.mockResolvedValue(q2);
       d.templatesRepo.listQuestions.mockResolvedValue([q1, q2, q3, q4]);
@@ -259,7 +259,7 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
       d.templatesRepo.findLatestVersion.mockResolvedValue(
-        borrador({ publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED }),
+        draft({ publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED }),
       );
       await expect(
         withTenant(() => d.service.deleteQuestion('tpl-1', 'q1', actor)),
@@ -269,18 +269,18 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
   });
 
   describe('reorderQuestions', () => {
-    const cuatro = () => [
-      pregunta('A', 1),
-      pregunta('B', 2),
-      pregunta('C', 3),
-      pregunta('D', 4),
+    const four = () => [
+      question('A', 1),
+      question('B', 2),
+      question('C', 3),
+      question('D', 4),
     ];
 
     it('aplica el orden entero como position 1..n', async () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
-      d.templatesRepo.findLatestVersion.mockResolvedValue(borrador());
-      const qs = cuatro();
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      const qs = four();
       d.templatesRepo.listQuestions.mockResolvedValue(qs);
 
       await withTenant(() =>
@@ -301,22 +301,22 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
     it('con [C, A] el orden queda C, A, B, D', async () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
-      d.templatesRepo.findLatestVersion.mockResolvedValue(borrador());
-      const qs = cuatro();
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      const qs = four();
       d.templatesRepo.listQuestions.mockResolvedValue(qs);
 
       await withTenant(() =>
         d.service.reorderQuestions('tpl-1', { questionIds: ['C', 'A'] }, actor),
       );
-      const porPosicion = [...qs].sort((x, y) => x.position - y.position);
-      expect(porPosicion.map((q) => q.id)).toEqual(['C', 'A', 'B', 'D']);
+      const byPosition = [...qs].sort((x, y) => x.position - y.position);
+      expect(byPosition.map((q) => q.id)).toEqual(['C', 'A', 'B', 'D']);
     });
 
     it('un id que no es de la versión responde 422 y no reordena', async () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
-      d.templatesRepo.findLatestVersion.mockResolvedValue(borrador());
-      const qs = cuatro();
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
+      const qs = four();
       d.templatesRepo.listQuestions.mockResolvedValue(qs);
 
       await expect(
@@ -339,7 +339,7 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
         description: 'vieja',
         updatedAt: new Date(0),
       });
-      const version = borrador();
+      const version = draft();
       d.templatesRepo.findTemplateById.mockResolvedValue(template);
       d.templatesRepo.findLatestVersion.mockResolvedValue(version);
 
@@ -363,7 +363,7 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
         updatedAt: new Date(0),
       });
       d.templatesRepo.findTemplateById.mockResolvedValue(template);
-      d.templatesRepo.findLatestVersion.mockResolvedValue(borrador());
+      d.templatesRepo.findLatestVersion.mockResolvedValue(draft());
       await withTenant(() =>
         d.service.updateTemplate('tpl-1', { title: 'Otro' }, actor),
       );
@@ -374,7 +374,7 @@ describe('SurveysTemplatesService · editor del cuestionario (CL-60)', () => {
       const d = build();
       d.templatesRepo.findTemplateById.mockResolvedValue(ownedTemplate());
       d.templatesRepo.findLatestVersion.mockResolvedValue(
-        borrador({ publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED }),
+        draft({ publicationStatusConceptId: SURVEYS.VERSION_PUBLISHED }),
       );
       await expect(
         withTenant(() =>

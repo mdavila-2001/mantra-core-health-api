@@ -5,6 +5,41 @@ health checks que derivan incidentes, ciclo de vida del incidente con timeline a
 postmortems, SLO y presupuesto de error con congelamiento de despliegues, capacidad, revisiones de
 preparación, runbooks versionados y ejercicios de resiliencia.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/platform_ops -name '*.controller.ts' | wc -l
+  find src/modules/platform_ops -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/platform_ops -name '*.entity.ts' | wc -l
+  find src/modules/platform_ops -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 15 rutas HTTP, 38 entidades y 4 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 38 de 38 archivos `*.entity.ts`): `artifacts`, `capacity_measurements`, `capacity_plans`, `change_approvals`, `change_requests`, `component_tools`, `deployments`, `error_budget_burn_events`, `error_budget_policies`, `escalation_policies`, `escalation_policy_steps`, `health_check_runs`, `health_checks`, `health_incidents`, `incident_communications`, `incident_responders`, `incident_timeline_events`, `maintenance_windows`, `on_call_schedules`, `on_call_shifts`, `operational_improvement_items`, `operational_readiness_reviews`, `operational_teams`, `postmortem_action_items`, `postmortems`, `readiness_review_findings`, `recovery_objectives`, `resilience_exercises`, `runbook_executions`, `runbook_versions`, `runbooks`, `service_components`, `service_dependencies`, `service_level_indicators`, `service_level_objectives`, `service_ownerships`, `slo_measurements`, `tool_registry`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /ops/change-requests` | RELEASE_MANAGER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/change-requests/:id/approvals` | CHANGE_APPROVER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/artifacts` | DEPLOY_PIPELINE, RELEASE_MANAGER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/deployments` | RELEASE_MANAGER, DEPLOY_PIPELINE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/deployments/:id/rollback` | SRE, RELEASE_MANAGER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/health-checks/:id/runs` | SYSTEM, SRE, PLATFORM_ADMIN | `platform-ops` |
+| `PATCH /ops/incidents/:id` | INCIDENT_COMMANDER, SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/incidents/:id/postmortem` | SRE, INCIDENT_COMMANDER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/slo/:id/measurements` | SYSTEM, SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/error-budget/:policyId/burn-events` | SYSTEM, SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/capacity-plans/:id/measurements` | CAPACITY_PLANNER, SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/readiness-reviews/:id/complete` | RELEASE_MANAGER, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/runbooks/:id/versions` | SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/runbook-executions` | SRE, PLATFORM_ADMIN | `platform-ops` |
+| `POST /ops/resilience-exercises/:id/complete` | SRE, PLATFORM_ADMIN | `platform-ops` |
+
 ## Casos de uso cubiertos (14)
 
 | UC | Endpoint | Descripción |
@@ -140,8 +175,8 @@ que quién los registró se deja en el log.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=platform_ops` — 146 pruebas (131 de servicio + 15 de delegación del
-controlador).
+`corepack yarn test src/modules/platform_ops --runInBand --silent` — 5 suites y 146 pruebas
+aprobadas durante la revisión.
 
 ## Divergencias con el caso de uso v3.9
 
@@ -174,3 +209,8 @@ controlador).
 - **Guardia y escalado**: `operational_teams`, `on_call_schedules`, `on_call_shifts` y
   `escalation_policies` están en el esquema pero ningún caso de uso del módulo los opera; su gestión
   llegará con los casos de uso que los declaren.
+
+## Revisión ALOVIDA
+
+Los recursos operativos resueltos por UUID aún no se acotan al tenant activo; ver
+[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/platform_ops.md).

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { DiagnosticOrdersRepository } from '../repositories';
-import { CATEGORIAS_DIAGNOSTICAS } from '../diagnostics.concepts';
+import { DIAGNOSTIC_CATEGORIES } from '../diagnostics.concepts';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
 
 /**
@@ -65,7 +65,7 @@ export class DiagnosticsOrdersService {
         em,
         custodianTenantId,
         patientProfileId,
-        CATEGORIAS_DIAGNOSTICAS,
+        DIAGNOSTIC_CATEGORIES,
         over,
       ),
       this.ordersRepo.findReportsByPatient(

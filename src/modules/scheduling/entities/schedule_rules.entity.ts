@@ -65,6 +65,13 @@ export class ScheduleRules {
   @Property({ fieldName: 'gap_minutes', columnType: 'int', nullable: true })
   gapMinutes?: number;
 
+  @Property({
+    fieldName: 'booking_mode_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  bookingModeConceptId?: string;
+
   /**
    * Valor de valid from mantenido por la instancia.
    */

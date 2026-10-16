@@ -30,10 +30,10 @@ function buildRepo() {
  * `SIGLA-NOMBRE`), no el del catálogo estático retirado.
  */
 function buildConcepts(
-  municipios: Record<string, { code: string; display: string }> = {},
+  municipalities: Record<string, { code: string; display: string }> = {},
 ) {
   return {
-    findById: mockFn((_tx: any, id: string) => municipios[id] ?? null),
+    findById: mockFn((_tx: any, id: string) => municipalities[id] ?? null),
   } as any;
 }
 
@@ -47,13 +47,13 @@ describe('createResidenceAddress', () => {
       [sacaba]: { code: 'CB-SACABA', display: 'Sacaba' },
     });
 
-    const escribio = await createResidenceAddress(repo, tx, concepts, {
+    const wrote = await createResidenceAddress(repo, tx, concepts, {
       personId: 'person-1',
       municipalityConceptId: sacaba,
       actorUserId: 'user-1',
     });
 
-    expect(escribio).toBe(true);
+    expect(wrote).toBe(true);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       ownerId: 'person-1',
@@ -69,12 +69,12 @@ describe('createResidenceAddress', () => {
     const { repo, rows } = buildRepo();
     const concepts = buildConcepts();
 
-    const escribio = await createResidenceAddress(repo, tx, concepts, {
+    const wrote = await createResidenceAddress(repo, tx, concepts, {
       personId: 'person-1',
       actorUserId: 'user-1',
     });
 
-    expect(escribio).toBe(false);
+    expect(wrote).toBe(false);
     // Una dirección con país y nada más no es un dato, es una fila.
     expect(rows).toHaveLength(0);
   });
@@ -110,7 +110,7 @@ describe('replaceResidenceAddress · quitar el punto del mapa', () => {
   const tx = {} as any;
 
   /** La fila vigente, con su punto puesto. */
-  const VIGENTE = {
+  const CURRENT = {
     id: 'addr-1',
     municipalityConceptId: 'mun-1',
     lines: 'Av. Banzer 3er anillo',
@@ -119,14 +119,14 @@ describe('replaceResidenceAddress · quitar el punto del mapa', () => {
   };
 
   /** Repositorio con una dirección vigente y captura de lo que se escribe. */
-  function conVigente() {
-    const escritas: any[] = [];
+  function withCurrent() {
+    const written: any[] = [];
     return {
-      escritas,
+      escritas: written,
       repo: {
-        findVigenteByOwnerAndUse: mockFn(async () => VIGENTE),
-        closeVigente: mockFn(),
-        create: mockFn((_tx: any, data: any) => escritas.push(data)),
+        findCurrentByOwnerAndUse: mockFn(async () => CURRENT),
+        closeCurrent: mockFn(),
+        create: mockFn((_tx: any, data: any) => written.push(data)),
       } as any,
     };
   }
@@ -137,7 +137,7 @@ describe('replaceResidenceAddress · quitar el punto del mapa', () => {
     });
 
   it('`null` en las dos QUITA el punto y conserva el resto de la dirección', async () => {
-    const { repo, escritas } = conVigente();
+    const { repo, escritas: written } = withCurrent();
 
     await replaceResidenceAddress(
       repo,
@@ -153,16 +153,16 @@ describe('replaceResidenceAddress · quitar el punto del mapa', () => {
       new Date('2026-09-10T12:00:00.000Z'),
     );
 
-    expect(escritas).toHaveLength(1);
-    expect(escritas[0].latitude).toBeUndefined();
-    expect(escritas[0].longitude).toBeUndefined();
+    expect(written).toHaveLength(1);
+    expect(written[0].latitude).toBeUndefined();
+    expect(written[0].longitude).toBeUndefined();
     // La calle no se toca: quitar el pin no es mudarse.
-    expect(escritas[0].lines).toBe('Av. Banzer 3er anillo');
+    expect(written[0].lines).toBe('Av. Banzer 3er anillo');
   });
 
   it('sin coordenadas en el cuerpo, el punto vigente se conserva', async () => {
     // La distinción que hace falta: no mandarlas es «no lo toqué».
-    const { repo, escritas } = conVigente();
+    const { repo, escritas: written } = withCurrent();
 
     await replaceResidenceAddress(
       repo,
@@ -179,12 +179,12 @@ describe('replaceResidenceAddress · quitar el punto del mapa', () => {
 
     // La columna es `numeric` y se escribe como texto: lo que importa acá es
     // que el punto sobrevive, no su representación.
-    expect(Number(escritas[0].latitude)).toBe(-17.78);
-    expect(Number(escritas[0].longitude)).toBe(-63.18);
+    expect(Number(written[0].latitude)).toBe(-17.78);
+    expect(Number(written[0].longitude)).toBe(-63.18);
   });
 
   it('un par de números mueve el punto', async () => {
-    const { repo, escritas } = conVigente();
+    const { repo, escritas: written } = withCurrent();
 
     await replaceResidenceAddress(
       repo,
@@ -200,22 +200,22 @@ describe('replaceResidenceAddress · quitar el punto del mapa', () => {
       new Date('2026-09-10T12:00:00.000Z'),
     );
 
-    expect(Number(escritas[0].latitude)).toBe(-16.5);
-    expect(Number(escritas[0].longitude)).toBe(-68.15);
+    expect(Number(written[0].latitude)).toBe(-16.5);
+    expect(Number(written[0].longitude)).toBe(-68.15);
   });
 
   it('quitar un punto que ya no estaba no escribe una fila nueva', async () => {
     // `sinCambios` tiene que seguir valiendo: si no, cada PATCH que repite el
     // mismo domicilio abriría una fila más en el historial.
-    const escritas: any[] = [];
+    const written: any[] = [];
     const repo = {
-      findVigenteByOwnerAndUse: mockFn(async () => ({
-        ...VIGENTE,
+      findCurrentByOwnerAndUse: mockFn(async () => ({
+        ...CURRENT,
         latitude: undefined,
         longitude: undefined,
       })),
-      closeVigente: mockFn(),
-      create: mockFn((_tx: any, data: any) => escritas.push(data)),
+      closeCurrent: mockFn(),
+      create: mockFn((_tx: any, data: any) => written.push(data)),
     } as any;
 
     await replaceResidenceAddress(
@@ -232,6 +232,6 @@ describe('replaceResidenceAddress · quitar el punto del mapa', () => {
       new Date('2026-09-10T12:00:00.000Z'),
     );
 
-    expect(escritas).toHaveLength(0);
+    expect(written).toHaveLength(0);
   });
 });

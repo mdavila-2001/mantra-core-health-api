@@ -12,8 +12,7 @@ import { Practices } from '../../practice/entities';
 import { PracticeTenantLookupService } from '../../practice/services';
 import { AccountsRepository, JournalRepository } from '../repositories';
 import { ACCT } from '../accounting.concepts';
-import { aCentimos, aTexto, importeEnBase } from './money';
-import { AccountingErrorReason } from '../accounting.error-reasons';
+import { toBigIntCents, toText, amountInBase } from './money';
 import type {
   BalanceSheetResponseDto,
   ChartOfAccountsResponseDto,
@@ -105,7 +104,6 @@ export class LedgerReadService {
       throw new PreconditionFailedException(
         'La cuenta no tiene un perfil profesional asociado',
         { actorId: actor.id },
-        AccountingErrorReason.PRACTITIONER_PROFILE_MISSING,
       );
     }
     // Sin lookup inyectado (specs previos), no hay forma de verificar: se
@@ -114,7 +112,6 @@ export class LedgerReadService {
       throw new PreconditionFailedException(
         'No se pudo verificar la vinculación del profesional con la práctica',
         { practiceId },
-        AccountingErrorReason.PRACTITIONER_LINK_VERIFICATION_UNAVAILABLE,
       );
     }
     const practiceIds =
@@ -125,7 +122,6 @@ export class LedgerReadService {
       throw new PreconditionFailedException(
         'El profesional no tiene una vinculación activa con esa práctica',
         { practiceId },
-        AccountingErrorReason.PRACTITIONER_PRACTICE_NOT_LINKED,
       );
     }
   }
@@ -144,26 +140,22 @@ export class LedgerReadService {
    * contrario para no revelar su existencia complicaría el diagnóstico sin
    * ganar nada — el id ya lo tenía quien preguntó.
    */
-  private async verificarPracticaDelTenant(practiceId: string): Promise<void> {
+  private async verifyPracticeTenant(practiceId: string): Promise<void> {
     const tenantId = getCurrentTenantId();
     // Sin tenant en contexto son los carriles internos (`SYSTEM`, workers), que
     // no pasan por la cabecera. No hay nada que acotar contra qué.
     if (tenantId === undefined) return;
 
-    const practica = await this.em
+    const practice = await this.em
       .fork()
       .findOne(Practices, { id: practiceId }, { fields: ['id', 'tenantId'] });
 
-    if (practica === null) {
-      throw new ResourceNotFoundException(
-        'Práctica no encontrada',
-        {
-          practiceId,
-        },
-        AccountingErrorReason.PRACTICE_NOT_FOUND,
-      );
+    if (practice === null) {
+      throw new ResourceNotFoundException('Práctica no encontrada', {
+        practiceId,
+      });
     }
-    if (practica.tenantId !== tenantId) {
+    if (practice.tenantId !== tenantId) {
       throw new ForbiddenException(
         'La práctica consultada pertenece a otra organización',
       );
@@ -181,26 +173,26 @@ export class LedgerReadService {
     practiceId: string,
     limit = LEDGER_DEFAULT_LIMIT,
   ): Promise<ChartOfAccountsResponseDto> {
-    await this.verificarPracticaDelTenant(practiceId);
+    await this.verifyPracticeTenant(practiceId);
 
     const em = this.em.fork();
-    const cuentas = await this.accountsRepo.findByPractice(
+    const accounts = await this.accountsRepo.findByPractice(
       em,
       practiceId,
       limit,
     );
 
     return {
-      items: cuentas.map((cuenta) => ({
-        id: cuenta.id,
-        code: cuenta.code,
-        name: cuenta.name,
-        accountTypeConceptId: cuenta.accountTypeConceptId,
-        normalBalanceConceptId: cuenta.normalBalanceConceptId,
-        parentAccountId: cuenta.parentAccountId ?? null,
-        currencyConceptId: cuenta.currencyConceptId ?? null,
+      items: accounts.map((account) => ({
+        id: account.id,
+        code: account.code,
+        name: account.name,
+        accountTypeConceptId: account.accountTypeConceptId,
+        normalBalanceConceptId: account.normalBalanceConceptId,
+        parentAccountId: account.parentAccountId ?? null,
+        currencyConceptId: account.currencyConceptId ?? null,
       })),
-      count: cuentas.length,
+      count: accounts.length,
       limit,
     };
   }
@@ -214,12 +206,12 @@ export class LedgerReadService {
   async listJournal(
     query: ListJournalQueryDto,
   ): Promise<ListJournalResponseDto> {
-    await this.verificarPracticaDelTenant(query.practiceId);
+    await this.verifyPracticeTenant(query.practiceId);
 
     const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
     const em = this.em.fork();
 
-    const asientos = await this.journalRepo.findTransactions(
+    const entries = await this.journalRepo.findTransactions(
       em,
       {
         practiceId: query.practiceId,
@@ -236,7 +228,7 @@ export class LedgerReadService {
     );
 
     return {
-      items: asientos.map((a) => ({
+      items: entries.map((a) => ({
         id: a.id,
         transactionNumber: a.transactionNumber ?? null,
         transactionDate: a.transactionDate,
@@ -247,7 +239,7 @@ export class LedgerReadService {
         totalAmount: a.totalAmount ?? null,
         postedAt: a.postedAt ?? null,
       })),
-      count: asientos.length,
+      count: entries.length,
       limit,
     };
   }
@@ -263,44 +255,37 @@ export class LedgerReadService {
     transactionId: string,
   ): Promise<JournalTransactionDetailDto> {
     const em = this.em.fork();
-    const asiento = await this.journalRepo.findTransactionById(
-      em,
-      transactionId,
-    );
-    if (!asiento) {
-      throw new ResourceNotFoundException(
-        'Asiento no encontrado',
-        {
-          transactionId,
-        },
-        AccountingErrorReason.LEDGER_TRANSACTION_NOT_FOUND,
-      );
+    const entry = await this.journalRepo.findTransactionById(em, transactionId);
+    if (!entry) {
+      throw new ResourceNotFoundException('Asiento no encontrado', {
+        transactionId,
+      });
     }
     // Acá la práctica se conoce recién al cargar el asiento, así que la
     // comprobación va después de la carga y antes de devolver nada.
-    await this.verificarPracticaDelTenant(asiento.practiceId);
+    await this.verifyPracticeTenant(entry.practiceId);
 
-    const lineas = await this.journalRepo.findEntriesByTransaction(
+    const lines = await this.journalRepo.findEntriesByTransaction(
       em,
       transactionId,
     );
 
     return {
-      id: asiento.id,
-      practiceId: asiento.practiceId,
-      transactionNumber: asiento.transactionNumber ?? null,
-      transactionDate: asiento.transactionDate,
-      fiscalPeriodId: asiento.fiscalPeriodId ?? null,
-      statusConceptId: asiento.statusConceptId,
-      currencyConceptId: asiento.currencyConceptId ?? null,
-      totalAmount: asiento.totalAmount ?? null,
-      postedAt: asiento.postedAt ?? null,
-      lines: lineas.map((l) => ({
+      id: entry.id,
+      practiceId: entry.practiceId,
+      transactionNumber: entry.transactionNumber ?? null,
+      transactionDate: entry.transactionDate,
+      fiscalPeriodId: entry.fiscalPeriodId ?? null,
+      statusConceptId: entry.statusConceptId,
+      currencyConceptId: entry.currencyConceptId ?? null,
+      totalAmount: entry.totalAmount ?? null,
+      postedAt: entry.postedAt ?? null,
+      lines: lines.map((l) => ({
         id: l.id,
         lineNo: l.lineNo ?? null,
         accountId: l.accountId,
         directionConceptId: l.directionConceptId,
-        amountBase: importeEnBase(l),
+        amountBase: amountInBase(l),
         costCenterId: l.costCenterId ?? null,
         currencyConceptId: l.currencyConceptId ?? null,
       })),
@@ -325,12 +310,12 @@ export class LedgerReadService {
   async trialBalance(
     query: TrialBalanceQueryDto,
   ): Promise<TrialBalanceResponseDto> {
-    await this.verificarPracticaDelTenant(query.practiceId);
+    await this.verifyPracticeTenant(query.practiceId);
 
     const em = this.em.fork();
 
     // Sólo lo POSTEADO: un borrador no es un hecho contable.
-    const asientos = await this.journalRepo.findTransactions(
+    const entries = await this.journalRepo.findTransactions(
       em,
       {
         practiceId: query.practiceId,
@@ -344,48 +329,48 @@ export class LedgerReadService {
       TRIAL_BALANCE_MAX_TRANSACTIONS,
     );
 
-    const lineas = await this.journalRepo.findEntriesByTransactions(
+    const lines = await this.journalRepo.findEntriesByTransactions(
       em,
-      asientos.map((a) => a.id),
+      entries.map((a) => a.id),
     );
 
-    const cuentas = await this.accountsRepo.findByPractice(
+    const accounts = await this.accountsRepo.findByPractice(
       em,
       query.practiceId,
       TRIAL_BALANCE_MAX_ACCOUNTS,
     );
-    const porId = new Map(cuentas.map((c) => [c.id, c]));
+    const byId = new Map(accounts.map((c) => [c.id, c]));
 
     /** Sumas por cuenta, en céntimos enteros: el dinero no se suma en flotante. */
-    const sumas = new Map<string, { debe: bigint; haber: bigint }>();
-    for (const linea of lineas) {
-      const actual = sumas.get(linea.accountId) ?? { debe: 0n, haber: 0n };
-      const importe = aCentimos(importeEnBase(linea));
-      if (linea.directionConceptId === ACCT.DIRECTION_DEBIT) {
-        actual.debe += importe;
+    const sums = new Map<string, { debe: bigint; haber: bigint }>();
+    for (const line of lines) {
+      const actual = sums.get(line.accountId) ?? { debe: 0n, haber: 0n };
+      const amount = toBigIntCents(amountInBase(line));
+      if (line.directionConceptId === ACCT.DIRECTION_DEBIT) {
+        actual.debe += amount;
       } else {
-        actual.haber += importe;
+        actual.haber += amount;
       }
-      sumas.set(linea.accountId, actual);
+      sums.set(line.accountId, actual);
     }
 
-    let totalDebe = 0n;
-    let totalHaber = 0n;
-    const items = [...sumas.entries()]
-      .map(([accountId, { debe, haber }]) => {
-        totalDebe += debe;
-        totalHaber += haber;
-        const cuenta = porId.get(accountId);
-        const deudora = cuenta?.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
-        const saldo = deudora ? debe - haber : haber - debe;
+    let totalMust = 0n;
+    let totalHave = 0n;
+    const items = [...sums.entries()]
+      .map(([accountId, { debe: must, haber }]) => {
+        totalMust += must;
+        totalHave += haber;
+        const account = byId.get(accountId);
+        const debtor = account?.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
+        const balance = debtor ? must - haber : haber - must;
         return {
           accountId,
-          code: cuenta?.code ?? null,
-          name: cuenta?.name ?? null,
-          normalBalanceConceptId: cuenta?.normalBalanceConceptId ?? null,
-          debit: aTexto(debe),
-          credit: aTexto(haber),
-          balance: aTexto(saldo),
+          code: account?.code ?? null,
+          name: account?.name ?? null,
+          normalBalanceConceptId: account?.normalBalanceConceptId ?? null,
+          debit: toText(must),
+          credit: toText(haber),
+          balance: toText(balance),
         };
       })
       // Por código, que es como se lee un balance; las cuentas sin código —que
@@ -395,12 +380,12 @@ export class LedgerReadService {
     return {
       items,
       count: items.length,
-      totalDebit: aTexto(totalDebe),
-      totalCredit: aTexto(totalHaber),
+      totalDebit: toText(totalMust),
+      totalCredit: toText(totalHave),
       /** La comprobación que se hace primero: si no cuadra, no se sigue. */
-      balanced: totalDebe === totalHaber,
-      transactionsIncluded: asientos.length,
-      truncated: asientos.length >= TRIAL_BALANCE_MAX_TRANSACTIONS,
+      balanced: totalMust === totalHave,
+      transactionsIncluded: entries.length,
+      truncated: entries.length >= TRIAL_BALANCE_MAX_TRANSACTIONS,
     };
   }
 
@@ -423,27 +408,26 @@ export class LedgerReadService {
     query: GeneralLedgerQueryDto,
     actor: AuthenticatedUser,
   ): Promise<GeneralLedgerResponseDto> {
-    await this.verificarPracticaDelTenant(query.practiceId);
+    await this.verifyPracticeTenant(query.practiceId);
     await this.assertPractitionerOwnsPractice(actor, query.practiceId);
 
     const em = this.em.fork();
     const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
 
-    const cuenta = await this.accountsRepo.findById(em, query.accountId);
-    if (!cuenta || cuenta.practiceId !== query.practiceId) {
+    const account = await this.accountsRepo.findById(em, query.accountId);
+    if (!account || account.practiceId !== query.practiceId) {
       throw new ResourceNotFoundException(
         'Cuenta no encontrada en la práctica',
         {
           accountId: query.accountId,
         },
-        AccountingErrorReason.ACCOUNT_NOT_FOUND_IN_PRACTICE,
       );
     }
-    const deudora = cuenta.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
+    const debtor = account.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
 
     // Sólo lo POSTEADO: un borrador no es un hecho contable (mismo criterio
     // que trialBalance).
-    const asientos = await this.journalRepo.findTransactions(
+    const entries = await this.journalRepo.findTransactions(
       em,
       {
         practiceId: query.practiceId,
@@ -453,65 +437,65 @@ export class LedgerReadService {
       },
       TRIAL_BALANCE_MAX_TRANSACTIONS,
     );
-    const fechaPorTransaccion = new Map(
-      asientos.map((a) => [a.id, a.transactionDate] as const),
+    const dateByTransaction = new Map(
+      entries.map((a) => [a.id, a.transactionDate] as const),
     );
-    const numeroPorTransaccion = new Map(
-      asientos.map((a) => [a.id, a.transactionNumber ?? null] as const),
+    const numberByTransaction = new Map(
+      entries.map((a) => [a.id, a.transactionNumber ?? null] as const),
     );
 
-    const lineas = (
+    const lines = (
       await this.journalRepo.findEntriesByTransactions(
         em,
-        asientos.map((a) => a.id),
+        entries.map((a) => a.id),
       )
     )
       .filter((l) => l.accountId === query.accountId)
       .map((l) => ({
         id: l.id,
         transactionId: l.transactionId,
-        transactionDate: fechaPorTransaccion.get(l.transactionId) as Date,
+        transactionDate: dateByTransaction.get(l.transactionId) as Date,
         directionConceptId: l.directionConceptId,
-        amount: importeEnBase(l),
+        amount: amountInBase(l),
         memo: l.memo ?? null,
       }))
       // Cronológico, ascendente: es como se lee un mayor. `id` desempata
       // dentro del mismo instante para que el orden sea estable entre páginas.
       .sort((a, b) => {
-        const porFecha =
+        const byDate =
           a.transactionDate.getTime() - b.transactionDate.getTime();
-        return porFecha !== 0 ? porFecha : a.id.localeCompare(b.id);
+        return byDate !== 0 ? byDate : a.id.localeCompare(b.id);
       });
 
     // Saldo corrido calculado sobre TODA la serie, desde el origen, antes de
     // recortar la página: así el saldo de apertura de la página 2 es exacto
     // aunque la página 1 nunca se haya pedido.
-    let acumulado = 0n;
-    const conSaldo = lineas.map((linea) => {
-      const importe = aCentimos(linea.amount);
-      acumulado +=
-        linea.directionConceptId === ACCT.DIRECTION_DEBIT
-          ? deudora
-            ? importe
-            : -importe
-          : deudora
-            ? -importe
-            : importe;
-      return { ...linea, runningBalance: acumulado };
+    let accumulated = 0n;
+    const withBalance = lines.map((line) => {
+      const amount = toBigIntCents(line.amount);
+      accumulated +=
+        line.directionConceptId === ACCT.DIRECTION_DEBIT
+          ? debtor
+            ? amount
+            : -amount
+          : debtor
+            ? -amount
+            : amount;
+      return { ...line, runningBalance: accumulated };
     });
 
     const after = query.cursor ? decodeKeysetCursor(query.cursor) : undefined;
-    const afterFecha =
+    const afterDate =
       typeof after?.transactionDate === 'string'
         ? new Date(after.transactionDate).getTime()
         : undefined;
     const afterId = typeof after?.id === 'string' ? after.id : undefined;
 
-    const inicio =
-      afterFecha === undefined
+    const start =
+      afterDate === undefined
         ? 0
-        : conSaldo.findIndex((l) => {
-            const cmp = l.transactionDate.getTime() - afterFecha;
+        : withBalance.findIndex((l) => {
+            const cmp = l.transactionDate.getTime() - afterDate;
             return (
               cmp > 0 ||
               (cmp === 0 &&
@@ -519,41 +503,41 @@ export class LedgerReadService {
                 l.id.localeCompare(afterId) > 0)
             );
           });
-    const desde = inicio === -1 ? conSaldo.length : inicio;
+    const from = start === -1 ? withBalance.length : start;
 
-    const saldoApertura =
-      desde > 0 ? aTexto(conSaldo[desde - 1].runningBalance) : '0.00';
-    const pagina = conSaldo.slice(desde, desde + limit);
-    const ultima = pagina.at(-1);
-    const huboMas = desde + limit < conSaldo.length;
+    const openingBalance =
+      from > 0 ? toText(withBalance[from - 1].runningBalance) : '0.00';
+    const page = withBalance.slice(from, from + limit);
+    const last = page.at(-1);
+    const hadMore = from + limit < withBalance.length;
 
     return {
-      accountId: cuenta.id,
-      code: cuenta.code,
-      name: cuenta.name,
-      normalBalanceConceptId: cuenta.normalBalanceConceptId,
-      currencyConceptId: cuenta.currencyConceptId ?? null,
-      openingBalance: saldoApertura,
-      items: pagina.map((l) => ({
+      accountId: account.id,
+      code: account.code,
+      name: account.name,
+      normalBalanceConceptId: account.normalBalanceConceptId,
+      currencyConceptId: account.currencyConceptId ?? null,
+      openingBalance: openingBalance,
+      items: page.map((l) => ({
         id: l.id,
         transactionId: l.transactionId,
-        transactionNumber: numeroPorTransaccion.get(l.transactionId) ?? null,
+        transactionNumber: numberByTransaction.get(l.transactionId) ?? null,
         transactionDate: l.transactionDate,
         directionConceptId: l.directionConceptId,
         debit:
           l.directionConceptId === ACCT.DIRECTION_DEBIT ? l.amount : '0.00',
         credit:
           l.directionConceptId === ACCT.DIRECTION_CREDIT ? l.amount : '0.00',
-        runningBalance: aTexto(l.runningBalance),
+        runningBalance: toText(l.runningBalance),
         memo: l.memo,
       })),
-      count: pagina.length,
+      count: page.length,
       limit,
       nextCursor:
-        huboMas && ultima
+        hadMore && last
           ? encodeKeysetCursor({
-              transactionDate: ultima.transactionDate.toISOString(),
-              id: ultima.id,
+              transactionDate: last.transactionDate.toISOString(),
+              id: last.id,
             })
           : null,
     };
@@ -571,7 +555,7 @@ export class LedgerReadService {
    */
   private async aggregatePostedByAccount(
     practiceId: string,
-    filtros: { fiscalPeriodId?: string; from?: Date; to?: Date },
+    filters: { fiscalPeriodId?: string; from?: Date; to?: Date },
   ): Promise<{
     items: Array<
       FinancialStatementLineDto & { normalBalanceConceptId: string | null }
@@ -580,59 +564,59 @@ export class LedgerReadService {
   }> {
     const em = this.em.fork();
 
-    const asientos = await this.journalRepo.findTransactions(
+    const entries = await this.journalRepo.findTransactions(
       em,
       {
         practiceId,
         statusConceptId: ACCT.TXN_POSTED,
-        ...filtros,
+        ...filters,
       },
       TRIAL_BALANCE_MAX_TRANSACTIONS,
     );
-    const lineas = await this.journalRepo.findEntriesByTransactions(
+    const lines = await this.journalRepo.findEntriesByTransactions(
       em,
-      asientos.map((a) => a.id),
+      entries.map((a) => a.id),
     );
-    const cuentas = await this.accountsRepo.findByPractice(
+    const accounts = await this.accountsRepo.findByPractice(
       em,
       practiceId,
       TRIAL_BALANCE_MAX_ACCOUNTS,
     );
-    const porId = new Map(cuentas.map((c) => [c.id, c]));
+    const byId = new Map(accounts.map((c) => [c.id, c]));
 
-    const sumas = new Map<string, bigint>();
-    for (const linea of lineas) {
-      const cuenta = porId.get(linea.accountId);
-      const deudora = cuenta?.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
-      const importe = aCentimos(importeEnBase(linea));
-      const signo =
-        linea.directionConceptId === ACCT.DIRECTION_DEBIT
-          ? deudora
-            ? importe
-            : -importe
-          : deudora
-            ? -importe
-            : importe;
-      sumas.set(linea.accountId, (sumas.get(linea.accountId) ?? 0n) + signo);
+    const sums = new Map<string, bigint>();
+    for (const line of lines) {
+      const account = byId.get(line.accountId);
+      const debtor = account?.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
+      const amount = toBigIntCents(amountInBase(line));
+      const sign =
+        line.directionConceptId === ACCT.DIRECTION_DEBIT
+          ? debtor
+            ? amount
+            : -amount
+          : debtor
+            ? -amount
+            : amount;
+      sums.set(line.accountId, (sums.get(line.accountId) ?? 0n) + sign);
     }
 
-    const items = [...sumas.entries()]
-      .map(([accountId, saldo]) => {
-        const cuenta = porId.get(accountId);
+    const items = [...sums.entries()]
+      .map(([accountId, balance]) => {
+        const account = byId.get(accountId);
         return {
           accountId,
-          code: cuenta?.code ?? null,
-          name: cuenta?.name ?? null,
-          accountTypeConceptId: cuenta?.accountTypeConceptId ?? '',
-          normalBalanceConceptId: cuenta?.normalBalanceConceptId ?? null,
-          amount: aTexto(saldo),
+          code: account?.code ?? null,
+          name: account?.name ?? null,
+          accountTypeConceptId: account?.accountTypeConceptId ?? '',
+          normalBalanceConceptId: account?.normalBalanceConceptId ?? null,
+          amount: toText(balance),
         };
       })
       .sort((a, b) => (a.code ?? '￿').localeCompare(b.code ?? '￿'));
 
     return {
       items,
-      truncated: asientos.length >= TRIAL_BALANCE_MAX_TRANSACTIONS,
+      truncated: entries.length >= TRIAL_BALANCE_MAX_TRANSACTIONS,
     };
   }
 
@@ -647,7 +631,7 @@ export class LedgerReadService {
     query: FinancialStatementQueryDto,
     actor: AuthenticatedUser,
   ): Promise<IncomeStatementResponseDto> {
-    await this.verificarPracticaDelTenant(query.practiceId);
+    await this.verifyPracticeTenant(query.practiceId);
     await this.assertPractitionerOwnsPractice(actor, query.practiceId);
     const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
 
@@ -669,7 +653,7 @@ export class LedgerReadService {
       (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EXPENSE,
     );
 
-    const { page, nextCursor } = paginarPorCodigo(
+    const { page, nextCursor } = paginateByCode(
       [...revenueItems, ...expenseItems],
       query.cursor,
       limit,
@@ -682,20 +666,20 @@ export class LedgerReadService {
     );
 
     const totalRevenue = revenueItems.reduce(
-      (acc, i) => acc + aCentimos(i.amount),
+      (acc, i) => acc + toBigIntCents(i.amount),
       0n,
     );
     const totalExpense = expenseItems.reduce(
-      (acc, i) => acc + aCentimos(i.amount),
+      (acc, i) => acc + toBigIntCents(i.amount),
       0n,
     );
 
     return {
-      revenueItems: revenuePage.map(sinNormalBalance),
-      expenseItems: expensePage.map(sinNormalBalance),
-      totalRevenue: aTexto(totalRevenue),
-      totalExpense: aTexto(totalExpense),
-      netIncome: aTexto(totalRevenue - totalExpense),
+      revenueItems: revenuePage.map(withoutNormalBalance),
+      expenseItems: expensePage.map(withoutNormalBalance),
+      totalRevenue: toText(totalRevenue),
+      totalExpense: toText(totalExpense),
+      netIncome: toText(totalRevenue - totalExpense),
       count: page.length,
       limit,
       nextCursor,
@@ -719,7 +703,7 @@ export class LedgerReadService {
     query: FinancialStatementQueryDto,
     actor: AuthenticatedUser,
   ): Promise<BalanceSheetResponseDto> {
-    await this.verificarPracticaDelTenant(query.practiceId);
+    await this.verifyPracticeTenant(query.practiceId);
     await this.assertPractitionerOwnsPractice(actor, query.practiceId);
     const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
     const asOf = query.to === undefined ? undefined : new Date(query.to);
@@ -740,48 +724,48 @@ export class LedgerReadService {
     );
     const revenueTotal = items
       .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_REVENUE)
-      .reduce((acc, i) => acc + aCentimos(i.amount), 0n);
+      .reduce((acc, i) => acc + toBigIntCents(i.amount), 0n);
     const expenseTotal = items
       .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EXPENSE)
-      .reduce((acc, i) => acc + aCentimos(i.amount), 0n);
+      .reduce((acc, i) => acc + toBigIntCents(i.amount), 0n);
     const netIncome = revenueTotal - expenseTotal;
 
-    const { page, nextCursor } = paginarPorCodigo(
+    const { page, nextCursor } = paginateByCode(
       [...assetItems, ...liabilityItems, ...equityItems],
       query.cursor,
       limit,
     );
 
     const totalAssets = assetItems.reduce(
-      (acc, i) => acc + aCentimos(i.amount),
+      (acc, i) => acc + toBigIntCents(i.amount),
       0n,
     );
     const totalLiabilities = liabilityItems.reduce(
-      (acc, i) => acc + aCentimos(i.amount),
+      (acc, i) => acc + toBigIntCents(i.amount),
       0n,
     );
-    const totalEquityDeclarado = equityItems.reduce(
-      (acc, i) => acc + aCentimos(i.amount),
+    const totalEquityDeclared = equityItems.reduce(
+      (acc, i) => acc + toBigIntCents(i.amount),
       0n,
     );
-    const totalEquity = totalEquityDeclarado + netIncome;
+    const totalEquity = totalEquityDeclared + netIncome;
     const totalLiabilitiesAndEquity = totalLiabilities + totalEquity;
 
     return {
       assetItems: page
         .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_ASSET)
-        .map(sinNormalBalance),
+        .map(withoutNormalBalance),
       liabilityItems: page
         .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_LIABILITY)
-        .map(sinNormalBalance),
+        .map(withoutNormalBalance),
       equityItems: page
         .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EQUITY)
-        .map(sinNormalBalance),
-      netIncomeOfPeriod: aTexto(netIncome),
-      totalAssets: aTexto(totalAssets),
-      totalLiabilities: aTexto(totalLiabilities),
-      totalEquity: aTexto(totalEquity),
-      totalLiabilitiesAndEquity: aTexto(totalLiabilitiesAndEquity),
+        .map(withoutNormalBalance),
+      netIncomeOfPeriod: toText(netIncome),
+      totalAssets: toText(totalAssets),
+      totalLiabilities: toText(totalLiabilities),
+      totalEquity: toText(totalEquity),
+      totalLiabilitiesAndEquity: toText(totalLiabilitiesAndEquity),
       balanced: totalAssets === totalLiabilitiesAndEquity,
       count: page.length,
       limit,
@@ -792,11 +776,11 @@ export class LedgerReadService {
 }
 
 /** Quita el campo interno `normalBalanceConceptId` antes de responder. */
-function sinNormalBalance(
+function withoutNormalBalance(
   item: FinancialStatementLineDto & { normalBalanceConceptId: string | null },
 ): FinancialStatementLineDto {
-  const { normalBalanceConceptId: _normalBalanceConceptId, ...resto } = item;
-  return resto;
+  const { normalBalanceConceptId: _normalBalanceConceptId, ...rest } = item;
+  return rest;
 }
 
 /**
@@ -806,44 +790,44 @@ function sinNormalBalance(
  * falta re-consultar la base por página, alcanza con cortar el arreglo ya
  * calculado — igual que `trialBalance` ya calcula todo de una vez.
  */
-function paginarPorCodigo<T extends { accountId: string; code: string | null }>(
+function paginateByCode<T extends { accountId: string; code: string | null }>(
   items: T[],
   cursor: string | undefined,
   limit: number,
 ): { page: T[]; nextCursor: string | null } {
-  const ordenados = [...items].sort(
+  const sorted = [...items].sort(
     (a, b) =>
       (a.code ?? '￿').localeCompare(b.code ?? '￿') ||
       a.accountId.localeCompare(b.accountId),
   );
 
-  let desde = 0;
+  let from = 0;
   if (cursor) {
     const after = decodeKeysetCursor(cursor);
     const afterCode = typeof after.code === 'string' ? after.code : null;
     const afterId =
       typeof after.accountId === 'string' ? after.accountId : undefined;
-    desde = ordenados.findIndex(
+    from = sorted.findIndex(
       (i) =>
         (i.code ?? '￿').localeCompare(afterCode ?? '￿') > 0 ||
         ((i.code ?? '￿') === (afterCode ?? '￿') &&
           afterId !== undefined &&
           i.accountId.localeCompare(afterId) > 0),
     );
-    if (desde === -1) desde = ordenados.length;
+    if (from === -1) from = sorted.length;
   }
 
-  const page = ordenados.slice(desde, desde + limit);
-  const ultima = page.at(-1);
-  const hayMas = desde + limit < ordenados.length;
+  const page = sorted.slice(from, from + limit);
+  const last = page.at(-1);
+  const hasMore = from + limit < sorted.length;
 
   return {
     page,
     nextCursor:
-      hayMas && ultima
+      hasMore && last
         ? encodeKeysetCursor({
-            code: ultima.code ?? '',
-            accountId: ultima.accountId,
+            code: last.code ?? '',
+            accountId: last.accountId,
           })
         : null,
   };

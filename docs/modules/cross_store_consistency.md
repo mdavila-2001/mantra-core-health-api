@@ -3,12 +3,12 @@
   Fuente real: src/modules/cross_store_consistency/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `cross_store_consistency`
 
-**Fuente:** [`src/modules/cross_store_consistency/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/cross_store_consistency/README.md)
+**Fuente:** [`src/modules/cross_store_consistency/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/cross_store_consistency/README.md)
 · 2 controllers · 5 services · 3 repositories · 20 entidades · 1 DTO
 
 ---
@@ -18,6 +18,45 @@
 Proyección del outbox a los stores secundarios con entrega idempotente y checkpoint,
 reconciliación del canónico contra sus proyecciones, propagación verificada del borrado, e
 invalidación de caché, movimiento entre zonas y archivado por retención.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/cross_store_consistency -name '*.controller.ts' | wc -l
+  find src/modules/cross_store_consistency -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/cross_store_consistency -name '*.entity.ts' | wc -l
+  find src/modules/cross_store_consistency -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 16 rutas HTTP, 20 entidades y 5 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 20 de 20 archivos `*.entity.ts`): `archive_jobs`, `cache_invalidation_jobs`, `data_movement_jobs`, `deletion_executions`, `deletion_requests`, `deletion_targets`, `deletion_verifications`, `projection_checkpoints`, `projection_consumers`, `projection_dead_letters`, `projection_definitions`, `projection_delivery_attempts`, `projection_drift_events`, `projection_repair_jobs`, `projection_subscriptions`, `reconciliation_items`, `reconciliation_runs`, `reindex_jobs`, `schema_migration_jobs`, `store_consistency_slos`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /admin/projections/definitions` | DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `cross-store-admin` |
+| `POST /admin/projections/dead-letters/:id/replay` | DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `cross-store-admin` |
+| `POST /admin/reconciliation/runs` | SYSTEM,
+    RECONCILIATION_WORKER,
+    DATA_GOVERNANCE_ADMIN,
+    PLATFORM_ADMIN, | `cross-store-admin` |
+| `POST /admin/projections/drift/:id/repair-jobs` | DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN | `cross-store-admin` |
+| `POST /admin/deletion-requests` | PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `cross-store-admin` |
+| `PATCH /admin/deletion-requests/:id` | PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `cross-store-admin` |
+| `POST /admin/data-movement-jobs` | DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `cross-store-admin` |
+| `POST /admin/archive-jobs` | SYSTEM, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `cross-store-admin` |
+| `POST /workers/projections/deliveries/process` | SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN | `cross-store-worker` |
+| `POST /workers/projections/dead-letters` | SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN | `cross-store-worker` |
+| `POST /workers/deletion-requests/:id/expand` | SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `cross-store-worker` |
+| `GET /workers/deletion-targets/pending` | SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `cross-store-worker` |
+| `POST /workers/deletion-targets/:id/executions` | SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `cross-store-worker` |
+| `GET /workers/deletion-targets/executed` | SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `cross-store-worker` |
+| `POST /workers/deletion-targets/:id/verifications` | SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `cross-store-worker` |
+| `POST /workers/cache/invalidations` | SYSTEM, MAINTENANCE_WORKER, PLATFORM_ADMIN | `cross-store-worker` |
 
 ## La idea que gobierna el módulo entero
 
@@ -47,7 +86,7 @@ grafo y objetos son proyecciones. De ahí sale todo lo demás:
 | UC-62-13 | `POST /admin/data-movement-jobs` | Movimiento entre zonas |
 | UC-62-14 | `POST /admin/archive-jobs` | Archivado por retención |
 
-14 endpoints para 14 casos de uso: UC-62-03 y UC-62-06 no tienen ruta propia —el caso de uso los
+14 endpoints para 14 casos de uso (cifra original del módulo; al 2026-10-08 el código declara 16 rutas, ver «Rutas HTTP y alcance (medido)»): UC-62-03 y UC-62-06 no tienen ruta propia —el caso de uso los
 declara *internos*, parte de UC-62-02 y UC-62-05— y UC-62-04 y UC-62-11 tienen dos cada uno.
 
 ## Estados en `varchar`, en MAYÚSCULAS
@@ -178,8 +217,7 @@ donde casi todo lo que pasa merece atención. No se loguean payloads ni localiza
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/cross_store_consistency` — 84 pruebas (20 entrega +
-14 reconciliación + 22 borrado + 14 mantenimiento + 14 de delegación de los dos controladores).
+`corepack yarn test src/modules/cross_store_consistency --runInBand --silent` — 6 suites y 99 pruebas aprobadas durante la revisión. El módulo conserva control e idempotencia; la confirmación física depende de los workers y adaptadores de cada store. Ver [auditoría backend](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/cross_store_consistency.md).
 
 ## Divergencias con el caso de uso v3.9
 
@@ -206,4 +244,3 @@ donde casi todo lo que pasa merece atención. No se loguean payloads ni localiza
   (UC-62-13): el job se registra; el movimiento es del módulo 60.
 - **`audit.audit_events`**: el caso de uso lo declara en los catorce. El registro de auditoría es del
   módulo 06.
-

@@ -3,7 +3,7 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { TenantTypeProfileService } from './tenant-type-profile.service';
 import { CONCEPTS, PreconditionFailedException } from '../../../common';
-import { INS } from '../../insurance/insurance.concepts';
+import { INS } from '../../insurance/domain/insurance.concepts';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import { TERRITORIAL_TENANT_TYPES } from '../directory.concepts';
 import { LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO } from '../legal-entity-types';
@@ -304,7 +304,7 @@ describe('TenantTypeProfileService', () => {
 
     it('rechaza una modalidad que no pertenece a la lista cerrada, nombrándola', () => {
       const { service } = build();
-      const modalidadInventada = 'no-existe-como-modalidad';
+      const inventedModality = 'no-existe-como-modalidad';
 
       try {
         service.assertProfileMatchesType({
@@ -312,13 +312,13 @@ describe('TenantTypeProfileService', () => {
           legalName: 'Centro de Imagen Z',
           countryConceptId: 'country-1',
           jurisdictionConceptId: 'jur-1',
-          diagnosticUnit: { modalityConceptIds: [modalidadInventada] },
+          diagnosticUnit: { modalityConceptIds: [inventedModality] },
         });
         throw new Error('debía rechazar');
       } catch (error) {
         expect(error).toBeInstanceOf(PreconditionFailedException);
         expect((error as PreconditionFailedException).details).toMatchObject({
-          invalidModalities: [modalidadInventada],
+          invalidModalities: [inventedModality],
         });
       }
     });
@@ -444,7 +444,7 @@ describe('TenantTypeProfileService', () => {
     });
 
     describe('la casa matriz del PAYER (subtarea 1.3)', () => {
-      const payerConCoordenadas = {
+      const payerWithCoordinates = {
         carrierCode: 'CAR-1',
         regulatorIdentifier: 'APS-4821',
         sigla: 'ASX',
@@ -462,7 +462,7 @@ describe('TenantTypeProfileService', () => {
           {
             tenantType: 'PAYER',
             legalName: 'Aseguradora X',
-            payer: payerConCoordenadas,
+            payer: payerWithCoordinates,
           },
           'actor-1',
         );
@@ -514,7 +514,7 @@ describe('TenantTypeProfileService', () => {
           {
             tenantType: 'PAYER',
             legalName: 'Aseguradora X',
-            payer: { ...payerConCoordenadas, latitude: 0, longitude: 0 },
+            payer: { ...payerWithCoordinates, latitude: 0, longitude: 0 },
           },
           'actor-1',
         );

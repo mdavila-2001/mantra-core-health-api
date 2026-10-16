@@ -11,8 +11,8 @@ import {
   Min,
 } from 'class-validator';
 import {
-  MAX_OBJETIVO_SEGUNDOS,
-  RANGO_OBJETIVOS,
+  MAX_TARGET_SECONDS,
+  TARGETS_RANGE,
   RestoreObjectiveStatus,
 } from '../policies';
 
@@ -48,12 +48,12 @@ export class CreateBackupPolicyDto {
   @ApiProperty({
     description:
       'RPO objetivo en segundos: cuántos datos se tolera perder. Independiente del RTO (MCH-022); 0 es válido y significa no perder ningún dato',
-    minimum: RANGO_OBJETIVOS.rpoSeconds.min,
-    maximum: MAX_OBJETIVO_SEGUNDOS,
+    minimum: TARGETS_RANGE.rpoSeconds.min,
+    maximum: MAX_TARGET_SECONDS,
   })
   @IsInt()
-  @Min(RANGO_OBJETIVOS.rpoSeconds.min)
-  @Max(RANGO_OBJETIVOS.rpoSeconds.max)
+  @Min(TARGETS_RANGE.rpoSeconds.min)
+  @Max(TARGETS_RANGE.rpoSeconds.max)
   rpoSeconds!: number;
 
   /**
@@ -62,12 +62,12 @@ export class CreateBackupPolicyDto {
   @ApiProperty({
     description:
       'RTO objetivo en segundos: cuánto tiempo se tolera estar fuera de servicio. Independiente del RPO (MCH-022); al menos 1 segundo',
-    minimum: RANGO_OBJETIVOS.rtoSeconds.min,
-    maximum: MAX_OBJETIVO_SEGUNDOS,
+    minimum: TARGETS_RANGE.rtoSeconds.min,
+    maximum: MAX_TARGET_SECONDS,
   })
   @IsInt()
-  @Min(RANGO_OBJETIVOS.rtoSeconds.min)
-  @Max(RANGO_OBJETIVOS.rtoSeconds.max)
+  @Min(TARGETS_RANGE.rtoSeconds.min)
+  @Max(TARGETS_RANGE.rtoSeconds.max)
   rtoSeconds!: number;
 
   /**

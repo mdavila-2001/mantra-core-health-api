@@ -118,7 +118,7 @@ export class ReactionsRepository {
     // JavaScript en un arreglo de Postgres, así que `any(?)` llegaba como texto
     // y la base respondía «Array value must start with "{"». Sigue siendo una
     // consulta parametrizada — los ids nunca se interpolan en el SQL.
-    const marcadores = reactableRefIds.map(() => '?').join(', ');
+    const markers = reactableRefIds.map(() => '?').join(', ');
     const rows = await em.getConnection().execute<
       Array<{
         reactable_ref_id: string;
@@ -129,7 +129,7 @@ export class ReactionsRepository {
       `select reactable_ref_id, reaction_type_concept_id, count(*)::int as count
            from community.reactions
           where reactable_type_concept_id=?
-            and reactable_ref_id in (${marcadores})
+            and reactable_ref_id in (${markers})
           group by reactable_ref_id, reaction_type_concept_id`,
       [reactableTypeConceptId, ...reactableRefIds],
       'all',

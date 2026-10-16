@@ -1,0 +1,20 @@
+Base origin/dev: 89ce296d262b3d12a43de872efae07a31f22bc9b
+Build: docker build --target build -t alovida-chat-api-build:dev .
+Exit code: 0
+#15 DONE 12.6s
+
+Jest: cuatro specs afectados, --runInBand, fuente actual montada read-only
+Test Suites: 4 passed, 4 total
+Tests:       54 passed, 54 total
+Snapshots:   0 total
+Time:        12.876 s
+Exit code: 0
+
+ESLint: los ocho archivos afectados
+Exit code: 0; sin diagnósticos
+
+git diff --check HEAD
+Exit code: 0
+
+Pruebas unitarias con dobles: no equivalen a SQL real ni al flujo E2E desplegado.
+No se alteraron bases, migraciones, secretos ni servicios desplegados.

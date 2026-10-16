@@ -32,7 +32,7 @@ describe('verificationFromSnapshot (C3 / P41)', () => {
   });
 
   it('una evidencia de clase desconocida se lee como sin evidencia (límite)', () => {
-    const leida = verificationFromSnapshot({
+    const read = verificationFromSnapshot({
       verification: {
         outcome: 'CONFIRMED',
         decidedAt: '2026-09-26T12:00:00.000Z',
@@ -41,7 +41,7 @@ describe('verificationFromSnapshot (C3 / P41)', () => {
         basedOn: { kind: 'IMAGEN' },
       },
     });
-    expect(leida?.basedOn).toBeNull();
+    expect(read?.basedOn).toBeNull();
   });
 
   it('sin decisión, o con una decisión mal formada, no hay verificación', () => {

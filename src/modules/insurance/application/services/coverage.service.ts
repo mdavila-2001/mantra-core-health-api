@@ -1,0 +1,301 @@
+import { Injectable } from '@nestjs/common';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { PinoLogger } from 'nestjs-pino';
+import { InsuranceErrorReason } from '../insurance.error-reasons';
+import {
+  ConflictException,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../../common';
+import {
+  CoverageRepository,
+  CatalogRepository,
+  InsurancePatientAccountRepository,
+} from '../../infrastructure/repositories';
+import { INS } from '../../domain/insurance.concepts';
+import {
+  CreateCoverageDto,
+  CreateEligibilityRequestDto,
+  CreateCobDto,
+  CreatedResourceDto,
+  ResourceStatusDto,
+  MyCoverageDto,
+} from '../../presentation/dto';
+
+const RELATIONSHIP_CONCEPT: Record<string, string> = {
+  SPOUSE: INS.RELATIONSHIP_SPOUSE,
+  CHILD: INS.RELATIONSHIP_CHILD,
+};
+
+/**
+ * Casos de uso de coberturas: alta de cobertura + dependientes (UC-26-02),
+ * solicitud/resolución de elegibilidad 270/271 (UC-26-03) y determinación de
+ * coordinación de beneficios COB (UC-26-09).
+ */
+@Injectable()
+export class CoverageService {
+  /**
+   * Inicializa la instancia y sus dependencias.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param repo - Valor de repo requerido por la operación.
+   * @param catalog - Valor de catalog requerido por la operación.
+   * @param logger - Valor de logger requerido por la operación.
+   */
+  constructor(
+    private readonly em: EntityManager,
+    private readonly repo: CoverageRepository,
+    private readonly catalog: CatalogRepository,
+    private readonly patientAccounts: InsurancePatientAccountRepository,
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(CoverageService.name);
+  }
+
+  /**
+   * CV-11 — «Mi cobertura»: las coberturas del paciente autenticado. La
+   * persona sale de la cuenta (`person_account_links`), nunca de un id de la
+   * ruta o el query, igual que {@link ReferralsService.listMine}. Sin cuenta
+   * vinculada a un perfil de paciente, la respuesta es una lista vacía.
+   */
+  async listMine(actor: AuthenticatedUser): Promise<MyCoverageDto[]> {
+    const em = this.em.fork();
+    const link = await this.patientAccounts.findActiveAccountLink(em, actor.id);
+    if (!link) return [];
+    const patient = await this.patientAccounts.findPatientProfile(
+      em,
+      link.personId,
+    );
+    if (!patient) return [];
+    const coverages = await this.repo.findByPatient(em, patient.profileId);
+    return coverages.map((c) => ({
+      id: c.id,
+      insurancePlanId: c.insurancePlanId,
+      insuranceBrokerId: c.insuranceBrokerId,
+      memberIdentifier: c.memberIdentifier,
+      policyIdentifier: c.policyIdentifier,
+      coverageOrder: c.coverageOrder,
+      relationshipToSubscriberConceptId: c.relationshipToSubscriberConceptId,
+      effectiveFrom: c.effectiveFrom,
+      effectiveTo: c.effectiveTo,
+      verificationStatusConceptId: c.verificationStatusConceptId,
+      status: c.statusConceptId,
+      createdAt: c.createdAt,
+    }));
+  }
+
+  /** UC-26-02: registrar cobertura del paciente y sus dependientes. */
+  async enrollCoverage(
+    dto: CreateCoverageDto,
+    actor: AuthenticatedUser,
+  ): Promise<ResourceStatusDto> {
+    this.logger.info(
+      { operation: 'insurance.coverage.enroll', actorId: actor.id },
+      'Enrolling coverage',
+    );
+    return this.em.transactional(async (tx) => {
+      const plan = await this.catalog.findPlan(tx, dto.insurancePlanId);
+      if (!plan)
+        throw new ResourceNotFoundException(
+          'Plan no encontrado',
+          {
+            planId: dto.insurancePlanId,
+          },
+          InsuranceErrorReason.PLAN_NOT_FOUND,
+        );
+      if (plan.statusConceptId !== INS.PLAN_ACTIVE) {
+        throw new PreconditionFailedException(
+          'El plan no está activo',
+          {
+            planId: dto.insurancePlanId,
+          },
+          InsuranceErrorReason.PLAN_NOT_ACTIVE,
+        );
+      }
+
+      const clash = await this.repo.findByMemberAndPlan(
+        tx,
+        dto.memberIdentifier,
+        dto.insurancePlanId,
+      );
+      if (clash) {
+        throw new ConflictException(
+          'El afiliado ya tiene cobertura en ese plan',
+          {
+            memberIdentifier: dto.memberIdentifier,
+          },
+          InsuranceErrorReason.COVERAGE_ALREADY_EXISTS,
+        );
+      }
+
+      const coverage = this.repo.createCoverage(tx, {
+        patientProfileId: dto.patientProfileId,
+        insurancePlanId: dto.insurancePlanId,
+        insuranceBrokerId: dto.insuranceBrokerId,
+        memberIdentifier: dto.memberIdentifier,
+        policyIdentifier: dto.policyIdentifier,
+        coverageOrder: dto.coverageOrder ?? 1,
+        relationshipToSubscriberConceptId: INS.RELATIONSHIP_SELF,
+        verificationStatusConceptId: INS.VERIFY_PENDING,
+        statusConceptId: INS.COVERAGE_ACTIVE,
+        actorUserId: actor.id,
+      });
+      // La cobertura es padre de los dependientes (FK forzada) → flush primero.
+      await tx.flush();
+
+      for (const dep of dto.dependents ?? []) {
+        this.repo.createDependent(tx, {
+          patientCoverageId: coverage.id,
+          dependentPatientProfileId: dep.dependentPatientProfileId,
+          relationshipConceptId: dep.relationship
+            ? RELATIONSHIP_CONCEPT[dep.relationship]
+            : INS.RELATIONSHIP_CHILD,
+          statusConceptId: INS.DEPENDENT_ACTIVE,
+          actorUserId: actor.id,
+        });
+      }
+
+      if (dto.insuranceBrokerId) {
+        this.repo.createBrokerClient(tx, {
+          insuranceBrokerId: dto.insuranceBrokerId,
+          patientProfileId: dto.patientProfileId,
+          clientTypeConceptId: INS.CLIENT_TYPE_INDIVIDUAL,
+          statusConceptId: INS.COVERAGE_ACTIVE,
+          actorUserId: actor.id,
+        });
+      }
+
+      this.logger.info(
+        { operation: 'insurance.coverage.enroll', coverageId: coverage.id },
+        'Coverage enrolled',
+      );
+      return {
+        id: coverage.id,
+        status: coverage.statusConceptId,
+        createdAt: coverage.createdAt,
+      };
+    });
+  }
+
+  /** UC-26-03: solicitar elegibilidad y registrar la respuesta inmutable in_force. */
+  async requestEligibility(
+    dto: CreateEligibilityRequestDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
+    this.logger.info(
+      { operation: 'insurance.eligibility.request', actorId: actor.id },
+      'Requesting eligibility',
+    );
+    return this.em.transactional(async (tx) => {
+      const coverage = await this.repo.findCoverage(tx, dto.patientCoverageId);
+      if (!coverage) {
+        throw new ResourceNotFoundException(
+          'Cobertura no encontrada',
+          {
+            coverageId: dto.patientCoverageId,
+          },
+          InsuranceErrorReason.COVERAGE_NOT_FOUND,
+        );
+      }
+
+      if (dto.idempotencyKey) {
+        const existing = await this.repo.findRequestByIdempotency(
+          tx,
+          dto.idempotencyKey,
+        );
+        if (existing)
+          throw new ConflictException(
+            'Solicitud de elegibilidad duplicada',
+            {
+              idempotencyKey: dto.idempotencyKey,
+            },
+            InsuranceErrorReason.ELIGIBILITY_REQUEST_DUPLICATE,
+          );
+      }
+
+      const request = this.repo.createEligibilityRequest(tx, {
+        patientCoverageId: dto.patientCoverageId,
+        requestingProviderTypeConceptId: INS.ELIG_PROVIDER_TYPE_PRACTICE,
+        serviceDate: dto.serviceDate ? new Date(dto.serviceDate) : undefined,
+        idempotencyKey: dto.idempotencyKey,
+        statusConceptId: INS.ELIG_REQUESTED,
+        requestedAt: new Date(),
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      // La respuesta 271 es inmutable; primera versión in_force=true.
+      this.repo.createEligibilityResponse(tx, {
+        coverageEligibilityRequestId: request.id,
+        responseVersion: 1,
+        inForce: true,
+        benefitSummaryJson: dto.benefitSummary ?? undefined,
+        outcomeConceptId: INS.ELIG_OUTCOME_ACTIVE,
+        respondedAt: new Date(),
+        respondedByUserId: actor.id,
+      });
+      request.statusConceptId = INS.ELIG_RESOLVED;
+
+      return { id: request.id };
+    });
+  }
+
+  /** UC-26-09: determinar coordinación de beneficios (nueva versión supersede la vigente). */
+  async determineCob(
+    dto: CreateCobDto,
+    actor: AuthenticatedUser,
+  ): Promise<CreatedResourceDto> {
+    this.logger.info(
+      { operation: 'insurance.cob.determine', actorId: actor.id },
+      'Determining COB',
+    );
+    return this.em.transactional(async (tx) => {
+      const primary = await this.repo.findCoverage(
+        tx,
+        dto.primaryPatientCoverageId,
+      );
+      if (!primary) {
+        throw new ResourceNotFoundException(
+          'Cobertura primaria no encontrada',
+          {
+            coverageId: dto.primaryPatientCoverageId,
+          },
+          InsuranceErrorReason.PRIMARY_COVERAGE_NOT_FOUND,
+        );
+      }
+      if (!dto.secondaryPatientCoverageId) {
+        throw new PreconditionFailedException(
+          'COB requiere al menos una cobertura secundaria',
+          {},
+          InsuranceErrorReason.COB_SECONDARY_COVERAGE_REQUIRED,
+        );
+      }
+
+      const previous = await this.repo.latestActiveCob(
+        tx,
+        dto.patientProfileId,
+      );
+      const nextVersion = (previous?.determinationVersion ?? 0) + 1;
+      if (previous) {
+        previous.effectiveTo = new Date();
+      }
+
+      const cob = this.repo.createCob(tx, {
+        patientProfileId: dto.patientProfileId,
+        primaryPatientCoverageId: dto.primaryPatientCoverageId,
+        secondaryPatientCoverageId: dto.secondaryPatientCoverageId,
+        tertiaryPatientCoverageId: dto.tertiaryPatientCoverageId,
+        cobRuleConceptId: INS.COB_RULE_STANDARD,
+        determinationVersion: nextVersion,
+        effectiveFrom: dto.effectiveFrom
+          ? new Date(dto.effectiveFrom)
+          : new Date(),
+        statusConceptId: INS.COB_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+      return { id: cob.id };
+    });
+  }
+}

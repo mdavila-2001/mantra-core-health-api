@@ -114,13 +114,13 @@ describe('VirtualEncountersService (UC-18-12)', () => {
 
   it('joins a scheduled session (scheduled -> in-progress)', async () => {
     const d = build();
-    const venc = {
+    const due = {
       id: 've1',
       encounterId: 'e1',
       statusConceptId: CEXT.VIRTUAL_ENCOUNTER_SCHEDULED,
       updatedAt: new Date(),
     };
-    d.encountersRepo.findById.mockResolvedValue(venc);
+    d.encountersRepo.findById.mockResolvedValue(due);
     const res = await d.service.join('ve1', actor);
     expect(res.statusConceptId).toBe(CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS);
   });
@@ -167,13 +167,13 @@ describe('VirtualEncountersService (UC-18-12)', () => {
 
   it('rechaza a un paciente que no es el titular sin cambiar el estado', async () => {
     const d = build();
-    const venc = {
+    const due = {
       id: 've1',
       encounterId: 'e1',
       statusConceptId: CEXT.VIRTUAL_ENCOUNTER_SCHEDULED,
       updatedAt: new Date(),
     };
-    d.encountersRepo.findById.mockResolvedValue(venc);
+    d.encountersRepo.findById.mockResolvedValue(due);
 
     await expect(
       d.service.join('ve1', {
@@ -183,7 +183,7 @@ describe('VirtualEncountersService (UC-18-12)', () => {
         tenantIds: ['ten-1'],
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(venc.statusConceptId).toBe(CEXT.VIRTUAL_ENCOUNTER_SCHEDULED);
+    expect(due.statusConceptId).toBe(CEXT.VIRTUAL_ENCOUNTER_SCHEDULED);
   });
 
   it('rejects joining a non-scheduled session (precondition)', async () => {
@@ -208,27 +208,27 @@ describe('VirtualEncountersService (UC-18-12)', () => {
 
   it('ends an in-progress session (in-progress -> completed)', async () => {
     const d = build();
-    const venc: any = {
+    const due: any = {
       id: 've1',
       encounterId: 'e1',
       statusConceptId: CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS,
       updatedAt: new Date(),
     };
-    d.encountersRepo.findById.mockResolvedValue(venc);
+    d.encountersRepo.findById.mockResolvedValue(due);
     const res = await d.service.end('ve1', { recordingFileId: 'f1' }, actor);
     expect(res.statusConceptId).toBe(CEXT.VIRTUAL_ENCOUNTER_COMPLETED);
-    expect(venc.recordingFileId).toBe('f1');
+    expect(due.recordingFileId).toBe('f1');
   });
 
   it('el paciente no puede finalizar la sesión', async () => {
     const d = build();
-    const venc: any = {
+    const due: any = {
       id: 've1',
       encounterId: 'e1',
       statusConceptId: CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS,
       updatedAt: new Date(),
     };
-    d.encountersRepo.findById.mockResolvedValue(venc);
+    d.encountersRepo.findById.mockResolvedValue(due);
 
     await expect(
       d.service.end(
@@ -242,18 +242,18 @@ describe('VirtualEncountersService (UC-18-12)', () => {
         },
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(venc.statusConceptId).toBe(CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS);
+    expect(due.statusConceptId).toBe(CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS);
   });
 
   it('un profesional ajeno no finaliza ni escribe datos de cierre', async () => {
     const d = build();
-    const venc: any = {
+    const due: any = {
       id: 've1',
       encounterId: 'e1',
       statusConceptId: CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS,
       updatedAt: new Date(),
     };
-    d.encountersRepo.findById.mockResolvedValue(venc);
+    d.encountersRepo.findById.mockResolvedValue(due);
 
     await expect(
       d.service.end(
@@ -267,11 +267,11 @@ describe('VirtualEncountersService (UC-18-12)', () => {
         },
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(venc).toMatchObject({
+    expect(due).toMatchObject({
       statusConceptId: CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS,
     });
-    expect(venc.endedAt).toBeUndefined();
-    expect(venc.recordingFileId).toBeUndefined();
+    expect(due.endedAt).toBeUndefined();
+    expect(due.recordingFileId).toBeUndefined();
   });
 
   it('un profesional participante activo puede unirse aunque no sea el principal', async () => {

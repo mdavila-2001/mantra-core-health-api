@@ -4,6 +4,38 @@ Alta de proveedores OIDC/SAML/OAuth2, configuración de protocolo por entorno, c
 rotación, mapeo de claims a atributos, vínculo por tenant, reglas de aprovisionamiento, login
 federado con `state`/`nonce`, vinculación y desvinculación de identidades.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/auth_providers -name '*.controller.ts' | wc -l
+  find src/modules/auth_providers -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/auth_providers -name '*.entity.ts' | wc -l
+  find src/modules/auth_providers -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 12 rutas HTTP, 9 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `account_link_requests`, `federated_identities`, `federated_login_attempts`, `identity_providers`, `provider_attribute_mappings`, `provider_protocol_configs`, `provider_signing_keys`, `provider_tenant_bindings`, `provisioning_rules`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /auth-providers/identity-providers` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/identity-providers/:id/protocol-configs` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/identity-providers/:id/signing-keys` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/identity-providers/:id/signing-keys/rotate` | IDENTITY_ADMIN | `auth-providers` |
+| `PUT /auth-providers/identity-providers/:id/attribute-mappings` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/tenant-bindings` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/identity-providers/:id/provisioning-rules` | IDENTITY_ADMIN | `auth-providers` |
+| `POST /auth-providers/identity-providers/by-code/:code/authorize` | IDENTITY_ADMIN, AUTH_SERVICE | `auth-providers` |
+| `POST /auth-providers/identity-providers/by-code/:code/callback` | IDENTITY_ADMIN, AUTH_SERVICE | `auth-providers` |
+| `POST /auth-providers/account-link-requests` | IDENTITY_ADMIN, AUTH_SERVICE | `auth-providers` |
+| `POST /auth-providers/account-link-requests/complete` | IDENTITY_ADMIN, AUTH_SERVICE | `auth-providers` |
+| `POST /auth-providers/federated-identities/:id/unlink` | IDENTITY_ADMIN | `auth-providers` |
+
 ## Casos de uso cubiertos (12)
 
 | UC | Endpoint | Descripción |
@@ -118,7 +150,7 @@ referencia al vault, nunca el secreto.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=auth_providers` — 96 pruebas (84 de servicio + 12 de delegación del
+`corepack yarn test src/modules/auth_providers --runInBand --silent` — 96 pruebas (84 de servicio + 12 de delegación del
 controlador).
 
 ## Pendiente
@@ -136,3 +168,10 @@ controlador).
   outbox; se poblará con el módulo 35.
 - **Outbox**: `ProviderRegistered`, `SigningKeyRotated`, `FederatedLoginSucceeded`,
   `IdentityUnlinked` se emitirán cuando exista el módulo 35.
+
+## Auditoría vigente
+
+La revisión de octubre de 2026 detectó que las URL de protocolo se validan sólo
+como texto y deben restringirse antes de configurarlas o entregarlas al conector
+de red. El detalle y la matriz de pruebas están en
+[`docs/revision-backend-2026-10-04/modulos/auth_providers.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/auth_providers.md).

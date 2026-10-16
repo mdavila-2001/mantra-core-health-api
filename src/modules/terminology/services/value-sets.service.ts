@@ -345,7 +345,7 @@ export class ValueSetsService {
       // Pertenencia exclusiva: cada término tiene exactamente una categoría,
       // así que la suma de las categorías es el total del glosario sin una
       // consulta más.
-      total: categories.reduce((suma, categoria) => suma + categoria.count, 0),
+      total: categories.reduce((sum, category) => sum + category.count, 0),
     };
   }
 
@@ -566,7 +566,7 @@ export class ValueSetsService {
     // En lote y sólo si las piden: una consulta más para toda la página, o
     // ninguna. Pedirlas concepto a concepto es lo que hacía imposible pintar
     // el nomenclador.
-    const propiedades = options.includeProperties
+    const properties = options.includeProperties
       ? await this.designationsRepo.findPropertiesForConcepts(
           this.em,
           conceptIds,
@@ -599,8 +599,8 @@ export class ValueSetsService {
           ordinal: member.ordinal,
           // Omitido y no `{}`: un concepto sin propiedades y una expansión que
           // no las pidió son cosas distintas, y `{}` las haría indistinguibles.
-          ...(propiedades.has(concept.id)
-            ? { properties: propiedades.get(concept.id) }
+          ...(properties.has(concept.id)
+            ? { properties: properties.get(concept.id) }
             : {}),
         },
       ];

@@ -28,8 +28,8 @@ describe('AddressesService', () => {
     const { em, tx } = createEmMock();
     const repo = {
       create: fn(),
-      findVigenteByOwnerAndUse: fn(),
-      closeVigente: fn(),
+      findCurrentByOwnerAndUse: fn(),
+      closeCurrent: fn(),
     };
     const service = new AddressesService(em as never, repo, logger as never);
     return { service, tx, repo };

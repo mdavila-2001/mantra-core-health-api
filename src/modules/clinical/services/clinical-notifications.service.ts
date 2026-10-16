@@ -3,7 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { NotificationsService } from '../../messaging/services';
 import type { EmitInAppResult } from '../../messaging/notifications.contract';
-import { PersonAccountLinksRepository } from '../../profiles/repositories';
+import { PersonAccountLinksRepository } from '../../profiles/infrastructure/repositories';
 
 /**
  * Carril P1 · los disparadores clínicos de la campana.
@@ -67,9 +67,9 @@ export class ClinicalNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu receta está lista',
+      subject: 'Su receta está lista',
       bodyText:
-        'Tu médico emitió una receta nueva. Podés verla en tu historia clínica.',
+        'Su médico emitió una receta nueva. Puede verla en su historia clínica.',
       destinationType: 'PRESCRIPTION',
       destinationId: medicationRequestId,
       actorUserId,
@@ -90,9 +90,9 @@ export class ClinicalNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu consulta está disponible',
+      subject: 'Su consulta está disponible',
       bodyText:
-        'Se cerró tu consulta y ya podés consultar lo que quedó registrado.',
+        'Se cerró su consulta y ya puede consultar lo que quedó registrado.',
       destinationType: 'ENCOUNTER',
       destinationId: encounterId,
       actorUserId,
@@ -126,9 +126,9 @@ export class ClinicalNotificationsService {
     actorUserId: string,
   ): Promise<EmitInAppResult> {
     return this.emitToPatient(patientProfileId, {
-      subject: 'Tu médico te dejó una orden',
+      subject: 'Su médico le dejó una orden',
       bodyText:
-        'Tenés una orden de estudios nueva. Podés verla en tus órdenes médicas.',
+        'Tiene una orden de estudios nueva. Puede verla en sus órdenes médicas.',
       destinationType: 'SERVICE_REQUEST',
       destinationId: serviceRequestId,
       actorUserId,
@@ -145,7 +145,7 @@ export class ClinicalNotificationsService {
    */
   private async emitToPatient(
     patientProfileId: string,
-    aviso: {
+    notice: {
       /** Título corto del aviso. */
       subject: string;
       /** Cuerpo de una línea. */
@@ -172,7 +172,7 @@ export class ClinicalNotificationsService {
           {
             operation: 'clinical.notification.emit',
             patientProfileId,
-            destination: aviso.destinationType,
+            destination: notice.destinationType,
           },
           'El paciente no tiene cuenta activa: no hay bandeja donde avisar',
         );
@@ -182,24 +182,24 @@ export class ClinicalNotificationsService {
       return await this.notifications.emitInApp({
         recipientUserId: link.userId,
         category: 'CLINICAL',
-        subject: aviso.subject,
-        bodyText: aviso.bodyText,
+        subject: notice.subject,
+        bodyText: notice.bodyText,
         destination: {
-          type: aviso.destinationType,
-          id: aviso.destinationId,
+          type: notice.destinationType,
+          id: notice.destinationId,
         },
         // El rebote hace idempotente el aviso: reintentar el caso de uso —o
         // emitir dos veces por una carrera— no produce dos campanazos del
         // mismo hecho.
-        debounceKey: `clinical:${aviso.destinationType}:${aviso.destinationId}`,
-        actorUserId: aviso.actorUserId,
+        debounceKey: `clinical:${notice.destinationType}:${notice.destinationId}`,
+        actorUserId: notice.actorUserId,
       });
     } catch (error) {
       this.logger.error(
         {
           operation: 'clinical.notification.emit',
           patientProfileId,
-          destination: aviso.destinationType,
+          destination: notice.destinationType,
           err: error,
         },
         'No se pudo avisar al paciente; el acto clínico ya quedó asentado',

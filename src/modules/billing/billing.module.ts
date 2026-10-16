@@ -8,6 +8,7 @@ import {
   BillingPayablesController,
   BillingOperationsController,
   BillingServiceCatalogController,
+  BillingSimulatedController,
 } from './controllers';
 import {
   InvoicesService,
@@ -22,6 +23,7 @@ import {
   KpiSnapshotsService,
   BillingServiceCatalogService,
   ProcedureNomenclatureService,
+  BillingSimulatedService,
 } from './services';
 import {
   InvoicesRepository,
@@ -58,6 +60,7 @@ import {
     BillingPayablesController,
     BillingOperationsController,
     BillingServiceCatalogController,
+    BillingSimulatedController,
   ],
   providers: [
     // Repositorios
@@ -84,6 +87,7 @@ import {
     KpiSnapshotsService,
     BillingServiceCatalogService,
     ProcedureNomenclatureService,
+    BillingSimulatedService,
   ],
   // Carril 18 — `accounting` reutiliza `LedgerService.postToLedger` (anclar
   // `transaction_id` en el documento de origen, idempotente por documento)

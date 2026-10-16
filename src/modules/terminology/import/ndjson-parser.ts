@@ -1,9 +1,9 @@
 import type {
-  FilaLeida,
-  ParseadorDeArchivo,
-  PerfilDeImportacion,
-  ProblemaDeFila,
-  ResultadoDeParseo,
+  ReadRow,
+  FileParser,
+  ImportProfile,
+  RowProblem,
+  ParsingResult,
 } from './row-contract';
 
 /**
@@ -26,74 +26,73 @@ import type {
  * A diferencia de un CSV, acá no hay encabezado: el número de fila es el número
  * de línea del archivo.
  */
-export class NdjsonParser implements ParseadorDeArchivo {
+export class NdjsonParser implements FileParser {
   readonly formato = 'ndjson' as const;
 
   /**
    * Parsea el archivo contra las columnas del perfil.
    *
    * @param buffer - Contenido del archivo.
-   * @param perfil - Qué columnas se esperan.
+   * @param profile - Qué columnas se esperan.
    * @returns Las filas leídas y los problemas de forma.
    */
-  parsear(buffer: Buffer, perfil: PerfilDeImportacion): ResultadoDeParseo {
-    const filas: FilaLeida[] = [];
-    const problemas: ProblemaDeFila[] = [];
-    const esperadas = new Set(perfil.columnas.map((columna) => columna.nombre));
+  parse(buffer: Buffer, profile: ImportProfile): ParsingResult {
+    const rows: ReadRow[] = [];
+    const problems: RowProblem[] = [];
+    const expected = new Set(profile.columnas.map((column) => column.nombre));
 
     buffer
       .toString('utf8')
       .split(/\r?\n/)
-      .forEach((linea, indice) => {
-        const texto = linea.trim();
+      .forEach((line, index) => {
+        const text = line.trim();
         // Las líneas vacías no son un error: separan bloques y terminan el
         // archivo. No se cuentan como leídas.
-        if (texto === '') return;
+        if (text === '') return;
 
-        const numero = indice + 1;
+        const lineNumber = index + 1;
 
-        let crudo: unknown;
+        let raw: unknown;
         try {
-          crudo = JSON.parse(texto);
+          raw = JSON.parse(text);
         } catch {
-          problemas.push({
-            fila: numero,
+          problems.push({
+            fila: lineNumber,
             motivo: 'la línea no es un JSON válido',
           });
           return;
         }
-        if (
-          typeof crudo !== 'object' ||
-          crudo === null ||
-          Array.isArray(crudo)
-        ) {
-          problemas.push({ fila: numero, motivo: 'la línea no es un objeto' });
+        if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+          problems.push({
+            fila: lineNumber,
+            motivo: 'la línea no es un objeto',
+          });
           return;
         }
 
-        const valores: Record<string, string> = {};
-        let sirve = true;
-        for (const [clave, valor] of Object.entries(crudo)) {
+        const values: Record<string, string> = {};
+        let serves = true;
+        for (const [key, value] of Object.entries(raw)) {
           // Una clave que el perfil no espera se ignora en silencio: en un
           // archivo por líneas es habitual que vengan campos de más, y
           // rechazarlos obligaría a recortar el archivo antes de cargarlo.
-          if (!esperadas.has(clave)) continue;
-          if (valor === undefined || valor === null) continue;
-          if (typeof valor !== 'string') {
-            problemas.push({
-              fila: numero,
-              columna: clave,
-              motivo: `«${clave}» no es texto`,
+          if (!expected.has(key)) continue;
+          if (value === undefined || value === null) continue;
+          if (typeof value !== 'string') {
+            problems.push({
+              fila: lineNumber,
+              columna: key,
+              motivo: `«${key}» no es texto`,
             });
-            sirve = false;
+            serves = false;
             break;
           }
-          valores[clave] = valor;
+          values[key] = value;
         }
 
-        if (sirve) filas.push({ numero, valores });
+        if (serves) rows.push({ numero: lineNumber, valores: values });
       });
 
-    return { filas, problemas };
+    return { filas: rows, problemas: problems };
   }
 }

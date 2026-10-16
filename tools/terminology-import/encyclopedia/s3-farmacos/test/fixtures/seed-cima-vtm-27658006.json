@@ -1,0 +1,15 @@
+{
+ "slug": "cima-vtm-27658006",
+ "code": "27658006",
+ "codeSystem": "cima-vtm",
+ "esName": "Amoxicilina",
+ "categoryKey": "pharmacology",
+ "imageUrl": "https://cima.aemps.es/cima/fotos/full/formafarmac/62880/62880_formafarmac.jpg",
+ "imageOrigin": "cima",
+ "externalIds": {
+  "atc": [
+   "J01CA04"
+  ],
+  "wikidata": "Q201928"
+ }
+}

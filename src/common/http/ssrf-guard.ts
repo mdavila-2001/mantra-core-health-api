@@ -256,8 +256,8 @@ export async function resolveOutboundDestination(
   const addresses = await resolver(hostname);
   if (addresses.length === 0) throw blocked(hostname);
   if (enforce) {
-    const privada = addresses.find((a) => isBlockedAddress(a.address));
-    if (privada) throw blocked(hostname, privada.address);
+    const isPrivate = addresses.find((a) => isBlockedAddress(a.address));
+    if (isPrivate) throw blocked(hostname, isPrivate.address);
   }
   return { url, hostname, addresses };
 }

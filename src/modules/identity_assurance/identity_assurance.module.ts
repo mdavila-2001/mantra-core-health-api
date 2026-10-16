@@ -6,6 +6,7 @@ import * as entities from './entities';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { DirectoryModule } from '../directory/directory.module';
 import { CommunityModule } from '../community/community.module';
+import { CommonModule } from '../common/common.module';
 import {
   IdentityAuthoritiesController,
   IdentityPoliciesController,
@@ -61,6 +62,7 @@ import {
     // este módulo sólo sabe que el caso quedó verificado. Sin ciclo: community
     // no importa `identity_assurance`.
     CommunityModule,
+    CommonModule,
   ],
   controllers: [
     IdentityAuthoritiesController,

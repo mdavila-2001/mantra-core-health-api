@@ -1,0 +1,104 @@
+(node:2372) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/architecture/module-layering.spec.ts
+  ● capas de los módulos migrados › profiles: ninguna capa viola las reglas de dependencia
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "src/modules/profiles/presentation/controllers/profiles-patients.controller.ts → ../../../clinical/services: entra a 'clinical' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    + ]
+
+      211 |     '%s: ninguna capa viola las reglas de dependencia',
+      212 |     (name) => {
+    > 213 |       expect(violationsOf(name)).toEqual([]);
+          |                                  ^
+      214 |     },
+      215 |   );
+      216 |
+
+      at toEqual (architecture/module-layering.spec.ts:213:34)
+
+  ● capas de los módulos migrados › insurance: ninguna capa viola las reglas de dependencia
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 56
+
+    - Array []
+    + Array [
+    +   "src/modules/insurance/application/services/claims-read.service.ts → ../../../terminology/entities: entra a 'terminology' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/claims-read.service.ts → ../../../profiles/entities: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/claims-read.service.ts → ../../../practice/services: entra a 'practice' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/claims-read.service.ts → ../../../clinical/entities: entra a 'clinical' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/claims-read.service.ts → ../../../clinical/services/duplicate-study-detector: entra a 'clinical' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/claims-read.service.ts → ../../../diagnostic_units/entities: entra a 'diagnostic_units' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/claims.service.ts → ../../../practice/services: entra a 'practice' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/coverage.service.ts → ../../../profiles/infrastructure/repositories: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/declared-coverages-reader.ts → ../../../profiles/domain/patient-coverage-validity: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/declared-coverages-reader.ts → ../../../profiles/presentation/dto/read-patients.dto: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-analytics.service.ts → ../../../profiles/domain/patient-coverage-validity: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-campaigns.service.ts → ../../../audit/services: entra a 'audit' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-campaigns.service.ts → ../../../profiles/application/services/profile-ownership.service: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-campaigns.service.ts → ../../../profiles/domain/patient-coverage-validity: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability-pdf.service.ts → ../../../clinical/services/alovida-mark: entra a 'clinical' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability-pdf.service.ts → ../../../clinical/services/prescription-qr: entra a 'clinical' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../profiles/application/services/profile-ownership.service: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../profiles/infrastructure/repositories: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../common/repositories: entra a 'common' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../profiles/domain/person-name: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../terminology/entities: entra a 'terminology' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../common/services: entra a 'common' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../common/dto: entra a 'common' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../health_data/repositories/data-release.repository: entra a 'health_data' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../health_data/repositories/health-provenance.repository: entra a 'health_data' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../audit/repositories/dsar-requests.repository: entra a 'audit' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../audit/repositories/data-access-log.repository: entra a 'audit' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../audit/services: entra a 'audit' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-portability.service.ts → ../../../scheduling/infrastructure/config/agenda-notices.env: entra a 'scheduling' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurance-read.service.ts → ../../../terminology/entities: entra a 'terminology' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurer-patients.query.ts → ../../../terminology/repositories/glossary-search.sql: entra a 'terminology' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurer-patients.service.ts → ../../../community/services/community-messaging.service: entra a 'community' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurer-patients.service.ts → ../../../audit/repositories/data-access-log.repository: entra a 'audit' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurer-patients.service.ts → ../../../profiles/domain/patient-coverage-validity: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurer-received-claims.service.ts → ../../../messaging/services: entra a 'messaging' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurer-received-claims.service.ts → ../../../profiles/entities: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/insurer-received-claims.service.ts → ../../../terminology/entities: entra a 'terminology' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/linked-claim-order.service.ts → ../../../clinical/entities: entra a 'clinical' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/linked-claim-order.service.ts → ../../../diagnostic_units/entities: entra a 'diagnostic_units' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/linked-claim-order.service.ts → ../../../pharmacy/entities: entra a 'pharmacy' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/linked-claim-order.service.ts → ../../../pharmacy_inventory/entities: entra a 'pharmacy_inventory' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/linked-claim-order.service.ts → ../../../pharmacy_inventory/services/pharmacy-pricing: entra a 'pharmacy_inventory' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/my-claims.service.ts → ../../../clinical/entities: entra a 'clinical' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/my-claims.service.ts → ../../../diagnostic_units/entities: entra a 'diagnostic_units' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/patient-settlement.service.ts → ../../../profiles/infrastructure/repositories: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/practitioner-settlement-batches.service.ts → ../../../practice/services: entra a 'practice' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/practitioner-settlement-batches.service.ts → ../../../diagnostic_units/entities: entra a 'diagnostic_units' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/practitioner-settlement-batches.service.ts → ../../../pharmacy/entities: entra a 'pharmacy' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/practitioner-settlement-batches.service.ts → ../../../terminology/entities: entra a 'terminology' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/prior-auth-read.service.ts → ../../../terminology/entities: entra a 'terminology' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/prior-auth-read.service.ts → ../../../profiles/entities: entra a 'profiles' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/prior-auth-read.service.ts → ../../../pharmacy/entities: entra a 'pharmacy' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/prior-auth-read.service.ts → ../../../diagnostic_units/entities: entra a 'diagnostic_units' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    +   "src/modules/insurance/application/services/prior-auth.service.ts → ../../../pharmacy_inventory/entities: entra a 'pharmacy_inventory' sin puerto: sólo infrastructure/ habla con otros contextos (o sus *.concepts)",
+    + ]
+
+      211 |     '%s: ninguna capa viola las reglas de dependencia',
+      212 |     (name) => {
+    > 213 |       expect(violationsOf(name)).toEqual([]);
+          |                                  ^
+      214 |     },
+      215 |   );
+      216 |
+
+      at toEqual (architecture/module-layering.spec.ts:213:34)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 5 passed, 7 total
+Snapshots:   0 total
+Time:        0.446 s, estimated 1 s

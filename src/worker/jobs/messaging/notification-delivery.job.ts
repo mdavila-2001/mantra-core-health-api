@@ -159,11 +159,11 @@ export class NotificationDeliveryJob {
     // esta rama, el adaptador por defecto devolvía `PROVIDER_NOT_CONFIGURED` y
     // toda notificación de la campana que llegara por el camino genérico
     // quedaba `FAILED` — un fallo que no describía ningún problema real.
-    const esInApp =
+    const isInApp =
       request.channelTypeConceptId === CONCEPTS.CHANNEL_TYPE_IN_APP;
 
     let result: ProviderDeliveryOutcome;
-    if (esInApp) {
+    if (isInApp) {
       span.setAttribute('messaging.delivery.provider', 'in-app');
       result = { outcome: 'SENT' };
     } else {

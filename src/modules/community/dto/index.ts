@@ -30,3 +30,4 @@ export * from './search-index.dto';
 export * from './verification.dto';
 export * from './profile-stats.dto';
 export * from './group-wall.dto';
+export * from './party-rating.dto';

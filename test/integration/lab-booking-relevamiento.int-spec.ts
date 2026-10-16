@@ -155,7 +155,7 @@ describe('J2 · relevamiento: reservar en un laboratorio con el motor existente'
   });
 
   it('5 · la reserva del laboratorio aparece en los turnos del paciente', async () => {
-    // Es el punto 5 de las tareas del carril: «Mis turnos» tiene que listar los
+    // Es el punto 5 de las tareas del carril: «Mis citas» tiene que listar los
     // de laboratorio junto con los médicos. Si el listado los excluyera, la
     // persona reservaría algo que después no puede ver.
     const res = await http()

@@ -65,25 +65,25 @@ export class CommunityPresenceService {
    * @returns `true` si **no** estaba en línea antes (pasó de ausente a
    *   presente: hay que avisar); `false` si sólo se renovó.
    */
-  async marcarEnLinea(profileId: string): Promise<boolean> {
+  async markInLine(profileId: string): Promise<boolean> {
     try {
-      const ahora = new Date().toISOString();
-      const [estaba] = await Promise.all([
+      const now = new Date().toISOString();
+      const [was] = await Promise.all([
         this.redis.set(
-          this.clavePresencia(profileId),
-          ahora,
+          this.presenceKey(profileId),
+          now,
           'EX',
           PRESENCE_TTL_SEC,
           'GET',
         ),
         this.redis.set(
-          this.claveUltimaVez(profileId),
-          ahora,
+          this.lastTimeKey(profileId),
+          now,
           'EX',
           LAST_SEEN_TTL_SEC,
         ),
       ]);
-      return estaba === null;
+      return was === null;
     } catch (error) {
       this.logger.warn(
         { operation: 'community.presence.online', profileId, err: error },
@@ -99,19 +99,19 @@ export class CommunityPresenceService {
    * @param profileId - Perfil cuyo último socket se cerró.
    * @returns La hora que quedó como «última vez», o `null` si Redis no respondió.
    */
-  async marcarDesconectado(profileId: string): Promise<Date | null> {
+  async markDisconnected(profileId: string): Promise<Date | null> {
     try {
-      const ahora = new Date();
+      const now = new Date();
       await Promise.all([
-        this.redis.del(this.clavePresencia(profileId)),
+        this.redis.del(this.presenceKey(profileId)),
         this.redis.set(
-          this.claveUltimaVez(profileId),
-          ahora.toISOString(),
+          this.lastTimeKey(profileId),
+          now.toISOString(),
           'EX',
           LAST_SEEN_TTL_SEC,
         ),
       ]);
-      return ahora;
+      return now;
     } catch (error) {
       this.logger.warn(
         { operation: 'community.presence.offline', profileId, err: error },
@@ -128,17 +128,17 @@ export class CommunityPresenceService {
    * @param profileIds - Perfiles a consultar.
    * @returns Una entrada por perfil, en el mismo orden.
    */
-  async presenciaDe(profileIds: string[]): Promise<ProfilePresenceDto[]> {
+  async presence(profileIds: string[]): Promise<ProfilePresenceDto[]> {
     if (profileIds.length === 0) return [];
     try {
-      const [enLinea, ultimaVez] = await Promise.all([
-        this.redis.mget(profileIds.map((id) => this.clavePresencia(id))),
-        this.redis.mget(profileIds.map((id) => this.claveUltimaVez(id))),
+      const [enLine, lastTime] = await Promise.all([
+        this.redis.mget(profileIds.map((id) => this.presenceKey(id))),
+        this.redis.mget(profileIds.map((id) => this.lastTimeKey(id))),
       ]);
-      return profileIds.map((profileId, indice) => ({
+      return profileIds.map((profileId, index) => ({
         profileId,
-        online: enLinea[indice] !== null && enLinea[indice] !== undefined,
-        lastSeenAt: aFecha(ultimaVez[indice]),
+        online: enLine[index] !== null && enLine[index] !== undefined,
+        lastSeenAt: toDate(lastTime[index]),
       }));
     } catch (error) {
       this.logger.warn(
@@ -153,17 +153,17 @@ export class CommunityPresenceService {
     }
   }
 
-  private clavePresencia(profileId: string): string {
+  private presenceKey(profileId: string): string {
     return `community:presence:${profileId}`;
   }
 
-  private claveUltimaVez(profileId: string): string {
+  private lastTimeKey(profileId: string): string {
     return `community:lastseen:${profileId}`;
   }
 }
 
-function aFecha(valor: string | null | undefined): Date | null {
-  if (valor === null || valor === undefined) return null;
-  const fecha = new Date(valor);
-  return Number.isNaN(fecha.getTime()) ? null : fecha;
+function toDate(value: string | null | undefined): Date | null {
+  if (value === null || value === undefined) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
 }

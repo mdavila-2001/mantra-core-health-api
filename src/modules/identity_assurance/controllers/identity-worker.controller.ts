@@ -20,6 +20,7 @@ export class EvidenceLifecycleScanDto {
 }
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -59,6 +60,11 @@ export class IdentityWorkerController {
     private readonly storagePurge?: IdentityEvidenceStoragePurgeService,
   ) {}
 
+  @Audited({
+    action: 'IDENTITY_EVIDENCE_PURGE_REVIEWED',
+    entity: 'identity_evidence_record',
+    entityId: 'result.id',
+  })
   @Post('evidence/storage-purge-review')
   @Roles('SYSTEM')
   @ApiOperation({
@@ -70,6 +76,11 @@ export class IdentityWorkerController {
     return this.storagePurge.review();
   }
 
+  @Audited({
+    action: 'IDENTITY_EVIDENCE_LIFECYCLE_SCANNED',
+    entity: 'identity_evidence_record',
+    entityId: 'result.id',
+  })
   @Post('evidence/lifecycle-scan')
   @Roles('SYSTEM')
   @ApiOperation({
@@ -95,6 +106,11 @@ export class IdentityWorkerController {
   }
 
   /** Asienta el intento de despacho contra la autoridad externa. */
+  @Audited({
+    action: 'VERIFICATION_CHECK_ATTEMPT_RECORDED',
+    entity: 'identity_check',
+    entityId: 'param:id',
+  })
   @Post('checks/:id/attempts')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -113,6 +129,11 @@ export class IdentityWorkerController {
    * Asienta el veredicto de la autoridad. Es el punto que puede cerrar el caso
    * (verificarlo y emitir su aserción, o rechazarlo).
    */
+  @Audited({
+    action: 'VERIFICATION_CHECK_RESULT_RECORDED',
+    entity: 'identity_check',
+    entityId: 'param:id',
+  })
   @Post('checks/:id/results')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

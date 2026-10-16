@@ -2,7 +2,7 @@
 
 Emulador **standalone** de los cuatro proveedores externos que
 `mantra-core-health-redesa-api` todavía no conecta de verdad porque ningún
-vendor concreto vive en ese repo (ver `ESTADO-Y-PENDIENTES.md` del backend
+vendor concreto vive en ese repo (ver `docs/progress/ESTADO-Y-PENDIENTES.md` del backend
 principal, sección "Conectar proveedores externos reales a los workers"):
 
 | Emula | Endpoint | Lo que sustituye en el backend principal |

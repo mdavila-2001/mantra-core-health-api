@@ -188,8 +188,8 @@ describe('GraphAnalyticsService', () => {
     it('sólo alerta por encima del umbral', async () => {
       const d = build();
 
-      const bajo = await d.service.computeRiskScores(DTO, actor);
-      expect(bajo.alerted).toBe(0);
+      const low = await d.service.computeRiskScores(DTO, actor);
+      expect(low.alerted).toBe(0);
 
       const d2 = build();
       const alto = await d2.service.computeRiskScores(

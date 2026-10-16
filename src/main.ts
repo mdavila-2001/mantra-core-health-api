@@ -4,7 +4,6 @@
 // tarde y no se emite ni un span. Ver `src/observability/telemetry.bootstrap.ts`.
 import './observability/telemetry.bootstrap';
 
-import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
@@ -17,6 +16,7 @@ import type { Server, ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
 import {
   buildCorsOptions,
+  createGlobalValidationPipe,
   describeBuild,
   installProcessGuards,
   installShutdownWatchdog,
@@ -183,18 +183,10 @@ async function bootstrap() {
   // gateways heredan la misma allowlist que el CORS de arriba.
   app.useWebSocketAdapter(new CorsIoAdapter(app, corsOptions));
 
-  // Validación global de DTO. `whitelist` + `forbidNonWhitelisted` cierran el
-  // mass-assignment: cualquier propiedad no declarada en el DTO se rechaza en
-  // lugar de filtrarse a la capa de dominio. `transform` habilita la coerción de
-  // tipos declarada con class-transformer (p. ej. query params numéricos).
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
+  // Validación global de DTO: ver `createGlobalValidationPipe`. Es la misma
+  // fábrica que usa el harness de integración, para que las pruebas validen el
+  // contrato que corre de verdad.
+  app.useGlobalPipes(createGlobalValidationPipe());
 
   // OpenAPI/Swagger en /docs y referencia interactiva Scalar en /reference.
   // Solo fuera de producción: en producción publicarían el mapa completo de

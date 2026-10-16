@@ -7,15 +7,15 @@ import { CarePlans } from '../entities';
  * y las actividades de cada plan resueltas en lote (no N+1).
  */
 describe('CarePlansRepository.findByEncounter', () => {
-  function emQueRecuerda(activities: unknown[] = []) {
-    const llamadas: unknown[] = [];
+  function rememberingEm(activities: unknown[] = []) {
+    const calls: unknown[] = [];
     return {
-      llamadas,
+      llamadas: calls,
       em: {
         find: (...args: unknown[]) => {
-          llamadas.push(args);
-          const [entidad] = args;
-          if (entidad === CarePlans) {
+          calls.push(args);
+          const [entity] = args;
+          if (entity === CarePlans) {
             return Promise.resolve([{ id: 'cp-1', createdAt: new Date() }]);
           }
           return Promise.resolve(activities);
@@ -25,11 +25,11 @@ describe('CarePlansRepository.findByEncounter', () => {
   }
 
   it('filtra los planes por el encuentro y ordena por createdAt, id', async () => {
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas: calls } = rememberingEm();
 
     await new CarePlansRepository().findByEncounter(em, 'enc-1');
 
-    expect(llamadas[0]).toEqual([
+    expect(calls[0]).toEqual([
       CarePlans,
       { encounterId: 'enc-1' },
       { orderBy: { createdAt: 'ASC', id: 'ASC' } },
@@ -37,11 +37,11 @@ describe('CarePlansRepository.findByEncounter', () => {
   });
 
   it('resuelve las actividades del plan en la misma llamada', async () => {
-    const actividad = { id: 'a-1', carePlanId: 'cp-1' };
-    const { em } = emQueRecuerda([actividad]);
+    const activity = { id: 'a-1', carePlanId: 'cp-1' };
+    const { em } = rememberingEm([activity]);
 
     const [plan] = await new CarePlansRepository().findByEncounter(em, 'enc-1');
 
-    expect(plan.activities).toEqual([actividad]);
+    expect(plan.activities).toEqual([activity]);
   });
 });

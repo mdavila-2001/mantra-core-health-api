@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import { ResourceNotFoundException } from '../../../common';
 import { PharmacyMarketplaceService } from './pharmacy-marketplace.service';
-import type { OfertaPublicada } from '../repositories';
+import type { PublishedOffer } from '../repositories';
 
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
@@ -9,12 +9,12 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 const SANTA_CRUZ = { lat: -17.7833, lng: -63.1821 };
 /** A ~2 km de la plaza: la farmacia del barrio. */
-const CERCA = { lat: -17.7833, lng: -63.2021 };
+const NEARBY = { lat: -17.7833, lng: -63.2021 };
 /** Cochabamba: a ~320 km, fuera de cualquier radio urbano. */
-const LEJOS = { lat: -17.3895, lng: -66.1568 };
+const FAR = { lat: -17.3895, lng: -66.1568 };
 
 /** Una oferta publicada, con lo mínimo y lo que cada prueba cambie. */
-function oferta(extra: Partial<OfertaPublicada> = {}): OfertaPublicada {
+function offer(extra: Partial<PublishedOffer> = {}): PublishedOffer {
   return {
     conceptId: 'concepto-losartan',
     atcCode: 'C09CA01',
@@ -23,8 +23,8 @@ function oferta(extra: Partial<OfertaPublicada> = {}): OfertaPublicada {
     pharmacyName: 'Farmacia Una',
     addressText: 'Av. Siempreviva 742',
     city: 'Santa Cruz de la Sierra',
-    latitude: CERCA.lat,
-    longitude: CERCA.lng,
+    latitude: NEARBY.lat,
+    longitude: NEARBY.lng,
     brandName: 'Cozaar',
     strengthText: '50 mg',
     packageSizeText: 'Caja x 30 comprimidos',
@@ -38,11 +38,11 @@ function oferta(extra: Partial<OfertaPublicada> = {}): OfertaPublicada {
   };
 }
 
-function build(ofertas: readonly OfertaPublicada[] = []) {
+function build(offers: readonly PublishedOffer[] = []) {
   const fork = {};
   const em = { fork: mockFn(() => fork) };
   const repo = {
-    findPublishedOffers: mockFn().mockResolvedValue([...ofertas]),
+    findPublishedOffers: mockFn().mockResolvedValue([...offers]),
   };
   const service = new PharmacyMarketplaceService(em as any, repo as any);
   return { service, repo };
@@ -51,162 +51,154 @@ function build(ofertas: readonly OfertaPublicada[] = []) {
 describe('PharmacyMarketplaceService · la vitrina', () => {
   it('agrupa las ofertas por medicamento: una tarjeta, no una por farmacia', async () => {
     const { service } = build([
-      oferta({ pharmacySlug: 'a', price: '78.00' }),
-      oferta({ pharmacySlug: 'b', price: '92.00' }),
-      oferta({ pharmacySlug: 'c', price: '67.00' }),
+      offer({ pharmacySlug: 'a', price: '78.00' }),
+      offer({ pharmacySlug: 'b', price: '92.00' }),
+      offer({ pharmacySlug: 'c', price: '67.00' }),
     ]);
 
-    const pagina = await service.listMedications({});
+    const page = await service.listMedications({});
 
-    expect(pagina.items).toHaveLength(1);
-    expect(pagina.items[0].pharmacyCount).toBe(3);
+    expect(page.items).toHaveLength(1);
+    expect(page.items[0].pharmacyCount).toBe(3);
   });
 
   it('cuenta farmacias distintas, no ofertas: dos marcas en la misma son una', async () => {
     const { service } = build([
-      oferta({ pharmacySlug: 'a', brandName: 'Cozaar' }),
-      oferta({ pharmacySlug: 'a', brandName: 'Losacor' }),
+      offer({ pharmacySlug: 'a', brandName: 'Cozaar' }),
+      offer({ pharmacySlug: 'a', brandName: 'Losacor' }),
     ]);
 
-    const pagina = await service.listMedications({});
+    const page = await service.listMedications({});
 
-    expect(pagina.items[0].pharmacyCount).toBe(1);
-    expect(pagina.items[0].brands).toEqual(['Cozaar', 'Losacor']);
+    expect(page.items[0].pharmacyCount).toBe(1);
+    expect(page.items[0].brands).toEqual(['Cozaar', 'Losacor']);
   });
 
   it('el rango de precio conserva el texto exacto que publicó la farmacia', async () => {
     const { service } = build([
-      oferta({ pharmacySlug: 'a', price: '46.00' }),
-      oferta({ pharmacySlug: 'b', price: '61.03' }),
+      offer({ pharmacySlug: 'a', price: '46.00' }),
+      offer({ pharmacySlug: 'b', price: '61.03' }),
     ]);
 
-    const [tarjeta] = (await service.listMedications({})).items;
+    const [card] = (await service.listMedications({})).items;
 
     // `46.00` y no `46`: reformatear por `number` pierde el centavo, que es
     // justamente el dato que la vitrina promete mostrar sin tocar.
-    expect(tarjeta.priceFrom).toBe('46.00');
-    expect(tarjeta.priceTo).toBe('61.03');
+    expect(card.priceFrom).toBe('46.00');
+    expect(card.priceTo).toBe('61.03');
   });
 
   it('deriva el grupo terapéutico del primer nivel del ATC', async () => {
     const { service } = build([
-      oferta({ atcCode: 'C09CA01' }),
-      oferta({
+      offer({ atcCode: 'C09CA01' }),
+      offer({
         conceptId: 'c-amoxi',
         atcCode: 'J01CA04',
         genericName: 'Amoxicilina',
       }),
     ]);
 
-    const pagina = await service.listMedications({});
+    const page = await service.listMedications({});
 
-    expect(pagina.groups).toEqual([
-      'Antiinfecciosos',
-      'Aparato cardiovascular',
-    ]);
+    expect(page.groups).toEqual(['Antiinfecciosos', 'Aparato cardiovascular']);
   });
 
   it('sin origen no inventa distancias y ordena por cobertura', async () => {
     const { service } = build([
-      oferta({
+      offer({
         conceptId: 'poco',
         genericName: 'Vancomicina',
         pharmacySlug: 'a',
       }),
-      oferta({
+      offer({
         conceptId: 'mucho',
         genericName: 'Paracetamol',
         pharmacySlug: 'a',
       }),
-      oferta({
+      offer({
         conceptId: 'mucho',
         genericName: 'Paracetamol',
         pharmacySlug: 'b',
       }),
     ]);
 
-    const pagina = await service.listMedications({});
+    const page = await service.listMedications({});
 
-    expect(pagina.items[0].genericName).toBe('Paracetamol');
-    expect(pagina.items.every((item) => item.nearestKm === null)).toBe(true);
+    expect(page.items[0].genericName).toBe('Paracetamol');
+    expect(page.items.every((item) => item.nearestKm === null)).toBe(true);
   });
 
   it('con origen ordena por cercanía y rotula la distancia más corta', async () => {
     const { service } = build([
-      oferta({
+      offer({
         conceptId: 'lejano',
         genericName: 'Vancomicina',
-        ...coord(LEJOS),
+        ...coord(FAR),
       }),
-      oferta({
+      offer({
         conceptId: 'cercano',
         genericName: 'Paracetamol',
-        ...coord(CERCA),
+        ...coord(NEARBY),
       }),
     ]);
 
-    const pagina = await service.listMedications({ origin: SANTA_CRUZ });
+    const page = await service.listMedications({ origin: SANTA_CRUZ });
 
-    expect(pagina.items[0].genericName).toBe('Paracetamol');
-    expect(pagina.items[0].nearestKm).toBeLessThan(5);
+    expect(page.items[0].genericName).toBe('Paracetamol');
+    expect(page.items[0].nearestKm).toBeLessThan(5);
   });
 
   it('el radio deja afuera lo que está lejos, y sólo cuando hay origen', async () => {
-    const ofertas = [
-      oferta({
+    const offers = [
+      offer({
         conceptId: 'lejano',
         genericName: 'Vancomicina',
-        ...coord(LEJOS),
+        ...coord(FAR),
       }),
-      oferta({
+      offer({
         conceptId: 'cercano',
         genericName: 'Paracetamol',
-        ...coord(CERCA),
+        ...coord(NEARBY),
       }),
     ];
 
-    const acotada = await build(ofertas).service.listMedications({
+    const narrowed = await build(offers).service.listMedications({
       origin: SANTA_CRUZ,
       radiusKm: 25,
     });
-    expect(acotada.items.map((item) => item.genericName)).toEqual([
+    expect(narrowed.items.map((item) => item.genericName)).toEqual([
       'Paracetamol',
     ]);
 
     // Sin origen el radio no puede aplicarse: no hay desde dónde medir.
-    const sinOrigen = await build(ofertas).service.listMedications({
+    const withoutOrigin = await build(offers).service.listMedications({
       radiusKm: 25,
     });
-    expect(sinOrigen.items).toHaveLength(2);
+    expect(withoutOrigin.items).toHaveLength(2);
   });
 
   it('los grupos ofrecidos no se achican al elegir uno: se puede cambiar de idea', async () => {
     const { service } = build([
-      oferta({ conceptId: 'cardio', atcCode: 'C09CA01' }),
-      oferta({
+      offer({ conceptId: 'cardio', atcCode: 'C09CA01' }),
+      offer({
         conceptId: 'anti',
         atcCode: 'J01CA04',
         genericName: 'Amoxicilina',
       }),
     ]);
 
-    const pagina = await service.listMedications({ group: 'Antiinfecciosos' });
+    const page = await service.listMedications({ group: 'Antiinfecciosos' });
 
-    expect(pagina.items.map((item) => item.genericName)).toEqual([
-      'Amoxicilina',
-    ]);
-    expect(pagina.groups).toEqual([
-      'Antiinfecciosos',
-      'Aparato cardiovascular',
-    ]);
+    expect(page.items.map((item) => item.genericName)).toEqual(['Amoxicilina']);
+    expect(page.groups).toEqual(['Antiinfecciosos', 'Aparato cardiovascular']);
   });
 
   it('recorta el tope al máximo y nunca lo deja en cero', async () => {
-    const muchas = Array.from({ length: 80 }, (_, i) =>
-      oferta({ conceptId: `c-${i}`, genericName: `Medicamento ${i}` }),
+    const many = Array.from({ length: 80 }, (_, i) =>
+      offer({ conceptId: `c-${i}`, genericName: `Medicamento ${i}` }),
     );
 
-    const { service } = build(muchas);
+    const { service } = build(many);
 
     expect((await service.listMedications({ limit: 999 })).items).toHaveLength(
       60,
@@ -228,12 +220,12 @@ describe('PharmacyMarketplaceService · la disponibilidad', () => {
 
   it('pone primero lo que hay en stock, aunque haya algo más barato agotado', async () => {
     const { service } = build([
-      oferta({
+      offer({
         pharmacySlug: 'barata-sin-stock',
         price: '50.00',
         availableQuantity: 0,
       }),
-      oferta({
+      offer({
         pharmacySlug: 'cara-con-stock',
         price: '90.00',
         availableQuantity: 4,
@@ -250,7 +242,7 @@ describe('PharmacyMarketplaceService · la disponibilidad', () => {
   });
 
   it('no esconde la oferta agotada: la publica y dice que no hay stock', async () => {
-    const { service } = build([oferta({ availableQuantity: 0 })]);
+    const { service } = build([offer({ availableQuantity: 0 })]);
 
     const { offers } = await service.getAvailability('concepto-losartan', {});
 
@@ -261,30 +253,30 @@ describe('PharmacyMarketplaceService · la disponibilidad', () => {
 
   it('la ficha se arma con TODAS las ofertas, aunque el radio recorte la lista', async () => {
     const { service } = build([
-      oferta({ pharmacySlug: 'cerca', price: '90.00', ...coord(CERCA) }),
-      oferta({ pharmacySlug: 'lejos', price: '45.00', ...coord(LEJOS) }),
+      offer({ pharmacySlug: 'cerca', price: '90.00', ...coord(NEARBY) }),
+      offer({ pharmacySlug: 'lejos', price: '45.00', ...coord(FAR) }),
     ]);
 
-    const resultado = await service.getAvailability('concepto-losartan', {
+    const result = await service.getAvailability('concepto-losartan', {
       origin: SANTA_CRUZ,
       radiusKm: 25,
     });
 
     // La lista se acota, pero «desde Bs 45» sigue siendo cierto del país: un
     // rango calculado sólo sobre lo cercano sería un precio inventado.
-    expect(resultado.offers.map((o) => o.pharmacySlug)).toEqual(['cerca']);
-    expect(resultado.medication.priceFrom).toBe('45.00');
+    expect(result.offers.map((o) => o.pharmacySlug)).toEqual(['cerca']);
+    expect(result.medication.priceFrom).toBe('45.00');
   });
 
   it('compone la presentación con lo que la farmacia publique, y nada más', async () => {
     const { service } = build([
-      oferta({ pharmacySlug: 'completa' }),
-      oferta({
+      offer({ pharmacySlug: 'completa' }),
+      offer({
         pharmacySlug: 'parcial',
         strengthText: '50 mg',
         packageSizeText: null,
       }),
-      oferta({
+      offer({
         pharmacySlug: 'vacia',
         strengthText: null,
         packageSizeText: null,
@@ -292,17 +284,15 @@ describe('PharmacyMarketplaceService · la disponibilidad', () => {
     ]);
 
     const { offers } = await service.getAvailability('concepto-losartan', {});
-    const porSlug = new Map(
-      offers.map((o) => [o.pharmacySlug, o.presentation]),
-    );
+    const bySlug = new Map(offers.map((o) => [o.pharmacySlug, o.presentation]));
 
-    expect(porSlug.get('completa')).toBe('50 mg · Caja x 30 comprimidos');
-    expect(porSlug.get('parcial')).toBe('50 mg');
-    expect(porSlug.get('vacia')).toBeNull();
+    expect(bySlug.get('completa')).toBe('50 mg · Caja x 30 comprimidos');
+    expect(bySlug.get('parcial')).toBe('50 mg');
+    expect(bySlug.get('vacia')).toBeNull();
   });
 
   it('sin origen las distancias viajan en null, no en cero', async () => {
-    const { service } = build([oferta()]);
+    const { service } = build([offer()]);
 
     const { offers } = await service.getAvailability('concepto-losartan', {});
 

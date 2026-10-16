@@ -1,4 +1,3 @@
-import { ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { MikroORM } from '@mikro-orm/postgresql';
 import type { INestApplication } from '@nestjs/common';
@@ -6,7 +5,13 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { createHash } from 'node:crypto';
 import pg from 'pg';
 import { AppModule } from '../../src/app.module';
-import { CONCEPTS, SEED, TokenService, createdBy } from '../../src/common';
+import {
+  CONCEPTS,
+  SEED,
+  TokenService,
+  createGlobalValidationPipe,
+  createdBy,
+} from '../../src/common';
 import { Logger } from 'nestjs-pino';
 import { Users, UserGlobalRoles } from '../../src/modules/iam/entities';
 import {
@@ -197,14 +202,7 @@ export async function bootstrapTestApp(
   // está registrado como APP_FILTER en AppModule, así que no se vuelve a añadir.
   app.useLogger(app.get(Logger));
   app.flushLogs();
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
+  app.useGlobalPipes(createGlobalValidationPipe());
   // Mismo adaptador que `main.ts`. Tiene que ir antes de `init()`: es cuando
   // Nest conecta cada `@WebSocketGateway` al servidor.
   if (opts.realtime) {
@@ -861,9 +859,18 @@ const OWNER_SIN_FK = [
  * cuelga de la persona o del tenant *antes* de llegar acá, que resuelve cada
  * llamador por su cuenta.
  *
+ * Una cuenta que una tabla WORM sigue nombrando —desde `@Audited`
+ * obligatorio (#621), toda ruta que muta deja su fila en `audit.audit_log`—
+ * no se borra: se anonimiza como lo hace el propio producto en UC-01-12
+ * (DSAR, `IamUsersService.anonymize`). Con credencial, sesiones y roles ya
+ * borrados por {@link CUENTA_ESCRIBE_EN}, lo que queda es una lápida sin
+ * datos personales que no puede iniciar sesión ni aparecer en un padrón, y
+ * la bitácora conserva su integridad referencial. Ver
+ * {@link anonymizeWormPinnedAccounts}.
+ *
  * Ruidoso por diseño: si borrar `iam.users` choca con una FK que
- * {@link CUENTA_ESCRIBE_EN} no conoce, o con una tabla WORM, lanza
- * explicando cuál - nunca deshabilita un trigger para forzar el borrado.
+ * {@link CUENTA_ESCRIBE_EN} no conoce, lanza explicando cuál - nunca
+ * deshabilita un trigger ni la replicación para forzar el borrado.
  *
  * @param client - Conexión ya abierta.
  * @param graph - El grafo de FK, ya leído.
@@ -911,10 +918,17 @@ async function deleteAccounts(
     );
   }
 
+  const anonimizadas = await anonymizeWormPinnedAccounts(
+    client,
+    graph,
+    userIds,
+  );
+  const borrables = userIds.filter((id) => !anonimizadas.has(id));
+
   try {
     await client.query(
       `delete from iam.users where id::text = any($1::text[])`,
-      [userIds],
+      [borrables],
     );
   } catch (err) {
     const pgErr = err as {
@@ -935,7 +949,7 @@ async function deleteAccounts(
       }
       throw new Error(
         `No se pudo limpiar iam.users: sigue referenciado desde "${tablaHija}" ` +
-          `(constraint "${pgErr.constraint ?? '?'}"). Agregala a CUENTA_ESCRIBE_EN ` +
+          `(constraint "${pgErr.constraint ?? '?'}"). Agréguela a CUENTA_ESCRIBE_EN ` +
           `en harness.ts. Detalle: ${pgErr.detail ?? pgErr.message}`,
       );
     }
@@ -943,7 +957,8 @@ async function deleteAccounts(
   }
 
   const { rows: resto } = await client.query<{ total: string }>(
-    `select count(*)::text as total from iam.users where id::text = any($1::text[])`,
+    `select count(*)::text as total from iam.users
+      where id::text = any($1::text[]) and anonymized_at is null`,
     [userIds],
   );
   const pendientes = Number(resto[0]?.total ?? 0);
@@ -952,6 +967,60 @@ async function deleteAccounts(
       `La limpieza dejó ${pendientes} cuenta(s) ${descripcion} en la base compartida.`,
     );
   }
+}
+
+/**
+ * Anonimiza, en vez de borrar, las cuentas que alguna tabla WORM sigue
+ * nombrando, y devuelve cuáles fueron.
+ *
+ * Las tablas WORM y sus FKs hacia `iam.users` salen del grafo que ya se leyó
+ * del catálogo (`pg_trigger` + `pg_constraint`), no de una lista escrita a
+ * mano: hoy es `audit.audit_log` (`user_id` y `recorded_by_user_id`), y si
+ * mañana otra bitácora inmutable empieza a nombrar cuentas, cae acá sola.
+ *
+ * Por qué anonimizar y no las alternativas: el trigger `trg_forbid_mutation`
+ * es justamente lo que el ADR-0021 y la promoción del WORM al modelo (v4.0.10)
+ * protegen, así que no se desactiva ni se esquiva con
+ * `session_replication_role = replica` —eso exige superusuario y sería, en la
+ * base compartida, el mismo agujero que el WORM existe para cerrar—. El
+ * estado final es el que deja UC-01-12 con una cuenta real: misma
+ * `status_concept_id`, mismo `display_name` y `anonymized_at` sellado.
+ *
+ * @param client - Conexión ya abierta.
+ * @param graph - El grafo de FK, ya leído.
+ * @param userIds - Las cuentas del fixture.
+ * @returns Las cuentas anonimizadas; el resto se puede borrar.
+ */
+async function anonymizeWormPinnedAccounts(
+  client: pg.Client,
+  graph: SchemaGraph,
+  userIds: readonly string[],
+): Promise<Set<string>> {
+  const fijadas = new Set<string>();
+  const aristasWorm = graph.edges.filter(
+    (e) => e.parentTable === 'iam.users' && graph.noBorrables.has(e.childTable),
+  );
+  for (const edge of aristasWorm) {
+    const { rows } = await client.query<{ id: string }>(
+      `select distinct "${edge.childColumn}"::text as id from ${edge.childTable}
+        where "${edge.childColumn}"::text = any($1::text[])`,
+      [userIds],
+    );
+    for (const r of rows) fijadas.add(r.id);
+  }
+  if (fijadas.size === 0) return fijadas;
+
+  await client.query(
+    `update iam.users
+        set status_concept_id = $2,
+            anonymized_at     = coalesce(anonymized_at, now()),
+            display_name      = 'ANONYMIZED',
+            updated_at        = now(),
+            row_version       = row_version + 1
+      where id::text = any($1::text[])`,
+    [[...fijadas], CONCEPTS.USER_ANONYMIZED],
+  );
+  return fijadas;
 }
 
 /**
@@ -1132,7 +1201,7 @@ export async function deleteRegisteredOrganizations(
         }
         throw new Error(
           `No se pudo limpiar directory.tenants: sigue referenciado desde ` +
-            `"${tablaHija}" (constraint "${pgErr.constraint ?? '?'}"). Agregala ` +
+            `"${tablaHija}" (constraint "${pgErr.constraint ?? '?'}"). Agréguela ` +
             `a TENANT_ESCRIBE_EN en harness.ts. Detalle: ${pgErr.detail ?? pgErr.message}`,
         );
       }

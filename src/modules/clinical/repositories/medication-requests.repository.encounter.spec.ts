@@ -6,13 +6,13 @@ import { MedicationRequests } from '../entities';
  * determinista para que el mismo contenido produzca siempre el mismo hash.
  */
 describe('MedicationRequestsRepository.findByEncounter', () => {
-  function emQueRecuerda() {
-    const llamadas: unknown[] = [];
+  function rememberingEm() {
+    const calls: unknown[] = [];
     return {
-      llamadas,
+      llamadas: calls,
       em: {
         find: (...args: unknown[]) => {
-          llamadas.push(args);
+          calls.push(args);
           return Promise.resolve([]);
         },
       } as never,
@@ -20,11 +20,11 @@ describe('MedicationRequestsRepository.findByEncounter', () => {
   }
 
   it('filtra por el encuentro y ordena por createdAt, id', async () => {
-    const { em, llamadas } = emQueRecuerda();
+    const { em, llamadas: calls } = rememberingEm();
 
     await new MedicationRequestsRepository().findByEncounter(em, 'enc-1');
 
-    expect(llamadas[0]).toEqual([
+    expect(calls[0]).toEqual([
       MedicationRequests,
       { encounterId: 'enc-1' },
       { orderBy: { createdAt: 'ASC', id: 'ASC' } },

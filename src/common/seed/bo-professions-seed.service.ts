@@ -143,14 +143,14 @@ export class BoProfessionsSeedService {
 
   /** Rompe si dos entradas comparten código: colapsarían en el mismo id. */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
+    const seen = new Set<string>();
     for (const profession of BO_PROFESSIONS) {
-      if (vistos.has(profession.code)) {
+      if (seen.has(profession.code)) {
         throw new Error(
           `El catálogo de profesiones declara el código "${profession.code}" más de una vez`,
         );
       }
-      vistos.add(profession.code);
+      seen.add(profession.code);
     }
   }
 
@@ -161,17 +161,17 @@ export class BoProfessionsSeedService {
     rows: readonly ({ id: string } & Record<string, unknown>)[],
   ): Promise<number> {
     if (rows.length === 0) return 0;
-    const existentes = await em.find(
+    const existing = await em.find(
       entity,
       { id: { $in: rows.map((row) => row.id) } },
       { fields: ['id'] as never },
     );
-    const ids = new Set(existentes.map((row) => (row as { id: string }).id));
-    const faltantes = rows.filter((row) => !ids.has(row.id));
-    for (const row of faltantes) {
+    const ids = new Set(existing.map((row) => (row as { id: string }).id));
+    const missing = rows.filter((row) => !ids.has(row.id));
+    for (const row of missing) {
       em.create(entity, row as never, { partial: true });
     }
     await em.flush();
-    return faltantes.length;
+    return missing.length;
   }
 }

@@ -166,7 +166,7 @@ export class SubledgerRepository {
     });
     if (subledgers.length === 0) return [];
 
-    const porId = new Map(subledgers.map((s) => [s.id, s]));
+    const byId = new Map(subledgers.map((s) => [s.id, s]));
     const items = await em.find(
       OpenItems,
       {
@@ -178,7 +178,7 @@ export class SubledgerRepository {
 
     return items
       .map((openItem) => {
-        const subledger = porId.get(openItem.subledgerAccountId);
+        const subledger = byId.get(openItem.subledgerAccountId);
         return subledger ? { openItem, subledger } : null;
       })
       .filter((x): x is OpenItemWithSubledger => x !== null);

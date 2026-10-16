@@ -28,7 +28,7 @@ import type { FieldAssignments } from '../entities';
  * Los roles que administran la extensibilidad **sin techo de tenant**: pueden
  * asignar en cualquier organización y crear asignaciones globales.
  */
-const ROLES_DE_GOBIERNO: readonly string[] = ['SECURITY_ADMIN', 'SUPERADMIN'];
+const ROLES_GOVERNMENT: readonly string[] = ['SECURITY_ADMIN', 'SUPERADMIN'];
 
 /**
  * Asignación de campos a un target con enforcement de la política de
@@ -83,10 +83,10 @@ export class FormsAssignmentsService {
     dto: CreateAssignmentDto,
     actor: AuthenticatedUser,
   ): Promise<IdResponseDto> {
-    const gobierna = actor.roles.some((rol) => ROLES_DE_GOBIERNO.includes(rol));
+    const governs = actor.roles.some((role) => ROLES_GOVERNMENT.includes(role));
     // El tenant de un doctor lo fija el contexto del request, nunca el cuerpo.
-    const tenantId = gobierna ? dto.tenantId : requireTenantId();
-    if (!gobierna && dto.tenantId !== undefined && dto.tenantId !== tenantId) {
+    const tenantId = governs ? dto.tenantId : requireTenantId();
+    if (!governs && dto.tenantId !== undefined && dto.tenantId !== tenantId) {
       throw new ForbiddenException(
         'Sólo se pueden asignar campos dentro de la propia organización',
       );
@@ -97,7 +97,7 @@ export class FormsAssignmentsService {
         operation: 'forms.assignment.create',
         fieldId: dto.fieldId,
         tenantId,
-        gobierna,
+        gobierna: governs,
       },
       'Assigning field to target',
     );
@@ -119,12 +119,12 @@ export class FormsAssignmentsService {
       // Para quien no gobierna, la política no es un techo opcional: es el
       // permiso. Un target sin política activa no declaró presupuesto alguno, y
       // uno con `allow_tenant_fields` en falso lo declaró cerrado.
-      if (!gobierna && !policy) {
+      if (!governs && !policy) {
         throw new ForbiddenException(
           'Este formulario no admite campos propios: no tiene política de extensión activa',
         );
       }
-      if (!gobierna && policy?.allowTenantFields !== true) {
+      if (!governs && policy?.allowTenantFields !== true) {
         throw new ForbiddenException(
           'La política de este formulario no permite campos del tenant',
         );
@@ -318,8 +318,8 @@ export class FormsAssignmentsService {
         assignmentId,
       });
     }
-    const gobierna = actor.roles.some((rol) => ROLES_DE_GOBIERNO.includes(rol));
-    if (gobierna) return assignment;
+    const governs = actor.roles.some((role) => ROLES_GOVERNMENT.includes(role));
+    if (governs) return assignment;
     if (!assignment.tenantId) {
       throw new ForbiddenException(
         'Los campos del formulario estándar no se editan desde una organización',

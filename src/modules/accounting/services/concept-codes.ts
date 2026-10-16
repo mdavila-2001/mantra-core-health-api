@@ -10,11 +10,11 @@ import { CatalogConcepts } from '../../terminology/entities';
  * lecturas del cockpit que exponen el rótulo de un concepto en vez de su id.
  */
 export class ConceptCodeResolver {
-  private readonly porId = new Map<string, CatalogConcepts>();
+  private readonly byId = new Map<string, CatalogConcepts>();
 
-  private constructor(conceptos: CatalogConcepts[]) {
-    for (const concepto of conceptos) {
-      this.porId.set(concepto.id, concepto);
+  private constructor(concepts: CatalogConcepts[]) {
+    for (const concept of concepts) {
+      this.byId.set(concept.id, concept);
     }
   }
 
@@ -29,23 +29,23 @@ export class ConceptCodeResolver {
     em: EntityManager,
     ids: ReadonlyArray<string | null | undefined>,
   ): Promise<ConceptCodeResolver> {
-    const unicos = [...new Set(ids.filter((id): id is string => !!id))];
-    if (unicos.length === 0) return new ConceptCodeResolver([]);
-    const conceptos = await em.find(CatalogConcepts, {
-      id: { $in: unicos },
+    const unique = [...new Set(ids.filter((id): id is string => !!id))];
+    if (unique.length === 0) return new ConceptCodeResolver([]);
+    const concepts = await em.find(CatalogConcepts, {
+      id: { $in: unique },
     });
-    return new ConceptCodeResolver(conceptos);
+    return new ConceptCodeResolver(concepts);
   }
 
   /** El `code` del concepto, o `null` si no se cargó o no existe. */
   code(id: string | null | undefined): string | null {
     if (!id) return null;
-    return this.porId.get(id)?.code ?? null;
+    return this.byId.get(id)?.code ?? null;
   }
 
   /** El `display` del concepto, o `null` si no se cargó o no existe. */
   display(id: string | null | undefined): string | null {
     if (!id) return null;
-    return this.porId.get(id)?.display ?? null;
+    return this.byId.get(id)?.display ?? null;
   }
 }

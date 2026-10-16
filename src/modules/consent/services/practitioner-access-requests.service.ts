@@ -19,7 +19,7 @@ import { AUTHZ } from '../../authz/authz.concepts';
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { AuditTrailService } from '../../audit/services';
 import { CONS } from '../consent.concepts';
 import {
@@ -82,25 +82,25 @@ export class PractitionerAccessRequestsService {
       'Practitioner requesting record access',
     );
     const consent = await this.em.transactional(async (tx) => {
-      const existentes = await this.consentsRepo.findByPatientCreatorCategory(
+      const existing = await this.consentsRepo.findByPatientCreatorCategory(
         tx,
         dto.patientProfileId,
         actor.id,
         CONS.CATEGORY_PRACTITIONER_ACCESS,
       );
-      const enCurso = existentes.find(
+      const inCourse = existing.find(
         (c) =>
           c.statusConceptId === CONS.ACCESS_REQUEST_PENDING ||
           c.statusConceptId === CONS.CONSENT_ACTIVE,
       );
-      if (enCurso) {
+      if (inCourse) {
         throw new ConflictException(
           'Ya existe una solicitud pendiente o un vínculo activo con este paciente',
-          { consentId: enCurso.id, status: enCurso.statusConceptId },
+          { consentId: inCourse.id, status: inCourse.statusConceptId },
         );
       }
 
-      const nuevo = this.consentsRepo.create(tx, {
+      const fresh = this.consentsRepo.create(tx, {
         patientProfileId: dto.patientProfileId,
         categoryConceptId: CONS.CATEGORY_PRACTITIONER_ACCESS,
         processingPurposeId: SEED.processingPurposeId,
@@ -112,7 +112,7 @@ export class PractitionerAccessRequestsService {
 
       for (const specialtyId of dto.specialtyConceptIds) {
         this.provisionsRepo.create(tx, {
-          consentId: nuevo.id,
+          consentId: fresh.id,
           provisionTypeConceptId: CONS.PROVISION_TYPE_BASE,
           actionConceptId: CONS.ACTION_REQUESTED,
           dataClassConceptId: specialtyId,
@@ -123,7 +123,7 @@ export class PractitionerAccessRequestsService {
 
       this.eventsRepo.record(tx, {
         subjectTypeConceptId: CONS.SUBJECT_CONSENT,
-        subjectId: nuevo.id,
+        subjectId: fresh.id,
         eventTypeConceptId: CONS.EVENT_ACCESS_REQUESTED,
         previousStatusConceptId: CONS.STATUS_NONE,
         newStatusConceptId: CONS.ACCESS_REQUEST_PENDING,
@@ -134,10 +134,10 @@ export class PractitionerAccessRequestsService {
       await this.auditTrail.record(tx, actor, {
         action: 'PRACTITIONER_ACCESS_REQUESTED',
         entity: 'consent',
-        entityId: nuevo.id,
+        entityId: fresh.id,
       });
 
-      return nuevo;
+      return fresh;
     });
 
     // Fuera de la transacción, como todo aviso: que la campana no suene no
@@ -149,10 +149,10 @@ export class PractitionerAccessRequestsService {
       await this.notices.emit({
         kind: 'ACCESS_REQUESTED',
         recipientUserId: patientUserId,
-        subject: 'Un médico pidió acceder a tu historia clínica',
+        subject: 'Un médico pidió acceder a su historia clínica',
         bodyText:
           dto.reasonText ??
-          'Un profesional te encontró en el padrón y pidió acceder a tu expediente. Vos elegís qué áreas autorizar.',
+          'Un profesional le encontró en el padrón y pidió acceder a su expediente. Usted elige qué áreas autorizar.',
         requestId: consent.id,
       });
     } else {
@@ -175,29 +175,29 @@ export class PractitionerAccessRequestsService {
     const em = this.em.fork();
     const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
     if (!link) return [];
-    const perfil = await this.patientProfilesRepo.findById(em, link.personId);
-    if (!perfil) return [];
+    const profile = await this.patientProfilesRepo.findById(em, link.personId);
+    if (!profile) return [];
 
-    const pendientes = await this.consentsRepo.findPendingForPatient(
+    const pending = await this.consentsRepo.findPendingForPatient(
       em,
-      perfil.profileId,
+      profile.profileId,
       CONS.CATEGORY_PRACTITIONER_ACCESS,
       CONS.ACCESS_REQUEST_PENDING,
     );
 
-    const resultados: PractitionerAccessRequestResponseDto[] = [];
-    for (const consent of pendientes) {
-      const provisiones = await this.provisionsRepo.findOpenByConsent(
+    const results: PractitionerAccessRequestResponseDto[] = [];
+    for (const consent of pending) {
+      const provisions = await this.provisionsRepo.findOpenByConsent(
         em,
         consent.id,
       );
-      const pedidas = provisiones
+      const requested = provisions
         .filter((p) => p.actionConceptId === CONS.ACTION_REQUESTED)
         .map((p) => p.dataClassConceptId)
         .filter((id): id is string => id !== undefined);
-      resultados.push(this.toResponse(consent, pedidas, []));
+      results.push(this.toResponse(consent, requested, []));
     }
-    return resultados;
+    return results;
   }
 
   /**
@@ -214,7 +214,11 @@ export class PractitionerAccessRequestsService {
       'Patient deciding practitioner access request',
     );
 
-    return this.em.transactional(async (tx) => {
+    // El aviso se arma dentro de la transacción y se emite DESPUÉS del commit,
+    // como en `request()`: si no, el socket anuncia una decisión que todavía
+    // puede revertirse.
+    let notice: Parameters<typeof this.notices.emit>[0] | undefined;
+    const response = await this.em.transactional(async (tx) => {
       const consent = await this.consentsRepo.findById(tx, id);
       if (
         !consent ||
@@ -226,10 +230,10 @@ export class PractitionerAccessRequestsService {
       // Titularidad: sólo el paciente titular decide. Mismo criterio que
       // `assertOwnRecord` — el 404 de arriba ya cubre "no es tuya".
       const link = await this.accountLinksRepo.findActiveByUser(tx, actor.id);
-      const perfil = link
+      const profile = link
         ? await this.patientProfilesRepo.findById(tx, link.personId)
         : null;
-      if (!perfil || perfil.profileId !== consent.patientProfileId) {
+      if (!profile || profile.profileId !== consent.patientProfileId) {
         throw new ResourceNotFoundException('Solicitud no encontrada', { id });
       }
 
@@ -240,9 +244,9 @@ export class PractitionerAccessRequestsService {
         });
       }
 
-      const pedidas = await this.provisionsRepo.findOpenByConsent(tx, id);
-      const especialidadesPedidas = new Set(
-        pedidas
+      const requested = await this.provisionsRepo.findOpenByConsent(tx, id);
+      const requestedSpecialties = new Set(
+        requested
           .map((p) => p.dataClassConceptId)
           .filter((v): v is string => v !== undefined),
       );
@@ -262,7 +266,7 @@ export class PractitionerAccessRequestsService {
         consent.grantedByUserId = actor.id;
         consent.validTo = now;
         touch(consent, actor.id, now);
-        for (const provision of pedidas) {
+        for (const provision of requested) {
           provision.actionConceptId = CONS.ACTION_DENY;
           touch(provision, actor.id, now);
         }
@@ -281,40 +285,38 @@ export class PractitionerAccessRequestsService {
           entityId: id,
         });
 
-        await this.notices.emit({
+        notice = {
           kind: 'ACCESS_DECLINED',
           recipientUserId: practitionerUserId,
           subject: 'El paciente no autorizó el acceso',
-          bodyText: 'El paciente decidió no darte acceso a su expediente.',
+          bodyText: 'El paciente decidió no darle acceso a su expediente.',
           requestId: id,
-        });
+        };
 
-        return this.toResponse(consent, [...especialidadesPedidas], []);
+        return this.toResponse(consent, [...requestedSpecialties], []);
       }
 
       // ACCEPTED. El DTO exige `authorizedSpecialtyConceptIds` (@ValidateIf) —
       // acá se comprueba además que sea subconjunto de lo pedido: el paciente
       // no puede "autorizar" una especialidad que nadie le pidió.
-      const autorizadas = dto.authorizedSpecialtyConceptIds ?? [];
-      const invalidas = autorizadas.filter(
-        (id) => !especialidadesPedidas.has(id),
-      );
-      if (invalidas.length > 0) {
+      const authorized = dto.authorizedSpecialtyConceptIds ?? [];
+      const invalid = authorized.filter((id) => !requestedSpecialties.has(id));
+      if (invalid.length > 0) {
         throw new PreconditionFailedException(
           'Sólo se pueden autorizar especialidades que el profesional pidió',
-          { invalidas },
+          { invalidas: invalid },
         );
       }
-      if (autorizadas.length === 0) {
+      if (authorized.length === 0) {
         throw new PreconditionFailedException(
-          'Aceptar exige autorizar al menos una especialidad; si no autorizás ninguna, rechazá la solicitud',
+          'Aceptar exige autorizar al menos una especialidad; si no autoriza ninguna, rechace la solicitud',
           {},
         );
       }
 
-      const meses = dto.validityMonths ?? DEFAULT_VALIDITY_MONTHS;
+      const months = dto.validityMonths ?? DEFAULT_VALIDITY_MONTHS;
       const validTo = new Date(now);
-      validTo.setMonth(validTo.getMonth() + meses);
+      validTo.setMonth(validTo.getMonth() + months);
 
       consent.statusConceptId = CONS.CONSENT_ACTIVE;
       consent.grantedByUserId = actor.id;
@@ -322,9 +324,9 @@ export class PractitionerAccessRequestsService {
       consent.validTo = validTo;
       touch(consent, actor.id, now);
 
-      const autorizadasSet = new Set(autorizadas);
-      for (const provision of pedidas) {
-        provision.actionConceptId = autorizadasSet.has(
+      const authorizedSet = new Set(authorized);
+      for (const provision of requested) {
+        provision.actionConceptId = authorizedSet.has(
           provision.dataClassConceptId ?? '',
         )
           ? CONS.ACTION_PERMIT
@@ -346,12 +348,12 @@ export class PractitionerAccessRequestsService {
       // consulta de verdad — el consent es la evidencia, el grant es la
       // puerta. Purpose TREATMENT: es un vínculo de atención continuada, no
       // un trámite administrativo (payment/operations).
-      const existente = await this.clinicalGrantsRepo.findActive(
+      const existing = await this.clinicalGrantsRepo.findActive(
         tx,
         consent.patientProfileId,
         practitionerUserId,
       );
-      if (!existente) {
+      if (!existing) {
         this.clinicalGrantsRepo.create(tx, {
           patientProfileId: consent.patientProfileId,
           grantedUserId: practitionerUserId,
@@ -372,16 +374,19 @@ export class PractitionerAccessRequestsService {
         entityId: id,
       });
 
-      await this.notices.emit({
+      notice = {
         kind: 'ACCESS_ACCEPTED',
         recipientUserId: practitionerUserId,
         subject: 'El paciente autorizó el acceso',
-        bodyText: `El paciente autorizó tu acceso para ${autorizadas.length} de ${especialidadesPedidas.size} área(s) pedida(s).`,
+        bodyText: `El paciente autorizó su acceso para ${authorized.length} de ${requestedSpecialties.size} área(s) pedida(s).`,
         requestId: id,
-      });
+      };
 
-      return this.toResponse(consent, [...especialidadesPedidas], autorizadas);
+      return this.toResponse(consent, [...requestedSpecialties], authorized);
     });
+
+    if (notice) await this.notices.emit(notice);
+    return response;
   }
 
   /** El `userId` de la cuenta dueña de este perfil de paciente, si existe. */

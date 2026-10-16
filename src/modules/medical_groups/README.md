@@ -9,6 +9,34 @@ Persiste en el esquema `medical_groups` (`groups` y `group_members`). El modelo
 entró por el patch `database/SQL/patches/2026-09-04_v426_medical_groups.sql`, que
 declara su desvío del recorrido `.puml → SQL → BD → ORM`.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/medical_groups -name '*.controller.ts' | wc -l
+  find src/modules/medical_groups -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/medical_groups -name '*.entity.ts' | wc -l
+  find src/modules/medical_groups -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 8 rutas HTTP, 2 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`PracticeModule`, `ClinicalModule`).
+
+Entidades (`tableName`, 2 de 2 archivos `*.entity.ts`): `group_members`, `groups`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /medical-groups` | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `GET /medical-groups/patients/:patientProfileId/conditions` | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `GET /medical-groups/:id` | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `POST /medical-groups` | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `POST /medical-groups/:id/members/:memberId/respond` | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `POST /medical-groups/:id/reschedule-requests` | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `POST /medical-groups/:id/reschedule-requests/respond` | PRACTITIONER, CLINICIAN | `medical-groups` |
+| `PATCH /medical-groups/:id/exercise-notes` | PRACTITIONER, CLINICIAN | `medical-groups` |
+
 ## Endpoints
 
 Todos exigen rol `PRACTITIONER` o `CLINICIAN` y una cuenta con perfil
@@ -49,3 +77,13 @@ profesional.
 - **Quien no es el invitado** recibe `404` al responder una invitación, para que
   no distinga «no es tuya» de «no existe».
 - Sólo el creador resuelve un cambio de horario.
+
+## Auditoría vigente
+
+La creación debe aplicar la política clínica al paciente aun si el diagnóstico es
+opcional; la implementación revisada sólo lo hace en la rama con condición. La
+auditoría y la matriz de pruebas propuesta están en
+[`docs/revision-backend-2026-10-04/modulos/medical_groups.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/medical_groups.md).
+
+No existen specs bajo `src/modules/medical_groups` en la base auditada; la
+ejecución dirigida termina con `No tests found`.

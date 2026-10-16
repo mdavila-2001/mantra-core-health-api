@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import {
   CONCEPTS,
-  requireTenantId,
+  marketplaceTenantScope,
   ResourceNotFoundException,
 } from '../../../common';
 import type { Addresses } from '../../common/entities';
@@ -56,7 +56,7 @@ export class PharmacyReadService {
 
   /** El directorio: farmacias publicadas del tenant, con sus números. */
   async listPharmacies(): Promise<PharmacyDirectoryResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) return { items: [], count: 0 };
@@ -94,7 +94,7 @@ export class PharmacyReadService {
 
   /** El perfil de una farmacia: su ficha y sus sedes con dirección resuelta. */
   async getPharmacy(id: string): Promise<PharmacyDetailDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacy = await this.readRepo.findVisibleById(em, tenantId, id);
     // 404 también para la de otro tenant o la no publicada: confirmar que ese
@@ -220,7 +220,7 @@ export class PharmacyReadService {
     origin?: GeoPoint;
     limit: number;
   }): Promise<PharmacySiteListResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) return { items: [], count: 0 };
@@ -295,7 +295,7 @@ export class PharmacyReadService {
     filter: ProductSearchFilter & { pharmacyId?: string },
     limit: number,
   ): Promise<PharmacyProductSearchResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) {
@@ -364,7 +364,7 @@ export class PharmacyReadService {
     siteId: string,
     productId?: string,
   ): Promise<PharmacySitePricesResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
 
     const site = await this.readRepo.findActiveSiteById(em, siteId);
@@ -623,10 +623,10 @@ export function toProductReadDto(
 
 /** La dirección en una línea, o null si no tiene ninguna parte con texto. */
 export function addressText(address: Addresses): string | null {
-  const partes = [address.lines, address.city, address.postalCode]
-    .map((parte) => parte?.trim())
-    .filter((parte): parte is string => Boolean(parte));
-  return partes.length === 0 ? null : partes.join(', ');
+  const parts = [address.lines, address.city, address.postalCode]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part));
+  return parts.length === 0 ? null : parts.join(', ');
 }
 
 /** Una coordenada `numeric` (string de BD) como número, o null. */
@@ -659,11 +659,11 @@ export function haversineKm(a: GeoPoint, b: GeoPoint): number {
   const toRad = (degrees: number): number => (degrees * Math.PI) / 180;
   const dLat = toRad(b.lat - a.lat);
   const dLng = toRad(b.lng - a.lng);
-  const sinLat = Math.sin(dLat / 2);
-  const sinLng = Math.sin(dLng / 2);
+  const withoutLat = Math.sin(dLat / 2);
+  const withoutLng = Math.sin(dLng / 2);
   const h =
-    sinLat * sinLat +
-    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * sinLng * sinLng;
+    withoutLat * withoutLat +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * withoutLng * withoutLng;
   const distance = 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(h));
   return Math.round(distance * 10) / 10;
 }

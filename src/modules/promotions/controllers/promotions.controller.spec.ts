@@ -244,16 +244,16 @@ describe('LoyaltyController', () => {
   });
 
   it('las rutas del portal exigen PATIENT, y no un MEMBER inexistente', () => {
-    const prototipo = LoyaltyController.prototype as unknown as Record<
+    const prototype = LoyaltyController.prototype as unknown as Record<
       string,
       unknown
     >;
-    const roles = (metodo: string): string[] =>
-      Reflect.getMetadata(ROLES_KEY, prototipo[metodo] as object) ?? [];
+    const roles = (method: string): string[] =>
+      Reflect.getMetadata(ROLES_KEY, prototype[method] as object) ?? [];
 
-    for (const metodo of ['myLoyalty', 'myPoints', 'redeemOwnPoints']) {
-      expect(roles(metodo)).toEqual(['PATIENT']);
-      expect(roles(metodo)).not.toContain('MEMBER');
+    for (const method of ['myLoyalty', 'myPoints', 'redeemOwnPoints']) {
+      expect(roles(method)).toEqual(['PATIENT']);
+      expect(roles(method)).not.toContain('MEMBER');
     }
   });
 });
@@ -344,12 +344,12 @@ describe('PromotionsController', () => {
 
   it('publishes GET /promotions/me only for PATIENT and delegates with the actor', async () => {
     const d = build();
-    const prototipo = PromotionsController.prototype as unknown as Record<
+    const prototype = PromotionsController.prototype as unknown as Record<
       string,
       unknown
     >;
     const roles: string[] =
-      Reflect.getMetadata(ROLES_KEY, prototipo.listMine as object) ?? [];
+      Reflect.getMetadata(ROLES_KEY, prototype.listMine as object) ?? [];
     expect(roles).toEqual(['PATIENT']);
 
     await d.promotions.listMine(actor as any);

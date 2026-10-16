@@ -15,7 +15,13 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  AccessLogged,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DataReleaseService } from '../services';
 import {
   ExportBundleDto,
@@ -43,6 +49,11 @@ export class FhirR5Controller {
   constructor(private readonly releaseService: DataReleaseService) {}
 
   /** UC-52-12. */
+  @Audited({
+    action: 'FHIR_BULK_EXPORT_STARTED',
+    entity: 'health_export_job',
+    entityId: 'result.id',
+  })
   @Post('$export')
   @Roles('PRIVACY_OFFICER', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -60,6 +71,10 @@ export class FhirR5Controller {
 
   /** UC-52-13. */
   @Get('Patient/:id/$everything')
+  @AccessLogged({
+    resourceType: 'FHIR_PATIENT_EVERYTHING',
+    patient: 'param:id',
+  })
   @Roles('INTEROP_CONSUMER', 'CLINICAL_INFORMATICIAN', 'HEALTH_DATA_ADMIN')
   @ApiOperation({
     summary: 'Servir la historia longitudinal del paciente',

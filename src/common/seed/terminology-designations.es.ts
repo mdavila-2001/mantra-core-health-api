@@ -3,7 +3,7 @@ import { PROF } from '../../modules/profiles/profiles.concepts';
 import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
-import { INS } from '../../modules/insurance/insurance.concepts';
+import { INS } from '../../modules/insurance/domain/insurance.concepts';
 import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts';
 import { DIAG } from '../../modules/diagnostics/diagnostics.concepts';
 import { definitionPropertyCode } from '../../modules/terminology/terminology.constants';
@@ -1997,7 +1997,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_URGENT,
     {
-      display: 'Prioridad urgente',
+      display: 'Urgente',
       definition:
         'Se necesita antes que las órdenes de rutina, sin llegar a ser una emergencia.',
     },
@@ -2005,7 +2005,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_ASAP,
     {
-      display: 'Prioridad cuanto antes',
+      display: 'Lo antes posible',
       definition:
         'Se realiza en cuanto haya disponibilidad, por delante de lo urgente programado.',
     },
@@ -2013,7 +2013,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_STAT,
     {
-      display: 'Prioridad inmediata',
+      display: 'Inmediata',
       definition: 'Emergencia: se realiza de inmediato e interrumpe la cola.',
     },
   ],
@@ -2718,7 +2718,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_ROUTINE,
     {
-      display: 'Prioridad de rutina',
+      display: 'De rutina',
       definition:
         'Se realiza en el turno normal del prestador, sin adelantarse a otras órdenes.',
     },

@@ -63,6 +63,30 @@ console.log(`        tenant: ${tenantId}`);
 
 console.log('\n=== 2 · alta asistida de la doctora ==============================');
 const sufijo = Date.now().toString(36);
+// El alta asistida exige documento y departamento emisor (como el registro
+// público): el departamento sale del catálogo, no se escribe un uuid a mano.
+const vs = await call(
+  'catálogo de departamentos',
+  'GET',
+  '/terminology/value-sets?code=VS_BO_DEPARTMENT',
+  { token: adminToken },
+);
+const departamentos = (vs.body?.items ?? []).find(
+  (i) => i.internalCode === 'VS_BO_DEPARTMENT',
+);
+const expansion = departamentos
+  ? await call(
+      'departamentos',
+      'GET',
+      `/terminology/value-sets/${departamentos.id}/$expand`,
+      { token: adminToken },
+    )
+  : null;
+const departamentoEmisor = expansion?.body?.items?.[0]?.conceptId;
+if (!departamentoEmisor) {
+  console.error('No hay departamentos publicados en VS_BO_DEPARTMENT: no se puede dar de alta.');
+  process.exit(1);
+}
 let alta = await call(
   'alta asistida (SECURITY_ADMIN)',
   'POST',
@@ -73,6 +97,8 @@ let alta = await call(
       email: DOCTOR_EMAIL,
       // Sin honorífico: el registro real no lo escribe (ver seed-dev-data.mjs).
       displayName: 'Valeria Fuentes Aramayo',
+      nationalId: `DEMO-${sufijo}`.toUpperCase(),
+      issuerAdministrativeAreaConceptId: departamentoEmisor,
       licenseNumber: `LIC-DEMO-${sufijo}`,
       credentialNumber: `CRED-DEMO-${sufijo}`,
       professionalTitle: 'Medicina general',

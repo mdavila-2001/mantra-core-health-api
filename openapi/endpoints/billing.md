@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `billing`
 
-Referencia exhaustiva de 18 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 34 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`
-- **Controladores:** `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`, `BillingServiceCatalogController`
+- **Etiquetas OpenAPI:** `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`
+- **Controladores:** `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`, `BillingServiceCatalogController`, `BillingSimulatedController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -15,20 +15,36 @@ Referencia exhaustiva de 18 operación(es) del módulo `billing`, derivada del c
 2. [POST /billing/documents/{id}:post-to-ledger](#2-post-billing-documents-id-post-to-ledger) — Contabilizar documento (posting CxC/CxP)
 3. [POST /billing/dunning-runs:execute](#3-post-billing-dunning-runs-execute) — Ejecutar ciclo de morosidad (dunning)
 4. [POST /billing/internal/dunning-runs/run-due](#4-post-billing-internal-dunning-runs-run-due) — Evaluar y disparar morosidad automática por tenant
-5. [POST /billing/invoices:issue-from-encounter](#5-post-billing-invoices-issue-from-encounter) — Emitir factura desde los cargos del encuentro
-6. [POST /billing/invoices/{id}:credit-note](#6-post-billing-invoices-id-credit-note) — Emitir nota de crédito / castigo sobre una factura
-7. [POST /billing/kpi-snapshots:compute](#7-post-billing-kpi-snapshots-compute) — Calcular snapshot de KPI financiero y aging
-8. [POST /billing/patient-statements:generate](#8-post-billing-patient-statements-generate) — Generar el estado de cuenta del paciente
-9. [POST /billing/payment-plans](#9-post-billing-payment-plans) — Configurar un plan de pagos del paciente
-10. [POST /billing/payments-made:execute](#10-post-billing-payments-made-execute) — Ejecutar pago a proveedor con asignación
-11. [POST /billing/payments-received:apply](#11-post-billing-payments-received-apply) — Aplicar un pago recibido con asignación multi-factura
-12. [POST /billing/reconciliation:clear](#12-post-billing-reconciliation-clear) — Conciliar pagos vía documento de compensación
-13. [POST /billing/reimbursements:link](#13-post-billing-reimbursements-link) — Vincular reembolso de reclamo de seguro a la factura
-14. [GET /billing/service-catalog](#14-get-billing-service-catalog) — Listar el catálogo de servicios de la práctica
-15. [POST /billing/service-catalog](#15-post-billing-service-catalog) — Dar de alta un servicio en el catálogo maestro
-16. [PATCH /billing/service-catalog/{id}](#16-patch-billing-service-catalog-id) — Corregir un servicio del catálogo de mi práctica
-17. [GET /billing/service-catalog/procedure-specialties](#17-get-billing-service-catalog-procedure-specialties) — Listar las especialidades del nomenclador de procedimientos
-18. [GET /billing/service-catalog/procedures](#18-get-billing-service-catalog-procedures) — Listar el nomenclador de procedimientos (arancel de referencia)
+5. [GET /billing/invoices](#5-get-billing-invoices) — Listar las facturas de la práctica
+6. [POST /billing/invoices:issue-from-encounter](#6-post-billing-invoices-issue-from-encounter) — Emitir factura desde los cargos del encuentro
+7. [GET /billing/invoices/{id}](#7-get-billing-invoices-id) — Detalle de una factura, con sus líneas
+8. [POST /billing/invoices/{id}:credit-note](#8-post-billing-invoices-id-credit-note) — Emitir nota de crédito / castigo sobre una factura
+9. [POST /billing/kpi-snapshots:compute](#9-post-billing-kpi-snapshots-compute) — Calcular snapshot de KPI financiero y aging
+10. [GET /billing/patient-statements](#10-get-billing-patient-statements) — Listar los estados de cuenta de la práctica
+11. [POST /billing/patient-statements:generate](#11-post-billing-patient-statements-generate) — Generar el estado de cuenta del paciente
+12. [POST /billing/payment-plans](#12-post-billing-payment-plans) — Configurar un plan de pagos del paciente
+13. [POST /billing/payments-made:execute](#13-post-billing-payments-made-execute) — Ejecutar pago a proveedor con asignación
+14. [POST /billing/payments-received:apply](#14-post-billing-payments-received-apply) — Aplicar un pago recibido con asignación multi-factura
+15. [POST /billing/reconciliation:clear](#15-post-billing-reconciliation-clear) — Conciliar pagos vía documento de compensación
+16. [POST /billing/reimbursements:link](#16-post-billing-reimbursements-link) — Vincular reembolso de reclamo de seguro a la factura
+17. [GET /billing/service-catalog](#17-get-billing-service-catalog) — Listar el catálogo de servicios de la práctica
+18. [POST /billing/service-catalog](#18-post-billing-service-catalog) — Dar de alta un servicio en el catálogo maestro
+19. [PATCH /billing/service-catalog/{id}](#19-patch-billing-service-catalog-id) — Corregir un servicio del catálogo de mi práctica
+20. [GET /billing/service-catalog/procedure-specialties](#20-get-billing-service-catalog-procedure-specialties) — Listar las especialidades del nomenclador de procedimientos
+21. [GET /billing/service-catalog/procedures](#21-get-billing-service-catalog-procedures) — Listar el nomenclador de procedimientos (arancel de referencia)
+22. [GET /billing/simulated/catalogs](#22-get-billing-simulated-catalogs) — Catálogos paramétricos del SIAT simulado
+23. [GET /billing/simulated/charges](#23-get-billing-simulated-charges) — Cobros de consultas (opcionalmente de una persona)
+24. [POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments](#24-post-billing-simulated-charges-chargeid-instances-instanceid-payments) — Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
+25. [POST /billing/simulated/charges/{chargeId}/invoices](#25-post-billing-simulated-charges-chargeid-invoices) — Emitir la factura SIAT simulada de un cobro pagado
+26. [POST /billing/simulated/charges/{chargeId}/payment](#26-post-billing-simulated-charges-chargeid-payment) — Registrar el pago real de un cobro
+27. [GET /billing/simulated/invoices/{invoiceId}](#27-get-billing-simulated-invoices-invoiceid) — Una factura simulada, dentro del alcance de quien la pide
+28. [POST /billing/simulated/invoices/{invoiceId}/annulment](#28-post-billing-simulated-invoices-invoiceid-annulment) — Anular la factura (sólo administración)
+29. [POST /billing/simulated/invoices/{invoiceId}/annulment-reversal](#29-post-billing-simulated-invoices-invoiceid-annulment-reversal) — Revertir la anulación (sólo administración)
+30. [POST /billing/simulated/invoices/{invoiceId}/email](#30-post-billing-simulated-invoices-invoiceid-email) — Encolar el envío (simulado, no se envía) de la factura
+31. [GET /billing/simulated/my-invoices](#31-get-billing-simulated-my-invoices) — Mis facturas: recibidas (paciente) o emitidas (quien factura)
+32. [GET /billing/simulated/my-invoices/{invoiceId}](#32-get-billing-simulated-my-invoices-invoiceid) — Una de mis facturas
+33. [GET /billing/simulated/outbox](#33-get-billing-simulated-outbox) — Bandeja de correo simulada (sólo administración)
+34. [GET /billing/simulated/status](#34-get-billing-simulated-status) — Estado fiscal simulado: emisores y credenciales sintéticas
 
 ---
 
@@ -636,7 +652,142 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /billing/invoices:issue-from-encounter
+## 5. GET /billing/invoices
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-receivables`
+- **Nombre:** Listar las facturas de la práctica
+- **Operation ID:** `BillingReceivablesController_listInvoices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingReceivablesController.listInvoices](../../src/modules/billing/controllers/billing-receivables.controller.ts)
+
+### Descripción de negocio
+
+Listar las facturas de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CV-12 — facturación deja de ser el único placeholder del menú: listado de facturas de la práctica, sin ninguna acción de cobro.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/invoices` en `BillingReceivablesController_listInvoices`. El controlador delega en `InvoicesService.listByPractice`. No recibe body. El tipo de retorno estático es `Promise<ListInvoicesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | Sin restricción adicional declarada | Práctica (uuid) | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Facturas por página | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/invoices?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/invoices?practiceId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListInvoicesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListInvoicesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListInvoicesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListInvoicesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListInvoicesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListInvoicesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListInvoicesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "invoiceNumber": "valor-ejemplo",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "status": "00000000-0000-4000-8000-000000000001",
+      "issueDate": "2026-07-31",
+      "dueDate": "2026-07-31",
+      "total": "valor-ejemplo",
+      "balance": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<InvoiceSummaryDto>` | Sin restricción adicional declarada | Facturas de esta página, ordenadas por `id`. | `[{"id":"00000000-0000-4000-8000-000000000001","invoiceNumber":"valor-ejemplo","patientProfileId":"00000000-0000-4000-8000-000000000001","status":"00000000-0000-4000-8000-000000000001","issueDate":"2026-07-31","dueDate":"2026-07-31","total":"valor-ejemplo","balance":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].invoiceNumber` | Sí | `string` | Sin restricción adicional declarada | Número de factura. | `valor-ejemplo` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Paciente facturado. | `00000000-0000-4000-8000-000000000001` |
+| `items[].status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
+| `items[].issueDate` | Sí | `string` | formato `date` | Fecha de emisión. | `2026-07-31` |
+| `items[].dueDate` | No | `string` | formato `date` | Fecha de vencimiento, si tiene. | `2026-07-31` |
+| `items[].total` | No | `string` | Sin restricción adicional declarada | Importe total. | `valor-ejemplo` |
+| `items[].balance` | No | `string` | Sin restricción adicional declarada | Saldo pendiente. | `valor-ejemplo` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Fecha de alta. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/billing/services/invoices.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/invoices"
+}
+```
+
+---
+
+## 6. POST /billing/invoices:issue-from-encounter
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -822,7 +973,134 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /billing/invoices/{id}:credit-note
+## 7. GET /billing/invoices/{id}
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-receivables`
+- **Nombre:** Detalle de una factura, con sus líneas
+- **Operation ID:** `BillingReceivablesController_getInvoice`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingReceivablesController.getInvoice](../../src/modules/billing/controllers/billing-receivables.controller.ts)
+
+### Descripción de negocio
+
+Detalle de una factura, con sus líneas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CV-12 — detalle de una factura con sus líneas.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/invoices/{id}` en `BillingReceivablesController_getInvoice`. El controlador delega en `InvoicesService.getDetail`. No recibe body. El tipo de retorno estático es `Promise<InvoiceDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | query | Sí | `string` | Sin restricción adicional declarada | Práctica (uuid) | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/invoices/00000000-0000-4000-8000-000000000001?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/invoices/00000000-0000-4000-8000-000000000001?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<InvoiceDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<InvoiceDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<InvoiceDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<InvoiceDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<InvoiceDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<InvoiceDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<InvoiceDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InvoiceDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "lines": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "description": "Texto descriptivo de ejemplo",
+      "quantity": "valor-ejemplo",
+      "unitPrice": "valor-ejemplo",
+      "discount": "valor-ejemplo",
+      "taxAmount": "valor-ejemplo",
+      "lineTotal": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `lines` | Sí | `array<InvoiceLineDto>` | Sin restricción adicional declarada | Líneas de la factura. | `[{"id":"00000000-0000-4000-8000-000000000001","description":"Texto descriptivo de ejemplo","quantity":"valor-ejemplo","unitPrice":"valor-ejemplo","discount":"valor-ejemplo","taxAmount":"valor-ejemplo","lineTotal":"valor-ejemplo"}]` |
+| `lines[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].description` | No | `string` | Sin restricción adicional declarada | Descripción de la línea. | `Texto descriptivo de ejemplo` |
+| `lines[].quantity` | Sí | `string` | Sin restricción adicional declarada | Cantidad facturada. | `valor-ejemplo` |
+| `lines[].unitPrice` | Sí | `string` | Sin restricción adicional declarada | Precio unitario. | `valor-ejemplo` |
+| `lines[].discount` | No | `string` | Sin restricción adicional declarada | Descuento de la línea, si tiene. | `valor-ejemplo` |
+| `lines[].taxAmount` | No | `string` | Sin restricción adicional declarada | Impuesto de la línea, si tiene. | `valor-ejemplo` |
+| `lines[].lineTotal` | No | `string` | Sin restricción adicional declarada | Importe total de la línea. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Factura no encontrada | Excepción explícita en src/modules/billing/services/invoices.service.ts |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/billing/services/invoices.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/invoices/{id}"
+}
+```
+
+---
+
+## 8. POST /billing/invoices/{id}:credit-note
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -990,7 +1268,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /billing/kpi-snapshots:compute
+## 9. POST /billing/kpi-snapshots:compute
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-operations`
@@ -1128,7 +1406,140 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /billing/patient-statements:generate
+## 10. GET /billing/patient-statements
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-receivables`
+- **Nombre:** Listar los estados de cuenta de la práctica
+- **Operation ID:** `BillingReceivablesController_listStatements`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingReceivablesController.listStatements](../../src/modules/billing/controllers/billing-receivables.controller.ts)
+
+### Descripción de negocio
+
+Listar los estados de cuenta de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CV-12 — estados de cuenta de la práctica, sólo lectura.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/patient-statements` en `BillingReceivablesController_listStatements`. El controlador delega en `PatientStatementsService.listByPractice`. No recibe body. El tipo de retorno estático es `Promise<ListPatientStatementsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | query | Sí | `string` | Sin restricción adicional declarada | Práctica (uuid) | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Estados de cuenta por página | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/patient-statements?practiceId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/patient-statements?practiceId=00000000-0000-4000-8000-000000000001&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListPatientStatementsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListPatientStatementsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListPatientStatementsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListPatientStatementsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListPatientStatementsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListPatientStatementsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPatientStatementsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "periodStart": "valor-ejemplo",
+      "periodEnd": "valor-ejemplo",
+      "openingBalance": "valor-ejemplo",
+      "charges": "valor-ejemplo",
+      "payments": "valor-ejemplo",
+      "closingBalance": "valor-ejemplo"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PatientStatementResponseDto>` | Sin restricción adicional declarada | Estados de cuenta de esta página, ordenados por `id`. | `[{"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","periodStart":"valor-ejemplo","periodEnd":"valor-ejemplo","openingBalance":"valor-ejemplo","charges":"valor-ejemplo","payments":"valor-ejemplo","closingBalance":"valor-ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].periodStart` | Sí | `string` | Sin restricción adicional declarada | Valor de period start mantenido por la instancia. | `valor-ejemplo` |
+| `items[].periodEnd` | Sí | `string` | Sin restricción adicional declarada | Valor de period end mantenido por la instancia. | `valor-ejemplo` |
+| `items[].openingBalance` | Sí | `string` | Sin restricción adicional declarada | Valor de opening balance mantenido por la instancia. | `valor-ejemplo` |
+| `items[].charges` | Sí | `string` | Sin restricción adicional declarada | Valor de charges mantenido por la instancia. | `valor-ejemplo` |
+| `items[].payments` | Sí | `string` | Sin restricción adicional declarada | Valor de payments mantenido por la instancia. | `valor-ejemplo` |
+| `items[].closingBalance` | Sí | `string` | Sin restricción adicional declarada | Valor de closing balance mantenido por la instancia. | `valor-ejemplo` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/billing/services/patient-statements.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/patient-statements"
+}
+```
+
+---
+
+## 11. POST /billing/patient-statements:generate
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -1275,7 +1686,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /billing/payment-plans
+## 12. POST /billing/payment-plans
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -1429,7 +1840,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /billing/payments-made:execute
+## 13. POST /billing/payments-made:execute
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-payables`
@@ -1602,7 +2013,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /billing/payments-received:apply
+## 14. POST /billing/payments-received:apply
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -1775,7 +2186,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /billing/reconciliation:clear
+## 15. POST /billing/reconciliation:clear
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-operations`
@@ -1906,7 +2317,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /billing/reimbursements:link
+## 16. POST /billing/reimbursements:link
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-receivables`
@@ -2049,7 +2460,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /billing/service-catalog
+## 17. GET /billing/service-catalog
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -2192,7 +2603,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /billing/service-catalog
+## 18. POST /billing/service-catalog
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -2203,7 +2614,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Dar de alta un servicio en el catálogo maestro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio propio.
 
 Contexto declarado en el controlador: Crea un servicio nuevo en el catálogo maestro.
 
@@ -2236,7 +2647,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -2340,7 +2751,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
 | 409 | `CONFLICT` | Ya existe un servicio con ese código en el catálogo | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2360,7 +2772,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. PATCH /billing/service-catalog/{id}
+## 19. PATCH /billing/service-catalog/{id}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -2513,7 +2925,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /billing/service-catalog/procedure-specialties
+## 20. GET /billing/service-catalog/procedure-specialties
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -2621,7 +3033,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /billing/service-catalog/procedures
+## 21. GET /billing/service-catalog/procedures
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -2744,6 +3156,1337 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/billing/service-catalog/procedures"
+}
+```
+
+---
+
+## 22. GET /billing/simulated/catalogs
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Catálogos paramétricos del SIAT simulado
+- **Operation ID:** `BillingSimulatedController_catalogs`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.catalogs](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Catálogos paramétricos del SIAT simulado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/simulated/catalogs` en `BillingSimulatedController_catalogs`. El controlador delega en `BillingSimulatedService.catalogs`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/simulated/catalogs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/simulated/catalogs HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/catalogs"
+}
+```
+
+---
+
+## 23. GET /billing/simulated/charges
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Cobros de consultas (opcionalmente de una persona)
+- **Operation ID:** `BillingSimulatedController_charges`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.charges](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Cobros de consultas (opcionalmente de una persona). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/simulated/charges` en `BillingSimulatedController_charges`. El controlador delega en `BillingSimulatedService.listCharges`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/simulated/charges?patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/simulated/charges?patientProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Su rol no permite operar la facturación | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/charges"
+}
+```
+
+---
+
+## 24. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
+- **Operation ID:** `BillingSimulatedController_instancePayment`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.instancePayment](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments` en `BillingSimulatedController_instancePayment`. El controlador delega en `BillingSimulatedService.registerInstancePayment`. Valida el body como `SimulatedInstancePaymentDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `chargeId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `instanceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SimulatedInstancePaymentDto`; los campos opcionales se omiten.
+
+```http
+POST /billing/simulated/charges/00000000-0000-4000-8000-000000000001/instances/00000000-0000-4000-8000-000000000001/payments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "methodCode": 1,
+  "amount": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `methodCode` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `amount` | Sí | `string` | Sin restricción adicional declarada | Decimal en texto | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /billing/simulated/charges/00000000-0000-4000-8000-000000000001/instances/00000000-0000-4000-8000-000000000001/payments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "methodCode": 1,
+  "amount": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Su rol no permite operar la facturación | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 409 | `CONFLICT` | El servicio es de una sola instancia: se cobra y se factura de una vez | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/charges/{chargeId}/instances/{instanceId}/payments"
+}
+```
+
+---
+
+## 25. POST /billing/simulated/charges/{chargeId}/invoices
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Emitir la factura SIAT simulada de un cobro pagado
+- **Operation ID:** `BillingSimulatedController_issue`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.issue](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Emitir la factura SIAT simulada de un cobro pagado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /billing/simulated/charges/{chargeId}/invoices` en `BillingSimulatedController_issue`. El controlador delega en `BillingSimulatedService.issueInvoice`. Valida el body como `SimulatedIssueInvoiceDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `chargeId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SimulatedIssueInvoiceDto`; los campos opcionales se omiten.
+
+```http
+POST /billing/simulated/charges/00000000-0000-4000-8000-000000000001/invoices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "buyer": {
+    "name": "Nombre de ejemplo",
+    "documentTypeCode": 1,
+    "documentNumber": "valor-ejemplo"
+  }
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `buyer` | Sí | `SimulatedBuyerDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","documentTypeCode":1,"documentNumber":"valor-ejemplo","complement":{},"email":{}}` |
+| `buyer.name` | Sí | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `buyer.documentTypeCode` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `buyer.documentNumber` | Sí | `string` | longitud máxima 20 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `buyer.complement` | No | `object` | longitud máxima 5 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `buyer.email` | No | `object` | longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `additionalDiscount` | No | `object` | Sin restricción adicional declarada | Descuento adicional, decimal en texto | `{}` |
+| `simulation` | No | `SimulatedSimulationDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"forceMessageCode":1}` |
+| `simulation.forceMessageCode` | No | `number` | Sin restricción adicional declarada | Sólo simulador: forzar un mensaje del catálogo oficial | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /billing/simulated/charges/00000000-0000-4000-8000-000000000001/invoices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "buyer": {
+    "name": "Nombre de ejemplo",
+    "documentTypeCode": 1,
+    "documentNumber": "valor-ejemplo",
+    "complement": {},
+    "email": {}
+  },
+  "additionalDiscount": {},
+  "simulation": {
+    "forceMessageCode": 1
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Su rol no permite operar la facturación | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 409 | `CONFLICT` | El cobro ya tiene la factura ${String(vigente[0]['n'])} vigente | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El cobro todavía no está pagado | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/charges/{chargeId}/invoices"
+}
+```
+
+---
+
+## 26. POST /billing/simulated/charges/{chargeId}/payment
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Registrar el pago real de un cobro
+- **Operation ID:** `BillingSimulatedController_payment`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.payment](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Registrar el pago real de un cobro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /billing/simulated/charges/{chargeId}/payment` en `BillingSimulatedController_payment`. El controlador delega en `BillingSimulatedService.registerPayment`. Valida el body como `SimulatedRegisterPaymentDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `chargeId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SimulatedRegisterPaymentDto`; los campos opcionales se omiten.
+
+```http
+POST /billing/simulated/charges/00000000-0000-4000-8000-000000000001/payment HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "methodCode": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `methodCode` | Sí | `number` | Sin restricción adicional declarada | Código del catálogo SIMULADO de métodos de pago | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /billing/simulated/charges/00000000-0000-4000-8000-000000000001/payment HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "methodCode": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Su rol no permite operar la facturación | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | Factura no encontrada | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
+| 409 | `CONFLICT` | El cobro ya está pagado | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 409 | `CONFLICT` | El número de factura ya existe en la práctica | Excepción explícita en src/modules/billing/services/invoices.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La consulta no tiene precio: defina el precio del servicio «${cobro.catalogName}» en el catálogo de servicios de la práctica | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 422 | `PRECONDITION_FAILED` | El monto del pago debe ser positivo | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
+| 422 | `PRECONDITION_FAILED` | La suma asignada excede el monto del pago | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
+| 422 | `PRECONDITION_FAILED` | La factura no tiene saldo pendiente | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
+| 422 | `PRECONDITION_FAILED` | La asignación excede el saldo de la factura | Excepción explícita en src/modules/billing/services/payments-received.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/charges/{chargeId}/payment"
+}
+```
+
+---
+
+## 27. GET /billing/simulated/invoices/{invoiceId}
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Una factura simulada, dentro del alcance de quien la pide
+- **Operation ID:** `BillingSimulatedController_invoice`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.invoice](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Una factura simulada, dentro del alcance de quien la pide. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/simulated/invoices/{invoiceId}` en `BillingSimulatedController_invoice`. El controlador delega en `BillingSimulatedService.invoice`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `invoiceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/simulated/invoices/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/simulated/invoices/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo la administración de la clínica puede hacer esto | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 403 | `FORBIDDEN` | Su rol no permite operar la facturación | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/invoices/{invoiceId}"
+}
+```
+
+---
+
+## 28. POST /billing/simulated/invoices/{invoiceId}/annulment
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Anular la factura (sólo administración)
+- **Operation ID:** `BillingSimulatedController_annul`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.annul](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Anular la factura (sólo administración). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /billing/simulated/invoices/{invoiceId}/annulment` en `BillingSimulatedController_annul`. El controlador delega en `BillingSimulatedService.annul`. Valida el body como `SimulatedAnnulDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `invoiceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SimulatedAnnulDto`; los campos opcionales se omiten.
+
+```http
+POST /billing/simulated/invoices/00000000-0000-4000-8000-000000000001/annulment HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reasonCode": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reasonCode` | Sí | `number` | Sin restricción adicional declarada | Motivo del catálogo SIMULADO de anulación | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /billing/simulated/invoices/00000000-0000-4000-8000-000000000001/annulment HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reasonCode": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo la administración de la clínica puede hacer esto | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 403 | `FORBIDDEN` | Su rol no permite operar la facturación | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/invoices/{invoiceId}/annulment"
+}
+```
+
+---
+
+## 29. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Revertir la anulación (sólo administración)
+- **Operation ID:** `BillingSimulatedController_revert`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.revert](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Revertir la anulación (sólo administración). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /billing/simulated/invoices/{invoiceId}/annulment-reversal` en `BillingSimulatedController_revert`. El controlador delega en `BillingSimulatedService.revertAnnulment`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `invoiceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /billing/simulated/invoices/00000000-0000-4000-8000-000000000001/annulment-reversal HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /billing/simulated/invoices/00000000-0000-4000-8000-000000000001/annulment-reversal HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo la administración de la clínica puede hacer esto | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 403 | `FORBIDDEN` | Su rol no permite operar la facturación | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/invoices/{invoiceId}/annulment-reversal"
+}
+```
+
+---
+
+## 30. POST /billing/simulated/invoices/{invoiceId}/email
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Encolar el envío (simulado, no se envía) de la factura
+- **Operation ID:** `BillingSimulatedController_email`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.email](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Encolar el envío (simulado, no se envía) de la factura. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /billing/simulated/invoices/{invoiceId}/email` en `BillingSimulatedController_email`. El controlador delega en `BillingSimulatedService.email`. Valida el body como `SimulatedEmailDto` y consume `application/json`. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `invoiceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SimulatedEmailDto`; los campos opcionales se omiten.
+
+```http
+POST /billing/simulated/invoices/00000000-0000-4000-8000-000000000001/email HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "to": "paciente@correo.com"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `to` | Sí | `string` | longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `paciente@correo.com` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /billing/simulated/invoices/00000000-0000-4000-8000-000000000001/email HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "to": "paciente@correo.com"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `no declarado` | No |
+| 400 | Operación completada correctamente. | `no declarado` | No |
+| 401 | Operación completada correctamente. | `no declarado` | No |
+| 403 | Operación completada correctamente. | `no declarado` | No |
+| 404 | Operación completada correctamente. | `no declarado` | No |
+| 409 | Operación completada correctamente. | `no declarado` | No |
+| 413 | Operación completada correctamente. | `no declarado` | No |
+| 422 | Operación completada correctamente. | `no declarado` | No |
+| 429 | Operación completada correctamente. | `no declarado` | No |
+| 500 | Operación completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo la administración de la clínica puede hacer esto | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 403 | `FORBIDDEN` | Su rol no permite operar la facturación | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/invoices/{invoiceId}/email"
+}
+```
+
+---
+
+## 31. GET /billing/simulated/my-invoices
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Mis facturas: recibidas (paciente) o emitidas (quien factura)
+- **Operation ID:** `BillingSimulatedController_myInvoices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.myInvoices](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Mis facturas: recibidas (paciente) o emitidas (quien factura). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/simulated/my-invoices` en `BillingSimulatedController_myInvoices`. El controlador delega en `BillingSimulatedService.myInvoices`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/simulated/my-invoices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/simulated/my-invoices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/my-invoices"
+}
+```
+
+---
+
+## 32. GET /billing/simulated/my-invoices/{invoiceId}
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Una de mis facturas
+- **Operation ID:** `BillingSimulatedController_myInvoice`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.myInvoice](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Una de mis facturas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/simulated/my-invoices/{invoiceId}` en `BillingSimulatedController_myInvoice`. El controlador delega en `BillingSimulatedService.myInvoice`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `invoiceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/simulated/my-invoices/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/simulated/my-invoices/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/my-invoices/{invoiceId}"
+}
+```
+
+---
+
+## 33. GET /billing/simulated/outbox
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Bandeja de correo simulada (sólo administración)
+- **Operation ID:** `BillingSimulatedController_outbox`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.outbox](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Bandeja de correo simulada (sólo administración). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/simulated/outbox` en `BillingSimulatedController_outbox`. El controlador delega en `BillingSimulatedService.outbox`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/simulated/outbox HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/simulated/outbox HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo la administración de la clínica puede hacer esto | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 403 | `FORBIDDEN` | Su rol no permite operar la facturación | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/outbox"
+}
+```
+
+---
+
+## 34. GET /billing/simulated/status
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-simulated`
+- **Nombre:** Estado fiscal simulado: emisores y credenciales sintéticas
+- **Operation ID:** `BillingSimulatedController_status`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingSimulatedController.status](../../src/modules/billing/controllers/billing-simulated.controller.ts)
+
+### Descripción de negocio
+
+Estado fiscal simulado: emisores y credenciales sintéticas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/simulated/status` en `BillingSimulatedController_status`. El controlador delega en `BillingSimulatedService.status`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/simulated/status HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/simulated/status HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Su rol no permite operar la facturación | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 404 | `NOT_FOUND` | La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false) | Excepción explícita en src/modules/billing/services/billing-simulated.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/simulated/status"
 }
 ```
 

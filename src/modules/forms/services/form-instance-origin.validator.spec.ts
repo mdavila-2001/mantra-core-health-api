@@ -12,12 +12,12 @@ import { FormInstances } from '../entities';
 const FORM = 'form-1';
 const ENCOUNTER = 'enc-1';
 
-function emCon(instancia: Partial<FormInstances> | null) {
-  const findOne = (jest.fn as any)().mockResolvedValue(instancia);
+function emWith(instance: Partial<FormInstances> | null) {
+  const findOne = (jest.fn as any)().mockResolvedValue(instance);
   return { em: { findOne } as any, findOne };
 }
 
-async function motivo(p: Promise<void>): Promise<unknown> {
+async function reason(p: Promise<void>): Promise<unknown> {
   try {
     await p;
   } catch (e) {
@@ -34,7 +34,7 @@ describe('FormInstanceOriginValidator (P43)', () => {
   const validator = new FormInstanceOriginValidator();
 
   it('busca la instancia por id en la transacción del llamador', async () => {
-    const { em, findOne } = emCon({
+    const { em, findOne } = emWith({
       id: FORM,
       stateConceptId: FORMS.INSTANCE_CLOSED,
       resourceId: ENCOUNTER,
@@ -44,36 +44,36 @@ describe('FormInstanceOriginValidator (P43)', () => {
   });
 
   it('inexistente → 422 NOT_FOUND', async () => {
-    const { em } = emCon(null);
+    const { em } = emWith(null);
     expect(
-      await motivo(validator.assertUsableOrigin(em, FORM, ENCOUNTER)),
+      await reason(validator.assertUsableOrigin(em, FORM, ENCOUNTER)),
     ).toBe('NOT_FOUND');
   });
 
   it('abierta (no cerrada) → 422 NOT_CLOSED', async () => {
-    const { em } = emCon({
+    const { em } = emWith({
       id: FORM,
       stateConceptId: FORMS.INSTANCE_OPEN,
       resourceId: ENCOUNTER,
     });
     expect(
-      await motivo(validator.assertUsableOrigin(em, FORM, ENCOUNTER)),
+      await reason(validator.assertUsableOrigin(em, FORM, ENCOUNTER)),
     ).toBe('NOT_CLOSED');
   });
 
   it('de otro encuentro → 422 ENCOUNTER_MISMATCH', async () => {
-    const { em } = emCon({
+    const { em } = emWith({
       id: FORM,
       stateConceptId: FORMS.INSTANCE_CLOSED,
       resourceId: 'otro-encuentro',
     });
     expect(
-      await motivo(validator.assertUsableOrigin(em, FORM, ENCOUNTER)),
+      await reason(validator.assertUsableOrigin(em, FORM, ENCOUNTER)),
     ).toBe('ENCOUNTER_MISMATCH');
   });
 
   it('cerrada y del mismo encuentro → pasa', async () => {
-    const { em } = emCon({
+    const { em } = emWith({
       id: FORM,
       stateConceptId: FORMS.INSTANCE_CLOSED,
       resourceId: ENCOUNTER,
@@ -84,7 +84,7 @@ describe('FormInstanceOriginValidator (P43)', () => {
   });
 
   it('sin encounterId en el registro sólo exige existir y estar cerrada', async () => {
-    const { em } = emCon({
+    const { em } = emWith({
       id: FORM,
       stateConceptId: FORMS.INSTANCE_CLOSED,
       resourceId: 'cualquier-recurso',
@@ -98,12 +98,12 @@ describe('FormInstanceOriginValidator (P43)', () => {
   });
 
   it('sin encounterId, una instancia abierta sigue siendo 422 NOT_CLOSED', async () => {
-    const { em } = emCon({
+    const { em } = emWith({
       id: FORM,
       stateConceptId: FORMS.INSTANCE_OPEN,
       resourceId: 'cualquier-recurso',
     });
-    expect(await motivo(validator.assertUsableOrigin(em, FORM))).toBe(
+    expect(await reason(validator.assertUsableOrigin(em, FORM))).toBe(
       'NOT_CLOSED',
     );
   });

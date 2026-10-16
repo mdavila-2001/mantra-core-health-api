@@ -212,8 +212,8 @@ export class PharmaSocialService {
               : 'PHARMA_LAB_POST_REJECTED',
           subject:
             dto.statusConceptId === PHL.POST_SUBMISSION_APPROVED
-              ? 'Tu publicación fue aprobada'
-              : 'Tu publicación fue rechazada',
+              ? 'Su publicación fue aprobada'
+              : 'Su publicación fue rechazada',
           bodyText: dto.rationale,
           relatedResourceType: 'visitor_post_submission',
           relatedResourceId: submission.id,

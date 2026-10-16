@@ -32,7 +32,7 @@ import {
   NormalBalance,
 } from '../dto';
 import { sumCents, fromCents } from './money';
-import { clasificar } from './journal-classification';
+import { classify } from './journal-classification';
 import { AuditTrailService } from '../../audit/services';
 import { PracticeTenantLookupService } from '../../practice/services';
 
@@ -389,26 +389,26 @@ export class LedgerService {
         });
       }
 
-      const resultado = clasificar({
+      const result = classify({
         sourceDocumentType: txn.sourceDocumentType,
       });
-      const destino =
-        resultado.decision === 'CLASIFICADA'
+      const destination =
+        result.decision === 'CLASIFICADA'
           ? ACCT.TXN_AUTO_CLASSIFIED
           : ACCT.TXN_PENDING_REVIEW;
-      this.assertTransition(txn.statusConceptId, destino);
+      this.assertTransition(txn.statusConceptId, destination);
 
-      if (resultado.transactionTypeConceptId) {
-        txn.transactionTypeConceptId = resultado.transactionTypeConceptId;
+      if (result.transactionTypeConceptId) {
+        txn.transactionTypeConceptId = result.transactionTypeConceptId;
       }
-      txn.statusConceptId = destino;
+      txn.statusConceptId = destination;
       touch(txn, actor.id);
 
       // La cadena WORM distingue las dos autoridades: una clasificación por
       // reglas no queda sellada igual que un envío a revisión humana.
       await this.auditTrail.record(tx, actor, {
         action:
-          resultado.decision === 'CLASIFICADA'
+          result.decision === 'CLASIFICADA'
             ? 'JOURNAL_AUTO_CLASSIFIED'
             : 'JOURNAL_CLASSIFICATION_REVIEW',
         entity: JOURNAL_AUDIT_ENTITY,
@@ -419,15 +419,15 @@ export class LedgerService {
         {
           operation: 'accounting.journal.classify',
           transactionId: id,
-          decision: resultado.decision,
-          rulesetVersion: resultado.rulesetVersion,
-          ruleId: resultado.ruleId,
-          to: destino,
+          decision: result.decision,
+          rulesetVersion: result.rulesetVersion,
+          ruleId: result.ruleId,
+          to: destination,
         },
         'Journal transaction classified',
       );
 
-      return { ...this.toResponse(txn), classification: resultado };
+      return { ...this.toResponse(txn), classification: result };
     });
   }
 

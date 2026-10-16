@@ -22,7 +22,7 @@ import {
 import { SURVEYS, TARGET_TYPE_BY_CODE } from '../surveys.concepts';
 import { AppointmentBookings } from '../../scheduling/entities/appointment_bookings.entity';
 import { BookableSlots } from '../../scheduling/entities/bookable_slots.entity';
-import { SCHED } from '../../scheduling/scheduling.concepts';
+import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 
 /** Milisegundos de un día, para derivar la ventana de respuesta. */
 const MS_PER_DAY = 24 * 60 * 60 * 1000;

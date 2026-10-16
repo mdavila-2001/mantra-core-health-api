@@ -6,7 +6,7 @@ import type {
   AgendaNoticeKind,
   AgendaNoticePort,
   AgendaNoticeResult,
-} from '../../src/modules/scheduling/ports/agenda-notice.port';
+} from '../../src/modules/scheduling/application/ports/agenda-notice.port';
 
 /**
  * Laboratorio de la capacidad de emisión de avisos de agenda (P8), contra

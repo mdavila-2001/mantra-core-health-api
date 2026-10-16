@@ -226,12 +226,12 @@ export class DiagnosticUnitsReadRepository {
     em: EntityManager,
     studyCode: string,
   ): Promise<string[]> {
-    const filas = await em.find(
+    const rows = await em.find(
       DiagnosticStudyOfferings,
       { studyCode, statusConceptId: DUNIT.OFFERING_ACTIVE },
       { fields: ['diagnosticUnitId'] },
     );
-    return [...new Set(filas.map((fila) => fila.diagnosticUnitId))];
+    return [...new Set(rows.map((row) => row.diagnosticUnitId))];
   }
 
   /**
@@ -249,12 +249,12 @@ export class DiagnosticUnitsReadRepository {
     em: EntityManager,
     insurerTenantId: string,
   ): Promise<string[]> {
-    const filas = await em.find(
+    const rows = await em.find(
       DiagnosticPriceSchedules,
       { insurerTenantId, statusConceptId: DUNIT.SCHEDULE_ACTIVE },
       { fields: ['diagnosticUnitId'] },
     );
-    return [...new Set(filas.map((fila) => fila.diagnosticUnitId))];
+    return [...new Set(rows.map((row) => row.diagnosticUnitId))];
   }
 
   /**
@@ -359,8 +359,8 @@ function searchWhere(
   if (criteria.q !== undefined && criteria.q !== '') {
     // `$ilike` y no `$like`: quien busca «lab central» no escribe la mayúscula,
     // y una búsqueda que distingue mayúsculas no encuentra nada.
-    const patron = `%${criteria.q}%`;
-    where.$or = [{ name: { $ilike: patron } }, { code: { $ilike: patron } }];
+    const pattern = `%${criteria.q}%`;
+    where.$or = [{ name: { $ilike: pattern } }, { code: { $ilike: pattern } }];
   }
   return where;
 }

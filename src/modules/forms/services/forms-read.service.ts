@@ -406,13 +406,13 @@ export class FormsReadService {
   /**
    * Las asignaciones de campo visibles, con sus secciones resueltas.
    *
-   * @param filtro - Acotaciones opcionales por target, campo o sección.
+   * @param filter - Acotaciones opcionales por target, campo o sección.
    * @param tenantId - Tenant del actor, si el contexto lo fijó.
    * @param limit - Tope del listado.
    * @returns Asignaciones visibles, con el recorte declarado.
    */
   async listAssignments(
-    filtro: {
+    filter: {
       /** Target al que se asignaron los campos. */
       targetResourceConceptId?: string;
       /** Campo asignado. */
@@ -430,7 +430,7 @@ export class FormsReadService {
     const em = this.em.fork();
     const rows = await this.assignmentsRepo.findAssignments(
       em,
-      filtro,
+      filter,
       tenantId,
       limit + 1,
     );
@@ -762,9 +762,9 @@ export class FormsReadService {
       return getter(value) ?? null;
     }
     for (const candidate of VALUE_FALLBACK_ORDER) {
-      const contenido = candidate(value);
-      if (contenido !== undefined && contenido !== null) {
-        return contenido;
+      const content = candidate(value);
+      if (content !== undefined && content !== null) {
+        return content;
       }
     }
     return null;

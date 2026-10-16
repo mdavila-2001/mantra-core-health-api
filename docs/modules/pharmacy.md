@@ -3,12 +3,12 @@
   Fuente real: src/modules/pharmacy/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `pharmacy`
 
-**Fuente:** [`src/modules/pharmacy/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/pharmacy/README.md)
+**Fuente:** [`src/modules/pharmacy/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy/README.md)
 · 3 controllers · 10 services · 12 repositories · 9 entidades · 13 DTO
 
 ---
@@ -18,6 +18,48 @@
 Identidad de farmacia con licencias, sedes dispensadoras, catálogo de productos con
 identificadores, listas de precios y precios versionados, integración externa con
 mapeo de productos, retiro de catálogo y proyección al read-model.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/pharmacy -name '*.controller.ts' | wc -l
+  find src/modules/pharmacy -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/pharmacy -name '*.entity.ts' | wc -l
+  find src/modules/pharmacy -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 22 rutas HTTP, 9 entidades y 10 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`DirectoryModule`).
+
+Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `pharmacies`, `pharmacy_external_product_mappings`, `pharmacy_integration_connections`, `pharmacy_licenses`, `pharmacy_price_lists`, `pharmacy_product_identifiers`, `pharmacy_product_prices`, `pharmacy_products`, `pharmacy_sites`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /public/medications` | pública | `pharmacy-public` |
+| `GET /public/medications/:conceptId/availability` | pública | `pharmacy-public` |
+| `GET /pharmacy/pharmacies` | sesión | `pharmacy-read` |
+| `GET /pharmacy/pharmacies/:id` | sesión | `pharmacy-read` |
+| `GET /pharmacy/pharmacies/:id/licenses` | sesión | `pharmacy-read` |
+| `GET /pharmacy/pharmacies/:id/contacts` | sesión | `pharmacy-read` |
+| `GET /pharmacy/sites` | sesión | `pharmacy-read` |
+| `GET /pharmacy/catalog-products` | sesión | `pharmacy-read` |
+| `GET /pharmacy/products` | sesión | `pharmacy-read` |
+| `GET /pharmacy/sites/:siteId/prices` | sesión | `pharmacy-read` |
+| `POST /pharmacies` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/licenses/:licenseId/verify` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/sites` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/products` | SECURITY_ADMIN | `pharmacy` |
+| `PATCH /pharmacies/:pharmacyId/products/:productId` | SECURITY_ADMIN | `pharmacy` |
+| `DELETE /pharmacies/:pharmacyId/products/:productId` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists/:priceListId/prices` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists/:priceListId/close` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/integration-connections` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/integration-connections/:connId/product-mappings` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/projections` | SECURITY_ADMIN | `pharmacy` |
 
 ## Endpoints (UC → ruta)
 
@@ -137,3 +179,11 @@ archivo para que el módulo sea auto-contenido.
 - Smoke de integración: `test/smoke/modules/pharmacy.smoke.ts`
   (`PHARMACY_SMOKE`), encadena el ciclo completo sobre `ctx.vars`.
 
+## Revisión backend 2026-10-05
+
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharmacy.md)
+registra que las mutaciones administrativas sólo exigen rol global y no atan el
+actor a farmacia ni tenant. También faltan comprobaciones entre farmacia, sede,
+práctica y aseguradora. La corrida dirigida pasó 22 suites y 278 tests; emitió
+dos advertencias de import JSON sin atributo y no prueba aislamiento de tenant
+ni claves foráneas reales.

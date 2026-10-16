@@ -141,8 +141,8 @@ describe('AssetService', () => {
       await d.service.runDepreciation(runDto, actor);
       expect(asset.accumulatedDepreciation).toBe('128.57');
       expect(asset.bookValue).toBe('871.43');
-      const esperado = (100000 - 12857) / 100;
-      expect(asset.bookValue).toBe(esperado.toFixed(2));
+      const expected = (100000 - 12857) / 100;
+      expect(asset.bookValue).toBe(expected.toFixed(2));
       expect(d.assetRepo.createDepreciation).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({ amount: '128.57', bookValueAfter: '871.43' }),
@@ -162,21 +162,21 @@ describe('AssetService', () => {
         updatedAt: new Date(),
       };
       d.assetRepo.activeAssets.mockResolvedValue([asset]);
-      let posteos = 0;
+      let postings = 0;
       // Seis corridas en seis períodos distintos para un activo de tres meses.
-      for (let periodo = 1; periodo <= 6; periodo++) {
+      for (let period = 1; period <= 6; period++) {
         try {
           await d.service.runDepreciation(
-            { ...runDto, fiscalPeriodId: `fp${periodo}` },
+            { ...runDto, fiscalPeriodId: `fp${period}` },
             actor,
           );
-          posteos += 1;
+          postings += 1;
         } catch (e) {
           // Sin nada que depreciar el motor responde 422: correcto para el disparo manual.
           expect(e).toBeInstanceOf(PreconditionFailedException);
         }
       }
-      expect(posteos).toBe(3);
+      expect(postings).toBe(3);
       expect(asset.bookValue).toBe('100.00');
       expect(asset.accumulatedDepreciation).toBe('900.00');
       expect(d.posting.post).toHaveBeenCalledTimes(3);
@@ -231,13 +231,13 @@ describe('AssetService', () => {
         accumulatedDepreciation: '0',
         updatedAt: new Date(),
       };
-      const orden: string[] = [];
+      const order: string[] = [];
       d.assetRepo.activeAssets.mockImplementation(async () => {
-        orden.push('lock');
+        order.push('lock');
         return [asset];
       });
       d.assetRepo.findDepreciation.mockImplementation(async () => {
-        orden.push('check');
+        order.push('check');
         return null;
       });
       await d.service.runDepreciation(runDto, actor);
@@ -247,7 +247,7 @@ describe('AssetService', () => {
         ACCT.ASSET_ACTIVE,
         { assetId: undefined, forUpdate: true },
       );
-      expect(orden).toEqual(['lock', 'check']);
+      expect(order).toEqual(['lock', 'check']);
     });
 
     it('omite un activo ya depreciado en el periodo', async () => {

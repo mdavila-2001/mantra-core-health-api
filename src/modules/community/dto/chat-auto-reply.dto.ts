@@ -29,7 +29,7 @@ export const AUTO_REPLY_MAX_LENGTH = 4000;
  * las dos formas y se normaliza al guardar, en vez de rechazar a quien manda
  * exactamente lo que la lectura anterior le devolvió.
  */
-const HORA = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
+const HOUR = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 
 /**
  * Cuerpo de `PUT /community/profiles/:profileId/auto-reply` (F4.7).
@@ -90,7 +90,7 @@ export class UpsertChatAutoReplyDto {
     example: '08:00',
   })
   @IsOptional()
-  @Matches(HORA, { message: 'businessHoursFrom debe tener formato HH:MM' })
+  @Matches(HOUR, { message: 'businessHoursFrom debe tener formato HH:MM' })
   businessHoursFrom?: string;
 
   /**
@@ -104,7 +104,7 @@ export class UpsertChatAutoReplyDto {
     example: '18:00',
   })
   @IsOptional()
-  @Matches(HORA, { message: 'businessHoursTo debe tener formato HH:MM' })
+  @Matches(HOUR, { message: 'businessHoursTo debe tener formato HH:MM' })
   businessHoursTo?: string;
 }
 

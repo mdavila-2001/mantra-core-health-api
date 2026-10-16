@@ -133,7 +133,7 @@ describe('IdentityChecksService', () => {
     });
 
     /** Check en curso cuyo intento sigue esperando el veredicto. */
-    function checkConIntentoEnVuelo(
+    function checkWithAttemptInFlight(
       d: ReturnType<typeof build>,
       attempt: Record<string, unknown>,
     ) {
@@ -165,7 +165,7 @@ describe('IdentityChecksService', () => {
         outcomeConceptId: IDA.ATTEMPT_PENDING,
         completedAt: undefined,
       };
-      checkConIntentoEnVuelo(d, attempt);
+      checkWithAttemptInFlight(d, attempt);
 
       await expect(
         d.service.recordResult('ch1', { result: 'MATCH' } as any, actor),
@@ -182,7 +182,7 @@ describe('IdentityChecksService', () => {
         outcomeConceptId: IDA.ATTEMPT_PENDING,
         completedAt: undefined,
       };
-      checkConIntentoEnVuelo(d, attempt);
+      checkWithAttemptInFlight(d, attempt);
 
       await d.service.recordResult('ch1', { result: 'NO_MATCH' } as any, actor);
 
@@ -193,17 +193,17 @@ describe('IdentityChecksService', () => {
 
     it('no reescribe la fecha de cierre de un intento ya completado', async () => {
       const d = build();
-      const completadoEl = new Date('2026-08-01T10:00:00.000Z');
+      const completed = new Date('2026-08-01T10:00:00.000Z');
       const attempt: Record<string, unknown> = {
         id: 'at1',
         outcomeConceptId: IDA.ATTEMPT_SUCCESS,
-        completedAt: completadoEl,
+        completedAt: completed,
       };
-      checkConIntentoEnVuelo(d, attempt);
+      checkWithAttemptInFlight(d, attempt);
 
       await d.service.recordResult('ch1', { result: 'MATCH' } as any, actor);
 
-      expect(attempt.completedAt).toBe(completadoEl);
+      expect(attempt.completedAt).toBe(completed);
     });
 
     it('no resucita un intento que falló al despacharse', async () => {
@@ -213,7 +213,7 @@ describe('IdentityChecksService', () => {
         outcomeConceptId: IDA.ATTEMPT_FAILED,
         completedAt: new Date('2026-08-01T10:00:00.000Z'),
       };
-      checkConIntentoEnVuelo(d, attempt);
+      checkWithAttemptInFlight(d, attempt);
 
       await d.service.recordResult('ch1', { result: 'MATCH' } as any, actor);
 

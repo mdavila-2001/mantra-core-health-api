@@ -1,5 +1,5 @@
 import { ProfilesModule } from './profiles.module';
-import { ProfilesPractitionersController } from './controllers';
+import { ProfilesPractitionersController } from './presentation/controllers';
 
 /**
  * Que el controlador exista y esté importado no publica sus rutas: si no entra
@@ -8,10 +8,10 @@ import { ProfilesPractitionersController } from './controllers';
  */
 describe('ProfilesModule', () => {
   it('publica ProfilesPractitionersController (especialidades y matrículas propias)', () => {
-    const controladores = (Reflect.getMetadata(
+    const controllers = (Reflect.getMetadata(
       'controllers',
       ProfilesModule as object,
     ) ?? []) as readonly unknown[];
-    expect(controladores).toContain(ProfilesPractitionersController);
+    expect(controllers).toContain(ProfilesPractitionersController);
   });
 });

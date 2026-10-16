@@ -12,6 +12,10 @@ route:
   group_interval: 5m
   repeat_interval: 4h
   routes:
+    # ContainerDown se apaga sola por su ventana de 15 min: un «resuelto»
+    # engañaría (el contenedor puede seguir parado).
+    - matchers: [alertname = "ContainerDown"]
+      receiver: telegram-sin-resuelto
     # El latido NO va a Telegram: va a Healthchecks.io cada 5 min.
     - matchers: [alertname = "Watchdog"]
       receiver: healthchecks
@@ -37,6 +41,14 @@ receivers:
         chat_id: __TELEGRAM_CHAT_ID__
         parse_mode: HTML
         send_resolved: true
+        message: '{{ template "alovida.telegram.message" . }}'
+
+  - name: telegram-sin-resuelto
+    telegram_configs:
+      - bot_token_file: __RUNTIME_DIR__/telegram_token
+        chat_id: __TELEGRAM_CHAT_ID__
+        parse_mode: HTML
+        send_resolved: false
         message: '{{ template "alovida.telegram.message" . }}'
 
   # Sin HEALTHCHECKS_PING_URL, entrypoint.sh borra el bloque marcado y este

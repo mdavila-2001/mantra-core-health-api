@@ -6,7 +6,7 @@ import { AUTHZ } from '../authz.concepts';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 const ACTOR = { id: 'u1', roles: ['PATIENT'] } as any;
-const PACIENTE = 'p1';
+const PATIENT = 'p1';
 
 /**
  * «Quién ve mi historia» (BR-20): lista con estado efectivo y revoca sólo lo
@@ -25,10 +25,10 @@ function build() {
     ),
   };
   const patientProfilesRepo = {
-    findById: mockFn().mockResolvedValue({ profileId: PACIENTE }),
+    findById: mockFn().mockResolvedValue({ profileId: PATIENT }),
   };
-  const futuro = new Date(Date.now() + 86_400_000);
-  const pasado = new Date(Date.now() - 86_400_000);
+  const future = new Date(Date.now() + 86_400_000);
+  const past = new Date(Date.now() - 86_400_000);
   const careRepo = {
     findAllByPatient: mockFn().mockResolvedValue([
       {
@@ -36,16 +36,16 @@ function build() {
         tenantId: 't1',
         practitionerProfileId: 'doc1',
         statusConceptId: CONCEPTS.STATE_ACTIVE,
-        validFrom: pasado,
-        validTo: futuro,
+        validFrom: past,
+        validTo: future,
       },
       {
         id: 'r2',
         tenantId: 't1',
         practitionerProfileId: 'doc1',
         statusConceptId: CONCEPTS.STATE_ACTIVE,
-        validFrom: pasado,
-        validTo: pasado,
+        validFrom: past,
+        validTo: past,
       },
     ]),
     findById: mockFn(),
@@ -59,8 +59,8 @@ function build() {
         reasonConceptId: AUTHZ.PURPOSE_EMERGENCY,
         accessLevelConceptId: 'lvl',
         stateConceptId: CONCEPTS.STATE_ACTIVE,
-        validFrom: pasado,
-        validTo: futuro,
+        validFrom: past,
+        validTo: future,
       },
     ]),
     findById: mockFn(),
@@ -92,7 +92,7 @@ describe('AuthzMeService (BR-20)', () => {
   it('lista con nombre, estado efectivo y marca de emergencia', async () => {
     const d = build();
     const out = await d.service.listMyAccess(ACTOR);
-    expect(d.careRepo.findAllByPatient.mock.calls[0][1]).toBe(PACIENTE);
+    expect(d.careRepo.findAllByPatient.mock.calls[0][1]).toBe(PATIENT);
     expect(out.careRelationships.map((r) => [r.id, r.state])).toEqual([
       ['r1', 'ACTIVE'],
       ['r2', 'EXPIRED'],
@@ -128,7 +128,7 @@ describe('AuthzMeService (BR-20)', () => {
     const d = build();
     d.careRepo.findById.mockResolvedValue({
       id: 'r1',
-      patientProfileId: PACIENTE,
+      patientProfileId: PATIENT,
       statusConceptId: CONCEPTS.STATE_ACTIVE,
     });
     await d.service.revokeMyCareRelationship(ACTOR, 'r1');
@@ -155,7 +155,7 @@ describe('AuthzMeService (BR-20)', () => {
     const d = build();
     d.careRepo.findById.mockResolvedValue({
       id: 'r3',
-      patientProfileId: PACIENTE,
+      patientProfileId: PATIENT,
       statusConceptId: CONCEPTS.STATE_PENDING,
     });
     await expect(
@@ -167,7 +167,7 @@ describe('AuthzMeService (BR-20)', () => {
     const d = build();
     d.grantsRepo.findById.mockResolvedValue({
       id: 'g1',
-      patientProfileId: PACIENTE,
+      patientProfileId: PATIENT,
     });
     await d.service.revokeMyClinicalGrant(ACTOR, 'g1');
     expect(d.clinicalService.revokeClinicalAccess).toHaveBeenCalledWith(

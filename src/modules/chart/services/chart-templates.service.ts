@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
-  PreconditionFailedException,
   ResourceNotFoundException,
   getCurrentTenantId,
   touch,
@@ -59,77 +58,6 @@ export class ChartTemplatesService {
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ChartTemplatesService.name);
-  }
-
-  /**
-   * Las reglas de un campo de elección (`dataType: 'code'`) declarado inline
-   * al crear una plantilla. Misma regla que `FormsFieldsService.
-   * validateChoiceField` —son dos superficies de alta del mismo tipo de
-   * campo, `forms.dynamic_field_definitions`— duplicada a propósito: viven en
-   * módulos distintos (`chart` no depende de `forms` más que por las
-   * entidades) y la alternativa, un servicio compartido para una validación
-   * de una decena de líneas, es más acoplamiento del que vale.
-   */
-  private validateChoiceField(input: {
-    code: string;
-    dataType: string;
-    valueSetId?: string;
-    options?: string[];
-    allowOther?: boolean;
-  }): void {
-    if (input.dataType !== 'code') {
-      if (input.options !== undefined || input.allowOther) {
-        throw new PreconditionFailedException(
-          '`options`/`allowOther` sólo aplican a dataType "code"',
-          { code: input.code },
-        );
-      }
-      return;
-    }
-    if (input.valueSetId !== undefined && input.options !== undefined) {
-      throw new PreconditionFailedException(
-        'Un campo "code" declara valueSetId u options, no los dos',
-        { code: input.code },
-      );
-    }
-    if (input.valueSetId !== undefined) {
-      if (input.allowOther) {
-        throw new PreconditionFailedException(
-          '`allowOther` no aplica sobre un valueSetId',
-          { code: input.code },
-        );
-      }
-      return;
-    }
-    const opciones = input.options ?? [];
-    if (opciones.length < 2) {
-      throw new PreconditionFailedException(
-        'Un campo "code" sin valueSetId necesita al menos dos opciones',
-        { code: input.code, count: opciones.length },
-      );
-    }
-    const vistas = new Set<string>();
-    for (const opcionCruda of opciones) {
-      const opcion = opcionCruda.trim();
-      if (opcion === '') {
-        throw new PreconditionFailedException(
-          'Una opción no puede estar vacía',
-          {
-            code: input.code,
-          },
-        );
-      }
-      if (vistas.has(opcion)) {
-        throw new PreconditionFailedException(
-          'Las opciones no pueden repetirse',
-          {
-            code: input.code,
-            opcion,
-          },
-        );
-      }
-      vistas.add(opcion);
-    }
   }
 
   /** UC-15-12: asigna una plantilla a una práctica/profesional respetando un-solo-default. */
@@ -223,25 +151,11 @@ export class ChartTemplatesService {
 
       const fields: ChartTemplateFieldDto[] = [];
       for (const [i, input] of dto.fields.entries()) {
-        this.validateChoiceField({
-          code: input.code,
-          dataType: input.dataType,
-          valueSetId: input.valueSetId,
-          options: input.options,
-          allowOther: input.allowOther,
-        });
-
         const field = this.templatesRepo.createTemplateField(tx, {
           code: input.code,
           name: input.name,
           dataType: input.dataType,
           valueSetId: input.valueSetId,
-          options: input.options,
-          multiple: input.multiple,
-          allowOther: input.allowOther,
-          description: input.description,
-          cardinalityMin: input.cardinalityMin,
-          cardinalityMax: input.cardinalityMax,
           stateConceptId: FORMS.FIELD_ACTIVE,
           actorUserId: actor.id,
         });
@@ -268,12 +182,6 @@ export class ChartTemplatesService {
           name: field.name,
           dataType: input.dataType,
           valueSetId: field.valueSetId,
-          options: field.options,
-          multiple: field.multiple,
-          allowOther: field.allowOther,
-          description: field.description,
-          cardinalityMin: field.cardinalityMin,
-          cardinalityMax: field.cardinalityMax,
           required: assignment.required,
           ordinal: assignment.ordinal,
           // Recién creada por un administrador: propia si nació con tenant.
@@ -361,7 +269,7 @@ export class ChartTemplatesService {
     const fieldById = new Map(fieldDefinitions.map((f) => [f.id, f]));
 
     let provenance: ChartTemplateProvenanceDto | undefined;
-    let presentacion: Presentaciones = new Map();
+    let presentation: Presentations = new Map();
     let kind: ChartTemplateResponseDto['kind'];
     const fields: ChartTemplateFieldDto[] = [];
 
@@ -371,10 +279,10 @@ export class ChartTemplatesService {
 
       // El código viene prefijado con el de la plantilla porque
       // `dynamic_field_definitions` es una tabla global; se compara el sufijo.
-      if (esClaveDeCatalogo(field.code)) {
-        provenance = leerProcedencia(field.defaultValueJson);
-        presentacion = leerPresentacion(field.defaultValueJson);
-        kind = leerClase(field.defaultValueJson);
+      if (isCatalogKey(field.code)) {
+        provenance = readProvenance(field.defaultValueJson);
+        presentation = readPresentation(field.defaultValueJson);
+        kind = readClass(field.defaultValueJson);
         continue;
       }
 
@@ -390,12 +298,6 @@ export class ChartTemplatesService {
         name: field.name,
         dataType: field.dataType as ChartTemplateFieldDto['dataType'],
         valueSetId: field.valueSetId,
-        options: field.options,
-        multiple: field.multiple,
-        allowOther: field.allowOther,
-        description: field.description,
-        cardinalityMin: field.cardinalityMin,
-        cardinalityMax: field.cardinalityMax,
         required: assignment.required,
         ordinal: assignment.ordinal,
         // Los del estándar son globales; los que agregó la organización llevan
@@ -405,7 +307,7 @@ export class ChartTemplatesService {
     }
 
     return {
-      fields: aplicarPresentacion(fields, presentacion),
+      fields: applyPresentation(fields, presentation),
       provenance,
       kind,
     };
@@ -455,7 +357,7 @@ export class ChartTemplatesService {
  * formularios comparten nombres de campo—, pero se acepta también el código
  * pelado: una plantilla podría traer la clave sin prefijo.
  */
-function esClaveDeCatalogo(code: string): boolean {
+function isCatalogKey(code: string): boolean {
   return (
     code === CHART_TEMPLATE_PROVENANCE_FIELD_CODE ||
     code.endsWith(`.${CHART_TEMPLATE_PROVENANCE_FIELD_CODE}`)
@@ -470,19 +372,19 @@ function esClaveDeCatalogo(code: string): boolean {
  * legible y completable — se pierde el renglón de procedencia, no el
  * formulario.
  */
-function leerProcedencia(
+function readProvenance(
   value: unknown,
 ): ChartTemplateProvenanceDto | undefined {
   if (typeof value !== 'object' || value === null) return undefined;
   const raw = value as Record<string, unknown>;
-  const requeridos = [
+  const required = [
     'sourceTitle',
     'organization',
     'url',
     'license',
     'retrievedAt',
   ] as const;
-  if (requeridos.some((key) => typeof raw[key] !== 'string')) return undefined;
+  if (required.some((key) => typeof raw[key] !== 'string')) return undefined;
 
   return {
     sourceTitle: raw.sourceTitle as string,
@@ -497,10 +399,10 @@ function leerProcedencia(
 }
 
 /** Lo que el catálogo dice de cada campo, por código sin prefijo. */
-type Presentaciones = ReadonlyMap<string, Record<string, unknown>>;
+type Presentations = ReadonlyMap<string, Record<string, unknown>>;
 
 /** El código de un campo sin el prefijo de su plantilla. */
-function codigoPelado(code: string): string {
+function bareCode(code: string): string {
   const punto = code.indexOf('.');
   return punto === -1 ? code : code.slice(punto + 1);
 }
@@ -510,14 +412,14 @@ function codigoPelado(code: string): string {
  * Como con la procedencia, lo malformado se ignora en vez de lanzar: se pierde
  * la lista o la condición, no el formulario.
  */
-function leerPresentacion(value: unknown): Presentaciones {
+function readPresentation(value: unknown): Presentations {
   if (typeof value !== 'object' || value === null) return new Map();
   const raw = (value as Record<string, unknown>).fieldPresentation;
   if (typeof raw !== 'object' || raw === null) return new Map();
   return new Map(
     Object.entries(raw as Record<string, unknown>).filter(
-      (entrada): entrada is [string, Record<string, unknown>] =>
-        typeof entrada[1] === 'object' && entrada[1] !== null,
+      (entry): entry is [string, Record<string, unknown>] =>
+        typeof entry[1] === 'object' && entry[1] !== null,
     ),
   );
 }
@@ -528,17 +430,15 @@ function leerPresentacion(value: unknown): Presentaciones {
  * valor—; si ese campo no está en la respuesta, la condición se descarta y el
  * campo queda siempre visible, que es el error menos dañino.
  */
-function aplicarPresentacion(
+function applyPresentation(
   fields: ChartTemplateFieldDto[],
-  presentacion: Presentaciones,
+  presentation: Presentations,
 ): ChartTemplateFieldDto[] {
-  if (presentacion.size === 0) return fields;
-  const idPorCodigo = new Map(
-    fields.map((f) => [codigoPelado(f.code), f.fieldId]),
-  );
+  if (presentation.size === 0) return fields;
+  const idByCode = new Map(fields.map((f) => [bareCode(f.code), f.fieldId]));
 
   return fields.map((field) => {
-    const p = presentacion.get(codigoPelado(field.code));
+    const p = presentation.get(bareCode(field.code));
     if (p === undefined || field.own) return field;
 
     const extra: Partial<ChartTemplateFieldDto> = {};
@@ -553,16 +453,16 @@ function aplicarPresentacion(
     if (p.allowOther === true) extra.allowOther = true;
     if (typeof p.description === 'string') extra.description = p.description;
 
-    const condicion = p.showWhen as
+    const condition = p.showWhen as
       { field?: unknown; equals?: unknown } | undefined;
-    const padre =
-      typeof condicion?.field === 'string'
-        ? idPorCodigo.get(condicion.field)
+    const parent =
+      typeof condition?.field === 'string'
+        ? idByCode.get(condition.field)
         : undefined;
-    if (padre !== undefined && condicion?.equals !== undefined) {
+    if (parent !== undefined && condition?.equals !== undefined) {
       extra.showWhen = {
-        fieldId: padre,
-        equals: condicion.equals as ChartTemplateShowWhenDto['equals'],
+        fieldId: parent,
+        equals: condition.equals as ChartTemplateShowWhenDto['equals'],
       };
     }
     return { ...field, ...extra };
@@ -570,7 +470,7 @@ function aplicarPresentacion(
 }
 
 /** La clase de ficha del catálogo (`BASE`, `SPECIFIC`, `GENERAL`), si la trae. */
-function leerClase(value: unknown): ChartTemplateResponseDto['kind'] {
+function readClass(value: unknown): ChartTemplateResponseDto['kind'] {
   if (typeof value !== 'object' || value === null) return undefined;
   const kind = (value as Record<string, unknown>).kind;
   return kind === 'BASE' || kind === 'SPECIFIC' || kind === 'GENERAL'

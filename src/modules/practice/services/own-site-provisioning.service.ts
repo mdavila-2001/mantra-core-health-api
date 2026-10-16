@@ -116,8 +116,8 @@ export class OwnSiteProvisioningService {
       // `common.addresses`. Si no queda nada tras recortar, la columna
       // (varchar nullable) se deja sin valor en vez de guardar `''`.
       const lines = dto.address.lines
-        .map((linea) => linea.trim())
-        .filter((linea) => linea.length > 0);
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
       const address = this.addressesRepo.create(tx, {
         ownerTypeConceptId: CONCEPTS.OWNER_USER,
         ownerId: owner.userId,
@@ -161,6 +161,7 @@ export class OwnSiteProvisioningService {
       practitionerProfileId: owner.practitionerProfileId,
       practiceId: practice.id,
       practiceSiteId: site.id,
+      contactPhone: dto.contactPhone,
       roleConceptId: PRAC.ROLE_ATTENDING,
       // Es su propio consultorio: no hay nadie más a quien pedirle permiso,
       // así que nace activa directo (mismo criterio que el bootstrap de

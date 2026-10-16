@@ -8,7 +8,9 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
+  NotAudited,
   Public,
   Roles,
   type AuthenticatedUser,
@@ -55,6 +57,11 @@ export class PaymentsOperationsController {
   ) {}
 
   /** UC-42-02. */
+  @Audited({
+    action: 'CHECKOUT_SESSION_OPENED',
+    entity: 'payment_checkout_session',
+    entityId: 'result.id',
+  })
   @Post('checkout-sessions')
   @Roles('PAYMENTS_ADMIN', 'CASHIER')
   @HttpCode(HttpStatus.CREATED)
@@ -85,6 +92,9 @@ export class PaymentsOperationsController {
    * referencia externa, no con el guard de sesión.
    */
   @Public()
+  @NotAudited(
+    'Evento de webhook del gateway (recordWebhookEvent) en PaymentsTransactionsService.applyCallback.',
+  )
   @Post('callbacks/:callbackPath')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -100,6 +110,11 @@ export class PaymentsOperationsController {
   }
 
   /** UC-42-10. */
+  @Audited({
+    action: 'FEE_SCHEDULE_CREATED',
+    entity: 'fee_schedule',
+    entityId: 'result.id',
+  })
   @Post('fee-schedules')
   @Roles('PAYMENTS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -112,6 +127,11 @@ export class PaymentsOperationsController {
   }
 
   /** UC-42-12. */
+  @Audited({
+    action: 'SETTLEMENT_IMPORTED',
+    entity: 'gateway_settlement',
+    entityId: 'result.id',
+  })
   @Post('settlements/import')
   @Roles('PAYMENTS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -124,6 +144,11 @@ export class PaymentsOperationsController {
   }
 
   /** UC-42-13. */
+  @Audited({
+    action: 'PAYOUT_EXECUTED',
+    entity: 'payout',
+    entityId: 'result.id',
+  })
   @Post('payouts')
   @Roles('PAYMENTS_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -136,6 +161,11 @@ export class PaymentsOperationsController {
   }
 
   /** UC-42-14. */
+  @Audited({
+    action: 'PAYMENT_RECONCILIATION_RUN',
+    entity: 'reconciliation_run',
+    entityId: 'result.id',
+  })
   @Post('reconciliation-runs')
   @Roles('PAYMENTS_ADMIN')
   @HttpCode(HttpStatus.CREATED)

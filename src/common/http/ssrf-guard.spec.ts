@@ -15,12 +15,12 @@ import { PreconditionFailedException } from '../errors/domain.exception';
  * escriben tal como los escribiría un atacante y se deja que URL los normalice.
  */
 describe('assertOutboundUrlAllowed (MCH-006)', () => {
-  const previo = process.env.NODE_ENV;
+  const previous = process.env.NODE_ENV;
   beforeEach(() => {
     process.env.NODE_ENV = 'production';
   });
   afterAll(() => {
-    process.env.NODE_ENV = previo;
+    process.env.NODE_ENV = previous;
   });
 
   it.each([
@@ -76,25 +76,25 @@ describe('assertOutboundUrlAllowed (MCH-006)', () => {
 });
 
 describe('resolveOutboundDestination + pinnedLookup (MCH-006)', () => {
-  const previo = process.env.NODE_ENV;
+  const previous = process.env.NODE_ENV;
   beforeEach(() => {
     process.env.NODE_ENV = 'production';
   });
   afterAll(() => {
-    process.env.NODE_ENV = previo;
+    process.env.NODE_ENV = previous;
   });
 
   /** Resolvedor de laboratorio que responde, por llamada, la lista dada. */
-  function resolvedor(...respuestas: ResolvedAddress[][]) {
+  function resolver(...responses: ResolvedAddress[][]) {
     let n = 0;
     const fn = jest.fn(() =>
-      Promise.resolve(respuestas[Math.min(n++, respuestas.length - 1)]),
+      Promise.resolve(responses[Math.min(n++, responses.length - 1)]),
     );
     return fn;
   }
 
   it('rechaza si un solo registro A/AAAA es interno, aunque otro sea público', async () => {
-    const r = resolvedor([
+    const r = resolver([
       { address: '8.8.8.8', family: 4 },
       { address: 'fd00::1', family: 6 },
     ]);
@@ -104,31 +104,31 @@ describe('resolveOutboundDestination + pinnedLookup (MCH-006)', () => {
   });
 
   it('rechaza un AAAA link-local fuera del prefijo textual fe80:', async () => {
-    const r = resolvedor([{ address: 'fe8f::1', family: 6 }]);
+    const r = resolver([{ address: 'fe8f::1', family: 6 }]);
     await expect(
       resolveOutboundDestination('https://v6.example/x', r),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 
   it('rechaza un nombre sin direcciones (fail-closed)', async () => {
-    const r = resolvedor([]);
+    const r = resolver([]);
     await expect(
       resolveOutboundDestination('https://vacio.example/x', r),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 
   it('AC03 · el lookup anclado entrega la dirección validada aunque el DNS cambie después', async () => {
-    const r = resolvedor(
+    const r = resolver(
       [{ address: '8.8.4.4', family: 4 }],
       [{ address: '169.254.169.254', family: 4 }],
     );
-    const destino = await resolveOutboundDestination(
+    const destination = await resolveOutboundDestination(
       'https://rebinding.example/x',
       r,
     );
-    const lookup = pinnedLookup(destino);
+    const lookup = pinnedLookup(destination);
 
-    const unica = await new Promise<string>((ok, ko) =>
+    const unique = await new Promise<string>((ok, ko) =>
       lookup('rebinding.example', {}, (err, address) =>
         err ? ko(err) : ok(address as string),
       ),
@@ -139,18 +139,18 @@ describe('resolveOutboundDestination + pinnedLookup (MCH-006)', () => {
       ),
     );
 
-    expect(unica).toBe('8.8.4.4');
+    expect(unique).toBe('8.8.4.4');
     expect(todas).toEqual([{ address: '8.8.4.4', family: 4 }]);
     expect(r).toHaveBeenCalledTimes(1);
   });
 
   it('el lookup anclado no resuelve otro host (p. ej. tras un cambio de destino)', async () => {
-    const destino = await resolveOutboundDestination(
+    const destination = await resolveOutboundDestination(
       'https://uno.example/x',
-      resolvedor([{ address: '8.8.4.4', family: 4 }]),
+      resolver([{ address: '8.8.4.4', family: 4 }]),
     );
     const err = await new Promise<NodeJS.ErrnoException | null>((ok) =>
-      pinnedLookup(destino)('otro.example', {}, (e) => ok(e)),
+      pinnedLookup(destination)('otro.example', {}, (e) => ok(e)),
     );
     expect(err?.code).toBe('EOUTBOUNDPOLICY');
   });

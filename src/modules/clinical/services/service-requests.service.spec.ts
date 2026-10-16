@@ -34,11 +34,12 @@ function build() {
     findById: mockFn().mockResolvedValue(ENCOUNTER),
   };
   const clinicalRead = {
-    assertPuedeLeerHistoria: mockFn().mockResolvedValue(undefined),
+    assertCanReadHistory: mockFn().mockResolvedValue(undefined),
   };
   const duplicateStudyDetector = {
     findDuplicate: mockFn().mockResolvedValue(null),
     findPendingReport: mockFn().mockResolvedValue(false),
+    findActiveOrderWithoutReport: mockFn().mockResolvedValue(null),
     describe: mockFn(),
     warningMessageFor: mockFn().mockReturnValue('warning'),
   };
@@ -88,6 +89,19 @@ const MATCH = {
   version: null,
   performedAt: new Date(),
   resultsAvailable: true,
+};
+
+const ACTIVE_ORDER_STUDY = {
+  reportId: null,
+  serviceRequestId: 'sr-prev',
+  studyName: 'Hemograma completo',
+  providerName: 'Laboratorio Central',
+  performedAt: new Date(),
+  daysAgo: 0,
+  resultsAvailable: false,
+  conclusionText: null,
+  reportDownloadUrl: null,
+  sameOrganization: true,
 };
 
 const PREVIOUS_STUDY = {
@@ -142,7 +156,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
   });
 
   describe('formInstanceId (P43)', () => {
-    const alta = {
+    const registration = {
       custodianTenantId: 't1',
       patientProfileId: 'p1',
       codeConceptId: 'code1',
@@ -162,7 +176,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         }),
       );
       const res = await d.service.create(
-        { ...alta, formInstanceId: 'form-1' },
+        { ...registration, formInstanceId: 'form-1' },
         actor,
       );
       expect(d.formOrigin.assertUsableOrigin).toHaveBeenCalledWith(
@@ -184,7 +198,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
         createdAt: new Date(),
       });
-      const res = await d.service.create(alta, actor);
+      const res = await d.service.create(registration, actor);
       expect(d.formOrigin.assertUsableOrigin).not.toHaveBeenCalled();
       expect(res.formInstanceId).toBeNull();
     });
@@ -195,7 +209,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         new PreconditionFailedException('La instancia es de otro encuentro'),
       );
       await expect(
-        d.service.create({ ...alta, formInstanceId: 'form-1' }, actor),
+        d.service.create({ ...registration, formInstanceId: 'form-1' }, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
     });
@@ -333,6 +347,81 @@ describe('ServiceRequestsService (UC-08-05)', () => {
       );
     });
 
+    it('rejects with DUPLICATE_STUDY_DETECTED (reportId null) when an active order without report exists and no reason was given', async () => {
+      const d = build();
+      d.duplicateStudyDetector.findActiveOrderWithoutReport.mockResolvedValue(
+        ACTIVE_ORDER_STUDY,
+      );
+      await expect(
+        d.service.create(
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            codeConceptId: 'code1',
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        details: {
+          reason: 'DUPLICATE_STUDY_DETECTED',
+          previousStudy: { reportId: null, serviceRequestId: 'sr-prev' },
+        },
+      });
+      expect(d.serviceRequestsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects reusing when the duplicate is an active order: there is no report to reuse', async () => {
+      const d = build();
+      d.duplicateStudyDetector.findActiveOrderWithoutReport.mockResolvedValue(
+        ACTIVE_ORDER_STUDY,
+      );
+      await expect(
+        d.service.create(
+          {
+            custodianTenantId: 't1',
+            patientProfileId: 'p1',
+            codeConceptId: 'code1',
+            reusePreviousReport: true,
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        details: { reason: 'DUPLICATE_STUDY_DETECTED' },
+      });
+    });
+
+    it('creates the ACTIVE order, without previous report, when repeating over an active order with a reason', async () => {
+      const d = build();
+      d.duplicateStudyDetector.findActiveOrderWithoutReport.mockResolvedValue(
+        ACTIVE_ORDER_STUDY,
+      );
+      d.serviceRequestsRepo.create.mockReturnValue({
+        id: 'sr2',
+        patientProfileId: 'p1',
+        statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+        intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
+        createdAt: new Date(),
+      });
+      await d.service.create(
+        {
+          custodianTenantId: 't1',
+          patientProfileId: 'p1',
+          codeConceptId: 'code1',
+          duplicateOverrideReason:
+            'Muestra anterior hemolizada, se necesita repetir hoy',
+        } as any,
+        actor,
+      );
+      expect(d.serviceRequestsRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE,
+          previousDiagnosticReportId: undefined,
+          duplicateOverrideReason: undefined,
+        }),
+      );
+    });
+
     it('does not consult the detector when duplicatePolicy is "skip"', async () => {
       const d = build();
       d.serviceRequestsRepo.create.mockReturnValue({
@@ -396,6 +485,28 @@ describe('ServiceRequestsService (UC-08-05)', () => {
       expect(result.requiresJustification).toBe(true);
     });
 
+    it('flags an active order without report as duplicate with reportId null and pendingReport', async () => {
+      const d = build();
+      d.duplicateStudyDetector.findActiveOrderWithoutReport.mockResolvedValue(
+        ACTIVE_ORDER_STUDY,
+      );
+      const result = await runWithTenant('t1', () =>
+        d.service.checkDuplicate(
+          {
+            patientProfileId: 'p1',
+            codeConceptId: 'code1',
+            encounterId: 'enc-1',
+          } as any,
+          actor,
+        ),
+      );
+      expect(result.isDuplicate).toBe(true);
+      expect(result.pendingReport).toBe(true);
+      expect(result.requiresJustification).toBe(true);
+      expect(result.previousStudy).toEqual(ACTIVE_ORDER_STUDY);
+      expect(result.previousStudy?.reportId).toBeNull();
+    });
+
     it('rejects with 404 when the encounter belongs to another patient', async () => {
       const d = build();
       d.encountersRepo.findById.mockResolvedValue({
@@ -440,7 +551,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
 
     it('propagates the ForbiddenException raised by assertPuedeLeerHistoria', async () => {
       const d = build();
-      d.clinicalRead.assertPuedeLeerHistoria.mockRejectedValue(
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(
         new Error('forbidden'),
       );
 
@@ -519,7 +630,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
     patientProfileId: 'p1',
     codeConceptId: 'code1',
   };
-  const orden = (statusConceptId: string) => ({
+  const order = (statusConceptId: string) => ({
     id: 'sr1',
     custodianTenantId: 't1',
     patientProfileId: 'p1',
@@ -531,7 +642,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
   it('publica exactamente un hecho al outbox, dentro de la transacción y sólo con ids', async () => {
     const d = build();
     d.serviceRequestsRepo.create.mockReturnValue(
-      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+      order(CLIN.SERVICE_REQUEST_ACTIVE),
     );
 
     await d.service.create(dto, actor);
@@ -553,7 +664,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
   it('le avisa al paciente de una orden activa', async () => {
     const d = build();
     d.serviceRequestsRepo.create.mockReturnValue(
-      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+      order(CLIN.SERVICE_REQUEST_ACTIVE),
     );
 
     await d.service.create(dto, actor);
@@ -569,7 +680,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
     const d = build();
     d.duplicateStudyDetector.findDuplicate.mockResolvedValue(MATCH);
     d.serviceRequestsRepo.create.mockReturnValue(
-      orden(CLIN.SERVICE_REQUEST_SATISFIED_BY_PRIOR),
+      order(CLIN.SERVICE_REQUEST_SATISFIED_BY_PRIOR),
     );
 
     await d.service.create(
@@ -588,7 +699,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
   it('una emisión fallida no tumba la orden', async () => {
     const d = build();
     d.serviceRequestsRepo.create.mockReturnValue(
-      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+      order(CLIN.SERVICE_REQUEST_ACTIVE),
     );
     d.clinicalNotifications.serviceRequestPlaced.mockResolvedValue({
       suppressed: false,
@@ -603,7 +714,7 @@ describe('ServiceRequestsService · MCH-027, el aviso de la orden', () => {
   it('si la orden no llega a persistirse no hay hecho ni aviso', async () => {
     const d = build();
     d.serviceRequestsRepo.create.mockReturnValue(
-      orden(CLIN.SERVICE_REQUEST_ACTIVE),
+      order(CLIN.SERVICE_REQUEST_ACTIVE),
     );
     d.tx.flush.mockRejectedValueOnce(new Error('violación de FK'));
 

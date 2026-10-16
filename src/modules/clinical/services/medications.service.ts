@@ -116,13 +116,13 @@ export class MedicationsService {
     actor: AuthenticatedUser,
   ): string {
     if (actor.roles.includes('SUPERADMIN')) {
-      const elegido = declared ?? actor.practitionerProfileId;
-      if (!elegido) {
+      const chosen = declared ?? actor.practitionerProfileId;
+      if (!chosen) {
         throw new ForbiddenException(
           'Una receta necesita un profesional prescriptor.',
         );
       }
-      return elegido;
+      return chosen;
     }
     if (!actor.practitionerProfileId) {
       throw new ForbiddenException(
@@ -146,8 +146,8 @@ export class MedicationsService {
     indicationText?: string;
   }): string | undefined {
     if (dto.indicationConditionId !== undefined) return undefined;
-    const texto = dto.indicationText?.trim();
-    return texto ? texto : undefined;
+    const text = dto.indicationText?.trim();
+    return text ? text : undefined;
   }
 
   /**
@@ -162,7 +162,7 @@ export class MedicationsService {
     actor: AuthenticatedUser,
   ): Promise<FileLinkResponseDto> {
     const request = await this.loadRequestOrThrow(this.em, requestId);
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       request.patientProfileId,
       actor,
     );
@@ -192,7 +192,7 @@ export class MedicationsService {
     actor: AuthenticatedUser,
   ): Promise<LinkedFilePageDto> {
     const request = await this.loadRequestOrThrow(this.em, requestId);
-    await this.clinicalRead.assertPuedeLeerHistoria(
+    await this.clinicalRead.assertCanReadHistory(
       request.patientProfileId,
       actor,
     );
@@ -275,7 +275,7 @@ export class MedicationsService {
     actor: AuthenticatedUser,
   ): Promise<MedicationRequests> {
     const request = await this.loadRequestOrThrow(tx, requestId);
-    await this.clinicalRead.assertPuedeEscribirHistoria(
+    await this.clinicalRead.assertCanWriteHistory(
       request.patientProfileId,
       actor,
     );
@@ -291,15 +291,15 @@ export class MedicationsService {
    * campo es opcional al prescribir), firma quien redactó el borrador.
    * `SUPERADMIN` pasa, igual que en el resto del sistema de roles.
    */
-  private assertFirmaElPrescriptor(
+  private assertPrescriberSignature(
     request: MedicationRequests,
     actor: AuthenticatedUser,
   ): void {
     if (actor.roles.includes('SUPERADMIN')) return;
-    const esSuya = request.prescriberProfileId
+    const isTheirs = request.prescriberProfileId
       ? request.prescriberProfileId === actor.practitionerProfileId
       : request.createdByUserId === actor.id;
-    if (!esSuya) {
+    if (!isTheirs) {
       throw new ForbiddenException(
         'Una receta la firma su prescriptor: no se puede firmar en nombre de otro profesional.',
       );
@@ -330,6 +330,24 @@ export class MedicationsService {
    * UC-08-10: prescribe una medicación. La receta nace en DRAFT (borrador
    * editable/eliminable por el autor); no surte efecto hasta emitirla (`issue`).
    */
+  /**
+   * §2: sella una revisión de `medication_requests_history`. La receta está
+   * fuera del espejo automático (`EXPLICITLY_WIRED_SOURCES`), así que cada
+   * transición la versiona acá, en la misma transacción, desde el borrador.
+   */
+  private async versionRequest(
+    tx: EntityManager,
+    request: MedicationRequests,
+    operationConceptId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.historyRepo.append(tx, RX_HISTORY_ENTITY, request.id, {
+      operationConceptId,
+      dataSnapshot: this.snapshot(request),
+      changedByUserId: actor.id,
+    });
+  }
+
   async prescribe(
     dto: CreateMedicationRequestDto,
     actor: AuthenticatedUser,
@@ -388,6 +406,7 @@ export class MedicationsService {
         actorUserId: actor.id,
       });
       await tx.flush();
+      await this.versionRequest(tx, request, AUD.OPERATION_INSERT, actor);
 
       this.logger.info(
         { operation: 'clinical.medication.prescribe', requestId: request.id },
@@ -456,12 +475,13 @@ export class MedicationsService {
       // P24: el texto libre se reemplaza entero cuando viaja; con condición
       // codificada (previa o recién puesta) gana el concepto y el texto cae.
       if (dto.indicationText !== undefined) {
-        const texto = dto.indicationText.trim();
-        request.indicationText = texto ? texto : undefined;
+        const text = dto.indicationText.trim();
+        request.indicationText = text ? text : undefined;
       }
       if (request.indicationConditionId) request.indicationText = undefined;
       touch(request, actor.id);
       await tx.flush();
+      await this.versionRequest(tx, request, AUD.OPERATION_UPDATE, actor);
 
       this.logger.info(
         { operation: 'clinical.medication.editDraft', requestId },
@@ -495,7 +515,7 @@ export class MedicationsService {
       }
       // Antes del atajo idempotente: quien no es el prescriptor recibe 403
       // aunque la receta ya esté firmada, no un 200 que parezca éxito.
-      this.assertFirmaElPrescriptor(request, actor);
+      this.assertPrescriberSignature(request, actor);
       if (!request.signedAt) {
         request.signedAt = new Date();
         request.signedByUserId = actor.id;
@@ -507,6 +527,7 @@ export class MedicationsService {
           entityId: request.id,
           tenantId: request.custodianTenantId,
         });
+        await this.versionRequest(tx, request, AUD.OPERATION_UPDATE, actor);
       }
       return this.toRequestResponse(request);
     });
@@ -529,7 +550,7 @@ export class MedicationsService {
       { operation: 'clinical.medication.issue', requestId },
       'Issuing medication request',
     );
-    const emitida = await this.em.transactional(async (tx) => {
+    const issued = await this.em.transactional(async (tx) => {
       const request = await this.loadRequestForWrite(tx, requestId, actor);
       // CAN §6 (idempotencia): un reintento de la emisión con la MISMA clave sobre
       // una receta ya emitida devuelve el resultado sellado (replay), sin volver a
@@ -594,12 +615,8 @@ export class MedicationsService {
         entityId: request.id,
         tenantId: request.custodianTenantId,
       });
-      // §2: sella la primera revisión versionada del contenido emitido.
-      await this.historyRepo.append(tx, RX_HISTORY_ENTITY, request.id, {
-        operationConceptId: AUD.OPERATION_INSERT,
-        dataSnapshot: this.snapshot(request),
-        changedByUserId: actor.id,
-      });
+      // §2: la emisión es una revisión más; la primera la selló el borrador.
+      await this.versionRequest(tx, request, AUD.OPERATION_UPDATE, actor);
 
       this.logger.info(
         {
@@ -619,11 +636,11 @@ export class MedicationsService {
     // puede deshacerla. `prescriptionIssued` no lanza: el peor caso es una
     // receta emitida sin su aviso, nunca un aviso sin su receta.
     await this.clinicalNotifications.prescriptionIssued(
-      emitida.id,
-      emitida.patientProfileId,
+      issued.id,
+      issued.patientProfileId,
       actor.id,
     );
-    return emitida;
+    return issued;
   }
 
   /**
@@ -659,11 +676,7 @@ export class MedicationsService {
         entityId: request.id,
         tenantId: request.custodianTenantId,
       });
-      await this.historyRepo.append(tx, RX_HISTORY_ENTITY, request.id, {
-        operationConceptId: AUD.OPERATION_UPDATE,
-        dataSnapshot: this.snapshot(request),
-        changedByUserId: actor.id,
-      });
+      await this.versionRequest(tx, request, AUD.OPERATION_UPDATE, actor);
 
       this.logger.info(
         {
@@ -744,11 +757,8 @@ export class MedicationsService {
         entityId: original.id,
         tenantId: original.custodianTenantId,
       });
-      await this.historyRepo.append(tx, RX_HISTORY_ENTITY, original.id, {
-        operationConceptId: AUD.OPERATION_UPDATE,
-        dataSnapshot: this.snapshot(original),
-        changedByUserId: actor.id,
-      });
+      await this.versionRequest(tx, original, AUD.OPERATION_UPDATE, actor);
+      await this.versionRequest(tx, replacement, AUD.OPERATION_INSERT, actor);
 
       this.logger.info(
         {
@@ -825,6 +835,7 @@ export class MedicationsService {
         entityId: renewal.id,
         tenantId: source.custodianTenantId,
       });
+      await this.versionRequest(tx, renewal, AUD.OPERATION_INSERT, actor);
 
       this.logger.info(
         {

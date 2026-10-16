@@ -617,13 +617,13 @@ describe('ValueSetsService', () => {
 
     it('rechaza un cursor bien formado pero de otro listado', async () => {
       const harness = withDefaultVersion();
-      const ajeno = Buffer.from(
+      const foreign = Buffer.from(
         JSON.stringify({ createdAt: 1, id: 'x' }),
         'utf8',
       ).toString('base64url');
 
       await expect(
-        harness.service.readExpansion('vs-1', { limit: 50, cursor: ajeno }),
+        harness.service.readExpansion('vs-1', { limit: 50, cursor: foreign }),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
@@ -847,12 +847,12 @@ describe('ValueSetsService.searchValueSets', () => {
       row('a', 'vs-a'),
       row('b', 'vs-b'),
     ]);
-    const primera = await d.service.searchValueSets({ limit: 1 });
+    const first = await d.service.searchValueSets({ limit: 1 });
 
     d.valueSetsRepo.searchPage.mockClear();
     d.valueSetsRepo.searchPage.mockResolvedValue([]);
     await d.service.searchValueSets({
-      cursor: primera.nextCursor!,
+      cursor: first.nextCursor!,
       limit: 1,
     });
 

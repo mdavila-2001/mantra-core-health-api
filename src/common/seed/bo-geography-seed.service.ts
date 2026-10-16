@@ -211,16 +211,16 @@ export class BoGeographySeedService {
     );
 
     // --- Los municipios, que cuelgan de los conceptos recién sembrados ---
-    const municipios = await this.runMunicipalities(em, now);
-    counters.valueSets += municipios.valueSets;
-    counters.versions += municipios.versions;
-    counters.municipalities += municipios.municipalities;
-    counters.designations += municipios.designations;
-    counters.properties += municipios.properties;
-    counters.memberships += municipios.memberships;
+    const municipalities = await this.runMunicipalities(em, now);
+    counters.valueSets += municipalities.valueSets;
+    counters.versions += municipalities.versions;
+    counters.municipalities += municipalities.municipalities;
+    counters.designations += municipalities.designations;
+    counters.properties += municipalities.properties;
+    counters.memberships += municipalities.memberships;
 
     const total = Object.values(counters).reduce(
-      (suma, valor) => suma + valor,
+      (sum, value) => sum + value,
       0,
     );
     if (total > 0) {
@@ -241,30 +241,32 @@ export class BoGeographySeedService {
    * glosario.
    */
   private assertUniqueCodes(): void {
-    const vistas = new Set<string>();
+    const views = new Set<string>();
     for (const department of BO_DEPARTMENTS) {
-      if (vistas.has(department.code)) {
+      if (views.has(department.code)) {
         throw new Error(
           `El catálogo geográfico declara la sigla "${department.code}" más de una vez`,
         );
       }
-      vistas.add(department.code);
+      views.add(department.code);
     }
 
-    const siglas = new Set(BO_DEPARTMENTS.map((department) => department.code));
-    const codigos = new Set<string>();
+    const acronyms = new Set(
+      BO_DEPARTMENTS.map((department) => department.code),
+    );
+    const codes = new Set<string>();
     for (const municipality of BO_MUNICIPALITIES) {
-      if (codigos.has(municipality.ine)) {
+      if (codes.has(municipality.ine)) {
         throw new Error(
           `El catálogo geográfico declara el código INE "${municipality.ine}" más de una vez`,
         );
       }
-      codigos.add(municipality.ine);
+      codes.add(municipality.ine);
 
       // Un municipio cuyo departamento no está en el catálogo dejaría una FK
       // apuntando a un concepto que nadie siembra: la fila entra y la lectura
       // revienta después, lejos de acá. Mejor no arrancar.
-      if (!siglas.has(municipality.department)) {
+      if (!acronyms.has(municipality.department)) {
         throw new Error(
           `El municipio "${municipality.name}" (${municipality.ine}) cuelga del ` +
             `departamento "${municipality.department}", que no está en el catálogo`,
@@ -274,14 +276,14 @@ export class BoGeographySeedService {
       // El prefijo del código del INE ES el departamento: si los dos no
       // coinciden, el árbol que arma el cliente —que sólo mira el prefijo—
       // pondría el municipio bajo otro departamento.
-      const porPrefijo = BO_DEPARTMENT_BY_INE_PREFIX.get(
+      const byPrefix = BO_DEPARTMENT_BY_INE_PREFIX.get(
         municipality.ine.slice(0, 2),
       );
-      if (porPrefijo !== municipality.department) {
+      if (byPrefix !== municipality.department) {
         throw new Error(
           `El municipio "${municipality.name}" declara el departamento ` +
             `"${municipality.department}" pero su código INE ${municipality.ine} ` +
-            `corresponde a "${porPrefijo ?? 'ninguno'}"`,
+            `corresponde a "${byPrefix ?? 'ninguno'}"`,
         );
       }
     }
@@ -391,7 +393,7 @@ export class BoGeographySeedService {
       ),
     );
 
-    let creadas = 0;
+    let created = 0;
     for (const municipality of BO_MUNICIPALITIES) {
       const id = boMunicipalityDesignationId(municipality.ine);
       if (existing.has(id)) continue;
@@ -409,10 +411,10 @@ export class BoGeographySeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /**
@@ -434,7 +436,7 @@ export class BoGeographySeedService {
     ]);
     const existing = await this.existingIds(em, ConceptProperties, ids);
 
-    let creadas = 0;
+    let created = 0;
     for (const municipality of BO_MUNICIPALITIES) {
       const conceptId = boMunicipalityConceptId(municipality.ine);
 
@@ -453,7 +455,7 @@ export class BoGeographySeedService {
           },
           { partial: true },
         );
-        creadas += 1;
+        created += 1;
       }
 
       const parentId = boMunicipalityParentPropertyId(municipality.ine);
@@ -471,11 +473,11 @@ export class BoGeographySeedService {
           },
           { partial: true },
         );
-        creadas += 1;
+        created += 1;
       }
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** La expansión de municipios, en el orden del INE. */
@@ -492,7 +494,7 @@ export class BoGeographySeedService {
       ),
     );
 
-    let creadas = 0;
+    let created = 0;
     BO_MUNICIPALITIES.forEach((municipality, ordinal) => {
       const id = boMunicipalityMemberId(municipality.ine);
       if (existing.has(id)) return;
@@ -509,10 +511,10 @@ export class BoGeographySeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     });
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** Designación preferida (ES) de cada departamento. */
@@ -528,7 +530,7 @@ export class BoGeographySeedService {
       ),
     );
 
-    let creadas = 0;
+    let created = 0;
     for (const department of BO_DEPARTMENTS) {
       const id = boDepartmentDesignationId(department.code);
       if (existing.has(id)) continue;
@@ -546,10 +548,10 @@ export class BoGeographySeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /**
@@ -571,7 +573,7 @@ export class BoGeographySeedService {
       ),
     );
 
-    let creadas = 0;
+    let created = 0;
     for (const department of BO_DEPARTMENTS) {
       const id = boDepartmentIsoPropertyId(department.code);
       if (existing.has(id)) continue;
@@ -588,10 +590,10 @@ export class BoGeographySeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** La expansión: los nueve miembros, con el ordinal del orden oficial. */
@@ -606,7 +608,7 @@ export class BoGeographySeedService {
       BO_DEPARTMENTS.map((department) => boDepartmentMemberId(department.code)),
     );
 
-    let creadas = 0;
+    let created = 0;
     BO_DEPARTMENTS.forEach((department, ordinal) => {
       const id = boDepartmentMemberId(department.code);
       if (existing.has(id)) return;
@@ -623,10 +625,10 @@ export class BoGeographySeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     });
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** Los ids que ya están en la base, de entre los que se van a sembrar. */
@@ -655,10 +657,10 @@ export class BoGeographySeedService {
       counters: { valueSets: number };
     },
   ): Promise<string> {
-    const presente = await em.findOne(ValueSets, {
+    const present = await em.findOne(ValueSets, {
       internalCode: spec.internalCode,
     });
-    if (presente) return presente.id;
+    if (present) return present.id;
 
     em.create(
       ValueSets,
@@ -698,11 +700,11 @@ export class BoGeographySeedService {
       counters: { versions: number };
     },
   ): Promise<string> {
-    const presente = await em.findOne(ValueSetVersions, {
+    const present = await em.findOne(ValueSetVersions, {
       valueSetId: spec.valueSetId,
       version: spec.version,
     });
-    if (presente) return presente.id;
+    if (present) return present.id;
 
     em.create(
       ValueSetVersions,

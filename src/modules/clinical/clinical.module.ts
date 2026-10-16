@@ -97,19 +97,19 @@ import {
   PersonsRepository,
   PractitionerSpecialtiesRepository,
   JurisdictionAuthorizationsRepository,
-} from '../profiles/repositories';
+} from '../profiles/infrastructure/repositories';
 // B.1 — la historia de un menor la lee también quien lo representa, y quién
 // representa a quién lo sabe `profiles`. Mismo criterio que los repositorios de
 // arriba: es una clase sin estado que recibe el `EntityManager` por parámetro,
 // así que se provee suelta. Importar `ProfilesModule` cerraría el ciclo que el
 // comentario anterior ya explica.
-import { PatientRepresentationService } from '../profiles/services/patient-representation.service';
+import { PatientRepresentationService } from '../profiles/application/services/patient-representation.service';
 // v4.2.2 — el permiso de lectura de la historia nace del turno, así que la lectura
 // clínica necesita preguntarle a la agenda. Mismo criterio de arriba: es una clase
 // sin estado que recibe el `EntityManager` por parámetro. El cruce inverso ya
 // existe —`scheduling` provee `AppointmentsRepository` de este módulo—, así que
 // tampoco acá se importa el módulo entero ni se cierra un ciclo.
-import { SchedulingBookingsRepository } from '../scheduling/repositories';
+import { SchedulingBookingsRepository } from '../scheduling/infrastructure/repositories';
 // ALV-029 — el permiso de lectura también nace de una relación asistencial
 // vigente (no sólo del turno de hoy), y esa tabla vive en `authz`. Mismo
 // criterio de arriba: repo sin estado por `EntityManager`, sin importar el
@@ -131,7 +131,7 @@ import {
 // tiene constructor (clase sin estado, `EntityManager` por parámetro), así
 // que se provee directo acá y en `InsuranceModule` sin importar ese módulo
 // entero — mismo criterio que el resto de este archivo.
-import { DeclaredCoveragesReader } from '../insurance/services/declared-coverages-reader';
+import { DeclaredCoveragesReader } from '../insurance/application/services/declared-coverages-reader';
 // N-04 (M3) — la lectura del resumen clínico asienta su acceso en
 // `audit.data_access_log`. `AuditModule` exporta sólo la cadena WORM de
 // mutaciones (`AuditTrailService`, `AuditLogRepository`, `HistoryRepository`),

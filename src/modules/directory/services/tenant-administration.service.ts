@@ -159,14 +159,14 @@ export class TenantAdministrationService {
     em: EntityManager,
     tenantId: string,
   ): Promise<boolean> {
-    for (const rol of ADMIN_TENANT_ROLES) {
-      const cuantos = await this.membershipsRepo.countActiveByTenantRole(
+    for (const role of ADMIN_TENANT_ROLES) {
+      const howMany = await this.membershipsRepo.countActiveByTenantRole(
         em,
         tenantId,
-        rol,
+        role,
         DIR.MEMBERSHIP_ACTIVE,
       );
-      if (cuantos > 0) return true;
+      if (howMany > 0) return true;
     }
     return false;
   }

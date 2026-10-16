@@ -179,11 +179,11 @@ export class ConceptDesignationsRepository {
       preferred: true,
     });
 
-    const porConcepto = new Map<string, ConceptDesignations>();
+    const byConcept = new Map<string, ConceptDesignations>();
     for (const row of rows) {
-      if (!porConcepto.has(row.conceptId)) porConcepto.set(row.conceptId, row);
+      if (!byConcept.has(row.conceptId)) byConcept.set(row.conceptId, row);
     }
-    return porConcepto;
+    return byConcept;
   }
 
   /**
@@ -229,20 +229,20 @@ export class ConceptDesignationsRepository {
     em: EntityManager,
     conceptIds: string[],
   ): Promise<Map<string, Record<string, unknown>>> {
-    const porConcepto = new Map<string, Record<string, unknown>>();
-    if (conceptIds.length === 0) return porConcepto;
+    const byConcept = new Map<string, Record<string, unknown>>();
+    if (conceptIds.length === 0) return byConcept;
 
     const rows = await em.find(ConceptProperties, {
       conceptId: { $in: conceptIds },
     });
     for (const row of rows) {
-      const actuales = porConcepto.get(row.conceptId) ?? {};
+      const current = byConcept.get(row.conceptId) ?? {};
       // Indexado por código y no como lista: quien lo consume lo lee por
       // nombre (`properties.specialty`), nunca recorriéndolo. Es la misma
       // forma que ya devuelve el detalle de un concepto.
-      actuales[row.propertyCode] = row.valueJson;
-      porConcepto.set(row.conceptId, actuales);
+      current[row.propertyCode] = row.valueJson;
+      byConcept.set(row.conceptId, current);
     }
-    return porConcepto;
+    return byConcept;
   }
 }

@@ -33,7 +33,12 @@ function build() {
   };
   const alertsRepo = { create: mockFn() };
   const interactionsRepo = { findByPair: mockFn(), create: mockFn() };
-  const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const logger = {
+    setContext: mockFn(),
+    info: mockFn(),
+    warn: mockFn(),
+    error: mockFn(),
+  };
   const service = new CdsService(
     em as any,
     rulesRepo,
@@ -41,7 +46,7 @@ function build() {
     interactionsRepo,
     logger as any,
   );
-  return { service, tx, rulesRepo, alertsRepo, interactionsRepo };
+  return { service, tx, rulesRepo, alertsRepo, interactionsRepo, logger };
 }
 
 describe('CdsService', () => {
@@ -81,6 +86,7 @@ describe('CdsService', () => {
         version: 1,
         isActive: false,
         statusConceptId: CEXT.CDS_RULE_DRAFT,
+        logicJson: { field: 'medications', op: 'contains', value: 'm1' },
         updatedAt: new Date(),
       };
       d.rulesRepo.findById.mockResolvedValue(rule);
@@ -88,6 +94,29 @@ describe('CdsService', () => {
       expect(res.version).toBe(2);
       expect(rule.isActive).toBe(true);
       expect(rule.statusConceptId).toBe(CEXT.CDS_RULE_ACTIVE);
+    });
+
+    it('P-08: no publica una regla cuya lógica no se entiende (422, field logicJson)', async () => {
+      const d = build();
+      const rule = {
+        id: 'r1',
+        code: 'C1',
+        version: 1,
+        isActive: false,
+        statusConceptId: CEXT.CDS_RULE_DRAFT,
+        logicJson: { all: [{ field: 'x', op: 'exists' }, { weird: true }] },
+        updatedAt: new Date(),
+      };
+      d.rulesRepo.findById.mockResolvedValue(rule);
+      await expect(
+        d.service.publishVersion('r1', {}, actor),
+      ).rejects.toMatchObject({
+        status: 422,
+        response: expect.objectContaining({
+          details: expect.objectContaining({ field: 'logicJson' }),
+        }),
+      });
+      expect(rule.isActive).toBe(false);
     });
 
     it('throws when the rule is missing', async () => {
@@ -209,7 +238,7 @@ describe('CdsService', () => {
       expect(res.count).toBe(1);
     });
 
-    it('fails closed: an unparseable rule does not fire and is logged (warn)', async () => {
+    it('fails closed: an unparseable rule does not fire, is logged and is reported', async () => {
       const d = build();
       d.rulesRepo.findActive.mockResolvedValue([
         {
@@ -226,6 +255,9 @@ describe('CdsService', () => {
       );
       expect(res.count).toBe(0);
       expect(d.alertsRepo.create).not.toHaveBeenCalled();
+      // P-08: la regla que no se pudo leer se dice, no se confunde con «no aplica».
+      expect(res.unevaluatedRuleIds).toEqual(['r-bad', 'r-nologic']);
+      expect(d.logger.error).toHaveBeenCalledTimes(2);
     });
   });
 

@@ -30,7 +30,7 @@ describe('MCH-017 · reembolsos con importes decimales exactos (integración)', 
   });
 
   it('AC01/AC02 · capturado 0.30: acepta 0.10 + 0.20 y rechaza un centavo más', async () => {
-    const intentId = await f.intencion('0.30');
+    const intentId = await f.intent('0.30');
     const ref = f.ref();
     await f.operar(intentId, 'SALE', ref).expect(201);
     await f.callback(ref, 'CAPTURED').expect(200);
@@ -49,7 +49,7 @@ describe('MCH-017 · reembolsos con importes decimales exactos (integración)', 
   });
 
   it('AC03 · muchas devoluciones chicas cierran justo en el capturado', async () => {
-    const intentId = await f.intencion('2.00');
+    const intentId = await f.intent('2.00');
     const ref = f.ref();
     await f.operar(intentId, 'SALE', ref).expect(201);
     await f.callback(ref, 'CAPTURED').expect(200);

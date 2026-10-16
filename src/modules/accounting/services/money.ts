@@ -40,11 +40,11 @@ export function fromCents(cents: number): string {
  * datos reales; ninguna prueba con dobles lo habría visto, porque los dobles
  * llenaban la columna que el código leía.
  */
-export function importeEnBase(linea: {
+export function amountInBase(line: {
   amountBase?: string | null;
   amount?: string | null;
 }): string {
-  return linea.amountBase ?? linea.amount ?? '0.00';
+  return line.amountBase ?? line.amount ?? '0.00';
 }
 
 /**
@@ -55,22 +55,24 @@ export function importeEnBase(linea: {
  * por un error real. Los importes llegan como texto decimal desde `numeric` de
  * PostgreSQL justamente para no perder precisión en el camino.
  */
-export function aCentimos(valor: string | number | null | undefined): bigint {
-  if (valor === null || valor === undefined) {
+export function toBigIntCents(
+  value: string | number | null | undefined,
+): bigint {
+  if (value === null || value === undefined) {
     return 0n;
   }
-  const texto = String(valor).trim();
-  const negativo = texto.startsWith('-');
-  const [entera = '0', decimal = ''] = texto.replace('-', '').split('.');
-  const centimos = BigInt(entera) * 100n + BigInt((decimal + '00').slice(0, 2));
-  return negativo ? -centimos : centimos;
+  const text = String(value).trim();
+  const negative = text.startsWith('-');
+  const [whole = '0', decimal = ''] = text.replace('-', '').split('.');
+  const cents = BigInt(whole) * 100n + BigInt((decimal + '00').slice(0, 2));
+  return negative ? -cents : cents;
 }
 
 /** De céntimos a texto decimal, que es como viaja el dinero en el contrato. */
-export function aTexto(centimos: bigint): string {
-  const negativo = centimos < 0n;
-  const abs = negativo ? -centimos : centimos;
-  const entera = abs / 100n;
-  const resto = abs % 100n;
-  return `${negativo ? '-' : ''}${entera}.${resto.toString().padStart(2, '0')}`;
+export function toText(cents: bigint): string {
+  const negative = cents < 0n;
+  const abs = negative ? -cents : cents;
+  const whole = abs / 100n;
+  const rest = abs % 100n;
+  return `${negative ? '-' : ''}${whole}.${rest.toString().padStart(2, '0')}`;
 }

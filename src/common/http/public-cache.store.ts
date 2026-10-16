@@ -62,8 +62,8 @@ export class PublicCacheStore {
   set(key: string, value: CachedRepresentation, ttlMs: number): void {
     if (this.entries.size >= MAX_ENTRIES && !this.entries.has(key)) {
       // `Map` conserva el orden de inserción: la primera clave es la más vieja.
-      const masVieja = this.entries.keys().next().value;
-      if (masVieja !== undefined) this.entries.delete(masVieja);
+      const oldest = this.entries.keys().next().value;
+      if (oldest !== undefined) this.entries.delete(oldest);
     }
     this.entries.set(key, { ...value, expiresAt: Date.now() + ttlMs });
   }

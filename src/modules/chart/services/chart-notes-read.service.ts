@@ -72,7 +72,7 @@ export class ChartNotesReadService {
     query: ListChartNotesQueryDto,
     actor: AuthenticatedUser,
   ): Promise<ChartNotesListResponseDto> {
-    const authorProfileId = this.resolverAlcance(query, actor);
+    const authorProfileId = this.resolverScope(query, actor);
     const limit = query.limit ?? DEFAULT_NOTES_PAGE_SIZE;
     const from = query.from ? new Date(query.from) : undefined;
     const to = query.to ? new Date(query.to) : undefined;
@@ -148,17 +148,17 @@ export class ChartNotesReadService {
    * @returns El perfil profesional cuyas notas se van a listar.
    * @throws ForbiddenException según la regla de alcance de la subtarea.
    */
-  private resolverAlcance(
+  private resolverScope(
     query: ListChartNotesQueryDto,
     actor: AuthenticatedUser,
   ): string {
-    const esSuperadmin = actor.roles.includes(SUPERADMIN_ROLE);
+    const isSuperadmin = actor.roles.includes(SUPERADMIN_ROLE);
 
     if (
       query.practitionerId &&
       query.practitionerId !== actor.practitionerProfileId
     ) {
-      if (!esSuperadmin) {
+      if (!isSuperadmin) {
         throw new ForbiddenException(
           'Estas notas son de otro profesional: solo las lista quien las firma.',
         );
@@ -166,13 +166,13 @@ export class ChartNotesReadService {
       return query.practitionerId;
     }
 
-    const objetivo = query.practitionerId ?? actor.practitionerProfileId;
-    if (!objetivo) {
+    const target = query.practitionerId ?? actor.practitionerProfileId;
+    if (!target) {
       throw new ForbiddenException(
         'Esta lectura es la de un profesional: la sesión no tiene perfil profesional.',
       );
     }
-    return objetivo;
+    return target;
   }
 
   /**

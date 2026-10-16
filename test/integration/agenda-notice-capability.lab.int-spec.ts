@@ -3,7 +3,7 @@ import {
   AgendaNoticeCapabilityLab,
   AgendaNoticeLabUnconsumedFailuresError,
 } from '../lab/agenda-notice-capability.lab';
-import type { AgendaNotice } from '../../src/modules/scheduling/ports/agenda-notice.port';
+import type { AgendaNotice } from '../../src/modules/scheduling/application/ports/agenda-notice.port';
 
 /**
  * H2 (carril de Pablo) · el laboratorio de la capacidad del piloto,

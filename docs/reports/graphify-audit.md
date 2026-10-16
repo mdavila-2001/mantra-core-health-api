@@ -137,7 +137,7 @@ El grafo reporta **89 nodos con grado 0** (sin ninguna arista entrante ni salien
 Excluyendo el núcleo compartido (`common`, `orm`), las relaciones cruzadas dominio-a-dominio muestran dos patrones claros:
 
 1. **`authz` como hub de autorización transversal** — aparece en 71 de los 97 pares cruzados de dominio-a-dominio detectados, con la mayor concentración hacia `system_ops` (24), `procedures_perioperative` (23), `scheduling` (20) y `accounting` (20). Es el patrón esperado de un PDP (Policy Decision Point) centralizado: cada dominio consulta `authz` para decisiones de acceso, no al revés.
-2. **`messaging` como bus de eventos entre dominios operativos** — coupling con `automation` (16), `vector_rag` (16), `lakehouse` (13), `graph_intelligence` (12), `time_series` (12), `cross_store_consistency` (10), `workflow` (9). Confirma el patrón outbox descrito en `ESTADO-Y-PENDIENTES.md` ("Worker HTTP autenticado para relay, dispatch, colas y notificaciones de mensajería").
+2. **`messaging` como bus de eventos entre dominios operativos** — coupling con `automation` (16), `vector_rag` (16), `lakehouse` (13), `graph_intelligence` (12), `time_series` (12), `cross_store_consistency` (10), `workflow` (9). Confirma el patrón outbox descrito en `docs/progress/ESTADO-Y-PENDIENTES.md` ("Worker HTTP autenticado para relay, dispatch, colas y notificaciones de mensajería").
 
 **Único acceso cruzado fuera de estos dos patrones esperados:** `billing ↔ practice` (vía `practices-lookup.repository.ts`), ya señalado en la línea base (`docs/reports/baseline.md` §3.4) como violación de aislamiento de dominio pendiente de remediar con un puerto de lectura.
 

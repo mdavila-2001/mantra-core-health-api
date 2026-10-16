@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `authz`
 
-Referencia exhaustiva de 24 operación(es) del módulo `authz`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 27 operación(es) del módulo `authz`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-pdp`, `authz-policies`, `authz-roles`
-- **Controladores:** `AuthzCareRelationshipsController`, `AuthzCatalogController`, `AuthzClinicalController`, `AuthzGrantsController`, `AuthzPdpController`, `AuthzPoliciesController`, `AuthzRolesController`
+- **Etiquetas OpenAPI:** `authz-care-relationships`, `authz-catalog`, `authz-clinical`, `authz-grants`, `authz-me`, `authz-pdp`, `authz-policies`, `authz-roles`
+- **Controladores:** `AuthzCareRelationshipsController`, `AuthzCatalogController`, `AuthzClinicalController`, `AuthzGrantsController`, `AuthzMeController`, `AuthzPdpController`, `AuthzPoliciesController`, `AuthzRolesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -22,19 +22,22 @@ Referencia exhaustiva de 24 operación(es) del módulo `authz`, derivada del con
 9. [GET /authz/legal-representations](#9-get-authz-legal-representations) — Listar representaciones legales de un paciente
 10. [POST /authz/legal-representations](#10-post-authz-legal-representations) — Registrar una representación legal del paciente
 11. [POST /authz/legal-representations/{id}/revoke](#11-post-authz-legal-representations-id-revoke) — Revocar o expirar una representación legal
-12. [POST /authz/patients/{patientProfileId}/break-the-glass](#12-post-authz-patients-patientprofileid-break-the-glass) — Break-the-glass / anulación de emergencia
-13. [POST /authz/patients/{patientProfileId}/clinical-access-grants](#13-post-authz-patients-patientprofileid-clinical-access-grants) — Otorgar acceso clínico con propósito de uso
-14. [POST /authz/pdp/cache/invalidate](#14-post-authz-pdp-cache-invalidate) — Invalidar la cache de decisiones del PDP
-15. [POST /authz/permission-categories](#15-post-authz-permission-categories) — Definir una categoría de permiso
-16. [POST /authz/permissions](#16-post-authz-permissions) — Definir un permiso del catálogo global
-17. [POST /authz/resource-scope-grants](#17-post-authz-resource-scope-grants) — Otorgar acceso a un recurso específico (grant polimórfico)
-18. [GET /authz/roles](#18-get-authz-roles) — Listar los roles asignables
-19. [POST /authz/roles](#19-post-authz-roles) — Componer un rol (con herencia opcional)
-20. [PUT /authz/roles/{roleId}/field-permissions](#20-put-authz-roles-roleid-field-permissions) — Configurar el enmascaramiento de campos del rol
-21. [PUT /authz/roles/{roleId}/permissions](#21-put-authz-roles-roleid-permissions) — Asignar permisos al rol (reemplaza los activos)
-22. [POST /authz/tenants/{tenantId}/access-policies](#22-post-authz-tenants-tenantid-access-policies) — Definir una política de acceso ABAC con enmascaramiento
-23. [POST /authz/users/{userId}/permission-grants](#23-post-authz-users-userid-permission-grants) — Otorgar una excepción de permiso por usuario
-24. [POST /authz/users/{userId}/role-assignments](#24-post-authz-users-userid-role-assignments) — Asignar un rol a un usuario con vigencia y ámbito
+12. [GET /authz/me/access](#12-get-authz-me-access) — Quién ve mi historia
+13. [POST /authz/me/care-relationships/{id}/revoke](#13-post-authz-me-care-relationships-id-revoke) — Revocar una de mis relaciones asistenciales
+14. [POST /authz/me/clinical-access-grants/{grantId}/revoke](#14-post-authz-me-clinical-access-grants-grantid-revoke) — Revocar uno de los accesos clínicos a mi historia
+15. [POST /authz/patients/{patientProfileId}/break-the-glass](#15-post-authz-patients-patientprofileid-break-the-glass) — Break-the-glass / anulación de emergencia
+16. [POST /authz/patients/{patientProfileId}/clinical-access-grants](#16-post-authz-patients-patientprofileid-clinical-access-grants) — Otorgar acceso clínico con propósito de uso
+17. [POST /authz/pdp/cache/invalidate](#17-post-authz-pdp-cache-invalidate) — Invalidar la cache de decisiones del PDP
+18. [POST /authz/permission-categories](#18-post-authz-permission-categories) — Definir una categoría de permiso
+19. [POST /authz/permissions](#19-post-authz-permissions) — Definir un permiso del catálogo global
+20. [POST /authz/resource-scope-grants](#20-post-authz-resource-scope-grants) — Otorgar acceso a un recurso específico (grant polimórfico)
+21. [GET /authz/roles](#21-get-authz-roles) — Listar los roles asignables
+22. [POST /authz/roles](#22-post-authz-roles) — Componer un rol (con herencia opcional)
+23. [PUT /authz/roles/{roleId}/field-permissions](#23-put-authz-roles-roleid-field-permissions) — Configurar el enmascaramiento de campos del rol
+24. [PUT /authz/roles/{roleId}/permissions](#24-put-authz-roles-roleid-permissions) — Asignar permisos al rol (reemplaza los activos)
+25. [POST /authz/tenants/{tenantId}/access-policies](#25-post-authz-tenants-tenantid-access-policies) — Definir una política de acceso ABAC con enmascaramiento
+26. [POST /authz/users/{userId}/permission-grants](#26-post-authz-users-userid-permission-grants) — Otorgar una excepción de permiso por usuario
+27. [POST /authz/users/{userId}/role-assignments](#27-post-authz-users-userid-role-assignments) — Asignar un rol a un usuario con vigencia y ámbito
 
 ---
 
@@ -1425,7 +1428,380 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /authz/patients/{patientProfileId}/break-the-glass
+## 12. GET /authz/me/access
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-me`
+- **Nombre:** Quién ve mi historia
+- **Operation ID:** `AuthzMeController_listMyAccess`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzMeController.listMyAccess](../../src/modules/authz/controllers/authz-me.controller.ts)
+
+### Descripción de negocio
+
+Quién ve mi historia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Relaciones asistenciales y accesos clínicos sobre mi historia.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /authz/me/access` en `AuthzMeController_listMyAccess`. El controlador delega en `AuthzMeService.listMyAccess`. No recibe body. El tipo de retorno estático es `Promise<MyClinicalAccessResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /authz/me/access HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /authz/me/access HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyClinicalAccessResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyClinicalAccessResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "careRelationships": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
+      "state": "ACTIVE",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "purposeConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "grants": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "grantedUserId": "00000000-0000-4000-8000-000000000001",
+      "grantedName": "Nombre de ejemplo",
+      "isEmergency": true,
+      "state": "ACTIVE",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "reasonConceptId": "00000000-0000-4000-8000-000000000001",
+      "accessLevelConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `careRelationships` | Sí | `array<MyCareRelationshipDto>` | Sin restricción adicional declarada | Relaciones asistenciales del titular (sin las solicitudes pendientes). | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","state":"ACTIVE","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","purposeConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `careRelationships[].id` | Sí | `string` | formato `uuid` | Identificador (el que se pasa a `revoke`). | `00000000-0000-4000-8000-000000000001` |
+| `careRelationships[].tenantId` | Sí | `string` | formato `uuid` | Organización en la que se estableció. | `00000000-0000-4000-8000-000000000001` |
+| `careRelationships[].practitionerProfileId` | Sí | `string` | formato `uuid` | Perfil del profesional. | `00000000-0000-4000-8000-000000000001` |
+| `careRelationships[].practitionerName` | No | `string` | Sin restricción adicional declarada | Nombre del profesional, para mostrarlo. | `Nombre de ejemplo` |
+| `careRelationships[].state` | Sí | `string` | valores: `ACTIVE`, `REVOKED`, `EXPIRED`, `OTHER` | Estado legible; `ACTIVE` con la vigencia vencida figura como `EXPIRED`. | `ACTIVE` |
+| `careRelationships[].validFrom` | Sí | `string` | formato `date-time` | Desde cuándo. | `2026-07-31T12:00:00.000Z` |
+| `careRelationships[].validTo` | No | `string` | formato `date-time` | Hasta cuándo, si tiene fin. | `2026-07-31T12:00:00.000Z` |
+| `careRelationships[].purposeConceptId` | No | `string` | formato `uuid` | Propósito acotado (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `grants` | Sí | `array<MyClinicalAccessGrantDto>` | Sin restricción adicional declarada | Accesos clínicos concedidos sobre su historia. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","grantedUserId":"00000000-0000-4000-8000-000000000001","grantedName":"Nombre de ejemplo","isEmergency":true,"state":"ACTIVE","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","reasonConceptId":"00000000-0000-4000-8000-000000000001","accessLevelConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `grants[].id` | Sí | `string` | formato `uuid` | Identificador (el que se pasa a `revoke`). | `00000000-0000-4000-8000-000000000001` |
+| `grants[].tenantId` | Sí | `string` | formato `uuid` | Organización del acceso. | `00000000-0000-4000-8000-000000000001` |
+| `grants[].grantedUserId` | Sí | `string` | formato `uuid` | Usuario que recibió el acceso. | `00000000-0000-4000-8000-000000000001` |
+| `grants[].grantedName` | No | `string` | Sin restricción adicional declarada | Nombre de quien recibió el acceso, para mostrarlo. | `Nombre de ejemplo` |
+| `grants[].isEmergency` | Sí | `boolean` | Sin restricción adicional declarada | `true` si es un acceso de emergencia (break-the-glass). | `true` |
+| `grants[].state` | Sí | `string` | valores: `ACTIVE`, `REVOKED`, `EXPIRED`, `OTHER` | Estado legible; vencido por vigencia figura como `EXPIRED`. | `ACTIVE` |
+| `grants[].validFrom` | Sí | `string` | formato `date-time` | Desde cuándo. | `2026-07-31T12:00:00.000Z` |
+| `grants[].validTo` | Sí | `string` | formato `date-time` | Hasta cuándo. | `2026-07-31T12:00:00.000Z` |
+| `grants[].reasonConceptId` | Sí | `string` | formato `uuid` | Motivo del acceso (concept id). | `00000000-0000-4000-8000-000000000001` |
+| `grants[].accessLevelConceptId` | Sí | `string` | formato `uuid` | Nivel de acceso (concept id). | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/me/access"
+}
+```
+
+---
+
+## 13. POST /authz/me/care-relationships/{id}/revoke
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-me`
+- **Nombre:** Revocar una de mis relaciones asistenciales
+- **Operation ID:** `AuthzMeController_revokeCareRelationship`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzMeController.revokeCareRelationship](../../src/modules/authz/controllers/authz-me.controller.ts)
+
+### Descripción de negocio
+
+Revocar una de mis relaciones asistenciales. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Revoca una de mis relaciones asistenciales.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /authz/me/care-relationships/{id}/revoke` en `AuthzMeController_revokeCareRelationship`. El controlador delega en `AuthzMeService.revokeMyCareRelationship`. No recibe body. El tipo de retorno estático es `Promise<AuthzStatusResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /authz/me/care-relationships/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /authz/me/care-relationships/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "affected": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+| `affected` | No | `number` | Sin restricción adicional declarada | Nº de filas afectadas cuando aplica | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Relación asistencial no encontrada | Excepción explícita en src/modules/authz/services/authz-care-relationships.service.ts |
+| 422 | `PRECONDITION_FAILED` | La solicitud sigue pendiente: respóndala en lugar de revocarla | Excepción explícita en src/modules/authz/services/authz-me.service.ts |
+| 422 | `PRECONDITION_FAILED` | La relación asistencial no está activa | Excepción explícita en src/modules/authz/services/authz-care-relationships.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/me/care-relationships/{id}/revoke"
+}
+```
+
+---
+
+## 14. POST /authz/me/clinical-access-grants/{grantId}/revoke
+
+- **Módulo:** `authz`
+- **Etiqueta OpenAPI:** `authz-me`
+- **Nombre:** Revocar uno de los accesos clínicos a mi historia
+- **Operation ID:** `AuthzMeController_revokeClinicalGrant`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AuthzMeController.revokeClinicalGrant](../../src/modules/authz/controllers/authz-me.controller.ts)
+
+### Descripción de negocio
+
+Revocar uno de los accesos clínicos a mi historia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Revoca uno de los accesos clínicos a mi historia.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /authz/me/clinical-access-grants/{grantId}/revoke` en `AuthzMeController_revokeClinicalGrant`. El controlador delega en `AuthzMeService.revokeMyClinicalGrant`. No recibe body. El tipo de retorno estático es `Promise<AuthzStatusResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `grantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /authz/me/clinical-access-grants/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Deben ser UUID válidos: `grantId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /authz/me/clinical-access-grants/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AuthzStatusResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AuthzStatusResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "affected": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+| `affected` | No | `number` | Sin restricción adicional declarada | Nº de filas afectadas cuando aplica | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Acceso clínico no encontrado | Excepción explícita en src/modules/authz/services/authz-clinical.service.ts |
+| 422 | `PRECONDITION_FAILED` | El acceso clínico no está activo | Excepción explícita en src/modules/authz/services/authz-clinical.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/authz/me/clinical-access-grants/{grantId}/revoke"
+}
+```
+
+---
+
+## 15. POST /authz/patients/{patientProfileId}/break-the-glass
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-clinical`
@@ -1560,7 +1936,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /authz/patients/{patientProfileId}/clinical-access-grants
+## 16. POST /authz/patients/{patientProfileId}/clinical-access-grants
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-clinical`
@@ -1711,7 +2087,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /authz/pdp/cache/invalidate
+## 17. POST /authz/pdp/cache/invalidate
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-pdp`
@@ -1836,7 +2212,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /authz/permission-categories
+## 18. POST /authz/permission-categories
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-catalog`
@@ -1967,7 +2343,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. POST /authz/permissions
+## 19. POST /authz/permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-catalog`
@@ -2115,7 +2491,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /authz/resource-scope-grants
+## 20. POST /authz/resource-scope-grants
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`
@@ -2261,7 +2637,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /authz/roles
+## 21. GET /authz/roles
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2367,7 +2743,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /authz/roles
+## 22. POST /authz/roles
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2513,7 +2889,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. PUT /authz/roles/{roleId}/field-permissions
+## 23. PUT /authz/roles/{roleId}/field-permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2662,7 +3038,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. PUT /authz/roles/{roleId}/permissions
+## 24. PUT /authz/roles/{roleId}/permissions
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-roles`
@@ -2813,7 +3189,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /authz/tenants/{tenantId}/access-policies
+## 25. POST /authz/tenants/{tenantId}/access-policies
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-policies`
@@ -2950,7 +3326,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /authz/users/{userId}/permission-grants
+## 26. POST /authz/users/{userId}/permission-grants
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`
@@ -3095,7 +3471,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /authz/users/{userId}/role-assignments
+## 27. POST /authz/users/{userId}/role-assignments
 
 - **Módulo:** `authz`
 - **Etiqueta OpenAPI:** `authz-grants`

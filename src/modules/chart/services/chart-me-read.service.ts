@@ -221,7 +221,7 @@ export class ChartMeReadService {
     const em = this.em.fork();
 
     const record = await this.documentsRepo.findRecordById(em, documentId);
-    const noExiste = () =>
+    const doesNotExist = () =>
       new ResourceNotFoundException('Documento no encontrado', {
         documentId,
       });
@@ -230,14 +230,14 @@ export class ChartMeReadService {
       record.patientProfileId !== patientProfileId ||
       record.patientVisibilityConceptId !== CHART.VISIBILITY_PATIENT_VISIBLE
     ) {
-      throw noExiste();
+      throw doesNotExist();
     }
 
     const files = await this.documentsRepo.findFilesForRecords(em, [
       documentId,
     ]);
     if (!files.some((f) => f.fileId === fileId)) {
-      throw noExiste();
+      throw doesNotExist();
     }
 
     this.dataAccessLogRepo.record(em, {

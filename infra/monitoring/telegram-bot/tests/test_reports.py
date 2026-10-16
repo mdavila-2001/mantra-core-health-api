@@ -93,3 +93,15 @@ def test_cpu_report_shows_each_core_in_order_load_and_top_containers():
 
 def test_cpu_report_without_data_does_not_crash():
     assert "CPU: sin datos" in reports.cpu_report(FakeSources())
+
+
+def test_containers_report_hides_old_leftovers_and_says_how_many():
+    from datetime import timedelta
+
+    now = datetime(2026, 10, 8, 12, 0, tzinfo=timezone.utc)
+    states = [
+        container(),
+        container(name="old", service="web", status="exited", health="none", finished_at=now - timedelta(days=2)),
+    ]
+    text = reports.containers_report(states, True, now)
+    assert "Contenedores (1)" in text and "+ 1 detenidos hace más de 1 h" in text

@@ -173,6 +173,26 @@ export const { seeds: IDENTITY_ASSURANCE_CONCEPT_SEEDS, ids: IDA } =
       code: 'IDA_EVIDENCE_TYPE_SELFIE_WITH_ID',
       display: 'Selfie holding identity document',
     },
+    EVIDENCE_TYPE_IDENTITY_DOCUMENT_FRONT: {
+      code: 'IDA_EVIDENCE_TYPE_IDENTITY_DOCUMENT_FRONT',
+      display: 'Front of identity document',
+    },
+    EVIDENCE_TYPE_IDENTITY_DOCUMENT_BACK: {
+      code: 'IDA_EVIDENCE_TYPE_IDENTITY_DOCUMENT_BACK',
+      display: 'Back of identity document',
+    },
+    EVIDENCE_TYPE_LIVENESS_CENTER: {
+      code: 'IDA_EVIDENCE_TYPE_LIVENESS_CENTER',
+      display: 'Active liveness challenge facing forward',
+    },
+    EVIDENCE_TYPE_LIVENESS_TURN_LEFT: {
+      code: 'IDA_EVIDENCE_TYPE_LIVENESS_TURN_LEFT',
+      display: 'Active liveness challenge turning left',
+    },
+    EVIDENCE_TYPE_LIVENESS_TURN_RIGHT: {
+      code: 'IDA_EVIDENCE_TYPE_LIVENESS_TURN_RIGHT',
+      display: 'Active liveness challenge turning right',
+    },
     EVIDENCE_TYPE_LICENSE_DOCUMENT: {
       code: 'IDA_EVIDENCE_TYPE_LICENSE_DOCUMENT',
       display: 'Professional license document',

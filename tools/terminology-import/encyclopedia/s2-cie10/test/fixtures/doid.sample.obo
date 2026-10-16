@@ -1,0 +1,70 @@
+format-version: 1.2
+data-version: releases/2026-09-30/doid.obo
+date: 30:09:2026 11:23
+saved-by: lschriml
+subsetdef: DO_AGR_slim "DO_AGR_slim"
+subsetdef: DO_cancer_slim "DO_cancer_slim"
+subsetdef: DO_CFDE_slim "DO_CFDE_slim"
+subsetdef: DO_childhood_cancer_slim "DO_childhood_cancer_slim"
+subsetdef: DO_FlyBase_slim "DO_FlyBase_slim"
+subsetdef: DO_GXD_slim "DO_GXD_slim"
+subsetdef: DO_IEDB_slim "DO_IEDB_slim"
+subsetdef: DO_infectious_disease_slim "DO_infectious_disease_slim"
+subsetdef: DO_MGI_slim "DO_MGI_slim"
+subsetdef: DO_RAD_slim "DO_RAD_slim"
+subsetdef: DO_rare_slim "DO_rare_slim"
+subsetdef: GOLD "GOLD"
+subsetdef: gram-negative_bacterial_infectious_disease "gram-negative_bacterial_infectious_disease"
+subsetdef: gram-positive_bacterial_infectious_disease "gram-positive_bacterial_infectious_disease"
+subsetdef: NCIthesaurus "NCIthesaurus"
+subsetdef: sexually_transmitted_infectious_disease "sexually_transmitted_infectious_disease"
+subsetdef: tick-borne_infectious_disease "tick-borne_infectious_disease"
+subsetdef: TopNodes_DOcancerslim "TopNodes_DOcancerslim"
+subsetdef: zoonotic_infectious_disease "zoonotic_infectious_disease"
+synonymtypedef: OMO:0003012 "acronym"
+default-namespace: disease_ontology
+idspace: dc http://purl.org/dc/elements/1.1/ 
+idspace: oboInOwl http://www.geneontology.org/formats/oboInOwl# 
+idspace: skos http://www.w3.org/2004/02/skos/core# 
+idspace: terms http://purl.org/dc/terms/ 
+remark: The Disease Ontology content is available via the Creative Commons Public Domain Dedication CC0 1.0 Universal license (https://creativecommons.org/publicdomain/zero/1.0/).
+ontology: doid
+property_value: dc:description "The Disease Ontology has been developed as a standardized ontology for human disease with the purpose of providing the biomedical community with consistent, reusable and sustainable descriptions of human disease terms, phenotype characteristics and related medical vocabulary disease concepts." xsd:string
+property_value: dc:language "en" xsd:string
+property_value: dc:title "Human Disease Ontology" xsd:string
+property_value: IAO:0000700 DOID:4
+property_value: owl:versionInfo "2026-09-30" xsd:string
+property_value: terms:license https://creativecommons.org/publicdomain/zero/1.0/
+
+[Term]
+id: DOID:1485
+name: cystic fibrosis
+alt_id: DOID:12447
+alt_id: DOID:13383
+alt_id: DOID:14395
+alt_id: DOID:1484
+def: "A syndrome that is characterized by the buildup of thick, sticky mucus that can damage many organs." [url:http\://en.wikipedia.org/wiki/Cystic_fibrosis, url:http\://ghr.nlm.nih.gov/condition/cystic-fibrosis, url:http\://www.nhlbi.nih.gov/health/health-topics/topics/cf/, url:https\://www.genome.gov/Genetic-Disorders/Cystic-Fibrosis]
+comment: OMIM mapping confirmed by DO. [SN].
+subset: DO_rare_slim
+subset: NCIthesaurus
+synonym: "CF" EXACT OMO:0003012 []
+synonym: "mucoviscidosis" EXACT []
+xref: GARD:6233
+xref: ICD10CM:E84
+xref: ICD9CM:277.0
+xref: MESH:D003550
+xref: MIM:219700
+xref: NCI:C2975
+xref: ORDO:586
+xref: SNOMEDCT_US_2025_09_01:85809002
+xref: UMLS_CUI:C0010674
+is_a: DOID:0050737 ! autosomal recessive disease
+is_a: DOID:225 ! syndrome
+property_value: skos:exactMatch "MESH:D003550" xsd:string
+
+[Term]
+id: DOID:0050001
+name: obsolete Actinomadura madurae infectious disease
+subset: gram-positive_bacterial_infectious_disease
+is_obsolete: true
+

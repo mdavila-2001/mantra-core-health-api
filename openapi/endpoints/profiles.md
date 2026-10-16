@@ -2,70 +2,215 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 44 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 57 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `profiles-affiliations`, `profiles-patients`, `profiles-practitioners`
-- **Controladores:** `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
+- **Controladores:** `PractitionerSignatureAssetsController`, `ProfilesDependentRequestsController`, `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /profiles/credentials/{credentialId}/verify](#1-post-profiles-credentials-credentialid-verify) — Verificar credencial profesional
-2. [GET /profiles/patients](#2-get-profiles-patients) — UC-05-13: listado paginado de pacientes
-3. [POST /profiles/patients](#3-post-profiles-patients) — Alta de persona y perfil de paciente
-4. [GET /profiles/patients/{profileId}](#4-get-profiles-patients-profileid) — UC-05-14: ficha de filiación de un paciente (F-01)
-5. [POST /profiles/patients/{profileId}/identity-links](#5-post-profiles-patients-profileid-identity-links) — Vincular identidad externa de paciente (MPI)
-6. [POST /profiles/patients/{profileId}/portal-proxies](#6-post-profiles-patients-profileid-portal-proxies) — Otorgar proxy de portal a un representante
-7. [POST /profiles/patients/{profileId}/related-persons](#7-post-profiles-patients-profileid-related-persons) — Registrar persona relacionada / contacto de emergencia
-8. [GET /profiles/patients/me](#8-get-profiles-patients-me) — Consultar los propios datos de filiación
-9. [PATCH /profiles/patients/me](#9-patch-profiles-patients-me) — Editar los propios datos de filiación
-10. [GET /profiles/patients/me/dependents](#10-get-profiles-patients-me-dependents) — Listar los dependientes a cargo del paciente autenticado
-11. [POST /profiles/patients/me/dependents](#11-post-profiles-patients-me-dependents) — Registrar un dependiente (menor o adulto mayor tutelado)
-12. [DELETE /profiles/patients/me/photo](#12-delete-profiles-patients-me-photo) — Quitar la propia foto de perfil
-13. [PUT /profiles/patients/me/photo](#13-put-profiles-patients-me-photo) — Fijar la propia foto de perfil
-14. [GET /profiles/patients/me/summary](#14-get-profiles-patients-me-summary) — Consultar el resumen propio
-15. [POST /profiles/patients/merge](#15-post-profiles-patients-merge) — Fusionar pacientes duplicados
-16. [GET /profiles/patients/merge-events](#16-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
-17. [POST /profiles/patients/merge/{eventId}/reverse](#17-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
-18. [POST /profiles/persons/{personId}/account-links](#18-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
-19. [POST /profiles/persons/{personId}/decease](#19-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
-20. [GET /profiles/practitioners](#20-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
-21. [POST /profiles/practitioners](#21-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
-22. [POST /profiles/practitioners/{profileId}/affiliations](#22-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
-23. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#23-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
-24. [DELETE /profiles/practitioners/{profileId}/photo](#24-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
-25. [PUT /profiles/practitioners/{profileId}/photo](#25-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
-26. [POST /profiles/practitioners/{profileId}/specialties](#26-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
-27. [GET /profiles/practitioners/{profileId}/summary](#27-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
-28. [PATCH /profiles/practitioners/me](#28-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
-29. [GET /profiles/practitioners/me/affiliations](#29-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
-30. [POST /profiles/practitioners/me/affiliations](#30-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
-31. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#31-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
-32. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#32-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
-33. [POST /profiles/practitioners/me/credentials](#33-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
-34. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#34-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
-35. [PATCH /profiles/practitioners/me/credentials/{credentialId}](#35-patch-profiles-practitioners-me-credentials-credentialid) — Editar un título propio pendiente de verificación
-36. [GET /profiles/practitioners/me/linkable-organizations](#36-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
-37. [GET /profiles/practitioners/me/onboarding](#37-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
-38. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#38-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
-39. [GET /profiles/practitioners/me/summary](#39-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
-40. [GET /profiles/practitioners/specialty-counts](#40-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
-41. [GET /tenants/{tenantId}/practitioner-requests](#41-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
-42. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#42-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
-43. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#43-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
-44. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#44-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
+1. [GET /profiles/credentials](#1-get-profiles-credentials) — Listar credenciales pendientes de verificación
+2. [POST /profiles/credentials/{credentialId}/verify](#2-post-profiles-credentials-credentialid-verify) — Verificar credencial profesional
+3. [GET /profiles/patients](#3-get-profiles-patients) — UC-05-13: listado paginado de pacientes
+4. [POST /profiles/patients](#4-post-profiles-patients) — Alta de persona y perfil de paciente
+5. [GET /profiles/patients/{profileId}](#5-get-profiles-patients-profileid) — UC-05-14: ficha de filiación de un paciente (F-01)
+6. [POST /profiles/patients/{profileId}/identity-links](#6-post-profiles-patients-profileid-identity-links) — Vincular identidad externa de paciente (MPI)
+7. [POST /profiles/patients/{profileId}/portal-proxies](#7-post-profiles-patients-profileid-portal-proxies) — Otorgar proxy de portal a un representante
+8. [POST /profiles/patients/{profileId}/related-persons](#8-post-profiles-patients-profileid-related-persons) — Registrar persona relacionada / contacto de emergencia
+9. [GET /profiles/patients/me](#9-get-profiles-patients-me) — Consultar los propios datos de filiación
+10. [PATCH /profiles/patients/me](#10-patch-profiles-patients-me) — Editar los propios datos de filiación
+11. [GET /profiles/patients/me/dependent-candidates](#11-get-profiles-patients-me-dependent-candidates) — Buscar por nombre a quién pedirle que deje representarla
+12. [POST /profiles/patients/me/dependent-requests](#12-post-profiles-patients-me-dependent-requests) — Pedir representar a una persona que ya tiene cuenta
+13. [POST /profiles/patients/me/dependent-requests/{id}/accept](#13-post-profiles-patients-me-dependent-requests-id-accept) — Aceptar una solicitud de dependiente
+14. [POST /profiles/patients/me/dependent-requests/{id}/reject](#14-post-profiles-patients-me-dependent-requests-id-reject) — Rechazar una solicitud de dependiente
+15. [GET /profiles/patients/me/dependent-requests/incoming](#15-get-profiles-patients-me-dependent-requests-incoming) — Listar las solicitudes de dependiente recibidas
+16. [GET /profiles/patients/me/dependents](#16-get-profiles-patients-me-dependents) — Listar los dependientes a cargo del paciente autenticado
+17. [POST /profiles/patients/me/dependents](#17-post-profiles-patients-me-dependents) — Registrar un dependiente (menor o adulto mayor tutelado)
+18. [DELETE /profiles/patients/me/photo](#18-delete-profiles-patients-me-photo) — Quitar la propia foto de perfil
+19. [PUT /profiles/patients/me/photo](#19-put-profiles-patients-me-photo) — Fijar la propia foto de perfil
+20. [GET /profiles/patients/me/summary](#20-get-profiles-patients-me-summary) — Consultar el resumen propio
+21. [POST /profiles/patients/merge](#21-post-profiles-patients-merge) — Fusionar pacientes duplicados
+22. [GET /profiles/patients/merge-events](#22-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
+23. [POST /profiles/patients/merge/{eventId}/reverse](#23-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
+24. [POST /profiles/patients/search](#24-post-profiles-patients-search) — UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
+25. [POST /profiles/persons/{personId}/account-links](#25-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
+26. [POST /profiles/persons/{personId}/decease](#26-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
+27. [GET /profiles/practitioners](#27-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
+28. [POST /profiles/practitioners](#28-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
+29. [POST /profiles/practitioners/{profileId}/affiliations](#29-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
+30. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#30-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
+31. [DELETE /profiles/practitioners/{profileId}/photo](#31-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
+32. [PUT /profiles/practitioners/{profileId}/photo](#32-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
+33. [POST /profiles/practitioners/{profileId}/specialties](#33-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
+34. [GET /profiles/practitioners/{profileId}/summary](#34-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
+35. [PATCH /profiles/practitioners/me](#35-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
+36. [GET /profiles/practitioners/me/affiliations](#36-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
+37. [POST /profiles/practitioners/me/affiliations](#37-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
+38. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#38-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
+39. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#39-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
+40. [POST /profiles/practitioners/me/credentials](#40-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
+41. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#41-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
+42. [PATCH /profiles/practitioners/me/credentials/{credentialId}](#42-patch-profiles-practitioners-me-credentials-credentialid) — Editar un título propio pendiente de verificación
+43. [DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#43-delete-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Retirar una matrícula propia pendiente de verificación
+44. [PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#44-patch-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Corregir una matrícula propia pendiente de verificación
+45. [GET /profiles/practitioners/me/linkable-organizations](#45-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
+46. [GET /profiles/practitioners/me/onboarding](#46-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
+47. [GET /profiles/practitioners/me/signature-assets](#47-get-profiles-practitioners-me-signature-assets) — Consultar las imágenes de firma y sello propias
+48. [PUT /profiles/practitioners/me/signature-assets](#48-put-profiles-practitioners-me-signature-assets) — Guardar o quitar las imágenes de firma y sello propias
+49. [DELETE /profiles/practitioners/me/specialties/{specialtyId}](#49-delete-profiles-practitioners-me-specialties-specialtyid) — Retirar una especialidad propia pendiente de verificación
+50. [PATCH /profiles/practitioners/me/specialties/{specialtyId}](#50-patch-profiles-practitioners-me-specialties-specialtyid) — Corregir una especialidad propia pendiente de verificación
+51. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#51-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
+52. [GET /profiles/practitioners/me/summary](#52-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
+53. [GET /profiles/practitioners/specialty-counts](#53-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
+54. [GET /tenants/{tenantId}/practitioner-requests](#54-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
+55. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#55-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
+56. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#56-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
+57. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#57-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
 
 ---
 
-## 1. POST /profiles/credentials/{credentialId}/verify
+## 1. GET /profiles/credentials
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Listar credenciales pendientes de verificación
+- **Operation ID:** `ProfilesPractitionersController_listPendingCredentials`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.listPendingCredentials](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+Listar credenciales pendientes de verificación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CV-20: cola de credenciales pendientes de verificación.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/credentials` en `ProfilesPractitionersController_listPendingCredentials`. El controlador delega en `ProfilesPractitionersService.listPendingCredentials`. No recibe body. El tipo de retorno estático es `Promise<ListPendingCredentialsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `state` | query | No | `string` | Sin restricción adicional declarada | Concepto de estado (por defecto, pendiente) | `valor-ejemplo` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Credenciales por página | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/credentials HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/credentials?state=valor-ejemplo&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListPendingCredentialsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListPendingCredentialsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListPendingCredentialsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListPendingCredentialsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListPendingCredentialsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListPendingCredentialsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPendingCredentialsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "number": "valor-ejemplo",
+      "issuingInstitutionText": "valor-ejemplo",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "state": "00000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PendingCredentialSummaryDto>` | Sin restricción adicional declarada | Credenciales de esta página, ordenadas por `id`. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","state":"00000000-0000-4000-8000-000000000001","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerProfileId` | Sí | `string` | formato `uuid` | Profesional dueño de la credencial. | `00000000-0000-4000-8000-000000000001` |
+| `items[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Concepto del tipo de credencial (matrícula, título, certificación). | `00000000-0000-4000-8000-000000000001` |
+| `items[].number` | Sí | `string` | Sin restricción adicional declarada | Número de matrícula o de documento declarado. | `valor-ejemplo` |
+| `items[].issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Institución u organismo emisor, en texto libre. | `valor-ejemplo` |
+| `items[].fileId` | No | `string` | formato `uuid` | Archivo adjunto (diploma o certificado), si se cargó uno. | `00000000-0000-4000-8000-000000000001` |
+| `items[].state` | Sí | `string` | formato `uuid` | Estado actual de la credencial. | `00000000-0000-4000-8000-000000000001` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Fecha en que se cargó la credencial. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/credentials"
+}
+```
+
+---
+
+## 2. POST /profiles/credentials/{credentialId}/verify
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Verificar credencial profesional
 - **Operation ID:** `ProfilesPractitionersController_verifyCredential`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.verifyCredential](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.verifyCredential](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -171,10 +316,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Credencial no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | Credencial no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Una credencial verificada debe declarar la fuente consultada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | La credencial no está pendiente de verificación | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una credencial verificada debe declarar la fuente consultada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | La credencial no está pendiente de verificación | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -192,14 +337,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. GET /profiles/patients
+## 3. GET /profiles/patients
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** UC-05-13: listado paginado de pacientes
 - **Operation ID:** `ProfilesPatientsController_searchPatients`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.searchPatients](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.searchPatients](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -278,7 +423,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   ],
   "count": 1,
   "limit": 1,
-  "nextCursor": "valor-ejemplo"
+  "nextCursor": {}
 }
 ```
 
@@ -286,17 +431,17 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PatientListItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"profileId":"00000000-0000-4000-8000-000000000001","personId":"00000000-0000-4000-8000-000000000001","patientCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","birthDate":"2026-07-31","personStatusConceptId":"00000000-0000-4000-8000-000000000001","deceased":true}]` |
-| `items[].profileId` | Sí | `string` | formato `uuid` | Identificador asociado a profile. | `00000000-0000-4000-8000-000000000001` |
-| `items[].personId` | Sí | `string` | formato `uuid` | Identificador asociado a person. | `00000000-0000-4000-8000-000000000001` |
+| `items` | Sí | `array<PatientListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"profileId":"00000000-0000-4000-8000-000000000001","personId":"00000000-0000-4000-8000-000000000001","patientCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","birthDate":"2026-07-31","personStatusConceptId":"00000000-0000-4000-8000-000000000001","deceased":true}]` |
+| `items[].profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientCode` | Sí | `string` | Sin restricción adicional declarada | Código único de paciente | `CODIGO_EJEMPLO` |
 | `items[].displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible de la persona | `Nombre de ejemplo` |
-| `items[].birthDate` | No | `string` | formato `date` | Valor de birth date mantenido por la instancia. | `2026-07-31` |
+| `items[].birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `items[].personStatusConceptId` | No | `string` | formato `uuid` | Concept id del estado de la persona | `00000000-0000-4000-8000-000000000001` |
 | `items[].deceased` | Sí | `boolean` | Sin restricción adicional declarada | Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología | `true` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
-| `nextCursor` | No | `string` | admite null | Cursor opaco para la página siguiente; `null` cuando no hay más | `valor-ejemplo` |
+| `nextCursor` | No | `object` | admite null | Cursor opaco para la página siguiente; `null` cuando no hay más | `{}` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -307,9 +452,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | Buscá por nombre, código o documento: no se puede listar el padrón completo de pacientes | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Busque por nombre, código o documento: no se puede listar el padrón completo de pacientes | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -327,14 +472,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /profiles/patients
+## 4. POST /profiles/patients
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Alta de persona y perfil de paciente
 - **Operation ID:** `ProfilesPatientsController_registerPatient`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.registerPatient](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.registerPatient](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -446,7 +591,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | El patient_code ya está en uso | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 409 | `CONFLICT` | El patient_code ya está en uso | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -465,24 +610,24 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /profiles/patients/{profileId}
+## 5. GET /profiles/patients/{profileId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** UC-05-14: ficha de filiación de un paciente (F-01)
 - **Operation ID:** `ProfilesPatientsController_getPatient`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.getPatient](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.getPatient](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
-UC-05-14: ficha de filiación de un paciente (F-01). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+SECURITY_ADMIN siempre. Quien atiende (CLINICIAN, PRACTITIONER) sólo si está atendiendo a esa persona: consulta en curso, turno de hoy o relación asistencial vigente.
 
 Contexto declarado en el controlador: UC-05-14: ficha de filiación del paciente (F-01).
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /profiles/patients/{profileId}` en `ProfilesPatientsController_getPatient`. El controlador delega en `ProfilesPatientsService.getPatientById`. No recibe body. El tipo de retorno estático es `Promise<PatientDetailResponseDto>`.
+NestJS resuelve `GET /profiles/patients/{profileId}` en `ProfilesPatientsController_getPatient`. El controlador delega en `ModuleRef.get`, `ProfilesPatientsService.getPatientById`. No recibe body. El tipo de retorno estático es `Promise<PatientDetailResponseDto>`.
 
 ### Parámetros
 
@@ -503,7 +648,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `CLINICIAN`, `PRACTITIONER`.
 - Deben ser UUID válidos: `profileId`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -609,8 +754,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -628,14 +773,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /profiles/patients/{profileId}/identity-links
+## 6. POST /profiles/patients/{profileId}/identity-links
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Vincular identidad externa de paciente (MPI)
 - **Operation ID:** `ProfilesPatientsController_addIdentityLink`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.addIdentityLink](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.addIdentityLink](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -751,7 +896,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -770,14 +915,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /profiles/patients/{profileId}/portal-proxies
+## 7. POST /profiles/patients/{profileId}/portal-proxies
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Otorgar proxy de portal a un representante
 - **Operation ID:** `ProfilesPatientsController_grantPortalProxy`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.grantPortalProxy](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.grantPortalProxy](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -895,9 +1040,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La persona relacionada no pertenece al paciente | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La persona relacionada no pertenece al paciente | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -915,14 +1060,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /profiles/patients/{profileId}/related-persons
+## 8. POST /profiles/patients/{profileId}/related-persons
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Registrar persona relacionada / contacto de emergencia
 - **Operation ID:** `ProfilesPatientsController_addRelatedPerson`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.addRelatedPerson](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.addRelatedPerson](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -1035,10 +1180,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular del perfil o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 404 | `NOT_FOUND` | Persona relacionada no encontrada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 409 | `CONFLICT` | El paciente ya tiene un tutor legal activo | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Persona relacionada no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 409 | `CONFLICT` | El paciente ya tiene un tutor legal activo | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1057,14 +1202,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /profiles/patients/me
+## 9. GET /profiles/patients/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Consultar los propios datos de filiación
 - **Operation ID:** `ProfilesPatientsController_getOwnProfile`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.getOwnProfile](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.getOwnProfile](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -1198,11 +1343,19 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "coverageOrder": 1
     }
   ],
+  "emergencyContacts": [
+    {
+      "displayName": "Nombre de ejemplo",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
+      "relationshipDisplay": "valor-ejemplo",
+      "phone": "+59170000000"
+    }
+  ],
   "guardians": [
     {
       "displayName": "Nombre de ejemplo",
       "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
-      "isEmergencyContact": true,
+      "relationshipDisplay": "valor-ejemplo",
       "isLegalGuardian": true,
       "phone": "+59170000000"
     }
@@ -1281,10 +1434,15 @@ Campos de la respuesta:
 | `coverages[].benefits[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
-| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
+| `emergencyContacts` | Sí | `array<OwnEmergencyContactDto>` | Sin restricción adicional declarada | Contactos de emergencia activos. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","relationshipDisplay":"valor-ejemplo","phone":"+59170000000"}]` |
+| `emergencyContacts[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
+| `emergencyContacts[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `emergencyContacts[].relationshipDisplay` | Sí | `string` | Sin restricción adicional declarada | Parentesco en palabras | `valor-ejemplo` |
+| `emergencyContacts[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
+| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Representantes con apoderamiento activo, con su parentesco. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","relationshipDisplay":"valor-ejemplo","isLegalGuardian":true,"phone":"+59170000000"}]` |
 | `guardians[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
 | `guardians[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `guardians[].isEmergencyContact` | Sí | `boolean` | Sin restricción adicional declarada | Es a quien llamar en una urgencia | `true` |
+| `guardians[].relationshipDisplay` | Sí | `string` | Sin restricción adicional declarada | Parentesco en palabras | `valor-ejemplo` |
 | `guardians[].isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Es su representante legal | `true` |
 | `guardians[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
 
@@ -1296,8 +1454,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1315,14 +1473,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. PATCH /profiles/patients/me
+## 10. PATCH /profiles/patients/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Editar los propios datos de filiación
 - **Operation ID:** `ProfilesPatientsController_updateOwnProfile`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.updateOwnProfile](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.updateOwnProfile](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -1522,11 +1680,19 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "coverageOrder": 1
     }
   ],
+  "emergencyContacts": [
+    {
+      "displayName": "Nombre de ejemplo",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
+      "relationshipDisplay": "valor-ejemplo",
+      "phone": "+59170000000"
+    }
+  ],
   "guardians": [
     {
       "displayName": "Nombre de ejemplo",
       "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
-      "isEmergencyContact": true,
+      "relationshipDisplay": "valor-ejemplo",
       "isLegalGuardian": true,
       "phone": "+59170000000"
     }
@@ -1605,10 +1771,15 @@ Campos de la respuesta:
 | `coverages[].benefits[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
-| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
+| `emergencyContacts` | Sí | `array<OwnEmergencyContactDto>` | Sin restricción adicional declarada | Contactos de emergencia activos. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","relationshipDisplay":"valor-ejemplo","phone":"+59170000000"}]` |
+| `emergencyContacts[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
+| `emergencyContacts[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `emergencyContacts[].relationshipDisplay` | Sí | `string` | Sin restricción adicional declarada | Parentesco en palabras | `valor-ejemplo` |
+| `emergencyContacts[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
+| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Representantes con apoderamiento activo, con su parentesco. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","relationshipDisplay":"valor-ejemplo","isLegalGuardian":true,"phone":"+59170000000"}]` |
 | `guardians[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
 | `guardians[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `guardians[].isEmergencyContact` | Sí | `boolean` | Sin restricción adicional declarada | Es a quien llamar en una urgencia | `true` |
+| `guardians[].relationshipDisplay` | Sí | `string` | Sin restricción adicional declarada | Parentesco en palabras | `valor-ejemplo` |
 | `guardians[].isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Es su representante legal | `true` |
 | `guardians[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
 
@@ -1621,9 +1792,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1641,14 +1812,590 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. GET /profiles/patients/me/dependents
+## 11. GET /profiles/patients/me/dependent-candidates
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Buscar por nombre a quién pedirle que deje representarla
+- **Operation ID:** `ProfilesDependentRequestsController_listDependentCandidates`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesDependentRequestsController.listDependentCandidates](../../src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts)
+
+### Descripción de negocio
+
+Buscar por nombre a quién pedirle que deje representarla. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cuentas cuyo nombre coincide con lo escrito, para elegir a quién pedirle que deje representarla. Es una búsqueda de personas, así que va acotada: nada por debajo de tres letras, pocas filas, el CI enmascarado, y con su propio límite de frecuencia (más holgado que el del pedido porque se llama al escribir). Cada candidata trae el `patientProfileId` que se manda después a `dependent-requests`. La ruta tiene tres segmentos, así que no compite con `patients/:profileId` de `ProfilesPatientsController`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/patients/me/dependent-candidates` en `ProfilesDependentRequestsController_listDependentCandidates`. El controlador delega en `DependentLinkRequestsService.findCandidates`. No recibe body. El tipo de retorno estático es `Promise<DependentCandidateDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `q` | query | No | `string` | longitud máxima 100 | Parte del nombre de la persona. Con menos de tres letras la respuesta es vacía | `ana per` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/patients/me/dependent-candidates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit particular: `Throttle({ default: { limit: 30, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/patients/me/dependent-candidates?q=ana%20per HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Hasta ocho cuentas de paciente activas, con el CI enmascarado. `[]` si el texto tiene menos de tres letras. | `Promise<DependentCandidateDto[]>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<DependentCandidateDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<DependentCandidateDto[]>` | No |
+| 403 | La cuenta no es de un paciente | `Promise<DependentCandidateDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<DependentCandidateDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<DependentCandidateDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentCandidateDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "patientProfileId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Nombre de ejemplo",
+    "maskedNationalId": "••••321"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene perfil de paciente | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 30, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/dependent-candidates"
+}
+```
+
+---
+
+## 12. POST /profiles/patients/me/dependent-requests
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Pedir representar a una persona que ya tiene cuenta
+- **Operation ID:** `ProfilesDependentRequestsController_requestDependentLink`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesDependentRequestsController.requestDependentLink](../../src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts)
+
+### Descripción de negocio
+
+Pedir representar a una persona que ya tiene cuenta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Pide representar a quien ya tiene cuenta con ese CI. Con límite propio: la respuesta distingue «hay cuenta» de «no la hay», y sin freno la ruta serviría para recorrer documentos.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/patients/me/dependent-requests` en `ProfilesDependentRequestsController_requestDependentLink`. El controlador delega en `DependentLinkRequestsService.request`. Valida el body como `RequestDependentLinkDto` y consume `application/json`. El tipo de retorno estático es `Promise<DependentLinkRequestSentDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RequestDependentLinkDto`; los campos opcionales se omiten.
+
+```http
+POST /profiles/patients/me/dependent-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 10, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `nationalId` | No | `string` | longitud máxima 60; patrón runtime `/^\s*[A-Za-z0-9.-]{4,40}\s*$/` | Documento de identidad de la persona a representar. Obligatorio si no se manda `patientProfileId` | `7654321` |
+| `patientProfileId` | No | `string` | formato `uuid` | Perfil de paciente devuelto por `dependent-candidates`. Alternativa a `nationalId`: se manda uno u otro | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /profiles/patients/me/dependent-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "nationalId": "7654321",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | La solicitud quedó pendiente y a esa cuenta le llegó un aviso. `404` es «no hay cuenta con ese CI»; `422`, «ese CI es el suyo». | `Promise<DependentLinkRequestSentDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
+| 404 | No hay cuenta de paciente con ese CI | `Promise<DependentLinkRequestSentDto>` | No |
+| 409 | Ya la representa, o ya hay una solicitud pendiente | `Promise<DependentLinkRequestSentDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DependentLinkRequestSentDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentLinkRequestSentDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": "PENDING"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `PENDING` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene perfil de paciente | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 404 | `NOT_FOUND` | Esa persona ya no tiene una cuenta registrada. | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 409 | `CONFLICT` | Esa persona ya es su dependiente. | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 409 | `CONFLICT` | Ya le envió una solicitud a esa persona. Falta que la acepte. | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Ese CI es el suyo: no puede registrarse como su propio dependiente. | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/dependent-requests"
+}
+```
+
+---
+
+## 13. POST /profiles/patients/me/dependent-requests/{id}/accept
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Aceptar una solicitud de dependiente
+- **Operation ID:** `ProfilesDependentRequestsController_acceptDependentLinkRequest`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesDependentRequestsController.acceptDependentLinkRequest](../../src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts)
+
+### Descripción de negocio
+
+Aceptar una solicitud de dependiente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Acepta: quien pidió pasa a representar a esta cuenta.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/patients/me/dependent-requests/{id}/accept` en `ProfilesDependentRequestsController_acceptDependentLinkRequest`. El controlador delega en `DependentLinkRequestsService.accept`. Valida el body como `AcceptDependentLinkRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<DependentLinkRequestDecisionDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AcceptDependentLinkRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /profiles/patients/me/dependent-requests/00000000-0000-4000-8000-000000000001/accept HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `relationshipConceptId` | No | `string` | formato `uuid` | Parentesco de quien representará al paciente | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /profiles/patients/me/dependent-requests/00000000-0000-4000-8000-000000000001/accept HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "relationshipConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 404 | No existe o no es de esta cuenta | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 409 | Ya fue respondida | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentLinkRequestDecisionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": "ACCEPTED"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACCEPTED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `ACCEPTED` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 409 | `CONFLICT` | Esa persona ya le representa. Puede rechazar esta solicitud. | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 409 | `CONFLICT` | La cuenta que lo pidió ya no está activa. Puede rechazar esta solicitud. | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 409 | `CONFLICT` | Esa solicitud ya fue respondida. | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/dependent-requests/{id}/accept"
+}
+```
+
+---
+
+## 14. POST /profiles/patients/me/dependent-requests/{id}/reject
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Rechazar una solicitud de dependiente
+- **Operation ID:** `ProfilesDependentRequestsController_rejectDependentLinkRequest`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesDependentRequestsController.rejectDependentLinkRequest](../../src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts)
+
+### Descripción de negocio
+
+Rechazar una solicitud de dependiente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Rechaza: no se crea ningún vínculo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/patients/me/dependent-requests/{id}/reject` en `ProfilesDependentRequestsController_rejectDependentLinkRequest`. El controlador delega en `DependentLinkRequestsService.reject`. No recibe body. El tipo de retorno estático es `Promise<DependentLinkRequestDecisionDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /profiles/patients/me/dependent-requests/00000000-0000-4000-8000-000000000001/reject HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /profiles/patients/me/dependent-requests/00000000-0000-4000-8000-000000000001/reject HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 404 | No existe o no es de esta cuenta | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 409 | Ya fue respondida | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DependentLinkRequestDecisionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DependentLinkRequestDecisionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": "ACCEPTED"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACCEPTED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `ACCEPTED` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 409 | `CONFLICT` | Esa solicitud ya fue respondida. | Excepción explícita en src/modules/profiles/application/services/dependent-link-requests.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/dependent-requests/{id}/reject"
+}
+```
+
+---
+
+## 15. GET /profiles/patients/me/dependent-requests/incoming
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Listar las solicitudes de dependiente recibidas
+- **Operation ID:** `ProfilesDependentRequestsController_listIncomingDependentLinkRequests`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesDependentRequestsController.listIncomingDependentLinkRequests](../../src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts)
+
+### Descripción de negocio
+
+Listar las solicitudes de dependiente recibidas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Las solicitudes que esperan respuesta de esta cuenta.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/patients/me/dependent-requests/incoming` en `ProfilesDependentRequestsController_listIncomingDependentLinkRequests`. El controlador delega en `DependentLinkRequestsService.listIncoming`. No recibe body. El tipo de retorno estático es `Promise<IncomingDependentLinkRequestDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/patients/me/dependent-requests/incoming HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/patients/me/dependent-requests/incoming HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<IncomingDependentLinkRequestDto[]>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<IncomingDependentLinkRequestDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<IncomingDependentLinkRequestDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<IncomingDependentLinkRequestDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<IncomingDependentLinkRequestDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<IncomingDependentLinkRequestDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IncomingDependentLinkRequestDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "requesterDisplayName": "Nombre de ejemplo",
+    "createdAt": "2026-07-31T12:00:00.000Z"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/dependent-requests/incoming"
+}
+```
+
+---
+
+## 16. GET /profiles/patients/me/dependents
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Listar los dependientes a cargo del paciente autenticado
 - **Operation ID:** `ProfilesPatientsController_getOwnDependents`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.getOwnDependents](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.getOwnDependents](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -1753,14 +2500,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /profiles/patients/me/dependents
+## 17. POST /profiles/patients/me/dependents
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Registrar un dependiente (menor o adulto mayor tutelado)
 - **Operation ID:** `ProfilesPatientsController_registerOwnDependent`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.registerOwnDependent](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.registerOwnDependent](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -1895,14 +2642,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 409 | `CONFLICT` | Ese documento ya está registrado en la plataforma | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 409 | `CONFLICT` | Ese documento ya está registrado en la plataforma | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La fecha de nacimiento no es una fecha válida | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 422 | `PRECONDITION_FAILED` | La fecha de nacimiento no puede ser futura | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La fecha de nacimiento no es una fecha válida | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La fecha de nacimiento no puede ser futura | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1920,14 +2667,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. DELETE /profiles/patients/me/photo
+## 18. DELETE /profiles/patients/me/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Quitar la propia foto de perfil
 - **Operation ID:** `ProfilesPatientsController_removeOwnPhoto`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.removeOwnPhoto](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.removeOwnPhoto](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -2063,11 +2810,19 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "coverageOrder": 1
     }
   ],
+  "emergencyContacts": [
+    {
+      "displayName": "Nombre de ejemplo",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
+      "relationshipDisplay": "valor-ejemplo",
+      "phone": "+59170000000"
+    }
+  ],
   "guardians": [
     {
       "displayName": "Nombre de ejemplo",
       "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
-      "isEmergencyContact": true,
+      "relationshipDisplay": "valor-ejemplo",
       "isLegalGuardian": true,
       "phone": "+59170000000"
     }
@@ -2146,10 +2901,15 @@ Campos de la respuesta:
 | `coverages[].benefits[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
-| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
+| `emergencyContacts` | Sí | `array<OwnEmergencyContactDto>` | Sin restricción adicional declarada | Contactos de emergencia activos. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","relationshipDisplay":"valor-ejemplo","phone":"+59170000000"}]` |
+| `emergencyContacts[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
+| `emergencyContacts[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `emergencyContacts[].relationshipDisplay` | Sí | `string` | Sin restricción adicional declarada | Parentesco en palabras | `valor-ejemplo` |
+| `emergencyContacts[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
+| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Representantes con apoderamiento activo, con su parentesco. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","relationshipDisplay":"valor-ejemplo","isLegalGuardian":true,"phone":"+59170000000"}]` |
 | `guardians[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
 | `guardians[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `guardians[].isEmergencyContact` | Sí | `boolean` | Sin restricción adicional declarada | Es a quien llamar en una urgencia | `true` |
+| `guardians[].relationshipDisplay` | Sí | `string` | Sin restricción adicional declarada | Parentesco en palabras | `valor-ejemplo` |
 | `guardians[].isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Es su representante legal | `true` |
 | `guardians[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
 
@@ -2161,8 +2921,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2180,14 +2940,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. PUT /profiles/patients/me/photo
+## 19. PUT /profiles/patients/me/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Fijar la propia foto de perfil
 - **Operation ID:** `ProfilesPatientsController_setOwnPhoto`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.setOwnPhoto](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.setOwnPhoto](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -2337,11 +3097,19 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "coverageOrder": 1
     }
   ],
+  "emergencyContacts": [
+    {
+      "displayName": "Nombre de ejemplo",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
+      "relationshipDisplay": "valor-ejemplo",
+      "phone": "+59170000000"
+    }
+  ],
   "guardians": [
     {
       "displayName": "Nombre de ejemplo",
       "relationshipConceptId": "00000000-0000-4000-8000-000000000001",
-      "isEmergencyContact": true,
+      "relationshipDisplay": "valor-ejemplo",
       "isLegalGuardian": true,
       "phone": "+59170000000"
     }
@@ -2420,10 +3188,15 @@ Campos de la respuesta:
 | `coverages[].benefits[].effectiveTo` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `coverages[].planId` | No | `string` | formato `uuid` | Plan de salud elegido | `00000000-0000-4000-8000-000000000001` |
 | `coverages[].coverageOrder` | Sí | `number` | Sin restricción adicional declarada | Orden de la cobertura: 1 privada, 2 pública | `1` |
-| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Tutores y personas autorizadas, con su teléfono. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","isEmergencyContact":true,"isLegalGuardian":true,"phone":"+59170000000"}]` |
+| `emergencyContacts` | Sí | `array<OwnEmergencyContactDto>` | Sin restricción adicional declarada | Contactos de emergencia activos. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","relationshipDisplay":"valor-ejemplo","phone":"+59170000000"}]` |
+| `emergencyContacts[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
+| `emergencyContacts[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `emergencyContacts[].relationshipDisplay` | Sí | `string` | Sin restricción adicional declarada | Parentesco en palabras | `valor-ejemplo` |
+| `emergencyContacts[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
+| `guardians` | Sí | `array<OwnGuardianDto>` | Sin restricción adicional declarada | Representantes con apoderamiento activo, con su parentesco. | `[{"displayName":"Nombre de ejemplo","relationshipConceptId":"00000000-0000-4000-8000-000000000001","relationshipDisplay":"valor-ejemplo","isLegalGuardian":true,"phone":"+59170000000"}]` |
 | `guardians[].displayName` | No | `string` | Sin restricción adicional declarada | Cómo se llama | `Nombre de ejemplo` |
 | `guardians[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `guardians[].isEmergencyContact` | Sí | `boolean` | Sin restricción adicional declarada | Es a quien llamar en una urgencia | `true` |
+| `guardians[].relationshipDisplay` | Sí | `string` | Sin restricción adicional declarada | Parentesco en palabras | `valor-ejemplo` |
 | `guardians[].isLegalGuardian` | Sí | `boolean` | Sin restricción adicional declarada | Es su representante legal | `true` |
 | `guardians[].phone` | No | `string` | Sin restricción adicional declarada | Su teléfono | `+59170000000` |
 
@@ -2436,15 +3209,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2462,14 +3229,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /profiles/patients/me/summary
+## 20. GET /profiles/patients/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Consultar el resumen propio
 - **Operation ID:** `ProfilesPatientsController_getOwnSummary`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.getOwnSummary](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.getOwnSummary](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -2558,8 +3325,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2577,14 +3344,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /profiles/patients/merge
+## 21. POST /profiles/patients/merge
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Fusionar pacientes duplicados
 - **Operation ID:** `ProfilesPatientsController_mergePatients`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.mergePatients](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.mergePatients](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -2693,11 +3460,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Paciente sobreviviente no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 404 | `NOT_FOUND` | Paciente a fusionar no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 409 | `CONFLICT` | El paciente ya fue fusionado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Paciente sobreviviente no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Paciente a fusionar no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 409 | `CONFLICT` | El paciente ya fue fusionado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | No se puede fusionar un paciente consigo mismo | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se puede fusionar un paciente consigo mismo | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2715,14 +3482,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /profiles/patients/merge-events
+## 22. GET /profiles/patients/merge-events
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Listar eventos de fusión de pacientes
 - **Operation ID:** `ProfilesPatientsController_listMergeEvents`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.listMergeEvents](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.listMergeEvents](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -2840,14 +3607,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /profiles/patients/merge/{eventId}/reverse
+## 23. POST /profiles/patients/merge/{eventId}/reverse
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Revertir una fusión de pacientes
 - **Operation ID:** `ProfilesPatientsController_reverseMerge`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.reverseMerge](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.reverseMerge](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -2953,10 +3720,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Evento de fusión no encontrado | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 409 | `CONFLICT` | La fusión ya fue revertida | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Evento de fusión no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 409 | `CONFLICT` | La fusión ya fue revertida | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Solo se puede revertir una fusión aprobada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | Solo se puede revertir una fusión aprobada | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2974,14 +3741,163 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /profiles/persons/{personId}/account-links
+## 24. POST /profiles/patients/search
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
+- **Operation ID:** `ProfilesPatientsController_searchPatientsByBody`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPatientsController.searchPatientsByBody](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
+
+### Descripción de negocio
+
+Igual que `GET /profiles/patients`, pero el nombre y el documento viajan en el cuerpo y no en la URL. `CLINICIAN` y `PRACTITIONER` deben aportar `q` o `nationalId`: sin ninguno responde 422.
+
+Contexto declarado en el controlador: UC-05-13: la misma búsqueda de pacientes, con los filtros en el **cuerpo**. `q` es el nombre de una persona y `nationalId` su documento: en la URL de una petición quedan en los logs de acceso de cualquier proxy, en el historial del navegador y en el `Referer`. Es el camino que usa el cliente; el `GET patients` sigue vivo con el mismo DTO, los mismos roles y la misma respuesta, y se conserva sólo por compatibilidad. Responde `200` y no `201`: no crea nada. Va declarada junto al `GET` y antes de cualquier `patients/:profileId` por lo de siempre con las rutas de Nest: se resuelven por orden de declaración. Los filtros son exactamente los del `GET` (`q`, `nationalId`, `issuerAdministrativeAreaConceptId`, `cursor`, `limit`). Una clave de más responde `400`: ignorar en silencio un filtro devolvería filas que el llamador cree haber descartado.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/patients/search` en `ProfilesPatientsController_searchPatientsByBody`. No se detectó una delegación adicional desde el controlador. Valida el body como `SearchPatientsQueryDto` y consume `application/json`. El tipo de retorno estático es `Promise<SearchPatientsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SearchPatientsQueryDto`; los campos opcionales se omiten.
+
+```http
+POST /profiles/patients/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPERADMIN`, `CLINICIAN`, `PRACTITIONER`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `q` | No | `string` | Sin restricción adicional declarada | Texto a buscar en el código de paciente o el nombre | `valor-ejemplo` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Documento de identidad exacto (`common.identifiers.value`) | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento que expidió el documento; sólo tiene efecto junto a nationalId | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | No | `number` | mínimo 1; máximo 500 | Sin descripción específica en el contrato OpenAPI. | `50` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /profiles/patients/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "q": "valor-ejemplo",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "cursor": "valor-ejemplo",
+  "limit": 50
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SearchPatientsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchPatientsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "personId": "00000000-0000-4000-8000-000000000001",
+      "patientCode": "CODIGO_EJEMPLO",
+      "displayName": "Nombre de ejemplo",
+      "birthDate": "2026-07-31",
+      "personStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "deceased": true
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PatientListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"profileId":"00000000-0000-4000-8000-000000000001","personId":"00000000-0000-4000-8000-000000000001","patientCode":"CODIGO_EJEMPLO","displayName":"Nombre de ejemplo","birthDate":"2026-07-31","personStatusConceptId":"00000000-0000-4000-8000-000000000001","deceased":true}]` |
+| `items[].profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientCode` | Sí | `string` | Sin restricción adicional declarada | Código único de paciente | `CODIGO_EJEMPLO` |
+| `items[].displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible de la persona | `Nombre de ejemplo` |
+| `items[].birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `items[].personStatusConceptId` | No | `string` | formato `uuid` | Concept id del estado de la persona | `00000000-0000-4000-8000-000000000001` |
+| `items[].deceased` | Sí | `boolean` | Sin restricción adicional declarada | Si la persona está registrada como fallecida. Es un booleano derivado y no un concepto: una lista de pacientes tiene que poder marcarlo sin resolver terminología | `true` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope de resultados aplicado | `1` |
+| `nextCursor` | No | `object` | admite null | Cursor opaco para la página siguiente; `null` cuando no hay más | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/search"
+}
+```
+
+---
+
+## 25. POST /profiles/persons/{personId}/account-links
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Vincular cuenta de portal a una persona
 - **Operation ID:** `ProfilesPatientsController_linkAccount`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.linkAccount](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.linkAccount](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -3089,9 +4005,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Persona no encontrada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Persona no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La persona no está activa | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 422 | `PRECONDITION_FAILED` | La persona no está activa | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3109,14 +4025,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /profiles/persons/{personId}/decease
+## 26. POST /profiles/persons/{personId}/decease
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
 - **Nombre:** Registrar defunción y anonimización de una persona
 - **Operation ID:** `ProfilesPatientsController_decease`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPatientsController.decease](../../src/modules/profiles/controllers/profiles-patients.controller.ts)
+- **Implementación:** [ProfilesPatientsController.decease](../../src/modules/profiles/presentation/controllers/profiles-patients.controller.ts)
 
 ### Descripción de negocio
 
@@ -3224,8 +4140,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Persona no encontrada | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
-| 409 | `CONFLICT` | La persona ya está registrada como fallecida | Excepción explícita en src/modules/profiles/services/profiles-patients.service.ts |
+| 404 | `NOT_FOUND` | Persona no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
+| 409 | `CONFLICT` | La persona ya está registrada como fallecida | Excepción explícita en src/modules/profiles/application/services/profiles-patients.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3244,14 +4160,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /profiles/practitioners
+## 27. GET /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Listar profesionales para la guía, con sus especialidades
 - **Operation ID:** `ProfilesPractitionersController_listPractitioners`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.listPractitioners](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.listPractitioners](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -3391,14 +4307,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /profiles/practitioners
+## 28. POST /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Alta de profesional de salud (workforce generalista)
 - **Operation ID:** `ProfilesPractitionersController_onboardPractitioner`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.onboardPractitioner](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.onboardPractitioner](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -3540,12 +4456,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Persona no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | Persona no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3563,14 +4479,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /profiles/practitioners/{profileId}/affiliations
+## 29. POST /profiles/practitioners/{profileId}/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Registrar un consultorio de un profesional sin cuenta
 - **Operation ID:** `ProfilesPractitionersController_addAffiliationFor`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.addAffiliationFor](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.addAffiliationFor](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -3580,7 +4496,7 @@ Contexto declarado en el controlador: Un consultorio de OTRO profesional — las
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /profiles/practitioners/{profileId}/affiliations` en `ProfilesPractitionersController_addAffiliationFor`. El controlador delega en `ProfilesPractitionersService.addAffiliationFor`. Valida el body como `CreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
+NestJS resuelve `POST /profiles/practitioners/{profileId}/affiliations` en `ProfilesPractitionersController_addAffiliationFor`. El controlador delega en `ProfilesPractitionersService.addAffiliationFor`. Valida el body como `ProfilesCreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
 
 ### Parámetros
 
@@ -3590,7 +4506,7 @@ NestJS resuelve `POST /profiles/practitioners/{profileId}/affiliations` en `Prof
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAffiliationDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `ProfilesCreateAffiliationDto`; los campos opcionales se omiten.
 
 ```http
 POST /profiles/practitioners/00000000-0000-4000-8000-000000000001/affiliations HTTP/1.1
@@ -3599,8 +4515,8 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001"
+  "organizationName": "Hospital Obrero N.º 1",
+  "startDate": "2026-07-31"
 }
 ```
 
@@ -3615,15 +4531,13 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `primaryTenantId` | Sí | `string` | formato `uuid` | Tenant primario (organizador) | `00000000-0000-4000-8000-000000000001` |
-| `participatingTenantId` | Sí | `string` | formato `uuid` | Tenant participante | `00000000-0000-4000-8000-000000000001` |
-| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de afiliación (concepto) | `00000000-0000-4000-8000-000000000001` |
-| `hostPracticeSiteId` | No | `string` | formato `uuid` | Sitio de práctica anfitrión | `00000000-0000-4000-8000-000000000001` |
-| `healthcareServiceId` | No | `string` | formato `uuid` | Servicio de salud implicado | `00000000-0000-4000-8000-000000000001` |
-| `contractReference` | No | `string` | longitud máxima 200 | Referencia de contrato | `valor-ejemplo` |
-| `dataUseAgreementId` | No | `string` | formato `uuid` | Acuerdo de uso de datos (DUA) firmado | `00000000-0000-4000-8000-000000000001` |
-| `validFrom` | No | `string` | Sin restricción adicional declarada | Vigente desde (ISO date-time) | `valor-ejemplo` |
-| `validTo` | No | `string` | Sin restricción adicional declarada | Vigente hasta (ISO date-time) | `valor-ejemplo` |
+| `organizationName` | Sí | `string` | Sin restricción adicional declarada | Hospital o entidad médica, tal como la declara el profesional | `Hospital Obrero N.º 1` |
+| `roleTitle` | No | `string` | Sin restricción adicional declarada | Cargo ejercido, cuando aplica | `Médico de planta` |
+| `practiceSiteId` | No | `string` | formato `uuid` | Sede de la plataforma (`practice.practice_sites`) cuando la institución está dentro. Se omite para instituciones externas | `00000000-0000-4000-8000-000000000001` |
+| `healthFacilityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de vínculo laboral (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `endDate` | No | `string` | formato `date` | Fin del vínculo. Se omite si sigue ejerciendo ahí | `2026-07-31` |
 
 ### Payload completo de ejemplo
 
@@ -3636,15 +4550,13 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "Hospital Obrero N.º 1",
+  "roleTitle": "Médico de planta",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "healthFacilityConceptId": "00000000-0000-4000-8000-000000000001",
   "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
-  "hostPracticeSiteId": "00000000-0000-4000-8000-000000000001",
-  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
-  "contractReference": "valor-ejemplo",
-  "dataUseAgreementId": "00000000-0000-4000-8000-000000000001",
-  "validFrom": "valor-ejemplo",
-  "validTo": "valor-ejemplo"
+  "startDate": "2026-07-31",
+  "endDate": "2026-07-31"
 }
 ```
 
@@ -3672,6 +4584,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "organizationName": "Nombre de ejemplo",
   "roleTitle": {},
   "practiceSiteId": {},
+  "healthFacilityConceptId": {},
   "affiliationTypeConceptId": {},
   "startDate": "2026-07-31",
   "endDate": "2026-07-31",
@@ -3692,6 +4605,7 @@ Campos de la respuesta:
 | `organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
@@ -3710,13 +4624,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 404 | `NOT_FOUND` | La sede indicada no existe | Excepción explícita en src/modules/profiles/services/profiles-affiliations.service.ts |
-| 409 | `CONFLICT` | Ese vínculo ya está en el historial laboral | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 409 | `CONFLICT` | Ya pediste vincularte a esa sede | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | La sede indicada no existe | Excepción explícita en src/modules/profiles/application/services/profiles-affiliations.service.ts |
+| 409 | `CONFLICT` | Ese vínculo ya está en el historial laboral | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | Ese vínculo con el establecimiento ya está en el historial laboral | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | Ya pidió vincularse a esa sede | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El fin del vínculo no puede ser anterior a su inicio | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | El fin del vínculo no puede ser anterior a su inicio | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | El padrón de establecimientos no está disponible | Excepción explícita en src/modules/profiles/application/services/health-facility-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El establecimiento no pertenece al padrón oficial de establecimientos de salud | Excepción explícita en src/modules/profiles/application/services/health-facility-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3734,14 +4651,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 30. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Registrar/renovar autorización jurisdiccional (licencia)
 - **Operation ID:** `ProfilesPractitionersController_addJurisdictionAuthorization`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.addJurisdictionAuthorization](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.addJurisdictionAuthorization](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -3860,15 +4777,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3886,14 +4797,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. DELETE /profiles/practitioners/{profileId}/photo
+## 31. DELETE /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Quitar la foto del perfil profesional
 - **Operation ID:** `ProfilesPractitionersController_removePractitionerPhoto`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.removePractitionerPhoto](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.removePractitionerPhoto](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -3958,6 +4869,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
   "profileId": "00000000-0000-4000-8000-000000000001",
   "personId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
@@ -3977,6 +4891,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "lastName": "Nombre de ejemplo",
   "motherLastName": "Nombre de ejemplo",
   "birthDate": "2026-07-31",
+  "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
@@ -4024,6 +4939,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "number": "valor-ejemplo",
       "fileId": "00000000-0000-4000-8000-000000000001",
       "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
       "issueDate": "2026-07-31T12:00:00.000Z",
       "expiryDate": "2026-07-31T12:00:00.000Z",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
@@ -4039,7 +4958,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "regulatoryAuthority": "valor-ejemplo",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
       "validFrom": "2026-07-31T12:00:00.000Z",
-      "validTo": "2026-07-31T12:00:00.000Z"
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ],
   "languages": [
@@ -4056,6 +4976,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "organizationName": "Nombre de ejemplo",
       "roleTitle": {},
       "practiceSiteId": {},
+      "healthFacilityConceptId": {},
       "affiliationTypeConceptId": {},
       "startDate": "2026-07-31",
       "endDate": "2026-07-31",
@@ -4080,6 +5001,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -4099,6 +5021,7 @@ Campos de la respuesta:
 | `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
@@ -4134,18 +5057,22 @@ Campos de la respuesta:
 | `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `specialties[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
 | `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia; permite descargar el diploma adjunto | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].issueDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].verifiedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].verificationSourceUri` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].licenseNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -4153,16 +5080,18 @@ Campos de la respuesta:
 | `licenses[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `licenses[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `licenses[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `languages` | Sí | `array<PractitionerLanguageDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"healthFacilityConceptId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `affiliations[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `affiliations[].roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `affiliations[].endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
@@ -4187,9 +5116,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4207,14 +5136,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. PUT /profiles/practitioners/{profileId}/photo
+## 32. PUT /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Fijar la foto del perfil profesional
 - **Operation ID:** `ProfilesPractitionersController_setPractitionerPhoto`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.setPractitionerPhoto](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.setPractitionerPhoto](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -4293,6 +5222,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
   "profileId": "00000000-0000-4000-8000-000000000001",
   "personId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
@@ -4312,6 +5244,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "lastName": "Nombre de ejemplo",
   "motherLastName": "Nombre de ejemplo",
   "birthDate": "2026-07-31",
+  "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
@@ -4359,6 +5292,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "number": "valor-ejemplo",
       "fileId": "00000000-0000-4000-8000-000000000001",
       "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
       "issueDate": "2026-07-31T12:00:00.000Z",
       "expiryDate": "2026-07-31T12:00:00.000Z",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
@@ -4374,7 +5311,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "regulatoryAuthority": "valor-ejemplo",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
       "validFrom": "2026-07-31T12:00:00.000Z",
-      "validTo": "2026-07-31T12:00:00.000Z"
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ],
   "languages": [
@@ -4391,6 +5329,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "organizationName": "Nombre de ejemplo",
       "roleTitle": {},
       "practiceSiteId": {},
+      "healthFacilityConceptId": {},
       "affiliationTypeConceptId": {},
       "startDate": "2026-07-31",
       "endDate": "2026-07-31",
@@ -4415,6 +5354,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -4434,6 +5374,7 @@ Campos de la respuesta:
 | `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
@@ -4469,18 +5410,22 @@ Campos de la respuesta:
 | `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `specialties[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
 | `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia; permite descargar el diploma adjunto | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].issueDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].verifiedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].verificationSourceUri` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].licenseNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -4488,16 +5433,18 @@ Campos de la respuesta:
 | `licenses[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `licenses[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `licenses[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `languages` | Sí | `array<PractitionerLanguageDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"healthFacilityConceptId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `affiliations[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `affiliations[].roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `affiliations[].endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
@@ -4522,16 +5469,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4549,14 +5490,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /profiles/practitioners/{profileId}/specialties
+## 33. POST /profiles/practitioners/{profileId}/specialties
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Agregar especialidad con credencial de soporte
 - **Operation ID:** `ProfilesPractitionersController_addSpecialty`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.addSpecialty](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.addSpecialty](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -4667,16 +5608,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 409 | `CONFLICT` | El profesional ya tiene esa especialidad activa | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | El profesional ya tiene esa especialidad activa | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La credencial de soporte no pertenece al profesional | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | La credencial de soporte no está verificada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Falta indicar la especialidad | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | La credencial de soporte no pertenece al profesional | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | La credencial de soporte no está verificada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Falta indicar la especialidad | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4694,14 +5635,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /profiles/practitioners/{profileId}/summary
+## 34. GET /profiles/practitioners/{profileId}/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Consultar el perfil profesional de un colega (ficha de la guía)
 - **Operation ID:** `ProfilesPractitionersController_getPractitionerSummary`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.getPractitionerSummary](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.getPractitionerSummary](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -4764,6 +5705,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
   "profileId": "00000000-0000-4000-8000-000000000001",
   "personId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
@@ -4783,6 +5727,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "lastName": "Nombre de ejemplo",
   "motherLastName": "Nombre de ejemplo",
   "birthDate": "2026-07-31",
+  "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
@@ -4830,6 +5775,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "number": "valor-ejemplo",
       "fileId": "00000000-0000-4000-8000-000000000001",
       "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
       "issueDate": "2026-07-31T12:00:00.000Z",
       "expiryDate": "2026-07-31T12:00:00.000Z",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
@@ -4845,7 +5794,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "regulatoryAuthority": "valor-ejemplo",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
       "validFrom": "2026-07-31T12:00:00.000Z",
-      "validTo": "2026-07-31T12:00:00.000Z"
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ],
   "languages": [
@@ -4862,6 +5812,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "organizationName": "Nombre de ejemplo",
       "roleTitle": {},
       "practiceSiteId": {},
+      "healthFacilityConceptId": {},
       "affiliationTypeConceptId": {},
       "startDate": "2026-07-31",
       "endDate": "2026-07-31",
@@ -4886,6 +5837,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -4905,6 +5857,7 @@ Campos de la respuesta:
 | `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
@@ -4940,18 +5893,22 @@ Campos de la respuesta:
 | `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `specialties[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
 | `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia; permite descargar el diploma adjunto | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].issueDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].verifiedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].verificationSourceUri` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].licenseNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -4959,16 +5916,18 @@ Campos de la respuesta:
 | `licenses[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `licenses[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `licenses[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `languages` | Sí | `array<PractitionerLanguageDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"healthFacilityConceptId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `affiliations[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `affiliations[].roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `affiliations[].endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
@@ -4993,7 +5952,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5011,14 +5970,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. PATCH /profiles/practitioners/me
+## 35. PATCH /profiles/practitioners/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Editar la presentación del propio perfil profesional
 - **Operation ID:** `ProfilesPractitionersController_updateOwnPractitionerProfile`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.updateOwnPractitionerProfile](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.updateOwnPractitionerProfile](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -5065,12 +6024,14 @@ Content-Type: application/json
 | `lastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `birthDate` | No | `object` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
-| `phone` | No | `string` | longitud máxima 40; patrón runtime `PATRON_TELEFONO` | Forma anterior de declarar el teléfono. Preferí workMobilePhone. | `+59170000000` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `phone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Forma anterior de declarar el teléfono. Preferí workMobilePhone. | `+59170000000` |
 | `workEmail` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
 | `personalEmail` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
-| `mobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PATRON_TELEFONO` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
-| `workMobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PATRON_TELEFONO` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
-| `workLandline` | No | `string` | longitud máxima 40; patrón runtime `PATRON_TELEFONO` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `mobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `workMobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `workLandline` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | longitud máxima 20 | NIT para facturación. Cadena vacía para quedarse sin NIT. | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | longitud máxima 200 | Nombre o razón social del titular del NIT. Cadena vacía para quitarla. | `Nombre de ejemplo` |
@@ -5084,6 +6045,10 @@ Content-Type: application/json
 | `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla. | `valor-ejemplo` |
 | `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
 | `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `valor-ejemplo` |
+| `languages` | No | `array<PractitionerLanguageInputDto>` | máximo 20 elemento(s) | Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
+| `languages[].languageConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].clinicalInterpretationAllowed` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 
 ### Payload completo de ejemplo
 
@@ -5105,6 +6070,8 @@ Content-Type: application/json
   "lastName": "Nombre de ejemplo",
   "motherLastName": "Nombre de ejemplo",
   "birthDate": {},
+  "sexAtBirth": "MALE",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "phone": "+59170000000",
   "workEmail": "usuario@example.com",
   "personalEmail": "usuario@example.com",
@@ -5123,7 +6090,14 @@ Content-Type: application/json
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
   "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
-  "workEmployerFreeText": "valor-ejemplo"
+  "workEmployerFreeText": "valor-ejemplo",
+  "languages": [
+    {
+      "languageConceptId": "00000000-0000-4000-8000-000000000001",
+      "proficiencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "clinicalInterpretationAllowed": true
+    }
+  ]
 }
 ```
 
@@ -5145,6 +6119,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
   "profileId": "00000000-0000-4000-8000-000000000001",
   "personId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
@@ -5164,6 +6141,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "lastName": "Nombre de ejemplo",
   "motherLastName": "Nombre de ejemplo",
   "birthDate": "2026-07-31",
+  "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
@@ -5211,6 +6189,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "number": "valor-ejemplo",
       "fileId": "00000000-0000-4000-8000-000000000001",
       "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
       "issueDate": "2026-07-31T12:00:00.000Z",
       "expiryDate": "2026-07-31T12:00:00.000Z",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
@@ -5226,7 +6208,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "regulatoryAuthority": "valor-ejemplo",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
       "validFrom": "2026-07-31T12:00:00.000Z",
-      "validTo": "2026-07-31T12:00:00.000Z"
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ],
   "languages": [
@@ -5243,6 +6226,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "organizationName": "Nombre de ejemplo",
       "roleTitle": {},
       "practiceSiteId": {},
+      "healthFacilityConceptId": {},
       "affiliationTypeConceptId": {},
       "startDate": "2026-07-31",
       "endDate": "2026-07-31",
@@ -5267,6 +6251,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -5286,6 +6271,7 @@ Campos de la respuesta:
 | `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
@@ -5321,18 +6307,22 @@ Campos de la respuesta:
 | `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `specialties[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
 | `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia; permite descargar el diploma adjunto | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].issueDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].verifiedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].verificationSourceUri` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].licenseNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -5340,16 +6330,18 @@ Campos de la respuesta:
 | `licenses[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `licenses[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `licenses[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `languages` | Sí | `array<PractitionerLanguageDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"healthFacilityConceptId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `affiliations[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `affiliations[].roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `affiliations[].endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
@@ -5374,9 +6366,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un idioma no puede declararse dos veces | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5394,14 +6389,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /profiles/practitioners/me/affiliations
+## 36. GET /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Historial laboral propio (instituciones donde trabajó)
 - **Operation ID:** `ProfilesPractitionersController_listOwnAffiliations`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.listOwnAffiliations](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.listOwnAffiliations](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -5467,6 +6462,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "organizationName": "Nombre de ejemplo",
       "roleTitle": {},
       "practiceSiteId": {},
+      "healthFacilityConceptId": {},
       "affiliationTypeConceptId": {},
       "startDate": "2026-07-31",
       "endDate": "2026-07-31",
@@ -5485,12 +6481,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Las afiliaciones, de la más reciente a la más antigua. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Las afiliaciones, de la más reciente a la más antigua. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"healthFacilityConceptId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `items[].roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `items[].practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `items[].affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `items[].startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `items[].endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
@@ -5509,7 +6506,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5527,14 +6524,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /profiles/practitioners/me/affiliations
+## 37. POST /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Registrar una afiliación institucional en el historial propio
 - **Operation ID:** `ProfilesPractitionersController_addOwnAffiliation`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.addOwnAffiliation](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.addOwnAffiliation](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -5543,7 +6540,7 @@ El sujeto sale de la sesión: no hay forma de escribir el historial de otro.
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /profiles/practitioners/me/affiliations` en `ProfilesPractitionersController_addOwnAffiliation`. El controlador delega en `ProfilesPractitionersService.addOwnAffiliation`. Valida el body como `CreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
+NestJS resuelve `POST /profiles/practitioners/me/affiliations` en `ProfilesPractitionersController_addOwnAffiliation`. El controlador delega en `ProfilesPractitionersService.addOwnAffiliation`. Valida el body como `ProfilesCreateAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationResponseDto>`.
 
 ### Parámetros
 
@@ -5551,7 +6548,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAffiliationDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `ProfilesCreateAffiliationDto`; los campos opcionales se omiten.
 
 ```http
 POST /profiles/practitioners/me/affiliations HTTP/1.1
@@ -5560,8 +6557,8 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001"
+  "organizationName": "Hospital Obrero N.º 1",
+  "startDate": "2026-07-31"
 }
 ```
 
@@ -5574,15 +6571,13 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `primaryTenantId` | Sí | `string` | formato `uuid` | Tenant primario (organizador) | `00000000-0000-4000-8000-000000000001` |
-| `participatingTenantId` | Sí | `string` | formato `uuid` | Tenant participante | `00000000-0000-4000-8000-000000000001` |
-| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de afiliación (concepto) | `00000000-0000-4000-8000-000000000001` |
-| `hostPracticeSiteId` | No | `string` | formato `uuid` | Sitio de práctica anfitrión | `00000000-0000-4000-8000-000000000001` |
-| `healthcareServiceId` | No | `string` | formato `uuid` | Servicio de salud implicado | `00000000-0000-4000-8000-000000000001` |
-| `contractReference` | No | `string` | longitud máxima 200 | Referencia de contrato | `valor-ejemplo` |
-| `dataUseAgreementId` | No | `string` | formato `uuid` | Acuerdo de uso de datos (DUA) firmado | `00000000-0000-4000-8000-000000000001` |
-| `validFrom` | No | `string` | Sin restricción adicional declarada | Vigente desde (ISO date-time) | `valor-ejemplo` |
-| `validTo` | No | `string` | Sin restricción adicional declarada | Vigente hasta (ISO date-time) | `valor-ejemplo` |
+| `organizationName` | Sí | `string` | Sin restricción adicional declarada | Hospital o entidad médica, tal como la declara el profesional | `Hospital Obrero N.º 1` |
+| `roleTitle` | No | `string` | Sin restricción adicional declarada | Cargo ejercido, cuando aplica | `Médico de planta` |
+| `practiceSiteId` | No | `string` | formato `uuid` | Sede de la plataforma (`practice.practice_sites`) cuando la institución está dentro. Se omite para instituciones externas | `00000000-0000-4000-8000-000000000001` |
+| `healthFacilityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliationTypeConceptId` | No | `string` | formato `uuid` | Tipo de vínculo laboral (concept id) | `00000000-0000-4000-8000-000000000001` |
+| `startDate` | Sí | `string` | formato `date` | Inicio del vínculo | `2026-07-31` |
+| `endDate` | No | `string` | formato `date` | Fin del vínculo. Se omite si sigue ejerciendo ahí | `2026-07-31` |
 
 ### Payload completo de ejemplo
 
@@ -5595,15 +6590,13 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "primaryTenantId": "00000000-0000-4000-8000-000000000001",
-  "participatingTenantId": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "Hospital Obrero N.º 1",
+  "roleTitle": "Médico de planta",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "healthFacilityConceptId": "00000000-0000-4000-8000-000000000001",
   "affiliationTypeConceptId": "00000000-0000-4000-8000-000000000001",
-  "hostPracticeSiteId": "00000000-0000-4000-8000-000000000001",
-  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
-  "contractReference": "valor-ejemplo",
-  "dataUseAgreementId": "00000000-0000-4000-8000-000000000001",
-  "validFrom": "valor-ejemplo",
-  "validTo": "valor-ejemplo"
+  "startDate": "2026-07-31",
+  "endDate": "2026-07-31"
 }
 ```
 
@@ -5630,6 +6623,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "organizationName": "Nombre de ejemplo",
   "roleTitle": {},
   "practiceSiteId": {},
+  "healthFacilityConceptId": {},
   "affiliationTypeConceptId": {},
   "startDate": "2026-07-31",
   "endDate": "2026-07-31",
@@ -5650,6 +6644,7 @@ Campos de la respuesta:
 | `organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
@@ -5668,13 +6663,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 404 | `NOT_FOUND` | La sede indicada no existe | Excepción explícita en src/modules/profiles/services/profiles-affiliations.service.ts |
-| 409 | `CONFLICT` | Ese vínculo ya está en el historial laboral | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 409 | `CONFLICT` | Ya pediste vincularte a esa sede | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | La sede indicada no existe | Excepción explícita en src/modules/profiles/application/services/profiles-affiliations.service.ts |
+| 409 | `CONFLICT` | Ese vínculo ya está en el historial laboral | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | Ese vínculo con el establecimiento ya está en el historial laboral | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | Ya pidió vincularse a esa sede | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El fin del vínculo no puede ser anterior a su inicio | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | El fin del vínculo no puede ser anterior a su inicio | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | El padrón de establecimientos no está disponible | Excepción explícita en src/modules/profiles/application/services/health-facility-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El establecimiento no pertenece al padrón oficial de establecimientos de salud | Excepción explícita en src/modules/profiles/application/services/health-facility-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5692,14 +6690,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+## 38. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Quitar una afiliación del historial laboral propio
 - **Operation ID:** `ProfilesPractitionersController_removeOwnAffiliation`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.removeOwnAffiliation](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.removeOwnAffiliation](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -5771,8 +6769,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Afiliación no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Afiliación no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5790,14 +6788,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+## 39. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Corregir una afiliación del historial laboral propio
 - **Operation ID:** `ProfilesPractitionersController_updateOwnAffiliation`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.updateOwnAffiliation](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.updateOwnAffiliation](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -5887,6 +6885,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "organizationName": "Nombre de ejemplo",
   "roleTitle": {},
   "practiceSiteId": {},
+  "healthFacilityConceptId": {},
   "affiliationTypeConceptId": {},
   "startDate": "2026-07-31",
   "endDate": "2026-07-31",
@@ -5907,6 +6906,7 @@ Campos de la respuesta:
 | `organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
@@ -5925,11 +6925,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Afiliación no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 409 | `CONFLICT` | Ese vínculo ya está en el historial laboral | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Afiliación no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | Ese vínculo ya está en el historial laboral | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El fin del vínculo no puede ser anterior a su inicio | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | El fin del vínculo no puede ser anterior a su inicio | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5947,14 +6947,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /profiles/practitioners/me/credentials
+## 40. POST /profiles/practitioners/me/credentials
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Agregar un título propio (diplomado, maestría, doctorado…)
 - **Operation ID:** `ProfilesPractitionersController_addOwnCredential`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.addOwnCredential](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.addOwnCredential](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -5998,6 +6998,10 @@ Content-Type: application/json
 | `credentialTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
 | `number` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issuingCityText` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issuingCountryText` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `professionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `titleText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `issueDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `fileId` | No | `string` | formato `uuid` | Archivo del diploma (debe haberlo subido el mismo usuario) | `00000000-0000-4000-8000-000000000001` |
 
@@ -6015,6 +7019,10 @@ Content-Type: application/json
   "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "number": "valor-ejemplo",
   "issuingInstitutionText": "valor-ejemplo",
+  "issuingCityText": "valor-ejemplo",
+  "issuingCountryText": "BO",
+  "professionConceptId": "00000000-0000-4000-8000-000000000001",
+  "titleText": "valor-ejemplo",
   "issueDate": "2026-07-31",
   "fileId": "00000000-0000-4000-8000-000000000001"
 }
@@ -6042,6 +7050,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "number": "valor-ejemplo",
   "issuingInstitutionText": "valor-ejemplo",
+  "issuingCityText": "valor-ejemplo",
+  "issuingCountryText": "BO",
+  "professionConceptId": "00000000-0000-4000-8000-000000000001",
+  "titleText": "valor-ejemplo",
   "issueDate": "2026-07-31",
   "stateConceptId": "00000000-0000-4000-8000-000000000001",
   "fileId": "00000000-0000-4000-8000-000000000001",
@@ -6057,6 +7069,10 @@ Campos de la respuesta:
 | `credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `number` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issuingCityText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issuingCountryText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `professionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `titleText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `issueDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `stateConceptId` | Sí | `string` | formato `uuid` | `CRED_PENDING` recién creada: declararla no es haberla verificado. | `00000000-0000-4000-8000-000000000001` |
 | `fileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -6071,15 +7087,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6097,14 +7107,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. DELETE /profiles/practitioners/me/credentials/{credentialId}
+## 41. DELETE /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Retirar un título propio pendiente
 - **Operation ID:** `ProfilesPractitionersController_removeOwnCredential`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.removeOwnCredential](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.removeOwnCredential](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -6176,9 +7186,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Título no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ese título ya fue verificado o rechazado; no se puede retirar | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Título no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese título ya fue verificado o rechazado; no se puede retirar | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6196,14 +7206,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. PATCH /profiles/practitioners/me/credentials/{credentialId}
+## 42. PATCH /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Editar un título propio pendiente de verificación
 - **Operation ID:** `ProfilesPractitionersController_updateOwnCredential`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.updateOwnCredential](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.updateOwnCredential](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -6247,6 +7257,10 @@ Content-Type: application/json
 | `credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id de tipo de credencial profesional | `00000000-0000-4000-8000-000000000001` |
 | `number` | No | `string` | longitud máxima 100; patrón `\S`; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issuingCityText` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `issuingCountryText` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `professionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `titleText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `issueDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `fileId` | No | `string` | formato `uuid` | Archivo del diploma (debe haberlo subido el mismo usuario) | `00000000-0000-4000-8000-000000000001` |
 
@@ -6264,6 +7278,10 @@ Content-Type: application/json
   "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "number": "valor-ejemplo",
   "issuingInstitutionText": "valor-ejemplo",
+  "issuingCityText": "valor-ejemplo",
+  "issuingCountryText": "BO",
+  "professionConceptId": "00000000-0000-4000-8000-000000000001",
+  "titleText": "valor-ejemplo",
   "issueDate": "2026-07-31",
   "fileId": "00000000-0000-4000-8000-000000000001"
 }
@@ -6295,17 +7313,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 404 | `NOT_FOUND` | Título no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Título no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Ese título ya fue verificado o rechazado; no se puede editar | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese título ya fue verificado o rechazado; no se puede editar | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6323,14 +7335,234 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /profiles/practitioners/me/linkable-organizations
+## 43. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Retirar una matrícula propia pendiente de verificación
+- **Operation ID:** `ProfilesPractitionersController_removeOwnLicense`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.removeOwnLicense](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+`404` si no existe o es ajena. `422` si no está pendiente, tiene una verificación en curso o ya tiene historial de auditoría.
+
+Contexto declarado en el controlador: Retirar una matrícula propia pendiente; con historial de auditoría, 422.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` en `ProfilesPractitionersController_removeOwnLicense`. El controlador delega en `ProfilesPractitionersService.removeOwnLicense`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `licenseId` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /profiles/practitioners/me/jurisdiction-authorizations/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `licenseId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /profiles/practitioners/me/jurisdiction-authorizations/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Matrícula no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula ya tiene historial de auditoría; no se puede borrar | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula ya no está pendiente; no se puede ${verb} | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula tiene una verificación en curso; no se puede ${verb} | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}"
+}
+```
+
+---
+
+## 44. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Corregir una matrícula propia pendiente de verificación
+- **Operation ID:** `ProfilesPractitionersController_updateOwnLicense`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.updateOwnLicense](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+`404` si no existe o es ajena. `422` si no está pendiente o tiene una verificación en curso.
+
+Contexto declarado en el controlador: Corregir una matrícula propia pendiente y sin verificación en curso.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` en `ProfilesPractitionersController_updateOwnLicense`. El controlador delega en `ProfilesPractitionersService.updateOwnLicense`. Valida el body como `UpdateOwnLicenseDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `licenseId` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateOwnLicenseDto`; los campos opcionales se omiten.
+
+```http
+PATCH /profiles/practitioners/me/jurisdiction-authorizations/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `licenseId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `licenseNumber` | No | `string` | longitud máxima 100; patrón `\S`; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `regulatoryAuthority` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validFrom` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `fileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /profiles/practitioners/me/jurisdiction-authorizations/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "licenseNumber": "valor-ejemplo",
+  "regulatoryAuthority": "valor-ejemplo",
+  "validFrom": "2026-07-31",
+  "fileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 413 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Matrícula no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula ya no está pendiente; no se puede ${verb} | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa matrícula tiene una verificación en curso; no se puede ${verb} | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}"
+}
+```
+
+---
+
+## 45. GET /profiles/practitioners/me/linkable-organizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Buscar instituciones del padrón para declarar una afiliación
 - **Operation ID:** `ProfilesPractitionersController_searchLinkableOrganizations`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.searchLinkableOrganizations](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.searchLinkableOrganizations](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -6340,7 +7572,7 @@ Contexto declarado en el controlador: El buscador de instituciones para declarar
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /profiles/practitioners/me/linkable-organizations` en `ProfilesPractitionersController_searchLinkableOrganizations`. El controlador delega en `LinkableOrganizationsService.buscar`. No recibe body. El tipo de retorno estático es `Promise<ListLinkableOrganizationsResponseDto>`.
+NestJS resuelve `GET /profiles/practitioners/me/linkable-organizations` en `ProfilesPractitionersController_searchLinkableOrganizations`. El controlador delega en `LinkableOrganizationsService.search`. No recibe body. El tipo de retorno estático es `Promise<ListLinkableOrganizationsResponseDto>`.
 
 ### Parámetros
 
@@ -6448,14 +7680,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /profiles/practitioners/me/onboarding
+## 46. GET /profiles/practitioners/me/onboarding
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Qué le falta al profesional para completar su alta
 - **Operation ID:** `ProfilesPractitionersController_getOwnOnboarding`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.getOwnOnboarding](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.getOwnOnboarding](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -6547,8 +7779,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil profesional | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil profesional | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6566,14 +7798,457 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+## 47. GET /profiles/practitioners/me/signature-assets
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Consultar las imágenes de firma y sello propias
+- **Operation ID:** `PractitionerSignatureAssetsController_getOwn`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSignatureAssetsController.getOwn](../../src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts)
+
+### Descripción de negocio
+
+Consultar las imágenes de firma y sello propias. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/practitioners/me/signature-assets` en `PractitionerSignatureAssetsController_getOwn`. El controlador delega en `PractitionerSignatureAssetsService.getOwn`. No recibe body. El tipo de retorno estático es `Promise<PractitionerSignatureAssetsDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/practitioners/me/signature-assets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/practitioners/me/signature-assets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSignatureAssetsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "signatureFileId": {},
+  "sealFileId": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `signatureFileId` | Sí | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sealFileId` | Sí | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/practitioner-signature-assets.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/signature-assets"
+}
+```
+
+---
+
+## 48. PUT /profiles/practitioners/me/signature-assets
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Guardar o quitar las imágenes de firma y sello propias
+- **Operation ID:** `PractitionerSignatureAssetsController_setOwn`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSignatureAssetsController.setOwn](../../src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts)
+
+### Descripción de negocio
+
+Guardar o quitar las imágenes de firma y sello propias. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /profiles/practitioners/me/signature-assets` en `PractitionerSignatureAssetsController_setOwn`. El controlador delega en `PractitionerSignatureAssetsService.setOwn`. Valida el body como `SetPractitionerSignatureAssetsDto` y consume `application/json`. El tipo de retorno estático es `Promise<PractitionerSignatureAssetsDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SetPractitionerSignatureAssetsDto`; los campos opcionales se omiten.
+
+```http
+PUT /profiles/practitioners/me/signature-assets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `signatureFileId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sealFileId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /profiles/practitioners/me/signature-assets HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "signatureFileId": {},
+  "sealFileId": {}
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PractitionerSignatureAssetsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSignatureAssetsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "signatureFileId": {},
+  "sealFileId": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `signatureFileId` | Sí | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sealFileId` | Sí | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/practitioner-signature-assets.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La imagen supera el límite de 2 MB | Excepción explícita en src/modules/profiles/application/services/practitioner-signature-assets.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/signature-assets"
+}
+```
+
+---
+
+## 49. DELETE /profiles/practitioners/me/specialties/{specialtyId}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Retirar una especialidad propia pendiente de verificación
+- **Operation ID:** `ProfilesPractitionersController_removeOwnSpecialty`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.removeOwnSpecialty](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+`404` si no existe o es ajena. `422` si ya no está pendiente.
+
+Contexto declarado en el controlador: Retirar una especialidad propia pendiente; no promueve otra como principal.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /profiles/practitioners/me/specialties/{specialtyId}` en `ProfilesPractitionersController_removeOwnSpecialty`. El controlador delega en `ProfilesPractitionersService.removeOwnSpecialty`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `specialtyId` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /profiles/practitioners/me/specialties/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `specialtyId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /profiles/practitioners/me/specialties/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Especialidad no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa especialidad ya no está pendiente de verificación; no se puede ${verb} | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/specialties/{specialtyId}"
+}
+```
+
+---
+
+## 50. PATCH /profiles/practitioners/me/specialties/{specialtyId}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Corregir una especialidad propia pendiente de verificación
+- **Operation ID:** `ProfilesPractitionersController_updateOwnSpecialty`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.updateOwnSpecialty](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+`404` si no existe o es ajena. `422` si ya no está pendiente o el concepto no es una especialidad del catálogo. `409` si ya tiene esa especialidad vigente.
+
+Contexto declarado en el controlador: Corregir una especialidad propia pendiente. `isPrimary` no se acepta acá (400 por la lista blanca): para eso está `…/:specialtyId/primary`.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /profiles/practitioners/me/specialties/{specialtyId}` en `ProfilesPractitionersController_updateOwnSpecialty`. El controlador delega en `ProfilesPractitionersService.updateOwnSpecialty`. Valida el body como `UpdateOwnSpecialtyDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `specialtyId` | path | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateOwnSpecialtyDto`; los campos opcionales se omiten.
+
+```http
+PATCH /profiles/practitioners/me/specialties/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `specialtyId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `specialtyConceptId` | No | `string` | formato `uuid` | Concept id de la especialidad (VS_MEDICAL_SPECIALTY) | `00000000-0000-4000-8000-000000000001` |
+| `boardCertified` | No | `boolean` | Sin restricción adicional declarada | Certificada por junta | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /profiles/practitioners/me/specialties/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+  "boardCertified": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 413 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Especialidad no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | El profesional ya tiene esa especialidad activa | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Esa especialidad ya no está pendiente de verificación; no se puede ${verb} | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/specialties/{specialtyId}"
+}
+```
+
+---
+
+## 51. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Marcar una especialidad propia como la principal
 - **Operation ID:** `ProfilesPractitionersController_setOwnPrimarySpecialty`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.setOwnPrimarySpecialty](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.setOwnPrimarySpecialty](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -6665,9 +8340,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/services/profile-ownership.service.ts |
-| 404 | `NOT_FOUND` | Especialidad no encontrada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | Una especialidad que ya no ejercés no puede ser la principal | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Especialidad no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una especialidad que ya no ejerce no puede ser la principal | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6685,14 +8360,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. GET /profiles/practitioners/me/summary
+## 52. GET /profiles/practitioners/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Consultar el perfil profesional propio (trayectoria y actividad)
 - **Operation ID:** `ProfilesPractitionersController_getOwnPractitionerProfile`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.getOwnPractitionerProfile](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.getOwnPractitionerProfile](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -6751,6 +8426,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
   "profileId": "00000000-0000-4000-8000-000000000001",
   "personId": "00000000-0000-4000-8000-000000000001",
   "practitionerCode": "CODIGO_EJEMPLO",
@@ -6770,6 +8448,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "lastName": "Nombre de ejemplo",
   "motherLastName": "Nombre de ejemplo",
   "birthDate": "2026-07-31",
+  "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
@@ -6817,6 +8496,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "number": "valor-ejemplo",
       "fileId": "00000000-0000-4000-8000-000000000001",
       "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
       "issueDate": "2026-07-31T12:00:00.000Z",
       "expiryDate": "2026-07-31T12:00:00.000Z",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
@@ -6832,7 +8515,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "regulatoryAuthority": "valor-ejemplo",
       "stateConceptId": "00000000-0000-4000-8000-000000000001",
       "validFrom": "2026-07-31T12:00:00.000Z",
-      "validTo": "2026-07-31T12:00:00.000Z"
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "fileId": "00000000-0000-4000-8000-000000000001"
     }
   ],
   "languages": [
@@ -6849,6 +8533,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "organizationName": "Nombre de ejemplo",
       "roleTitle": {},
       "practiceSiteId": {},
+      "healthFacilityConceptId": {},
       "affiliationTypeConceptId": {},
       "startDate": "2026-07-31",
       "endDate": "2026-07-31",
@@ -6873,6 +8558,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
 | `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
@@ -6892,6 +8578,7 @@ Campos de la respuesta:
 | `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
@@ -6927,18 +8614,22 @@ Campos de la respuesta:
 | `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `specialties[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
 | `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia; permite descargar el diploma adjunto | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `credentials[].issueDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `credentials[].verifiedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `credentials[].verificationSourceUri` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","fileId":"00000000-0000-4000-8000-000000000001"}]` |
 | `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].licenseNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -6946,16 +8637,18 @@ Campos de la respuesta:
 | `licenses[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `licenses[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `licenses[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `licenses[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `languages` | Sí | `array<PractitionerLanguageDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
 | `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"healthFacilityConceptId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `affiliations[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `affiliations[].roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `affiliations[].startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `affiliations[].endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
@@ -6979,8 +8672,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/services/profiles-practitioners.service.ts |
+| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6998,14 +8691,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /profiles/practitioners/specialty-counts
+## 53. GET /profiles/practitioners/specialty-counts
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
 - **Nombre:** Contar profesionales visibles por especialidad
 - **Operation ID:** `ProfilesPractitionersController_countPractitionersBySpecialty`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [ProfilesPractitionersController.countPractitionersBySpecialty](../../src/modules/profiles/controllers/profiles-practitioners.controller.ts)
+- **Implementación:** [ProfilesPractitionersController.countPractitionersBySpecialty](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
 
 ### Descripción de negocio
 
@@ -7110,14 +8803,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. GET /tenants/{tenantId}/practitioner-requests
+## 54. GET /tenants/{tenantId}/practitioner-requests
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
 - **Nombre:** Solicitudes de médicos que piden atender en la organización
 - **Operation ID:** `TenantPractitionerRequestsController_list`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TenantPractitionerRequestsController.list](../../src/modules/profiles/controllers/tenant-practitioner-requests.controller.ts)
+- **Implementación:** [TenantPractitionerRequestsController.list](../../src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts)
 
 ### Descripción de negocio
 
@@ -7127,7 +8820,7 @@ Contexto declarado en el controlador: Las solicitudes pendientes de las sedes de
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /tenants/{tenantId}/practitioner-requests` en `TenantPractitionerRequestsController_list`. El controlador delega en `ProfilesAffiliationsService.listarSolicitudes`. No recibe body. El tipo de retorno estático es `Promise<AffiliationRequestListDto>`.
+NestJS resuelve `GET /tenants/{tenantId}/practitioner-requests` en `TenantPractitionerRequestsController_list`. El controlador delega en `ProfilesAffiliationsService.listRequests`. No recibe body. El tipo de retorno estático es `Promise<AffiliationRequestListDto>`.
 
 ### Parámetros
 
@@ -7222,7 +8915,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7240,14 +8932,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 55. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
 - **Nombre:** Aprobar la solicitud de un profesional
 - **Operation ID:** `TenantPractitionerRequestsController_approve`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TenantPractitionerRequestsController.approve](../../src/modules/profiles/controllers/tenant-practitioner-requests.controller.ts)
+- **Implementación:** [TenantPractitionerRequestsController.approve](../../src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts)
 
 ### Descripción de negocio
 
@@ -7257,7 +8949,7 @@ Contexto declarado en el controlador: La organización acepta el vínculo.
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` en `TenantPractitionerRequestsController_approve`. El controlador delega en `ProfilesAffiliationsService.aprobar`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` en `TenantPractitionerRequestsController_approve`. El controlador delega en `ProfilesAffiliationsService.approve`. No recibe body. El tipo de retorno estático es `Promise<void>`.
 
 ### Parámetros
 
@@ -7320,9 +9012,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/profiles/services/profiles-affiliations.service.ts |
-| 422 | `PRECONDITION_FAILED` | decision.siNoEsta | Excepción explícita en src/modules/profiles/services/profiles-affiliations.service.ts |
+| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-affiliations.service.ts |
+| 422 | `PRECONDITION_FAILED` | decision.siNoEsta | Excepción explícita en src/modules/profiles/application/services/profiles-affiliations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7340,14 +9031,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 56. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
 - **Nombre:** Rechazar la solicitud de un profesional
 - **Operation ID:** `TenantPractitionerRequestsController_reject`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TenantPractitionerRequestsController.reject](../../src/modules/profiles/controllers/tenant-practitioner-requests.controller.ts)
+- **Implementación:** [TenantPractitionerRequestsController.reject](../../src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts)
 
 ### Descripción de negocio
 
@@ -7357,7 +9048,7 @@ Contexto declarado en el controlador: La organización rechaza el vínculo, con 
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` en `TenantPractitionerRequestsController_reject`. El controlador delega en `ProfilesAffiliationsService.rechazar`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` en `TenantPractitionerRequestsController_reject`. El controlador delega en `ProfilesAffiliationsService.reject`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
 
 ### Parámetros
 
@@ -7432,10 +9123,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/profiles/services/profiles-affiliations.service.ts |
+| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-affiliations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | decision.siNoEsta | Excepción explícita en src/modules/profiles/services/profiles-affiliations.service.ts |
+| 422 | `PRECONDITION_FAILED` | decision.siNoEsta | Excepción explícita en src/modules/profiles/application/services/profiles-affiliations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -7453,14 +9143,14 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 57. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
 - **Nombre:** Dar de baja un vínculo ya aprobado
 - **Operation ID:** `TenantPractitionerRequestsController_revoke`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [TenantPractitionerRequestsController.revoke](../../src/modules/profiles/controllers/tenant-practitioner-requests.controller.ts)
+- **Implementación:** [TenantPractitionerRequestsController.revoke](../../src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts)
 
 ### Descripción de negocio
 
@@ -7470,7 +9160,7 @@ Contexto declarado en el controlador: La organización da de baja un vínculo qu
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` en `TenantPractitionerRequestsController_revoke`. El controlador delega en `ProfilesAffiliationsService.revocar`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
+NestJS resuelve `POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` en `TenantPractitionerRequestsController_revoke`. El controlador delega en `ProfilesAffiliationsService.revoke`. Valida el body como `RejectAffiliationDto` y consume `application/json`. El tipo de retorno estático es `Promise<void>`.
 
 ### Parámetros
 
@@ -7545,10 +9235,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/profiles/services/profiles-affiliations.service.ts |
+| 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/profiles/application/services/profiles-affiliations.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | decision.siNoEsta | Excepción explícita en src/modules/profiles/services/profiles-affiliations.service.ts |
+| 422 | `PRECONDITION_FAILED` | decision.siNoEsta | Excepción explícita en src/modules/profiles/application/services/profiles-affiliations.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

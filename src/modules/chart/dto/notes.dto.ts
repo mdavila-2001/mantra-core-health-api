@@ -182,14 +182,18 @@ export class AddVersionDto {
 /** Cuerpo de `POST .../versions/{versionId}/sign` (UC-15-03). */
 export class SignVersionDto {
   /**
-   * Identificador asociado a signer profile.
+   * Perfil profesional que firma. Opcional: el firmante es siempre el perfil
+   * de la sesión, así que el servidor lo deriva; si viene, se confirma contra
+   * la sesión (403 si difiere). Sólo `SUPERADMIN` puede nombrar otro perfil.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Perfil del firmante (autor o delegado)',
+    description:
+      'Perfil del firmante. Si se omite, es el perfil profesional de la sesión.',
   })
+  @IsOptional()
   @IsUUID()
-  signerProfileId!: string;
+  signerProfileId?: string;
 
   /**
    * Valor de certificate thumbprint mantenido por la instancia.
@@ -216,14 +220,17 @@ export class SignVersionDto {
 /** Cuerpo de `POST .../versions/{versionId}/cosign` (UC-15-04). */
 export class CosignVersionDto {
   /**
-   * Identificador asociado a signer profile.
+   * Perfil profesional que cofirma. Opcional por la misma regla que
+   * {@link SignVersionDto.signerProfileId}: si se omite, es el de la sesión.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Perfil del cofirmante / supervisor',
+    description:
+      'Perfil del cofirmante / supervisor. Si se omite, es el perfil profesional de la sesión.',
   })
+  @IsOptional()
   @IsUUID()
-  signerProfileId!: string;
+  signerProfileId?: string;
 
   /**
    * Valor de certificate thumbprint mantenido por la instancia.

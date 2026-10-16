@@ -183,11 +183,11 @@ describe('FormsFieldsController · CL-68 roles', () => {
     'upsertLocalization',
   ] as const)(
     '%s exige personal de salud o SECURITY_ADMIN, no cualquier sesión',
-    (metodo) => {
+    (method) => {
       const roles = Reflect.getMetadata(
         ROLES_KEY,
         // eslint-disable-next-line @typescript-eslint/unbound-method -- se lee la metadata del método, no se invoca
-        FormsFieldsController.prototype[metodo],
+        FormsFieldsController.prototype[method],
       );
       expect(roles).toEqual(['CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN']);
       expect(roles).not.toContain('PATIENT');
@@ -235,16 +235,16 @@ describe('FormsAssignmentsController', () => {
       'as1',
       actor,
     );
-    const orden = { targetResourceConceptId: 'rt', assignmentIds: ['as1'] };
-    await d.controller.reorderAssignments(orden, actor);
+    const order = { targetResourceConceptId: 'rt', assignmentIds: ['as1'] };
+    await d.controller.reorderAssignments(order, actor);
     expect(d.assignmentsService.reorderAssignments).toHaveBeenCalledWith(
-      orden,
+      order,
       actor,
     );
   });
 
   it('las rutas de edición abren la puerta a quien atiende (CL-61)', () => {
-    const rolesDe = (handler: string): string[] =>
+    const roles = (handler: string): string[] =>
       Reflect.getMetadata(
         ROLES_KEY,
         Object.getOwnPropertyDescriptor(
@@ -257,7 +257,7 @@ describe('FormsAssignmentsController', () => {
       'retireAssignment',
       'reorderAssignments',
     ]) {
-      expect(rolesDe(handler)).toEqual(
+      expect(roles(handler)).toEqual(
         expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
       );
     }
@@ -297,7 +297,7 @@ describe('FormsAssignmentsController', () => {
     // campo y no colgarlo de ningún sitio. Los límites de tenant y política los
     // aplica el servicio; acá se comprueba que la puerta del rol esté abierta,
     // que es lo que se cerró sin querer si alguien recorta este decorador.
-    const rolesDe = (handler: string): string[] =>
+    const roles = (handler: string): string[] =>
       Reflect.getMetadata(
         ROLES_KEY,
         Object.getOwnPropertyDescriptor(
@@ -305,10 +305,10 @@ describe('FormsAssignmentsController', () => {
           handler,
         )!.value,
       ) as string[];
-    expect(rolesDe('createAssignment')).toEqual(
+    expect(roles('createAssignment')).toEqual(
       expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
     );
-    expect(rolesDe('getBudget')).toEqual(
+    expect(roles('getBudget')).toEqual(
       expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
     );
   });
@@ -382,7 +382,7 @@ describe('FormsInstancesController', () => {
 });
 
 describe('FormsMeController', () => {
-  const paciente = { id: 'u-1', patientProfileId: 'pp-1' } as any;
+  const patient = { id: 'u-1', patientProfileId: 'pp-1' } as any;
 
   /**
    * Construye el sistema bajo prueba con dependencias controladas.
@@ -401,28 +401,28 @@ describe('FormsMeController', () => {
 
   it('delegates listMyInstances with the actor and the default limit', async () => {
     const d = build();
-    await d.controller.listMyInstances(paciente, undefined);
-    expect(d.readService.listMyInstances).toHaveBeenCalledWith(paciente, 50);
+    await d.controller.listMyInstances(patient, undefined);
+    expect(d.readService.listMyInstances).toHaveBeenCalledWith(patient, 50);
   });
 
   it('delegates getMyInstance with the actor of the session', async () => {
     const d = build();
-    await d.controller.getMyInstance('i1', paciente);
-    expect(d.readService.getMyInstance).toHaveBeenCalledWith('i1', paciente);
+    await d.controller.getMyInstance('i1', patient);
+    expect(d.readService.getMyInstance).toHaveBeenCalledWith('i1', patient);
   });
 
   it('declares no role requirement: the filter is the patient claim', () => {
     // Igual que surveys/me: sin @Roles ni en la clase ni en los handlers — el
     // guard de roles deja pasar y el servicio exige el perfil de paciente.
-    const rolesDe = (handler: string): unknown =>
+    const roles = (handler: string): unknown =>
       Reflect.getMetadata(
         ROLES_KEY,
         Object.getOwnPropertyDescriptor(FormsMeController.prototype, handler)!
           .value,
       );
     expect(Reflect.getMetadata(ROLES_KEY, FormsMeController)).toBeUndefined();
-    expect(rolesDe('listMyInstances')).toBeUndefined();
-    expect(rolesDe('getMyInstance')).toBeUndefined();
+    expect(roles('listMyInstances')).toBeUndefined();
+    expect(roles('getMyInstance')).toBeUndefined();
   });
 });
 

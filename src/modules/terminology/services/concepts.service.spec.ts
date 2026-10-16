@@ -9,6 +9,7 @@ import {
 } from '../../../common';
 import {
   GLOSSARY_ALL_TERMS_CODE,
+  GLOSSARY_ARTICLE_PROPERTY_CODE,
   GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE,
   GLOSSARY_IMAGE_PROPERTY_CODE,
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
@@ -50,6 +51,8 @@ function build() {
     findEquivalent: jest.fn(),
     create: jest.fn(),
     findByTypesForSources: jest.fn(() => Promise.resolve([])),
+    findByTypesForTargets: jest.fn(() => Promise.resolve([])),
+    countNeighborsByType: jest.fn(() => Promise.resolve([])),
   } as any;
   const valueSetsRepo = {
     findMembersByConceptForUpdate: jest.fn(() => Promise.resolve([])),
@@ -91,6 +94,32 @@ function build() {
 }
 
 describe('ConceptsService', () => {
+  describe('readGlossaryArticle', () => {
+    it('returns the stored glossary article property', async () => {
+      const { service, em, designationsRepo } = build();
+      const article = { conceptRef: { code: 'x' }, sections: [] };
+      designationsRepo.findProperty.mockResolvedValue({ valueJson: article });
+
+      await expect(service.readGlossaryArticle('concept-1')).resolves.toBe(
+        article,
+      );
+      expect(designationsRepo.findProperty).toHaveBeenCalledWith(
+        em,
+        'concept-1',
+        GLOSSARY_ARTICLE_PROPERTY_CODE,
+      );
+    });
+
+    it('returns 404 when the concept has no article property', async () => {
+      const { service, designationsRepo } = build();
+      designationsRepo.findProperty.mockResolvedValue(null);
+
+      await expect(
+        service.readGlossaryArticle('concept-1'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
   describe('addDesignation', () => {
     it('crea la designación con idioma/tipo por defecto y sus propiedades', async () => {
       const { service, conceptsRepo, designationsRepo } = build();
@@ -544,7 +573,7 @@ describe('ConceptsService', () => {
    * cambio de contrato para quien serializa la respuesta.
    */
   describe('searchConcepts · idioma y etiquetas', () => {
-    const conceptoIngles = {
+    const englishConcept = {
       id: 'concept-1',
       code: 'COND_SEV_MILD',
       display: 'Mild',
@@ -556,7 +585,7 @@ describe('ConceptsService', () => {
     it('sin `lang` ni `includeValueSets` devuelve exactamente lo de siempre', async () => {
       const { service, conceptsRepo, designationsRepo, valueSetsRepo } =
         build();
-      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+      conceptsRepo.search.mockResolvedValue([englishConcept]);
 
       const result = await service.searchConcepts(undefined, undefined, 50);
 
@@ -582,7 +611,7 @@ describe('ConceptsService', () => {
 
     it('con `lang` devuelve la designación de ese idioma y su definición', async () => {
       const { service, conceptsRepo, designationsRepo } = build();
-      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+      conceptsRepo.search.mockResolvedValue([englishConcept]);
       designationsRepo.findPreferredByLanguageForConcepts.mockResolvedValue(
         new Map([['concept-1', { value: 'Leve' }]]),
       );
@@ -619,7 +648,7 @@ describe('ConceptsService', () => {
 
     it('sin traducción cargada devuelve el original y lo marca — no lo deja en blanco', async () => {
       const { service, conceptsRepo } = build();
-      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+      conceptsRepo.search.mockResolvedValue([englishConcept]);
 
       const result = await service.searchConcepts(
         undefined,
@@ -639,7 +668,7 @@ describe('ConceptsService', () => {
 
     it('una definición que no sea texto se descarta en vez de pintarse cruda', async () => {
       const { service, conceptsRepo, designationsRepo } = build();
-      conceptsRepo.search.mockResolvedValue([conceptoIngles]);
+      conceptsRepo.search.mockResolvedValue([englishConcept]);
       designationsRepo.findPropertyForConcepts.mockResolvedValue([
         { conceptId: 'concept-1', valueJson: { texto: 'algo' } },
       ]);
@@ -660,8 +689,8 @@ describe('ConceptsService', () => {
     it('resuelve las etiquetas de toda la página en una sola consulta', async () => {
       const { service, conceptsRepo, valueSetsRepo } = build();
       conceptsRepo.search.mockResolvedValue([
-        conceptoIngles,
-        { ...conceptoIngles, id: 'concept-2', code: 'COND_SEV_SEVERE' },
+        englishConcept,
+        { ...englishConcept, id: 'concept-2', code: 'COND_SEV_SEVERE' },
       ]);
       valueSetsRepo.findValueSetsByConceptIds.mockResolvedValue(
         new Map([
@@ -704,8 +733,8 @@ describe('ConceptsService', () => {
     it('con `lang` ordena por nombre — un glosario se lee alfabético', async () => {
       const { service, conceptsRepo, designationsRepo } = build();
       conceptsRepo.search.mockResolvedValue([
-        { ...conceptoIngles, id: 'c-1', code: 'A_CODE' },
-        { ...conceptoIngles, id: 'c-2', code: 'B_CODE' },
+        { ...englishConcept, id: 'c-1', code: 'A_CODE' },
+        { ...englishConcept, id: 'c-2', code: 'B_CODE' },
       ]);
       designationsRepo.findPreferredByLanguageForConcepts.mockResolvedValue(
         new Map([
@@ -732,8 +761,8 @@ describe('ConceptsService', () => {
     it('sin `lang` conserva el orden del catálogo, que es por código', async () => {
       const { service, conceptsRepo } = build();
       conceptsRepo.search.mockResolvedValue([
-        { ...conceptoIngles, id: 'c-1', code: 'A_CODE', display: 'Zebra' },
-        { ...conceptoIngles, id: 'c-2', code: 'B_CODE', display: 'Alfa' },
+        { ...englishConcept, id: 'c-1', code: 'A_CODE', display: 'Zebra' },
+        { ...englishConcept, id: 'c-2', code: 'B_CODE', display: 'Alfa' },
       ]);
 
       const result = await service.searchConcepts(undefined, undefined, 50);
@@ -819,7 +848,7 @@ describe('ConceptsService', () => {
   });
 
   describe('readConcept', () => {
-    const concepto = {
+    const concept = {
       id: 'concept-1',
       code: 'I10',
       display: 'Hipertensión esencial',
@@ -831,7 +860,7 @@ describe('ConceptsService', () => {
     it('arma la ficha con sus textos, sus etiquetas y sus sinónimos', async () => {
       const { service, conceptsRepo, designationsRepo, valueSetsRepo } =
         build();
-      conceptsRepo.findById.mockResolvedValue(concepto);
+      conceptsRepo.findById.mockResolvedValue(concept);
       designationsRepo.findPreferredByLanguageForConcepts.mockResolvedValue(
         new Map([['concept-1', { value: 'Hipertensión esencial' }]]),
       );
@@ -865,20 +894,20 @@ describe('ConceptsService', () => {
         ]),
       );
 
-      const ficha = await service.readConcept('concept-1', 'ES');
+      const record = await service.readConcept('concept-1', 'ES');
 
-      expect(ficha).toMatchObject({
+      expect(record).toMatchObject({
         conceptId: 'concept-1',
         code: 'I10',
         display: 'Hipertensión esencial',
         definition: 'Presión arterial alta.',
         translated: true,
       });
-      expect(ficha.valueSets).toEqual([
+      expect(record.valueSets).toEqual([
         { id: 'vs-1', internalCode: 'condition-code', name: 'Diagnóstico' },
       ]);
       // El nombre que ya se muestra arriba no vuelve como sinónimo de sí mismo.
-      expect(ficha.synonyms).toEqual([
+      expect(record.synonyms).toEqual([
         {
           value: 'Hypertensive disorder',
           language: 'EN',
@@ -1167,7 +1196,7 @@ describe('ConceptsService', () => {
     });
 
     describe('búsqueda paginada (glosario de cientos de miles de términos)', () => {
-      const corazon = {
+      const heart = {
         id: 'concept-1',
         code: 'GLOSSARY_CORAZON',
         display: 'Heart',
@@ -1176,7 +1205,7 @@ describe('ConceptsService', () => {
         codeSystemVersionId: 'v1',
         stateConceptId: CONCEPTS.TERM_ACTIVE,
       };
-      const aorta = { ...corazon, id: 'concept-2', code: 'GLOSSARY_AORTA' };
+      const aorta = { ...heart, id: 'concept-2', code: 'GLOSSARY_AORTA' };
 
       it('pasa el desplazamiento y devuelve el total, no sólo lo de la página', async () => {
         const { service, conceptsRepo, valueSetsRepo } = build();
@@ -1189,7 +1218,7 @@ describe('ConceptsService', () => {
         });
         conceptsRepo.findByIds.mockResolvedValue(
           new Map([
-            ['concept-1', corazon],
+            ['concept-1', heart],
             ['concept-2', aorta],
           ]),
         );
@@ -1230,7 +1259,7 @@ describe('ConceptsService', () => {
         conceptsRepo.findByIds.mockResolvedValue(
           new Map([
             ['concept-2', { ...aorta, display: 'Aorta' }],
-            ['concept-1', { ...corazon, display: 'Zzz' }],
+            ['concept-1', { ...heart, display: 'Zzz' }],
           ]),
         );
 
@@ -1319,7 +1348,7 @@ describe('ConceptsService', () => {
         });
         conceptsRepo.findByIds.mockResolvedValue(
           new Map([
-            ['concept-1', corazon],
+            ['concept-1', heart],
             ['concept-2', aorta],
           ]),
         );
@@ -1357,9 +1386,604 @@ describe('ConceptsService', () => {
       });
     });
 
+    describe('grafo', () => {
+      it('descarta slugs no publicables y normaliza los campos opcionales', async () => {
+        const { service, relationshipsRepo, em } = build();
+        const search = jest.spyOn(service, 'searchConcepts').mockResolvedValue({
+          items: [
+            {
+              conceptId: 'concept-1',
+              slug: 'corazon',
+              display: 'Corazón',
+              category: {
+                internalCode: 'glossary-category-anatomy',
+                name: 'Anatomía',
+              },
+              shortDefinition: 'Órgano que bombea sangre',
+            },
+            {
+              conceptId: 'concept-2',
+              slug: 'pulmon',
+              display: 'Pulmón',
+            },
+            { conceptId: 'concept-3', slug: '', display: 'Vacío' },
+            { conceptId: 'concept-4', display: 'Sin slug' },
+          ],
+          count: 4,
+          limit: 3,
+        } as any);
+
+        const graph = await service.readGlossaryGraph();
+
+        expect(search).toHaveBeenCalledWith(
+          undefined,
+          undefined,
+          500,
+          undefined,
+          {
+            language: 'ES',
+            includeValueSets: true,
+          },
+        );
+        expect(relationshipsRepo.findByTypesForSources).toHaveBeenCalledWith(
+          em,
+          expect.any(Array),
+          ['concept-1', 'concept-2'],
+        );
+        expect(graph).toEqual({
+          nodes: [
+            {
+              conceptId: 'concept-1',
+              slug: 'corazon',
+              display: 'Corazón',
+              category: {
+                internalCode: 'glossary-category-anatomy',
+                name: 'Anatomía',
+              },
+              shortDefinition: 'Órgano que bombea sangre',
+            },
+            {
+              conceptId: 'concept-2',
+              slug: 'pulmon',
+              display: 'Pulmón',
+              category: null,
+              shortDefinition: '',
+            },
+          ],
+          edges: [],
+          count: 2,
+          limit: 500,
+          possiblyTruncated: false,
+        });
+      });
+
+      it('conserva aristas internas y elimina duplicadas o externas', async () => {
+        const {
+          service,
+          relationshipsRepo,
+          conceptsRepo,
+          designationsRepo,
+          em,
+        } = build();
+        jest.spyOn(service, 'searchConcepts').mockResolvedValue({
+          items: [
+            { conceptId: 'concept-1', slug: 'corazon', display: 'Corazón' },
+            { conceptId: 'concept-2', slug: 'pulmon', display: 'Pulmón' },
+          ],
+          count: 2,
+          total: 2,
+          limit: 2,
+        } as any);
+        relationshipsRepo.findByTypesForSources.mockResolvedValue([
+          {
+            sourceConceptId: 'concept-1',
+            targetConceptId: 'concept-2',
+            relationshipTypeConceptId: CONCEPTS.REL_DISEASE,
+          },
+          {
+            sourceConceptId: 'concept-1',
+            targetConceptId: 'concept-2',
+            relationshipTypeConceptId: CONCEPTS.REL_DISEASE,
+          },
+          {
+            sourceConceptId: 'concept-2',
+            targetConceptId: 'concept-external',
+            relationshipTypeConceptId: CONCEPTS.REL_TREATMENT,
+          },
+        ]);
+        conceptsRepo.findByIds.mockResolvedValue(
+          new Map([
+            ['concept-2', { id: 'concept-2', display: 'Pulmón' }],
+            [
+              'concept-external',
+              { id: 'concept-external', display: 'Término externo' },
+            ],
+          ]),
+        );
+        designationsRepo.findPropertyForConcepts.mockResolvedValue([
+          { conceptId: 'concept-2', valueJson: 'pulmon' },
+          { conceptId: 'concept-external', valueJson: 'externo' },
+        ]);
+
+        const graph = await service.readGlossaryGraph('EN', 2);
+
+        expect(relationshipsRepo.findByTypesForSources).toHaveBeenCalledWith(
+          em,
+          expect.any(Array),
+          ['concept-1', 'concept-2'],
+        );
+        expect(graph).toMatchObject({
+          edges: [
+            {
+              sourceConceptId: 'concept-1',
+              targetConceptId: 'concept-2',
+              type: 'DISEASE',
+            },
+          ],
+          count: 2,
+          limit: 2,
+          possiblyTruncated: false,
+        });
+      });
+
+      it('marca truncamiento cuando el total supera los nodos de la página', async () => {
+        const { service } = build();
+        jest.spyOn(service, 'searchConcepts').mockResolvedValue({
+          items: [
+            {
+              conceptId: 'concept-1',
+              slug: 'corazon',
+              display: 'Corazón',
+            },
+            { conceptId: 'concept-2', slug: 'pulmon', display: 'Pulmón' },
+          ],
+          count: 2,
+          total: 3,
+          limit: 2,
+        } as any);
+
+        await expect(service.readGlossaryGraph('ES', 2)).resolves.toMatchObject(
+          {
+            count: 2,
+            limit: 2,
+            possiblyTruncated: true,
+          },
+        );
+      });
+
+      it('no consulta relaciones si la página no contiene nodos publicables', async () => {
+        const { service, relationshipsRepo } = build();
+        jest.spyOn(service, 'searchConcepts').mockResolvedValue({
+          items: [
+            { conceptId: 'concept-1', slug: '', display: 'Vacío' },
+            { conceptId: 'concept-2', slug: null, display: 'Nulo' },
+          ],
+          count: 2,
+          limit: 2,
+        } as any);
+
+        await expect(service.readGlossaryGraph('ES', 2)).resolves.toEqual({
+          nodes: [],
+          edges: [],
+          count: 0,
+          limit: 2,
+          possiblyTruncated: false,
+        });
+        expect(relationshipsRepo.findByTypesForSources).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('vecindario', () => {
+      const FOCUS = 'concept-fiebre';
+      const CATEGORY = {
+        id: 'vs-cat-sintomas',
+        internalCode: 'glossary-category-symptoms',
+        name: 'Síntomas',
+      };
+      const UMBRELLA = glossaryValueSets[2];
+
+      interface FixtureTerm {
+        id: string;
+        display: string;
+        slug?: string;
+        state?: string;
+      }
+
+      const edge = (
+        sourceConceptId: string,
+        targetConceptId: string,
+        relationshipTypeConceptId: string,
+      ) => ({ sourceConceptId, targetConceptId, relationshipTypeConceptId });
+
+      /**
+       * Un glosario mínimo: el término central («Fiebre») más los vecinos que
+       * cada prueba declare. Todos pertenecen al paraguas; `categorized` los
+       * pone además en la categoría «Síntomas».
+       */
+      function setUpNeighborhood(
+        neighbors: FixtureTerm[],
+        {
+          focusState = CONCEPTS.TERM_ACTIVE,
+          focusInGlossary = true,
+          focusSlug = 'fiebre',
+        }: {
+          focusState?: string;
+          focusInGlossary?: boolean;
+          focusSlug?: string | null;
+        } = {},
+      ) {
+        const built = build();
+        const {
+          conceptsRepo,
+          designationsRepo,
+          valueSetsRepo,
+          relationshipsRepo,
+        } = built;
+        const terms: FixtureTerm[] = [
+          {
+            id: FOCUS,
+            display: 'Fiebre',
+            slug: focusSlug ?? undefined,
+            state: focusState,
+          },
+          ...neighbors,
+        ];
+        const concept = (term: FixtureTerm) => ({
+          id: term.id,
+          display: term.display,
+          stateConceptId: term.state ?? CONCEPTS.TERM_ACTIVE,
+        });
+        conceptsRepo.findById.mockImplementation((_em: unknown, id: string) =>
+          Promise.resolve(
+            terms.filter((term) => term.id === id).map(concept)[0] ?? null,
+          ),
+        );
+        conceptsRepo.findByIds.mockImplementation(
+          (_em: unknown, ids: string[]) =>
+            Promise.resolve(
+              new Map(
+                terms
+                  .filter((term) => ids.includes(term.id))
+                  .map((term) => [term.id, concept(term)]),
+              ),
+            ),
+        );
+        designationsRepo.findPropertyForConcepts.mockImplementation(
+          (_em: unknown, ids: string[], code: string) =>
+            Promise.resolve(
+              code === GLOSSARY_SLUG_PROPERTY_CODE
+                ? terms
+                    .filter(
+                      (term) =>
+                        ids.includes(term.id) && term.slug !== undefined,
+                    )
+                    .map((term) => ({
+                      conceptId: term.id,
+                      valueJson: term.slug,
+                    }))
+                : [],
+            ),
+        );
+        valueSetsRepo.findValueSetsByConceptIds.mockImplementation(
+          (_em: unknown, ids: string[]) =>
+            Promise.resolve(
+              new Map(
+                ids.map((id) => [
+                  id,
+                  id === FOCUS && !focusInGlossary
+                    ? [CATEGORY]
+                    : [UMBRELLA, CATEGORY],
+                ]),
+              ),
+            ),
+        );
+        return built;
+      }
+
+      const diseases: FixtureTerm[] = [
+        { id: 'c-neumonia', display: 'Neumonía', slug: 'neumonia' },
+        { id: 'c-gripe', display: 'Gripe', slug: 'gripe' },
+        { id: 'c-dengue', display: 'Dengue', slug: 'dengue' },
+      ];
+
+      it('lee los dos sentidos: el síntoma muestra las enfermedades que lo presentan (entrantes)', async () => {
+        const { service, relationshipsRepo, em } = setUpNeighborhood(diseases);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'incoming',
+            total: 3,
+          },
+        ]);
+        // La relación se guarda en la enfermedad: enfermedad → síntoma.
+        relationshipsRepo.findByTypesForTargets.mockResolvedValue(
+          diseases.map((d) => edge(d.id, FOCUS, CONCEPTS.REL_SYMPTOM)),
+        );
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 8,
+        });
+
+        expect(relationshipsRepo.findByTypesForTargets).toHaveBeenCalledWith(
+          em,
+          expect.arrayContaining([CONCEPTS.REL_SYMPTOM]),
+          [FOCUS],
+        );
+        expect(result.focus).toEqual({
+          conceptId: FOCUS,
+          slug: 'fiebre',
+          display: 'Fiebre',
+          category: { internalCode: CATEGORY.internalCode, name: 'Síntomas' },
+          shortDefinition: '',
+        });
+        expect(result.groups).toEqual([
+          {
+            type: 'SYMPTOM',
+            direction: 'incoming',
+            total: 3,
+            // Alfabético en castellano, no el orden en que vinieron las aristas.
+            items: [
+              expect.objectContaining({
+                conceptId: 'c-dengue',
+                display: 'Dengue',
+              }),
+              expect.objectContaining({
+                conceptId: 'c-gripe',
+                display: 'Gripe',
+              }),
+              expect.objectContaining({
+                conceptId: 'c-neumonia',
+                slug: 'neumonia',
+                category: {
+                  internalCode: CATEGORY.internalCode,
+                  name: 'Síntomas',
+                },
+              }),
+            ],
+          },
+        ]);
+      });
+
+      it('lee las relaciones salientes con el término como origen', async () => {
+        const treatments: FixtureTerm[] = [
+          { id: 'c-paracetamol', display: 'Paracetamol', slug: 'paracetamol' },
+        ];
+        const { service, relationshipsRepo, em } =
+          setUpNeighborhood(treatments);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_TREATMENT,
+            direction: 'outgoing',
+            total: 1,
+          },
+        ]);
+        relationshipsRepo.findByTypesForSources.mockResolvedValue([
+          edge(FOCUS, 'c-paracetamol', CONCEPTS.REL_TREATMENT),
+        ]);
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 8,
+        });
+
+        expect(relationshipsRepo.findByTypesForSources).toHaveBeenCalledWith(
+          em,
+          expect.any(Array),
+          [FOCUS],
+        );
+        expect(result.groups).toEqual([
+          expect.objectContaining({
+            type: 'TREATMENT',
+            direction: 'outgoing',
+            total: 1,
+            items: [
+              expect.objectContaining({
+                conceptId: 'c-paracetamol',
+                slug: 'paracetamol',
+              }),
+            ],
+          }),
+        ]);
+      });
+
+      it('el total es el del grupo y no el de la muestra: perGroup recorta los ítems, no el total', async () => {
+        const many: FixtureTerm[] = Array.from({ length: 12 }, (_, i) => ({
+          id: `c-enf-${String(i).padStart(2, '0')}`,
+          display: `Enfermedad ${String(i).padStart(2, '0')}`,
+          slug: `enfermedad-${i}`,
+        }));
+        const { service, relationshipsRepo } = setUpNeighborhood(many);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'incoming',
+            total: 12,
+          },
+        ]);
+        relationshipsRepo.findByTypesForTargets.mockResolvedValue(
+          many.map((d) => edge(d.id, FOCUS, CONCEPTS.REL_SYMPTOM)),
+        );
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 5,
+        });
+
+        expect(result.groups).toHaveLength(1);
+        expect(result.groups[0].total).toBe(12);
+        expect(result.groups[0].items.map((i) => i.display)).toEqual([
+          'Enfermedad 00',
+          'Enfermedad 01',
+          'Enfermedad 02',
+          'Enfermedad 03',
+          'Enfermedad 04',
+        ]);
+      });
+
+      it('la página de un grupo pide sólo ese tipo y ese sentido, y respeta offset y limit', async () => {
+        const many: FixtureTerm[] = Array.from({ length: 6 }, (_, i) => ({
+          id: `c-enf-${i}`,
+          display: `Enfermedad ${i}`,
+          slug: `enfermedad-${i}`,
+        }));
+        const { service, relationshipsRepo, em } = setUpNeighborhood(many);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'incoming',
+            total: 6,
+          },
+          // El otro sentido existe pero no se pidió: no puede colarse.
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'outgoing',
+            total: 99,
+          },
+        ]);
+        relationshipsRepo.findByTypesForTargets.mockResolvedValue(
+          many.map((d) => edge(d.id, FOCUS, CONCEPTS.REL_SYMPTOM)),
+        );
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          type: 'SYMPTOM',
+          direction: 'incoming',
+          offset: 2,
+          limit: 3,
+        });
+
+        expect(relationshipsRepo.countNeighborsByType).toHaveBeenCalledWith(
+          em,
+          FOCUS,
+          [CONCEPTS.REL_SYMPTOM],
+          expect.any(Object),
+        );
+        expect(relationshipsRepo.findByTypesForSources).not.toHaveBeenCalled();
+        expect(result.groups).toHaveLength(1);
+        expect(result.groups[0]).toMatchObject({
+          type: 'SYMPTOM',
+          direction: 'incoming',
+          total: 6,
+        });
+        expect(result.groups[0].items.map((i) => i.display)).toEqual([
+          'Enfermedad 2',
+          'Enfermedad 3',
+          'Enfermedad 4',
+        ]);
+      });
+
+      it('omite vecinos sin slug, sin publicar, repetidos y el propio término', async () => {
+        const mixed: FixtureTerm[] = [
+          { id: 'c-ok', display: 'Gripe', slug: 'gripe' },
+          { id: 'c-sin-slug', display: 'Sin slug', slug: undefined },
+          {
+            id: 'c-borrador',
+            display: 'Borrador',
+            slug: 'borrador',
+            state: CONCEPTS.TERM_DRAFT,
+          },
+        ];
+        const { service, relationshipsRepo } = setUpNeighborhood(mixed);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'incoming',
+            total: 1,
+          },
+        ]);
+        relationshipsRepo.findByTypesForTargets.mockResolvedValue([
+          edge('c-ok', FOCUS, CONCEPTS.REL_SYMPTOM),
+          edge('c-ok', FOCUS, CONCEPTS.REL_SYMPTOM),
+          edge('c-sin-slug', FOCUS, CONCEPTS.REL_SYMPTOM),
+          edge('c-borrador', FOCUS, CONCEPTS.REL_SYMPTOM),
+          edge(FOCUS, FOCUS, CONCEPTS.REL_SYMPTOM),
+          edge('c-inexistente', FOCUS, CONCEPTS.REL_SYMPTOM),
+        ]);
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 8,
+        });
+
+        expect(result.groups).toHaveLength(1);
+        expect(result.groups[0].items.map((i) => i.conceptId)).toEqual([
+          'c-ok',
+        ]);
+      });
+
+      it('un término sin vecinos devuelve el foco y ningún grupo', async () => {
+        const { service, relationshipsRepo } = setUpNeighborhood([]);
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 8,
+        });
+
+        expect(result.focus.conceptId).toBe(FOCUS);
+        expect(result.groups).toEqual([]);
+        expect(relationshipsRepo.findByTypesForSources).not.toHaveBeenCalled();
+        expect(relationshipsRepo.findByTypesForTargets).not.toHaveBeenCalled();
+      });
+
+      it('ordena los grupos por tipo y sentido de forma estable', async () => {
+        const { service, relationshipsRepo } = setUpNeighborhood(diseases);
+        relationshipsRepo.countNeighborsByType.mockResolvedValue([
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'incoming',
+            total: 1,
+          },
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_DISEASE,
+            direction: 'outgoing',
+            total: 1,
+          },
+          {
+            relationshipTypeConceptId: CONCEPTS.REL_SYMPTOM,
+            direction: 'outgoing',
+            total: 1,
+          },
+        ]);
+        relationshipsRepo.findByTypesForSources.mockResolvedValue([
+          edge(FOCUS, 'c-gripe', CONCEPTS.REL_DISEASE),
+          edge(FOCUS, 'c-dengue', CONCEPTS.REL_SYMPTOM),
+        ]);
+        relationshipsRepo.findByTypesForTargets.mockResolvedValue([
+          edge('c-neumonia', FOCUS, CONCEPTS.REL_SYMPTOM),
+        ]);
+
+        const result = await service.readGlossaryNeighborhood(FOCUS, 'ES', {
+          perGroup: 8,
+        });
+
+        expect(
+          result.groups.map((group) => `${group.type}|${group.direction}`),
+        ).toEqual(['DISEASE|outgoing', 'SYMPTOM|outgoing', 'SYMPTOM|incoming']);
+      });
+
+      it.each([
+        ['no existe', () => ({ found: false })],
+        ['no es del glosario', () => ({ found: true, inGlossary: false })],
+        ['es un borrador', () => ({ found: true, state: CONCEPTS.TERM_DRAFT })],
+        ['no tiene slug', () => ({ found: true, slug: null })],
+      ])('responde 404 si el concepto %s', async (_name, makeCase) => {
+        const scenario = makeCase() as {
+          found: boolean;
+          inGlossary?: boolean;
+          state?: string;
+          slug?: string | undefined;
+        };
+        const { service, conceptsRepo } = setUpNeighborhood([], {
+          focusInGlossary: scenario.inGlossary ?? true,
+          focusState: scenario.state ?? CONCEPTS.TERM_ACTIVE,
+          focusSlug: 'slug' in scenario ? scenario.slug : 'fiebre',
+        });
+        if (!scenario.found) conceptsRepo.findById.mockResolvedValue(null);
+
+        await expect(
+          service.readGlossaryNeighborhood(FOCUS, 'ES', { perGroup: 8 }),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      });
+    });
+
     describe('ficha', () => {
       /** Configura los mocks comunes a la ficha de un término del glosario. */
-      function setUpGlossaryTermFicha({
+      function setUpGlossaryTermRecord({
         stateConceptId = CONCEPTS.TERM_ACTIVE,
       }: { stateConceptId?: string } = {}) {
         const built = build();
@@ -1437,16 +2061,16 @@ describe('ConceptsService', () => {
       }
 
       it('separa categoría y etiquetas de `valueSets`, y resuelve las relaciones tipadas', async () => {
-        const { service } = setUpGlossaryTermFicha();
+        const { service } = setUpGlossaryTermRecord();
 
-        const ficha = await service.readConcept('concept-1');
+        const record = await service.readConcept('concept-1');
 
-        expect(ficha.category).toEqual({
+        expect(record.category).toEqual({
           valueSetId: 'vs-cat-1',
           internalCode: 'glossary-category-anatomy',
           name: 'Anatomía',
         });
-        expect(ficha.tags).toEqual([
+        expect(record.tags).toEqual([
           {
             valueSetId: 'vs-tag-1',
             internalCode: 'glossary-tag-cardiovascular',
@@ -1454,13 +2078,13 @@ describe('ConceptsService', () => {
           },
         ]);
         // El value set paraguas no aparece ni como categoría ni como etiqueta.
-        expect(ficha.category?.internalCode).not.toBe(GLOSSARY_ALL_TERMS_CODE);
+        expect(record.category?.internalCode).not.toBe(GLOSSARY_ALL_TERMS_CODE);
         expect(
-          ficha.tags.some(
+          record.tags.some(
             (tag) => tag.internalCode === GLOSSARY_ALL_TERMS_CODE,
           ),
         ).toBe(false);
-        expect(ficha.relations).toEqual([
+        expect(record.relations).toEqual([
           {
             type: 'ANATOMY',
             conceptId: 'concept-2',
@@ -1468,50 +2092,50 @@ describe('ConceptsService', () => {
             display: 'Heart failure',
           },
         ]);
-        expect(ficha.slug).toBe('corazon');
+        expect(record.slug).toBe('corazon');
       });
 
       it('sin `lang`, cae a castellano y lo marca como traducido (es el idioma nativo del contenido)', async () => {
-        const { service } = setUpGlossaryTermFicha();
+        const { service } = setUpGlossaryTermRecord();
 
-        const ficha = await service.readConcept('concept-1');
+        const record = await service.readConcept('concept-1');
 
-        expect(ficha.clinicalDefinition).toEqual({
+        expect(record.clinicalDefinition).toEqual({
           text: 'Definición clínica en castellano',
           translated: true,
         });
-        expect(ficha.plainSummary).toEqual({
+        expect(record.plainSummary).toEqual({
           text: 'Resumen en castellano',
           translated: true,
         });
       });
 
       it('con `lang=EN`, la definición clínica sin traducir cae a ES y se marca `translated: false`', async () => {
-        const { service } = setUpGlossaryTermFicha();
+        const { service } = setUpGlossaryTermRecord();
 
-        const ficha = await service.readConcept('concept-1', 'EN');
+        const record = await service.readConcept('concept-1', 'EN');
 
         // No hay `clinicalDefinition.en` cargado para este término (ver fixture):
         // debe caer al texto en castellano, no dejarlo en blanco.
-        expect(ficha.clinicalDefinition).toEqual({
+        expect(record.clinicalDefinition).toEqual({
           text: 'Definición clínica en castellano',
           translated: false,
         });
       });
 
       it('con `lang=EN`, el resumen llano que sí tiene traducción se marca `translated: true`', async () => {
-        const { service } = setUpGlossaryTermFicha();
+        const { service } = setUpGlossaryTermRecord();
 
-        const ficha = await service.readConcept('concept-1', 'EN');
+        const record = await service.readConcept('concept-1', 'EN');
 
-        expect(ficha.plainSummary).toEqual({
+        expect(record.plainSummary).toEqual({
           text: 'Summary in English',
           translated: true,
         });
       });
 
       it('un término del glosario en borrador es 404, no una ficha a medias', async () => {
-        const { service } = setUpGlossaryTermFicha({
+        const { service } = setUpGlossaryTermRecord({
           stateConceptId: CONCEPTS.TERM_DRAFT,
         });
 
@@ -1546,15 +2170,15 @@ describe('ConceptsService', () => {
           ]),
         );
 
-        const ficha = await service.readConcept('concept-1');
+        const record = await service.readConcept('concept-1');
 
-        expect(ficha.conceptId).toBe('concept-1');
-        expect(ficha.category).toBeNull();
+        expect(record.conceptId).toBe('concept-1');
+        expect(record.category).toBeNull();
       });
 
       it('publica la imagen del término con su atribución y licencia, y deja `properties` intacto', async () => {
-        const { service, designationsRepo } = setUpGlossaryTermFicha();
-        const imagen = {
+        const { service, designationsRepo } = setUpGlossaryTermRecord();
+        const image = {
           url: 'https://upload.wikimedia.org/heart.jpg',
           thumbUrl: 'https://upload.wikimedia.org/heart-320.jpg',
           attribution: 'Patrick J. Lynch',
@@ -1562,24 +2186,24 @@ describe('ConceptsService', () => {
           sourcePage: 'https://commons.wikimedia.org/wiki/File:Heart.jpg',
         };
         designationsRepo.findPropertiesByConcept.mockResolvedValue([
-          { propertyCode: GLOSSARY_IMAGE_PROPERTY_CODE, valueJson: imagen },
+          { propertyCode: GLOSSARY_IMAGE_PROPERTY_CODE, valueJson: image },
           { propertyCode: 'source_url', valueJson: 'https://cima.aemps.es/' },
         ]);
 
-        const ficha = await service.readConcept('concept-1', 'ES');
+        const record = await service.readConcept('concept-1', 'ES');
 
-        expect(ficha.image).toEqual({
-          source: imagen.url,
-          thumbnailSource: imagen.thumbUrl,
-          attribution: imagen.attribution,
-          license: imagen.license,
-          sourcePage: imagen.sourcePage,
+        expect(record.image).toEqual({
+          source: image.url,
+          thumbnailSource: image.thumbUrl,
+          attribution: image.attribution,
+          license: image.license,
+          sourcePage: image.sourcePage,
           // Sin alt propio, se arma con el nombre que muestra la ficha.
           alt: 'Imagen ilustrativa: Heart',
           status: 'approved',
         });
-        expect(ficha.properties).toMatchObject({
-          [GLOSSARY_IMAGE_PROPERTY_CODE]: imagen,
+        expect(record.properties).toMatchObject({
+          [GLOSSARY_IMAGE_PROPERTY_CODE]: image,
           source_url: 'https://cima.aemps.es/',
         });
       });
@@ -1587,7 +2211,7 @@ describe('ConceptsService', () => {
   });
 
   describe('imageFromProperty', () => {
-    const completa = {
+    const complete = {
       url: 'https://x/y.jpg',
       attribution: 'Autor',
       license: 'CC0',
@@ -1623,17 +2247,17 @@ describe('ConceptsService', () => {
 
     it('una imagen rechazada en revisión no se publica', () => {
       expect(
-        imageFromProperty({ ...completa, status: 'rejected' }),
+        imageFromProperty({ ...complete, status: 'rejected' }),
       ).toBeUndefined();
       expect(
-        imageFromProperty({ ...completa, status: 'pending' }),
+        imageFromProperty({ ...complete, status: 'pending' }),
       ).toMatchObject({ status: 'pending' });
     });
 
     it('un valor que no es objeto es «sin imagen», no un error', () => {
       expect(imageFromProperty('https://x/y.jpg')).toBeUndefined();
       expect(imageFromProperty(null)).toBeUndefined();
-      expect(imageFromProperty([completa])).toBeUndefined();
+      expect(imageFromProperty([complete])).toBeUndefined();
     });
   });
 });

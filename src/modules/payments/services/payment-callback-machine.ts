@@ -32,7 +32,7 @@ export type DecisionCallback =
  * "más" ni "menos" que CAPTURED, son otra rama, y por eso su choque es una
  * contradicción y no una entrega atrasada.
  */
-const ORDEN_CICLO: Readonly<Record<string, number>> = {
+const CYCLE_ORDER: Readonly<Record<string, number>> = {
   [CONCEPTS.TXN_PROCESSING]: 0,
   [CONCEPTS.TXN_AUTHORIZED]: 1,
   [CONCEPTS.TXN_CAPTURED]: 2,
@@ -40,7 +40,7 @@ const ORDEN_CICLO: Readonly<Record<string, number>> = {
 };
 
 /** Transiciones admitidas. Lo que no está acá no se escribe. */
-const TRANSICIONES: Readonly<Record<string, readonly string[]>> = {
+const TRANSITIONS: Readonly<Record<string, readonly string[]>> = {
   [CONCEPTS.TXN_PROCESSING]: [
     CONCEPTS.TXN_AUTHORIZED,
     CONCEPTS.TXN_CAPTURED,
@@ -60,22 +60,22 @@ const TRANSICIONES: Readonly<Record<string, readonly string[]>> = {
  * Clasifica un callback ya verificado contra el estado actual de la transacción.
  *
  * @param actual - Estado local de la transacción.
- * @param objetivo - Estado que informa el proveedor.
+ * @param target - Estado que informa el proveedor.
  * @returns La decisión de la máquina de estados.
  */
-export function decidirCallback(
+export function decideCallback(
   actual: string,
-  objetivo: string,
+  target: string,
 ): DecisionCallback {
-  if (actual === objetivo) return 'duplicado';
-  if (TRANSICIONES[actual]?.includes(objetivo)) return 'aplicar';
+  if (actual === target) return 'duplicado';
+  if (TRANSITIONS[actual]?.includes(target)) return 'aplicar';
 
-  const rangoActual = ORDEN_CICLO[actual];
-  const rangoObjetivo = ORDEN_CICLO[objetivo];
+  const rangeActual = CYCLE_ORDER[actual];
+  const targetRange = CYCLE_ORDER[target];
   if (
-    rangoActual !== undefined &&
-    rangoObjetivo !== undefined &&
-    rangoObjetivo < rangoActual
+    rangeActual !== undefined &&
+    targetRange !== undefined &&
+    targetRange < rangeActual
   ) {
     return 'obsoleto';
   }
@@ -92,10 +92,10 @@ export function decidirCallback(
  * misma transacción es otro evento. Pendiente: cuando el proveedor aporte su
  * propio ID de evento, esta derivación debe reemplazarse por él.
  *
- * @param partes - Campos firmados del callback.
+ * @param parts - Campos firmados del callback.
  * @returns La referencia del evento, estable para el mismo contenido.
  */
-export function referenciaEvento(partes: {
+export function eventReference(parts: {
   /** Referencia de la transacción en el gateway. */
   gatewayTransactionRef: string;
   /** Resultado informado. */
@@ -103,10 +103,10 @@ export function referenciaEvento(partes: {
   /** Código de autorización, si vino. */
   authorizationCode?: string;
 }): string {
-  const canonico = [
-    partes.gatewayTransactionRef,
-    partes.outcome,
-    partes.authorizationCode ?? '',
+  const canonical = [
+    parts.gatewayTransactionRef,
+    parts.outcome,
+    parts.authorizationCode ?? '',
   ].join('|');
-  return `sha256:${createHash('sha256').update(canonico, 'utf8').digest('hex')}`;
+  return `sha256:${createHash('sha256').update(canonical, 'utf8').digest('hex')}`;
 }

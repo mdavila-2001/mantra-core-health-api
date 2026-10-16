@@ -3,12 +3,12 @@
   Fuente real: src/modules/workflow/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `workflow`
 
-**Fuente:** [`src/modules/workflow/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/workflow/README.md)
+**Fuente:** [`src/modules/workflow/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/workflow/README.md)
 · 3 controllers · 3 services · 3 repositories · 8 entidades · 1 DTO
 
 ---
@@ -18,6 +18,37 @@
 Un solo sitio donde se declara qué estados puede tener un agregado, qué comandos lo mueven de uno a
 otro, qué hay que cumplir para moverlo y qué pasa después de moverlo. Y un solo sitio donde eso se
 ejecuta, con idempotencia, compensación, reintento y vencimiento.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/workflow -name '*.controller.ts' | wc -l
+  find src/modules/workflow -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/workflow -name '*.entity.ts' | wc -l
+  find src/modules/workflow -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 11 rutas HTTP, 8 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 8 de 8 archivos `*.entity.ts`): `state_definitions`, `state_machine_definitions`, `state_transition_definitions`, `state_transition_events`, `transition_guards`, `transition_side_effects`, `workflow_instances`, `workflow_tasks`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /workflow/state-machines` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/state-machines/:id/states` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/state-machines/:id/transitions` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/state-machines/:id/publish` | WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `workflow-definitions` |
+| `POST /workflow/instances/sweep-timeouts` | SYSTEM, PLATFORM_ADMIN | `workflow-instances` |
+| `POST /workflow/instances` | CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `workflow-instances` |
+| `POST /workflow/tasks/:id/complete` | CLINICIAN, BILLING_AGENT, SCHEDULER, PLATFORM_ADMIN | `workflow-instances` |
+| `GET /workflow/aggregates/:aggregateId/transitions` | AUDITOR, COMPLIANCE_OFFICER, CLINICIAN, PLATFORM_ADMIN | `workflow-transitions` |
+| `POST /workflow/aggregates/:aggregateId/transitions/:commandCode` | CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `workflow-transitions` |
+| `POST /workflow/aggregates/:aggregateId/transitions/:eventId/compensate` | SYSTEM, SAGA_ORCHESTRATOR, PLATFORM_ADMIN | `workflow-transitions` |
+| `POST /workflow/aggregates/:aggregateId/transitions/:eventId/retry` | SYSTEM, PLATFORM_ADMIN | `workflow-transitions` |
 
 ## Casos de uso cubiertos (13)
 
@@ -165,8 +196,8 @@ guarda ni el contenido de `payloadJson`.
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/workflow` — 87 pruebas (17 definición + 31 ejecución +
-19 instancias + 9 del repositorio de agregado + 11 de delegación de los tres controladores).
+`corepack yarn test src/modules/workflow --runInBand --silent` — 5 suites y 87 pruebas
+aprobadas durante la revisión.
 
 ## Divergencia con el caso de uso v3.9
 
@@ -199,3 +230,7 @@ guarda ni el contenido de `payloadJson`.
   pero no se contrasta contra el propósito declarado por el llamante. Eso vive en `authz`
   (`access_policies`), que es de la parte de Pablo.
 
+## Revisión ALOVIDA
+
+El propósito de uso configurado en una transición todavía no se comprueba contra la política del
+actor; ver [el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/workflow.md).

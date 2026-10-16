@@ -12,7 +12,7 @@ import { DiagnosticUnitsSearchService } from './diagnostic-units-search.service'
 import { DUNIT } from '../diagnostic_units.concepts';
 
 /** Una unidad publicada mínima, con lo que la proyección lee. */
-function unidad(overrides: Record<string, unknown> = {}) {
+function unit(overrides: Record<string, unknown> = {}) {
   return {
     id: 'unit-1',
     tenantId: 'tenant-1',
@@ -64,7 +64,7 @@ function build() {
 describe('DiagnosticUnitsSearchService', () => {
   it('only ever asks for published units, whatever the filters say', async () => {
     const d = build();
-    d.readRepo.searchVisible.mockResolvedValue([unidad()]);
+    d.readRepo.searchVisible.mockResolvedValue([unit()]);
     d.readRepo.countVisible.mockResolvedValue(1);
 
     await d.service.search({});
@@ -112,7 +112,7 @@ describe('DiagnosticUnitsSearchService', () => {
 
   it('projects the rating and the cheapest published price', async () => {
     const d = build();
-    d.readRepo.searchVisible.mockResolvedValue([unidad()]);
+    d.readRepo.searchVisible.mockResolvedValue([unit()]);
     d.readRepo.countVisible.mockResolvedValue(1);
     d.readRepo.findActiveSites.mockResolvedValue([
       { id: 'site-1', diagnosticUnitId: 'unit-1' },
@@ -145,7 +145,7 @@ describe('DiagnosticUnitsSearchService', () => {
   describe('cities y minAmountCurrency (CL-45, CL-51)', () => {
     it('aceptado: junta ciudades de sedes distintas y la moneda del precio mínimo', async () => {
       const d = build();
-      d.readRepo.searchVisible.mockResolvedValue([unidad()]);
+      d.readRepo.searchVisible.mockResolvedValue([unit()]);
       d.readRepo.countVisible.mockResolvedValue(1);
       d.readRepo.findActiveSites.mockResolvedValue([
         { id: 'site-1', diagnosticUnitId: 'unit-1', practiceSiteId: 'ps-1' },
@@ -184,7 +184,7 @@ describe('DiagnosticUnitsSearchService', () => {
 
     it('límite: una sede sin dirección cargada no aporta ciudad ni rompe la lista', async () => {
       const d = build();
-      d.readRepo.searchVisible.mockResolvedValue([unidad()]);
+      d.readRepo.searchVisible.mockResolvedValue([unit()]);
       d.readRepo.countVisible.mockResolvedValue(1);
       d.readRepo.findActiveSites.mockResolvedValue([
         { id: 'site-1', diagnosticUnitId: 'unit-1', practiceSiteId: 'ps-1' },
@@ -201,7 +201,7 @@ describe('DiagnosticUnitsSearchService', () => {
 
     it('inválido: un centro sin tarifa publica no tiene minAmountCurrency', async () => {
       const d = build();
-      d.readRepo.searchVisible.mockResolvedValue([unidad()]);
+      d.readRepo.searchVisible.mockResolvedValue([unit()]);
       d.readRepo.countVisible.mockResolvedValue(1);
       d.readRepo.findCurrentPublicSchedulesFor.mockResolvedValue([]);
       d.readRepo.findCurrentPricesForSchedules.mockResolvedValue([]);
@@ -215,7 +215,7 @@ describe('DiagnosticUnitsSearchService', () => {
 
   it('never shows a concept id where a label belongs', async () => {
     const d = build();
-    d.readRepo.searchVisible.mockResolvedValue([unidad()]);
+    d.readRepo.searchVisible.mockResolvedValue([unit()]);
     d.readRepo.countVisible.mockResolvedValue(1);
     // El catálogo no resolvió el concepto: se muestra vacío, nunca el uuid.
     d.readRepo.findConcepts.mockResolvedValue([]);
@@ -228,8 +228,8 @@ describe('DiagnosticUnitsSearchService', () => {
   it('drops units below the minimum rating and corrects the total', async () => {
     const d = build();
     d.readRepo.searchVisible.mockResolvedValue([
-      unidad(),
-      unidad({ id: 'unit-2', publicProfileId: 'profile-2' }),
+      unit(),
+      unit({ id: 'unit-2', publicProfileId: 'profile-2' }),
     ]);
     d.readRepo.countVisible.mockResolvedValue(2);
     d.ratings.ratingsByProfiles.mockResolvedValue(
@@ -250,7 +250,7 @@ describe('DiagnosticUnitsSearchService', () => {
 
   it('drops units with no published price when a price ceiling is given', async () => {
     const d = build();
-    d.readRepo.searchVisible.mockResolvedValue([unidad()]);
+    d.readRepo.searchVisible.mockResolvedValue([unit()]);
     d.readRepo.countVisible.mockResolvedValue(1);
 
     const res = await d.service.search({ maxAmount: 500 });

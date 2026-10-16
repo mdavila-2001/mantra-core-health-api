@@ -29,7 +29,6 @@ import {
   CommunityEngagementService,
   type PostEngagement,
 } from './community-engagement.service';
-import { CommunityErrorReason } from '../community.error-reasons';
 import { FileUploadService } from '../../common/services';
 import type { FileContentDto } from '../../common/dto';
 import type {
@@ -129,15 +128,11 @@ export class CommunitySocialReadService {
     actor: AuthenticatedUser,
   ): Promise<PublicProfileDetailDto> {
     const em = this.em.fork();
-    const perfil = await this.profilesRepo.findBySlug(em, slug);
-    if (!perfil) {
-      throw new ResourceNotFoundException(
-        'Perfil no encontrado',
-        { slug },
-        CommunityErrorReason.PROFILE_NOT_FOUND_BY_SLUG,
-      );
+    const profile = await this.profilesRepo.findBySlug(em, slug);
+    if (!profile) {
+      throw new ResourceNotFoundException('Perfil no encontrado', { slug });
     }
-    return this.getProfile(perfil.id, actor);
+    return this.getProfile(profile.id, actor);
   }
 
   async getProfile(
@@ -147,13 +142,9 @@ export class CommunitySocialReadService {
     const em = this.em.fork();
     const profile = await this.profilesRepo.findById(em, profileId);
     if (!profile)
-      throw new ResourceNotFoundException(
-        'Perfil público no encontrado',
-        {
-          profileId,
-        },
-        CommunityErrorReason.PUBLIC_PROFILE_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Perfil público no encontrado', {
+        profileId,
+      });
 
     // Un bloqueo responde 404 y no 403, por lo mismo que en las publicaciones:
     // «existe pero no podés verlo» ya confirma que ese perfil existe, y quien
@@ -166,13 +157,9 @@ export class CommunitySocialReadService {
       actorProfileId &&
       (await this.visibility.isBlockedBetween(em, actorProfileId, profile.id))
     )
-      throw new ResourceNotFoundException(
-        'Perfil público no encontrado',
-        {
-          profileId,
-        },
-        CommunityErrorReason.PUBLIC_PROFILE_BLOCKED,
-      );
+      throw new ResourceNotFoundException('Perfil público no encontrado', {
+        profileId,
+      });
 
     const [badges, prestige] = await Promise.all([
       this.profilesRepo.listBadgesBySubject(
@@ -315,13 +302,9 @@ export class CommunitySocialReadService {
     const em = this.em.fork();
     const post = await this.postsRepo.findById(em, postId);
     if (!post)
-      throw new ResourceNotFoundException(
-        'Publicación no encontrada',
-        {
-          postId,
-        },
-        CommunityErrorReason.POST_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Publicación no encontrada', {
+        postId,
+      });
 
     const actorProfileId = await this.visibility.resolveActorProfileId(
       em,
@@ -330,13 +313,9 @@ export class CommunitySocialReadService {
     );
     const canView = await this.visibility.canViewPost(em, post, actorProfileId);
     if (!canView)
-      throw new ResourceNotFoundException(
-        'Publicación no encontrada',
-        {
-          postId,
-        },
-        CommunityErrorReason.POST_NOT_VISIBLE,
-      );
+      throw new ResourceNotFoundException('Publicación no encontrada', {
+        postId,
+      });
 
     const [media, hashtags, mentions, engagement] = await Promise.all([
       this.postsRepo.listMedia(em, post.id),
@@ -469,24 +448,16 @@ export class CommunitySocialReadService {
     requestedProfileId?: string,
   ): Promise<FileContentDto> {
     const em = this.em.fork();
-    const adjunto = await this.commentsRepo.findMediaByFileId(em, fileId);
-    if (!adjunto) {
-      throw new ResourceNotFoundException(
-        'Archivo no encontrado',
-        { fileId },
-        CommunityErrorReason.COMMENT_MEDIA_NOT_FOUND,
-      );
+    const attachment = await this.commentsRepo.findMediaByFileId(em, fileId);
+    if (!attachment) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
     }
-    const comentario = await this.commentsRepo.findById(em, adjunto.commentId);
+    const comment = await this.commentsRepo.findById(em, attachment.commentId);
     if (
-      !comentario ||
-      comentario.commentableTypeConceptId !== SOCIAL_OBJECT_CONCEPT_BY_CODE.POST
+      !comment ||
+      comment.commentableTypeConceptId !== SOCIAL_OBJECT_CONCEPT_BY_CODE.POST
     ) {
-      throw new ResourceNotFoundException(
-        'Archivo no encontrado',
-        { fileId },
-        CommunityErrorReason.COMMENT_MEDIA_INVALID_PARENT,
-      );
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
     }
 
     const actorProfileId = await this.visibility.resolveActorProfileId(
@@ -496,11 +467,7 @@ export class CommunitySocialReadService {
     );
     // Mismo 404 que «no existe»: a quien enumera fileIds ajenos no se le
     // confirma si el archivo existe pero el post es privado.
-    await this.assertPostVisible(
-      em,
-      comentario.commentableRefId,
-      actorProfileId,
-    );
+    await this.assertPostVisible(em, comment.commentableRefId, actorProfileId);
 
     return this.files.downloadPublicMedia(fileId);
   }
@@ -714,13 +681,9 @@ export class CommunitySocialReadService {
   ): Promise<void> {
     const post = await this.postsRepo.findById(em, postId);
     if (!post || !(await this.visibility.canViewPost(em, post, actorProfileId)))
-      throw new ResourceNotFoundException(
-        'Publicación no encontrada',
-        {
-          postId,
-        },
-        CommunityErrorReason.POST_NOT_VISIBLE,
-      );
+      throw new ResourceNotFoundException('Publicación no encontrada', {
+        postId,
+      });
   }
 
   /** Clave de continuación `(createdAt, id)` de un cursor, si es válida. */
@@ -761,8 +724,8 @@ export class CommunitySocialReadService {
       commentsEnabled: post.commentsEnabled ?? null,
       publishedAt: post.publishedAt ?? null,
       editedAt: post.editedAt ?? null,
-      reactions: (engagement ?? CommunityEngagementService.vacio()).reactions,
-      commentCount: (engagement ?? CommunityEngagementService.vacio())
+      reactions: (engagement ?? CommunityEngagementService.empty()).reactions,
+      commentCount: (engagement ?? CommunityEngagementService.empty())
         .commentCount,
     };
   }

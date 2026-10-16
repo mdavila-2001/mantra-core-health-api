@@ -11,6 +11,11 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { GlossarySeedService } from './glossary-seed.service';
 import { GLOSSARY_TERMS } from './glossary-terms.catalog';
 import {
+  GLOSSARY_ARTICLE_SLUGS,
+  glossaryArticleFor,
+} from './glossary-articles.catalog';
+import { GLOSSARY_SOURCE_REFERENCES } from './glossary-source-provenance';
+import {
   GLOSSARY_TAXONOMY,
   glossaryPreferredDesignationId,
   glossaryPropertyId,
@@ -22,6 +27,7 @@ import {
 } from './glossary-taxonomy';
 import {
   GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE,
+  GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
   glossaryRelationTypeConceptId,
 } from '../../modules/terminology/glossary.constants';
 
@@ -146,11 +152,17 @@ const TOTAL_DESIGNATIONS = GLOSSARY_TERMS.reduce(
 
 /**
  * Cuántas propiedades declara el catálogo: 3 por término (slug, definición
- * clínica, resumen llano) + 4 más (`active_ingredients`/`dosage_form`/
- * `route`/`manufacturer`) por cada término con `drugFacts` (FND-25-02).
+ * clínica, resumen llano), fuentes editoriales cuando están curadas y 4 más
+ * (`active_ingredients`/`dosage_form`/`route`/`manufacturer`) con `drugFacts`,
+ * más el artículo enciclopédico (`glossary-article`) de los términos que lo tienen.
  */
 const TOTAL_PROPERTIES = GLOSSARY_TERMS.reduce(
-  (total, term) => total + 3 + (term.drugFacts ? 4 : 0),
+  (total, term) =>
+    total +
+    3 +
+    (GLOSSARY_SOURCE_REFERENCES[term.slug] !== undefined ? 1 : 0) +
+    (glossaryArticleFor(term.slug) !== undefined ? 1 : 0) +
+    (term.drugFacts ? 4 : 0),
   0,
 );
 
@@ -177,8 +189,7 @@ describe('GlossarySeedService', () => {
     expect(result.orphanRelationships).toBe(
       TOTAL_DECLARED_RELATIONS - TOTAL_RESOLVABLE_RELATIONS,
     );
-    // La única discrepancia conocida de la fuente (ver cabecera del catálogo).
-    expect(result.orphanRelationships).toBe(1);
+    expect(result.orphanRelationships).toBe(0);
   });
 
   it('todo término se siembra activo (`TERM_ACTIVE`), nunca en borrador', async () => {
@@ -190,10 +201,10 @@ describe('GlossarySeedService', () => {
       expect(concept.stateConceptId).toEqual(expect.any(String));
     }
     // Todos comparten el mismo estado: el activo.
-    const estados = new Set(
+    const states = new Set(
       g.rowsOf('CatalogConcepts').map((concept) => concept.stateConceptId),
     );
-    expect(estados.size).toBe(1);
+    expect(states.size).toBe(1);
   });
 
   it('no siembra ninguna propiedad `glossary-image`: decisión deliberada, no una omisión', async () => {
@@ -206,31 +217,82 @@ describe('GlossarySeedService', () => {
     );
     // Los cuatro códigos de FND-25-02 (`active_ingredients`/`dosage_form`/
     // `route`/`manufacturer`) sólo aparecen para los términos que declaran
-    // `drugFacts` en el catálogo — no para los 64+ restantes. Lo que este
-    // test sigue fijando es que `glossary-image` nunca aparece.
+    // `drugFacts`; las fuentes editoriales sólo para términos documentados.
+    // Este test también fija que `glossary-image` nunca aparece.
     expect(propertyCodes.has('glossary-image')).toBe(false);
-    const esperados = new Set([
+    const expected = new Set([
       'glossary-slug',
       'glossary-clinical-definition',
       'glossary-plain-summary',
+      'glossary-sources',
+      'glossary-article',
       'active_ingredients',
       'dosage_form',
       'route',
       'manufacturer',
     ]);
     for (const code of propertyCodes) {
-      expect(esperados.has(code)).toBe(true);
+      expect(expected.has(code)).toBe(true);
+    }
+
+    const sourceProperties = g
+      .rowsOf('ConceptProperties')
+      .filter(
+        (property) =>
+          property.propertyCode === GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
+      );
+    expect(sourceProperties).toHaveLength(
+      Object.keys(GLOSSARY_SOURCE_REFERENCES).length,
+    );
+    for (const [slug, references] of Object.entries(
+      GLOSSARY_SOURCE_REFERENCES,
+    )) {
+      const property = sourceProperties.find(
+        (candidate) =>
+          candidate.id ===
+          glossaryPropertyId(slug, GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE),
+      );
+      expect(property).toMatchObject({
+        conceptId: glossaryTermConceptId(slug),
+        dataType: 'json',
+        valueJson: references,
+      });
+    }
+  });
+
+  it('siembra el artículo enciclopédico propio, íntegro, sólo en los términos que lo tienen', async () => {
+    const g = build();
+
+    await g.service.run();
+
+    const articles = g
+      .rowsOf('ConceptProperties')
+      .filter((property) => property.propertyCode === 'glossary-article');
+    expect(articles.map((property) => property.conceptId).sort()).toEqual(
+      GLOSSARY_ARTICLE_SLUGS.map((slug) => glossaryTermConceptId(slug)).sort(),
+    );
+    for (const slug of GLOSSARY_ARTICLE_SLUGS) {
+      const property = articles.find(
+        (candidate) =>
+          candidate.id === glossaryPropertyId(slug, 'glossary-article'),
+      );
+      expect(property).toMatchObject({
+        conceptId: glossaryTermConceptId(slug),
+        dataType: 'json',
+      });
+      // Lo que se siembra es el documento tal cual: lo que el front dibuja.
+      expect(property.valueJson).toEqual(glossaryArticleFor(slug));
     }
   });
 
   it('re-sembrar sobre una base ya poblada no duplica ninguna fila (reseed idempotente)', async () => {
     // Se siembra una vez y se vuelve a correr sobre lo que quedó — mismo
     // patrón que `DynamicEnumSeedService`.
-    const segunda = build(await seeded());
-    const result = await segunda.service.run();
+    const second = build(await seeded());
+    const result = await second.service.run();
 
-    expect(segunda.created).toEqual([]);
-    expect(segunda.removed).toEqual([]);
+    expect(second.created).toEqual([]);
+    expect(second.removed).toEqual([]);
     expect(result).toEqual({
       valueSets: 0,
       terms: 0,
@@ -238,7 +300,7 @@ describe('GlossarySeedService', () => {
       properties: 0,
       memberships: 0,
       relationships: 0,
-      orphanRelationships: 1,
+      orphanRelationships: 0,
       codeSystemBackfilled: 0,
       updated: 0,
       removed: 0,
@@ -246,22 +308,22 @@ describe('GlossarySeedService', () => {
   });
 
   it('los identificadores deterministas de dos corridas independientes coinciden byte a byte', async () => {
-    const primera = build();
-    await primera.service.run();
-    const segunda = build();
-    await segunda.service.run();
+    const first = build();
+    await first.service.run();
+    const second = build();
+    await second.service.run();
 
-    const idsPrimera = primera.created.map((row) => row.data.id).sort();
-    const idsSegunda = segunda.created.map((row) => row.data.id).sort();
-    expect(idsPrimera).toEqual(idsSegunda);
+    const idsFirst = first.created.map((row) => row.data.id).sort();
+    const idsSecond = second.created.map((row) => row.data.id).sort();
+    expect(idsFirst).toEqual(idsSecond);
   });
 
-  it('advierte, pero no falla, ante la relación huérfana declarada en la fuente', async () => {
+  it('no deja advertencia por la relación de control de signos vitales, que ya tiene destino', async () => {
     const g = build();
 
     await g.service.run();
 
-    expect(g.logger.warn).toHaveBeenCalledWith(
+    expect(g.logger.warn).not.toHaveBeenCalledWith(
       expect.objectContaining({
         sourceSlug: 'hipertension-arterial',
         targetSlug: 'control-de-signos-vitales',
@@ -272,7 +334,7 @@ describe('GlossarySeedService', () => {
 
   describe('reconciliación de una base sembrada con el catálogo anterior', () => {
     const PT = 'tiempo-de-protrombina';
-    const HEMOGRAMA = 'hemograma-completo';
+    const BLOODCOUNT = 'hemograma-completo';
 
     /**
      * La base tal como la dejó el catálogo de antes de la auditoría del
@@ -281,24 +343,24 @@ describe('GlossarySeedService', () => {
      * nombre en inglés viejo, el resumen viejo de la warfarina y una relación
      * entre curados que el catálogo ya no declara.
      */
-    async function baseAnterior(): Promise<Store> {
+    async function basePrevious(): Promise<Store> {
       const store = await seeded();
       const rows = (entity: string) => store.get(entity)!;
       const put = (entity: string, row: any) => rows(entity).set(row.id, row);
 
-      const hemograma = glossaryTermConceptId(HEMOGRAMA);
+      const bloodCount = glossaryTermConceptId(BLOODCOUNT);
       rows('ValueSetMembers').delete(
-        glossaryValueSetMemberId('glossary-category-lab', hemograma),
+        glossaryValueSetMemberId('glossary-category-lab', bloodCount),
       );
       put('ValueSetMembers', {
         id: glossaryValueSetMemberId(
           'glossary-category-diagnostic-test',
-          hemograma,
+          bloodCount,
         ),
         valueSetVersionId: glossaryValueSetVersionId(
           'glossary-category-diagnostic-test',
         ),
-        conceptId: hemograma,
+        conceptId: bloodCount,
       });
 
       put('ConceptDesignations', {
@@ -335,35 +397,35 @@ describe('GlossarySeedService', () => {
     }
 
     it('mueve la categoría, corrige textos y quita sinónimos y relaciones que ya no van', async () => {
-      const g = build(await baseAnterior());
+      const g = build(await basePrevious());
 
       const result = await g.service.run();
 
-      const hemograma = glossaryTermConceptId(HEMOGRAMA);
-      const categorias = g
+      const bloodCount = glossaryTermConceptId(BLOODCOUNT);
+      const categories = g
         .rowsIn('ValueSetMembers')
         .filter(
           (m) =>
-            m.conceptId === hemograma &&
+            m.conceptId === bloodCount &&
             [
               glossaryValueSetVersionId('glossary-category-lab'),
               glossaryValueSetVersionId('glossary-category-diagnostic-test'),
             ].includes(m.valueSetVersionId),
         )
         .map((m) => m.valueSetVersionId);
-      expect(categorias).toEqual([
+      expect(categories).toEqual([
         glossaryValueSetVersionId('glossary-category-lab'),
       ]);
 
-      const designacion = (id: string) =>
+      const designation = (id: string) =>
         g.rowsIn('ConceptDesignations').find((d) => d.id === id);
       expect(
-        designacion(glossarySynonymDesignationId('fiebre', 1)),
+        designation(glossarySynonymDesignationId('fiebre', 1)),
       ).toBeUndefined();
-      expect(designacion(glossarySynonymDesignationId(PT, 0))?.value).toBe(
+      expect(designation(glossarySynonymDesignationId(PT, 0))?.value).toBe(
         'TP',
       );
-      expect(designacion(glossarySynonymDesignationId(PT, 1))).toBeUndefined();
+      expect(designation(glossarySynonymDesignationId(PT, 1))).toBeUndefined();
 
       expect(
         g
@@ -401,31 +463,51 @@ describe('GlossarySeedService', () => {
     });
 
     it('una segunda corrida sobre la base reconciliada no escribe nada', async () => {
-      const primera = build(await baseAnterior());
-      await primera.service.run();
+      const first = build(await basePrevious());
+      await first.service.run();
 
-      const segunda = build(primera.store);
-      const result = await segunda.service.run();
+      const second = build(first.store);
+      const result = await second.service.run();
 
-      expect(segunda.created).toEqual([]);
-      expect(segunda.removed).toEqual([]);
+      expect(second.created).toEqual([]);
+      expect(second.removed).toEqual([]);
       expect(result.updated).toBe(0);
       expect(result.removed).toBe(0);
     });
 
+    it('un artículo desactualizado en la base se reescribe con el del catálogo', async () => {
+      const slug = GLOSSARY_ARTICLE_SLUGS[0];
+      const store = await seeded();
+      const property = store
+        .get('ConceptProperties')!
+        .get(glossaryPropertyId(slug, 'glossary-article'));
+      property.valueJson = { ...property.valueJson, sections: [] };
+
+      const g = build(store);
+      const result = await g.service.run();
+
+      expect(result.updated).toBe(1);
+      expect(
+        g
+          .rowsIn('ConceptProperties')
+          .find((row) => row.id === glossaryPropertyId(slug, 'glossary-article'))
+          .valueJson,
+      ).toEqual(glossaryArticleFor(slug));
+    });
+
     it('no toca filas ajenas colgadas de un término curado', async () => {
       const store = await seeded();
-      const fiebre = glossaryTermConceptId('fiebre');
-      const ajenas: [string, any][] = [
+      const fever = glossaryTermConceptId('fiebre');
+      const foreign: [string, any][] = [
         [
           'ConceptDesignations',
-          { id: 'designacion-ajena', conceptId: fiebre, value: 'Calentura' },
+          { id: 'designacion-ajena', conceptId: fever, value: 'Calentura' },
         ],
         [
           'ConceptProperties',
           {
             id: 'propiedad-ajena',
-            conceptId: fiebre,
+            conceptId: fever,
             propertyCode: 'nota-local',
             valueJson: { es: 'x' },
           },
@@ -434,7 +516,7 @@ describe('GlossarySeedService', () => {
           'ValueSetMembers',
           {
             id: 'membresia-ajena',
-            conceptId: fiebre,
+            conceptId: fever,
             valueSetVersionId: 'version-de-otro-value-set',
           },
         ],
@@ -442,7 +524,7 @@ describe('GlossarySeedService', () => {
           'ConceptRelationships',
           {
             id: 'relacion-ajena',
-            sourceConceptId: fiebre,
+            sourceConceptId: fever,
             targetConceptId: glossaryTermConceptId('corazon'),
             relationshipTypeConceptId:
               glossaryRelationTypeConceptId('RELATED_TERM'),
@@ -453,17 +535,17 @@ describe('GlossarySeedService', () => {
           {
             // Id fuera del espacio que este servicio genera para la preferida.
             id: `${glossaryPreferredDesignationId('fiebre')}-copia`,
-            conceptId: fiebre,
+            conceptId: fever,
             value: 'Fiebre (copia)',
           },
         ],
       ];
-      for (const [entity, row] of ajenas) store.get(entity)!.set(row.id, row);
+      for (const [entity, row] of foreign) store.get(entity)!.set(row.id, row);
 
       const g = build(store);
       const result = await g.service.run();
 
-      for (const [entity, row] of ajenas) {
+      for (const [entity, row] of foreign) {
         expect(g.rowsIn(entity).find((r) => r.id === row.id)).toEqual(row);
       }
       expect(result.updated).toBe(0);

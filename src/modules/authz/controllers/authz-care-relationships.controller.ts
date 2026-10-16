@@ -15,7 +15,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AuthzCareRelationshipsService } from '../services';
 import {
   CreateCareRelationshipDto,
@@ -52,6 +57,11 @@ export class AuthzCareRelationshipsController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de establish care relationship conforme al contrato `Promise<AuthzIdResponseDto>`.
    */
+  @Audited({
+    action: 'CARE_RELATIONSHIP_ESTABLISHED',
+    entity: 'care_relationship',
+    entityId: 'result.id',
+  })
   @Post('care-relationships')
   @Roles('CLINICIAN', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -70,6 +80,11 @@ export class AuthzCareRelationshipsController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de revoke care relationship conforme al contrato `Promise<AuthzStatusResultDto>`.
    */
+  @Audited({
+    action: 'CARE_RELATIONSHIP_REVOKED',
+    entity: 'care_relationship',
+    entityId: 'param:id',
+  })
   @Post('care-relationships/:id/revoke')
   @Roles('CLINICIAN', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -128,6 +143,11 @@ export class AuthzCareRelationshipsController {
    * @param dto - Paciente, tenant y motivo de la solicitud.
    * @param actor - El practicante que la envía (debe tener perfil propio).
    */
+  @Audited({
+    action: 'CARE_RELATIONSHIP_REQUESTED',
+    entity: 'care_relationship',
+    entityId: 'result.id',
+  })
   @Post('care-relationships/request')
   @Roles('CLINICIAN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -152,6 +172,11 @@ export class AuthzCareRelationshipsController {
    * @param dto - Decisión del paciente.
    * @param actor - Debe ser el paciente titular (`actor.patientProfileId`).
    */
+  @Audited({
+    action: 'CARE_RELATIONSHIP_REQUEST_ANSWERED',
+    entity: 'care_relationship',
+    entityId: 'param:id',
+  })
   @Post('care-relationships/:id/respond')
   @Roles('PATIENT')
   @HttpCode(HttpStatus.OK)
@@ -176,6 +201,11 @@ export class AuthzCareRelationshipsController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de establish legal representation conforme al contrato `Promise<AuthzIdResponseDto>`.
    */
+  @Audited({
+    action: 'LEGAL_REPRESENTATION_ESTABLISHED',
+    entity: 'patient_legal_representation',
+    entityId: 'result.id',
+  })
   @Post('legal-representations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -194,6 +224,11 @@ export class AuthzCareRelationshipsController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de revoke legal representation conforme al contrato `Promise<AuthzStatusResultDto>`.
    */
+  @Audited({
+    action: 'LEGAL_REPRESENTATION_REVOKED',
+    entity: 'patient_legal_representation',
+    entityId: 'param:id',
+  })
   @Post('legal-representations/:id/revoke')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

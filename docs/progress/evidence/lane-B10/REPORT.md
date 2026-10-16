@@ -8,7 +8,7 @@
 - Fecha: 2026-09-26 · Máquina: **M4 · Dell Inspiron 2** · Plan: [PLAN.md](./PLAN.md) · Decisiones: [DECISIONS.md](./DECISIONS.md)
 - Rama: `justin/test-b10-agenda-solapamiento-retiro`, desde `origin/test` @ `016caaa1`, PR contra `test`
 - Compuertas del carril: `yarn typecheck` exit 0 · `yarn lint` exit 0 · `yarn test --testPathPatterns=scheduling`
-  **507/507** (24 suites) — salidas en [`evidencia/`](./evidencia/)
+  **507/507** (24 suites) — salidas en [`evidencia/`](./evidencia/index.md)
 
 ## Completado
 
@@ -80,7 +80,7 @@ Con la API de esta rama levantada contra la base del VPS (o local con seeds):
 
 ## Evidencia
 
-Todas en [`evidencia/`](./evidencia/), con el comando en la primera línea y la salida literal:
+Todas en [`evidencia/`](./evidencia/index.md), con el comando en la primera línea y la salida literal:
 
 ```text
 $ corepack yarn typecheck                                    → exit=0   (gate-typecheck.txt)

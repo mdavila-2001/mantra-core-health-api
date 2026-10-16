@@ -5,11 +5,11 @@ import type { FormatoDeArchivo, PerfilDeImportacion } from '../import';
 import { ImportFileRejectedException } from './concept-file-import.service';
 import {
   IMPORT_PARSERS,
-  type LectorDeArchivosDeImportacion,
+  type ReaderImportFiles,
 } from './import-parsers.provider';
 
 /** Un archivo listo para descargar. */
-export interface PlantillaDeImportacion {
+export interface ImportTemplate {
   /** El contenido del archivo. */
   readonly contenido: Buffer;
   /** Qué tipo declarar para que el navegador lo abra con lo que corresponde. */
@@ -19,10 +19,10 @@ export interface PlantillaDeImportacion {
 }
 
 /** Cómo se arma cada formato de plantilla. */
-interface GeneradorDePlantilla {
+interface TemplateGenerator {
   readonly extension: string;
   readonly tipo: string;
-  armar: (perfil: PerfilDeImportacion) => Buffer;
+  armar: (profile: PerfilDeImportacion) => Buffer;
 }
 
 /**
@@ -31,13 +31,13 @@ interface GeneradorDePlantilla {
  * Es el mismo patrón que la lista de parseadores, por el mismo motivo: el día
  * que se pueda generar una planilla, se registra acá y el endpoint no cambia.
  */
-const GENERADORES: Partial<Record<FormatoDeArchivo, GeneradorDePlantilla>> = {
+const GENERATORS: Partial<Record<FormatoDeArchivo, TemplateGenerator>> = {
   csv: {
     extension: 'csv',
     // Con la codificación declarada: sin eso, una planilla abre el archivo con
     // la codificación del sistema y los acentos del ejemplo salen rotos.
     tipo: 'text/csv; charset=utf-8',
-    armar: armarCsv,
+    armar: buildCsv,
   },
 };
 
@@ -62,11 +62,11 @@ export class ImportTemplateService {
   /**
    * Inicializa el servicio.
    *
-   * @param lector - De dónde salen los perfiles y qué formatos se reconocen.
+   * @param reader - De dónde salen los perfiles y qué formatos se reconocen.
    */
   constructor(
     @Inject(IMPORT_PARSERS)
-    private readonly lector: LectorDeArchivosDeImportacion,
+    private readonly reader: ReaderImportFiles,
   ) {}
 
   /**
@@ -76,9 +76,9 @@ export class ImportTemplateService {
    * @param format - En qué formato se quiere la plantilla.
    * @returns El archivo, con su tipo y su nombre.
    */
-  generar(profile: string, format: string): PlantillaDeImportacion {
-    const perfil = this.lector.perfil(profile);
-    if (perfil === undefined) {
+  generate(profile: string, format: string): ImportTemplate {
+    const importProfile = this.reader.perfil(profile);
+    if (importProfile === undefined) {
       throw new ImportFileRejectedException(
         ErrorCode.IMPORT_PROFILE_UNKNOWN,
         `No hay plantilla para «${profile}»`,
@@ -86,8 +86,8 @@ export class ImportTemplateService {
       );
     }
 
-    const generador = GENERADORES[format as FormatoDeArchivo];
-    if (generador === undefined) {
+    const generator = GENERATORS[format as FormatoDeArchivo];
+    if (generator === undefined) {
       throw new ImportFileRejectedException(
         ErrorCode.IMPORT_FORMAT_UNSUPPORTED,
         `Todavía no se puede generar una plantilla en formato «${format}»`,
@@ -96,9 +96,9 @@ export class ImportTemplateService {
     }
 
     return {
-      contenido: generador.armar(perfil),
-      tipo: generador.tipo,
-      nombre: `plantilla-${perfil.id}.${generador.extension}`,
+      contenido: generator.armar(importProfile),
+      tipo: generator.tipo,
+      nombre: `plantilla-${importProfile.id}.${generator.extension}`,
     };
   }
 }
@@ -109,18 +109,15 @@ export class ImportTemplateService {
  * Los encabezados son los nombres **canónicos**, no los alias: quien use la
  * plantilla tal cual no depende de que el importador siga aceptando el alias.
  *
- * @param perfil - El perfil del que salen las columnas y el ejemplo.
+ * @param profile - El perfil del que salen las columnas y el ejemplo.
  * @returns El archivo como bytes.
  */
-function armarCsv(perfil: PerfilDeImportacion): Buffer {
-  const nombres = perfil.columnas.map((columna) => columna.nombre);
-  const ejemplo = nombres.map((nombre) => perfil.ejemplo[nombre] ?? '');
+function buildCsv(profile: PerfilDeImportacion): Buffer {
+  const names = profile.columnas.map((column) => column.nombre);
+  const example = names.map((name) => profile.ejemplo[name] ?? '');
 
-  const filas = [
-    nombres.map(escapar).join(','),
-    ejemplo.map(escapar).join(','),
-  ];
-  return Buffer.from(filas.join('\n') + '\n', 'utf8');
+  const rows = [names.map(escape).join(','), example.map(escape).join(',')];
+  return Buffer.from(rows.join('\n') + '\n', 'utf8');
 }
 
 /**
@@ -130,10 +127,10 @@ function armarCsv(perfil: PerfilDeImportacion): Buffer {
  * adentro se escriben dobles: es la misma regla con la que el parseador las
  * vuelve a leer.
  *
- * @param valor - El contenido de la celda.
+ * @param value - El contenido de la celda.
  * @returns La celda lista para escribir.
  */
-function escapar(valor: string): string {
-  if (!/[",\n\r]/.test(valor)) return valor;
-  return `"${valor.replace(/"/g, '""')}"`;
+function escape(value: string): string {
+  if (!/[",\n\r]/.test(value)) return value;
+  return `"${value.replace(/"/g, '""')}"`;
 }

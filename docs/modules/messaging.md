@@ -3,12 +3,12 @@
   Fuente real: src/modules/messaging/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `messaging`
 
-**Fuente:** [`src/modules/messaging/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/messaging/README.md)
+**Fuente:** [`src/modules/messaging/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/messaging/README.md)
 · 3 controllers · 3 services · 4 repositories · 22 entidades · 2 DTO
 
 ---
@@ -22,6 +22,43 @@ conciliación de acuses del proveedor.
 > **Este módulo es la pieza que desbloquea a los demás.** Los 17 módulos de la tanda A declaran sus
 > eventos en el "Pendiente" de su README porque no había dónde publicarlos. `OutboxService` es esa
 > API: ver *Cómo lo usa un módulo de negocio*, más abajo.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/messaging -name '*.controller.ts' | wc -l
+  find src/modules/messaging -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/messaging -name '*.entity.ts' | wc -l
+  find src/modules/messaging -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 17 rutas HTTP, 22 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Su `*.module.ts` no declara `imports` de otros módulos.
+
+Entidades (`tableName`, 22 de 22 archivos `*.entity.ts`): `adapter_event_mappings`, `adapter_inbound_events`, `adapter_tracking_capabilities`, `dead_letter_jobs`, `delivery_receipts`, `delivery_reconciliation_runs`, `delivery_status_transitions`, `delivery_tracking_events`, `domain_events`, `event_deliveries`, `event_subscriptions`, `in_app_notifications`, `message_channels`, `message_queues`, `message_templates`, `messaging_providers`, `notification_deliveries`, `notification_requests`, `outbox_messages`, `provider_channel_configs`, `queued_jobs`, `recipient_preferences`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /internal/outbox/relay/run` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/events/:domainEventId/dispatch` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/event-deliveries/:id/ack` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/queues/:code/claim` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/jobs/:id/complete` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/jobs/:id/fail` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `GET /internal/notifications/pending` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /internal/notifications/:requestId/deliver` | SYSTEM, MESSAGING_ADMIN | `messaging-internal` |
+| `POST /queues/:code/jobs` | SYSTEM, MESSAGING_ADMIN | `messaging` |
+| `POST /queues/dead-letter/:deadLetterJobId/redrive` | MESSAGING_ADMIN | `messaging` |
+| `POST /notifications/requests` | SYSTEM, MESSAGING_ADMIN | `messaging` |
+| `GET /notifications/me` | USER, MESSAGING_ADMIN | `messaging` |
+| `POST /notifications/in-app/read-all` | USER, MESSAGING_ADMIN | `messaging` |
+| `GET /notifications/preferences/me` | USER, MESSAGING_ADMIN | `messaging` |
+| `PUT /notifications/preferences/me` | USER, MESSAGING_ADMIN | `messaging` |
+| `POST /notifications/in-app/:id/read` | USER, MESSAGING_ADMIN | `messaging` |
+| `POST /webhooks/providers/:providerCode/receipts` | pública | `provider-webhooks` |
 
 ## Casos de uso cubiertos (13)
 
@@ -161,7 +198,8 @@ de proveedor, categoría, idioma y moneda son catálogos abiertos y llegan como 
 ## Permisos
 
 `MESSAGING_ADMIN` cubre el módulo. `SYSTEM` —los workers— opera el relay, el despacho, el reclamo de
-jobs y la entrega de notificaciones. `USER` marca sus propias notificaciones como leídas.
+jobs y la entrega de notificaciones. `USER` lee su propia bandeja, marca sus notificaciones como
+leídas y administra sus preferencias.
 
 `POST /webhooks/providers/:providerCode/receipts` es **la única ruta pública**: quien llama es un
 proveedor externo sin sesión.
@@ -181,8 +219,9 @@ intento de entrega fallido y rebote del proveedor. No se loguea el contenido de 
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/messaging` — 83 pruebas (70 de servicio + 13 de delegación de
-los tres controladores).
+`corepack yarn test src/modules/messaging --runInBand --silent` — 9 suites y 123 pruebas
+(ejecutado el 2026-10-05). Las pruebas dirigidas son unitarias; no sustituyen las pruebas de
+integración de restricciones DDL indicadas en la revisión.
 
 ## Pendiente
 
@@ -191,8 +230,9 @@ los tres controladores).
 - **Llamada real al proveedor**: el worker la hace fuera de la transacción y aquí sólo se asienta el
   resultado. Elegir el proveedor por `rate_limit_per_min` y rotar a la siguiente configuración por
   prioridad vive en el worker.
-- **Verificación de firma del webhook**: la ruta es pública y hoy sólo comprueba que el proveedor
-  exista. El HMAC corresponde al conector de integraciones (módulo 12), que guarda el secreto.
+- **Secreto de webhook por proveedor**: la ruta pública verifica HMAC antes de conciliar, pero el
+  secreto actual se deriva de `WEBHOOK_SIGNING_KEY` y del id del proveedor. Falta integrar la
+  credencial rotatoria específica que ya contempla `provider_channel_configs`.
 - **Evaluación del consentimiento**: se guarda la referencia a la directiva (`consent_id`); evaluarla
   vive en `consent` y leerla desde aquí cruzaría la frontera del esquema. Las horas de silencio y el
   opt-in sí se evalúan, porque son tablas nuestras.
@@ -205,3 +245,11 @@ los tres controladores).
   `notification_inbox_v`, `delivery_status_v` y las series de `time_series` las alimentará el propio
   outbox una vez haya consumidores registrados.
 
+## Revisión backend 2026-10-04
+
+Informe de evidencia: [`docs/revision-backend-2026-10-04/modulos/messaging.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/messaging.md).
+
+Hallazgos confirmados: el índice único actual de `event_deliveries` impide el fan-out a más de
+una suscripción (MSG-01) y el contrato permite un destinatario externo que el esquema no puede
+persistir (MSG-02). No se deben considerar resueltos hasta aplicar y probar las migraciones y
+validaciones descritas en ese informe.

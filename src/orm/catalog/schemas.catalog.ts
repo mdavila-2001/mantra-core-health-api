@@ -61,7 +61,7 @@ export const schemaCatalog: readonly SchemaSpec[] = [
   ['qa_lab', 36, 'qa_lab', 13],
   ['read_models', 30, 'read_models', 13],
   ['reporting', 39, 'reporting', 12],
-  ['scheduling', 41, 'scheduling', 17],
+  ['scheduling', 41, 'scheduling', 18],
   ['surveys', 65, 'surveys', 7],
   ['system_context', 45, 'system_context', 9],
   ['system_ops', 11, 'system_ops', 30],

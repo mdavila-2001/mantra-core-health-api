@@ -95,7 +95,7 @@ export class QuotationsService {
     // La práctica viene declarada en el cuerpo: el rol no alcanza, hay que
     // estar vinculado a ella (mismo criterio y mismo mensaje que el asiento
     // contable, `LedgerService.assertPractitionerOwnsPractice`).
-    if (!(await this.alcanzaPractica(actor, dto.practiceId))) {
+    if (!(await this.reachesPractice(actor, dto.practiceId))) {
       throw new PreconditionFailedException(
         'El profesional no tiene una vinculación activa con esa práctica',
         { practiceId: dto.practiceId },
@@ -200,7 +200,7 @@ export class QuotationsService {
     const quotation = await this.quotationsRepo.findById(em, id);
     if (
       quotation === null ||
-      !(await this.alcanzaPractica(actor, quotation.practiceId))
+      !(await this.reachesPractice(actor, quotation.practiceId))
     ) {
       throw new ResourceNotFoundException('Cotización no encontrada', { id });
     }
@@ -217,7 +217,7 @@ export class QuotationsService {
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<QuotationResponseDto[]> {
-    const practiceIds = await this.practicasAlcanzables(actor);
+    const practiceIds = await this.reachablePractices(actor);
     if (practiceIds.length === 0) {
       return [];
     }
@@ -254,27 +254,27 @@ export class QuotationsService {
    * respuesta booleana, porque acá el error lo decide el llamador: 422 al
    * crear con una práctica declarada, 404 al leer por id.
    */
-  private async alcanzaPractica(
+  private async reachesPractice(
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<boolean> {
     if (actor.practitionerProfileId !== undefined) {
-      const propias =
+      const own =
         await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
           actor.practitionerProfileId,
         );
-      if (propias.includes(practiceId)) return true;
+      if (own.includes(practiceId)) return true;
     }
 
     if (actor.roles.includes('SECURITY_ADMIN')) {
       const tenantId = getCurrentTenantId();
-      const tenantDeLaPractica =
+      const tenantPractice =
         await this.practiceTenantLookup.findTenantOfPractice(practiceId);
       // Sin tenant en contexto son los carriles internos, que no pasan por la
       // cabecera: lo único que se exige es que la práctica exista.
       if (
-        tenantDeLaPractica !== null &&
-        (tenantId === undefined || tenantDeLaPractica === tenantId)
+        tenantPractice !== null &&
+        (tenantId === undefined || tenantPractice === tenantId)
       ) {
         return true;
       }
@@ -289,25 +289,25 @@ export class QuotationsService {
    * las activas de la organización en contexto. Sin organización en contexto
    * la cuenta administradora no tiene contra qué acotar y no suma ninguna.
    */
-  private async practicasAlcanzables(
+  private async reachablePractices(
     actor: AuthenticatedUser,
   ): Promise<string[]> {
     const ids = new Set<string>();
     if (actor.practitionerProfileId !== undefined) {
-      const propias =
+      const own =
         await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
           actor.practitionerProfileId,
         );
-      for (const id of propias) ids.add(id);
+      for (const id of own) ids.add(id);
     }
     if (actor.roles.includes('SECURITY_ADMIN')) {
       const tenantId = getCurrentTenantId();
       if (tenantId !== undefined) {
-        const delTenant =
+        const ofTenant =
           await this.practiceTenantLookup.findActivePracticeIdsForTenant(
             tenantId,
           );
-        for (const id of delTenant) ids.add(id);
+        for (const id of ofTenant) ids.add(id);
       }
     }
     return [...ids];

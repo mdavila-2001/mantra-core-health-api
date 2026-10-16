@@ -1294,7 +1294,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "practiceId": "00000000-0000-4000-8000-000000000001",
   "bankAccountId": "00000000-0000-4000-8000-000000000001",
   "clearingDate": "2026-02-01",
@@ -1317,7 +1316,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Organización del documento. Si se omite, es la de la práctica; si viene, debe coincidir. | `00000000-0000-4000-8000-000000000001` |
 | `clearingNumber` | No | `string` | longitud máxima 60 | Número de clearing (único por tenant); autogenerado si se omite | `valor-ejemplo` |
 | `practiceId` | Sí | `string` | formato `uuid` | Práctica del asiento de compensación | `00000000-0000-4000-8000-000000000001` |
 | `bankAccountId` | Sí | `string` | formato `uuid` | Cuenta banco/tesorería del contra-asiento | `00000000-0000-4000-8000-000000000001` |
@@ -1400,8 +1399,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La práctica de la compensación pertenece a otra organización | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
 | 404 | `NOT_FOUND` | Partida abierta no encontrada | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
 | 404 | `NOT_FOUND` | Subledger no encontrado | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
 | 409 | `CONFLICT` | La partida ya está compensada | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
 | 409 | `CONFLICT` | El número de clearing ya existe en el tenant | Excepción explícita en src/modules/accounting/services/subledger.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |

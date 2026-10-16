@@ -120,7 +120,10 @@ for (const file of controllers) {
   const lines = text.split(/\r?\n/);
   const domain = file.match(/modules\/([^/]+)\//)?.[1] ?? '';
   const classHasRoles = /@Roles\(/.test(text);
-  const isImmutableCtrl = IMMUTABLE_RESOURCE.test(file);
+  // Contra la ruta RELATIVA: con la absoluta, un checkout cuya carpeta contenga
+  // «audit» o «journal» (p. ej. `wt-audit-trail-api`) volvía «inmutable» a
+  // todo controlador y el chequeo local no se parecía al de CI.
+  const isImmutableCtrl = IMMUTABLE_RESOURCE.test(rel(file));
 
   // Bloque por método: acumula decoradores hasta el nombre del handler.
   let pendingDecorators = [];
@@ -222,7 +225,7 @@ try {
 // primera vez fue `promotions-loyalty.repository.ts:findActivePrograms`
 // (expuesto sin filtro a roles de negocio no-SYSTEM); la segunda, 10
 // repositorios de solo lectura nuevos que nunca declaraban `tenantId` en
-// ningún método. Ver ESTADO-Y-PENDIENTES.md.
+// ningún método. Ver docs/progress/ESTADO-Y-PENDIENTES.md.
 const TENANT_ENTITY_CLASSES = new Set();
 try {
   for (const f of walk(join(SRC, 'modules')).filter((f) =>
@@ -240,7 +243,7 @@ try {
 /**
  * Módulos deliberadamente globales/cross-tenant por diseño de arquitectura
  * (barrido SYSTEM/SECURITY_ADMIN o atribución sin ser límite de acceso, ver
- * ESTADO-Y-PENDIENTES.md): su `tenant_id` no es un perímetro de autorización,
+ * docs/progress/ESTADO-Y-PENDIENTES.md): su `tenant_id` no es un perímetro de autorización,
  * así que un repositorio entero sin `tenantId` ahí es esperado, no un hallazgo.
  * `consent` queda FUERA de esta lista a propósito: mezcla barridos globales
  * con operaciones tenant-scoped reales en el mismo módulo.

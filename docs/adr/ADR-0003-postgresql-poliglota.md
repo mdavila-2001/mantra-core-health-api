@@ -37,7 +37,7 @@ accidental.
 
 ## Riesgos
 Consistencia eventual entre PostgreSQL y los almacenes secundarios; sin `cross_store_consistency`
-funcionando completamente (ver `ESTADO-Y-PENDIENTES.md`), hay ventana de divergencia posible.
+funcionando completamente (ver `docs/progress/ESTADO-Y-PENDIENTES.md`), hay ventana de divergencia posible.
 
 ## Evidencia
 `docker-compose.yml`, `docs/architecture/integration-map.md` §2, módulos

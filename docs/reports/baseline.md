@@ -82,7 +82,7 @@ Todas las 16 advertencias `high` provienen de la misma causa raíz: `brace-expan
 `src/modules/billing/repositories/practices-lookup.repository.ts` importa una entidad del dominio `practice` directamente, violando la regla de aislamiento de dominios (cada módulo debe leer otros dominios vía servicio/puerto, no repositorio ajeno).
 
 **Clasificación:** `HIGH` (arquitectural, no de seguridad de datos).
-**Registro:** se documenta como excepción conocida en `docs/governance/traceability-matrix.md` y en `docs/architecture/module-dependencies.md` (Fase 1); no se corrige en esta fase porque corregirlo requiere diseño de un puerto de lectura entre `billing` y `practice` fuera del alcance documental — se traslada como acción a `ESTADO-Y-PENDIENTES.md`.
+**Registro:** se documenta como excepción conocida en `docs/governance/traceability-matrix.md` y en `docs/architecture/module-dependencies.md` (Fase 1); no se corrige en esta fase porque corregirlo requiere diseño de un puerto de lectura entre `billing` y `practice` fuera del alcance documental — se traslada como acción a `docs/progress/ESTADO-Y-PENDIENTES.md`.
 
 ### 3.5 Endpoints y contrato
 
