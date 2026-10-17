@@ -23,11 +23,11 @@
 | H1.1.1 | `http-sli.aggregator.ts` puro | `yarn test src/observability/http-sli/http-sli.aggregator.spec.ts` | HECHO (TESTED) |
 | H1.1.2 | `http-sli.middleware.ts` + env | spec + `grep -c 'originalUrl\|req.url\|req.query\|req.body\|req.headers' …middleware.ts` → 0 | HECHO (TESTED) |
 | H1.1.3 | `http-sli-flush.service.ts` + módulo | spec | HECHO (TESTED) |
-| H1.1.4 | Registro en `main.ts`/`app.module.ts`, variables | `yarn typecheck && yarn lint` | A MEDIAS: registrado, typecheck/lint/wiring OK; verificación SQL contra Postgres NOT_RUN (sin base) |
-| H1.2.1 | `route-index.service.ts` | spec; `lookup('GET','/admin/catalog/schemas')` = `DataCatalogController_listSchemas` | TODO |
-| H1.2.2 | `latency-buckets.ts` | spec | TODO |
-| H1.2.3 | Repositorio de tráfico + int-spec | `yarn test:integration test/integration/ops-traffic.int-spec.ts` | TODO |
-| H1.2.4 | Servicio + controlador + openapi | `yarn test src/modules/ops_console`; `docs:openapi:check-breaking` 0 | TODO |
+| H1.1.4 | Registro en `main.ts`/`app.module.ts`, variables | `yarn typecheck && yarn lint` | A MEDIAS: registrado, typecheck/lint/wiring OK; el volcado a `service_sli_series` se ejercitó contra Postgres real vía `ops-traffic.int-spec` (H1.2.3); falta la API arrancada con tráfico real |
+| H1.2.1 | `route-index.service.ts` | spec; `lookup('GET','/admin/catalog/schemas')` = `DataCatalogController_listSchemas` | HECHO (TESTED) · `evidencia/H1.2.1-route-index.txt` |
+| H1.2.2 | `latency-buckets.ts` | spec | HECHO (TESTED) · `evidencia/H1.2.2-latency-buckets.txt` |
+| H1.2.3 | Repositorio de tráfico + int-spec | `yarn test:integration test/integration/ops-traffic.int-spec.ts` | HECHO (TESTED contra Postgres real, 7/7) · `evidencia/H1.2.3-ops-traffic-int-spec.txt` |
+| H1.2.4 | Servicio + controlador + openapi | `yarn test src/modules/ops_console`; `docs:openapi:check-breaking` 0 | HECHO (TESTED) · `evidencia/H1.2.4-*.txt` |
 
 ## H2 — Catálogo de datos
 | ID | Microtarea | DoD | Estado |

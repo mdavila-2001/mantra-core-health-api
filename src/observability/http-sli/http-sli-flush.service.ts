@@ -9,15 +9,18 @@ import { randomUUID } from 'node:crypto';
 import { PinoLogger } from 'nestjs-pino';
 import { SEED, deterministicId } from '../../common/constants/concepts';
 import { SeriesIngestRepository } from '../../modules/time_series/repositories';
-import type { HttpSliAggregator, HttpSliPoint } from './http-sli.aggregator';
+import {
+  HTTP_SLI_CODE,
+  type HttpSliAggregator,
+  type HttpSliPoint,
+} from './http-sli.aggregator';
 import type { HttpSliEnv } from './http-sli.env';
 import { HTTP_SLI_AGGREGATOR, HTTP_SLI_ENV } from './http-sli.tokens';
 
 /** Versión del formato de las filas; sube si cambia `dimensions`. */
 export const HTTP_SLI_SOURCE_VERSION = 'http-sli/1';
 
-/** `sli_code` de las filas de peticiones. */
-export const HTTP_SLI_CODE = 'http_requests';
+export { HTTP_SLI_CODE };
 
 /** Servicio lógico bajo el que se agrupan las series: la API. */
 export const HTTP_SLI_SERVICE_ID = deterministicId('observability:service:api');

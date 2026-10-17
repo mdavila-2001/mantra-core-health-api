@@ -1,0 +1,7 @@
+$ yarn test src/modules/ops_console src/observability
+
+Test Suites: 17 passed, 17 total
+Tests:       192 passed, 192 total
+Snapshots:   0 total
+Time:        3.8 s, estimated 5 s
+Ran all test suites matching src/modules/ops_console|src/observability.

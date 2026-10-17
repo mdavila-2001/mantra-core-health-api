@@ -49,6 +49,9 @@ export const UNMATCHED_ROUTE = 'UNMATCHED';
 /** Prefijo de `series_id`: separa estas series de cualquier otra del dataset. */
 export const SERIES_PREFIX = 'http';
 
+/** `sli_code` de las filas de peticiones en `service_sli_series`. */
+export const HTTP_SLI_CODE = 'http_requests';
+
 const MINUTE_MS = 60_000;
 const KNOWN_METHODS = new Set([
   'GET',
