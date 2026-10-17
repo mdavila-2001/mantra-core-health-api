@@ -1,0 +1,18 @@
+merge-base: 402005dc28fb4daa0d0777df5673fe226dd5614e
+== cambios de la rama en database/ (DDL, patches, seeds SQL)
+(vacío = el modelo no se tocó)
+== archivos de la rama fuera de docs/test/src:
+.env.example
+docker-compose.yml
+openapi/openapi.json
+openapi/openapi.yaml
+package.json
+tools/catalog/README.md
+tools/catalog/generate-schema-descriptions.mjs
+tools/catalog/import-vault-annotations.mjs
+tools/catalog/lib/import-vault.mjs
+tools/catalog/lib/import-vault.test.mjs
+tools/catalog/lib/module-notes.mjs
+tools/catalog/lib/module-notes.test.mjs
+tools/catalog/lib/vault-notes.mjs
+tools/catalog/lib/vault-notes.test.mjs
