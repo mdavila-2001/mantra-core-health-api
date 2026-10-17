@@ -6,7 +6,7 @@
 - Kill-test: `curl /admin/ops/traffic` con el token del superadmin tras 20 peticiones devuelve `requests<20` o contiene un UUID → no está hecho.
 
 ## Alcance
-- IN: H0.1 credencial, H1 (middleware + lecturas de tráfico), H2.1–H2.2 (origen `IMPORTED_VAULT`, importador, esquemas), H3 (flujos), H4.1.3 (ADR-0026), H5.1.
+- IN: H0.1 credencial, H1 (middleware + lecturas de tráfico), H2.1–H2.2 (origen `IMPORTED_VAULT`, importador, esquemas), H3 (flujos), H4.1.3 (ADR-0027), H5.1.
 - OUT: cualquier cambio de modelo/DDL (`check_ddl_sources.py` debe seguir en PASS), sembrar roles operativos (TS-10), cross-tenant (TS-05), producción.
 - Ambigüedades: ver el plan aprobado §Decisiones y ambigüedades.
 
@@ -44,14 +44,18 @@
 ## H3 — Catálogo de flujos
 | ID | Microtarea | DoD | Estado |
 |---|---|---|---|
-| H3.1.1 | `flow-catalog.ts` + schema + spec | `yarn test src/modules/qa_lab/domain/flow-catalog.spec.ts` | HECHO |
-| H3.1.2 | `1.3`, `2.6`, `2.7` `.flow.json` | spec 'catálogo real' | HECHO |
-| H3.2.1 | `qa-flows-seed.service.ts` | spec; `SEED_QA_FLOWS=true yarn seed:boot` | HECHO |
-| H3.2.2 | `qa-flows.int-spec.ts` | `yarn test:integration test/integration/qa-flows.int-spec.ts` | HECHO |
-| H3.3.1–2 | Repositorio + `qa-flows.service.ts` + 2 `@Get` | spec; `check-breaking` 0 | TODO |
+| H3.1.1 | `flow-catalog.ts` + schema + spec | `yarn test src/modules/qa_lab/domain/flow-catalog.spec.ts` | HECHO (TESTED) · 51 pruebas (validador, orden de recorrido, catálogo real válido, endpoints presentes en `openapi.json`) · `evidencia/H3.1.1-spec-flow-catalog.txt` |
+| H3.1.2 | `1.3`, `2.6`, `2.7` `.flow.json` | spec 'catálogo real' + cada `qaCase` contra la API real | HECHO (VERIFIED local) · 27 casos, 0 discrepancias de estado HTTP · `evidencia/H3.1.2-casos-contra-api-real.txt` |
+| H3.2.1 | `qa-flows-seed.service.ts` | spec; `SEED_QA_FLOWS=true yarn seed:boot` ×2 | HECHO (VERIFIED local) · 1.ª corrida 3 suites/27 casos/27 aserciones; 2.ª `inserted:0` y `row_version` intacto · `evidencia/H3.2.1-*.txt` |
+| H3.2.2 | `qa-flows.int-spec.ts` | `yarn test:integration test/integration/qa-flows.int-spec.ts` | HECHO (TESTED contra Postgres real, 7/7; el destino es un doble que hace de la API) · `evidencia/H3.2.2-qa-flows-int-spec.txt` |
+| H3.3.1–2 | `qa-flows.service.ts` + 2 `@Get` (sin repositorio propio: lee con `EntityManager`, como `QaLabReadService`) | spec; `check-breaking` 0 | HECHO (VERIFIED local) · API real: 3 flujos, contrato 22/22 `DECLARED`, 404/400/401 · `evidencia/H3.3-*.txt` |
+| H4.1.1 | ADR-0027 «Métricas HTTP en proceso sobre `service_sli_series`, sin PHI» | archivo en `docs/adr/` + `yarn docs:links` | TODO |
+| H4.1.2 | `docs/admin-portal/implementation-status.md` al día (observabilidad, catálogo, flujos) | `git diff --stat` | TODO |
+| H5.1.1 | `qa-endpoints-seed.service.ts` (`EP-<operationId>-HAPPY\|NEG401`, `SEED_QA_ENDPOINTS`) | spec + int-spec | TODO |
+| H5.1.2 | `GET /admin/qa/endpoints-coverage` | spec; `check-breaking` 0 | TODO |
 
 ## H4 / H5
-ADR-0026, `implementation-status.md`, `REPORTE.md` (H4.1.3); seed de endpoints y `endpoints-coverage` (H5.1).
+ADR-0027, `implementation-status.md`, `REPORTE.md` (H4.1.3); seed de endpoints y `endpoints-coverage` (H5.1).
 
 ## Riesgos
 Ver plan aprobado §Riesgos. Entorno: sin `node_modules` ni Postgres en esta sesión → todo DoD que los requiera se declara `NOT_RUN`/`BLOQUEADO`, nunca `PASS`.

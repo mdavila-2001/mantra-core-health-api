@@ -7,6 +7,7 @@ import {
 } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -17,6 +18,11 @@ import {
 } from 'class-validator';
 import { Roles } from '../../../common';
 import { QaLabReadService } from '../services/qa-lab-read.service';
+import {
+  FLOW_COVERAGE,
+  QaFlowsService,
+  type FlowCoverage,
+} from '../services/qa-flows.service';
 
 export const QA_LAB_READ_ROLES = [
   'QA_ADMIN',
@@ -47,12 +53,38 @@ export class DefectsQueryDto {
   status?: string;
 }
 
+export class FlowsQueryDto {
+  @ApiPropertyOptional({ description: 'Módulo del Registro: «2 · Médico»' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  module?: string;
+
+  @ApiPropertyOptional({ description: 'Texto en el id, el título o el módulo' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  search?: string;
+
+  @ApiPropertyOptional({
+    enum: FLOW_COVERAGE,
+    description:
+      'SEEDED/NOT_SEEDED: la suite FLOW-<id> existe en qa_lab o no. RAN/NEVER_RAN: tuvo alguna corrida o no.',
+  })
+  @IsOptional()
+  @IsIn(FLOW_COVERAGE)
+  coverage?: FlowCoverage;
+}
+
 /** Lectura del laboratorio de pruebas para el portal (módulo 36). */
 @ApiTags('qa-lab-read')
 @ApiBearerAuth()
 @Controller('admin/qa')
 export class QaLabReadController {
-  constructor(private readonly read: QaLabReadService) {}
+  constructor(
+    private readonly read: QaLabReadService,
+    private readonly flows: QaFlowsService,
+  ) {}
 
   @Get('environments')
   @Roles(...QA_LAB_READ_ROLES)
@@ -97,5 +129,25 @@ export class QaLabReadController {
   @ApiOperation({ summary: 'Defectos deduplicados por firma' })
   defects(@Query() query: DefectsQueryDto) {
     return this.read.listDefects(query);
+  }
+
+  @Get('flows')
+  @Roles(...QA_LAB_READ_ROLES)
+  @ApiOperation({
+    summary:
+      'Catálogo de flujos: recorridos del usuario con su cobertura de contrato y de pruebas',
+  })
+  listFlows(@Query() query: FlowsQueryDto) {
+    return this.flows.list(query);
+  }
+
+  @Get('flows/:flowId')
+  @Roles(...QA_LAB_READ_ROLES)
+  @ApiOperation({
+    summary:
+      'Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su último veredicto',
+  })
+  flow(@Param('flowId') flowId: string) {
+    return this.flows.detail(flowId);
   }
 }

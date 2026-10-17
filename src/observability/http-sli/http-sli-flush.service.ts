@@ -47,7 +47,7 @@ export const HTTP_SLI_SERVICE_ID = deterministicId('observability:service:api');
  *
  * `tenant_id` es obligatorio en la tabla. Las métricas son de la plataforma, no
  * de una organización: se guardan bajo el tenant por defecto del seed (deuda
- * TS-07 del backlog de superadmin, anotada en ADR-0026). Con `RLS_ENFORCE=true`
+ * TS-07 del backlog de superadmin, anotada en ADR-0027). Con `RLS_ENFORCE=true`
  * la transacción fija ese tenant, igual que el interceptor de auditoría.
  */
 @Injectable()

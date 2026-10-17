@@ -16,6 +16,7 @@ import {
 import { QaExecutionService } from '../../src/modules/qa_execution/services/qa-execution.service';
 import { GuardedHttpClient } from '../../src/modules/qa_execution/infrastructure/guarded-http.client';
 import { QaFlowsSeedService } from '../../src/common/seed/qa-flows-seed.service';
+import { QaFlowsService } from '../../src/modules/qa_lab/services/qa-flows.service';
 import { FLOW_CATALOG } from '../../src/modules/qa_lab/flows';
 import {
   casesOf,
@@ -83,6 +84,7 @@ describeIfDb('Catálogo de flujos en qa_lab (integración real)', () => {
   let client: pg.Client;
   let orm: MikroORM;
   let seed: QaFlowsSeedService;
+  let flows: QaFlowsService;
   let service: QaExecutionService;
   let server: Server;
   let port: number;
@@ -206,6 +208,8 @@ describeIfDb('Catálogo de flujos en qa_lab (integración real)', () => {
     );
     service = new QaExecutionService(em, runs, new GuardedHttpClient(), silent);
     seed = new QaFlowsSeedService(orm, silent);
+    // El índice de rutas no es lo que se prueba acá: lo prueba su propia suite.
+    flows = new QaFlowsService(orm.em.fork(), { all: () => [] } as never);
 
     // Los flujos llevan POST (cuerpos inválidos, ids inexistentes): el destino debe admitir mutaciones.
     for (const [id, allowMutations] of [
@@ -358,6 +362,28 @@ describeIfDb('Catálogo de flujos en qa_lab (integración real)', () => {
       'sourceRef',
     );
     expect(plan.status).toBeDefined();
+
+    // La lectura del portal ve el veredicto de cada rama contra la base real.
+    const detail = await flows.detail(FLOW.id);
+    const verdicts = detail.nodes
+      .flatMap((n) => n.branches)
+      .map((b) => b.qaCase)
+      .filter((q) => q !== null);
+    expect(verdicts).toHaveLength(FLOW_CASES.length);
+    for (const q of verdicts) {
+      expect(q.seeded).toBe(true);
+      expect(q.drifted).toBe(false);
+      expect(q.lastResult).toMatchObject({
+        status: 'RESULT_PASSED',
+        observedStatus: q.expectedStatus,
+      });
+    }
+    expect(detail.qa).toMatchObject({
+      casesLinked: FLOW_CASES.length,
+      casesMissing: 0,
+      passed: FLOW_CASES.length,
+      failed: 0,
+    });
   });
 
   it('si la API cambia de respuesta, la rama falla con el valor observado', async () => {
@@ -399,6 +425,21 @@ describeIfDb('Catálogo de flujos en qa_lab (integración real)', () => {
         message: 'Se esperaba 400',
       },
     ]);
+
+    // La rama rota aparece como fallida con el estado que la API devolvió.
+    const detail = await flows.detail(FLOW.id);
+    const branch = detail.nodes
+      .find((n) => n.id === 'ver-disponibilidad')!
+      .branches.find((b) => b.kind === 'NEGATIVE')!;
+    expect(branch.qaCase?.lastResult).toMatchObject({
+      status: 'RESULT_FAILED',
+      observedStatus: 200,
+      message: 'Se esperaba 400',
+    });
+    expect(detail.qa).toMatchObject({
+      passed: FLOW_CASES.length - 1,
+      failed: 1,
+    });
   });
 
   it('una rama que sale del artefacto pasa a borrador, no se corre más y conserva su historial', async () => {
