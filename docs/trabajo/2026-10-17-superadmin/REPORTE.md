@@ -1,6 +1,6 @@
 # Reporte — Superadministración de AloVida (lado API)
 
-> **AVANCE: 11 / 23 — 47,8 %.** (`microtareas HECHO / total` del PLAN.md de este repo; `DESCARTADO`, `BLOQUEADO` y `A MEDIAS` no suman. Hecho: H0.1.1, H0.1.3, H1.1.1–H1.1.5, H1.2.1–H1.2.4.)
+> **AVANCE: 15 / 23 — 65,2 %.** (`microtareas HECHO / total` del PLAN.md de este repo; `DESCARTADO`, `BLOQUEADO` y `A MEDIAS` no suman. Hecho: H0.1.1, H0.1.3, H1.1.1–H1.1.5, H1.2.1–H1.2.4, H2.1.1–H2.1.4.)
 
 - Fecha: 2026-10-17 · Plan: [PLAN.md](./PLAN.md) · Rama: `claude-marcelo/serene-planck-1q7zje`
 - Peldaño de evidencia alcanzado: **`VERIFIED` local** para el acceso del superadmin (H0.1.3), la medición HTTP (H1.1) y las lecturas de tráfico (H1.2): la API se arrancó de verdad contra un PostgreSQL 16 descartable, con tráfico HTTP real. **No** `REGRESSION_VERIFIED`. Límites de ese entorno: la serie fue una tabla común (no hipertabla Timescale), `xlsx` fue un *stub*, y la API sólo arranca con un parche de DI aplicado **al `dist` de la copia** (ver Desvíos).
@@ -15,6 +15,10 @@
 | H0.1.3 | Siembra ×2 idempotente (misma cuenta, 0 inserciones la 2.ª) y login real del superadmin: 200 con `SECURITY_ADMIN`+`SUPERADMIN`; contraseña errónea 401; `/admin/ops/readiness`, `/admin/catalog/schemas`, `/admin/qa/suites`, `/admin/analytics/overview` y `/admin/ops/traffic` → 200; sin token 401 | `node dist/src/seed-cli.js` ×2; `curl` | `evidencia/H0.1.3-login-y-lecturas.txt`, `H0.1.3-seed-segunda-corrida.txt` |
 | H1.1.4 | La medición en la API arrancada: 21 peticiones reales (14+3 a 200, 2 sin token 401, 1 ruta inexistente 404, 1 login) → `requests: 21`, `client4xx: 3`, `/health` excluido, ningún UUID en las series ni en la respuesta, p95 estimado | `curl` ×21, espera del volcado, `psql`, `GET /admin/ops/traffic*` | `evidencia/H1.1.4-trafico-real.txt` |
 | H1.1.5 | Defecto hallado por esa corrida: la ruta inexistente se medía como `GET /{*all}` (comodín del middleware) y ahora como `UNMATCHED`; sin ninguna URL real | spec (138 pruebas de `src/observability`) + petición real a ruta inexistente | `evidencia/H1.1.4-unmatched-real.txt` |
+| H2.1.1 | Origen `IMPORTED_VAULT` en la API: queda en borrador, no se envía a revisión (422), no pisa una ficha escrita a mano ni una que ya entró a revisión (422 `MANUAL_REVISION_EXISTS`); la evidencia repetida no se duplica | `originViolations` + `data-catalog.int-spec` contra PostgreSQL real | 28/28 (las 21 previas + 7 nuevas) · `evidencia/H2.1.1-data-catalog-int-spec.txt` |
+| H2.1.2 | Lector de la bóveda y criterio de plantilla (repetición ≥3 o esqueleto generado conocido) | `yarn catalog:import-vault:test` | 27/27 · `evidencia/H2.1.2-tests-importador.txt` |
+| H2.1.3 | Importador `import-vault-annotations.mjs`: dry-run sobre la bóveda (2 601 notas, 1 245 conjuntos de índices, 1 356 tablas/vistas, 6 783 FK) y `--apply --schema iam` real ×2: 14 fichas + 62 evidencias de FK, 2.ª corrida sin cambios; en la base 14 fichas `IMPORTED_VAULT` en `DRAFT`, 0 aprobadas, 76 evidencias distintas | `node tools/catalog/import-vault-annotations.mjs --apply --schema iam` ×2 + `psql` | `evidencia/H2.1.3-*.txt` |
+| H2.1.4 | Casos de integración de la importación (6) | `data-catalog.int-spec` | ver H2.1.1 |
 | H1.2.1 | Índice de rutas en proceso (`RouteIndexService`); sus operationId coinciden con los del contrato publicado | `yarn test src/observability/route-index` | 20 pruebas, incluida la comparación contra `openapi.json` · `evidencia/H1.2.1-route-index.txt` |
 | H1.2.2 | Percentiles desde histograma acumulado (`latency-buckets.ts`) | `yarn test src/modules/ops_console/domain` | verde · `evidencia/H1.2.2-latency-buckets.txt` |
 | H1.2.3 | Lecturas de tráfico y usuarios activos (`ops-traffic.repository.ts`) contra Postgres real: suma exacta de lo que escribe `http-sli`, ventana sin filas, dimensiones corruptas, filtro por serie/tenant/ventana, sesiones, RLS con rol sin privilegios | `OPS_TRAFFIC_IT_DB_URL=… yarn test:integration test/integration/ops-traffic.int-spec.ts` | 7/7 · `evidencia/H1.2.3-ops-traffic-int-spec.txt`. Encontró un bug real (un `?` en una regex lo leía MikroORM como parámetro) |
@@ -46,6 +50,8 @@ Ninguna.
 - `GET /admin/ops/traffic*` no se llamó por HTTP (ni con token ni sin él): la autorización se cubre por el spec de metadatos `@Roles` del controlador, no por una petición real.
 
 ## Desvíos del plan
+- **H2.1.3 · FK como evidencia, no como ficha de columna.** El plan decía «FK → ficha de la columna con `valueDomain:'FK → …'`». Escribir ~6 800 fichas de columna en borrador sólo para repetir lo que `pg_catalog` ya da (la FK) ensuciaba el inventario; cada nota de FK se importa como **evidencia `VAULT_NOTE` de su columna** con el destino y el criterio (`puml`, convención, inferido…), que es lo único que la bóveda añade.
+- **H2.1.1 · `REVIEW_ALREADY_STARTED` es defensa en profundidad.** Una ficha enviada por una persona siempre tiene su última revisión `MANUAL`, así que en la práctica gana `MANUAL_REVISION_EXISTS`; la regla extra queda probada en el unitario.
 - **`SeriesIngestRepository` se provee en `HttpSliModule`** en vez de importar `TimeSeriesModule`: ese módulo no lo exporta y no hacía falta tocarlo. El repositorio no tiene dependencias.
 - **`H0.1.2` descartada** (ya cubierta).
 - **Entorno de pruebas:** `cdn.sheetjs.com` (de donde viene `xlsx`) está denegado por el proxy de la sesión, así que `yarn install` del repo falla. Se trabajó en una **copia fuera del repo** (`scratchpad/api-work`) sin `xlsx`, con un *stub* vacío, instalada con Yarn 4.14.1 obtenido de `@yarnpkg/cli-dist` (registro npm permitido). `package.json` y `yarn.lock` del repo **no se tocaron**.
@@ -53,6 +59,11 @@ Ninguna.
 
 - **Contrato OpenAPI parcial a propósito.** Regenerado con el generador oficial (en la copia, contra un Postgres 16 descartable), `openapi.json` traía además deriva ajena a este trabajo: la operación `GET /identity/verification-cases/{id}`, `PUT /practitioners/me/sites/{siteId}/contact-phone`, el esquema `SetSiteContactPhoneDto` y cambios en 3 esquemas (`CreateOwnSiteDto`, `IdentityAssuranceRequest*Dto`). Se insertaron **sólo** `GET /admin/ops/traffic` y `GET /admin/ops/traffic/endpoints` (+257 líneas, 0 borradas; la serialización reproduce el archivo commiteado byte a byte). Quien posea esos otros cambios debe regenerar el contrato.
 - **Para poder generar el contrato** hubo que parchear **sólo el `dist` de la copia** (no el repo): `InsurancePatientSettlementModule` no provee `LinkedOrderDataRepository` ni `InsurancePatientAccountRepository`, y sin eso la aplicación no arranca (`UnknownDependenciesException`). Es un defecto del código ya commiteado, fuera de este alcance: se anota, no se arregla.
+
+## Hallazgos de H2.1
+- **El texto de «Negocio / Ejemplo / Por qué / Sistema» de la bóveda es casi todo plantilla generada:** 111 variantes de «Negocio» cubren 2 580 textos; sólo 26 de las 1 356 tablas/vistas tienen texto propio completo (p. ej. `audio_assets`). Se importa igualmente, pero marcado como plantilla y como borrador; la explicación real de cada tabla sigue sin escribirse. Decisión del dueño de negocio: quién redacta.
+- 1 245 de las 2 601 «entidades» son conjuntos de índices (`tipo/index_set`), no tablas.
+- 22 notas de FK no declaran destino y 172 son «inferido»: son la parte menos confiable de las «relaciones».
 
 ## Riesgos residuales
 - Las métricas se guardan bajo `SEED.tenantId` (el tenant por defecto): `tenant_id` es obligatorio en la tabla y no existe un tenant de plataforma. Es la deuda TS-07 del backlog de superadmin.

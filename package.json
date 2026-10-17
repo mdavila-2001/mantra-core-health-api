@@ -100,6 +100,8 @@
     "ddl:sources": "python ../mantra-core-health-model/salud-db/check_ddl_sources.py",
     "orm:entities:missing": "node tools/catalog/generate-missing-entities.mjs",
     "orm:audit": "node tools/catalog/audit-fidelity.mjs fidelity-audit.json",
+    "catalog:import-vault": "node tools/catalog/import-vault-annotations.mjs",
+    "catalog:import-vault:test": "node --test tools/catalog/lib/vault-notes.test.mjs tools/catalog/lib/import-vault.test.mjs",
     "orm:schema:dump": "cross-env ORM_SCHEMA_SYNC=dry-run node dist/src/main.js",
     "docker:prune": "bash scripts/docker-prune.sh",
     "docker:up": "yarn docker:prune && docker compose up -d",

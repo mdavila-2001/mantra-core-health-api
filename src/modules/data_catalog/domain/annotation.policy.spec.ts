@@ -3,6 +3,7 @@ import {
   fillerReason,
   mergeContent,
   misplacedFields,
+  originViolations,
   reviewViolations,
   submissionViolations,
   type ReviewContext,
@@ -175,6 +176,80 @@ describe('annotation.policy', () => {
       expect(reviewViolations({ ...base, status: 'DRAFT' })).toEqual([
         expect.objectContaining({ reason: 'NOT_PENDING_REVIEW' }),
       ]);
+    });
+  });
+
+  describe('originViolations', () => {
+    const borrador = {
+      reviewStatus: 'DRAFT' as const,
+      lastRevisionOrigin: 'IMPORTED_VAULT' as const,
+    };
+
+    it('una escritura manual no tiene restricciones de origen', () => {
+      expect(
+        originViolations({
+          origin: 'MANUAL',
+          submit: true,
+          existing: { reviewStatus: 'APPROVED', lastRevisionOrigin: 'MANUAL' },
+        }),
+      ).toEqual([]);
+    });
+
+    it('una importación sobre una ficha inexistente o sobre un borrador importado pasa', () => {
+      expect(
+        originViolations({
+          origin: 'IMPORTED_VAULT',
+          submit: false,
+          existing: null,
+        }),
+      ).toEqual([]);
+      expect(
+        originViolations({
+          origin: 'IMPORTED_VAULT',
+          submit: false,
+          existing: borrador,
+        }),
+      ).toEqual([]);
+    });
+
+    it('una importación nunca se envía a revisión', () => {
+      const out = originViolations({
+        origin: 'IMPORTED_VAULT',
+        submit: true,
+        existing: null,
+      });
+      expect(out.map((v) => v.reason)).toEqual(['IMPORT_CANNOT_SUBMIT']);
+    });
+
+    it('una importación no pisa una revisión escrita a mano', () => {
+      const out = originViolations({
+        origin: 'IMPORTED_VAULT',
+        submit: false,
+        existing: { reviewStatus: 'DRAFT', lastRevisionOrigin: 'MANUAL' },
+      });
+      expect(out.map((v) => v.reason)).toEqual(['MANUAL_REVISION_EXISTS']);
+    });
+
+    it.each(['NEEDS_REVIEW', 'APPROVED', 'REJECTED'] as const)(
+      'una importación no reabre una ficha en estado %s',
+      (reviewStatus) => {
+        const out = originViolations({
+          origin: 'IMPORTED_VAULT',
+          submit: false,
+          existing: { reviewStatus, lastRevisionOrigin: 'IMPORTED_VAULT' },
+        });
+        expect(out.map((v) => v.reason)).toEqual(['REVIEW_ALREADY_STARTED']);
+      },
+    );
+
+    it('el origen de una IA no se trata como importación permitida', () => {
+      // La API ni siquiera lo acepta (IsIn en el DTO); la política, además, lo trata como no manual.
+      const out = originViolations({
+        origin: 'AI_SUGGESTED',
+        submit: true,
+        existing: null,
+      });
+      expect(out.map((v) => v.reason)).toEqual(['IMPORT_CANNOT_SUBMIT']);
     });
   });
 

@@ -25,10 +25,12 @@ import {
   REVIEW_DECISIONS,
   REVIEW_STATUSES,
   SENSITIVITIES,
+  WRITABLE_ORIGINS,
   type AnnotationField,
   type EvidenceKind,
   type ReviewDecision,
   type Sensitivity,
+  type WritableOrigin,
 } from '../domain';
 
 const ANNOTATION_FIELDS = [
@@ -185,6 +187,16 @@ export class UpsertAnnotationDto {
   @IsOptional()
   @IsBoolean()
   submit?: boolean;
+
+  @ApiPropertyOptional({
+    enum: WRITABLE_ORIGINS,
+    default: 'MANUAL',
+    description:
+      'De dónde sale el contenido. IMPORTED_VAULT lo escribe el importador de la bóveda: queda siempre en borrador, no se puede enviar a revisión y no pisa una ficha escrita a mano ni una que ya entró a revisión. AI_SUGGESTED no se acepta.',
+  })
+  @IsOptional()
+  @IsIn(WRITABLE_ORIGINS)
+  origin?: WritableOrigin;
 
   @ApiPropertyOptional({ maxLength: 500 })
   @IsOptional()

@@ -5,6 +5,7 @@ import {
   OBJECT_ONLY_FIELDS,
   type AnnotationContent,
   type AnnotationField,
+  type AnnotationOrigin,
   type ReviewDecision,
   type ReviewStatus,
   type TargetKind,
@@ -64,6 +65,57 @@ const FILLER_PATTERNS: readonly RegExp[] = [
   // Plantilla generada de la bóveda: vale como evidencia importada, no como ficha.
   /si esta tabla se eliminara, el negocio perder[ií]a el registro mismo/i,
 ];
+
+/**
+ * Reglas de una escritura que no viene de una persona (importación de la
+ * bóveda). Una importación **sólo escribe sobre un borrador importado**: nunca
+ * pisa lo que alguien escribió a mano, ni una ficha que ya entró a revisión o
+ * fue decidida —sería revertir en silencio una aprobación—, y nunca la envía a
+ * revisión: eso lo decide una persona.
+ */
+export function originViolations(input: {
+  origin: AnnotationOrigin;
+  submit: boolean;
+  existing: {
+    reviewStatus: ReviewStatus;
+    lastRevisionOrigin: AnnotationOrigin | null;
+  } | null;
+}): PolicyViolation[] {
+  if (input.origin === 'MANUAL') return [];
+  if (input.submit) {
+    return [
+      {
+        field: 'status',
+        reason: 'IMPORT_CANNOT_SUBMIT',
+        message:
+          'Una importación queda en borrador: una persona la revisa y la envía',
+      },
+    ];
+  }
+  const { existing } = input;
+  if (!existing) return [];
+  if (existing.lastRevisionOrigin === 'MANUAL') {
+    return [
+      {
+        field: 'status',
+        reason: 'MANUAL_REVISION_EXISTS',
+        message:
+          'La ficha tiene una revisión escrita a mano; una importación no la pisa',
+      },
+    ];
+  }
+  if (existing.reviewStatus !== 'DRAFT') {
+    return [
+      {
+        field: 'status',
+        reason: 'REVIEW_ALREADY_STARTED',
+        message:
+          'La ficha ya entró a revisión o fue decidida; una importación no la reabre',
+      },
+    ];
+  }
+  return [];
+}
 
 /** Aplica el parche sobre el contenido vigente sin mutarlo. */
 export function mergeContent(

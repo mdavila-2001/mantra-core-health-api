@@ -33,10 +33,10 @@
 ## H2 — Catálogo de datos
 | ID | Microtarea | DoD | Estado |
 |---|---|---|---|
-| H2.1.1 | `origin` en `UpsertAnnotationDto` y servicio | spec del servicio | TODO |
-| H2.1.2 | Parser `tools/catalog/lib/vault-notes.mjs` | `node --test tools/catalog/test/vault-notes.test.mjs` | TODO |
-| H2.1.3 | CLI `import-vault-annotations.mjs` | `--dry-run` reporta 2601 E y 6783 FK | TODO |
-| H2.1.4 | Caso de integración | `yarn test:integration … -t vault` | TODO |
+| H2.1.1 | `origin` en `UpsertAnnotationDto` y servicio; evidencia idempotente | `originViolations` (unitario) + `data-catalog.int-spec` 28/28 contra PostgreSQL real | HECHO (TESTED) · `evidencia/H2.1.1-data-catalog-int-spec.txt` |
+| H2.1.2 | Parser `tools/catalog/lib/vault-notes.mjs` | `yarn catalog:import-vault:test` (27 pruebas: lector, plantilla vs texto propio, importador con API simulada) | HECHO (TESTED) · `evidencia/H2.1.2-tests-importador.txt` |
+| H2.1.3 | CLI `import-vault-annotations.mjs` | `--dry-run` reporta 2601 notas E (1245 índices, 1356 tablas/vistas) y 6783 FK; `--apply --schema iam` real ×2 | HECHO (VERIFIED local) · `evidencia/H2.1.3-*.txt` |
+| H2.1.4 | Caso de integración | `data-catalog.int-spec`: bloque «importación de la bóveda» (6 casos) | HECHO (TESTED) · ver H2.1.1 |
 | H2.2.2 | Generador de descripciones de esquema | `node tools/catalog/generate-schema-descriptions.mjs && yarn typecheck` | TODO |
 | H2.2.3 | `listSchemas()` anexa `description` | spec + `check-breaking` 0 | TODO |
 

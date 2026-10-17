@@ -76,6 +76,28 @@ async function statusOf(promise: Promise<unknown>): Promise<number | string> {
   }
 }
 
+/** Estado, código y primera razón de una violación de una excepción de dominio. */
+async function failureOf(
+  promise: Promise<unknown>,
+): Promise<{ status: number | string; code?: string; reason?: string }> {
+  try {
+    await promise;
+    return { status: 'resolved' };
+  } catch (error) {
+    const e = error as {
+      getStatus?: () => number;
+      code?: string;
+      details?: { violations?: { reason?: string }[] };
+      message?: string;
+    };
+    return {
+      status: e.getStatus?.() ?? `threw: ${e.message}`,
+      code: e.code,
+      reason: e.details?.violations?.[0]?.reason,
+    };
+  }
+}
+
 describeIfDb('Catálogo de datos (integración, PostgreSQL real)', () => {
   let orm: MikroORM;
   let client: pg.Client;
@@ -623,6 +645,199 @@ describeIfDb('Catálogo de datos (integración, PostgreSQL real)', () => {
         'orders',
       );
       expect(missing.items.length).toBe(3);
+    });
+  });
+
+  describe('importación de la bóveda (origen IMPORTED_VAULT)', () => {
+    const TEMPLATE =
+      'Si esta tabla se eliminara, el negocio perdería el registro mismo de los pedidos y sus líneas, sin otra tabla que cumpla ese rol.';
+    let linesId: string;
+    let archiveId: string;
+
+    beforeAll(async () => {
+      linesId = await objectId('fx_sales', 'order_lines');
+      archiveId = await objectId('fx_archive', 'orders');
+    });
+
+    const imported = (expectedVersion: number, extra = {}) => ({
+      expectedVersion,
+      origin: 'IMPORTED_VAULT' as const,
+      definition:
+        'order_lines es un registro central de negocio del módulo ventas.',
+      existenceRationale: TEMPLATE,
+      changeReason: 'Importado de SALUD/Entidades/E fx_sales.order_lines.md',
+      ...extra,
+    });
+
+    it('crea un borrador importado: origen en la ficha y en la revisión, nunca aprobado', async () => {
+      const draft = await annotations.upsertForObject(
+        linesId,
+        imported(0),
+        operator,
+      );
+      expect(draft).toMatchObject({
+        reviewStatus: 'DRAFT',
+        origin: 'IMPORTED_VAULT',
+        currentRevisionNo: 1,
+        version: 1,
+      });
+      const history = await annotations.historyForObject(linesId);
+      expect(history.revisions[0]).toMatchObject({
+        revisionNo: 1,
+        origin: 'IMPORTED_VAULT',
+      });
+      expect(history.decisions).toHaveLength(0);
+    });
+
+    it('una importación no se envía a revisión', async () => {
+      expect(
+        await statusOf(
+          annotations.upsertForObject(
+            linesId,
+            imported(1, { submit: true }),
+            operator,
+          ),
+        ),
+      ).toBe(422);
+    });
+
+    it('reimportar lo mismo no crea otra revisión; lo distinto, sí, mientras siga siendo un borrador importado', async () => {
+      const same = await annotations.upsertForObject(
+        linesId,
+        imported(1),
+        operator,
+      );
+      expect(same).toMatchObject({ currentRevisionNo: 1, version: 1 });
+      const changed = await annotations.upsertForObject(
+        linesId,
+        imported(1, {
+          definition:
+            'order_lines es el detalle por producto de cada pedido del módulo ventas.',
+        }),
+        operator,
+      );
+      expect(changed).toMatchObject({
+        currentRevisionNo: 2,
+        origin: 'IMPORTED_VAULT',
+      });
+    });
+
+    it('el texto de plantilla importado no deja enviar la ficha a revisión', async () => {
+      const current = (await query.getObject(linesId)).annotation!;
+      expect(
+        await statusOf(
+          annotations.upsertForObject(
+            linesId,
+            {
+              expectedVersion: current.version,
+              submit: true,
+              purpose:
+                'Registrar cada producto de un pedido para facturarlo y despacharlo.',
+              rowGrain: 'Una fila por producto de cada pedido.',
+            },
+            author,
+          ),
+        ),
+      ).toBe(422);
+    });
+
+    it('una edición manual toma la ficha, y desde entonces la importación no la pisa', async () => {
+      const current = (await query.getObject(linesId)).annotation!;
+      const manual = await annotations.upsertForObject(
+        linesId,
+        {
+          expectedVersion: current.version,
+          purpose:
+            'Registrar cada producto de un pedido para facturarlo y despacharlo.',
+        },
+        author,
+      );
+      expect(manual).toMatchObject({ origin: 'MANUAL', reviewStatus: 'DRAFT' });
+      expect(
+        await failureOf(
+          annotations.upsertForObject(
+            linesId,
+            imported(manual.version, {
+              definition: 'Otro texto importado distinto.',
+            }),
+            operator,
+          ),
+        ),
+      ).toEqual({
+        status: 422,
+        code: 'PRECONDITION_FAILED',
+        reason: 'MANUAL_REVISION_EXISTS',
+      });
+      expect((await query.getObject(linesId)).annotation).toMatchObject({
+        origin: 'MANUAL',
+        currentRevisionNo: manual.currentRevisionNo,
+      });
+    });
+
+    // Una ficha enviada por una persona tiene su última revisión MANUAL, así que esa razón
+    // gana; REVIEW_ALREADY_STARTED es defensa en profundidad (ver annotation.policy.spec).
+    it('una ficha que ya entró a revisión no se reabre desde una importación', async () => {
+      const sent = await annotations.upsertForObject(
+        archiveId,
+        {
+          expectedVersion: 0,
+          submit: true,
+          purpose:
+            'Conservar los pedidos cerrados para consultarlos sin cargar la tabla viva.',
+          existenceRationale:
+            'Sin este archivo las consultas históricas obligarían a mantener todo en la tabla viva y degradarían el cobro diario.',
+          rowGrain: 'Una fila por pedido archivado, identificada por su id.',
+        },
+        author,
+      );
+      expect(sent.reviewStatus).toBe('NEEDS_REVIEW');
+      expect(
+        await failureOf(
+          annotations.upsertForObject(
+            archiveId,
+            imported(sent.version),
+            operator,
+          ),
+        ),
+      ).toEqual({
+        status: 422,
+        code: 'PRECONDITION_FAILED',
+        reason: 'MANUAL_REVISION_EXISTS',
+      });
+      expect((await query.getObject(archiveId)).annotation).toMatchObject({
+        reviewStatus: 'NEEDS_REVIEW',
+        origin: 'MANUAL',
+      });
+    });
+
+    it('la evidencia repetida no se duplica', async () => {
+      const evidence = {
+        kind: 'VAULT_NOTE' as const,
+        reference: 'SALUD/Entidades/E fx_sales.order_lines.md',
+        excerpt: 'Negocio: order_lines es un registro central…',
+        sourceRevision: 'vault@0000000',
+      };
+      const first = await annotations.addEvidenceToObject(
+        linesId,
+        evidence,
+        operator,
+      );
+      const second = await annotations.addEvidenceToObject(
+        linesId,
+        evidence,
+        operator,
+      );
+      expect(second.id).toBe(first.id);
+      const other = await annotations.addEvidenceToObject(
+        linesId,
+        { ...evidence, sourceRevision: 'vault@1111111' },
+        operator,
+      );
+      expect(other.id).not.toBe(first.id);
+      const listed = await annotations.listEvidenceForObject(linesId);
+      expect(
+        listed.filter((item) => item.reference === evidence.reference),
+      ).toHaveLength(2);
     });
   });
 });
