@@ -15,7 +15,7 @@
 |---|---|---|---|---|
 | H0.1.1 | `.env.example:287-288` → `admin@alovidasalud.com` con aviso «sólo local y dev» | grep encuentra la línea comentada y el aviso | `grep -n 'BOOTSTRAP_ADMIN_EMAIL=admin@alovidasalud.com' .env.example` → `289:# BOOTSTRAP_ADMIN_EMAIL=admin@alovidasalud.com` | HECHO |
 | H0.1.2 | ~~Caso nuevo en `bootstrap-admin-seed.service.spec.ts`~~ | — | — | DESCARTADO: ya existe `se niega en producción sin autorización explícita` (spec `:92-100`) con las mismas aserciones; duplicarlo no aporta. Decidido al leer el spec (2026-10-17) |
-| H0.1.3 | Sembrar y verificar login + 4 lecturas 200 | `POST /iam/auth/login` 200 con `SUPERADMIN`; 4 GET → 200 | curl + salida literal | TODO |
+| H0.1.3 | Sembrar y verificar login + 4 lecturas 200 | `POST /iam/auth/login` 200 con `SUPERADMIN`; 4 GET → 200 | curl + salida literal | HECHO (VERIFIED local) · `evidencia/H0.1.3-*.txt` |
 
 ## H1 — Observabilidad HTTP
 | ID | Microtarea | DoD | Estado |
@@ -23,7 +23,8 @@
 | H1.1.1 | `http-sli.aggregator.ts` puro | `yarn test src/observability/http-sli/http-sli.aggregator.spec.ts` | HECHO (TESTED) |
 | H1.1.2 | `http-sli.middleware.ts` + env | spec + `grep -c 'originalUrl\|req.url\|req.query\|req.body\|req.headers' …middleware.ts` → 0 | HECHO (TESTED) |
 | H1.1.3 | `http-sli-flush.service.ts` + módulo | spec | HECHO (TESTED) |
-| H1.1.4 | Registro en `main.ts`/`app.module.ts`, variables | `yarn typecheck && yarn lint` | A MEDIAS: registrado, typecheck/lint/wiring OK; el volcado a `service_sli_series` se ejercitó contra Postgres real vía `ops-traffic.int-spec` (H1.2.3); falta la API arrancada con tráfico real |
+| H1.1.4 | Registro en `main.ts`/`app.module.ts`, variables | `yarn typecheck && yarn lint` | HECHO (VERIFIED local): 21 peticiones reales → 21 solicitudes medidas, 3 de 4xx, sin `/health` y sin UUID en ninguna serie · `evidencia/H1.1.4-trafico-real.txt` |
+| H1.1.5 | Un 404 llega como `UNMATCHED` y no como `/{*all}` (hallado por la corrida real) | spec del agregador; petición real a ruta inexistente | HECHO (VERIFIED local) · `evidencia/H1.1.4-unmatched-real.txt` |
 | H1.2.1 | `route-index.service.ts` | spec; `lookup('GET','/admin/catalog/schemas')` = `DataCatalogController_listSchemas` | HECHO (TESTED) · `evidencia/H1.2.1-route-index.txt` |
 | H1.2.2 | `latency-buckets.ts` | spec | HECHO (TESTED) · `evidencia/H1.2.2-latency-buckets.txt` |
 | H1.2.3 | Repositorio de tráfico + int-spec | `yarn test:integration test/integration/ops-traffic.int-spec.ts` | HECHO (TESTED contra Postgres real, 7/7) · `evidencia/H1.2.3-ops-traffic-int-spec.txt` |

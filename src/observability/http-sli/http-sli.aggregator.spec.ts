@@ -145,12 +145,16 @@ describe('HttpSliAggregator', () => {
     aggregator.record(sample({ route: '/lookup/12345678' }));
     aggregator.record(sample({ route: `/${'a'.repeat(250)}` }));
     aggregator.record(sample({ route: '' }));
+    // Lo que Express entrega para una ruta inexistente cuando un middleware
+    // atrapa todo (medido contra la API real: `/{*all}`).
+    aggregator.record(sample({ route: '/{*all}', status: 404 }));
+    aggregator.record(sample({ route: '*', status: 404 }));
 
     const points = aggregator.drain();
 
     expect(points).toHaveLength(1);
     expect(points[0].dimensions.route).toBe(UNMATCHED_ROUTE);
-    expect(points[0].denominator).toBe(5);
+    expect(points[0].denominator).toBe(7);
     expect(JSON.stringify(points)).not.toMatch(/550e8400|12345678/);
   });
 

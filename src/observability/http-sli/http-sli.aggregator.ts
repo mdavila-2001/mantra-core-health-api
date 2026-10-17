@@ -141,6 +141,9 @@ function sanitizeRoute(route: string): string {
   if (UUID.test(route) || LONG_DIGITS.test(route) || route.length > 200) {
     return UNMATCHED_ROUTE;
   }
+  // Un comodín (`/{*all}`, `*`) es el middleware que atrapa lo que ninguna ruta
+  // quiso —Express lo entrega como si fuera la ruta—: no es un endpoint.
+  if (route.includes('*')) return UNMATCHED_ROUTE;
   return route;
 }
 
