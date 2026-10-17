@@ -60,7 +60,7 @@ Ninguna.
 - `GET /admin/ops/traffic*` no se llamó por HTTP (ni con token ni sin él): la autorización se cubre por el spec de metadatos `@Roles` del controlador, no por una petición real.
 
 - **H3 · El runner M68 no se ejercitó contra la API real.** El int-spec usa un destino que hace de la API (doble declarado, regla 65). La API real se ejerció aparte con los 27 casos (H3.1.2), y la lectura (`/admin/qa/flows`) contra la API real y Postgres real; pero «Ejecutar» un plan sobre `FLOW-1.3` apuntando a la propia API (con credencial del destino y aprobación por otra identidad) queda para H5.
-- **H3 · 14 de 27 ramas por flujo no tienen caso** y lo dicen (`reason`): las `HAPPY_PATH` de los POST necesitan un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal); los `gap` no tienen endpoint. Ningún caso «sin token»: el runner siempre envía la credencial del destino.
+- **H3 · 39 de las 66 ramas no tienen caso** (27 sí) y todas lo dicen (`reason`): las `HAPPY_PATH` de los POST necesitan un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal); los `gap` no tienen endpoint. Ningún caso «sin token»: el runner siempre envía la credencial del destino.
 - **H3 · Un destino de QA para flujos debe permitir mutaciones.** Los casos incluyen `POST` con cuerpos inválidos o ids inexistentes (la API los rechaza), pero el guard no puede saberlo: sin `allowMutations`, el preflight los marca `MUTATION_NOT_ALLOWED` (probado) y el plan exige aprobación.
 - **H3 · Autorización de `GET /admin/qa/flows*`** cubierta por metadatos `@Roles` (spec), 401 sin token (petición real); **no** se probó un 403 con un rol ajeno por petición.
 
