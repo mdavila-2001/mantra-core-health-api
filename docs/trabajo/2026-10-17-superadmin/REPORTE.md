@@ -1,6 +1,6 @@
 # Reporte — Superadministración de AloVida (lado API)
 
-> **AVANCE: 23 / 28 — 82,1 %.** (`microtareas HECHO / total` del PLAN.md de este repo; `DESCARTADO`, `BLOQUEADO` y `A MEDIAS` no suman. Hecho: H0.1.1, H0.1.3, H1.1.1–H1.1.5, H1.2.1–H1.2.4, H2.1.1–H2.1.4, H2.2.1–H2.2.3, H3.1.1–H3.1.2, H3.2.1–H3.2.2, H3.3.1–2. Pendientes: H4.1.1, H4.1.2, H5.1.1, H5.1.2; descartada: H0.1.2.)
+> **AVANCE: 25 / 28 — 89,3 %.** (`microtareas HECHO / total` del PLAN.md de este repo; `DESCARTADO`, `BLOQUEADO` y `A MEDIAS` no suman. Hecho: H0.1.1, H0.1.3, H1.1.1–H1.1.5, H1.2.1–H1.2.4, H2.1.1–H2.1.4, H2.2.1–H2.2.3, H3.1.1–H3.1.2, H3.2.1–H3.2.2, H3.3.1–2, H4.1.1–H4.1.2. Pendientes: H5.1.1, H5.1.2; descartada: H0.1.2.)
 
 - Fecha: 2026-10-17 · Plan: [PLAN.md](./PLAN.md) · Rama: `claude-marcelo/serene-planck-1q7zje`
 - Peldaño de evidencia alcanzado: **`VERIFIED` local** para el acceso del superadmin (H0.1.3), la medición HTTP (H1.1) y las lecturas de tráfico (H1.2): la API se arrancó de verdad contra un PostgreSQL 16 descartable, con tráfico HTTP real. **No** `REGRESSION_VERIFIED`. Límites de ese entorno: la serie fue una tabla común (no hipertabla Timescale), `xlsx` fue un *stub*, y la API sólo arranca con un parche de DI aplicado **al `dist` de la copia** (ver Desvíos).
@@ -33,6 +33,9 @@
 | H3.2.2 | El runner M68 ejecuta el flujo sembrado y la lectura ve el veredicto por rama | `DATA_CATALOG_IT_DB_URL=… test/integration/qa-flows.int-spec.ts` | 7/7 contra Postgres real; destino = doble que hace de la API · `evidencia/H3.2.2-qa-flows-int-spec.txt` |
 | H3.3.1–2 | `GET /admin/qa/flows` y `/:flowId` (contrato `DECLARED/MISSING`, cobertura, deriva, último veredicto por rama) | `yarn test src/modules/qa_lab src/observability/route-index`; `check-breaking`; petición real | 215/215; «Sin cambios incompatibles» (+118 líneas, 0 borradas); API real: 22/22 endpoints `DECLARED`, 404 flujo inexistente, 400 filtro inválido, 401 sin token · `evidencia/H3.3-*.txt` |
 
+| H4.1.1 | ADR-0027 «Métricas HTTP en proceso sobre `service_sli_series`, sin datos de personas» (el 0026 ya era «molde de módulo DDD») | `node tools/docs/check-doc-links.mjs` | «1070 enlaces internos verificados… Sin enlaces rotos» · `evidencia/H4.1-docs-links.txt` |
+| H4.1.2 | `implementation-status.md` con los incrementos 6–8, la importación de la bóveda marcada como hecha y lo que sigue pendiente | `git diff --numstat docs/admin-portal` | +14 −2 (las 2 líneas modificadas son los pendientes #3 y #5) |
+
 Conjunto final sobre el código ya formateado: **ESLint exit 0, Jest 53/53** (incluye `app.module.wiring.spec.ts`), `tsc` sin errores en mis archivos → `evidencia/H1.1-*.txt`.
 
 ## A medias
@@ -43,7 +46,6 @@ Ninguna.
 | ID | Estado | Qué lo destraba |
 |---|---|---|
 | H0.1.2 | `DESCARTADO` | El spec ya cubre producción sin autorización (`bootstrap-admin-seed.service.spec.ts:92-100`); 11/11 verdes |
-| H4.1.1, H4.1.2 | `TODO` | ADR-0027 (métricas HTTP) y `implementation-status.md` al día; sin bloqueo |
 | H5.1.1, H5.1.2 | `TODO` | Segunda entrega: seed por endpoint y `endpoints-coverage`; depende del índice de rutas (hecho) |
 
 ## Evidencia

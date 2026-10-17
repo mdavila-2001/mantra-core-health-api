@@ -49,8 +49,8 @@
 | H3.2.1 | `qa-flows-seed.service.ts` | spec; `SEED_QA_FLOWS=true yarn seed:boot` ×2 | HECHO (VERIFIED local) · 1.ª corrida 3 suites/27 casos/27 aserciones; 2.ª `inserted:0` y `row_version` intacto · `evidencia/H3.2.1-*.txt` |
 | H3.2.2 | `qa-flows.int-spec.ts` | `yarn test:integration test/integration/qa-flows.int-spec.ts` | HECHO (TESTED contra Postgres real, 7/7; el destino es un doble que hace de la API) · `evidencia/H3.2.2-qa-flows-int-spec.txt` |
 | H3.3.1–2 | `qa-flows.service.ts` + 2 `@Get` (sin repositorio propio: lee con `EntityManager`, como `QaLabReadService`) | spec; `check-breaking` 0 | HECHO (VERIFIED local) · API real: 3 flujos, contrato 22/22 `DECLARED`, 404/400/401 · `evidencia/H3.3-*.txt` |
-| H4.1.1 | ADR-0027 «Métricas HTTP en proceso sobre `service_sli_series`, sin PHI» | archivo en `docs/adr/` + `yarn docs:links` | TODO |
-| H4.1.2 | `docs/admin-portal/implementation-status.md` al día (observabilidad, catálogo, flujos) | `git diff --stat` | TODO |
+| H4.1.1 | ADR-0027 «Métricas HTTP en proceso sobre `service_sli_series`, sin PHI» | archivo en `docs/adr/` + `yarn docs:links` | HECHO |
+| H4.1.2 | `docs/admin-portal/implementation-status.md` al día (observabilidad, catálogo, flujos) | `git diff --stat` | HECHO |
 | H5.1.1 | `qa-endpoints-seed.service.ts` (`EP-<operationId>-HAPPY\|NEG401`, `SEED_QA_ENDPOINTS`) | spec + int-spec | TODO |
 | H5.1.2 | `GET /admin/qa/endpoints-coverage` | spec; `check-breaking` 0 | TODO |
 
