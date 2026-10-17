@@ -415,6 +415,30 @@ export function branchCaseCode(
   return `FLOW-${flowId}-${node.id}-${branch.kind}-${String(index).padStart(2, '0')}`;
 }
 
+/**
+ * Los nodos en orden de recorrido: profundidad primero, siguiendo `next` en el
+ * orden de las ramas y visitando cada nodo una sola vez. Es el orden en que se
+ * dibuja el árbol y el `ordinal` de los casos en `qa_lab`.
+ */
+export function traversalOrder(flow: FlowDefinition): readonly FlowNode[] {
+  const byId = new Map(flow.nodes.map((n) => [n.id, n]));
+  const seen = new Set<string>();
+  const out: FlowNode[] = [];
+  const visit = (id: string): void => {
+    const node = byId.get(id);
+    if (!node || seen.has(id)) return;
+    seen.add(id);
+    out.push(node);
+    for (const branch of node.branches) {
+      if (branch.next !== undefined) visit(branch.next);
+    }
+  };
+  visit(flow.root);
+  // Un nodo suelto no pasa la validación; si llega acá, no se pierde.
+  for (const node of flow.nodes) visit(node.id);
+  return out;
+}
+
 /** Los casos que el seed escribe: sólo las ramas con `qaCase`, en orden de recorrido. */
 export function casesOf(flow: FlowDefinition): {
   readonly code: string;
@@ -422,7 +446,7 @@ export function casesOf(flow: FlowDefinition): {
   readonly branch: FlowBranch;
   readonly qaCase: FlowQaCase;
 }[] {
-  return flow.nodes.flatMap((node) =>
+  return traversalOrder(flow).flatMap((node) =>
     node.branches
       .filter(
         (b): b is FlowBranch & { qaCase: FlowQaCase } => b.qaCase !== undefined,

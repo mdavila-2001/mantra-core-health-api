@@ -8,6 +8,7 @@ import {
   countFlow,
   pathMatchesTemplate,
   suiteCode,
+  traversalOrder,
   validateFlow,
   type FlowDefinition,
   type FlowNode,
@@ -349,5 +350,28 @@ describe('catálogo real de flujos', () => {
   it('ningún caso lleva datos de una persona ni una credencial', () => {
     const text = JSON.stringify(FLOW_CATALOG);
     expect(text).not.toMatch(/authorization|bearer|password|@[a-z0-9-]+\./i);
+  });
+});
+
+describe('traversalOrder y casesOf', () => {
+  it('ordena en profundidad por next, una vez por nodo', () => {
+    const flow = FLOW_CATALOG.find((f) => f.id === '1.3')!;
+    const order = traversalOrder(flow).map((n) => n.id);
+    expect(order[0]).toBe(flow.root);
+    expect(new Set(order).size).toBe(flow.nodes.length);
+    // La rama «hay cupo» se recorre completa antes que «lista de espera».
+    expect(order.indexOf('confirmar-cita')).toBeLessThan(
+      order.indexOf('lista-espera'),
+    );
+  });
+
+  it('casesOf sigue el orden de recorrido y no repite códigos', () => {
+    const flow = FLOW_CATALOG.find((f) => f.id === '1.3')!;
+    const codes = casesOf(flow).map((c) => c.code);
+    expect(codes[0]).toBe('FLOW-1.3-buscar-api-HAPPY_PATH-01');
+    expect(new Set(codes).size).toBe(codes.length);
+    expect(codes.length).toBe(
+      flow.nodes.flatMap((n) => n.branches).filter((b) => b.qaCase).length,
+    );
   });
 });

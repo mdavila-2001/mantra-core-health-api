@@ -46,8 +46,8 @@
 |---|---|---|---|
 | H3.1.1 | `flow-catalog.ts` + schema + spec | `yarn test src/modules/qa_lab/domain/flow-catalog.spec.ts` | HECHO |
 | H3.1.2 | `1.3`, `2.6`, `2.7` `.flow.json` | spec 'catálogo real' | HECHO |
-| H3.2.1 | `qa-flows-seed.service.ts` | spec; `SEED_QA_FLOWS=true yarn seed:boot` | TODO |
-| H3.2.2 | `qa-flows.int-spec.ts` | `yarn test:integration test/integration/qa-flows.int-spec.ts` | TODO |
+| H3.2.1 | `qa-flows-seed.service.ts` | spec; `SEED_QA_FLOWS=true yarn seed:boot` | HECHO |
+| H3.2.2 | `qa-flows.int-spec.ts` | `yarn test:integration test/integration/qa-flows.int-spec.ts` | HECHO |
 | H3.3.1–2 | Repositorio + `qa-flows.service.ts` + 2 `@Get` | spec; `check-breaking` 0 | TODO |
 
 ## H4 / H5

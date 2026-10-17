@@ -49,3 +49,13 @@ El formato lo describe `flow.schema.json`; las reglas de coherencia, `domain/flo
 3. `yarn test src/modules/qa_lab/domain/flow-catalog.spec.ts`: valida la forma, que no haya ciclos ni nodos
    sueltos, y que cada endpoint exista en `openapi/openapi.json`.
 4. Ejercer cada `qaCase` contra una API real y anotar la fecha en `observedOn`.
+
+## Sembrar en `qa_lab`
+
+`SEED_QA_FLOWS=true yarn seed:boot` crea (o refresca) una suite `FLOW-<id>` por flujo, un caso por rama con
+`qaCase` y una aserción `STATUS_CODE EQUALS`. Es idempotente (la segunda corrida no inserta ni reescribe nada),
+no borra: un caso que sale del artefacto pasa a borrador y conserva su historial. Se niega en producción
+salvo `SEED_QA_FLOWS_ALLOW_PRODUCTION=true`. Las suites quedan en el tenant de plataforma.
+
+Los flujos incluyen `POST` (cuerpos inválidos, identificadores inexistentes que la API rechaza): el destino de QA
+debe tener `allowMutations`, y el plan pide aprobación de otra persona (`MUTATING_REQUESTS`).
