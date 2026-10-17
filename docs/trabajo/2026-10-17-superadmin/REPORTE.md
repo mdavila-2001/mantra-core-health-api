@@ -1,6 +1,6 @@
 # Reporte — Superadministración de AloVida (lado API)
 
-> **AVANCE: 15 / 23 — 65,2 %.** (`microtareas HECHO / total` del PLAN.md de este repo; `DESCARTADO`, `BLOQUEADO` y `A MEDIAS` no suman. Hecho: H0.1.1, H0.1.3, H1.1.1–H1.1.5, H1.2.1–H1.2.4, H2.1.1–H2.1.4.)
+> **AVANCE: 18 / 24 — 75,0 %.** (`microtareas HECHO / total` del PLAN.md de este repo; `DESCARTADO`, `BLOQUEADO` y `A MEDIAS` no suman. Hecho: H0.1.1, H0.1.3, H1.1.1–H1.1.5, H1.2.1–H1.2.4, H2.1.1–H2.1.4, H2.2.1–H2.2.3.)
 
 - Fecha: 2026-10-17 · Plan: [PLAN.md](./PLAN.md) · Rama: `claude-marcelo/serene-planck-1q7zje`
 - Peldaño de evidencia alcanzado: **`VERIFIED` local** para el acceso del superadmin (H0.1.3), la medición HTTP (H1.1) y las lecturas de tráfico (H1.2): la API se arrancó de verdad contra un PostgreSQL 16 descartable, con tráfico HTTP real. **No** `REGRESSION_VERIFIED`. Límites de ese entorno: la serie fue una tabla común (no hipertabla Timescale), `xlsx` fue un *stub*, y la API sólo arranca con un parche de DI aplicado **al `dist` de la copia** (ver Desvíos).
@@ -19,6 +19,9 @@
 | H2.1.2 | Lector de la bóveda y criterio de plantilla (repetición ≥3 o esqueleto generado conocido) | `yarn catalog:import-vault:test` | 27/27 · `evidencia/H2.1.2-tests-importador.txt` |
 | H2.1.3 | Importador `import-vault-annotations.mjs`: dry-run sobre la bóveda (2 601 notas, 1 245 conjuntos de índices, 1 356 tablas/vistas, 6 783 FK) y `--apply --schema iam` real ×2: 14 fichas + 62 evidencias de FK, 2.ª corrida sin cambios; en la base 14 fichas `IMPORTED_VAULT` en `DRAFT`, 0 aprobadas, 76 evidencias distintas | `node tools/catalog/import-vault-annotations.mjs --apply --schema iam` ×2 + `psql` | `evidencia/H2.1.3-*.txt` |
 | H2.1.4 | Casos de integración de la importación (6) | `data-catalog.int-spec` | ver H2.1.1 |
+| H2.2.1 | Notas de módulo M67 `data_catalog` y M68 `qa_execution` en la bóveda (repo de docs), que no existían, y alta en el dominio «Operaciones de Plataforma» | `node tools/catalog/generate-schema-descriptions.mjs` | 67 schemas con descripción · `evidencia/H2.2-schemas-real.txt` |
+| H2.2.2 | Generador de la explicación por schema desde `SALUD/Módulos/M*.md` (módulos sin propósito → `business: null`; M65/M66 sin formato estándar se declaran) | `yarn catalog:schemas --check`, `module-notes.test.mjs` 8/8 | al día · 69 notas leídas |
+| H2.2.3 | `GET /admin/catalog/schemas` trae `description`; contrato con `origin` en `UpsertAnnotationDto` (+19 líneas, 0 incompatibles) | `schema-description.spec.ts` 6/6 (encontró un defecto: `describeSchema('constructor')`) + petición real | 61 schemas, 59 con descripción, 2 sin ella (`medical_groups`, `surveys`) · `evidencia/H2.2-schemas-real.txt` |
 | H1.2.1 | Índice de rutas en proceso (`RouteIndexService`); sus operationId coinciden con los del contrato publicado | `yarn test src/observability/route-index` | 20 pruebas, incluida la comparación contra `openapi.json` · `evidencia/H1.2.1-route-index.txt` |
 | H1.2.2 | Percentiles desde histograma acumulado (`latency-buckets.ts`) | `yarn test src/modules/ops_console/domain` | verde · `evidencia/H1.2.2-latency-buckets.txt` |
 | H1.2.3 | Lecturas de tráfico y usuarios activos (`ops-traffic.repository.ts`) contra Postgres real: suma exacta de lo que escribe `http-sli`, ventana sin filas, dimensiones corruptas, filtro por serie/tenant/ventana, sesiones, RLS con rol sin privilegios | `OPS_TRAFFIC_IT_DB_URL=… yarn test:integration test/integration/ops-traffic.int-spec.ts` | 7/7 · `evidencia/H1.2.3-ops-traffic-int-spec.txt`. Encontró un bug real (un `?` en una regex lo leía MikroORM como parámetro) |
@@ -59,6 +62,11 @@ Ninguna.
 
 - **Contrato OpenAPI parcial a propósito.** Regenerado con el generador oficial (en la copia, contra un Postgres 16 descartable), `openapi.json` traía además deriva ajena a este trabajo: la operación `GET /identity/verification-cases/{id}`, `PUT /practitioners/me/sites/{siteId}/contact-phone`, el esquema `SetSiteContactPhoneDto` y cambios en 3 esquemas (`CreateOwnSiteDto`, `IdentityAssuranceRequest*Dto`). Se insertaron **sólo** `GET /admin/ops/traffic` y `GET /admin/ops/traffic/endpoints` (+257 líneas, 0 borradas; la serialización reproduce el archivo commiteado byte a byte). Quien posea esos otros cambios debe regenerar el contrato.
 - **Para poder generar el contrato** hubo que parchear **sólo el `dist` de la copia** (no el repo): `InsurancePatientSettlementModule` no provee `LinkedOrderDataRepository` ni `InsurancePatientAccountRepository`, y sin eso la aplicación no arranca (`UnknownDependenciesException`). Es un defecto del código ya commiteado, fuera de este alcance: se anota, no se arregla.
+
+## Hallazgos de H2.2
+- 10 de los 69 módulos de la bóveda no traen «Propósito de negocio» (M00, M08, M16, M17, M18, M21, M33, M34 y los resúmenes M65/M66, que ni siquiera tienen el formato estándar): su explicación de negocio queda en `null` y la pantalla lo dice. Entre ellos están `clinical`, `accounting` y `billing`.
+- Los módulos 67 y 68 no tenían nota en la bóveda; se escribieron con lo medido en la base. Queda **supuesto** que ambos pertenecen a «Operaciones de Plataforma» (el `qa_lab`, del que depende el 68, está en «Clínico y Diagnóstico»): confirmar con quien gobierna el modelo. Las notas `E data_catalog.*` y `E qa_execution.*` siguen sin existir.
+- La propia nota M46 `platform_ops` tiene su propósito cortado a media frase («…their»): es un defecto de la bóveda, mostrado tal cual.
 
 ## Hallazgos de H2.1
 - **El texto de «Negocio / Ejemplo / Por qué / Sistema» de la bóveda es casi todo plantilla generada:** 111 variantes de «Negocio» cubren 2 580 textos; sólo 26 de las 1 356 tablas/vistas tienen texto propio completo (p. ej. `audio_assets`). Se importa igualmente, pero marcado como plantilla y como borrador; la explicación real de cada tabla sigue sin escribirse. Decisión del dueño de negocio: quién redacta.

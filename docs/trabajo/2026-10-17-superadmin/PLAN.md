@@ -37,8 +37,9 @@
 | H2.1.2 | Parser `tools/catalog/lib/vault-notes.mjs` | `yarn catalog:import-vault:test` (27 pruebas: lector, plantilla vs texto propio, importador con API simulada) | HECHO (TESTED) · `evidencia/H2.1.2-tests-importador.txt` |
 | H2.1.3 | CLI `import-vault-annotations.mjs` | `--dry-run` reporta 2601 notas E (1245 índices, 1356 tablas/vistas) y 6783 FK; `--apply --schema iam` real ×2 | HECHO (VERIFIED local) · `evidencia/H2.1.3-*.txt` |
 | H2.1.4 | Caso de integración | `data-catalog.int-spec`: bloque «importación de la bóveda» (6 casos) | HECHO (TESTED) · ver H2.1.1 |
-| H2.2.2 | Generador de descripciones de esquema | `node tools/catalog/generate-schema-descriptions.mjs && yarn typecheck` | TODO |
-| H2.2.3 | `listSchemas()` anexa `description` | spec + `check-breaking` 0 | TODO |
+| H2.2.1 | Notas de módulo `M67 data_catalog.md` y `M68 qa_execution.md` en la bóveda (repo de docs), más el dominio «Operaciones de Plataforma» | `generate-schema-descriptions` las lee (67 schemas con descripción) | HECHO (TESTED) · `evidencia/H2.2-schemas-real.txt` |
+| H2.2.2 | Generador de descripciones de esquema | `yarn catalog:schemas --check` + `module-notes.test.mjs` (8) + `schema-description.spec.ts` (6) + `tsc` | HECHO (TESTED) |
+| H2.2.3 | `listSchemas()` anexa `description` | `GET /admin/catalog/schemas` real: 61 schemas, 59 con descripción; `check-breaking` 0 | HECHO (VERIFIED local) · `evidencia/H2.2-schemas-real.txt` |
 
 ## H3 — Catálogo de flujos
 | ID | Microtarea | DoD | Estado |

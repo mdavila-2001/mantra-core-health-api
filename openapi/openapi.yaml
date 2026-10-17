@@ -95174,6 +95174,16 @@ components:
           type: boolean
           default: false
           description: true envía a revisión (NEEDS_REVIEW); false guarda borrador
+        origin:
+          type: string
+          enum:
+            - MANUAL
+            - IMPORTED_VAULT
+          default: MANUAL
+          description: >-
+            De dónde sale el contenido. IMPORTED_VAULT lo escribe el importador de la bóveda: queda siempre en borrador,
+            no se puede enviar a revisión y no pisa una ficha escrita a mano ni una que ya entró a revisión.
+            AI_SUGGESTED no se acepta.
         changeReason:
           type: string
           maxLength: 500

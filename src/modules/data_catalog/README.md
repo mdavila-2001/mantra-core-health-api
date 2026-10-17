@@ -107,6 +107,18 @@ PUT sobre algo aprobado            ──> revisión N+1 en NEEDS_REVIEW; lo apr
   a la revisión humana.
 - **Quien escribió una revisión no la aprueba**, sea cual sea su rol. Aprobar exige evidencia;
   rechazar exige comentario.
+- **Origen de una revisión.** `origin` es `MANUAL` (una persona) o `IMPORTED_VAULT` (el importador
+  `yarn catalog:import-vault`, ver `tools/catalog/README.md`); `AI_SUGGESTED` no entra por la API.
+  Una importación **queda en borrador**, no se puede enviar a revisión (422) y **no pisa** una ficha
+  cuya última revisión es manual ni una que ya entró a revisión (422 `PRECONDITION_FAILED`, razón
+  `MANUAL_REVISION_EXISTS`). El texto importado lo genera una herramienta: cada campo plantilla
+  queda como pregunta abierta. La evidencia repetida (mismo objeto, columna, tipo, referencia y
+  revisión de la fuente) no se duplica.
+- **`GET /admin/catalog/schemas` trae `description`**: lo que la bóveda dice del módulo dueño del
+  schema (título, dominio, propósito de negocio, frase de sistema con las métricas de la nota y la
+  ruta de la nota). Sale de `domain/schema-descriptions.generated.ts` (`yarn catalog:schemas`); es
+  `null` si ningún módulo declara el schema y `business` es `null` si la nota no trae propósito
+  (10 de 69 módulos). No es una ficha revisable: el ciclo de revisión es de tablas y columnas.
 - **La cobertura** sin escaneo terminado es `UNKNOWN`; con denominador cero, `NOT_APPLICABLE`.
   Una aprobación vieja no cubre una revisión nueva.
 
