@@ -1,0 +1,486 @@
+{
+  "id": "1.3",
+  "version": 1,
+  "module": "1 · Paciente",
+  "title": "Agendar hora para consultas médicas",
+  "source": {
+    "document": "SALUD/📋 Registro de procesos por módulo.md",
+    "section": "1.3 · Agendar Hora para Consultas Medicas"
+  },
+  "actors": [
+    "PATIENT",
+    "PRACTITIONER",
+    "SYSTEM"
+  ],
+  "frontRoutes": [
+    "/directory",
+    "/directory/:profileId",
+    "/my-account/appointments",
+    "/my-account/appointments/book/:slotId"
+  ],
+  "root": "buscar-medicos",
+  "nodes": [
+    {
+      "id": "buscar-medicos",
+      "kind": "SCREEN",
+      "title": "El paciente busca médicos con y sin seguro",
+      "actor": "PATIENT",
+      "uiRoute": "/directory",
+      "sourceRef": "ítems 1 y 2",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El paciente abre el directorio",
+          "expected": "Se pide la lista de médicos",
+          "next": "buscar-api",
+          "reason": "Pantalla: no hace una petición propia; la hace la llamada que dispara."
+        }
+      ]
+    },
+    {
+      "id": "buscar-api",
+      "kind": "API_CALL",
+      "title": "Listar médicos disponibles",
+      "actor": "PATIENT",
+      "endpoint": {
+        "method": "GET",
+        "path": "/public/search/practitioners"
+      },
+      "sourceRef": "ítem 1",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "Hay médicos que cumplen el filtro",
+          "expected": "Devuelve la lista paginada",
+          "next": "ver-aseguradoras",
+          "qaCase": {
+            "method": "GET",
+            "path": "/public/search/practitioners",
+            "expectedStatus": 200,
+            "observedOn": "2026-10-17",
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        },
+        {
+          "kind": "EDGE",
+          "condition": "Parámetros fuera de rango (limit=0, cursor inexistente)",
+          "expected": "La API los ignora y devuelve la lista",
+          "next": "ver-aseguradoras",
+          "qaCase": {
+            "method": "GET",
+            "path": "/public/search/practitioners?limit=0&cursor=zzz",
+            "expectedStatus": 200,
+            "observedOn": "2026-10-17",
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ver-aseguradoras",
+      "kind": "API_CALL",
+      "title": "Ver con qué aseguradoras trabaja el médico",
+      "actor": "PATIENT",
+      "uiRoute": "/directory/:profileId",
+      "endpoint": {
+        "method": "GET",
+        "path": "/practitioners/{profileId}/insurance-networks"
+      },
+      "sourceRef": "ítem 2",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico existe",
+          "expected": "Devuelve sus convenios (puede ser una lista vacía)",
+          "next": "ver-horario-lugar",
+          "qaCase": {
+            "method": "GET",
+            "path": "/practitioners/00000000-0000-4000-8000-0000000000aa/insurance-networks",
+            "expectedStatus": 200,
+            "observedOn": "2026-10-17",
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "El identificador no es un UUID",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "buscar-medicos",
+          "qaCase": {
+            "method": "GET",
+            "path": "/practitioners/abc/insurance-networks",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ver-horario-lugar",
+      "kind": "API_CALL",
+      "title": "Ver horario y lugar de atención",
+      "actor": "PATIENT",
+      "uiRoute": "/directory/:profileId",
+      "endpoint": {
+        "method": "GET",
+        "path": "/practitioners/{profileId}/sites"
+      },
+      "sourceRef": "ítem 3",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico atiende en uno o más lugares",
+          "expected": "Devuelve sus sedes",
+          "next": "ver-disponibilidad",
+          "qaCase": {
+            "method": "GET",
+            "path": "/practitioners/00000000-0000-4000-8000-0000000000aa/sites",
+            "expectedStatus": 200,
+            "observedOn": "2026-10-17",
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "No llega la organización (cabecera x-tenant-id)",
+          "expected": "Rechaza con precondición fallida (422)",
+          "loopsTo": "buscar-medicos",
+          "qaCase": {
+            "method": "GET",
+            "path": "/practitioners/00000000-0000-4000-8000-0000000000aa/sites",
+            "expectedStatus": 422,
+            "observedOn": "2026-10-17"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ver-disponibilidad",
+      "kind": "API_CALL",
+      "title": "Consultar cupos disponibles",
+      "actor": "PATIENT",
+      "uiRoute": "/my-account/appointments",
+      "endpoint": {
+        "method": "GET",
+        "path": "/scheduling/slots"
+      },
+      "sourceRef": "ítem 3",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "Hay una ventana de fechas válida",
+          "expected": "Devuelve los cupos de la ventana",
+          "next": "hay-cita",
+          "qaCase": {
+            "method": "GET",
+            "path": "/scheduling/slots?from=2026-10-18T00:00:00Z&to=2026-10-19T00:00:00Z",
+            "expectedStatus": 200,
+            "observedOn": "2026-10-17",
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Faltan from y to",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "ver-horario-lugar",
+          "qaCase": {
+            "method": "GET",
+            "path": "/scheduling/slots",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "hay-cita",
+      "kind": "DECISION",
+      "title": "¿Hay cupo en el día que necesita?",
+      "actor": "PATIENT",
+      "sourceRef": "ítem 4",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "Hay cupo en la fecha",
+          "expected": "Toma el cupo",
+          "next": "tomar-cupo",
+          "reason": "Decisión del recorrido: no llama a la API; sus caminos se prueban en los nodos a los que lleva."
+        },
+        {
+          "kind": "EDGE",
+          "condition": "No hay cupo en el día y el paciente confirma otra fecha",
+          "expected": "Entra a la lista de espera",
+          "next": "lista-espera",
+          "reason": "Decisión del recorrido: no llama a la API; sus caminos se prueban en los nodos a los que lleva."
+        }
+      ]
+    },
+    {
+      "id": "tomar-cupo",
+      "kind": "API_CALL",
+      "title": "Reservar temporalmente el cupo",
+      "actor": "PATIENT",
+      "uiRoute": "/my-account/appointments/book/:slotId",
+      "endpoint": {
+        "method": "POST",
+        "path": "/scheduling/slots/{id}/holds"
+      },
+      "effects": [
+        "Bloquea el cupo con FOR UPDATE; lo devuelve sólo si el hold vence"
+      ],
+      "sourceRef": "ítem 3",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El cupo sigue libre",
+          "expected": "Crea un hold con vencimiento",
+          "next": "confirmar-cita",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "El cupo no existe",
+          "expected": "Responde 404 «Slot no encontrado»",
+          "loopsTo": "ver-disponibilidad",
+          "qaCase": {
+            "method": "POST",
+            "path": "/scheduling/slots/00000000-0000-4000-8000-0000000000aa/holds",
+            "expectedStatus": 404,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "confirmar-cita",
+      "kind": "API_CALL",
+      "title": "Confirmar la cita",
+      "actor": "PATIENT",
+      "uiRoute": "/my-account/appointments/book/:slotId",
+      "endpoint": {
+        "method": "POST",
+        "path": "/scheduling/holds/{holdToken}/confirm"
+      },
+      "sourceRef": "ítem 3",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El hold sigue vigente",
+          "expected": "Crea la cita",
+          "next": "datos-facturacion",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "EDGE",
+          "condition": "El médico se demorará",
+          "expected": "El paciente recibe el aviso de demora",
+          "next": "avisar-demora",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo de la confirmación",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "tomar-cupo",
+          "qaCase": {
+            "method": "POST",
+            "path": "/scheduling/holds/00000000-0000-4000-8000-0000000000aa/confirm",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "avisar-demora",
+      "kind": "API_CALL",
+      "title": "El médico informa que se demora",
+      "actor": "PRACTITIONER",
+      "endpoint": {
+        "method": "POST",
+        "path": "/scheduling/bookings/{id}/delay"
+      },
+      "effects": [
+        "Sólo la informa quien atiende esa agenda"
+      ],
+      "sourceRef": "ítem 5",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El médico llega tarde a una cita vigente",
+          "expected": "Avisa al paciente; no mueve el turno",
+          "next": "fin-agendada",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo con la demora",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "avisar-demora",
+          "qaCase": {
+            "method": "POST",
+            "path": "/scheduling/bookings/00000000-0000-4000-8000-0000000000aa/delay",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "datos-facturacion",
+      "kind": "API_CALL",
+      "title": "Guardar nombre o razón social y NIT para facturar",
+      "actor": "PATIENT",
+      "gap": "No se encontró en el contrato un endpoint que guarde los datos de facturación del paciente (nombre o razón social, NIT).",
+      "sourceRef": "ítem 6",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El paciente deja sus datos de facturación",
+          "expected": "Quedan guardados para próximas facturas",
+          "next": "fin-agendada",
+          "reason": "Sin endpoint en el contrato: no hay qué probar."
+        }
+      ]
+    },
+    {
+      "id": "lista-espera",
+      "kind": "API_CALL",
+      "title": "Anotarse en la lista de espera",
+      "actor": "PATIENT",
+      "endpoint": {
+        "method": "POST",
+        "path": "/scheduling/waitlist"
+      },
+      "sourceRef": "ítem 4",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "El paciente pide aviso para otra fecha",
+          "expected": "Queda en la lista de espera",
+          "next": "liberacion-cupo",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "Falta el cuerpo de la solicitud",
+          "expected": "Rechaza la petición (400)",
+          "loopsTo": "hay-cita",
+          "qaCase": {
+            "method": "POST",
+            "path": "/scheduling/waitlist",
+            "expectedStatus": 400,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "liberacion-cupo",
+      "kind": "API_CALL",
+      "title": "Otro paciente desconfirma y el cupo se libera",
+      "actor": "SYSTEM",
+      "endpoint": {
+        "method": "POST",
+        "path": "/scheduling/internal/promote-waitlist/{slotId}"
+      },
+      "sourceRef": "ítem 4",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "Hay candidatos en espera para el cupo",
+          "expected": "Promueve al primero de la lista",
+          "next": "aviso-cupo-libre",
+          "reason": "Journey con variable: necesita un identificador producido por el paso anterior y el runner aún no encadena respuestas (pendiente #5 del portal)."
+        },
+        {
+          "kind": "NEGATIVE",
+          "condition": "El cupo no existe",
+          "expected": "Responde 404 «Slot no encontrado»",
+          "loopsTo": "liberacion-cupo",
+          "qaCase": {
+            "method": "POST",
+            "path": "/scheduling/internal/promote-waitlist/00000000-0000-4000-8000-0000000000aa",
+            "expectedStatus": 404,
+            "observedOn": "2026-10-17",
+            "body": {},
+            "headers": {
+              "x-tenant-id": "1befcfea-44c0-563a-81cd-337ec6acc840"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "aviso-cupo-libre",
+      "kind": "API_CALL",
+      "title": "Avisar al paciente que hay un horario disponible",
+      "actor": "SYSTEM",
+      "gap": "No se encontró un endpoint que dispare el aviso «se liberó un horario» al paciente en espera; la promoción existe, el envío no figura en el contrato.",
+      "sourceRef": "ítem 4",
+      "branches": [
+        {
+          "kind": "HAPPY_PATH",
+          "condition": "Se promovió a un paciente de la lista",
+          "expected": "El paciente recibe la notificación",
+          "next": "fin-espera",
+          "reason": "Sin endpoint en el contrato: no hay qué probar."
+        }
+      ]
+    },
+    {
+      "id": "fin-agendada",
+      "kind": "OUTCOME",
+      "title": "Cita agendada",
+      "actor": "PATIENT",
+      "sourceRef": "ítems 3, 5 y 6",
+      "branches": []
+    },
+    {
+      "id": "fin-espera",
+      "kind": "OUTCOME",
+      "title": "Paciente avisado de un horario libre",
+      "actor": "PATIENT",
+      "sourceRef": "ítem 4",
+      "branches": []
+    }
+  ],
+  "openQuestions": [
+    "El ítem 6 («Datos de la facturación para recibir de todas las instituciones») no dice quién carga los datos ni en qué momento del agendamiento; aquí se ubicó después de confirmar. Confirmar con el stakeholder de procesos.",
+    "La fuente pide filtrar médicos «con seguro y sin seguro» y por aseguradora; el contrato expone `insuranceCarrierId` en la búsqueda, pero no se verificó que el filtro funcione con datos reales (la base de prueba no tiene médicos).",
+    "Las ramas con `reason` «Journey con variable» no corren hasta que el runner de QA encadene respuestas (identificador del slot, token del hold)."
+  ]
+}

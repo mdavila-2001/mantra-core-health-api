@@ -15,8 +15,10 @@ import {
   contentHash,
   mergeContent,
   misplacedFields,
+  originViolations,
   reviewViolations,
   submissionViolations,
+  type AnnotationOrigin,
   type PolicyViolation,
   type ReviewStatus,
   type TargetKind,
@@ -158,7 +160,13 @@ export class CatalogAnnotationsService {
     dto: UpsertAnnotationDto,
     actor: AuthenticatedUser,
   ): Promise<AnnotationView> {
-    const { expectedVersion, submit = false, changeReason, ...patch } = dto;
+    const {
+      expectedVersion,
+      submit = false,
+      changeReason,
+      origin = 'MANUAL',
+      ...patch
+    } = dto;
     const misplaced = misplacedFields(target.kind, patch);
     if (misplaced.length > 0) {
       throw new CatalogValidationException(
@@ -178,6 +186,37 @@ export class CatalogAnnotationsService {
           latestVersion: currentVersion,
         },
       );
+    }
+
+    if (origin !== 'MANUAL') {
+      const lastRevision = annotation
+        ? await tx.findOne(CatalogAnnotationRevisions, {
+            annotationId: annotation.id,
+            revisionNo: annotation.currentRevisionNo,
+          })
+        : null;
+      const blocked = originViolations({
+        origin,
+        submit,
+        existing: annotation
+          ? {
+              reviewStatus: annotation.reviewStatus as ReviewStatus,
+              lastRevisionOrigin: (lastRevision?.origin ??
+                null) as AnnotationOrigin | null,
+            }
+          : null,
+      });
+      if (blocked.some((v) => v.reason === 'IMPORT_CANNOT_SUBMIT')) {
+        throw new CatalogValidationException(
+          'Una importación no puede enviarse a revisión',
+          blocked,
+        );
+      }
+      if (blocked.length > 0) {
+        throw new PreconditionFailedException(blocked[0].message, {
+          violations: blocked,
+        });
+      }
     }
 
     const next = mergeContent(annotation ? toContent(annotation) : null, patch);
@@ -221,7 +260,7 @@ export class CatalogAnnotationsService {
           columnId: target.columnId ?? undefined,
           sensitivity: 'UNKNOWN',
           reviewStatus: status,
-          origin: 'MANUAL',
+          origin,
           currentRevisionNo: 0,
           ...createdBy(actor.id, now),
         },
@@ -229,7 +268,7 @@ export class CatalogAnnotationsService {
       );
     applyContent(entity, next);
     entity.reviewStatus = status;
-    entity.origin = 'MANUAL';
+    entity.origin = origin;
     entity.currentRevisionNo += 1;
     entity.updatedAt = now;
     entity.updatedByUserId = actor.id;
@@ -242,7 +281,7 @@ export class CatalogAnnotationsService {
       revisionNo: entity.currentRevisionNo,
       contentJson: next,
       contentHash: hash,
-      origin: 'MANUAL',
+      origin,
       submittedStatus: status,
       changeReason,
       authorUserId: actor.id,
@@ -400,13 +439,26 @@ export class CatalogAnnotationsService {
     dto: AddEvidenceDto,
     actor: AuthenticatedUser,
   ) {
+    const reference = dto.reference.trim();
+    const sourceRevision = dto.sourceRevision?.trim() || undefined;
+    // Idempotente: la misma evidencia (objeto, columna, tipo, referencia y
+    // revisión de la fuente) no se duplica. Es lo que hace repetible al importador.
+    const existing = await tx.findOne(CatalogEvidenceItems, {
+      objectId: target.objectId,
+      columnId: target.columnId ?? null,
+      kind: dto.kind,
+      reference,
+      sourceRevision: sourceRevision ?? null,
+    });
+    if (existing) return evidenceView(existing);
+
     const item = tx.create(CatalogEvidenceItems, {
       objectId: target.objectId,
       columnId: target.columnId ?? undefined,
       kind: dto.kind,
-      reference: dto.reference.trim(),
+      reference,
       excerpt: dto.excerpt?.trim() || undefined,
-      sourceRevision: dto.sourceRevision?.trim() || undefined,
+      sourceRevision,
       addedByUserId: actor.id,
       createdAt: new Date(),
     });

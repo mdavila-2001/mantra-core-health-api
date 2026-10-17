@@ -1,0 +1,4 @@
+$ node --test tools/catalog/lib/*.test.mjs
+# tests 27
+# pass 27
+# fail 0

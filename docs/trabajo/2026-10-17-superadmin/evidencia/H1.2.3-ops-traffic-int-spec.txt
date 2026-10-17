@@ -1,0 +1,7 @@
+$ OPS_TRAFFIC_IT_DB_URL=postgres://postgres@localhost:54329/alovida yarn test:integration test/integration/ops-traffic.int-spec.ts
+(Postgres 16.15 de sistema; base descartable con database/SQL + patches aplicados; time_series como tabla común, sin Timescale)
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+Snapshots:   0 total
+Time:        4.062 s
+Ran all test suites matching test/integration/ops-traffic.int-spec.ts.

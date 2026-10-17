@@ -1,0 +1,7 @@
+GET /admin/qa/flows (API real, Postgres con SEED_QA_FLOWS=true ya sembrado)
+1.3 contrato {'endpoints': 9, 'declared': 9, 'missing': 0, 'gaps': 2} qa {'seeded': True, 'casesExpected': 13, 'casesLinked': 13, 'casesMissing': 0}
+2.6 contrato {'endpoints': 8, 'declared': 8, 'missing': 0, 'gaps': 2} qa {'seeded': True, 'casesExpected': 9, 'casesLinked': 9, 'casesMissing': 0}
+2.7 contrato {'endpoints': 5, 'declared': 5, 'missing': 0, 'gaps': 5} qa {'seeded': True, 'casesExpected': 5, 'casesLinked': 5, 'casesMissing': 0}
+404 GET /admin/qa/flows/9.9
+400 GET /admin/qa/flows?coverage=NOPE
+401 GET /admin/qa/flows sin token

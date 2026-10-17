@@ -7,6 +7,7 @@ import {
 } from '../../../common';
 import {
   PRIMARY_SOURCE,
+  describeSchema,
   impactOf,
   objectCoverage,
   type Direction,
@@ -60,6 +61,8 @@ export class CatalogQueryService {
       notObserved: row.not_observed,
       annotated: row.annotated,
       approved: row.approved,
+      // Lo que la bóveda dice del módulo dueño del schema; `null` si ninguno lo declara.
+      description: describeSchema(row.schema_name),
     }));
   }
 

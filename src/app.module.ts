@@ -14,6 +14,7 @@ import {
   TraceResponseInterceptor,
   telemetryEnvSchema,
 } from './observability';
+import { HttpSliModule } from './observability/http-sli/http-sli.module';
 import {
   AllExceptionsFilter,
   AuthModule,
@@ -154,6 +155,10 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // `TracingService` sin reimportar nada. No arranca el SDK -eso ocurre en la
     // primera línea de `main.ts`-, solo expone la API que lo consume.
     ObservabilityModule,
+    // Medición de peticiones HTTP (portal de superadministración): vuelca cada
+    // minuto lo que el middleware de `main.ts` agregó. Apagado por defecto
+    // (`OBSERVABILITY_HTTP_SLI_ENABLED`).
+    HttpSliModule,
     // Autenticación/autorización transversal: estrategia JWT, guards globales y
     // emisión de tokens. Global, se aplica a todos los dominios.
     AuthModule,

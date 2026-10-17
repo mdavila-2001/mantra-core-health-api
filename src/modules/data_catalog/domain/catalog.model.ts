@@ -77,6 +77,10 @@ export const ANNOTATION_ORIGINS = [
 ] as const;
 export type AnnotationOrigin = (typeof ANNOTATION_ORIGINS)[number];
 
+/** Los orígenes que acepta la API al escribir: la sugerencia de una IA no entra por acá. */
+export const WRITABLE_ORIGINS = ['MANUAL', 'IMPORTED_VAULT'] as const;
+export type WritableOrigin = (typeof WRITABLE_ORIGINS)[number];
+
 /** UNKNOWN no equivale a NONE: significa que nadie lo ha determinado todavía. */
 export const SENSITIVITIES = [
   'UNKNOWN',

@@ -34,6 +34,7 @@
 | [0024](ADR-0024-portal-admin-catalogo-de-datos.md) | Portal administrativo — catálogo de datos como módulo propio con jobs durables | Aceptado (desvío declarado de 0021) |
 | [0025](ADR-0025-qa-runner-en-servidor.md) | QA Lab ejecuta en el servidor, con destinos aprobados y aprobación ligada al plan | Aceptado (desvío declarado de 0021) |
 | [0026](ADR-0026-molde-de-modulo-ddd.md) | Molde de módulo por capas (DDD) con puertos hacia otros contextos | Aceptado (piloto: scheduling) |
+| [0027](ADR-0027-metricas-http-en-proceso.md) | Métricas HTTP en proceso sobre `service_sli_series`, sin datos de personas | Aceptado |
 
 ## Cómo añadir un ADR nuevo
 

@@ -49214,6 +49214,89 @@ paths:
       description: >-
         Defectos deduplicados por firma. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /admin/qa/flows:
+    get:
+      operationId: QaLabReadController_listFlows
+      parameters:
+        - name: module
+          required: false
+          in: query
+          description: 'Módulo del Registro: «2 · Médico»'
+          schema:
+            type: string
+        - name: search
+          required: false
+          in: query
+          description: Texto en el id, el título o el módulo
+          schema:
+            type: string
+        - name: coverage
+          required: false
+          in: query
+          description: 'SEEDED/NOT_SEEDED: la suite FLOW-<id> existe en qa_lab o no. RAN/NEVER_RAN: tuvo alguna corrida o no.'
+          schema:
+            type: string
+            enum:
+              - SEEDED
+              - NOT_SEEDED
+              - RAN
+              - NEVER_RAN
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: 'Catálogo de flujos: recorridos del usuario con su cobertura de contrato y de pruebas'
+      tags:
+        - qa-lab-read
+      description: >-
+        Catálogo de flujos: recorridos del usuario con su cobertura de contrato y de pruebas. Requiere JWT y los roles o
+        alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /admin/qa/flows/{flowId}:
+    get:
+      operationId: QaLabReadController_flow
+      parameters:
+        - name: flowId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: >-
+        Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su
+        último veredicto
+      tags:
+        - qa-lab-read
+      description: >-
+        Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su
+        último veredicto. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de
+        error usan el envelope ErrorResponse.
   /quotations:
     post:
       operationId: QuotationsController_create
@@ -55569,6 +55652,111 @@ paths:
         - ops-console
       description: >-
         Políticas de backup con su última prueba de restauración. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /admin/ops/traffic:
+    get:
+      description: >-
+        Agregado por minuto desde la medición en proceso. Sin usuarios ni direcciones reales; `notMeasured` dice lo que
+        no se mide.
+      operationId: OpsConsoleController_trafficOverview
+      parameters:
+        - name: from
+          required: false
+          in: query
+          description: 'Por defecto: 00:00 UTC del día de `to`'
+          schema:
+            format: date-time
+            type: string
+        - name: to
+          required: false
+          in: query
+          description: 'Por defecto: ahora'
+          schema:
+            format: date-time
+            type: string
+        - name: interval
+          required: false
+          in: query
+          schema:
+            default: hour
+            type: string
+            enum:
+              - hour
+              - day
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: 'Tráfico HTTP de la API: solicitudes, éxito, fallos, latencia y usuarios activos'
+      tags:
+        - ops-console
+  /admin/ops/traffic/endpoints:
+    get:
+      operationId: OpsConsoleController_trafficEndpoints
+      parameters:
+        - name: from
+          required: false
+          in: query
+          description: 'Por defecto: 00:00 UTC del día de `to`'
+          schema:
+            format: date-time
+            type: string
+        - name: to
+          required: false
+          in: query
+          description: 'Por defecto: ahora'
+          schema:
+            format: date-time
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 50
+            type: number
+        - name: sort
+          required: false
+          in: query
+          schema:
+            default: requests
+            type: string
+            enum:
+              - requests
+              - failed
+              - p95
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Endpoints tocados en la ventana, por plantilla de ruta
+      tags:
+        - ops-console
+      description: >-
+        Endpoints tocados en la ventana, por plantilla de ruta. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /telemetry/tracking-purposes:
     post:
@@ -95069,6 +95257,16 @@ components:
           type: boolean
           default: false
           description: true envía a revisión (NEEDS_REVIEW); false guarda borrador
+        origin:
+          type: string
+          enum:
+            - MANUAL
+            - IMPORTED_VAULT
+          default: MANUAL
+          description: >-
+            De dónde sale el contenido. IMPORTED_VAULT lo escribe el importador de la bóveda: queda siempre en borrador,
+            no se puede enviar a revisión y no pisa una ficha escrita a mano ni una que ya entró a revisión.
+            AI_SUGGESTED no se acepta.
         changeReason:
           type: string
           maxLength: 500
