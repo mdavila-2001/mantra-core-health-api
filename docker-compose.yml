@@ -264,6 +264,11 @@ x-app-env: &app-env
   # contenedor deriva el suyo del entrypoint que ejecuta
   # (`alovida-api`, `alovida-worker-messaging`, …); fijarlo aquí haría que los 21
   # procesos exportaran bajo el mismo nombre. Ver `docs/observability/`.
+  # Medición de peticiones HTTP para el portal de superadministración. Apagada por
+  # defecto en el código; el `.env.example` de desarrollo la enciende. Ver
+  # `src/observability/http-sli/`.
+  OBSERVABILITY_HTTP_SLI_ENABLED: ${OBSERVABILITY_HTTP_SLI_ENABLED:-false}
+  OBSERVABILITY_HTTP_SLI_FLUSH_SECONDS: ${OBSERVABILITY_HTTP_SLI_FLUSH_SECONDS:-60}
   OTEL_ENABLED: ${OTEL_ENABLED:-false}
   OTEL_SERVICE_NAMESPACE: ${OTEL_SERVICE_NAMESPACE:-alovida}
   OTEL_SERVICE_VERSION: ${OTEL_SERVICE_VERSION:-}
