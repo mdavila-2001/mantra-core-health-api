@@ -1,4 +1,3 @@
-import { normalizeSearchText } from '../../../common/text/normalize-search-text';
 export { normalizeSearchText } from '../../../common/text/normalize-search-text';
 
 /**
