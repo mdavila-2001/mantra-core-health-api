@@ -1,408 +1,302 @@
-import { randomUUID } from 'node:crypto';
-import { Injectable } from '@nestjs/common';
+import { hostname } from 'node:os';
+import { Injectable, Logger } from '@nestjs/common';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { ConflictException } from '../../../common/errors/domain.exception';
 import {
-  EntityManager,
-  UniqueConstraintViolationException,
-} from '@mikro-orm/postgresql';
-import { PinoLogger } from 'nestjs-pino';
+  SCAN_LEASE_SECONDS,
+  SCAN_LIMITATIONS,
+  SOURCE_CODE,
+} from '../catalog/catalog.constants';
 import {
-  ConflictException,
-  ResourceNotFoundException,
-  createdBy,
-  type AuthenticatedUser,
-} from '../../../common';
+  planScan,
+  type ForeignKeyInfo,
+  type ObservedColumn,
+  type ObservedObject,
+} from '../catalog/scan-diff';
 import {
-  CONNECTOR_VERSION,
-  PRIMARY_SOURCE,
-  SCAN_TERMINAL,
-  objectKey,
-  planReconciliation,
-  snapshotHash,
-  type KnownObject,
-  type ReconciliationPlan,
-  type ScanStatus,
-} from '../domain';
-import { CatalogScanRuns } from '../entities';
-import { PostgresIntrospector } from '../infrastructure/postgres-introspector';
-import { CatalogScanRepository } from '../repositories';
+  SQL_CLAVES,
+  SQL_CLAVES_FORANEAS,
+  SQL_COLUMNAS,
+  SQL_OBJETOS,
+  SQL_VERSION,
+} from '../catalog/scan.queries';
+import {
+  CatalogRepository,
+  type ScanRow,
+} from '../repositories/catalog.repository';
 
-/** Un worker que no termina en este plazo pierde la corrida y otro la retoma. */
-export const SCAN_LEASE_MS = 5 * 60_000;
-/** Intentos antes de declarar la corrida fallida en vez de reintentarla. */
-export const SCAN_MAX_ATTEMPTS = 3;
+/** Schemas que el escaneo no mira: los del sistema y los de extensiones con prefijo `_`. */
+export const EXCLUDED_SCHEMAS = ['pg_*', 'information_schema', '_*'];
 
-export interface ScanAcceptance {
-  scan: CatalogScanRuns;
-  /** false cuando la clave de idempotencia devolvió una corrida ya aceptada. */
+/** Resultado de pedir un escaneo. */
+export interface ScanRequest {
+  scan: ScanRow;
+  /** `false` si la petición repetía una clave de idempotencia ya usada: se devuelve el escaneo de entonces. */
   created: boolean;
 }
 
-export interface RunNextResult {
-  claimed: number;
-  scanId?: string;
-  status?: ScanStatus;
-  /** true si otro worker reclamó la corrida mientras ésta trabajaba. */
-  fenced?: boolean;
-}
-
 /**
- * Ciclo de vida del escaneo técnico: aceptación durable (202), reclamo por un
- * worker con lease, introspección de sólo lectura, reconciliación y cierre.
+ * Escaneo del catálogo: lee `pg_catalog` de la base primaria y actualiza `data_catalog.*` con lo
+ * observado, sin pisar jamás lo curado (fichas, revisiones, evidencia).
  *
- * La API no ejecuta nada al aceptar: la corrida queda QUEUED en la base y el
- * worker `data_catalog` la reclama. Así un reinicio de la API o de la pestaña
- * no pierde trabajo aceptado.
+ * Pedir un escaneo es una aceptación durable (`QUEUED`, 202) y su ejecución ocurre fuera de la
+ * petición. Hay **a lo sumo un escaneo activo por fuente**, garantizado por un índice único
+ * parcial y no por un `if`; un escaneo `RUNNING` cuyo lease venció (el proceso murió) se cierra
+ * como `FAILED` en la siguiente petición.
  */
 @Injectable()
 export class CatalogScanService {
+  private readonly logger = new Logger(CatalogScanService.name);
+  private readonly enCurso = new Set<Promise<unknown>>();
+
   constructor(
     private readonly em: EntityManager,
-    private readonly repo: CatalogScanRepository,
-    private readonly introspector: PostgresIntrospector,
-    private readonly logger: PinoLogger,
-  ) {
-    this.logger.setContext(CatalogScanService.name);
+    private readonly repo: CatalogRepository,
+  ) {}
+
+  /** Espera a que terminen los escaneos en vuelo de este proceso. Existe para las pruebas y el cierre ordenado. */
+  async drain(): Promise<void> {
+    await Promise.allSettled([...this.enCurso]);
   }
 
   /**
-   * Acepta una corrida. Misma clave de idempotencia del mismo usuario devuelve
-   * la corrida original; una corrida viva de la misma fuente es un conflicto,
-   * garantizado además por el índice único parcial de la tabla.
+   * Acepta un escaneo. Con la misma clave de idempotencia del mismo usuario devuelve el que ya
+   * existe; con otro escaneo activo responde 409.
    */
   async request(
-    actor: AuthenticatedUser,
-    idempotencyKey: string | undefined,
-  ): Promise<ScanAcceptance> {
-    try {
-      return await this.em.transactional(async (tx) => {
-        if (idempotencyKey) {
-          const existing = await this.repo.findByIdempotencyKey(
-            tx,
-            actor.id,
+    userId: string,
+    idempotencyKey: string | null,
+    { autorun = true } = {},
+  ): Promise<ScanRequest> {
+    const resultado = await this.em.fork().transactional(async (tx) => {
+      await this.repo.failAbandoned(tx, new Date(), SCAN_LEASE_SECONDS);
+      if (idempotencyKey) {
+        const previo = await this.repo.scanByIdempotency(
+          tx,
+          userId,
+          idempotencyKey,
+        );
+        if (previo) return { scan: previo, created: false };
+      }
+      const activo = await this.repo.activeScan(tx);
+      if (activo)
+        throw new ConflictException(
+          'Ya hay un escaneo en curso de esta fuente',
+          { scanId: activo.id, status: activo.status },
+        );
+      try {
+        return {
+          scan: await this.repo.insertScan(tx, {
+            userId,
             idempotencyKey,
-          );
-          if (existing) return { scan: existing, created: false };
-        }
-        const active = await this.repo.findActiveScan(tx, PRIMARY_SOURCE);
-        if (active) {
+            excludedSchemas: EXCLUDED_SCHEMAS,
+          }),
+          created: true,
+        };
+      } catch (error) {
+        // dos peticiones a la vez: el índice único de «uno activo» o el de idempotencia deciden
+        if (
+          error instanceof Error &&
+          /ux_data_catalog_scan_runs_(one_active|idempotency)/.test(
+            error.message,
+          )
+        )
           throw new ConflictException(
             'Ya hay un escaneo en curso de esta fuente',
-            {
-              activeScanId: active.id,
-              status: active.status,
-            },
           );
-        }
-        const now = new Date();
-        const scan = tx.create(
-          CatalogScanRuns,
+        throw error;
+      }
+    });
+    // el efecto se dispara DESPUÉS del commit, nunca dentro de la transacción
+    if (resultado.created && autorun) this.start(resultado.scan.id);
+    return resultado;
+  }
+
+  private start(scanId: string): void {
+    const trabajo = this.run(scanId)
+      .catch((error: unknown) =>
+        this.logger.error(
           {
-            sourceCode: PRIMARY_SOURCE,
-            mode: 'FULL',
-            status: 'QUEUED',
-            idempotencyKey,
-            requestedByUserId: actor.id,
-            requestedAt: now,
-            attempt: 0,
-            connectorVersion: CONNECTOR_VERSION,
-            ...createdBy(actor.id, now),
+            scanId,
+            err: error instanceof Error ? error.message : String(error),
           },
-          { partial: true },
-        );
-        await tx.flush();
-        this.logger.info(
-          { operation: 'catalog.scan.request', scanId: scan.id },
-          'Catalog scan accepted',
-        );
-        return { scan, created: true };
-      });
-    } catch (error) {
-      if (error instanceof UniqueConstraintViolationException) {
-        throw new ConflictException(
-          'Otra petición aceptó un escaneo de esta fuente al mismo tiempo',
-        );
-      }
-      throw error;
-    }
+          'El escaneo del catálogo falló fuera de su manejo de errores',
+        ),
+      )
+      .finally(() => this.enCurso.delete(trabajo));
+    this.enCurso.add(trabajo);
   }
 
-  /** Pide cancelar. En cola se cancela ya; en marcha, lo confirma el runner. */
-  async cancel(
-    scanId: string,
-    actor: AuthenticatedUser,
-  ): Promise<CatalogScanRuns> {
-    return this.em.transactional(async (tx) => {
-      const scan = await this.repo.findScanForUpdate(tx, scanId);
-      if (!scan)
-        throw new ResourceNotFoundException('Escaneo no encontrado', {
+  /** Ejecuta un escaneo ya aceptado. Nunca lanza: un fallo deja el escaneo en `FAILED` con su causa. */
+  async run(scanId: string): Promise<ScanRow | null> {
+    const owner = `${hostname()}:${process.pid}`;
+    const tomado = await this.repo.claimScan(
+      this.em.fork(),
+      scanId,
+      owner,
+      SCAN_LEASE_SECONDS,
+    );
+    if (!tomado) return this.repo.scanById(this.em.fork(), scanId);
+    try {
+      const { observed, engineVersion } = await this.observe();
+      await this.em.fork().transactional(async (tx) => {
+        const plan = planScan(await this.repo.knownObjects(tx), observed);
+        await this.repo.applyScan(
+          tx,
           scanId,
-        });
-      if (SCAN_TERMINAL.includes(scan.status as ScanStatus)) {
-        throw new ConflictException('El escaneo ya terminó', {
-          status: scan.status,
-        });
-      }
-      const now = new Date();
-      scan.cancelRequestedAt ??= now;
-      if (scan.status === 'QUEUED') {
-        scan.status = 'CANCELLED';
-        scan.finishedAt = now;
-      }
-      scan.updatedAt = now;
-      scan.updatedByUserId = actor.id;
-      await tx.flush();
-      return scan;
-    });
-  }
-
-  /**
-   * Reclama y ejecuta la siguiente corrida disponible. Lo invoca el worker; si
-   * no hay nada que hacer devuelve `claimed: 0` sin tocar la base.
-   */
-  async runNext(workerId: string): Promise<RunNextResult> {
-    const leaseOwner = `${workerId}:${randomUUID()}`;
-    const claimed = await this.em.transactional((tx) =>
-      this.repo.claimNext(tx, leaseOwner, SCAN_LEASE_MS),
-    );
-    if (!claimed) return { claimed: 0 };
-
-    const log = {
-      operation: 'catalog.scan.run',
-      scanId: claimed.id,
-      attempt: claimed.attempt,
-    };
-    if (claimed.attempt > SCAN_MAX_ATTEMPTS) {
-      const status = await this.finish(claimed.id, leaseOwner, 'FAILED', {
-        errorCode: 'MAX_ATTEMPTS_EXCEEDED',
-        errorMessage: `La corrida se reclamó ${claimed.attempt} veces sin terminar`,
-      });
-      return {
-        claimed: 1,
-        scanId: claimed.id,
-        status: status ?? undefined,
-        fenced: status === null,
-      };
-    }
-
-    let introspection;
-    try {
-      introspection = await this.introspector.introspect();
-    } catch (error) {
-      this.logger.error({ ...log, err: error }, 'Catalog introspection failed');
-      const status = await this.finish(claimed.id, leaseOwner, 'FAILED', {
-        errorCode: 'INTROSPECTION_FAILED',
-        errorMessage: sanitize(error),
-      });
-      return {
-        claimed: 1,
-        scanId: claimed.id,
-        status: status ?? undefined,
-        fenced: status === null,
-      };
-    }
-
-    try {
-      const outcome = await this.em.transactional(async (tx) => {
-        const scan = await this.repo.findScanForUpdate(tx, claimed.id);
-        // Fencing: si el lease cambió de manos, este worker llegó tarde y su
-        // resultado no se escribe.
-        if (
-          !scan ||
-          scan.leaseOwner !== leaseOwner ||
-          scan.status !== 'RUNNING'
-        ) {
-          return null;
-        }
-        const now = new Date();
-        if (scan.cancelRequestedAt) {
-          scan.status = 'CANCELLED';
-          scan.finishedAt = now;
-          scan.updatedAt = now;
-          await tx.flush();
-          return 'CANCELLED' as const;
-        }
-
-        const known = await this.repo.loadKnown(tx, scan.sourceCode);
-        const plan = planReconciliation(introspection.objects, known, true);
-        await this.apply(tx, scan, plan, known, now);
-
-        Object.assign(scan, plan.counters, {
-          status: 'SUCCEEDED',
-          finishedAt: now,
-          updatedAt: now,
-          engineVersion: introspection.engineVersion,
-          excludedSchemas: introspection.excludedSchemas,
-          limitations: introspection.limitations,
-          snapshotHash: snapshotHash(introspection.objects),
-          leaseExpiresAt: undefined,
-        });
-        await tx.flush();
-        this.logger.info(
-          { ...log, ...plan.counters },
-          'Catalog scan succeeded',
+          tomado.requested_by_user_id,
+          plan,
         );
-        return 'SUCCEEDED' as const;
+        await this.repo.finishScan(tx, scanId, {
+          counters: plan.counters,
+          snapshotHash: plan.snapshotHash,
+          engineVersion,
+          limitations: [...SCAN_LIMITATIONS],
+        });
       });
-      return {
-        claimed: 1,
-        scanId: claimed.id,
-        status: outcome ?? undefined,
-        fenced: outcome === null,
-      };
     } catch (error) {
+      const mensaje = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        { ...log, err: error },
-        'Catalog reconciliation failed',
+        { scanId, err: mensaje },
+        'El escaneo del catálogo falló',
       );
-      const status = await this.finish(claimed.id, leaseOwner, 'FAILED', {
-        errorCode: 'RECONCILIATION_FAILED',
-        errorMessage: sanitize(error),
-      });
+      await this.repo.failScan(this.em.fork(), scanId, 'SCAN_FAILED', mensaje);
+    }
+    return this.repo.scanById(this.em.fork(), scanId);
+  }
+
+  /** Lee `pg_catalog` en una transacción de sólo lectura. */
+  async observe(): Promise<{
+    observed: ObservedObject[];
+    engineVersion: string;
+  }> {
+    return this.em.fork().transactional(async (tx) => {
+      const ejecutar = <T>(sql: string): Promise<T> =>
+        tx
+          .getConnection()
+          .execute(sql, [], 'all', tx.getTransactionContext()) as Promise<T>;
+      await ejecutar('set transaction read only');
+      const [objetos, columnas, claves, foraneas, version] = await Promise.all([
+        ejecutar<ObjetoPg[]>(SQL_OBJETOS),
+        ejecutar<ColumnaPg[]>(SQL_COLUMNAS),
+        ejecutar<ClavePg[]>(SQL_CLAVES),
+        ejecutar<ForaneaPg[]>(SQL_CLAVES_FORANEAS),
+        ejecutar<{ engine_version: string }[]>(SQL_VERSION),
+      ]);
       return {
-        claimed: 1,
-        scanId: claimed.id,
-        status: status ?? undefined,
-        fenced: status === null,
+        observed: this.assemble(objetos, columnas, claves, foraneas),
+        engineVersion: version[0]?.engine_version ?? 'desconocida',
       };
-    }
-  }
-
-  /** Aplica el plan de reconciliación dentro de la transacción del cierre. */
-  private async apply(
-    tx: EntityManager,
-    scan: CatalogScanRuns,
-    plan: ReconciliationPlan,
-    known: readonly KnownObject[],
-    now: Date,
-  ): Promise<void> {
-    // Ids de lo ya conocido: los eventos de columnas que dejaron de verse
-    // tienen que apuntar a su fila real.
-    const objectIds = new Map<string, string>();
-    const columnIds = new Map<string, string>();
-    for (const object of known) {
-      const key = objectKey(object.schemaName, object.objectName);
-      objectIds.set(key, object.id);
-      for (const column of object.columns) {
-        columnIds.set(`${key}.${column.name}`, column.id);
-      }
-    }
-    const inserted = await this.repo.insertObjects(
-      tx,
-      scan.sourceCode,
-      scan.id,
-      now,
-      plan.create,
-    );
-    for (const [key, id] of inserted) objectIds.set(key, id);
-
-    await this.repo.touchObjects(
-      tx,
-      scan.id,
-      now,
-      plan.update.map((update) => ({
-        id: update.id,
-        estimatedRows: update.next.estimatedRows,
-        totalBytes: update.next.totalBytes,
-      })),
-    );
-    for (const update of plan.update) {
-      const key = objectKey(update.next.schemaName, update.next.objectName);
-      if (update.changed) {
-        await this.repo.updateObjectFacts(tx, update.id, update.next, now);
-      }
-      const created = await this.repo.insertColumns(
-        tx,
-        update.id,
-        scan.id,
-        now,
-        update.columns.create,
-      );
-      for (const [name, id] of created) columnIds.set(`${key}.${name}`, id);
-      await this.repo.touchColumns(
-        tx,
-        scan.id,
-        now,
-        update.columns.update.map((column) => column.id),
-      );
-      for (const column of update.columns.update) {
-        if (column.changed) {
-          await this.repo.updateColumnFacts(tx, column.id, column.next, now);
-        }
-      }
-      await this.repo.markColumnsNotObserved(
-        tx,
-        update.columns.notObserved,
-        now,
-      );
-    }
-    for (const gone of plan.notObserved) {
-      await this.repo.markColumnsNotObserved(tx, gone.columnIds, now);
-    }
-    await this.repo.markObjectsNotObserved(
-      tx,
-      plan.notObserved.map((gone) => gone.id),
-      now,
-    );
-
-    await this.repo.insertEvents(
-      tx,
-      plan.events.map((event) => {
-        const key = objectKey(event.schemaName, event.objectName);
-        return {
-          scanRunId: scan.id,
-          objectId: objectIds.get(key)!,
-          columnId: event.columnName
-            ? columnIds.get(`${key}.${event.columnName}`)
-            : undefined,
-          changeKind: event.kind,
-          beforeJson: event.before ?? undefined,
-          afterJson: event.after ?? undefined,
-          createdAt: now,
-        };
-      }),
-    );
-  }
-
-  /**
-   * Cierra la corrida en un estado terminal si este worker sigue siendo su
-   * dueño. Devuelve null si el lease ya era de otro (resultado descartado).
-   */
-  private async finish(
-    scanId: string,
-    leaseOwner: string,
-    status: ScanStatus,
-    error: { errorCode: string; errorMessage: string },
-  ): Promise<ScanStatus | null> {
-    return this.em.transactional(async (tx) => {
-      const scan = await this.repo.findScanForUpdate(tx, scanId);
-      if (
-        !scan ||
-        scan.leaseOwner !== leaseOwner ||
-        scan.status !== 'RUNNING'
-      ) {
-        return null;
-      }
-      const now = new Date();
-      scan.status = status;
-      scan.finishedAt = now;
-      scan.updatedAt = now;
-      scan.leaseExpiresAt = undefined;
-      scan.errorCode = error.errorCode;
-      scan.errorMessage = error.errorMessage;
-      await tx.flush();
-      return status;
     });
+  }
+
+  /** Une las filas de `pg_catalog` en objetos observados. Pública para probarla sin base. */
+  assemble(
+    objetos: ObjetoPg[],
+    columnas: ColumnaPg[],
+    claves: ClavePg[],
+    foraneas: ForaneaPg[],
+  ): ObservedObject[] {
+    const porOid = <T extends { oid: string | number }>(
+      filas: T[],
+    ): Map<string, T[]> => {
+      const m = new Map<string, T[]>();
+      for (const f of filas)
+        m.set(String(f.oid), [...(m.get(String(f.oid)) ?? []), f]);
+      return m;
+    };
+    const columnasPorOid = porOid(columnas);
+    const clavesPorOid = porOid(claves);
+    const foraneasPorOid = porOid(foraneas);
+    return objetos.map((o) => {
+      const oid = String(o.oid);
+      const pk = new Set(
+        (clavesPorOid.get(oid) ?? [])
+          .filter((k) => k.kind === 'p')
+          .map((k) => k.column_name),
+      );
+      const unicas = new Set(
+        (clavesPorOid.get(oid) ?? [])
+          .filter((k) => Number(k.width) === 1)
+          .map((k) => k.column_name),
+      );
+      const fkPorColumna = new Map<string, ForeignKeyInfo>();
+      for (const f of foraneasPorOid.get(oid) ?? []) {
+        const origen = f.source_columns;
+        if (origen.length)
+          fkPorColumna.set(origen[0], {
+            constraintName: f.constraint_name,
+            sourceColumns: origen,
+            targetSchema: f.target_schema,
+            targetTable: f.target_table,
+            targetColumns: f.target_columns,
+          });
+      }
+      const cols: ObservedColumn[] = (columnasPorOid.get(oid) ?? []).map(
+        (c) => ({
+          name: c.column_name,
+          ordinal: Number(c.ordinal),
+          nativeType: c.native_type,
+          isNullable: Boolean(c.is_nullable),
+          defaultExpression: c.default_expression,
+          isIdentity: Boolean(c.is_identity),
+          isGenerated: Boolean(c.is_generated),
+          isPrimaryKey: pk.has(c.column_name),
+          isUnique: unicas.has(c.column_name),
+          foreignKey: fkPorColumna.get(c.column_name) ?? null,
+          comment: c.column_comment,
+        }),
+      );
+      return {
+        schemaName: o.schema_name,
+        objectName: o.object_name,
+        kind: o.object_kind as ObservedObject['kind'],
+        comment: o.table_comment,
+        estimatedRows: o.estimated_rows,
+        totalBytes: o.total_bytes,
+        primaryKey: cols.filter((c) => c.isPrimaryKey).map((c) => c.name),
+        columns: cols,
+      };
+    });
+  }
+
+  /** Códigos de fuente soportados: hoy sólo `primary`. */
+  get sourceCode(): string {
+    return SOURCE_CODE;
   }
 }
 
-/**
- * Mensaje de error apto para guardarse y mostrarse: sin cadenas de conexión
- * y acotado. El detalle completo va al log estructurado, no a la base.
- */
-export function sanitize(error: unknown): string {
-  const message = error instanceof Error ? error.message : String(error);
-  return message
-    .replace(/postgres(ql)?:\/\/[^\s]+/gi, 'postgres://[redactado]')
-    .replace(/password=[^\s;]+/gi, 'password=[redactado]')
-    .slice(0, 500);
+export interface ObjetoPg {
+  schema_name: string;
+  object_name: string;
+  object_kind: string;
+  table_comment: string | null;
+  estimated_rows: string | null;
+  total_bytes: string | null;
+  oid: string | number;
+}
+export interface ColumnaPg {
+  oid: string | number;
+  column_name: string;
+  ordinal: number | string;
+  native_type: string;
+  is_nullable: boolean;
+  default_expression: string | null;
+  is_identity: boolean;
+  is_generated: boolean;
+  column_comment: string | null;
+}
+export interface ClavePg {
+  oid: string | number;
+  kind: string;
+  column_name: string;
+  width: number | string;
+}
+export interface ForaneaPg {
+  oid: string | number;
+  constraint_name: string;
+  source_columns: string[];
+  target_schema: string;
+  target_table: string;
+  target_columns: string[];
 }
