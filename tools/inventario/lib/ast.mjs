@@ -126,6 +126,47 @@ export function parseDecoratorConstraints(decorators) {
   return constraints;
 }
 
+const TIPOS_MAPEADOS = new Set([
+  'OmitType',
+  'PickType',
+  'PartialType',
+  'IntersectionType',
+]);
+
+/**
+ * Base de una clase de DTO: `extends Base` o `extends OmitType(Base, ['x'])`
+ * (también `PickType`, `PartialType`, `IntersectionType`). Devuelve la clase base y,
+ * si corresponde, qué propiedades se omiten o se eligen.
+ */
+function herenciaDe(statement, sourceFile) {
+  const extiende = statement.heritageClauses?.find(
+    (clause) => clause.token === ts.SyntaxKind.ExtendsKeyword,
+  )?.types[0];
+  if (!extiende) return null;
+  const expresion = extiende.expression;
+  if (ts.isIdentifier(expresion)) return { base: expresion.text };
+  if (
+    ts.isCallExpression(expresion) &&
+    ts.isIdentifier(expresion.expression) &&
+    TIPOS_MAPEADOS.has(expresion.expression.text)
+  ) {
+    const [base, lista] = expresion.arguments;
+    if (!base || !ts.isIdentifier(base)) return null;
+    const nombres = lista
+      ? [...lista.getText(sourceFile).matchAll(/['"`]([^'"`]+)['"`]/g)].map(
+          (match) => match[1],
+        )
+      : [];
+    const tipo = expresion.expression.text;
+    return {
+      base: base.text,
+      omitir: tipo === 'OmitType' ? nombres : undefined,
+      elegir: tipo === 'PickType' ? nombres : undefined,
+    };
+  }
+  return null;
+}
+
 /**
  * Construye el índice del código fuente.
  *
@@ -145,6 +186,12 @@ export function buildSourceIndex(root = process.cwd()) {
   const sourceClassProperties = new Map();
   const sourceTypeAliases = new Map();
   const sourceEnums = new Map();
+  // nombre publicado en el contrato (@ApiSchema({ name })) → nombre de la clase
+  const apiSchemaAliases = new Map();
+  // Dos módulos pueden declarar una clase con el mismo nombre: estos mapas usan
+  // la clave `archivo#Clase`, que no se pisa.
+  const dtoConstraintsPorClave = new Map();
+  const herenciaPorClave = new Map();
 
   for (const file of sourceFiles) {
     const text = fs.readFileSync(file, 'utf8');
@@ -217,11 +264,17 @@ export function buildSourceIndex(root = process.cwd()) {
             .match(/enum\s*:\s*\[([^\]]*)\]/)?.[1]
             ?.match(/['"]([^'"]+)['"]/g)
             ?.map((item) => item.slice(1, -1));
+          const fuente = `${relative}:${
+            sourceFile.getLineAndCharacterOfPosition(member.name.getStart())
+              .line + 1
+          }`;
           properties.set(member.name.text, {
             constraints: parseDecoratorConstraints(decorators),
             decorators,
+            fuente,
           });
           sourceProperties.set(member.name.text, {
+            fuente,
             typeText: member.type?.getText(sourceFile) ?? 'unknown',
             optional:
               Boolean(member.questionToken) ||
@@ -246,6 +299,13 @@ export function buildSourceIndex(root = process.cwd()) {
         }
       }
 
+      const alias = getDecorators(statement)
+        .map((item) => decoratorInfo(item, sourceFile))
+        .find((item) => item.name === 'ApiSchema')
+        ?.args[0]?.match(/name\s*:\s*['"`]([^'"`]+)['"`]/)?.[1];
+      const clave = `${relative}#${className}`;
+      if (alias) apiSchemaAliases.set(alias, clave);
+
       classes.set(className, {
         node: statement,
         sourceFile,
@@ -256,6 +316,9 @@ export function buildSourceIndex(root = process.cwd()) {
           statement.typeParameters?.map((item) => item.name.text) ?? [],
       });
       if (properties.size) dtoConstraints.set(className, properties);
+      dtoConstraintsPorClave.set(clave, properties);
+      const herencia = herenciaDe(statement, sourceFile);
+      if (herencia) herenciaPorClave.set(clave, { ...herencia, relative });
       if (sourceProperties.size)
         sourceClassProperties.set(className, sourceProperties);
     }
@@ -475,6 +538,9 @@ export function buildSourceIndex(root = process.cwd()) {
     sourceClassProperties,
     sourceTypeAliases,
     sourceEnums,
+    apiSchemaAliases,
+    dtoConstraintsPorClave,
+    herenciaPorClave,
     extractThrownExceptions,
   };
 }
