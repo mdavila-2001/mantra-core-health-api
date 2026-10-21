@@ -199,12 +199,33 @@ export function arbolAMermaid(nodos, { maxNodos = 70 } = {}) {
   return lineas.join('\n');
 }
 
-/** Máquina de estados → `stateDiagram-v2`. */
+/** `POST /a/{id}/cancel` → `POST …/cancel`: el final de la ruta basta para reconocerla en una arista. */
+function operacionCorta(o) {
+  const tramos = o.ruta.split('/').filter(Boolean);
+  return `${o.metodo} ${tramos.length > 2 ? '…/' : '/'}${tramos.slice(-2).join('/')}`;
+}
+
+/**
+ * Máquina de estados → `stateDiagram-v2`. Cada arista lleva las operaciones cuyo método nombra el
+ * estado de destino (POR_REFERENCIA); hasta 3, y «+n» si hay más.
+ */
 export function maquinaAMermaid(maquina) {
   const lineas = ['stateDiagram-v2'];
+  const porDestino = new Map();
+  for (const o of maquina.operaciones ?? [])
+    for (const estado of o.estados ?? [])
+      porDestino.set(estado, [
+        ...(porDestino.get(estado) ?? []),
+        operacionCorta(o),
+      ]);
+  const rotulo = (estado) => {
+    const ops = [...new Set(porDestino.get(estado) ?? [])];
+    if (!ops.length) return '';
+    return ` : ${etiqueta(ops.slice(0, 3).join(', ') + (ops.length > 3 ? ` +${ops.length - 3}` : ''), 90).replace(/:/g, '·')}`;
+  };
   for (const i of maquina.iniciales) lineas.push(`  [*] --> ${id(i)}`);
   for (const t of maquina.transiciones)
-    lineas.push(`  ${id(t.de)} --> ${id(t.a)}`);
+    lineas.push(`  ${id(t.de)} --> ${id(t.a)}${rotulo(t.a)}`);
   for (const f of maquina.terminales) lineas.push(`  ${id(f)} --> [*]`);
   return lineas.join('\n');
 }

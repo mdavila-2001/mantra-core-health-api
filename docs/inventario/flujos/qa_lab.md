@@ -206,12 +206,12 @@ stateDiagram-v2
   [*] --> OPEN
   OPEN --> TRIAGED
   OPEN --> REJECTED
-  TRIAGED --> IN_PROGRESS
+  TRIAGED --> IN_PROGRESS : PATCH …/defects/{defectId}
   TRIAGED --> REJECTED
   IN_PROGRESS --> RESOLVED
   IN_PROGRESS --> TRIAGED
   RESOLVED --> CLOSED
-  RESOLVED --> IN_PROGRESS
+  RESOLVED --> IN_PROGRESS : PATCH …/defects/{defectId}
   REJECTED --> [*]
   CLOSED --> [*]
 ```
