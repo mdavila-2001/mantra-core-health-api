@@ -56,10 +56,12 @@ import { PROFILES_TERMINOLOGY_PORT } from './application/ports/profiles-terminol
 import { ProfilesTerminologyAdapter } from './infrastructure/adapters/profiles-terminology.adapter';
 import { AFFILIATION_ORGANIZATIONS_PORT } from './application/ports/affiliation-organizations.port';
 import { ATTACHABLE_FILES_PORT } from './application/ports/attachable-files.port';
+import { CLINICAL_PATIENT_HISTORY_ACCESS_PORT } from './application/ports/clinical-patient-history-access.port';
 import { DEPENDENT_LINK_IDENTIFIERS_PORT } from './application/ports/dependent-link-identifiers.port';
 import { DEPENDENT_LINK_NOTIFICATIONS_PORT } from './application/ports/dependent-link-notifications.port';
 import { AffiliationOrganizationsAdapter } from './infrastructure/adapters/affiliation-organizations.adapter';
 import { AttachableFilesAdapter } from './infrastructure/adapters/attachable-files.adapter';
+import { ClinicalPatientHistoryAccessAdapter } from './infrastructure/adapters/clinical-patient-history-access.adapter';
 import { DependentLinkContextAdapter } from './infrastructure/adapters/dependent-link-context.adapter';
 import { PRACTITIONER_CONTEXT_PORT } from './application/ports/practitioner-context.port';
 import { PractitionerContextAdapter } from './infrastructure/adapters/practitioner-context.adapter';
@@ -127,6 +129,10 @@ import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-cover
     {
       provide: ATTACHABLE_FILES_PORT,
       useClass: AttachableFilesAdapter,
+    },
+    {
+      provide: CLINICAL_PATIENT_HISTORY_ACCESS_PORT,
+      useClass: ClinicalPatientHistoryAccessAdapter,
     },
     PersonRecordsAdapter,
     PatientCoveragesAdapter,
