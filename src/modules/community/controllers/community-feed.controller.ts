@@ -10,6 +10,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
+  NotAudited,
   ParseOptionalLimitPipe,
   Roles,
   type AuthenticatedUser,
@@ -19,6 +20,10 @@ import {
   RebuildFeedDto,
   FeedRebuildResponseDto,
   FeedPendingResponseDto,
+  FeedRankingPendingResponseDto,
+  ApplyFeedRankingDto,
+  FeedRankingApplyResponseDto,
+  FEED_RANKING_MAX_BATCH,
 } from '../dto';
 
 /** Antigüedad máxima, en horas, de los posts que entran al lote de fan-out. */
@@ -77,5 +82,36 @@ export class CommunityFeedController {
       limit: limit ?? PENDING_POSTS_LIMIT,
       followersPerPost: FOLLOWERS_PER_POST,
     });
+  }
+
+  /**
+   * Lote de ítems de feed pendientes de recalcular su rank_score (UC-19-16).
+   *
+   * Descubre-y-actúa como `pending`/`rebuild`: este endpoint junta las
+   * señales crudas (recencia, interacción) y `ranking/apply` persiste el
+   * puntaje que el worker calculó con ellas.
+   */
+  @Get('ranking/pending')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Items de feed pendientes de puntuar' })
+  rankingPending(
+    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+  ): Promise<FeedRankingPendingResponseDto> {
+    return this.service.pendingRanking(
+      Math.min(limit ?? FEED_RANKING_MAX_BATCH, FEED_RANKING_MAX_BATCH),
+    );
+  }
+
+  /** Aplica los rank_score recalculados por el worker (UC-19-16). */
+  @NotAudited(
+    'Plomería del worker: rank_score es un dato derivado y recalculable (recencia e interacción), sin datos personales; lo vuelve a escribir cada pasada de RankingScoreJob.',
+  )
+  @Post('ranking/apply')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
+  @ApiOperation({ summary: 'Aplicar rank_score recalculado' })
+  rankingApply(
+    @Body() dto: ApplyFeedRankingDto,
+  ): Promise<FeedRankingApplyResponseDto> {
+    return this.service.applyRanking(dto);
   }
 }
