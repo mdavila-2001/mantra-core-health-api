@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import { ValidationFailedHttp } from './admin-catalog.errors';
+import { iso } from '../catalog/timestamps';
 import { TenantAgnostic } from '../../../common/tenant/tenant-agnostic.decorator';
 import {
   CATALOG_WRITE_ROLES,
@@ -298,7 +299,7 @@ export class AdminCatalogController {
       scanId: scan.id,
       status: scan.status,
       created,
-      acceptedAt: scan.requested_at,
+      acceptedAt: iso(scan.requested_at),
       statusUrl: `/admin/catalog/scans/${scan.id}`,
     };
   }

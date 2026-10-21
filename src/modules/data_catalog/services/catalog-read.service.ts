@@ -16,6 +16,7 @@ import {
   summarizeCoverage,
   type CoverageAnnotation,
 } from '../catalog/coverage';
+import { iso, isoOrNull } from '../catalog/timestamps';
 import { DEFAULT_PAGE_SIZE } from '../data_catalog.constants';
 import type {
   CatalogObjectsQueryDto,
@@ -60,12 +61,12 @@ export function presentarFicha(a: AnnotationRow | null | undefined) {
     origin: a.origin,
     currentRevisionNo: a.current_revision_no,
     approvedRevisionNo: a.approved_revision_no,
-    approvedAt: a.approved_at,
+    approvedAt: isoOrNull(a.approved_at),
     approvalIsCurrent:
       a.review_status === 'APPROVED' &&
       a.approved_revision_no === a.current_revision_no,
     content: a.content,
-    updatedAt: a.updated_at,
+    updatedAt: iso(a.updated_at),
   };
 }
 
@@ -74,7 +75,7 @@ function presentarEstadisticas(o: ObjectRow) {
     estimatedRows: o.estimated_rows,
     totalBytes: o.total_bytes,
     isEstimate: true,
-    observedAt: o.stats_observed_at,
+    observedAt: isoOrNull(o.stats_observed_at),
   };
 }
 
@@ -140,7 +141,7 @@ export class CatalogReadService {
           observationStatus: o.observation_status,
           columnCount: o.column_count,
           statistics: presentarEstadisticas(o),
-          lastSeenAt: o.last_seen_at,
+          lastSeenAt: iso(o.last_seen_at),
           annotation: a
             ? {
                 id: a.id,
@@ -196,8 +197,8 @@ export class CatalogReadService {
       },
       observation: {
         status: o.observation_status,
-        lastSeenAt: o.last_seen_at,
-        notObservedSince: o.not_observed_since,
+        lastSeenAt: iso(o.last_seen_at),
+        notObservedSince: isoOrNull(o.not_observed_since),
         lastScanEngineVersion: o.engine_version,
       },
       annotation: presentarFicha(ficha),
@@ -243,7 +244,7 @@ export class CatalogReadService {
         foreignKey: c.foreign_key,
         comment: c.column_comment,
         observationStatus: c.observation_status,
-        lastSeenAt: c.last_seen_at,
+        lastSeenAt: iso(c.last_seen_at),
         annotation: presentarFicha(fichas.get(c.id)),
       })),
     };
@@ -272,14 +273,14 @@ export class CatalogReadService {
         submittedStatus: r.submitted_status,
         changeReason: r.change_reason,
         authorUserId: r.author_user_id,
-        createdAt: r.created_at,
+        createdAt: iso(r.created_at),
       })),
       decisions: decisiones.map((d) => ({
         revisionNo: d.revision_no,
         decision: d.decision,
         comment: d.comment,
         reviewerUserId: d.reviewer_user_id,
-        decidedAt: d.decided_at,
+        decidedAt: iso(d.decided_at),
       })),
     };
   }
@@ -303,12 +304,12 @@ export class CatalogReadService {
         changeKind: c.change_kind,
         before: c.before_json,
         after: c.after_json,
-        detectedAt: c.created_at,
+        detectedAt: iso(c.created_at),
       })),
       nextCursor:
         hayMas && ultimo
           ? encodeKeysetCursor({
-              t: ultimo.created_at.toISOString(),
+              t: ultimo.created_at,
               i: ultimo.id,
             })
           : null,
@@ -445,7 +446,7 @@ export class CatalogReadService {
       ...resumen,
       scope: { sourceCode: SOURCE_CODE, schema: q.schema ?? null },
       lastScan: ultimoOk
-        ? { scanId: ultimoOk.id, finishedAt: ultimoOk.finished_at }
+        ? { scanId: ultimoOk.id, finishedAt: isoOrNull(ultimoOk.finished_at) }
         : null,
     };
   }
@@ -462,7 +463,7 @@ export class CatalogReadService {
       nextCursor:
         hayMas && ultimo
           ? encodeKeysetCursor({
-              t: ultimo.requested_at.toISOString(),
+              t: ultimo.requested_at,
               i: ultimo.id,
             })
           : null,
@@ -484,7 +485,7 @@ export function presentarEvidencia(e: {
   excerpt: string | null;
   source_revision: string | null;
   added_by_user_id: string | null;
-  created_at: Date;
+  created_at: string;
 }) {
   return {
     id: e.id,
@@ -493,7 +494,7 @@ export function presentarEvidencia(e: {
     excerpt: e.excerpt,
     sourceRevision: e.source_revision,
     addedByUserId: e.added_by_user_id,
-    createdAt: e.created_at,
+    createdAt: iso(e.created_at),
   };
 }
 
@@ -517,9 +518,9 @@ export function presentarEscaneo(s: ScanRow) {
     sourceCode: s.source_code,
     mode: s.mode,
     status: s.status,
-    requestedAt: s.requested_at,
-    startedAt: s.started_at,
-    finishedAt: s.finished_at,
+    requestedAt: iso(s.requested_at),
+    startedAt: isoOrNull(s.started_at),
+    finishedAt: isoOrNull(s.finished_at),
     attempt: s.attempt,
     connectorVersion: s.connector_version,
     engineVersion: s.engine_version,

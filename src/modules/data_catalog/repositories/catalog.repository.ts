@@ -14,6 +14,11 @@ import type {
   ScanPlan,
 } from '../catalog/scan-diff';
 
+/**
+ * Los `timestamptz` de estas filas son el texto que entrega el driver (`2026-10-21 15:02:26.892+00`):
+ * se conservan así (con microsegundos, útiles como cursor) y se convierten a ISO al presentarlos.
+ */
+
 /** La ficha completa tal como está en `catalog_annotations`, con el contenido agrupado. */
 export interface AnnotationRow {
   id: string;
@@ -25,8 +30,8 @@ export interface AnnotationRow {
   current_revision_no: number;
   approved_revision_no: number | null;
   approved_by_user_id: string | null;
-  approved_at: Date | null;
-  updated_at: Date;
+  approved_at: string | null;
+  updated_at: string;
   row_version: number;
   content: AnnotationContent;
 }
@@ -41,11 +46,11 @@ export interface ObjectRow {
   table_comment: string | null;
   estimated_rows: string | null;
   total_bytes: string | null;
-  stats_observed_at: Date | null;
+  stats_observed_at: string | null;
   column_count: number;
   primary_key_columns: string[] | null;
-  last_seen_at: Date;
-  not_observed_since: Date | null;
+  last_seen_at: string;
+  not_observed_since: string | null;
   engine_version: string | null;
 }
 
@@ -64,7 +69,7 @@ export interface ColumnRow {
   foreign_key: ForeignKeyInfo | null;
   column_comment: string | null;
   observation_status: string;
-  last_seen_at: Date;
+  last_seen_at: string;
 }
 
 export interface EvidenceRow {
@@ -76,7 +81,7 @@ export interface EvidenceRow {
   excerpt: string | null;
   source_revision: string | null;
   added_by_user_id: string | null;
-  created_at: Date;
+  created_at: string;
 }
 
 export interface RevisionRow {
@@ -85,7 +90,7 @@ export interface RevisionRow {
   submitted_status: string;
   change_reason: string | null;
   author_user_id: string | null;
-  created_at: Date;
+  created_at: string;
 }
 
 export interface DecisionRow {
@@ -93,7 +98,7 @@ export interface DecisionRow {
   decision: string;
   comment: string | null;
   reviewer_user_id: string;
-  decided_at: Date;
+  decided_at: string;
 }
 
 export interface ChangeRow {
@@ -106,7 +111,7 @@ export interface ChangeRow {
   change_kind: string;
   before_json: Record<string, unknown> | null;
   after_json: Record<string, unknown> | null;
-  created_at: Date;
+  created_at: string;
 }
 
 export interface ScanRow {
@@ -116,11 +121,11 @@ export interface ScanRow {
   status: string;
   idempotency_key: string | null;
   requested_by_user_id: string | null;
-  requested_at: Date;
-  started_at: Date | null;
-  finished_at: Date | null;
+  requested_at: string;
+  started_at: string | null;
+  finished_at: string | null;
   lease_owner: string | null;
-  lease_expires_at: Date | null;
+  lease_expires_at: string | null;
   attempt: number;
   engine_version: string | null;
   connector_version: string;
@@ -494,7 +499,8 @@ export class CatalogRepository {
          join data_catalog.catalog_objects t
            on t.source_code = ? and t.schema_name = c.foreign_key->>'targetSchema' and t.object_name = c.foreign_key->>'targetTable'
         where c.foreign_key is not null and c.observation_status = 'OBSERVED' and t.observation_status = 'OBSERVED'
-          and c.foreign_key->'sourceColumns'->>0 = c.column_name`,
+          and c.foreign_key->'sourceColumns'->>0 = c.column_name
+        order by c.foreign_key->>'constraintName', c.object_id`,
       [SOURCE_CODE],
     );
   }
