@@ -53,10 +53,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, GOVERNANCE | `src/modules/system_context/controllers/system-context.controller.ts:249` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -175,11 +175,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MODULE_OWNER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:299` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:299` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -295,11 +295,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:265` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:265` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -442,11 +442,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:316` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:316` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -552,11 +552,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:282` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_context/controllers/system-context.controller.ts:282` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -657,8 +657,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/system_context/controllers/system-context.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -752,8 +752,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/system_context/controllers/system-context.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -838,10 +838,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:149` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -954,11 +954,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MODULE_OWNER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:199` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:199` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -1073,11 +1073,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:232` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:232` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -1178,11 +1178,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:165` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:165` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -1312,9 +1312,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: TERMINOLOGY_ENGINEER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:182` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/system_context/controllers/system-context.controller.ts:182` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -1398,10 +1398,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: WRITE_SERVICE, MODULE_OWNER, PLATFORM_ADMIN | `src/modules/system_context/controllers/system-context.controller.ts:216` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 

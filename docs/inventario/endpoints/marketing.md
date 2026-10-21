@@ -54,10 +54,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:236` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -178,10 +178,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -303,11 +303,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER, SYSTEM | `src/modules/marketing/controllers/marketing.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:103` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -409,10 +409,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CONTENT_EDITOR, MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -526,11 +526,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:178` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -630,11 +630,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:195` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:195` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -736,10 +736,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:135` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -849,11 +849,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:163` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:163` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -961,11 +961,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:147` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:147` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -1085,10 +1085,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -1192,11 +1192,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER, SYSTEM | `src/modules/marketing/controllers/marketing.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:74` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -1311,10 +1311,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:220` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -1427,10 +1427,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:208` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 
@@ -1533,7 +1533,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/marketing/controllers/tracked-link-redirect.controller.ts:36` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
 
 ### Tablas que afecta
 

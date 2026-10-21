@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { type INestApplication, ValidationPipe } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Test } from '@nestjs/testing';
 import { MikroORM, EntityManager, defineConfig } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -277,6 +278,76 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
       'DPO',
     ])('el rol %s puede leer', async (rol) => {
       await get('/admin/catalog/schemas', as(lector, [rol])).expect(200);
+    });
+  });
+
+  // ------------------------------------------------------------------------------------------
+  describe('contrato OpenAPI que describen los decoradores', () => {
+    it('declara las 15 operaciones con operationId único, los códigos de error y el esquema de cada respuesta', () => {
+      const doc = SwaggerModule.createDocument(
+        app,
+        new DocumentBuilder().build(),
+      );
+      const rutas = Object.entries(doc.paths).filter(([ruta]) =>
+        ruta.startsWith('/admin/catalog'),
+      );
+      const operaciones = rutas.flatMap(([ruta, metodos]) =>
+        Object.entries(
+          metodos as Record<
+            string,
+            {
+              operationId?: string;
+              responses: Record<string, { content?: unknown }>;
+            }
+          >,
+        ).map(([metodo, op]) => ({ ruta, metodo, op })),
+      );
+      expect(operaciones).toHaveLength(15);
+      const operationIds = operaciones.map((o) => o.op.operationId);
+      expect(
+        operationIds.every((id) => id && id.startsWith('adminCatalog')),
+      ).toBe(true);
+      expect(new Set(operationIds).size).toBe(15);
+      const por = (m: string, r: string) =>
+        operaciones.find((o) => o.metodo === m && o.ruta === r)!.op;
+      expect(
+        Object.keys(por('post', '/admin/catalog/scans').responses),
+      ).toEqual(expect.arrayContaining(['202', '409']));
+      expect(
+        Object.keys(
+          por('put', '/admin/catalog/objects/{id}/annotation').responses,
+        ),
+      ).toEqual(expect.arrayContaining(['200', '409', '422']));
+      expect(
+        Object.keys(
+          por('post', '/admin/catalog/annotations/{id}/review').responses,
+        ),
+      ).toEqual(expect.arrayContaining(['200', '403', '409', '422']));
+      expect(
+        Object.keys(
+          por('post', '/admin/catalog/objects/{id}/evidence').responses,
+        ),
+      ).toContain('201');
+      // cada operación que devuelve cuerpo lo describe
+      for (const { ruta, metodo, op } of operaciones) {
+        const ok = Object.entries(op.responses).find(([c]) =>
+          c.startsWith('2'),
+        );
+        expect([ruta, metodo, ok?.[1].content !== undefined]).toEqual([
+          ruta,
+          metodo,
+          true,
+        ]);
+      }
+      const schemas = Object.keys(doc.components?.schemas ?? {});
+      expect(schemas).toEqual(
+        expect.arrayContaining([
+          'AnnotationDto',
+          'CatalogObjectDetailDto',
+          'ImpactDto',
+          'ScanAcceptedDto',
+        ]),
+      );
     });
   });
 

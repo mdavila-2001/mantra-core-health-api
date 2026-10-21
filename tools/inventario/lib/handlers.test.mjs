@@ -142,3 +142,68 @@ test('el filtro por módulo deja fuera lo demás', () => {
     4,
   );
 });
+
+test('@Roles(...CONSTANTE) se resuelve al arreglo declarado; un nombre ambiguo no se adivina', () => {
+  const root = fixture();
+  const dir = path.join(root, 'src', 'modules', 'widgets');
+  fs.writeFileSync(
+    path.join(dir, 'widgets.constants.ts'),
+    "export const ROLES_LECTURA = ['WIDGET_ADMIN', 'WIDGET_AUDITOR'] as const;\nexport const ROLES_REPETIDOS = ['A'] as const;\n",
+  );
+  fs.writeFileSync(
+    path.join(dir, 'otro.constants.ts'),
+    "export const ROLES_REPETIDOS = ['B'] as const;\n",
+  );
+  fs.writeFileSync(
+    path.join(dir, 'controllers', 'spread.controller.ts'),
+    `import { Controller, Get } from '@nestjs/common';
+import { Roles } from '../../../common';
+import { ROLES_LECTURA, ROLES_REPETIDOS } from '../widgets.constants';
+
+@Controller('spread')
+export class SpreadController {
+  @Get('lectura')
+  @Roles(...ROLES_LECTURA)
+  lectura() {
+    return 1;
+  }
+
+  @Get('repetidos')
+  @Roles(...ROLES_REPETIDOS)
+  repetidos() {
+    return 1;
+  }
+
+  @Get('mezcla')
+  @Roles('EXTRA', ...ROLES_LECTURA)
+  mezcla() {
+    return 1;
+  }
+}
+`,
+  );
+  const contrato = path.join(root, 'openapi', 'openapi.json');
+  const doc = JSON.parse(fs.readFileSync(contrato, 'utf8'));
+  for (const nombre of ['lectura', 'repetidos', 'mezcla'])
+    doc.paths[`/spread/${nombre}`] = {
+      get: {
+        operationId: `SpreadController_${nombre}`,
+        security: [{ bearer: [] }],
+      },
+    };
+  fs.writeFileSync(contrato, JSON.stringify(doc));
+  const { filas } = buildHandlerTable({ root });
+  const rolesDe = (id) => filas.find((f) => f.operationId === id)?.roles;
+  assert.deepEqual(rolesDe('SpreadController_lectura'), [
+    'WIDGET_ADMIN',
+    'WIDGET_AUDITOR',
+  ]);
+  assert.deepEqual(rolesDe('SpreadController_mezcla'), [
+    'EXTRA',
+    'WIDGET_ADMIN',
+    'WIDGET_AUDITOR',
+  ]);
+  assert.deepEqual(rolesDe('SpreadController_repetidos'), [
+    '...ROLES_REPETIDOS',
+  ]);
+});

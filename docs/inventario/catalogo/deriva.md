@@ -7,9 +7,9 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Concepto | Cantidad |
 |---|---|
 | Tablas en el DDL del modelo | 1230 |
-| Entidades del ORM | 1240 |
-| Tablas del DDL con entidad | 1208 |
-| Tablas del DDL **sin** entidad | 22 |
+| Entidades del ORM | 1248 |
+| Tablas del DDL con entidad | 1216 |
+| Tablas del DDL **sin** entidad | 14 |
 | Entidades del ORM **sin** tabla en el DDL | 32 |
 | Columnas del DDL ausentes en su entidad | 42 |
 | Columnas con nulabilidad divergente | 25 |
@@ -62,14 +62,6 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | `community.chat_auto_replies` | `Mantra Core Health Context/modules/diagram_19_community.puml` |
 | `community.comment_media` | `Mantra Core Health Context/modules/diagram_19_community.puml` |
 | `community.party_ratings` | `Mantra Core Health Context/modules/diagram_19_community.puml` |
-| `data_catalog.catalog_annotation_revisions` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
-| `data_catalog.catalog_annotations` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
-| `data_catalog.catalog_change_events` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
-| `data_catalog.catalog_columns` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
-| `data_catalog.catalog_evidence_items` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
-| `data_catalog.catalog_objects` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
-| `data_catalog.catalog_review_decisions` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
-| `data_catalog.catalog_scan_runs` | `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` |
 | `insurance.insurance_campaign_partners` | `Mantra Core Health Context/modules/diagram_26_insurance.puml` |
 | `insurance.insurance_campaigns` | `Mantra Core Health Context/modules/diagram_26_insurance.puml` |
 | `medical_groups.group_members` | `Mantra Core Health Context/modules/diagram_66_medical_groups.puml` |

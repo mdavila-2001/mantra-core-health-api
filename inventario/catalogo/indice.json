@@ -17,18 +17,18 @@
       "CONSULTA": 1285,
       "ESTRUCTURAL": 17
     },
-    "tablasConEntidad": 1208,
+    "tablasConEntidad": 1216,
     "tablasAppendOnlyDeclaradas": 141,
-    "tablasConOperaciones": 909,
+    "tablasConOperaciones": 917,
     "orm": {
-      "COINCIDE": 1170,
+      "COINCIDE": 1178,
       "DIVERGE": 38,
-      "SIN_ENTIDAD": 22
+      "SIN_ENTIDAD": 14
     },
     "columnasOrm": {
-      "COINCIDE": 16420,
+      "COINCIDE": 16568,
       "AUSENTE_EN_ORM": 42,
-      "SIN_ENTIDAD": 364,
+      "SIN_ENTIDAD": 216,
       "NULABILIDAD_DIVERGE": 25
     }
   },
@@ -329,14 +329,6 @@
       "community.chat_auto_replies",
       "community.comment_media",
       "community.party_ratings",
-      "data_catalog.catalog_annotation_revisions",
-      "data_catalog.catalog_annotations",
-      "data_catalog.catalog_change_events",
-      "data_catalog.catalog_columns",
-      "data_catalog.catalog_evidence_items",
-      "data_catalog.catalog_objects",
-      "data_catalog.catalog_review_decisions",
-      "data_catalog.catalog_scan_runs",
       "insurance.insurance_campaign_partners",
       "insurance.insurance_campaigns",
       "medical_groups.group_members",
@@ -5521,8 +5513,8 @@
       "dominio": null,
       "columnas": 10,
       "indices": 1,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 3,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -5532,8 +5524,8 @@
       "dominio": null,
       "columnas": 34,
       "indices": 3,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 12,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -5543,8 +5535,8 @@
       "dominio": null,
       "columnas": 8,
       "indices": 2,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 2,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -5554,8 +5546,8 @@
       "dominio": null,
       "columnas": 24,
       "indices": 1,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 6,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -5565,8 +5557,8 @@
       "dominio": null,
       "columnas": 9,
       "indices": 2,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 4,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -5576,8 +5568,8 @@
       "dominio": null,
       "columnas": 22,
       "indices": 2,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 14,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -5587,8 +5579,8 @@
       "dominio": null,
       "columnas": 7,
       "indices": 1,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 2,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -5598,8 +5590,8 @@
       "dominio": null,
       "columnas": 34,
       "indices": 3,
-      "operaciones": 0,
-      "orm": "SIN_ENTIDAD",
+      "operaciones": 15,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -13210,7 +13202,7 @@
       "dominio": "Operaciones de Plataforma",
       "columnas": 21,
       "indices": 7,
-      "operaciones": 6,
+      "operaciones": 7,
       "orm": "COINCIDE",
       "appendOnly": false
     },

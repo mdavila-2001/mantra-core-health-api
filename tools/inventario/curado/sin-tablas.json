@@ -1,4 +1,100 @@
 {
+  "AdminPortalController_arbol": {
+    "operacion": "GET /admin/portal/operaciones/:id/arbol",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_deriva": {
+    "operacion": "GET /admin/portal/catalogo/deriva",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_detalleDeHallazgo": {
+    "operacion": "GET /admin/portal/flujos/hallazgos/:id",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_detalleDeOperacion": {
+    "operacion": "GET /admin/portal/operaciones/:id",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_detalleDeProceso": {
+    "operacion": "GET /admin/portal/flujos/:codigo",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_fichaDeTabla": {
+    "operacion": "GET /admin/portal/catalogo/tablas/:schema/:tabla",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_glosario": {
+    "operacion": "GET /admin/portal/glosario",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_grafo": {
+    "operacion": "GET /admin/portal/flujos/:codigo/grafo",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_hallazgos": {
+    "operacion": "GET /admin/portal/flujos/hallazgos",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_linaje": {
+    "operacion": "GET /admin/portal/linaje",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_linajeDeTabla": {
+    "operacion": "GET /admin/portal/linaje/tablas/:schema/:tabla",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_listarOperaciones": {
+    "operacion": "GET /admin/portal/operaciones",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_listarProcesos": {
+    "operacion": "GET /admin/portal/flujos",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_listarTablas": {
+    "operacion": "GET /admin/portal/catalogo/tablas",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_mapa": {
+    "operacion": "GET /admin/portal/flujos/mapa",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
+  "AdminPortalController_version": {
+    "operacion": "GET /admin/portal/version",
+    "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
+    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "revision": "manual, 2026-10-21"
+  },
   "AppController_getHello": {
     "operacion": "GET /",
     "motivo": "Devuelve la constante 'Hello World!'; no accede a datos.",
@@ -9,6 +105,12 @@
     "operacion": "GET /readiness",
     "motivo": "Sondas de salud: `select 1` contra PostgreSQL y ping a MongoDB, Redis y OpenSearch; no lee tablas del modelo.",
     "fuente": "src/app-readiness.service.ts:32",
+    "revision": "manual, 2026-10-21"
+  },
+  "AuthzPdpController_invalidateCache": {
+    "operacion": "POST /authz/pdp/cache/invalidate",
+    "motivo": "No escribe ni encola nada: calcula una clave de caché, escribe un log y responde `ok: true`. El comentario del método dice que un consumidor de outbox hace la invalidación, pero el método no publica ningún evento (ver HZ-19).",
+    "fuente": "src/modules/authz/services/authz-pdp.service.ts:128",
     "revision": "manual, 2026-10-21"
   },
   "DataSourcesController_dataSources": {
@@ -23,16 +125,22 @@
     "fuente": "src/persistence/health/data-sources.health.ts:71",
     "revision": "manual, 2026-10-21"
   },
-  "AuthzPdpController_invalidateCache": {
-    "operacion": "POST /authz/pdp/cache/invalidate",
-    "motivo": "No escribe ni encola nada: calcula una clave de caché, escribe un log y responde `ok: true`. El comentario del método dice que un consumidor de outbox hace la invalidación, pero el método no publica ningún evento (ver HZ-19).",
-    "fuente": "src/modules/authz/services/authz-pdp.service.ts:128",
-    "revision": "manual, 2026-10-21"
-  },
   "DentalController_catalog": {
     "operacion": "GET /dental-procedures/catalog",
     "motivo": "Devuelve catálogos que viven en constantes del código (códigos, piezas, cuadrantes).",
     "fuente": "src/modules/procedures_perioperative/services/periop-dental.service.ts:252",
+    "revision": "manual, 2026-10-21"
+  },
+  "SchedulingController_listActivityTypes": {
+    "operacion": "GET /scheduling/activity-types",
+    "motivo": "Devuelve el catálogo de tipologías de actividad, que vive en constantes del código (ACTIVITY_TYPES y sus etiquetas); no accede a datos.",
+    "fuente": "src/modules/scheduling/services/scheduling-catalog.service.ts:1080",
+    "revision": "manual, 2026-10-21"
+  },
+  "SchedulingController_listExceptionTypes": {
+    "operacion": "GET /scheduling/exception-types",
+    "motivo": "Devuelve el catálogo de motivos de bloqueo, que vive en constantes del código (EXCEPTION_TYPES y sus etiquetas); no accede a datos.",
+    "fuente": "src/modules/scheduling/services/scheduling-catalog.service.ts:1091",
     "revision": "manual, 2026-10-21"
   },
   "SeriesController_queryRange": {
@@ -51,18 +159,6 @@
     "operacion": "PATCH /ts/admin/hypertables/{table}",
     "motivo": "Modifica la hypertable que indica la ruta (`{table}`); el nombre no se conoce antes de ejecutar.",
     "fuente": "src/modules/time_series/services/timescale-admin.service.ts:122",
-    "revision": "manual, 2026-10-21"
-  },
-  "SchedulingController_listActivityTypes": {
-    "operacion": "GET /scheduling/activity-types",
-    "motivo": "Devuelve el catálogo de tipologías de actividad, que vive en constantes del código (ACTIVITY_TYPES y sus etiquetas); no accede a datos.",
-    "fuente": "src/modules/scheduling/services/scheduling-catalog.service.ts:1080",
-    "revision": "manual, 2026-10-21"
-  },
-  "SchedulingController_listExceptionTypes": {
-    "operacion": "GET /scheduling/exception-types",
-    "motivo": "Devuelve el catálogo de motivos de bloqueo, que vive en constantes del código (EXCEPTION_TYPES y sus etiquetas); no accede a datos.",
-    "fuente": "src/modules/scheduling/services/scheduling-catalog.service.ts:1091",
     "revision": "manual, 2026-10-21"
   }
 }
