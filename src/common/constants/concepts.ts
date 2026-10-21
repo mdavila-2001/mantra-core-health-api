@@ -109,6 +109,20 @@ export const SEED = {
     'seed:processing-legal-basis:guardian-portal-proxy',
   ),
   /**
+   * Propósito de tracking de los mapas de calor del portal y el esquema de
+   * evento con el que el navegador manda sus interacciones
+   * (`POST /telemetry/activity-events`). Deterministas para que el frontend los
+   * conozca sin que un `SECURITY_ADMIN` tenga que registrarlos a mano y copiar
+   * el id al entorno. Los siembra `TelemetryUxHeatmapSeedService`.
+   */
+  uxHeatmapPurposeId: deterministicId(
+    'seed:telemetry:purpose:PORTAL_UX_HEATMAP',
+  ),
+  uxHeatmapPurposeCode: 'PORTAL_UX_HEATMAP',
+  uxHeatmapEventSchemaId: deterministicId(
+    'seed:telemetry:event-schema:ux_interaccion:1',
+  ),
+  /**
    * Cuenta de servicio de los 17 procesos worker (`src/worker-<dominio>.ts`,
    * `src/worker/bootstrap.ts`). No tiene
    * credencial de login: el worker firma su propio access token con
