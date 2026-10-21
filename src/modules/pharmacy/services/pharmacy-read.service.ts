@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import {
   CONCEPTS,
   marketplaceTenantScope,
-  requireTenantId,
   ResourceNotFoundException,
 } from '../../../common';
 import type { Addresses } from '../../common/entities';
