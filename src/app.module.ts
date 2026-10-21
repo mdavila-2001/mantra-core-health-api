@@ -54,6 +54,7 @@ import { CrossStoreConsistencyModule } from './modules/cross_store_consistency/c
 import { DelegatedAccessModule } from './modules/delegated_access/delegated_access.module';
 import { DiagnosticUnitsModule } from './modules/diagnostic_units/diagnostic_units.module';
 import { DiagnosticsModule } from './modules/diagnostics/diagnostics.module';
+import { DataCatalogModule } from './modules/data_catalog/data_catalog.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
 import { EducationModule } from './modules/education/education.module';
 import { ErpModule } from './modules/erp/erp.module';
@@ -239,6 +240,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     ReportingModule,
     SchedulingModule,
     SurveysModule,
+    DataCatalogModule,
     SystemContextModule,
     SystemOpsModule,
     DataCatalogModule,

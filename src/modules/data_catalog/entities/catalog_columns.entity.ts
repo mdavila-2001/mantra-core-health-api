@@ -1,19 +1,12 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
 
-/**
- * Columna observada de un objeto del catálogo (`data_catalog.catalog_columns`).
- *
- * `is_nullable` es un booleano obligatorio a propósito: la introspección de
- * PostgreSQL siempre lo sabe. Si algún día llega una fuente que no lo informe,
- * esa fuente tendrá que declarar el desconocido, no presentarlo como NOT NULL.
- */
 @Entity({ schema: 'data_catalog', tableName: 'catalog_columns' })
 export class CatalogColumns {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
-  @Property({ fieldName: 'object_id', type: 'uuid' }) // FK → data_catalog.catalog_objects
+  @Property({ fieldName: 'object_id', type: 'uuid' }) // FK (destino no resuelto)
   objectId!: string;
 
   @Property({ fieldName: 'column_name', columnType: 'varchar' })
@@ -22,7 +15,6 @@ export class CatalogColumns {
   @Property({ columnType: 'int' })
   ordinal!: number;
 
-  /** Tipo tal como lo formatea el motor (`format_type`). */
   @Property({ fieldName: 'native_type', columnType: 'varchar' })
   nativeType!: string;
 
@@ -45,11 +37,9 @@ export class CatalogColumns {
   @Property({ fieldName: 'is_primary_key', type: 'boolean' })
   isPrimaryKey!: boolean;
 
-  /** Participa en una restricción UNIQUE o PK de una sola columna. */
   @Property({ fieldName: 'is_unique', type: 'boolean' })
   isUnique!: boolean;
 
-  /** Restricción FK completa (compuesta incluida) en la que participa. */
   @Property({
     fieldName: 'foreign_key',
     type: 'json',
@@ -67,10 +57,10 @@ export class CatalogColumns {
   @Property({ fieldName: 'technical_hash', columnType: 'varchar' })
   technicalHash!: string;
 
-  @Property({ fieldName: 'first_seen_scan_id', type: 'uuid' }) // FK → data_catalog.catalog_scan_runs
+  @Property({ fieldName: 'first_seen_scan_id', type: 'uuid' }) // FK (destino no resuelto)
   firstSeenScanId!: string;
 
-  @Property({ fieldName: 'last_seen_scan_id', type: 'uuid' }) // FK → data_catalog.catalog_scan_runs
+  @Property({ fieldName: 'last_seen_scan_id', type: 'uuid' }) // FK (destino no resuelto)
   lastSeenScanId!: string;
 
   @Property({ fieldName: 'last_seen_at', columnType: 'timestamptz' })
@@ -89,10 +79,10 @@ export class CatalogColumns {
   @Property({ fieldName: 'updated_at', columnType: 'timestamptz' })
   updatedAt!: Date;
 
-  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   createdByUserId?: string;
 
-  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  @Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users (inferida)
   updatedByUserId?: string;
 
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
