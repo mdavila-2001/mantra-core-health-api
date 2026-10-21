@@ -1113,6 +1113,21 @@ describe('CommunitySocialService', () => {
         },
       },
       {
+        nombre: 'unreact',
+        perfil: 'p1',
+        ejecutar: (d) => {
+          d.reactionsRepo.findByActorTarget.mockResolvedValue({ id: 'r1' });
+          return d.service.unreact(
+            {
+              actorProfileId: 'p1',
+              reactableType: 'POST',
+              reactableRefId: 'post1',
+            } as any,
+            actor,
+          );
+        },
+      },
+      {
         nombre: 'unbookmark',
         perfil: 'p1',
         ejecutar: (d) => {
@@ -1203,6 +1218,86 @@ describe('CommunitySocialService', () => {
           actor,
         ),
       ).resolves.toEqual({ removed: false });
+    });
+  });
+
+  describe('unreact (UC-19-03, cara inversa)', () => {
+    it('quita la reacción del actor al contenido', async () => {
+      const d = build();
+      d.reactionsRepo.findByActorTarget.mockResolvedValue({
+        id: 'r1',
+        reactionTypeConceptId: 'cualquiera',
+      });
+      const res = await d.service.unreact(
+        {
+          actorProfileId: 'p1',
+          reactableType: 'POST',
+          reactableRefId: 'post1',
+        } as any,
+        actor,
+      );
+      expect(res).toEqual({ removed: true });
+      expect(d.tx.remove).toHaveBeenCalledTimes(1);
+      expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('busca por actor, tipo de objeto y objeto: no por el tipo de reacción', async () => {
+      const d = build();
+      d.reactionsRepo.findByActorTarget.mockResolvedValue(null);
+      await d.service.unreact(
+        {
+          actorProfileId: 'p1',
+          reactableType: 'COMMENT',
+          reactableRefId: 'c1',
+        } as any,
+        actor,
+      );
+      expect(d.reactionsRepo.findByActorTarget).toHaveBeenCalledWith(
+        d.tx,
+        'p1',
+        expect.any(String),
+        'c1',
+      );
+    });
+
+    /**
+     * Es un conmutador: si la reacción ya no está (otra pestaña, otro
+     * dispositivo), el estado final es el que se pedía. Un error obligaría a la
+     * pantalla a tratar como fallo lo que para la persona es lo que quería.
+     */
+    it('devuelve removed=false cuando no había reacción, sin error y sin borrar nada', async () => {
+      const d = build();
+      d.reactionsRepo.findByActorTarget.mockResolvedValue(null);
+      await expect(
+        d.service.unreact(
+          {
+            actorProfileId: 'p1',
+            reactableType: 'POST',
+            reactableRefId: 'post1',
+          } as any,
+          actor,
+        ),
+      ).resolves.toEqual({ removed: false });
+      expect(d.tx.remove).not.toHaveBeenCalled();
+    });
+
+    it('no quita la reacción de un perfil que no es del actor', async () => {
+      const d = build();
+      d.visibility.assertActsAsProfile.mockRejectedValue(
+        new Error('perfil ajeno'),
+      );
+      await expect(
+        d.service.unreact(
+          {
+            actorProfileId: 'ajeno',
+            reactableType: 'POST',
+            reactableRefId: 'post1',
+          } as any,
+          actor,
+        ),
+      ).rejects.toThrow('perfil ajeno');
+      expect(d.reactionsRepo.findByActorTarget).not.toHaveBeenCalled();
+      expect(d.tx.remove).not.toHaveBeenCalled();
     });
   });
 

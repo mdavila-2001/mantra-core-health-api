@@ -45,6 +45,7 @@ import {
   OwnPublicProfileDto,
   UnfollowQueryDto,
   UnbookmarkQueryDto,
+  UnreactQueryDto,
   UnblockQueryDto,
   SocialRemovalResponseDto,
 } from '../dto';
@@ -672,6 +673,46 @@ export class CommunitySocialService {
       });
       await tx.flush();
       return { id: reaction.id, created: true, reactionType: dto.reactionType };
+    });
+  }
+
+  /**
+   * UC-19-03, cara inversa: quita la reacción del actor a un contenido.
+   *
+   * `react` es upsert y no hay otra forma de dejar de reaccionar: sin esto,
+   * «Recomendar» sólo se podía cambiar, nunca deshacer. Es un conmutador como
+   * `unfollow` y `unbookmark`: si la reacción ya no está, el estado final es el
+   * que se pedía y se responde `removed: false` en vez de un 404.
+   *
+   * Las reacciones no son un asiento ni un rastro de auditoría: se borra la
+   * fila, y el recuento (que se calcula al leer, agrupando por tipo) baja solo.
+   *
+   * @param query - Quién y a qué.
+   * @param actor - Sesión, que debe ser titular del perfil.
+   * @returns Si esta llamada quitó la reacción.
+   */
+  async unreact(
+    query: UnreactQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    return this.em.transactional(async (tx) => {
+      await this.visibility.assertActsAsProfile(
+        tx,
+        query.actorProfileId,
+        actor,
+      );
+      const reaction = await this.reactionsRepo.findByActorTarget(
+        tx,
+        query.actorProfileId,
+        SOCIAL_OBJECT_CONCEPT_BY_CODE[query.reactableType],
+        query.reactableRefId,
+      );
+      if (!reaction) {
+        return { removed: false };
+      }
+      tx.remove(reaction);
+      await tx.flush();
+      return { removed: true };
     });
   }
 

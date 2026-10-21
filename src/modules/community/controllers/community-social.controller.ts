@@ -48,6 +48,7 @@ import {
   ProfileStatsDto,
   UnfollowQueryDto,
   UnbookmarkQueryDto,
+  UnreactQueryDto,
   UnblockQueryDto,
   SocialRemovalResponseDto,
 } from '../dto';
@@ -177,6 +178,23 @@ export class CommunitySocialController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ReactionResponseDto> {
     return this.service.react(dto, actor);
+  }
+
+  /** UC-19-03, cara inversa. */
+  @Delete('reactions')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Quitar la reacción propia a un contenido',
+    description:
+      '`PUT /community/reactions` es upsert y sólo cambia el tipo; esta es la ' +
+      'forma de dejar de reaccionar. Es un conmutador: si la reacción ya no ' +
+      'estaba responde `removed: false`, no un 404.',
+  })
+  unreact(
+    @Query() query: UnreactQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SocialRemovalResponseDto> {
+    return this.service.unreact(query, actor);
   }
 
   /** UC-19-04. */

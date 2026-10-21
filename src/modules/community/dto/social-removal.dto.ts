@@ -107,3 +107,39 @@ export class UnblockQueryDto {
   @IsUUID()
   blockedProfileId!: string;
 }
+
+/**
+ * Query de `DELETE /community/reactions` (UC-19-03, cara inversa).
+ *
+ * Lleva la clave de la reacción —quién, a qué— y **no el tipo**: hay una sola
+ * reacción por actor y objeto (`PUT /community/reactions` es upsert), así que
+ * pedir «quitar mi LIKE» y «quitar mi reacción» es lo mismo, y exigir el tipo
+ * sólo agregaría una forma de equivocarse (quitar un LIKE cuando la reacción
+ * ya cambió a LOVE no quitaría nada y la pantalla quedaría desincronizada).
+ */
+@ApiSchema({ name: 'CommunityUnreactQueryDto' })
+export class UnreactQueryDto {
+  /**
+   * Perfil que quita su reacción. Se comprueba que sea del actor.
+   */
+  @ApiProperty({ description: 'Perfil que quita su reacción', format: 'uuid' })
+  @IsUUID()
+  actorProfileId!: string;
+
+  /**
+   * Tipo del objeto reaccionado.
+   */
+  @ApiProperty({
+    description: 'Tipo de objeto',
+    enum: ['POST', 'COMMENT', 'REVIEW'],
+  })
+  @IsIn(['POST', 'COMMENT', 'REVIEW'])
+  reactableType!: 'POST' | 'COMMENT' | 'REVIEW';
+
+  /**
+   * Identificador del objeto reaccionado.
+   */
+  @ApiProperty({ description: 'Id del objeto', format: 'uuid' })
+  @IsUUID()
+  reactableRefId!: string;
+}
