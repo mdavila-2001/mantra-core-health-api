@@ -174,7 +174,15 @@ Se construyó una base descartable con SQL/apply_all.sql + SQL/apply_deferred.sq
 
 **Alcance:** la base se construyó con el DDL canónico, no es una base de producción: demuestra que el modelo y su DDL son coherentes entre sí, no que un despliegue real esté al día. Los parches de `SQL/patches` no se aplicaron.
 
-## Schemas del DDL que el catálogo de la API no declara
+## Schemas del DDL que el catálogo de la API no lista
+
+El arranque de la API crea el esquema desde `src/orm/catalog/schemas.catalog.ts`: un schema que no figura ahí no se crea al arrancar contra una base vacía.
+
+`data_catalog` · `medical_groups` · `qa_execution`
+
+## Schemas del DDL sin dominio en el modelo
+
+No figuran en la tabla de dominios de `semantic-data-analysis.md`; sus tablas quedan con dominio «sin dato».
 
 `audio_assets` · `data_catalog` · `medical_groups` · `pharma_lab` · `qa_execution` · `surveys`
 

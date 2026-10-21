@@ -327,7 +327,7 @@ export function renderDeriva(
   resumen,
   deriva,
   tablas,
-  esquemasSinCatalogoDeApi,
+  esquemas,
   derivaBd = null,
 ) {
   const sinEntidad = tablas.filter((t) => !t.entidadOrm);
@@ -458,10 +458,20 @@ export function renderDeriva(
           '_No se comparó con ninguna base: falta `inventario/catalogo/deriva-bd.json` (ver `tools/inventario/deriva-bd.mjs`)._',
         ]),
     '',
-    '## Schemas del DDL que el catálogo de la API no declara',
+    '## Schemas del DDL que el catálogo de la API no lista',
     '',
-    esquemasSinCatalogoDeApi.length
-      ? esquemasSinCatalogoDeApi.map(code).join(' · ')
+    'El arranque de la API crea el esquema desde `src/orm/catalog/schemas.catalog.ts`: un schema que no figura ahí no se crea al arrancar contra una base vacía.',
+    '',
+    esquemas.sinCatalogoDeApi.length
+      ? esquemas.sinCatalogoDeApi.map(code).join(' · ')
+      : '_Ninguno._',
+    '',
+    '## Schemas del DDL sin dominio en el modelo',
+    '',
+    'No figuran en la tabla de dominios de `semantic-data-analysis.md`; sus tablas quedan con dominio «sin dato».',
+    '',
+    esquemas.sinDominio.length
+      ? esquemas.sinDominio.map(code).join(' · ')
       : '_Ninguno._',
     '',
   ].join('\n');
