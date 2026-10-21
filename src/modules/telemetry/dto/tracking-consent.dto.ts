@@ -98,3 +98,24 @@ export class TrackingConsentResponseDto {
   @ApiPropertyOptional()
   withdrawnAt?: Date;
 }
+
+/** Estado vigente del consentimiento de quien consulta, para un propósito. */
+export class MyTrackingConsentStatusDto {
+  /**
+   * `GRANTED` si la última decisión es el otorgamiento, `WITHDRAWN` si es el
+   * retiro y `NONE` si nunca decidió.
+   */
+  @ApiProperty({ enum: ['GRANTED', 'WITHDRAWN', 'NONE'] })
+  status!: 'GRANTED' | 'WITHDRAWN' | 'NONE';
+
+  /**
+   * Consentimiento que hay que pasar a `POST /telemetry/tracking-consents/:id/withdraw`
+   * para retirarlo. Sólo viene con `GRANTED`.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  consentId?: string;
+
+  /** Propósito consultado. */
+  @ApiProperty({ format: 'uuid' })
+  purposeDefinitionId!: string;
+}
