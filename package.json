@@ -101,6 +101,7 @@
     "docs:openapi:lint": "redocly lint openapi/openapi.yaml",
     "docs:openapi:bundle": "redocly bundle openapi/openapi.yaml -o dist-docs/openapi.yaml",
     "docs:endpoints:generate": "node tools/docs/generate-endpoint-markdown.mjs",
+    "inventario:test": "node --test \"tools/inventario/**/*.test.mjs\"",
     "docs:modules:sync": "node tools/docs/sync-module-docs.mjs",
     "docs:data:sync": "node tools/docs/generate-data-catalog.mjs",
     "docs:coverage": "node tools/docs/check-doc-coverage.mjs",

@@ -1,22 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
+import {
+  loadContract,
+  requestBody,
+  schemaName,
+  schemaType,
+} from '../inventario/lib/openapi.mjs';
 
 const ROOT = process.cwd();
-const SPEC_PATH = path.join(ROOT, 'openapi', 'openapi.json');
 const OUTPUT_DIR = path.join(ROOT, 'openapi', 'endpoints');
-const HTTP_METHODS = new Set([
-  'get',
-  'post',
-  'put',
-  'patch',
-  'delete',
-  'head',
-  'options',
-]);
 
-const spec = JSON.parse(fs.readFileSync(SPEC_PATH, 'utf8'));
-const schemas = spec.components?.schemas ?? {};
+const { schemas, dereference, mergedSchema, operations } = loadContract(ROOT);
 
 function walk(dir, predicate, result = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -588,51 +583,6 @@ for (const [className, classInfo] of classes) {
   }
 }
 
-function dereference(schema) {
-  if (!schema) return {};
-  if (schema.$ref) return schemas[schema.$ref.split('/').at(-1)] ?? {};
-  return schema;
-}
-
-function schemaName(schema) {
-  return schema?.$ref?.split('/').at(-1);
-}
-
-function mergedSchema(schema) {
-  if (!schema) return {};
-  if (schema.$ref) return mergedSchema(dereference(schema));
-  if (schema.allOf) {
-    return schema.allOf.reduce(
-      (acc, item) => {
-        const current = mergedSchema(item);
-        return {
-          ...acc,
-          ...current,
-          properties: {
-            ...(acc.properties ?? {}),
-            ...(current.properties ?? {}),
-          },
-          required: [
-            ...new Set([...(acc.required ?? []), ...(current.required ?? [])]),
-          ],
-        };
-      },
-      { ...schema, allOf: undefined },
-    );
-  }
-  return schema;
-}
-
-function schemaType(schema) {
-  if (!schema) return 'desconocido';
-  if (schema.$ref) return schemaName(schema);
-  if (schema.oneOf) return schema.oneOf.map(schemaType).join(' | ');
-  if (schema.anyOf) return schema.anyOf.map(schemaType).join(' | ');
-  if (schema.allOf) return schema.allOf.map(schemaType).join(' & ');
-  if (schema.type === 'array') return `array<${schemaType(schema.items)}>`;
-  return schema.type ?? (schema.properties ? 'object' : 'desconocido');
-}
-
 function runtimeConstraints(ownerName, propertyName) {
   return dtoConstraints.get(ownerName)?.get(propertyName)?.constraints ?? {};
 }
@@ -1074,17 +1024,6 @@ function cleanJsDoc(value) {
   return value;
 }
 
-function requestBody(operation) {
-  const entries = Object.entries(operation.requestBody?.content ?? {});
-  if (!entries.length) return {};
-  const [contentType, media] = entries[0];
-  return {
-    contentType,
-    schema: media.schema,
-    required: Boolean(operation.requestBody.required),
-  };
-}
-
 function resolvedRoute(route, parameters, includeOptional) {
   let result = route;
   const query = [];
@@ -1293,18 +1232,15 @@ function renderEndpoint(endpoint, ordinal) {
 }
 
 const endpoints = [];
-for (const [route, pathItem] of Object.entries(spec.paths ?? {})) {
-  for (const [method, operation] of Object.entries(pathItem)) {
-    if (!HTTP_METHODS.has(method)) continue;
-    const source = controllerMethods.get(operation.operationId.split('__')[0]);
-    endpoints.push({
-      route,
-      method,
-      operation,
-      source,
-      moduleName: source?.moduleName ?? operation.tags?.[0] ?? 'sin-clasificar',
-    });
-  }
+for (const { route, method, operation } of operations()) {
+  const source = controllerMethods.get(operation.operationId.split('__')[0]);
+  endpoints.push({
+    route,
+    method,
+    operation,
+    source,
+    moduleName: source?.moduleName ?? operation.tags?.[0] ?? 'sin-clasificar',
+  });
 }
 
 const byModule = new Map();
