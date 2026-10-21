@@ -1,0 +1,3718 @@
+{
+ "fuente": {
+  "servidor": "PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+  "base": "salud",
+  "aplicado": "SQL/apply_all.sql + SQL/apply_deferred.sql del modelo (sin SQL/patches)"
+ },
+ "resumen": {
+  "tablasDelCatalogo": 1230,
+  "tablasEnBase": 1230,
+  "columnasEnBase": 16851,
+  "indicesEnBase": 9497,
+  "fkEnBase": 7069,
+  "tablasAusentes": 0,
+  "columnasAusentes": 0,
+  "columnasDeMas": 0,
+  "nulabilidad": 0,
+  "tipos": 0,
+  "indicesAusentes": 0,
+  "fkAusentes": 0,
+  "tablasDeMas": 0,
+  "indicesDeMas": 0,
+  "tablasCoinciden": 1230
+ },
+ "tablasDeMas": [],
+ "indicesDeMas": [],
+ "tablas": {
+  "accounting.account_determination_rules": {
+   "estado": "COINCIDE"
+  },
+  "accounting.account_groups": {
+   "estado": "COINCIDE"
+  },
+  "accounting.accounting_document_links": {
+   "estado": "COINCIDE"
+  },
+  "accounting.accounts": {
+   "estado": "COINCIDE"
+  },
+  "accounting.accrual_objects": {
+   "estado": "COINCIDE"
+  },
+  "accounting.accrual_postings": {
+   "estado": "COINCIDE"
+  },
+  "accounting.accrual_schedule_lines": {
+   "estado": "COINCIDE"
+  },
+  "accounting.asset_assignments": {
+   "estado": "COINCIDE"
+  },
+  "accounting.asset_classes": {
+   "estado": "COINCIDE"
+  },
+  "accounting.asset_components": {
+   "estado": "COINCIDE"
+  },
+  "accounting.asset_depreciations": {
+   "estado": "COINCIDE"
+  },
+  "accounting.asset_postings": {
+   "estado": "COINCIDE"
+  },
+  "accounting.asset_valuations": {
+   "estado": "COINCIDE"
+  },
+  "accounting.assets": {
+   "estado": "COINCIDE"
+  },
+  "accounting.clearing_documents": {
+   "estado": "COINCIDE"
+  },
+  "accounting.clearing_items": {
+   "estado": "COINCIDE"
+  },
+  "accounting.company_bank_accounts": {
+   "estado": "COINCIDE"
+  },
+  "accounting.controlling_areas": {
+   "estado": "COINCIDE"
+  },
+  "accounting.cost_center_maps": {
+   "estado": "COINCIDE"
+  },
+  "accounting.cost_centers": {
+   "estado": "COINCIDE"
+  },
+  "accounting.depreciation_areas": {
+   "estado": "COINCIDE"
+  },
+  "accounting.employee_payments": {
+   "estado": "COINCIDE"
+  },
+  "accounting.exchange_rates": {
+   "estado": "COINCIDE"
+  },
+  "accounting.fiscal_periods": {
+   "estado": "COINCIDE"
+  },
+  "accounting.fiscal_years": {
+   "estado": "COINCIDE"
+  },
+  "accounting.functional_areas": {
+   "estado": "COINCIDE"
+  },
+  "accounting.infrastructure_items": {
+   "estado": "COINCIDE"
+  },
+  "accounting.internal_orders": {
+   "estado": "COINCIDE"
+  },
+  "accounting.journal_entry_assignments": {
+   "estado": "COINCIDE"
+  },
+  "accounting.journal_transactions": {
+   "estado": "COINCIDE"
+  },
+  "accounting.ledger_entries": {
+   "estado": "COINCIDE"
+  },
+  "accounting.liabilities": {
+   "estado": "COINCIDE"
+  },
+  "accounting.liability_payments": {
+   "estado": "COINCIDE"
+  },
+  "accounting.liability_postings": {
+   "estado": "COINCIDE"
+  },
+  "accounting.liability_schedules": {
+   "estado": "COINCIDE"
+  },
+  "accounting.open_items": {
+   "estado": "COINCIDE"
+  },
+  "accounting.profit_centers": {
+   "estado": "COINCIDE"
+  },
+  "accounting.purchases": {
+   "estado": "COINCIDE"
+  },
+  "accounting.sales": {
+   "estado": "COINCIDE"
+  },
+  "accounting.segments": {
+   "estado": "COINCIDE"
+  },
+  "accounting.subledger_accounts": {
+   "estado": "COINCIDE"
+  },
+  "accounting.transaction_files": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_account_users": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_accounts": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_billing_events": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_creatives": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_event_data_policies": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_event_field_rules": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_experiments": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_identity_asset_assignments": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_identity_assets": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_invoice_lines": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_invoices": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_partners": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_placements": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_platform_connections": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_policy_appeals": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_policy_violations": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_review_events": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_sets": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_sync_checkpoints": {
+   "estado": "COINCIDE"
+  },
+  "ads.ad_sync_runs": {
+   "estado": "COINCIDE"
+  },
+  "ads.ads": {
+   "estado": "COINCIDE"
+  },
+  "ads.adset_learning_snapshots": {
+   "estado": "COINCIDE"
+  },
+  "ads.attribution_settings": {
+   "estado": "COINCIDE"
+  },
+  "ads.automated_rules": {
+   "estado": "COINCIDE"
+  },
+  "ads.blocked_ad_events": {
+   "estado": "COINCIDE"
+  },
+  "ads.brand_lift_studies": {
+   "estado": "COINCIDE"
+  },
+  "ads.budget_schedules": {
+   "estado": "COINCIDE"
+  },
+  "ads.business_managers": {
+   "estado": "COINCIDE"
+  },
+  "ads.campaigns": {
+   "estado": "COINCIDE"
+  },
+  "ads.catalog_feeds": {
+   "estado": "COINCIDE"
+  },
+  "ads.catalog_products": {
+   "estado": "COINCIDE"
+  },
+  "ads.collection_ads": {
+   "estado": "COINCIDE"
+  },
+  "ads.conversion_attributions": {
+   "estado": "COINCIDE"
+  },
+  "ads.conversion_datasets": {
+   "estado": "COINCIDE"
+  },
+  "ads.conversion_event_custom_data": {
+   "estado": "COINCIDE"
+  },
+  "ads.conversion_event_deduplication": {
+   "estado": "COINCIDE"
+  },
+  "ads.conversion_event_delivery_attempts": {
+   "estado": "COINCIDE"
+  },
+  "ads.conversion_event_user_data": {
+   "estado": "COINCIDE"
+  },
+  "ads.creative_assets": {
+   "estado": "COINCIDE"
+  },
+  "ads.custom_audiences": {
+   "estado": "COINCIDE"
+  },
+  "ads.custom_conversions": {
+   "estado": "COINCIDE"
+  },
+  "ads.dataset_connections": {
+   "estado": "COINCIDE"
+  },
+  "ads.dataset_quality_snapshots": {
+   "estado": "COINCIDE"
+  },
+  "ads.delivery_status_snapshots": {
+   "estado": "COINCIDE"
+  },
+  "ads.dynamic_ad_templates": {
+   "estado": "COINCIDE"
+  },
+  "ads.experiment_variants": {
+   "estado": "COINCIDE"
+  },
+  "ads.external_ad_object_snapshots": {
+   "estado": "COINCIDE"
+  },
+  "ads.feed_run_logs": {
+   "estado": "COINCIDE"
+  },
+  "ads.frequency_caps": {
+   "estado": "COINCIDE"
+  },
+  "ads.insight_breakdown_definitions": {
+   "estado": "COINCIDE"
+  },
+  "ads.insight_fact_rows": {
+   "estado": "COINCIDE"
+  },
+  "ads.insight_metric_definitions": {
+   "estado": "COINCIDE"
+  },
+  "ads.insight_query_runs": {
+   "estado": "COINCIDE"
+  },
+  "ads.insights_daily": {
+   "estado": "COINCIDE"
+  },
+  "ads.lead_answers": {
+   "estado": "COINCIDE"
+  },
+  "ads.lead_delivery_events": {
+   "estado": "COINCIDE"
+  },
+  "ads.lead_form_questions": {
+   "estado": "COINCIDE"
+  },
+  "ads.lead_forms": {
+   "estado": "COINCIDE"
+  },
+  "ads.lead_submissions": {
+   "estado": "COINCIDE"
+  },
+  "ads.lookalike_specs": {
+   "estado": "COINCIDE"
+  },
+  "ads.offline_conversion_events": {
+   "estado": "COINCIDE"
+  },
+  "ads.offline_conversion_sets": {
+   "estado": "COINCIDE"
+  },
+  "ads.partner_relationships": {
+   "estado": "COINCIDE"
+  },
+  "ads.pixel_events": {
+   "estado": "COINCIDE"
+  },
+  "ads.product_catalogs": {
+   "estado": "COINCIDE"
+  },
+  "ads.product_localizations": {
+   "estado": "COINCIDE"
+  },
+  "ads.product_set_members": {
+   "estado": "COINCIDE"
+  },
+  "ads.product_sets": {
+   "estado": "COINCIDE"
+  },
+  "ads.rule_executions": {
+   "estado": "COINCIDE"
+  },
+  "ads.saved_audiences": {
+   "estado": "COINCIDE"
+  },
+  "ads.server_conversion_events": {
+   "estado": "COINCIDE"
+  },
+  "ads.targeting_specs": {
+   "estado": "COINCIDE"
+  },
+  "ads.tracking_pixels": {
+   "estado": "COINCIDE"
+  },
+  "audio_assets.audio_assets": {
+   "estado": "COINCIDE"
+  },
+  "audio_assets.audio_generation_events": {
+   "estado": "COINCIDE"
+  },
+  "audio_assets.audio_generation_usage": {
+   "estado": "COINCIDE"
+  },
+  "audio_assets.audio_templates": {
+   "estado": "COINCIDE"
+  },
+  "audit.accounts_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.ad_accounts_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.ad_creatives_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.ad_experiments_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.ad_sets_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.ads_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.agent_versions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.agents_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.allergy_intolerances_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.analytics_governance_log": {
+   "estado": "COINCIDE"
+  },
+  "audit.appointment_bookings_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.assets_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.audit_log": {
+   "estado": "COINCIDE"
+  },
+  "audit.automated_rules_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.bills_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.booking_policies_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.campaigns_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.care_plans_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.care_spaces_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.care_teams_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.catalog_products_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.cds_rules_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.certificates_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.clinical_alerts_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.clinical_note_headers_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.clinical_units_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.comments_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.conditions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.connected_accounts_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.consents_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.contacts_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.contracts_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.conversations_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.coupons_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.course_versions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.courses_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.crm_accounts_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.custom_audiences_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.custom_conversions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.data_access_log": {
+   "estado": "COINCIDE"
+  },
+  "audit.delegated_access_audit_log": {
+   "estado": "COINCIDE"
+  },
+  "audit.departments_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.diagnostic_reports_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.diagnostic_study_prices_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.document_records_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.dsar_requests": {
+   "estado": "COINCIDE"
+  },
+  "audit.employment_records_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.enrollments_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.event_subscriptions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.federated_identities_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.groups_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.guardrail_policies_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.health_practitioner_profiles_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.identity_providers_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.identity_verification_access_log": {
+   "estado": "COINCIDE"
+  },
+  "audit.imaging_studies_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.inbound_messages_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.informational_materials_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.insurance_claims_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.insurance_decision_access_log": {
+   "estado": "COINCIDE"
+  },
+  "audit.integration_endpoints_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.invoices_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.journal_transactions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.journeys_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.jurisdiction_authorizations_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.liabilities_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.loyalty_memberships_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.loyalty_programs_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.marketing_campaigns_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.medical_visitors_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.medication_requests_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.message_retries_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.message_templates_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.moderation_decisions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.moderation_events": {
+   "estado": "COINCIDE"
+  },
+  "audit.opportunities_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.order_sets_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.organization_affiliations_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.outbound_messages_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.partnership_agreements_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.partnerships_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.patient_content_access_log": {
+   "estado": "COINCIDE"
+  },
+  "audit.patient_identity_links_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.patient_profiles_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.payment_intents_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.payment_mandates_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.payment_methods_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.payment_transactions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.payouts_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.pharma_lab_staff_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.pharma_labs_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.pharma_products_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.pharmacovigilance_reports_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.pharmacy_inventory_access_log": {
+   "estado": "COINCIDE"
+  },
+  "audit.pharmacy_product_prices_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.positions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.practice_sites_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.practices_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.practitioner_role_assignments_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.product_catalogs_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.product_sets_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.professional_credentials_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.promotions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.provider_channel_configs_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.provider_connections_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.provider_protocol_configs_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.provider_tenant_bindings_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.public_profiles_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.record_automations_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.referral_programs_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.referrals_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.regulatory_documents_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.report_definitions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.report_schedules_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.schedule_templates_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.segments_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.service_reviews_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.shipments_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.social_posts_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.subscription_plans_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.subscriptions_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.tenants_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.test_cases_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.test_suites_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.topics_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.trackable_subjects_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.users_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.verified_badges_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.visit_requests_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.wallets_history": {
+   "estado": "COINCIDE"
+  },
+  "audit.workflows_history": {
+   "estado": "COINCIDE"
+  },
+  "auth_providers.account_link_requests": {
+   "estado": "COINCIDE"
+  },
+  "auth_providers.federated_identities": {
+   "estado": "COINCIDE"
+  },
+  "auth_providers.federated_login_attempts": {
+   "estado": "COINCIDE"
+  },
+  "auth_providers.identity_providers": {
+   "estado": "COINCIDE"
+  },
+  "auth_providers.provider_attribute_mappings": {
+   "estado": "COINCIDE"
+  },
+  "auth_providers.provider_protocol_configs": {
+   "estado": "COINCIDE"
+  },
+  "auth_providers.provider_signing_keys": {
+   "estado": "COINCIDE"
+  },
+  "auth_providers.provider_tenant_bindings": {
+   "estado": "COINCIDE"
+  },
+  "auth_providers.provisioning_rules": {
+   "estado": "COINCIDE"
+  },
+  "authz.access_policies": {
+   "estado": "COINCIDE"
+  },
+  "authz.break_glass_sessions": {
+   "estado": "COINCIDE"
+  },
+  "authz.care_relationships": {
+   "estado": "COINCIDE"
+  },
+  "authz.clinical_access_grants": {
+   "estado": "COINCIDE"
+  },
+  "authz.field_permissions": {
+   "estado": "COINCIDE"
+  },
+  "authz.ip_access_rules": {
+   "estado": "COINCIDE"
+  },
+  "authz.patient_legal_representations": {
+   "estado": "COINCIDE"
+  },
+  "authz.permission_categories": {
+   "estado": "COINCIDE"
+  },
+  "authz.permissions": {
+   "estado": "COINCIDE"
+  },
+  "authz.resource_scope_grants": {
+   "estado": "COINCIDE"
+  },
+  "authz.role_permissions": {
+   "estado": "COINCIDE"
+  },
+  "authz.roles": {
+   "estado": "COINCIDE"
+  },
+  "authz.service_principals": {
+   "estado": "COINCIDE"
+  },
+  "authz.user_permission_grants": {
+   "estado": "COINCIDE"
+  },
+  "authz.user_role_assignments": {
+   "estado": "COINCIDE"
+  },
+  "automation.agent_guardrails": {
+   "estado": "COINCIDE"
+  },
+  "automation.agent_memory": {
+   "estado": "COINCIDE"
+  },
+  "automation.agent_run_steps": {
+   "estado": "COINCIDE"
+  },
+  "automation.agent_runs": {
+   "estado": "COINCIDE"
+  },
+  "automation.agent_tool_bindings": {
+   "estado": "COINCIDE"
+  },
+  "automation.agent_tools": {
+   "estado": "COINCIDE"
+  },
+  "automation.agent_versions": {
+   "estado": "COINCIDE"
+  },
+  "automation.agents": {
+   "estado": "COINCIDE"
+  },
+  "automation.automation_approvals": {
+   "estado": "COINCIDE"
+  },
+  "automation.automation_triggers": {
+   "estado": "COINCIDE"
+  },
+  "automation.guardrail_policies": {
+   "estado": "COINCIDE"
+  },
+  "automation.knowledge_sources": {
+   "estado": "COINCIDE"
+  },
+  "automation.record_automations": {
+   "estado": "COINCIDE"
+  },
+  "automation.workflow_runs": {
+   "estado": "COINCIDE"
+  },
+  "automation.workflow_steps": {
+   "estado": "COINCIDE"
+  },
+  "automation.workflows": {
+   "estado": "COINCIDE"
+  },
+  "billing.bill_lines": {
+   "estado": "COINCIDE"
+  },
+  "billing.billing_document_links": {
+   "estado": "COINCIDE"
+  },
+  "billing.bills": {
+   "estado": "COINCIDE"
+  },
+  "billing.budget_lines": {
+   "estado": "COINCIDE"
+  },
+  "billing.budgets": {
+   "estado": "COINCIDE"
+  },
+  "billing.dunning_items": {
+   "estado": "COINCIDE"
+  },
+  "billing.dunning_runs": {
+   "estado": "COINCIDE"
+  },
+  "billing.financial_kpi_snapshots": {
+   "estado": "COINCIDE"
+  },
+  "billing.invoice_lines": {
+   "estado": "COINCIDE"
+  },
+  "billing.invoices": {
+   "estado": "COINCIDE"
+  },
+  "billing.patient_statements": {
+   "estado": "COINCIDE"
+  },
+  "billing.payable_payment_allocations": {
+   "estado": "COINCIDE"
+  },
+  "billing.payments_made": {
+   "estado": "COINCIDE"
+  },
+  "billing.payments_received": {
+   "estado": "COINCIDE"
+  },
+  "billing.quotation_installments": {
+   "estado": "COINCIDE"
+  },
+  "billing.quotations": {
+   "estado": "COINCIDE"
+  },
+  "billing.receivable_payment_allocations": {
+   "estado": "COINCIDE"
+  },
+  "billing.reimbursements": {
+   "estado": "COINCIDE"
+  },
+  "billing.service_catalog": {
+   "estado": "COINCIDE"
+  },
+  "billing.tax_codes": {
+   "estado": "COINCIDE"
+  },
+  "billing.tax_periods": {
+   "estado": "COINCIDE"
+  },
+  "billing.vendors": {
+   "estado": "COINCIDE"
+  },
+  "chart.care_plan_activities": {
+   "estado": "COINCIDE"
+  },
+  "chart.care_plans": {
+   "estado": "COINCIDE"
+  },
+  "chart.chart_template_assignments": {
+   "estado": "COINCIDE"
+  },
+  "chart.clinical_note_headers": {
+   "estado": "COINCIDE"
+  },
+  "chart.clinical_note_signatures": {
+   "estado": "COINCIDE"
+  },
+  "chart.clinical_note_versions": {
+   "estado": "COINCIDE"
+  },
+  "chart.document_record_files": {
+   "estado": "COINCIDE"
+  },
+  "chart.document_records": {
+   "estado": "COINCIDE"
+  },
+  "chart.note_release_events": {
+   "estado": "COINCIDE"
+  },
+  "chart.physical_exam_findings": {
+   "estado": "COINCIDE"
+  },
+  "chart.specialty_chart_templates": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.care_gaps": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.care_team_members": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.care_teams": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.cds_rules": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.clinical_alerts": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.drug_interactions": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.immunization_schedules": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.order_set_items": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.order_sets": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.prescription_favorites": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.reference_ranges": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.referrals": {
+   "estado": "COINCIDE"
+  },
+  "clinical_ext.virtual_encounters": {
+   "estado": "COINCIDE"
+  },
+  "clinical.allergy_intolerances": {
+   "estado": "COINCIDE"
+  },
+  "clinical.allergy_reactions": {
+   "estado": "COINCIDE"
+  },
+  "clinical.appointments": {
+   "estado": "COINCIDE"
+  },
+  "clinical.care_episodes": {
+   "estado": "COINCIDE"
+  },
+  "clinical.conditions": {
+   "estado": "COINCIDE"
+  },
+  "clinical.diagnostic_reports": {
+   "estado": "COINCIDE"
+  },
+  "clinical.encounter_locations": {
+   "estado": "COINCIDE"
+  },
+  "clinical.encounter_participants": {
+   "estado": "COINCIDE"
+  },
+  "clinical.encounters": {
+   "estado": "COINCIDE"
+  },
+  "clinical.family_member_history": {
+   "estado": "COINCIDE"
+  },
+  "clinical.immunizations": {
+   "estado": "COINCIDE"
+  },
+  "clinical.medication_records": {
+   "estado": "COINCIDE"
+  },
+  "clinical.medication_requests": {
+   "estado": "COINCIDE"
+  },
+  "clinical.observation_components": {
+   "estado": "COINCIDE"
+  },
+  "clinical.observation_notes": {
+   "estado": "COINCIDE"
+  },
+  "clinical.observation_performers": {
+   "estado": "COINCIDE"
+  },
+  "clinical.observation_reference_ranges": {
+   "estado": "COINCIDE"
+  },
+  "clinical.observations": {
+   "estado": "COINCIDE"
+  },
+  "clinical.prescription_signature_policies": {
+   "estado": "COINCIDE"
+  },
+  "clinical.procedures": {
+   "estado": "COINCIDE"
+  },
+  "clinical.service_requests": {
+   "estado": "COINCIDE"
+  },
+  "clinical.social_history": {
+   "estado": "COINCIDE"
+  },
+  "common.addresses": {
+   "estado": "COINCIDE"
+  },
+  "common.contact_points": {
+   "estado": "COINCIDE"
+  },
+  "common.file_derivatives": {
+   "estado": "COINCIDE"
+  },
+  "common.file_links": {
+   "estado": "COINCIDE"
+  },
+  "common.file_versions": {
+   "estado": "COINCIDE"
+  },
+  "common.files": {
+   "estado": "COINCIDE"
+  },
+  "common.identifiers": {
+   "estado": "COINCIDE"
+  },
+  "community.bookmarks": {
+   "estado": "COINCIDE"
+  },
+  "community.chat_auto_replies": {
+   "estado": "COINCIDE"
+  },
+  "community.comment_media": {
+   "estado": "COINCIDE"
+  },
+  "community.comments": {
+   "estado": "COINCIDE"
+  },
+  "community.content_hashtags": {
+   "estado": "COINCIDE"
+  },
+  "community.content_reports": {
+   "estado": "COINCIDE"
+  },
+  "community.conversation_participants": {
+   "estado": "COINCIDE"
+  },
+  "community.conversations": {
+   "estado": "COINCIDE"
+  },
+  "community.direct_messages": {
+   "estado": "COINCIDE"
+  },
+  "community.feed_items": {
+   "estado": "COINCIDE"
+  },
+  "community.feedback_ticket_comments": {
+   "estado": "COINCIDE"
+  },
+  "community.feedback_ticket_events": {
+   "estado": "COINCIDE"
+  },
+  "community.feedback_tickets": {
+   "estado": "COINCIDE"
+  },
+  "community.group_members": {
+   "estado": "COINCIDE"
+  },
+  "community.groups": {
+   "estado": "COINCIDE"
+  },
+  "community.hashtags": {
+   "estado": "COINCIDE"
+  },
+  "community.mentions": {
+   "estado": "COINCIDE"
+  },
+  "community.message_receipts": {
+   "estado": "COINCIDE"
+  },
+  "community.moderation_appeals": {
+   "estado": "COINCIDE"
+  },
+  "community.moderation_decisions": {
+   "estado": "COINCIDE"
+  },
+  "community.moderation_queue": {
+   "estado": "COINCIDE"
+  },
+  "community.moderation_strikes": {
+   "estado": "COINCIDE"
+  },
+  "community.party_ratings": {
+   "estado": "COINCIDE"
+  },
+  "community.poll_options": {
+   "estado": "COINCIDE"
+  },
+  "community.poll_votes": {
+   "estado": "COINCIDE"
+  },
+  "community.polls": {
+   "estado": "COINCIDE"
+  },
+  "community.post_media": {
+   "estado": "COINCIDE"
+  },
+  "community.post_shares": {
+   "estado": "COINCIDE"
+  },
+  "community.prestige_awards": {
+   "estado": "COINCIDE"
+  },
+  "community.prestige_scores": {
+   "estado": "COINCIDE"
+  },
+  "community.public_profiles": {
+   "estado": "COINCIDE"
+  },
+  "community.reactions": {
+   "estado": "COINCIDE"
+  },
+  "community.review_dimension_scores": {
+   "estado": "COINCIDE"
+  },
+  "community.review_responses": {
+   "estado": "COINCIDE"
+  },
+  "community.service_reviews": {
+   "estado": "COINCIDE"
+  },
+  "community.social_follows": {
+   "estado": "COINCIDE"
+  },
+  "community.social_notifications": {
+   "estado": "COINCIDE"
+  },
+  "community.social_posts": {
+   "estado": "COINCIDE"
+  },
+  "community.topics": {
+   "estado": "COINCIDE"
+  },
+  "community.user_blocks": {
+   "estado": "COINCIDE"
+  },
+  "community.verified_badges": {
+   "estado": "COINCIDE"
+  },
+  "consent.consent_events": {
+   "estado": "COINCIDE"
+  },
+  "consent.consent_evidence": {
+   "estado": "COINCIDE"
+  },
+  "consent.consent_provisions": {
+   "estado": "COINCIDE"
+  },
+  "consent.consents": {
+   "estado": "COINCIDE"
+  },
+  "consent.hipaa_authorizations": {
+   "estado": "COINCIDE"
+  },
+  "consent.patient_objections": {
+   "estado": "COINCIDE"
+  },
+  "consent.privacy_restrictions": {
+   "estado": "COINCIDE"
+  },
+  "consent.processing_legal_bases": {
+   "estado": "COINCIDE"
+  },
+  "consent.processing_purposes": {
+   "estado": "COINCIDE"
+  },
+  "consent.treatment_informed_consents": {
+   "estado": "COINCIDE"
+  },
+  "crm.account_contact_relations": {
+   "estado": "COINCIDE"
+  },
+  "crm.account_team_members": {
+   "estado": "COINCIDE"
+  },
+  "crm.contact_channel_endpoints": {
+   "estado": "COINCIDE"
+  },
+  "crm.contact_channels": {
+   "estado": "COINCIDE"
+  },
+  "crm.contacts": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_accounts": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_activities": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_activity_assignments": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_activity_relations": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_activity_reminders": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_call_logs": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_case_comments": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_case_contacts": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_case_milestones": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_case_status_history": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_cases": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_email_messages": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_email_recipients": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_entitlements": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_events": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_notes": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_recurrence_rules": {
+   "estado": "COINCIDE"
+  },
+  "crm.crm_tasks": {
+   "estado": "COINCIDE"
+  },
+  "crm.leads": {
+   "estado": "COINCIDE"
+  },
+  "crm.opportunities": {
+   "estado": "COINCIDE"
+  },
+  "crm.opportunity_contact_roles": {
+   "estado": "COINCIDE"
+  },
+  "crm.opportunity_line_items": {
+   "estado": "COINCIDE"
+  },
+  "crm.opportunity_stage_history": {
+   "estado": "COINCIDE"
+  },
+  "crm.partnership_agreements": {
+   "estado": "COINCIDE"
+  },
+  "crm.partnerships": {
+   "estado": "COINCIDE"
+  },
+  "crm.pipeline_stages": {
+   "estado": "COINCIDE"
+  },
+  "crm.pipelines": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.archive_jobs": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.cache_invalidation_jobs": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.data_movement_jobs": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.deletion_executions": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.deletion_requests": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.deletion_targets": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.deletion_verifications": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.projection_checkpoints": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.projection_consumers": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.projection_dead_letters": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.projection_definitions": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.projection_delivery_attempts": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.projection_drift_events": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.projection_repair_jobs": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.projection_subscriptions": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.reconciliation_items": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.reconciliation_runs": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.reindex_jobs": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.schema_migration_jobs": {
+   "estado": "COINCIDE"
+  },
+  "cross_store_consistency.store_consistency_slos": {
+   "estado": "COINCIDE"
+  },
+  "data_catalog.catalog_annotation_revisions": {
+   "estado": "COINCIDE"
+  },
+  "data_catalog.catalog_annotations": {
+   "estado": "COINCIDE"
+  },
+  "data_catalog.catalog_change_events": {
+   "estado": "COINCIDE"
+  },
+  "data_catalog.catalog_columns": {
+   "estado": "COINCIDE"
+  },
+  "data_catalog.catalog_evidence_items": {
+   "estado": "COINCIDE"
+  },
+  "data_catalog.catalog_objects": {
+   "estado": "COINCIDE"
+  },
+  "data_catalog.catalog_review_decisions": {
+   "estado": "COINCIDE"
+  },
+  "data_catalog.catalog_scan_runs": {
+   "estado": "COINCIDE"
+  },
+  "delegated_access.delegated_access_approval_requests": {
+   "estado": "COINCIDE"
+  },
+  "delegated_access.delegated_access_grants": {
+   "estado": "COINCIDE"
+  },
+  "delegated_access.delegated_permission_set_items": {
+   "estado": "COINCIDE"
+  },
+  "delegated_access.delegated_permission_sets": {
+   "estado": "COINCIDE"
+  },
+  "delegated_access.delegation_events": {
+   "estado": "COINCIDE"
+  },
+  "delegated_access.organization_user_assignments": {
+   "estado": "COINCIDE"
+  },
+  "delegated_access.practitioner_delegate_assignments": {
+   "estado": "COINCIDE"
+  },
+  "diagnostic_units.diagnostic_equipment": {
+   "estado": "COINCIDE"
+  },
+  "diagnostic_units.diagnostic_price_schedules": {
+   "estado": "COINCIDE"
+  },
+  "diagnostic_units.diagnostic_study_components": {
+   "estado": "COINCIDE"
+  },
+  "diagnostic_units.diagnostic_study_offerings": {
+   "estado": "COINCIDE"
+  },
+  "diagnostic_units.diagnostic_study_prices": {
+   "estado": "COINCIDE"
+  },
+  "diagnostic_units.diagnostic_unit_accreditations": {
+   "estado": "COINCIDE"
+  },
+  "diagnostic_units.diagnostic_unit_practitioner_assignments": {
+   "estado": "COINCIDE"
+  },
+  "diagnostic_units.diagnostic_unit_sites": {
+   "estado": "COINCIDE"
+  },
+  "diagnostic_units.diagnostic_unit_specialties": {
+   "estado": "COINCIDE"
+  },
+  "diagnostic_units.diagnostic_units": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.accession_specimens": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.analyzer_result_messages": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.analyzer_runs": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.clinical_media": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.critical_result_notifications": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.diagnostic_data_quality_events": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.diagnostic_provenance_links": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.diagnostic_release_events": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.diagnostic_report_files": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.diagnostic_report_results": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.diagnostic_report_versions": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.dicom_object_locations": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.dicom_structured_reports": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.imaging_endpoints": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.imaging_instances": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.imaging_procedure_steps": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.imaging_selection_items": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.imaging_selections": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.imaging_series": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.imaging_studies": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.laboratory_accessions": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.laboratory_work_order_tests": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.laboratory_work_orders": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.media_annotations": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.observation_specimens": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.radiation_dose_events": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.result_verifications": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.specimen_chain_of_custody_events": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.specimen_collection_events": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.specimen_container_events": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.specimen_containers": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.specimen_identifiers": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.specimen_parent_links": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.specimen_processing_steps": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.specimen_rejection_events": {
+   "estado": "COINCIDE"
+  },
+  "diagnostics.specimens": {
+   "estado": "COINCIDE"
+  },
+  "directory.branch_memberships": {
+   "estado": "COINCIDE"
+  },
+  "directory.branches": {
+   "estado": "COINCIDE"
+  },
+  "directory.tenant_affiliation_documents": {
+   "estado": "COINCIDE"
+  },
+  "directory.tenant_legal_representatives": {
+   "estado": "COINCIDE"
+  },
+  "directory.tenant_memberships": {
+   "estado": "COINCIDE"
+  },
+  "directory.tenant_web_configs": {
+   "estado": "COINCIDE"
+  },
+  "directory.tenants": {
+   "estado": "COINCIDE"
+  },
+  "education.assessment_attempts": {
+   "estado": "COINCIDE"
+  },
+  "education.assessment_questions": {
+   "estado": "COINCIDE"
+  },
+  "education.assessments": {
+   "estado": "COINCIDE"
+  },
+  "education.certificates": {
+   "estado": "COINCIDE"
+  },
+  "education.cme_credit_records": {
+   "estado": "COINCIDE"
+  },
+  "education.course_cohorts": {
+   "estado": "COINCIDE"
+  },
+  "education.course_instructors": {
+   "estado": "COINCIDE"
+  },
+  "education.course_modules": {
+   "estado": "COINCIDE"
+  },
+  "education.course_reviews": {
+   "estado": "COINCIDE"
+  },
+  "education.course_versions": {
+   "estado": "COINCIDE"
+  },
+  "education.courses": {
+   "estado": "COINCIDE"
+  },
+  "education.enrollments": {
+   "estado": "COINCIDE"
+  },
+  "education.instructors": {
+   "estado": "COINCIDE"
+  },
+  "education.lesson_progress": {
+   "estado": "COINCIDE"
+  },
+  "education.lessons": {
+   "estado": "COINCIDE"
+  },
+  "erp.business_partner_bank_accounts": {
+   "estado": "COINCIDE"
+  },
+  "erp.business_partner_relationships": {
+   "estado": "COINCIDE"
+  },
+  "erp.business_partner_roles": {
+   "estado": "COINCIDE"
+  },
+  "erp.business_partner_tax_registrations": {
+   "estado": "COINCIDE"
+  },
+  "erp.business_partners": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_accounting_terms": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_amendments": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_approval_requests": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_approval_steps": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_clause_instances": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_clauses": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_documents": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_line_items": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_milestones": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_object_assignments": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_obligation_events": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_obligations": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_parties": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_payment_schedules": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_renewals": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_team_members": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_terminations": {
+   "estado": "COINCIDE"
+  },
+  "erp.contract_versions": {
+   "estado": "COINCIDE"
+  },
+  "erp.contracts": {
+   "estado": "COINCIDE"
+  },
+  "erp.departments": {
+   "estado": "COINCIDE"
+  },
+  "erp.employee_assignments": {
+   "estado": "COINCIDE"
+  },
+  "erp.employees": {
+   "estado": "COINCIDE"
+  },
+  "erp.employment_records": {
+   "estado": "COINCIDE"
+  },
+  "erp.enterprise_document_flow": {
+   "estado": "COINCIDE"
+  },
+  "erp.goods_receipt_items": {
+   "estado": "COINCIDE"
+  },
+  "erp.goods_receipts": {
+   "estado": "COINCIDE"
+  },
+  "erp.invoice_match_items": {
+   "estado": "COINCIDE"
+  },
+  "erp.invoice_match_runs": {
+   "estado": "COINCIDE"
+  },
+  "erp.lease_accounting_links": {
+   "estado": "COINCIDE"
+  },
+  "erp.lease_cash_flows": {
+   "estado": "COINCIDE"
+  },
+  "erp.lease_contracts": {
+   "estado": "COINCIDE"
+  },
+  "erp.lease_objects": {
+   "estado": "COINCIDE"
+  },
+  "erp.lease_valuations": {
+   "estado": "COINCIDE"
+  },
+  "erp.performance_reviews": {
+   "estado": "COINCIDE"
+  },
+  "erp.positions": {
+   "estado": "COINCIDE"
+  },
+  "erp.projects": {
+   "estado": "COINCIDE"
+  },
+  "erp.purchase_order_items": {
+   "estado": "COINCIDE"
+  },
+  "erp.purchase_orders": {
+   "estado": "COINCIDE"
+  },
+  "erp.purchase_requisition_items": {
+   "estado": "COINCIDE"
+  },
+  "erp.purchase_requisitions": {
+   "estado": "COINCIDE"
+  },
+  "erp.sales_order_items": {
+   "estado": "COINCIDE"
+  },
+  "erp.sales_orders": {
+   "estado": "COINCIDE"
+  },
+  "erp.service_entry_items": {
+   "estado": "COINCIDE"
+  },
+  "erp.service_entry_sheets": {
+   "estado": "COINCIDE"
+  },
+  "erp.time_off_requests": {
+   "estado": "COINCIDE"
+  },
+  "erp.wbs_elements": {
+   "estado": "COINCIDE"
+  },
+  "forms.dynamic_field_definitions": {
+   "estado": "COINCIDE"
+  },
+  "forms.dynamic_field_sections": {
+   "estado": "COINCIDE"
+  },
+  "forms.extension_target_policies": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_assignments": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_definition_localizations": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_definition_set_versions": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_definition_sets": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_dependencies": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_schema_migrations": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_set_members": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_validation_rules": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_value_access_rules": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_value_audit": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_value_provenance": {
+   "estado": "COINCIDE"
+  },
+  "forms.field_values": {
+   "estado": "COINCIDE"
+  },
+  "forms.form_instances": {
+   "estado": "COINCIDE"
+  },
+  "geo.geofence_events": {
+   "estado": "COINCIDE"
+  },
+  "geo.geofences": {
+   "estado": "COINCIDE"
+  },
+  "geo.location_pings": {
+   "estado": "COINCIDE"
+  },
+  "geo.tracked_subjects": {
+   "estado": "COINCIDE"
+  },
+  "geo.tracking_sessions": {
+   "estado": "COINCIDE"
+  },
+  "geo.trips": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_access_scopes": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_communities": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_deletion_jobs": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_edge_evidence": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_edges": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_node_identifiers": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_nodes": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_path_cache": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_projection_definitions": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_projection_runs": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_risk_scores": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_rule_definitions": {
+   "estado": "COINCIDE"
+  },
+  "graph_intelligence.graph_rule_hits": {
+   "estado": "COINCIDE"
+  },
+  "health_context.context_agents": {
+   "estado": "COINCIDE"
+  },
+  "health_context.context_collection_runs": {
+   "estado": "COINCIDE"
+  },
+  "health_context.context_fact_evidence": {
+   "estado": "COINCIDE"
+  },
+  "health_context.context_quality_reviews": {
+   "estado": "COINCIDE"
+  },
+  "health_context.context_source_observations": {
+   "estado": "COINCIDE"
+  },
+  "health_context.country_context_schedules": {
+   "estado": "COINCIDE"
+  },
+  "health_context.country_health_context_versions": {
+   "estado": "COINCIDE"
+  },
+  "health_context.country_health_contexts": {
+   "estado": "COINCIDE"
+  },
+  "health_context.health_context_facts": {
+   "estado": "COINCIDE"
+  },
+  "health_context.health_context_sources": {
+   "estado": "COINCIDE"
+  },
+  "health_data.canonical_health_resource_versions": {
+   "estado": "COINCIDE"
+  },
+  "health_data.canonical_health_resources": {
+   "estado": "COINCIDE"
+  },
+  "health_data.canonical_resource_bindings": {
+   "estado": "COINCIDE"
+  },
+  "health_data.canonical_resource_identifiers": {
+   "estado": "COINCIDE"
+  },
+  "health_data.canonical_resource_relationships": {
+   "estado": "COINCIDE"
+  },
+  "health_data.fhir_profile_definitions": {
+   "estado": "COINCIDE"
+  },
+  "health_data.fhir_profile_versions": {
+   "estado": "COINCIDE"
+  },
+  "health_data.fhir_validation_issues": {
+   "estado": "COINCIDE"
+  },
+  "health_data.fhir_validation_runs": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_data_quality_issues": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_data_quality_rule_sets": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_data_quality_rules": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_data_quality_runs": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_deidentification_profiles": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_deidentification_runs": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_export_jobs": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_export_manifests": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_ingestion_batches": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_ingestion_records": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_lineage_edges": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_provenance_records": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_provenance_targets": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_source_connections": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_source_systems": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_terminology_mapping_rules": {
+   "estado": "COINCIDE"
+  },
+  "health_data.health_terminology_mapping_sets": {
+   "estado": "COINCIDE"
+  },
+  "health_data.omop_mapping_rules": {
+   "estado": "COINCIDE"
+  },
+  "health_data.omop_mapping_sets": {
+   "estado": "COINCIDE"
+  },
+  "health_data.omop_transformation_runs": {
+   "estado": "COINCIDE"
+  },
+  "health_data.patient_identity_clusters": {
+   "estado": "COINCIDE"
+  },
+  "health_data.patient_identity_members": {
+   "estado": "COINCIDE"
+  },
+  "health_data.patient_match_candidates": {
+   "estado": "COINCIDE"
+  },
+  "health_data.patient_match_decisions": {
+   "estado": "COINCIDE"
+  },
+  "health_data.patient_timeline_entries": {
+   "estado": "COINCIDE"
+  },
+  "iam.account_activations": {
+   "estado": "COINCIDE"
+  },
+  "iam.account_lockouts": {
+   "estado": "COINCIDE"
+  },
+  "iam.api_key_scopes": {
+   "estado": "COINCIDE"
+  },
+  "iam.api_keys": {
+   "estado": "COINCIDE"
+  },
+  "iam.authentication_credentials": {
+   "estado": "COINCIDE"
+  },
+  "iam.devices": {
+   "estado": "COINCIDE"
+  },
+  "iam.email_verifications": {
+   "estado": "COINCIDE"
+  },
+  "iam.mfa_factors": {
+   "estado": "COINCIDE"
+  },
+  "iam.password_resets": {
+   "estado": "COINCIDE"
+  },
+  "iam.refresh_tokens": {
+   "estado": "COINCIDE"
+  },
+  "iam.security_events": {
+   "estado": "COINCIDE"
+  },
+  "iam.sessions": {
+   "estado": "COINCIDE"
+  },
+  "iam.user_global_roles": {
+   "estado": "COINCIDE"
+  },
+  "iam.users": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_assertions": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_authorities": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_authority_endpoints": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_check_results": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_checks": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_evidence_records": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_fraud_signals": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_manual_review_cases": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_verification_attempts": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_verification_cases": {
+   "estado": "COINCIDE"
+  },
+  "identity_assurance.identity_verification_policies": {
+   "estado": "COINCIDE"
+  },
+  "insurance.broker_carrier_agreements": {
+   "estado": "COINCIDE"
+  },
+  "insurance.broker_clients": {
+   "estado": "COINCIDE"
+  },
+  "insurance.broker_commission_statements": {
+   "estado": "COINCIDE"
+  },
+  "insurance.claim_adjudication_versions": {
+   "estado": "COINCIDE"
+  },
+  "insurance.claim_appeal_decisions": {
+   "estado": "COINCIDE"
+  },
+  "insurance.claim_disputes": {
+   "estado": "COINCIDE"
+  },
+  "insurance.claim_line_adjudications": {
+   "estado": "COINCIDE"
+  },
+  "insurance.claim_reversals": {
+   "estado": "COINCIDE"
+  },
+  "insurance.coordination_of_benefits": {
+   "estado": "COINCIDE"
+  },
+  "insurance.coverage_dependents": {
+   "estado": "COINCIDE"
+  },
+  "insurance.coverage_eligibility_requests": {
+   "estado": "COINCIDE"
+  },
+  "insurance.coverage_eligibility_responses": {
+   "estado": "COINCIDE"
+  },
+  "insurance.employer_groups": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_brokers": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_campaign_partners": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_campaigns": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_carriers": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_claim_lines": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_claims": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_plan_benefits": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_plans": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_products": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_reconciliation_batches": {
+   "estado": "COINCIDE"
+  },
+  "insurance.insurance_reconciliation_items": {
+   "estado": "COINCIDE"
+  },
+  "insurance.network_provider_memberships": {
+   "estado": "COINCIDE"
+  },
+  "insurance.patient_coverages": {
+   "estado": "COINCIDE"
+  },
+  "insurance.patient_explanations_of_benefit": {
+   "estado": "COINCIDE"
+  },
+  "insurance.prior_authorization_determinations": {
+   "estado": "COINCIDE"
+  },
+  "insurance.prior_authorization_items": {
+   "estado": "COINCIDE"
+  },
+  "insurance.prior_authorization_requests": {
+   "estado": "COINCIDE"
+  },
+  "insurance.provider_networks": {
+   "estado": "COINCIDE"
+  },
+  "integration_contracts.contract_webhook_subscriptions": {
+   "estado": "COINCIDE"
+  },
+  "integration_contracts.integration_auth_profiles": {
+   "estado": "COINCIDE"
+  },
+  "integration_contracts.integration_contract_versions": {
+   "estado": "COINCIDE"
+  },
+  "integration_contracts.integration_contracts": {
+   "estado": "COINCIDE"
+  },
+  "integration_contracts.integration_exchange_attempts": {
+   "estado": "COINCIDE"
+  },
+  "integration_contracts.integration_exchange_records": {
+   "estado": "COINCIDE"
+  },
+  "integration_contracts.integration_idempotency_records": {
+   "estado": "COINCIDE"
+  },
+  "integration_contracts.integration_sync_cursors": {
+   "estado": "COINCIDE"
+  },
+  "integration_contracts.webhook_delivery_evidence": {
+   "estado": "COINCIDE"
+  },
+  "integrations.external_providers": {
+   "estado": "COINCIDE"
+  },
+  "integrations.inbound_messages": {
+   "estado": "COINCIDE"
+  },
+  "integrations.integration_endpoints": {
+   "estado": "COINCIDE"
+  },
+  "integrations.integration_field_mappings": {
+   "estado": "COINCIDE"
+  },
+  "integrations.message_responses": {
+   "estado": "COINCIDE"
+  },
+  "integrations.message_retries": {
+   "estado": "COINCIDE"
+  },
+  "integrations.outbound_messages": {
+   "estado": "COINCIDE"
+  },
+  "integrations.provider_connections": {
+   "estado": "COINCIDE"
+  },
+  "integrations.provider_credentials": {
+   "estado": "COINCIDE"
+  },
+  "integrations.webhook_subscriptions": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.cohort_definitions": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.data_lake_zones": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.data_product_versions": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.data_products": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.dataset_release_manifests": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.dataset_release_requests": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.lakehouse_catalogs": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.lakehouse_datasets": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.lakehouse_files": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.lakehouse_lineage_edges": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.lakehouse_partitions": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.lakehouse_quality_issues": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.lakehouse_quality_rules": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.lakehouse_quality_runs": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.lakehouse_schema_versions": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.research_projects": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.transformation_definitions": {
+   "estado": "COINCIDE"
+  },
+  "lakehouse.transformation_runs": {
+   "estado": "COINCIDE"
+  },
+  "marketing.attribution_touches": {
+   "estado": "COINCIDE"
+  },
+  "marketing.campaign_dispatch_recipients": {
+   "estado": "COINCIDE"
+  },
+  "marketing.campaign_dispatches": {
+   "estado": "COINCIDE"
+  },
+  "marketing.campaign_members": {
+   "estado": "COINCIDE"
+  },
+  "marketing.campaign_schedules": {
+   "estado": "COINCIDE"
+  },
+  "marketing.content_templates": {
+   "estado": "COINCIDE"
+  },
+  "marketing.journey_enrollments": {
+   "estado": "COINCIDE"
+  },
+  "marketing.journey_steps": {
+   "estado": "COINCIDE"
+  },
+  "marketing.journeys": {
+   "estado": "COINCIDE"
+  },
+  "marketing.marketing_campaigns": {
+   "estado": "COINCIDE"
+  },
+  "marketing.marketing_touchpoints": {
+   "estado": "COINCIDE"
+  },
+  "marketing.segment_members": {
+   "estado": "COINCIDE"
+  },
+  "marketing.segments": {
+   "estado": "COINCIDE"
+  },
+  "marketing.tracked_links": {
+   "estado": "COINCIDE"
+  },
+  "medical_groups.group_members": {
+   "estado": "COINCIDE"
+  },
+  "medical_groups.groups": {
+   "estado": "COINCIDE"
+  },
+  "messaging.adapter_event_mappings": {
+   "estado": "COINCIDE"
+  },
+  "messaging.adapter_inbound_events": {
+   "estado": "COINCIDE"
+  },
+  "messaging.adapter_tracking_capabilities": {
+   "estado": "COINCIDE"
+  },
+  "messaging.dead_letter_jobs": {
+   "estado": "COINCIDE"
+  },
+  "messaging.delivery_receipts": {
+   "estado": "COINCIDE"
+  },
+  "messaging.delivery_reconciliation_runs": {
+   "estado": "COINCIDE"
+  },
+  "messaging.delivery_status_transitions": {
+   "estado": "COINCIDE"
+  },
+  "messaging.delivery_tracking_events": {
+   "estado": "COINCIDE"
+  },
+  "messaging.domain_events": {
+   "estado": "COINCIDE"
+  },
+  "messaging.event_deliveries": {
+   "estado": "COINCIDE"
+  },
+  "messaging.event_subscriptions": {
+   "estado": "COINCIDE"
+  },
+  "messaging.in_app_notifications": {
+   "estado": "COINCIDE"
+  },
+  "messaging.message_channels": {
+   "estado": "COINCIDE"
+  },
+  "messaging.message_queues": {
+   "estado": "COINCIDE"
+  },
+  "messaging.message_templates": {
+   "estado": "COINCIDE"
+  },
+  "messaging.messaging_providers": {
+   "estado": "COINCIDE"
+  },
+  "messaging.notification_deliveries": {
+   "estado": "COINCIDE"
+  },
+  "messaging.notification_requests": {
+   "estado": "COINCIDE"
+  },
+  "messaging.outbox_messages": {
+   "estado": "COINCIDE"
+  },
+  "messaging.provider_channel_configs": {
+   "estado": "COINCIDE"
+  },
+  "messaging.queued_jobs": {
+   "estado": "COINCIDE"
+  },
+  "messaging.recipient_preferences": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.archive_manifests": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.dicom_instance_manifests": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.dicom_series_manifests": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.dicom_study_manifests": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.dicomweb_access_logs": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.large_payload_manifests": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.multipart_uploads": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.object_checksums": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.object_deletion_markers": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.object_encryption_envelopes": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.object_integrity_checks": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.object_legal_holds": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.object_locations": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.object_manifests": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.object_namespaces": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.object_retention_locks": {
+   "estado": "COINCIDE"
+  },
+  "object_storage.object_versions": {
+   "estado": "COINCIDE"
+  },
+  "organization_extensions.facility_licenses": {
+   "estado": "COINCIDE"
+  },
+  "organization_extensions.hospital_service_lines": {
+   "estado": "COINCIDE"
+  },
+  "organization_extensions.hospitals": {
+   "estado": "COINCIDE"
+  },
+  "organization_extensions.organization_affiliations": {
+   "estado": "COINCIDE"
+  },
+  "organization_extensions.organization_data_boundaries": {
+   "estado": "COINCIDE"
+  },
+  "payments.callback_verification_runs": {
+   "estado": "COINCIDE"
+  },
+  "payments.cashier_payment_contexts": {
+   "estado": "COINCIDE"
+  },
+  "payments.connected_accounts": {
+   "estado": "COINCIDE"
+  },
+  "payments.fee_schedules": {
+   "estado": "COINCIDE"
+  },
+  "payments.fx_rate_locks": {
+   "estado": "COINCIDE"
+  },
+  "payments.gateway_connections": {
+   "estado": "COINCIDE"
+  },
+  "payments.gateway_payment_channel_mappings": {
+   "estado": "COINCIDE"
+  },
+  "payments.gateway_settlements": {
+   "estado": "COINCIDE"
+  },
+  "payments.installment_plans": {
+   "estado": "COINCIDE"
+  },
+  "payments.installment_schedules": {
+   "estado": "COINCIDE"
+  },
+  "payments.invoice_regeneration_requests": {
+   "estado": "COINCIDE"
+  },
+  "payments.kyc_verifications": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_cancellation_requests": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_channel_catalog": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_checkout_sessions": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_debt_invoice_requests": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_debt_lines": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_debts": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_disputes": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_gateways": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_intents": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_mandates": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_methods": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_receipts": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_splits": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_status_inquiries": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_transactions": {
+   "estado": "COINCIDE"
+  },
+  "payments.payment_webhook_events": {
+   "estado": "COINCIDE"
+  },
+  "payments.payout_items": {
+   "estado": "COINCIDE"
+  },
+  "payments.payouts": {
+   "estado": "COINCIDE"
+  },
+  "payments.plan_eligibility_rules": {
+   "estado": "COINCIDE"
+  },
+  "payments.plan_features": {
+   "estado": "COINCIDE"
+  },
+  "payments.plan_prices": {
+   "estado": "COINCIDE"
+  },
+  "payments.plan_quotas": {
+   "estado": "COINCIDE"
+  },
+  "payments.provider_api_attempts": {
+   "estado": "COINCIDE"
+  },
+  "payments.provider_api_operations": {
+   "estado": "COINCIDE"
+  },
+  "payments.provider_callback_endpoints": {
+   "estado": "COINCIDE"
+  },
+  "payments.provider_callback_events": {
+   "estado": "COINCIDE"
+  },
+  "payments.provider_invoice_artifacts": {
+   "estado": "COINCIDE"
+  },
+  "payments.provider_reconciliation_records": {
+   "estado": "COINCIDE"
+  },
+  "payments.reconciliation_exceptions": {
+   "estado": "COINCIDE"
+  },
+  "payments.reconciliation_runs": {
+   "estado": "COINCIDE"
+  },
+  "payments.refunds": {
+   "estado": "COINCIDE"
+  },
+  "payments.risk_assessments": {
+   "estado": "COINCIDE"
+  },
+  "payments.settlement_lines": {
+   "estado": "COINCIDE"
+  },
+  "payments.subscription_plans": {
+   "estado": "COINCIDE"
+  },
+  "payments.subscription_usage_counters": {
+   "estado": "COINCIDE"
+  },
+  "payments.subscriptions": {
+   "estado": "COINCIDE"
+  },
+  "payments.tips": {
+   "estado": "COINCIDE"
+  },
+  "payments.transaction_fees": {
+   "estado": "COINCIDE"
+  },
+  "payments.wallet_ledger_entries": {
+   "estado": "COINCIDE"
+  },
+  "payments.wallets": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.doctor_visit_blocks": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.doctor_visit_policies": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.doctor_visit_windows": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.informational_materials": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.material_approvals": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.material_assets": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.medical_visitor_products": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.medical_visitor_specialties": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.medical_visitors": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.pharma_cost_allocations": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.pharma_lab_link_events": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.pharma_lab_notices": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.pharma_lab_staff": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.pharma_labs": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.pharma_products": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.pharmacovigilance_actions": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.pharmacovigilance_reports": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.regulatory_document_access_log": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.regulatory_document_versions": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.regulatory_documents": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visit_ratings": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visit_record_materials": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visit_records": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visit_request_events": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visit_request_topics": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visit_requests": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visit_survey_answers": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visit_survey_questions": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visit_survey_responses": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visit_surveys": {
+   "estado": "COINCIDE"
+  },
+  "pharma_lab.visitor_post_submissions": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.inventory_count_lines": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.inventory_count_sessions": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.inventory_ledger_entries": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.inventory_locations": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.inventory_lots": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.inventory_recall_holds": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.inventory_reservation_lines": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.inventory_reservations": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.inventory_serials": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.inventory_stock_positions": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.medication_dispensation_lines": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.medication_dispensations": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.pharmacy_goods_receipt_lines": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.pharmacy_goods_receipts": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.pharmacy_inventory_sync_batches": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.pharmacy_inventory_sync_items": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.pharmacy_order_substitutions": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.pharmacy_purchase_order_lines": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.pharmacy_purchase_orders": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy_inventory.pharmacy_suppliers": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy.pharmacies": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy.pharmacy_external_product_mappings": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy.pharmacy_integration_connections": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy.pharmacy_licenses": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy.pharmacy_price_lists": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy.pharmacy_product_identifiers": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy.pharmacy_product_prices": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy.pharmacy_products": {
+   "estado": "COINCIDE"
+  },
+  "pharmacy.pharmacy_sites": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.artifacts": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.capacity_measurements": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.capacity_plans": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.change_approvals": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.change_requests": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.component_tools": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.deployments": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.error_budget_burn_events": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.error_budget_policies": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.escalation_policies": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.escalation_policy_steps": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.health_check_runs": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.health_checks": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.health_incidents": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.incident_communications": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.incident_responders": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.incident_timeline_events": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.maintenance_windows": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.on_call_schedules": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.on_call_shifts": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.operational_improvement_items": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.operational_readiness_reviews": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.operational_teams": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.postmortem_action_items": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.postmortems": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.readiness_review_findings": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.recovery_objectives": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.resilience_exercises": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.runbook_executions": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.runbook_versions": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.runbooks": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.service_components": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.service_dependencies": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.service_level_indicators": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.service_level_objectives": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.service_ownerships": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.slo_measurements": {
+   "estado": "COINCIDE"
+  },
+  "platform_ops.tool_registry": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.collection_definitions": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.collection_schema_versions": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.consistency_policies": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.data_access_policies": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.data_classifications": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.dataset_definitions": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.dataset_placements": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.dataset_versions": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.encryption_profiles": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.key_rotation_policies": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.replication_policies": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.residency_policies": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.retention_policies": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.storage_backend_regions": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.storage_backends": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.storage_capabilities": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.storage_cost_snapshots": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.storage_integrity_policies": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.store_health_checks": {
+   "estado": "COINCIDE"
+  },
+  "polyglot_storage.tenant_storage_bindings": {
+   "estado": "COINCIDE"
+  },
+  "practice.care_spaces": {
+   "estado": "COINCIDE"
+  },
+  "practice.clinical_units": {
+   "estado": "COINCIDE"
+  },
+  "practice.healthcare_services": {
+   "estado": "COINCIDE"
+  },
+  "practice.inventory_items": {
+   "estado": "COINCIDE"
+  },
+  "practice.inventory_movements": {
+   "estado": "COINCIDE"
+  },
+  "practice.practice_accreditations": {
+   "estado": "COINCIDE"
+  },
+  "practice.practice_settings": {
+   "estado": "COINCIDE"
+  },
+  "practice.practice_sites": {
+   "estado": "COINCIDE"
+  },
+  "practice.practices": {
+   "estado": "COINCIDE"
+  },
+  "practice.practitioner_role_assignments": {
+   "estado": "COINCIDE"
+  },
+  "practice.practitioner_support_assignments": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.anesthesia_airway_assessments": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.anesthesia_events": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.anesthesia_plans": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.implant_identifiers": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.operating_room_utilization_events": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.operative_findings": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.operative_reports": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.operative_steps": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.pacu_assessments": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.pacu_stays": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.postoperative_followups": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.postoperative_orders": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.preoperative_assessments": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.preoperative_orders": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.preoperative_risk_scores": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_body_sites": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_cancellations": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_case_diagnoses": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_case_locations": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_case_milestones": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_case_status_history": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_case_team_members": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_cases": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_charge_items": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_complications": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_devices": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_implants": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_medication_uses": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_outcomes": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_performers": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.procedure_specimens": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.sterility_verification_checks": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.surgical_safety_checklists": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.surgical_safety_items": {
+   "estado": "COINCIDE"
+  },
+  "procedures_perioperative.surgical_safety_responses": {
+   "estado": "COINCIDE"
+  },
+  "profiles.administrator_profiles": {
+   "estado": "COINCIDE"
+  },
+  "profiles.emergency_staff_profiles": {
+   "estado": "COINCIDE"
+  },
+  "profiles.health_practitioner_profiles": {
+   "estado": "COINCIDE"
+  },
+  "profiles.insurance_representative_profiles": {
+   "estado": "COINCIDE"
+  },
+  "profiles.jurisdiction_authorizations": {
+   "estado": "COINCIDE"
+  },
+  "profiles.patient_identity_links": {
+   "estado": "COINCIDE"
+  },
+  "profiles.patient_merge_events": {
+   "estado": "COINCIDE"
+  },
+  "profiles.patient_portal_proxies": {
+   "estado": "COINCIDE"
+  },
+  "profiles.patient_profiles": {
+   "estado": "COINCIDE"
+  },
+  "profiles.person_account_links": {
+   "estado": "COINCIDE"
+  },
+  "profiles.person_profiles": {
+   "estado": "COINCIDE"
+  },
+  "profiles.persons": {
+   "estado": "COINCIDE"
+  },
+  "profiles.practitioner_affiliations": {
+   "estado": "COINCIDE"
+  },
+  "profiles.practitioner_languages": {
+   "estado": "COINCIDE"
+  },
+  "profiles.practitioner_specialties": {
+   "estado": "COINCIDE"
+  },
+  "profiles.professional_credentials": {
+   "estado": "COINCIDE"
+  },
+  "profiles.provider_operator_profiles": {
+   "estado": "COINCIDE"
+  },
+  "profiles.related_persons": {
+   "estado": "COINCIDE"
+  },
+  "profiles.secretary_profiles": {
+   "estado": "COINCIDE"
+  },
+  "promotions.coupons": {
+   "estado": "COINCIDE"
+  },
+  "promotions.discount_rules": {
+   "estado": "COINCIDE"
+  },
+  "promotions.earning_rules": {
+   "estado": "COINCIDE"
+  },
+  "promotions.loyalty_memberships": {
+   "estado": "COINCIDE"
+  },
+  "promotions.loyalty_programs": {
+   "estado": "COINCIDE"
+  },
+  "promotions.loyalty_tiers": {
+   "estado": "COINCIDE"
+  },
+  "promotions.member_referrals": {
+   "estado": "COINCIDE"
+  },
+  "promotions.points_ledger_entries": {
+   "estado": "COINCIDE"
+  },
+  "promotions.promotions": {
+   "estado": "COINCIDE"
+  },
+  "promotions.redemptions": {
+   "estado": "COINCIDE"
+  },
+  "promotions.referral_programs": {
+   "estado": "COINCIDE"
+  },
+  "qa_execution.execution_plans": {
+   "estado": "COINCIDE"
+  },
+  "qa_execution.execution_targets": {
+   "estado": "COINCIDE"
+  },
+  "qa_execution.plan_approvals": {
+   "estado": "COINCIDE"
+  },
+  "qa_execution.plan_events": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.assertion_results": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.request_payloads": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.response_payloads": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.run_artifacts": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.test_assertions": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.test_case_results": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.test_cases": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.test_defects": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.test_environments": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.test_fixtures": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.test_runs": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.test_schedules": {
+   "estado": "COINCIDE"
+  },
+  "qa_lab.test_suites": {
+   "estado": "COINCIDE"
+  },
+  "read_models.frontend_page_views": {
+   "estado": "COINCIDE"
+  },
+  "read_models.frontend_routes": {
+   "estado": "COINCIDE"
+  },
+  "read_models.frontend_view_actions": {
+   "estado": "COINCIDE"
+  },
+  "read_models.frontend_view_fields": {
+   "estado": "COINCIDE"
+  },
+  "read_models.frontend_view_filters": {
+   "estado": "COINCIDE"
+  },
+  "read_models.frontend_view_kpis": {
+   "estado": "COINCIDE"
+  },
+  "read_models.frontend_view_sort_options": {
+   "estado": "COINCIDE"
+  },
+  "read_models.frontend_view_states": {
+   "estado": "COINCIDE"
+  },
+  "read_models.portal_surfaces": {
+   "estado": "COINCIDE"
+  },
+  "read_models.read_model_definitions": {
+   "estado": "COINCIDE"
+  },
+  "read_models.read_model_dependencies": {
+   "estado": "COINCIDE"
+  },
+  "read_models.read_model_refresh_runs": {
+   "estado": "COINCIDE"
+  },
+  "read_models.user_view_preferences": {
+   "estado": "COINCIDE"
+  },
+  "reporting.dashboard_widgets": {
+   "estado": "COINCIDE"
+  },
+  "reporting.dashboards": {
+   "estado": "COINCIDE"
+  },
+  "reporting.report_columns": {
+   "estado": "COINCIDE"
+  },
+  "reporting.report_data_sources": {
+   "estado": "COINCIDE"
+  },
+  "reporting.report_definitions": {
+   "estado": "COINCIDE"
+  },
+  "reporting.report_distributions": {
+   "estado": "COINCIDE"
+  },
+  "reporting.report_executions": {
+   "estado": "COINCIDE"
+  },
+  "reporting.report_parameters": {
+   "estado": "COINCIDE"
+  },
+  "reporting.report_schedules": {
+   "estado": "COINCIDE"
+  },
+  "reporting.report_snapshots": {
+   "estado": "COINCIDE"
+  },
+  "reporting.report_subscriptions": {
+   "estado": "COINCIDE"
+  },
+  "reporting.report_versions": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.appointment_bookings": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.appointment_payment_states": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.appointment_reminders": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.availability_exceptions": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.availability_slots": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.bookable_slots": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.booking_cancellations": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.booking_confirmation_rules": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.booking_policies": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.booking_reschedules": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.calendar_absences": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.practitioner_schedules": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.practitioner_service_offerings": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.schedulable_resources": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.schedule_rules": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.schedule_templates": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.slot_holds": {
+   "estado": "COINCIDE"
+  },
+  "scheduling.waitlist_entries": {
+   "estado": "COINCIDE"
+  },
+  "surveys.survey_answers": {
+   "estado": "COINCIDE"
+  },
+  "surveys.survey_assignments": {
+   "estado": "COINCIDE"
+  },
+  "surveys.survey_invitations": {
+   "estado": "COINCIDE"
+  },
+  "surveys.survey_questions": {
+   "estado": "COINCIDE"
+  },
+  "surveys.survey_responses": {
+   "estado": "COINCIDE"
+  },
+  "surveys.survey_templates": {
+   "estado": "COINCIDE"
+  },
+  "surveys.survey_versions": {
+   "estado": "COINCIDE"
+  },
+  "system_context.dynamic_enum_bindings": {
+   "estado": "COINCIDE"
+  },
+  "system_context.dynamic_enum_definitions": {
+   "estado": "COINCIDE"
+  },
+  "system_context.dynamic_enum_options": {
+   "estado": "COINCIDE"
+  },
+  "system_context.dynamic_enum_versions": {
+   "estado": "COINCIDE"
+  },
+  "system_context.system_context_bindings": {
+   "estado": "COINCIDE"
+  },
+  "system_context.system_context_inputs": {
+   "estado": "COINCIDE"
+  },
+  "system_context.system_context_refresh_runs": {
+   "estado": "COINCIDE"
+  },
+  "system_context.system_context_versions": {
+   "estado": "COINCIDE"
+  },
+  "system_context.system_contexts": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.anonymization_rules": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.assessment_control_results": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.assessment_findings": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.backup_policies": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.breach_notifications": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.cross_border_transfer_events": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.data_classifications": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.data_domains": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.data_residency_policies": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.draft_records": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.encryption_keys": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.entity_registry": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.field_registry": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.governance_change_log": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.key_rotation_events": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.legal_holds": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.operational_framework_controls": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.operational_frameworks": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.partition_specs": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.record_revisions": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.remediation_actions": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.remediation_plans": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.restore_test_runs": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.retention_executions": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.retention_policies": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.security_incidents": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.tenant_residency_bindings": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.workload_assessments": {
+   "estado": "COINCIDE"
+  },
+  "system_ops.write_policies": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.activity_event_schema_definitions": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.analytics_subjects": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.client_contexts": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.conversion_events": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.funnel_definitions": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.funnel_steps": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.session_journeys": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.tracking_consents": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.tracking_disclosure_acceptances": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.tracking_disclosure_versions": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.tracking_purpose_definitions": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.user_activity_event_properties": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.user_activity_events": {
+   "estado": "COINCIDE"
+  },
+  "telemetry.web_vitals": {
+   "estado": "COINCIDE"
+  },
+  "terminology.catalog_concepts": {
+   "estado": "COINCIDE"
+  },
+  "terminology.catalog_import_batches": {
+   "estado": "COINCIDE"
+  },
+  "terminology.code_system_versions": {
+   "estado": "COINCIDE"
+  },
+  "terminology.code_systems": {
+   "estado": "COINCIDE"
+  },
+  "terminology.concept_designations": {
+   "estado": "COINCIDE"
+  },
+  "terminology.concept_maps": {
+   "estado": "COINCIDE"
+  },
+  "terminology.concept_properties": {
+   "estado": "COINCIDE"
+  },
+  "terminology.concept_relationships": {
+   "estado": "COINCIDE"
+  },
+  "terminology.tenant_catalog_policies": {
+   "estado": "COINCIDE"
+  },
+  "terminology.tenant_concept_config": {
+   "estado": "COINCIDE"
+  },
+  "terminology.terminology_sources": {
+   "estado": "COINCIDE"
+  },
+  "terminology.value_set_members": {
+   "estado": "COINCIDE"
+  },
+  "terminology.value_set_rules": {
+   "estado": "COINCIDE"
+  },
+  "terminology.value_set_versions": {
+   "estado": "COINCIDE"
+  },
+  "terminology.value_sets": {
+   "estado": "COINCIDE"
+  },
+  "tracking.delivery_proofs": {
+   "estado": "COINCIDE"
+  },
+  "tracking.eta_estimates": {
+   "estado": "COINCIDE"
+  },
+  "tracking.milestone_definitions": {
+   "estado": "COINCIDE"
+  },
+  "tracking.shipment_handoffs": {
+   "estado": "COINCIDE"
+  },
+  "tracking.shipments": {
+   "estado": "COINCIDE"
+  },
+  "tracking.trackable_subjects": {
+   "estado": "COINCIDE"
+  },
+  "tracking.tracking_carriers": {
+   "estado": "COINCIDE"
+  },
+  "tracking.tracking_events": {
+   "estado": "COINCIDE"
+  },
+  "workflow.state_definitions": {
+   "estado": "COINCIDE"
+  },
+  "workflow.state_machine_definitions": {
+   "estado": "COINCIDE"
+  },
+  "workflow.state_transition_definitions": {
+   "estado": "COINCIDE"
+  },
+  "workflow.state_transition_events": {
+   "estado": "COINCIDE"
+  },
+  "workflow.transition_guards": {
+   "estado": "COINCIDE"
+  },
+  "workflow.transition_side_effects": {
+   "estado": "COINCIDE"
+  },
+  "workflow.workflow_instances": {
+   "estado": "COINCIDE"
+  },
+  "workflow.workflow_tasks": {
+   "estado": "COINCIDE"
+  }
+ }
+}

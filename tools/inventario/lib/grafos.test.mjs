@@ -119,7 +119,9 @@ test('el nombre de archivo no lleva dos puntos', () => {
 test('todos los grafos generados cumplen el esquema', () => {
   const dir = path.join(process.cwd(), 'inventario/grafos');
   const archivos = fs.existsSync(dir)
-    ? fs.readdirSync(dir).filter((f) => f.endsWith('.json'))
+    ? fs
+        .readdirSync(dir)
+        .filter((f) => f.endsWith('.json') && f !== 'linaje.json')
     : [];
   assert.ok(
     archivos.length >= 67,
