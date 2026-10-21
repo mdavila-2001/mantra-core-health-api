@@ -6,6 +6,7 @@
 //   node tools/inventario/flujos.mjs --modulo a,b       limita la salida a esos módulos
 //   node tools/inventario/flujos.mjs --modulo a --json  imprime procesos y máquinas de esos módulos
 import path from 'node:path';
+import { archivoDeGrafo, grafoDeProceso } from './lib/grafos.mjs';
 import { construirInventarioCompleto } from './lib/inventario-completo.mjs';
 import { esTrivial } from './lib/mermaid.mjs';
 import {
@@ -83,6 +84,15 @@ for (const [modulo, lista] of [...porModulo].sort(([a], [b]) =>
     operaciones: lista.length,
     maquinas: maquinas.filter((m) => m.modulo === modulo).length,
   });
+}
+
+for (const proceso of procesos) {
+  if (!incluye(proceso.modulo)) continue;
+  escribir(
+    path.join(root, 'inventario/grafos', archivoDeGrafo(proceso.codigo)),
+    `${JSON.stringify(grafoDeProceso(proceso))}\n`,
+    ctx,
+  );
 }
 
 if (!seleccion) {
