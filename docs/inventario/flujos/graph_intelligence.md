@@ -280,10 +280,10 @@ Declarada en `src/modules/graph_intelligence/constants/graph-intelligence.consta
 stateDiagram-v2
   [*] --> open
   open --> in_review
-  open --> resolved
-  open --> dismissed
-  in_review --> resolved
-  in_review --> dismissed
+  open --> resolved : PATCH …/rule-hits/{id}
+  open --> dismissed : PATCH …/rule-hits/{id}
+  in_review --> resolved : PATCH …/rule-hits/{id}
+  in_review --> dismissed : PATCH …/rule-hits/{id}
   resolved --> [*]
   dismissed --> [*]
 ```

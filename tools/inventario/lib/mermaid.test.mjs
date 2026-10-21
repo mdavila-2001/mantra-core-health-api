@@ -90,3 +90,30 @@ test('la máquina de estados dibuja inicio, aristas y terminales', () => {
   assert.match(d, /A --> B/);
   assert.match(d, /C --> \[\*\]/);
 });
+
+test('la arista de una máquina lleva las operaciones que nombran su estado de destino', () => {
+  const d = maquinaAMermaid({
+    iniciales: ['A'],
+    terminales: ['C'],
+    transiciones: [
+      { de: 'A', a: 'B' },
+      { de: 'B', a: 'C' },
+    ],
+    operaciones: [
+      { metodo: 'POST', ruta: '/x/{id}/cancel', estados: ['C'] },
+      { metodo: 'POST', ruta: '/x/{id}/pagar', estados: ['B'] },
+    ],
+  });
+  assert.match(d, /A --> B : POST …\/{id}\/pagar/);
+  assert.match(d, /B --> C : POST …\/{id}\/cancel/);
+});
+
+test('una arista sin operación que nombre su destino queda sin rótulo', () => {
+  const d = maquinaAMermaid({
+    iniciales: [],
+    terminales: [],
+    transiciones: [{ de: 'A', a: 'B' }],
+    operaciones: [],
+  });
+  assert.match(d, /A --> B$/m);
+});
