@@ -498,10 +498,24 @@ export function buildSourceIndex(root = process.cwd()) {
       )?.text;
       const isPublic = decorators.some((item) => item.name === 'Public');
       const uuidParams = [];
+      const parametros = []; // @Body / @Param / @Query / @Headers de cada handler
       for (const parameter of method.parameters) {
         const paramDecorators = getDecorators(parameter).map((item) =>
           decoratorInfo(item, classInfo.sourceFile),
         );
+        const origen = paramDecorators.find((item) =>
+          ['Body', 'Param', 'Query', 'Headers'].includes(item.name),
+        );
+        if (origen)
+          parametros.push({
+            en: origen.name,
+            nombre: literal(origen.args[0]) ?? null,
+            tipo: parameter.type?.getText(classInfo.sourceFile) ?? null,
+            uuid: paramDecorators.some(
+              (item) =>
+                item.name === 'Param' && item.text.includes('ParseUUIDPipe'),
+            ),
+          });
         for (const decorator of paramDecorators) {
           if (
             decorator.name === 'Param' &&
@@ -561,6 +575,7 @@ export function buildSourceIndex(root = process.cwd()) {
         throttle,
         isPublic,
         uuidParams: [...new Set(uuidParams)],
+        parametros,
         delegates: [...new Set(delegates)],
         exceptions: [
           ...new Map(
