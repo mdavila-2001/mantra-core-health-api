@@ -77,9 +77,21 @@ const { tablas, deriva } = construirCatalogo({
   dominioPorEsquema: dominios,
 });
 const resumen = resumirCatalogo(tablas);
-const esquemasSinCatalogoDeApi = [...new Set(tablas.map((t) => t.schema))]
-  .filter((s) => !dominios.has(s))
-  .sort();
+const esquemas = [...new Set(tablas.map((t) => t.schema))].sort();
+// schemas del DDL que el catálogo de la API (`schemas.catalog.ts`) no lista, y los que no tienen dominio en el modelo
+const catalogoDeApi = fs.readFileSync(
+  path.join(root, 'src/orm/catalog/schemas.catalog.ts'),
+  'utf8',
+);
+const esquemasEnCatalogoDeApi = new Set(
+  [...catalogoDeApi.matchAll(/\[\s*'([^']+)'\s*,\s*(?:\d+|null)\s*,/g)].map(
+    (m) => m[1],
+  ),
+);
+const esquemasSinCatalogoDeApi = esquemas.filter(
+  (s) => !esquemasEnCatalogoDeApi.has(s),
+);
+const esquemasSinDominio = esquemas.filter((s) => !dominios.has(s));
 
 const glosario = [
   ...leerGlosario(
@@ -131,7 +143,7 @@ for (const [schema, lista] of [...porEsquema].sort(([a], [b]) =>
 }
 escribir(
   path.join(root, 'inventario/catalogo/indice.json'),
-  `${JSON.stringify({ resumen, deriva: { entidadesSinTabla: deriva.entidadesSinTabla, tablasSinEntidad: deriva.tablasSinEntidad, columnasAusentesEnOrm: deriva.columnasAusentesEnOrm, columnasDeMasEnOrm: deriva.columnasDeMasEnOrm, nulabilidad: deriva.nulabilidad, tipos: deriva.tipos, esquemasSinCatalogoDeApi }, tablas: tablas.map((t) => ({ id: t.id, schema: t.schema, tabla: t.tabla, dominio: t.dominio?.dominio ?? null, columnas: t.columnas.length, indices: t.indices.length, operaciones: t.operaciones.length, orm: t.deriva.orm.estado, appendOnly: Boolean(t.gobierno.appendOnly.valor) })) }, null, 2)}\n`,
+  `${JSON.stringify({ resumen, deriva: { entidadesSinTabla: deriva.entidadesSinTabla, tablasSinEntidad: deriva.tablasSinEntidad, columnasAusentesEnOrm: deriva.columnasAusentesEnOrm, columnasDeMasEnOrm: deriva.columnasDeMasEnOrm, nulabilidad: deriva.nulabilidad, tipos: deriva.tipos, esquemasSinCatalogoDeApi, esquemasSinDominio }, tablas: tablas.map((t) => ({ id: t.id, schema: t.schema, tabla: t.tabla, dominio: t.dominio?.dominio ?? null, columnas: t.columnas.length, indices: t.indices.length, operaciones: t.operaciones.length, orm: t.deriva.orm.estado, appendOnly: Boolean(t.gobierno.appendOnly.valor) })) }, null, 2)}\n`,
   ctx,
 );
 escribir(
@@ -151,7 +163,7 @@ escribir(
 );
 escribir(
   path.join(root, 'docs/inventario/catalogo/deriva.md'),
-  `${renderDeriva(resumen, deriva, tablas, esquemasSinCatalogoDeApi, derivaBd)}\n`,
+  `${renderDeriva(resumen, deriva, tablas, { sinCatalogoDeApi: esquemasSinCatalogoDeApi, sinDominio: esquemasSinDominio }, derivaBd)}\n`,
   ctx,
 );
 escribir(

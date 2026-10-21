@@ -352,6 +352,11 @@
     "nulabilidad": 25,
     "tipos": 0,
     "esquemasSinCatalogoDeApi": [
+      "data_catalog",
+      "medical_groups",
+      "qa_execution"
+    ],
+    "esquemasSinDominio": [
       "audio_assets",
       "data_catalog",
       "medical_groups",

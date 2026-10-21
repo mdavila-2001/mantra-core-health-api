@@ -129,5 +129,5 @@ fuentes: una diferencia no dice quién tiene razón, dice que hay que mirarla.
   no hay planes de ejecución ni estadísticas de la base.
 - **Que la base desplegada de verdad esté al día:** la comparación se hizo con una base descartable
   construida con el DDL canónico. Demuestra que el modelo es coherente consigo mismo.
-- **Que las 32 entidades sin tabla relacional estén mal:** 24 viven en `NoSQL/` (Timescale y pgvector) y
+- **Que las 32 entidades sin tabla relacional estén mal:** 26 viven en `NoSQL/` (Timescale y pgvector) y
   el catálogo es sólo relacional. `deriva.md` dice dónde está cada una.
