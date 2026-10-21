@@ -80,13 +80,25 @@ La operación no recibe cuerpo.
 | `meta.total` | `number` | Sí | — | — | Valor de total mantenido por la instancia. | `src/common/dto/page-response.dto.ts:16` |
 | `meta.totalPages` | `number` | Sí | — | — | Valor de total pages mantenido por la instancia. | `src/common/dto/page-response.dto.ts:20` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/document_store.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 55 — Document Store (documentos flexibles sobre MongoDB) — etapa `ctrl:DocumentStoreController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -177,13 +189,25 @@ No toca tablas relacionales: opera sobre MongoDB, no sobre tablas relacionales. 
 | `updatedAt` | `string` | Sí | formato date-time | — | Fecha y hora de la última actualización. | `src/modules/document_store/dto/document-response.dto.ts:49` |
 | `deletedAt` | `string` | No | formato date-time; admite null | — | Marca de borrado lógico; null si el documento está vivo | `src/modules/document_store/dto/document-response.dto.ts:60` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/document_store.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 55 — Document Store (documentos flexibles sobre MongoDB) — etapa `ctrl:DocumentStoreController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -245,13 +269,26 @@ La operación no recibe cuerpo.
 | `updatedAt` | `string` | Sí | formato date-time | — | Fecha y hora de la última actualización. | `src/modules/document_store/dto/document-response.dto.ts:49` |
 | `deletedAt` | `string` | No | formato date-time; admite null | — | Marca de borrado lógico; null si el documento está vivo | `src/modules/document_store/dto/document-response.dto.ts:60` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Documento no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/document_store.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 55 — Document Store (documentos flexibles sobre MongoDB) — etapa `ctrl:DocumentStoreController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -313,13 +350,26 @@ La operación no recibe cuerpo.
 | `updatedAt` | `string` | Sí | formato date-time | — | Fecha y hora de la última actualización. | `src/modules/document_store/dto/document-response.dto.ts:49` |
 | `deletedAt` | `string` | No | formato date-time; admite null | — | Marca de borrado lógico; null si el documento está vivo | `src/modules/document_store/dto/document-response.dto.ts:60` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Documento no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/document_store.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 55 — Document Store (documentos flexibles sobre MongoDB) — etapa `ctrl:DocumentStoreController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -410,13 +460,28 @@ No toca tablas relacionales: opera sobre MongoDB, no sobre tablas relacionales. 
 | `updatedAt` | `string` | Sí | formato date-time | — | Fecha y hora de la última actualización. | `src/modules/document_store/dto/document-response.dto.ts:49` |
 | `deletedAt` | `string` | No | formato date-time; admite null | — | Marca de borrado lógico; null si el documento está vivo | `src/modules/document_store/dto/document-response.dto.ts:60` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Documento no encontrado |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: La versión del documento ha cambiado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Nada que actualizar: indica payload y/o documentType |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/document_store.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 55 — Document Store (documentos flexibles sobre MongoDB) — etapa `ctrl:DocumentStoreController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

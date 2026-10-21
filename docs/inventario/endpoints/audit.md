@@ -98,6 +98,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | `anomalous` | `boolean` | Sí | — | — | true si se detectó un patrón anómalo | `src/modules/audit/dto/operations.dto.ts:124` |
 | `auditLogId` | `string` | Sí | — | — | Id del hallazgo de auditoría registrado | `src/modules/audit/dto/operations.dto.ts:130` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -106,7 +118,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-10`
 
 ---
 
@@ -198,6 +210,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | `patientContentLogged` | `boolean` | Sí | — | — | true si además se registró detalle de contenido del paciente | `src/modules/audit/dto/data-access.dto.ts:142` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Momento del registro | `src/modules/audit/dto/data-access.dto.ts:152` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -206,7 +230,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-01`
 
 ---
 
@@ -296,6 +320,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | `recordHash` | `string` | Sí | — | — | Hash sellado de este registro | `src/modules/audit/dto/audit-event.dto.ts:116` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Momento del registro | `src/modules/audit/dto/audit-event.dto.ts:126` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -304,7 +340,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-04`
 
 ---
 
@@ -377,6 +413,19 @@ La operación no recibe cuerpo.
 | `revisions[].recordedAt` | `string` | Sí | formato date-time | — | Momento del registro | `src/modules/audit/dto/history.dto.ts:69` |
 | `revisions[].dataSnapshot` | `object` | Sí | — | — | Snapshot del estado en esa revisión | `src/modules/audit/dto/history.dto.ts:75` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Entidad de historial no soportada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -385,7 +434,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-05`
 
 ---
 
@@ -459,6 +508,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | `brokenAt` | `string` | Sí | admite null | — | Id del primer eslabón roto, si lo hay | `src/modules/audit/dto/integrity.dto.ts:55` |
 | `attestationId` | `string` | Sí | — | — | Id del evento de atestación registrado | `src/modules/audit/dto/integrity.dto.ts:61` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -467,7 +528,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-06`
 
 ---
 
@@ -544,6 +605,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | `purgedCount` | `number` | Sí | — | — | Nº real de filas purgadas por la política de retención | `src/modules/audit/dto/operations.dto.ts:67` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Momento del registro | `src/modules/audit/dto/operations.dto.ts:77` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -552,7 +625,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-09`
 
 ---
 
@@ -654,6 +727,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | `channel` | `string` | Sí | — | — | Canal usado | `src/modules/audit/dto/third-party-access.dto.ts:165` |
 | `auditLogId` | `string` | Sí | — | — | Id del evento de auditoría (provenance) | `src/modules/audit/dto/third-party-access.dto.ts:171` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el campo requerido para el canal: {field} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -662,7 +748,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-12`
 
 ---
 
@@ -746,6 +832,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | `auditLogId` | `string` | Sí | — | — | Id del evento de auditoría (provenance) | `src/modules/audit/dto/audit-export.dto.ts:99` |
 | `occurredAt` | `string` | Sí | formato date-time | — | Momento del registro | `src/modules/audit/dto/audit-export.dto.ts:109` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una exportación con ese query_hash |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -754,7 +853,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-07`
 
 ---
 
@@ -847,6 +946,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | `historyRecorded` | `boolean` | Sí | — | — | true si se versionó el historial de la decisión | `src/modules/audit/dto/moderation.dto.ts:129` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Momento del registro | `src/modules/audit/dto/moderation.dto.ts:139` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -855,7 +966,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-11`
 
 ---
 
@@ -938,6 +1049,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | `requestedAt` | `string` | Sí | formato date-time | — | Solicitada el | `src/modules/audit/dto/dsar.dto.ts:116` |
 | `completedAt` | `string` | No | formato date-time; admite null | — | Completada el | `src/modules/audit/dto/dsar.dto.ts:126` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -946,7 +1069,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-08`
 
 ---
 
@@ -1034,6 +1157,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | `requestedAt` | `string` | Sí | formato date-time | — | Solicitada el | `src/modules/audit/dto/dsar.dto.ts:116` |
 | `completedAt` | `string` | No | formato date-time; admite null | — | Completada el | `src/modules/audit/dto/dsar.dto.ts:126` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud DSAR no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud DSAR ya está en estado terminal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/audit.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1042,7 +1179,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 10 — Audit, Provenance and Version Histories — etapa `UC-10-08`
 
 ---
 

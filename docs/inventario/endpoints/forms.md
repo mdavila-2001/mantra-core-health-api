@@ -112,13 +112,24 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado al listado | `src/modules/forms/dto/read-responses.dto.ts:776` |
 | `truncated` | `boolean` | Sí | — | — | true si quedaron asignaciones fuera del tope. Se declara, no se calla | `src/modules/forms/dto/read-responses.dto.ts:785` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsAssignmentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -198,13 +209,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/forms/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo se pueden asignar campos dentro de la propia organización; ForbiddenException: Este formulario no admite campos propios: no tiene política de extensión activa; ForbiddenException: La política de este formulario no permite campos del tenant |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campo no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Se excedió el presupuesto de campos del target |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-06`
 
 ---
 
@@ -264,13 +289,25 @@ La operación no recibe cuerpo.
 | `used` | `number` | Sí | — | — | Campos activos que el tenant ya colgó | `src/modules/forms/dto/read-responses.dto.ts:824` |
 | `remaining` | `number` | No | — | — | Campos que quedan; ausente cuando no hay tope declarado | `src/modules/forms/dto/read-responses.dto.ts:833` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsAssignmentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -334,13 +371,24 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado al listado | `src/modules/forms/dto/read-responses.dto.ts:73` |
 | `truncated` | `boolean` | Sí | — | — | true si quedaron sets fuera del tope. Se declara, no se calla | `src/modules/forms/dto/read-responses.dto.ts:82` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsDefinitionSetsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -426,13 +474,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 | `versionId` | `string` | Sí | formato uuid | — | Versión inicial (draft) creada | `src/modules/forms/dto/responses.dto.ts:45` |
 | `status` | `string` | Sí | formato uuid | — | Estado del set (concept id) | `src/modules/forms/dto/responses.dto.ts:51` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El namespace ya está en uso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-01`
 
 ---
 
@@ -551,13 +612,26 @@ La operación no recibe cuerpo.
 | `sections[].parentSectionId` | `string` | No | formato uuid | — | Identificador asociado a parent section. | `src/modules/forms/dto/read-responses.dto.ts:435` |
 | `sections[].ordinal` | `number` | No | — | — | Valor de ordinal mantenido por la instancia. | `src/modules/forms/dto/read-responses.dto.ts:441` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Set de definiciones no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsDefinitionSetsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -651,13 +725,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 | `status` | `string` | Sí | formato uuid | — | Estado final (concept id) | `src/modules/forms/dto/responses.dto.ts:90` |
 | `migratedValues` | `number` | Sí | — | — | Nº de valores migrados | `src/modules/forms/dto/responses.dto.ts:96` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Set de definiciones no encontrado; ResourceNotFoundException: Versión origen no válida; ResourceNotFoundException: Versión destino no válida |
+| 409 | `CONFLICT` | ConflictException: La migración ya fue registrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-13`
 
 ---
 
@@ -754,13 +842,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/forms/dto/responses.dto.ts:27` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Set de definiciones no encontrado; ResourceNotFoundException: Versión no encontrada para el set |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión no está en borrador |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-03`
 
 ---
 
@@ -867,13 +969,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/forms/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El código de campo ya existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-02`
 
 ---
 
@@ -963,13 +1078,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/forms/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-12`
 
 ---
 
@@ -1060,13 +1188,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/forms/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campo destino no encontrado; ResourceNotFoundException: Campo fuente no encontrado |
+| 409 | `CONFLICT` | ConflictException: La dependencia ya existe en ese grupo lógico |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un campo no puede depender de sí mismo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-04`
 
 ---
 
@@ -1151,13 +1294,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/forms/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campo no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Idioma no soportado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-05`
 
 ---
 
@@ -1224,13 +1381,26 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado al listado | `src/modules/forms/dto/read-responses.dto.ts:535` |
 | `truncated` | `boolean` | Sí | — | — | true si quedaron instancias fuera del tope. Se declara, no se calla | `src/modules/forms/dto/read-responses.dto.ts:544` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada / Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsInstancesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1312,13 +1482,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 | `schemaVersion` | `number` | Sí | — | — | Versión de schema congelada | `src/modules/forms/dto/responses.dto.ts:66` |
 | `state` | `string` | Sí | formato uuid | — | Estado de la instancia (concept id) | `src/modules/forms/dto/responses.dto.ts:75` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una instancia para el recurso y versión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-07`
 
 ---
 
@@ -1388,13 +1571,26 @@ La operación no recibe cuerpo.
 | `values[].effectiveFrom` | `string` | No | formato date-time | — | Valor de effective from mantenido por la instancia. | `src/modules/forms/dto/read-responses.dto.ts:619` |
 | `values[].masked` | `boolean` | Sí | — | — | true si el campo tiene una regla de acceso activa que hoy no puede evaluarse: el valor no se expone (deny-by-default) | `src/modules/forms/dto/read-responses.dto.ts:628` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada; ResourceNotFoundException: Instancia no encontrada / Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsInstancesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1452,13 +1648,27 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/forms/dto/responses.dto.ts:27` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La instancia no está abierta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-11`
 
 ---
 
@@ -1558,13 +1768,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 |---|---|---|---|---|---|---|
 | `ids` | `array<string>` | Sí | formato uuid | — | Valor de ids mantenido por la instancia. | `src/modules/forms/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La instancia no está abierta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-08`
 
 ---
 
@@ -1628,13 +1852,25 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado al listado | `src/modules/forms/dto/read-responses.dto.ts:647` |
 | `truncated` | `boolean` | Sí | — | — | true si quedaron instancias fuera del tope. Se declara, no se calla | `src/modules/forms/dto/read-responses.dto.ts:656` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil de paciente asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsMeController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1704,13 +1940,27 @@ La operación no recibe cuerpo.
 | `values[].effectiveFrom` | `string` | No | formato date-time | — | Valor de effective from mantenido por la instancia. | `src/modules/forms/dto/read-responses.dto.ts:619` |
 | `values[].masked` | `boolean` | Sí | — | — | true si el campo tiene una regla de acceso activa que hoy no puede evaluarse: el valor no se expone (deny-by-default) | `src/modules/forms/dto/read-responses.dto.ts:628` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil de paciente asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsMeController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1795,13 +2045,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/forms/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Valor no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El valor ya fue superado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-09`
 
 ---
 
@@ -1903,13 +2167,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 |---|---|---|---|---|---|---|
 | `ids` | `array<string>` | Sí | formato uuid | — | Valor de ids mantenido por la instancia. | `src/modules/forms/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `UC-09-10`
 
 ---
 

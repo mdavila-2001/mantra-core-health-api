@@ -126,13 +126,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | sin fuente |
 | `duplicate` | `boolean` | Sí | — | — | true si ese lote ya se había archivado | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1533` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El corte de retención tiene que estar en el pasado.; PreconditionFailedException: No se purga la copia caliente sin el manifiesto del archivo frío confirmado. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-14`
 
 ---
 
@@ -241,13 +254,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `cacheInvalidationJobId` | `string` | No | formato uuid | — | Invalidación de caché encolada | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1426` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si ese lote ya se había movido | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1432` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El emplazamiento de origen y el de destino no pueden ser el mismo. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-13`
 
 ---
 
@@ -344,13 +370,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `dueAt` | `string` | Sí | formato date-time | — | Fecha límite de cumplimiento | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:859` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si ya había una solicitud viva para el sujeto | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:867` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-08`
 
 ---
 
@@ -440,13 +478,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `blockedTargets` | `number` | Sí | — | — | Objetivos bloqueados por retención legal | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1227` |
 | `pendingTargets` | `number` | Sí | — | — | Objetivos que todavía no están verificados | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1233` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de borrado no encontrada. |
+| 409 | `CONFLICT` | ConflictException: La solicitud ya está cerrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud no tiene objetivos; expándela antes de cerrarla.; PreconditionFailedException: Quedan objetivos sin verificar; el borrado no está completo. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-11`
 
 ---
 
@@ -527,13 +580,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `idempotencyKey` | `string` | Sí | — | — | Clave de idempotencia conservada del intento original | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:502` |
 | `deadLetterState` | `string` | Sí | — | — | Valor de dead letter state mantenido por la instancia. | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:508` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Entrada de cola muerta no encontrada.; ResourceNotFoundException: Intento original no encontrado. |
+| 409 | `CONFLICT` | ConflictException: La entrada de cola muerta ya no está abierta. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-04`
 
 ---
 
@@ -661,13 +728,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `subscriptionIds` | `array<string>` | Sí | formato uuid | — | Valor de subscription ids mantenido por la instancia. | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:246` |
 | `sloId` | `string` | No | formato uuid | — | Identificador asociado a slo. | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:252` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe esa versión de la definición de proyección.; ConflictException: Dos suscripciones comparten el mismo tipo de evento y consumidor. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El dataset de origen y el de destino no pueden ser el mismo. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-01`
 
 ---
 
@@ -768,13 +849,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `reindexJobId` | `string` | No | formato uuid | — | Job de reindexado creado, si procede | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:764` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si esa deriva ya tenía reparación | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:770` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Evento de deriva no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La deriva ya no está abierta.; PreconditionFailedException: Borrar el huérfano sólo repara una deriva de tipo EXTRA. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-07`
 
 ---
 
@@ -899,13 +994,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `repairJobId` | `string` | No | formato uuid | — | Job encolado para reparar lo que falta | sin fuente |
 | `purgeJobId` | `string` | No | formato uuid | — | Job encolado para purgar los huérfanos | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: La misma entidad canónica aparece dos veces en la corrida. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-05`
 
 ---
 
@@ -999,13 +1107,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1293` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si esa versión y ámbito ya se habían encolado | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1301` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-12`
 
 ---
 
@@ -1109,13 +1229,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `targetsSkipped` | `number` | Sí | — | — | Objetivos que ya estaban declarados | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:966` |
 | `blockedByLegalHold` | `number` | Sí | — | — | Objetivos bloqueados por retención legal | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:972` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de borrado no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud ya no admite expansión. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-09`
 
 ---
 
@@ -1202,13 +1336,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `targetState` | `string` | Sí | — | — | Estado en el que queda el objetivo | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1104` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si ese borrado ya se había ejecutado | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1112` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Objetivo de borrado no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objetivo está bloqueado por retención legal; no se borra.; PreconditionFailedException: El objetivo no está en un estado que admita ejecución. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-10`
 
 ---
 
@@ -1296,13 +1444,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `targetState` | `string` | Sí | — | — | Valor de target state mantenido por la instancia. | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1174` |
 | `requiresReexecution` | `boolean` | Sí | — | — | Verdadero si quedan referencias y hay que reintentar el borrado | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1183` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Objetivo de borrado no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objetivo tiene que estar ejecutado para poder verificarse. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-11`
 
 ---
 
@@ -1363,13 +1525,25 @@ La operación no recibe cuerpo.
 | `targets[].targetLocator` | `string` | Sí | — | — | Valor de target locator mantenido por la instancia. | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1012` |
 | `targets[].deletionMode` | `string` | Sí | — | — | Valor de deletion mode mantenido por la instancia. | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1018` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `ctrl:CrossStoreWorkerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1430,13 +1604,25 @@ La operación no recibe cuerpo.
 | `targets[].targetLocator` | `string` | Sí | — | — | Valor de target locator mantenido por la instancia. | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1012` |
 | `targets[].deletionMode` | `string` | Sí | — | — | Valor de deletion mode mantenido por la instancia. | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:1018` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `ctrl:CrossStoreWorkerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1526,13 +1712,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:451` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si ese intento ya estaba en la cola muerta | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:459` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Intento de entrega no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suscripción no tiene cola muerta habilitada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-04`
 
 ---
 
@@ -1637,13 +1837,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `checkpointAdvanced` | `boolean` | Sí | — | — | Verdadero si el checkpoint avanzó con esta entrega | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:390` |
 | `sourcePosition` | `string` | No | — | — | Posición del checkpoint tras la entrega | `src/modules/cross_store_consistency/dto/cross-store.dto.ts:398` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Suscripción de proyección no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suscripción no está activa. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/cross_store_consistency.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 62 — Consistencia cross-store — etapa `UC-62-02`
 
 ---
 

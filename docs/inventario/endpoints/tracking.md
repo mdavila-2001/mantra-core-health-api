@@ -120,6 +120,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `skipped` | `number` | Sí | — | — | Hitos omitidos por tener ya ese código | `src/modules/tracking/dto/tracking.dto.ts:275` |
 | `terminalCount` | `number` | Sí | — | — | Hitos terminales declarados | `src/modules/tracking/dto/tracking.dto.ts:281` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El tipo de sujeto ya tiene hito terminal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo puede haber un hito terminal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -128,7 +142,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-02`
 
 ---
 
@@ -212,6 +226,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `subjectStateConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el sujeto | `src/modules/tracking/dto/tracking.dto.ts:1014` |
 | `eventId` | `string` | Sí | formato uuid | — | Identificador asociado a event. | `src/modules/tracking/dto/tracking.dto.ts:1020` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado; ResourceNotFoundException: Sujeto rastreable no encontrado |
+| 409 | `CONFLICT` | ConflictException: El envío ya está cancelado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un envío entregado no se cancela |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -220,7 +249,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-10`
 
 ---
 
@@ -320,6 +349,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `subjectStateConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el sujeto | `src/modules/tracking/dto/tracking.dto.ts:882` |
 | `eventId` | `string` | Sí | formato uuid | — | Evento de entrega registrado | `src/modules/tracking/dto/tracking.dto.ts:888` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado; ResourceNotFoundException: Sujeto rastreable no encontrado |
+| 409 | `CONFLICT` | ConflictException: El envío ya está entregado; ConflictException: El envío ya tiene prueba de entrega verificada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una prueba por firma necesita el archivo de firma; PreconditionFailedException: Una prueba por foto necesita la foto; PreconditionFailedException: El envío no admite entrega en su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -328,7 +372,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-08`
 
 ---
 
@@ -412,6 +456,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `eventId` | `string` | Sí | formato uuid | — | Evento de despacho registrado | `src/modules/tracking/dto/tracking.dto.ts:331` |
 | `dispatchedAt` | `string` | Sí | formato date-time | — | Valor de dispatched at mantenido por la instancia. | `src/modules/tracking/dto/tracking.dto.ts:337` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado; ResourceNotFoundException: Sujeto rastreable no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El envío no está en preparación; PreconditionFailedException: El despacho necesita transportista o mensajero asignado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -420,7 +478,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-03`
 
 ---
 
@@ -511,6 +569,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `estimatedArrivalAt` | `string` | Sí | formato date-time | — | Llegada estimada del envío | `src/modules/tracking/dto/tracking.dto.ts:765` |
 | `applied` | `boolean` | Sí | — | — | true si esta estimación pasó a ser la vigente del envío | `src/modules/tracking/dto/tracking.dto.ts:773` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El envío ya no admite estimaciones |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -519,7 +591,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-07`
 
 ---
 
@@ -611,6 +683,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `eventId` | `string` | Sí | formato uuid | — | Identificador asociado a event. | `src/modules/tracking/dto/tracking.dto.ts:965` |
 | `failedAttemptProofId` | `string` | No | formato uuid | — | Constancia del intento fallido | `src/modules/tracking/dto/tracking.dto.ts:974` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado; ResourceNotFoundException: Sujeto rastreable no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El envío ya no admite excepciones |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -619,7 +705,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-09`
 
 ---
 
@@ -719,6 +805,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `eventId` | `string` | Sí | formato uuid | — | Evento de traspaso registrado | `src/modules/tracking/dto/tracking.dto.ts:683` |
 | `carrierId` | `string` | No | formato uuid | — | Transportista responsable tras el traspaso | `src/modules/tracking/dto/tracking.dto.ts:692` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Envío no encontrado; ResourceNotFoundException: Transportista no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El envío ya no admite traspasos; PreconditionFailedException: El transportista no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -727,7 +827,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-06`
 
 ---
 
@@ -801,6 +901,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `escalated` | `number` | Sí | — | — | Sujetos cuya prioridad subió por el incumplimiento | `src/modules/tracking/dto/tracking.dto.ts:1067` |
 | `eventIds` | `array<string>` | Sí | formato uuid | — | Eventos de incumplimiento creados | `src/modules/tracking/dto/tracking.dto.ts:1077` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -809,7 +921,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-11`
 
 ---
 
@@ -906,6 +1018,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `shipmentId` | `string` | Sí | formato uuid | — | Identificador asociado a shipment. | `src/modules/tracking/dto/tracking.dto.ts:139` |
 | `shipmentNumber` | `string` | Sí | — | — | Número del envío | `src/modules/tracking/dto/tracking.dto.ts:145` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Transportista no encontrado |
+| 409 | `CONFLICT` | ConflictException: La entidad ya tiene un seguimiento abierto; ConflictException: No se pudo generar un número de seguimiento libre; ConflictException: No se pudo asignar número de envío |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El transportista no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -914,7 +1041,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-01`
 
 ---
 
@@ -1014,6 +1141,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `currentMilestoneId` | `string` | No | formato uuid | — | Hito alcanzado, si lo hubo | `src/modules/tracking/dto/tracking.dto.ts:472` |
 | `subjectClosed` | `boolean` | Sí | — | — | true si el hito alcanzado cierra el seguimiento | `src/modules/tracking/dto/tracking.dto.ts:480` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreable no encontrado; ResourceNotFoundException: Hito no encontrado para el tipo de sujeto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El seguimiento del sujeto está cerrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1022,7 +1163,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-04`
 
 ---
 
@@ -1115,6 +1256,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 | `currentStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a current status concept. | `src/modules/tracking/dto/tracking.dto.ts:563` |
 | `duplicate` | `boolean` | Sí | — | — | true si el evento ya se había recibido | `src/modules/tracking/dto/tracking.dto.ts:569` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Transportista no encontrado; ResourceNotFoundException: Número de seguimiento desconocido; ResourceNotFoundException: Sujeto rastreable no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/tracking.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1123,7 +1276,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/trackin
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 37 — Seguimiento y Trazabilidad de Envíos — etapa `UC-37-05`
 
 ---
 

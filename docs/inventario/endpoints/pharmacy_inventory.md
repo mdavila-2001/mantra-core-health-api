@@ -136,13 +136,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/pharmacy_inventory/dto/responses.dto.ts:169` |
 | `itemIds` | `array<string>` | Sí | — | — | Ids de los items creados | `src/modules/pharmacy_inventory/dto/responses.dto.ts:175` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryInternalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -202,13 +214,27 @@ La operación no recibe cuerpo.
 | `itemsProcessed` | `number` | Sí | — | — | Items procesados | `src/modules/pharmacy_inventory/dto/responses.dto.ts:154` |
 | `discrepancies` | `number` | Sí | — | — | Items marcados como discrepancia | `src/modules/pharmacy_inventory/dto/responses.dto.ts:160` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Lote de sincronización no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El lote no está en estado reconciliable |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryInternalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -284,13 +310,24 @@ La operación no recibe cuerpo.
 | `expiredCount` | `number` | Sí | — | — | Reservas y pedidos expirados en esta corrida | `src/modules/pharmacy_inventory/dto/responses.dto.ts:130` |
 | `expiredOrderCount` | `number` | No | — | — | Pedidos de paciente vencidos en esta corrida | `src/modules/pharmacy_inventory/dto/responses.dto.ts:139` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryInternalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -394,6 +431,18 @@ La operación no recibe cuerpo.
 | `items[].products[].price.priceListCode` | `string` | No | — | — | — | sin fuente |
 | `count` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:343` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; BadRequestException: products es obligatorio: la disponibilidad se consulta para un pedido concreto |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -402,7 +451,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -481,13 +530,26 @@ La operación no recibe cuerpo.
 | `items[].locationCount` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:94` |
 | `count` | `number` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:133` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sede de farmacia no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -611,13 +673,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `quantityOnHand` | `string` | Sí | — | — | Valor de quantity on hand mantenido por la instancia. | sin fuente |
 | `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Reserva no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La reserva es un pedido de paciente: se dispensa con su código de retiro por POST /pharmacy/orders/:id/dispense; PreconditionFailedException: Stock insuficiente para dispensar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyDispensingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -751,13 +827,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lotIds` | `array<string>` | Sí | — | — | Ids de lotes afectados | `src/modules/pharmacy_inventory/dto/responses.dto.ts:51` |
 | `ledgerEntryIds` | `array<string>` | Sí | — | — | Ids de asientos del ledger | `src/modules/pharmacy_inventory/dto/responses.dto.ts:57` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden de compra no encontrada; ResourceNotFoundException: Ubicación destino no encontrada; ResourceNotFoundException: Línea de orden no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La orden no admite recepción |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyProcurementController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -864,13 +954,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `purchaseOrderNumber` | `string` | Sí | — | — | Valor de purchase order number mantenido por la instancia. | `src/modules/pharmacy_inventory/dto/responses.dto.ts:24` |
 | `lineIds` | `array<string>` | Sí | — | — | Ids de las líneas creadas | `src/modules/pharmacy_inventory/dto/responses.dto.ts:30` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proveedor no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyProcurementController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -982,13 +1086,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `quantityOnHand` | `string` | Sí | — | — | Valor de quantity on hand mantenido por la instancia. | sin fuente |
 | `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Stock disponible insuficiente para reservar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1069,13 +1186,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/pharmacy_inventory/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyProcurementController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1173,13 +1302,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `outLedgerEntryId` | `string` | Sí | formato uuid | — | Identificador asociado a out ledger entry. | `src/modules/pharmacy_inventory/dto/responses.dto.ts:114` |
 | `inLedgerEntryId` | `string` | Sí | formato uuid | — | Identificador asociado a in ledger entry. | `src/modules/pharmacy_inventory/dto/responses.dto.ts:120` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ubicación origen no encontrada; ResourceNotFoundException: Ubicación destino no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Stock disponible insuficiente en origen |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1278,13 +1421,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lineIds` | `array<string>` | Sí | — | — | Ids de líneas de conteo | `src/modules/pharmacy_inventory/dto/responses.dto.ts:93` |
 | `adjustments` | `number` | Sí | — | — | Número de ajustes generados | `src/modules/pharmacy_inventory/dto/responses.dto.ts:99` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ubicación no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe una sesión de conteo abierta en la ubicación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1368,13 +1525,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/pharmacy_inventory/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1472,13 +1641,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lineIds` | `array<string>` | Sí | — | — | Ids de líneas de conteo | `src/modules/pharmacy_inventory/dto/responses.dto.ts:93` |
 | `adjustments` | `number` | Sí | — | — | Número de ajustes generados | `src/modules/pharmacy_inventory/dto/responses.dto.ts:99` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de conteo no encontrada; ResourceNotFoundException: Línea de conteo no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no está en estado aprobable |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1561,13 +1744,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dispensación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La dispensación no está en estado reversible |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyDispensingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1715,13 +1912,25 @@ La operación no recibe cuerpo.
 | `items[].lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 | `count` | `number` | Sí | — | — | Cuántos pedidos se sirven. | `src/modules/pharmacy_inventory/dto/pharmacy-orders.dto.ts:507` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Estado de pedido desconocido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1893,13 +2102,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sede de farmacia no encontrada; ResourceNotFoundException: Receta no encontrada; ResourceNotFoundException: Producto no disponible en la sede |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta autenticada no tiene perfil de paciente; PreconditionFailedException: El pedido repite productos; use una línea por producto; PreconditionFailedException: El envío a domicilio o al trabajo llega con el carril de envío (FAR-E4); hoy solo RETIRO |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2042,13 +2265,25 @@ La operación no recibe cuerpo.
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2184,13 +2419,26 @@ La operación no recibe cuerpo.
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta autenticada no tiene perfil de paciente; PreconditionFailedException: El pedido no tiene una decisión de sustituciones pendiente; PreconditionFailedException: El pedido no tiene propuestas de sustitución en pie |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2323,13 +2571,27 @@ La operación no recibe cuerpo.
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El pedido ya está en un estado terminal y no puede cancelarse |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta autenticada no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2501,13 +2763,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay más de un ajuste para el mismo renglón; PreconditionFailedException: La transición no es legal para el estado actual del pedido; PreconditionFailedException: El ajuste refiere un producto que no está en el pedido; PreconditionFailedException: PROPONER_GENERICO exige el producto propuesto (proposedProductId); PreconditionFailedException: El producto propuesto no está disponible en esta farmacia; PreconditionFailedException: El producto propuesto no es del mismo medicamento que el original |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2678,13 +2953,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: La clave de idempotencia ya se usó para otra entrega |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un pedido listo para retiro puede dispensarse; PreconditionFailedException: El código de retiro no coincide. El pedido no se modificó.; PreconditionFailedException: La entrega refiere productos sin saldo en pie en este pedido; PreconditionFailedException: El pedido no tiene saldo en pie que entregar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2813,13 +3102,26 @@ La operación no recibe cuerpo.
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta autenticada no tiene perfil de paciente; PreconditionFailedException: El pedido no tiene una decisión de sustituciones pendiente; PreconditionFailedException: El pedido no tiene propuestas de sustitución en pie |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2956,13 +3258,27 @@ La operación no recibe cuerpo.
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: No se pudo sellar un código de retiro único; reintente la operación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La transición no es legal para el estado actual del pedido; PreconditionFailedException: El pedido no declara modalidad de entrega: no puede demostrarse que sea un retiro; PreconditionFailedException: El pedido es de envío: se cierra por el carril de envío, no por el mostrador; PreconditionFailedException: La sede no ofrece retiro en mostrador |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3126,13 +3442,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El rechazo exige un motivo en palabras; PreconditionFailedException: La transición no es legal para el estado actual del pedido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3269,13 +3598,26 @@ La operación no recibe cuerpo.
 | `lines[].status.code` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:17` |
 | `lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La transición no es legal para el estado actual del pedido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3413,13 +3755,25 @@ La operación no recibe cuerpo.
 | `items[].lines[].status.display` | `string` | Sí | — | — | — | `src/modules/pharmacy_inventory/dto/read-responses.dto.ts:23` |
 | `count` | `number` | Sí | — | — | Cuántos pedidos se sirven. | `src/modules/pharmacy_inventory/dto/pharmacy-orders.dto.ts:507` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta autenticada no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3512,13 +3866,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/pharmacy_inventory/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Lote no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3600,13 +3967,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Hold de recall no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El hold no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyInventoryController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

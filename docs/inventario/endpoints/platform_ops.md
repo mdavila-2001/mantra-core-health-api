@@ -134,6 +134,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `testRunId` | `string` | Sí | formato uuid | — | Identificador asociado a test run. | sin fuente |
 | `artifactTypeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a artifact type concept. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Componente no encontrado; ResourceNotFoundException: Herramienta no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe un artefacto con esa referencia; ConflictException: El componente ya publicó esa versión |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La herramienta no está homologada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -142,7 +157,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-03`
 
 ---
 
@@ -238,6 +253,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `guardrailCrossed` | `boolean` | Sí | — | — | true si la utilización cruzó el guardrail del plan | `src/modules/platform_ops/dto/platform-ops.dto.ts:1393` |
 | `planUpdated` | `boolean` | Sí | — | — | true si el plan se recalculó en esta medición | `src/modules/platform_ops/dto/platform-ops.dto.ts:1399` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plan de capacidad no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La capacidad debe ser mayor que cero; PreconditionFailedException: El plan de capacidad no está activo; PreconditionFailedException: La medición cae fuera del horizonte del plan |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -246,7 +275,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-11`
 
 ---
 
@@ -344,6 +373,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `changeNumber` | `string` | Sí | — | — | Número correlativo del cambio en el tenant | `src/modules/platform_ops/dto/platform-ops.dto.ts:149` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/platform_ops/dto/platform-ops.dto.ts:155` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Componente no encontrado; ResourceNotFoundException: Ventana de mantenimiento no encontrada |
+| 409 | `CONFLICT` | ConflictException: No se pudo asignar un número de cambio libre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana planificada está invertida; PreconditionFailedException: El componente no está activo; PreconditionFailedException: La ventana de mantenimiento está cerrada; PreconditionFailedException: El cambio empieza antes que su ventana; PreconditionFailedException: El cambio termina después que su ventana |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -352,7 +396,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-01`
 
 ---
 
@@ -442,6 +486,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `changeStatusConceptId` | `string` | Sí | formato uuid | — | Estado del cambio tras la decisión | `src/modules/platform_ops/dto/platform-ops.dto.ts:228` |
 | `approvedSteps` | `number` | Sí | — | — | Pasos aprobados hasta ahora | `src/modules/platform_ops/dto/platform-ops.dto.ts:234` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de cambio no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ese aprobador ya votó en este paso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud ya no admite decisiones; PreconditionFailedException: Quien solicita el cambio no puede aprobarlo; PreconditionFailedException: El paso anterior todavía no está aprobado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -450,7 +509,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-02`
 
 ---
 
@@ -545,6 +604,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `isCurrent` | `boolean` | Sí | — | — | true si pasa a ser el despliegue vigente del entorno | `src/modules/platform_ops/dto/platform-ops.dto.ts:525` |
 | `supersededDeploymentId` | `string` | No | formato uuid | — | Despliegue que deja de ser vigente | `src/modules/platform_ops/dto/platform-ops.dto.ts:534` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de cambio no encontrada; ResourceNotFoundException: Artefacto no encontrado |
+| 409 | `CONFLICT` | ConflictException: No se pudo asignar un número de despliegue libre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El cambio no está aprobado; PreconditionFailedException: El artefacto no está activo; PreconditionFailedException: El artefacto pertenece a otro componente; PreconditionFailedException: Producción exige una revisión de preparación con decisión "go"; PreconditionFailedException: Los despliegues están congelados por agotamiento del error budget |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -553,7 +627,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-04`
 
 ---
 
@@ -637,6 +711,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `rolledBackDeploymentId` | `string` | Sí | formato uuid | — | Despliegue revertido | `src/modules/platform_ops/dto/platform-ops.dto.ts:586` |
 | `artifactId` | `string` | Sí | formato uuid | — | Artefacto al que se vuelve | `src/modules/platform_ops/dto/platform-ops.dto.ts:592` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Despliegue no encontrado |
+| 409 | `CONFLICT` | ConflictException: No se pudo asignar un número de despliegue libre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El despliegue no está en un estado reversible; PreconditionFailedException: El despliegue ya no es el vigente; PreconditionFailedException: No hay un despliegue estable anterior al que volver; PreconditionFailedException: El destino de la reversión es de otro componente o entorno |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -645,7 +734,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-05`
 
 ---
 
@@ -736,6 +825,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `severityConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a severity concept. | `src/modules/platform_ops/dto/platform-ops.dto.ts:1283` |
 | `deploymentFreezeActive` | `boolean` | Sí | — | — | true si a partir de ahora los despliegues quedan congelados | `src/modules/platform_ops/dto/platform-ops.dto.ts:1291` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Política de error budget no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política no está activa; PreconditionFailedException: La política no tiene ninguna medición del objetivo sobre la que evaluar; PreconditionFailedException: El ritmo de quema no alcanza el umbral de aviso de la política |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -744,7 +847,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-10`
 
 ---
 
@@ -847,6 +950,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `healthIncidentId` | `string` | No | formato uuid | — | Incidente abierto o ya vivo | `src/modules/platform_ops/dto/platform-ops.dto.ts:726` |
 | `incidentOpened` | `boolean` | Sí | — | — | true si esta corrida abrió el incidente | `src/modules/platform_ops/dto/platform-ops.dto.ts:732` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Health check no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El health check no está activo; PreconditionFailedException: El health check está deshabilitado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -855,7 +972,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-06`
 
 ---
 
@@ -972,6 +1089,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `communicationIds` | `array<string>` | Sí | formato uuid | — | Comunicaciones publicadas | `src/modules/platform_ops/dto/platform-ops.dto.ts:937` |
 | `timelineEventIds` | `array<string>` | Sí | formato uuid | — | Entradas de timeline creadas | `src/modules/platform_ops/dto/platform-ops.dto.ts:947` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Incidente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El incidente ya está resuelto; PreconditionFailedException: La transición no es válida desde el estado actual; PreconditionFailedException: Resolver exige causa raíz y descripción de la resolución |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -980,7 +1111,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-07`
 
 ---
 
@@ -1104,6 +1235,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `actionItemIds` | `array<string>` | Sí | formato uuid | — | Valor de action item ids mantenido por la instancia. | `src/modules/platform_ops/dto/platform-ops.dto.ts:1120` |
 | `improvementItemIds` | `array<string>` | Sí | formato uuid | — | Mejoras abiertas para seguimiento | `src/modules/platform_ops/dto/platform-ops.dto.ts:1130` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Incidente no encontrado |
+| 409 | `CONFLICT` | ConflictException: El incidente ya tiene postmortem |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El código de acción está repetido; PreconditionFailedException: El incidente todavía no está resuelto |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1112,7 +1258,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-08`
 
 ---
 
@@ -1210,6 +1356,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `resolvedCount` | `number` | Sí | — | — | Hallazgos cerrados en esta operación | `src/modules/platform_ops/dto/platform-ops.dto.ts:1496` |
 | `improvementItemIds` | `array<string>` | Sí | formato uuid | — | Mejoras abiertas por lo que queda | `src/modules/platform_ops/dto/platform-ops.dto.ts:1506` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Revisión de preparación no encontrada; ResourceNotFoundException: El hallazgo no pertenece a esta revisión |
+| 409 | `CONFLICT` | ConflictException: El hallazgo ya no está abierto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La revisión no está en curso; PreconditionFailedException: Quedan hallazgos críticos o altos sin resolver |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1218,7 +1379,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-12`
 
 ---
 
@@ -1317,6 +1478,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `rpoBreached` | `boolean` | Sí | — | — | true si el RPO observado supera el objetivo | `src/modules/platform_ops/dto/platform-ops.dto.ts:1771` |
 | `improvementItemId` | `string` | No | formato uuid | — | Mejora abierta por el incumplimiento | `src/modules/platform_ops/dto/platform-ops.dto.ts:1780` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejercicio de resiliencia no encontrado |
+| 409 | `CONFLICT` | ConflictException: El ejercicio ya está cerrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El ejercicio termina antes de empezar; PreconditionFailedException: El componente no tiene objetivo de recuperación vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1325,7 +1501,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-14`
 
 ---
 
@@ -1419,6 +1595,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `resultConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a result concept. | `src/modules/platform_ops/dto/platform-ops.dto.ts:1660` |
 | `timelineEventId` | `string` | No | formato uuid | — | Entrada de timeline si la ejecución fue en un incidente | `src/modules/platform_ops/dto/platform-ops.dto.ts:1669` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de runbook no encontrada; ResourceNotFoundException: Incidente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución termina antes de empezar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1427,7 +1617,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-13`
 
 ---
 
@@ -1511,6 +1701,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `versionNumber` | `number` | Sí | — | — | Número de versión, correlativo dentro del runbook | `src/modules/platform_ops/dto/platform-ops.dto.ts:1557` |
 | `runbookId` | `string` | Sí | formato uuid | — | Versión que pasa a ser la vigente del runbook | `src/modules/platform_ops/dto/platform-ops.dto.ts:1566` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Runbook no encontrado |
+| 409 | `CONFLICT` | ConflictException: Esa versión del runbook ya existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El runbook no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1519,7 +1724,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-13`
 
 ---
 
@@ -1612,6 +1817,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/platform_ops/dto/platform-ops.dto.ts:1204` |
 | `duplicate` | `boolean` | Sí | — | — | true si la ventana ya estaba medida y se devuelve la anterior | `src/modules/platform_ops/dto/platform-ops.dto.ts:1213` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Objetivo de nivel de servicio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana de medición está invertida; PreconditionFailedException: Una ventana sin eventos no mide nada; PreconditionFailedException: Los eventos buenos no pueden superar a los totales; PreconditionFailedException: El objetivo no está activo; PreconditionFailedException: La ventana precede a la vigencia del objetivo; PreconditionFailedException: La ventana excede la vigencia del objetivo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1620,7 +1839,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases — etapa `UC-46-09`
 
 ---
 

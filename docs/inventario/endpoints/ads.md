@@ -206,6 +206,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `adSetIds` | `array<string>` | Sí | formato uuid | — | Valor de ad set ids mantenido por la instancia. | `src/modules/ads/dto/ads.dto.ts:824` |
 | `adIds` | `array<string>` | Sí | formato uuid | — | Valor de ad ids mantenido por la instancia. | `src/modules/ads/dto/ads.dto.ts:830` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta publicitaria no encontrada; ResourceNotFoundException: Segmentación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La campaña debe terminar después de empezar; PreconditionFailedException: La campaña o sus conjuntos necesitan presupuesto; PreconditionFailedException: La cuenta publicitaria no está activa; PreconditionFailedException: La cuenta agotó su tope de gasto |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -214,7 +228,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-04`
 
 ---
 
@@ -353,6 +367,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `variantIds` | `array<string>` | Sí | formato uuid | — | Valor de variant ids mantenido por la instancia. | `src/modules/ads/dto/ads.dto.ts:1973` |
 | `entitiesActivated` | `number` | Sí | — | — | Entidades que pasaron de pausadas a activas | `src/modules/ads/dto/ads.dto.ts:1979` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta publicitaria no encontrada; ResourceNotFoundException: Campaña de la variante no encontrada; ResourceNotFoundException: Conjunto de la variante no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El reparto de tráfico debe sumar 100; PreconditionFailedException: El experimento necesita exactamente un control |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -361,7 +389,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-10`
 
 ---
 
@@ -459,6 +487,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `lines` | `number` | Sí | — | — | Líneas emitidas, una por campaña con gasto | `src/modules/ads/dto/ads.dto.ts:2467` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/ads/dto/ads.dto.ts:2473` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta publicitaria no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe una factura con ese número; ConflictException: El periodo ya está facturado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El periodo debe terminar después de empezar; PreconditionFailedException: No hay consumo registrado en el periodo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -467,7 +510,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-14`
 
 ---
 
@@ -574,6 +617,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `customAudienceId` | `string` | No | formato uuid | — | Identificador asociado a custom audience. | `src/modules/ads/dto/ads.dto.ts:993` |
 | `lookalikeSpecId` | `string` | No | formato uuid | — | Identificador asociado a lookalike spec. | `src/modules/ads/dto/ads.dto.ts:999` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta publicitaria no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El rango de edad está invertido; PreconditionFailedException: Una lookalike necesita país |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -582,7 +639,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-05`
 
 ---
 
@@ -689,6 +746,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `learningReset` | `boolean` | Sí | — | — | true si el cambio reinició la fase de aprendizaje del conjunto | `src/modules/ads/dto/ads.dto.ts:2744` |
 | `learningSnapshotId` | `string` | No | formato uuid | — | Identificador asociado a learning snapshot. | `src/modules/ads/dto/ads.dto.ts:2750` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conjunto de anuncios no encontrado; ResourceNotFoundException: Campaña del conjunto no encontrada |
+| 409 | `CONFLICT` | ConflictException: El tramo se solapa con otro vigente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tramo debe terminar después de empezar; PreconditionFailedException: El presupuesto del tramo excede el tope de gasto de la cuenta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -697,7 +769,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-16`
 
 ---
 
@@ -782,6 +854,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `adSetId` | `string` | Sí | formato uuid | — | Identificador asociado a ad set. | `src/modules/ads/dto/ads.dto.ts:1034` |
 | `supersededAssignmentId` | `string` | No | formato uuid | — | Asignación anterior cerrada, si la había | `src/modules/ads/dto/ads.dto.ts:1043` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conjunto de anuncios no encontrado; ResourceNotFoundException: Identidad no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La identidad no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -790,7 +876,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-05`
 
 ---
 
@@ -896,6 +982,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `effectiveStatusConceptId` | `string` | Sí | formato uuid | — | Estado efectivo en el que queda el anuncio | `src/modules/ads/dto/ads.dto.ts:2172` |
 | `duplicate` | `boolean` | Sí | — | — | true si el evento ya se había recibido | `src/modules/ads/dto/ads.dto.ts:2178` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Anuncio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un rechazo necesita código, categoría y severidad de la política |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -904,7 +1004,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-12`
 
 ---
 
@@ -999,6 +1099,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `duplicatesSkipped` | `number` | Sí | — | — | Coincidencias descartadas por tener ya un hallazgo vivo | sin fuente |
 | `hitIds` | `array<string>` | Sí | formato uuid | — | Valor de hit ids mantenido por la instancia. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Regla automatizada no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La regla no está habilitada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1007,7 +1121,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-11`
 
 ---
 
@@ -1114,6 +1228,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `accountStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a account status concept. | `src/modules/ads/dto/ads.dto.ts:155` |
 | `ownerRoleId` | `string` | Sí | formato uuid | — | Rol de administrador creado para el propietario | `src/modules/ads/dto/ads.dto.ts:164` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Business manager no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con esa referencia externa; ConflictException: Ya existe un business manager con esa referencia |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sin business manager hay que aportar nombre y referencia externa para crearlo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1122,7 +1251,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-01`
 
 ---
 
@@ -1224,6 +1353,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `delegatedAccessId` | `string` | No | formato uuid | — | Acceso delegado creado, si se pidió | `src/modules/ads/dto/ads.dto.ts:263` |
 | `partnerExisted` | `boolean` | Sí | — | — | true si el socio ya existía y se reutilizó | `src/modules/ads/dto/ads.dto.ts:269` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Business manager no encontrado; ResourceNotFoundException: Cuenta publicitaria no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El socio no está activo; PreconditionFailedException: La cuenta no pertenece a este business manager |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1232,7 +1375,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-02`
 
 ---
 
@@ -1357,6 +1500,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `setMembershipsAdded` | `number` | Sí | — | — | Miembros añadidos a conjuntos dinámicos | `src/modules/ads/dto/ads.dto.ts:2370` |
 | `catalogItemCount` | `number` | Sí | — | — | Total de productos del catálogo tras la corrida | `src/modules/ads/dto/ads.dto.ts:2378` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Catálogo no encontrado; ResourceNotFoundException: Feed no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El feed pertenece a otro catálogo; PreconditionFailedException: El feed no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1365,7 +1522,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-13`
 
 ---
 
@@ -1502,6 +1659,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `blocked` | `boolean` | Sí | — | — | true si la política de datos bloqueó el evento | `src/modules/ads/dto/ads.dto.ts:1660` |
 | `transformedFields` | `array<string>` | Sí | — | — | Campos que la política obligó a hashear o quitar | `src/modules/ads/dto/ads.dto.ts:1669` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset de conversión no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El dataset de conversión no está activo; PreconditionFailedException: La política exige consentimiento y el evento no lo aporta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1510,7 +1681,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-08`
 
 ---
 
@@ -1626,6 +1797,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/ads/dto/ads.dto.ts:1211` |
 | `fieldRuleIds` | `array<string>` | Sí | formato uuid | — | Valor de field rule ids mantenido por la instancia. | `src/modules/ads/dto/ads.dto.ts:1217` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una regla HASH necesita transformación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1634,7 +1819,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-06`
 
 ---
 
@@ -1766,6 +1951,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `amountSpent` | `string` | Sí | — | — | Gasto acumulado de la cuenta tras el lote | `src/modules/ads/dto/ads.dto.ts:1408` |
 | `spendCapReached` | `boolean` | Sí | — | — | true si el gasto alcanzó el tope de la cuenta | `src/modules/ads/dto/ads.dto.ts:1414` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conexión de plataforma no encontrada; ResourceNotFoundException: Cuenta publicitaria no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La conexión de plataforma no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1774,7 +1973,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-07`
 
 ---
 
@@ -1891,6 +2090,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `duplicate` | `boolean` | Sí | — | — | true si el lead ya se había recibido | `src/modules/ads/dto/ads.dto.ts:2623` |
 | `deliveryEventId` | `string` | No | formato uuid | — | Intento de entrega al CRM | `src/modules/ads/dto/ads.dto.ts:2632` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Formulario de leads no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El formulario no está activo; PreconditionFailedException: Faltan respuestas obligatorias del formulario |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1899,7 +2112,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-15`
 
 ---
 
@@ -2010,6 +2223,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `attributedValue` | `string` | Sí | — | — | Valor atribuido a los eventos emparejados | `src/modules/ads/dto/ads.dto.ts:1821` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/ads/dto/ads.dto.ts:1827` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta publicitaria no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2018,7 +2244,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-09`
 
 ---
 
@@ -2140,6 +2366,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `identitiesUpdated` | `number` | Sí | — | — | Identidades que ya existían y se actualizaron | `src/modules/ads/dto/ads.dto.ts:453` |
 | `syncRunId` | `string` | Sí | formato uuid | — | Registro de la sincronización | `src/modules/ads/dto/ads.dto.ts:459` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Business manager no encontrado |
+| 409 | `CONFLICT` | ConflictException: Esa cuenta de la plataforma ya está conectada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2148,7 +2388,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-03`
 
 ---
 
@@ -2231,6 +2471,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `adPolicyViolationId` | `string` | Sí | formato uuid | — | Identificador asociado a ad policy violation. | `src/modules/ads/dto/ads.dto.ts:2216` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/ads/dto/ads.dto.ts:2222` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Infracción no encontrada |
+| 409 | `CONFLICT` | ConflictException: La infracción ya tiene una apelación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La infracción ya no está abierta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/ads.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2239,7 +2494,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 43 — Publicidad, Assets, Entrega, Comercio y Optimización — etapa `UC-43-12`
 
 ---
 

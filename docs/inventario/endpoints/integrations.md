@@ -85,6 +85,20 @@ La operación no recibe cuerpo.
 | `state` | `string` | Sí | formato uuid | — | Concept id del estado resultante | `src/modules/integrations/dto/responses.dto.ts:350` |
 | `heldMessages` | `number` | Sí | — | — | Nº de mensajes QUEUED retenidos (HELD) | `src/modules/integrations/dto/responses.dto.ts:355` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conexión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La conexión no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -93,7 +107,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsConnectionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -180,6 +194,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `credentialId` | `string` | Sí | formato uuid | — | Identificador asociado a credential. | `src/modules/integrations/dto/responses.dto.ts:62` |
 | `rotatedAt` | `string` | Sí | formato date-time | — | Valor de rotated at mantenido por la instancia. | `src/modules/integrations/dto/responses.dto.ts:66` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conexión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La conexión no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -188,7 +216,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsConnectionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -279,6 +307,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `correlationId` | `string` | Sí | — | — | Identificador asociado a correlation. | `src/modules/integrations/dto/responses.dto.ts:113` |
 | `idempotent` | `boolean` | Sí | — | — | true si se devolvió una fila preexistente por idempotencia | `src/modules/integrations/dto/responses.dto.ts:120` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conexión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La conexión no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -287,7 +329,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -348,6 +390,20 @@ La operación no recibe cuerpo.
 | `outboundMessageId` | `string` | Sí | formato uuid | — | Identificador asociado a outbound message. | `src/modules/integrations/dto/responses.dto.ts:222` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del mensaje entrante | `src/modules/integrations/dto/responses.dto.ts:230` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Mensaje entrante no encontrado; ResourceNotFoundException: No hay mensaje saliente correlacionado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mensaje entrante no está en estado recibido; PreconditionFailedException: El mensaje entrante no tiene correlación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -356,7 +412,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -416,6 +472,20 @@ La operación no recibe cuerpo.
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado resultante | `src/modules/integrations/dto/responses.dto.ts:185` |
 | `alreadyDeadLettered` | `boolean` | Sí | — | — | true si ya estaba en dead-letter (no-op idempotente) | `src/modules/integrations/dto/responses.dto.ts:192` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Mensaje no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mensaje no está en estado fallido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -424,7 +494,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -495,6 +565,20 @@ _El DTO no declara campos documentables, o no se pudo leer._
 | `isSuccess` | `boolean` | Sí | — | — | Valor de is success mantenido por la instancia. | `src/modules/integrations/dto/responses.dto.ts:140` |
 | `responseId` | `string` | Sí | formato uuid | — | Identificador asociado a response. | `src/modules/integrations/dto/responses.dto.ts:144` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Mensaje no encontrado; ResourceNotFoundException: Conexión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mensaje no está en cola; PreconditionFailedException: El proveedor no tiene base_url configurada para el despacho |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -503,7 +587,7 @@ _El DTO no declara campos documentables, o no se pudo leer._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -564,6 +648,20 @@ La operación no recibe cuerpo.
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado resultante del mensaje | `src/modules/integrations/dto/responses.dto.ts:164` |
 | `nextRetryAt` | `string` | No | formato date-time | — | Valor de next retry at mantenido por la instancia. | `src/modules/integrations/dto/responses.dto.ts:169` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Mensaje no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mensaje no está en estado fallido; PreconditionFailedException: Se agotaron los reintentos (usar dead-letter) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -572,7 +670,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -628,6 +726,18 @@ La operación no recibe cuerpo.
 | `messages` | `array<PendingCorrelationItemDto>` | Sí | — | — | Valor de messages mantenido por la instancia. | `src/modules/integrations/dto/responses.dto.ts:334` |
 | `messages[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/integrations/dto/responses.dto.ts:322` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -636,7 +746,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -692,6 +802,18 @@ La operación no recibe cuerpo.
 | `messages` | `array<PendingDispatchItemDto>` | Sí | — | — | Valor de messages mantenido por la instancia. | `src/modules/integrations/dto/responses.dto.ts:279` |
 | `messages[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/integrations/dto/responses.dto.ts:266` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -700,7 +822,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -759,6 +881,18 @@ La operación no recibe cuerpo.
 | `messages[].nextAttemptNumber` | `number` | Sí | — | — | Número que tendría el próximo intento | `src/modules/integrations/dto/responses.dto.ts:292` |
 | `messages[].exhausted` | `boolean` | Sí | — | — | true si el próximo intento excede MAX_ATTEMPTS: el worker debe | `src/modules/integrations/dto/responses.dto.ts:301` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -767,7 +901,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -854,6 +988,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `state` | `string` | Sí | formato uuid | — | Concept id del estado | `src/modules/integrations/dto/responses.dto.ts:21` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/integrations/dto/responses.dto.ts:25` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un proveedor con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -862,7 +1009,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -957,6 +1104,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado | sin fuente |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proveedor no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -965,7 +1126,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1081,6 +1242,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `state` | `string` | Sí | formato uuid | — | Concept id del estado | `src/modules/integrations/dto/responses.dto.ts:91` |
 | `mappingsCount` | `number` | Sí | — | — | Nº de mapeos de campos creados | `src/modules/integrations/dto/responses.dto.ts:96` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe un endpoint con esa versión para el proveedor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proveedor no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1089,7 +1265,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1180,6 +1356,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `state` | `string` | Sí | formato uuid | — | Concept id del estado | `src/modules/integrations/dto/responses.dto.ts:251` |
 | `updated` | `boolean` | Sí | — | — | true si se actualizó una suscripción existente | `src/modules/integrations/dto/responses.dto.ts:258` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proveedor no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1188,7 +1378,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1269,13 +1459,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado | `src/modules/integrations/dto/responses.dto.ts:205` |
 | `duplicate` | `boolean` | Sí | — | — | true si se de-duplicó una reentrega | `src/modules/integrations/dto/responses.dto.ts:210` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Firma del webhook inválida |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conexión no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integrations.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / integrations — etapa `ctrl:IntegrationsWebhooksController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

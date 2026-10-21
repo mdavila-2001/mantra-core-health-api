@@ -84,6 +84,17 @@ La operación no recibe cuerpo.
 | `items[].name` | `string` | Sí | — | — | Nombre del sistema de codificación | `src/modules/terminology/dto/code-systems-read.dto.ts:15` |
 | `items[].canonicalUrl` | `string` | Sí | — | — | URL canónica del sistema | `src/modules/terminology/dto/code-systems-read.dto.ts:19` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -92,7 +103,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyCodeSystemsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -179,6 +190,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `internalCode` | `string` | Sí | — | — | Código interno del sistema de códigos | `src/modules/terminology/dto/create-code-system.dto.ts:79` |
 | `sourceId` | `string` | Sí | — | — | Id de la fuente (creada o reutilizada) | `src/modules/terminology/dto/create-code-system.dto.ts:85` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un sistema de códigos con ese código interno |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -188,7 +212,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyCodeSystemsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -249,6 +273,18 @@ La operación no recibe cuerpo.
 | `items[].publishedAt` | `string` | Sí | formato date-time; admite null | — | Cuándo se publicó, si se publicó. | `src/modules/terminology/dto/code-systems-read.dto.ts:58` |
 | `items[].acceptsConcepts` | `boolean` | Sí | — | — | Si se le pueden importar conceptos | `src/modules/terminology/dto/code-systems-read.dto.ts:62` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -257,7 +293,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyCodeSystemsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -340,6 +376,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `version` | `string` | Sí | — | — | Etiqueta de versión | `src/modules/terminology/dto/create-code-system-version.dto.ts:45` |
 | `state` | `string` | Sí | — | — | Estado del ciclo de vida (código de concepto) | `src/modules/terminology/dto/create-code-system-version.dto.ts:51` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sistema de códigos no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe esa versión para el sistema de códigos |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -349,7 +399,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyCodeSystemsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -423,6 +473,19 @@ La operación no recibe cuerpo.
 | `properties[].dataType` | `string` | No | — | — | Tipo de dato técnico | `src/modules/terminology/dto/concept-properties.dto.ts:138` |
 | `properties[].valueJson` | `object` | Sí | — | — | Valor de la propiedad | `src/modules/terminology/dto/concept-properties.dto.ts:144` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; BadRequestException: $lookup exige los parámetros system y code |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sistema de códigos no encontrado; ResourceNotFoundException: El sistema de códigos no tiene versión vigente publicada; ResourceNotFoundException: Código no encontrado en la versión vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -431,7 +494,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyFhirController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -519,6 +582,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `matches[].context` | `string` | No | — | — | Contexto del mapeo | `src/modules/terminology/dto/translate-concept.dto.ts:97` |
 | `curated` | `boolean` | Sí | — | — | Verdadero si la llamada curó un mapeo en vez de sólo consultar | `src/modules/terminology/dto/translate-concept.dto.ts:130` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Concepto origen no encontrado; ResourceNotFoundException: Concepto destino no encontrado; ResourceNotFoundException: El mapeo dejó de existir durante el curado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Curar un mapeo exige declarar la equivalencia; PreconditionFailedException: Un concepto no puede mapearse a sí mismo; PreconditionFailedException: Los conceptos del mapeo tienen que estar activos |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -527,7 +604,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyFhirController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -614,6 +691,18 @@ La operación no recibe cuerpo.
 | `count` | `number` | Sí | — | — | Cantidad devuelta en esta página | `src/modules/terminology/dto/search-concepts.dto.ts:466` |
 | `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/terminology/dto/search-concepts.dto.ts:472` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El conjunto de valores no existe o no tiene versión vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -623,7 +712,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyConceptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -726,6 +815,19 @@ La operación no recibe cuerpo.
 | `image.alt` | `string` | No | — | — | Texto alternativo, para accesibilidad. | `src/modules/terminology/dto/search-concepts.dto.ts:309` |
 | `image.status` | `string` | No | valores: approved, pending, rejected | — | Estado de revisión de la imagen. | `src/modules/terminology/dto/search-concepts.dto.ts:313` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Concepto no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -734,7 +836,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyConceptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -816,6 +918,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `excludedMembers` | `number` | Sí | — | — | Miembros de conjuntos de valores que quedaron excluidos | `src/modules/terminology/dto/concept-properties.dto.ts:94` |
 | `alreadyRetired` | `boolean` | Sí | — | — | Verdadero si el concepto ya estaba retirado | `src/modules/terminology/dto/concept-properties.dto.ts:100` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Concepto no encontrado; ResourceNotFoundException: Concepto de reemplazo no encontrado |
+| 409 | `CONFLICT` | ConflictException: Un concepto no puede reemplazarse a sí mismo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El concepto de reemplazo está retirado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -824,7 +941,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyConceptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -928,6 +1045,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `preferred` | `boolean` | No | — | — | Si es la designación preferida | `src/modules/terminology/dto/create-designation.dto.ts:139` |
 | `propertiesCount` | `number` | Sí | — | — | Número de propiedades adjuntadas | `src/modules/terminology/dto/create-designation.dto.ts:145` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Concepto no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -937,7 +1067,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyConceptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1033,6 +1163,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `created` | `number` | Sí | — | — | Propiedades creadas | `src/modules/terminology/dto/concept-properties.dto.ts:45` |
 | `updated` | `number` | Sí | — | — | Propiedades actualizadas sobre una existente | `src/modules/terminology/dto/concept-properties.dto.ts:51` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Concepto no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1041,7 +1184,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyConceptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1129,6 +1272,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `relationshipTypeConceptId` | `string` | Sí | — | — | Tipo de relación (concepto) | `src/modules/terminology/dto/create-relationship.dto.ts:60` |
 | `ordinal` | `number` | No | — | — | Orden dentro de las relaciones del mismo tipo | `src/modules/terminology/dto/create-relationship.dto.ts:68` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Concepto origen no encontrado; ResourceNotFoundException: Concepto destino no encontrado |
+| 409 | `CONFLICT` | ConflictException: Un concepto no puede relacionarse consigo mismo; ConflictException: Ya existe una relación equivalente entre esos conceptos |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1138,7 +1295,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyConceptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1213,13 +1370,25 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:282` |
 | `possiblyTruncated` | `boolean` | Sí | — | — | — | `src/modules/terminology/dto/search-concepts.dto.ts:285` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El conjunto de valores no existe o no tiene versión vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyConceptsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1336,6 +1505,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `conceptsUpdated` | `number` | Sí | — | — | Configuraciones de concepto actualizadas | `src/modules/terminology/dto/tenant-catalog-policy.dto.ts:204` |
 | `updated` | `boolean` | Sí | — | — | Verdadero si la política ya existía y se actualizó | `src/modules/terminology/dto/tenant-catalog-policy.dto.ts:212` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conjunto de valores no encontrado; ResourceNotFoundException: Concepto no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política no permite renombrar conceptos; PreconditionFailedException: Sólo un concepto puede ser el valor por omisión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1344,7 +1527,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyTenantCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1412,6 +1595,16 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/terminology/dto/search-value-sets.dto.ts:86` |
 | `nextCursor` | `string` | No | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/terminology/dto/search-value-sets.dto.ts:92` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1423,7 +1616,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyValueSetsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1519,6 +1712,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `versionId` | `string` | Sí | — | — | Id de la versión inicial creada | `src/modules/terminology/dto/create-value-set.dto.ts:136` |
 | `rulesCount` | `number` | Sí | — | — | Número de reglas creadas | `src/modules/terminology/dto/create-value-set.dto.ts:142` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un conjunto de valores con ese código interno |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1528,7 +1734,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyValueSetsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1602,6 +1808,19 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/terminology/dto/read-value-set-expansion.dto.ts:120` |
 | `nextCursor` | `string` | No | admite null | — | Cursor opaco para pedir la página siguiente | `src/modules/terminology/dto/read-value-set-expansion.dto.ts:133` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conjunto de valores no encontrado; ResourceNotFoundException: Versión del conjunto de valores no encontrada / El conjunto de valores no tiene una versión vigente |
+| 409 | `CONFLICT` | ConflictException: La versión no pertenece a ese conjunto de valores |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1613,7 +1832,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyValueSetsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1708,6 +1927,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `includedMembers` | `number` | Sí | — | — | Conceptos incluidos en la expansión | `src/modules/terminology/dto/expand-value-set.dto.ts:75` |
 | `replacedMembers` | `number` | Sí | — | — | Miembros de la expansión anterior que se reemplazaron | `src/modules/terminology/dto/expand-value-set.dto.ts:83` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conjunto de valores no encontrado; ResourceNotFoundException: Versión del conjunto de valores no encontrada |
+| 409 | `CONFLICT` | ConflictException: La versión no pertenece a ese conjunto de valores |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se expanden versiones en borrador o activas |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1716,7 +1950,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyFhirController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1811,6 +2045,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `skipped` | `number` | Sí | — | — | Conceptos omitidos por existir ya en la versión | `src/modules/terminology/dto/import-concepts.dto.ts:78` |
 | `total` | `number` | Sí | — | — | Conceptos recibidos en la petición | `src/modules/terminology/dto/import-concepts.dto.ts:84` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede importar en una versión que no está en borrador |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1820,7 +2068,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyVersionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1910,6 +2158,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `errorSamples[].line` | `number` | Sí | — | — | Línea del archivo, empezando en 1 | `src/modules/terminology/dto/import-concepts-file.dto.ts:7` |
 | `errorSamples[].message` | `string` | Sí | — | — | Motivo por el que la línea se descartó | `src/modules/terminology/dto/import-concepts-file.dto.ts:11` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: El sistema de codificación de la versión no existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el archivo; PreconditionFailedException: El archivo llegó vacío; PreconditionFailedException: Solo se puede importar en una versión en borrador; PreconditionFailedException: Ninguna línea del archivo es un concepto válido: se esperaba NDJSON con «code» y «display» por línea. / El archivo no tiene ninguna línea con contenido. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1918,7 +2180,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyVersionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1978,6 +2240,21 @@ La operación no recibe cuerpo.
 | `state` | `string` | Sí | — | — | Estado del ciclo de vida tras la publicación (código de concepto) | `src/modules/terminology/dto/publish-version.dto.ts:18` |
 | `publishedAt` | `string` | Sí | formato date-time | — | Instante de publicación | `src/modules/terminology/dto/publish-version.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada |
+| 409 | `CONFLICT` | ConflictException: La versión ya está publicada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede publicar una versión en borrador |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/terminology.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1987,7 +2264,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Terminology module — etapa `ctrl:TerminologyVersionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

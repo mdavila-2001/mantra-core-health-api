@@ -152,13 +152,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `eventIds` | `array<string>` | Sí | — | — | Ids de los eventos insertados | `src/modules/telemetry/dto/activity-event.dto.ts:248` |
 | `sessionJourneyId` | `string` | No | formato uuid | — | Journey de sesión afectado | `src/modules/telemetry/dto/activity-event.dto.ts:257` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Esquema de evento no encontrado; ResourceNotFoundException: Journey de sesión no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryEventsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -239,6 +252,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `reused` | `boolean` | Sí | — | — | true si el sujeto ya existía (idempotente) | `src/modules/telemetry/dto/analytics-subject.dto.ts:96` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/telemetry/dto/analytics-subject.dto.ts:102` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -247,7 +272,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryConsentController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -354,13 +379,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `sessionJourneyId` | `string` | Sí | formato uuid | — | Journey de sesión creado o enlazado | `src/modules/telemetry/dto/client-context.dto.ts:204` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/telemetry/dto/client-context.dto.ts:210` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryEventsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -447,13 +485,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `analyticsSubjectId` | `string` | Sí | formato uuid | — | Identificador asociado a analytics subject. | `src/modules/telemetry/dto/conversion-event.dto.ts:72` |
 | `convertedAt` | `string` | Sí | formato date-time | — | Valor de converted at mantenido por la instancia. | `src/modules/telemetry/dto/conversion-event.dto.ts:78` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Funnel no encontrado; ResourceNotFoundException: Sujeto de analítica no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryEventsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -536,6 +587,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `userId` | `string` | Sí | formato uuid | — | Identificador asociado a user. | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:78` |
 | `acceptedAt` | `string` | Sí | formato date-time | — | Valor de accepted at mantenido por la instancia. | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:84` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de disclosure no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -544,7 +608,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryConsentController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -628,6 +692,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/telemetry/dto/disclosure-version.dto.ts:92` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/telemetry/dto/disclosure-version.dto.ts:98` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe esa versión del documento |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -636,7 +713,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -728,6 +805,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/telemetry/dto/event-schema.dto.ts:127` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/telemetry/dto/event-schema.dto.ts:133` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Propósito de tracking no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe un esquema con ese nombre y versión |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El propósito de tracking no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -736,7 +828,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -841,6 +933,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/telemetry/dto/funnel.dto.ts:138` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/telemetry/dto/funnel.dto.ts:144` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Propósito de tracking no encontrado |
+| 409 | `CONFLICT` | ConflictException: El código de funnel ya existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esquema de evento de un paso no existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -849,7 +956,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -930,13 +1037,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `endedAt` | `string` | No | formato date-time | — | Valor de ended at mantenido por la instancia. | `src/modules/telemetry/dto/session-journey.dto.ts:44` |
 | `eventCount` | `number` | Sí | — | — | Valor de event count mantenido por la instancia. | `src/modules/telemetry/dto/session-journey.dto.ts:50` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El journey ya está cerrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryEventsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1020,6 +1141,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `grantedAt` | `string` | No | formato date-time | — | Valor de granted at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:93` |
 | `withdrawnAt` | `string` | No | formato date-time | — | Valor de withdrawn at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:99` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Propósito de tracking no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El propósito no requiere consentimiento |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1028,7 +1163,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryConsentController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1091,6 +1226,20 @@ La operación no recibe cuerpo.
 | `grantedAt` | `string` | No | formato date-time | — | Valor de granted at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:93` |
 | `withdrawnAt` | `string` | No | formato date-time | — | Valor de withdrawn at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:99` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No hay un consentimiento vigente que retirar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1099,7 +1248,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryConsentController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1190,6 +1339,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `requiresConsent` | `boolean` | Sí | — | — | Requiere consentimiento | `src/modules/telemetry/dto/tracking-purpose.dto.ts:124` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/telemetry/dto/tracking-purpose.dto.ts:130` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El código de propósito ya existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1198,7 +1360,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1296,13 +1458,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `inserted` | `number` | Sí | — | — | Valor de inserted mantenido por la instancia. | `src/modules/telemetry/dto/web-vital.dto.ts:122` |
 | `ids` | `array<string>` | Sí | — | — | Valor de ids mantenido por la instancia. | `src/modules/telemetry/dto/web-vital.dto.ts:128` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / telemetry — etapa `ctrl:TelemetryEventsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

@@ -109,6 +109,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:118` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:124` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un agente con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -117,7 +130,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-01`
 
 ---
 
@@ -204,6 +217,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:572` |
 | `duplicate` | `boolean` | Sí | — | — | true si la clave ya se había usado y se devuelve la corrida previa | `src/modules/health_context/dto/health-context.dto.ts:581` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Programación no encontrada; ResourceNotFoundException: Agente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La programación no está activa; PreconditionFailedException: La corrida necesita agente y país, o una programación de la que salgan; PreconditionFailedException: El agente no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -212,7 +239,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-05`
 
 ---
 
@@ -302,6 +329,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `observationsRejected` | `string` | Sí | — | — | Valor de observations rejected mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1142` |
 | `sourceCount` | `number` | Sí | — | — | Fuentes distintas que aportaron observaciones | `src/modules/health_context/dto/health-context.dto.ts:1148` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
+| 409 | `CONFLICT` | ConflictException: La corrida ya está cerrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una corrida fallida debe declarar qué salió mal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -310,7 +352,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-10`
 
 ---
 
@@ -411,6 +453,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:690` |
 | `duplicate` | `boolean` | Sí | — | — | true si ya se había recogido el mismo contenido en la corrida | `src/modules/health_context/dto/health-context.dto.ts:699` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada; ResourceNotFoundException: Fuente no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La corrida ya no está en curso; PreconditionFailedException: La fuente no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -419,7 +475,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-06`
 
 ---
 
@@ -503,6 +559,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `contextKey` | `string` | Sí | — | — | Valor de context key mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:477` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | El contexto nace en borrador, sin versión vigente | `src/modules/health_context/dto/health-context.dto.ts:486` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe ese contexto para el país y el dominio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -511,7 +580,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-04`
 
 ---
 
@@ -658,6 +727,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `factIds` | `array<string>` | Sí | formato uuid | — | Valor de fact ids mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:945` |
 | `evidenceCount` | `number` | Sí | — | — | Enlaces hecho → observación creados | `src/modules/health_context/dto/health-context.dto.ts:951` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contexto no encontrado; ResourceNotFoundException: Corrida no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La clave del hecho está repetida en la versión; PreconditionFailedException: La corrida no está en un estado del que se pueda versionar; PreconditionFailedException: La corrida es de otro país; PreconditionFailedException: La evidencia debe apuntar a una observación aceptada de la misma corrida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -666,7 +749,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-07`
 
 ---
 
@@ -743,6 +826,20 @@ La operación no recibe cuerpo.
 | `facts[].confidenceScore` | `string` | No | — | — | Valor de confidence score mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:1269` |
 | `facts[].evidenceObservationIds` | `array<string>` | Sí | formato uuid | — | Observaciones que respaldan el hecho | `src/modules/health_context/dto/health-context.dto.ts:1279` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contexto no encontrado; ResourceNotFoundException: La versión vigente no existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contexto no tiene versión vigente; PreconditionFailedException: La versión vigente no está publicada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -751,7 +848,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-12`
 
 ---
 
@@ -831,6 +928,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `results[].nextRunAt` | `string` | No | formato date-time | — | Próxima marca calculada a partir del cron de la programación | `src/modules/health_context/dto/health-context.dto.ts:378` |
 | `results[].skippedReason` | `string` | No | — | — | Motivo por el que esta marca no llegó a encolar una corrida | `src/modules/health_context/dto/health-context.dto.ts:386` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -839,7 +948,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -927,6 +1036,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `nextRunAt` | `string` | Sí | formato date-time | — | Valor de next run at mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:330` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Agente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La expresión de programación debe tener cinco campos; PreconditionFailedException: El agente no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -935,7 +1058,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-03`
 
 ---
 
@@ -1025,6 +1148,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/health_context/dto/health-context.dto.ts:222` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_context/dto/health-context.dto.ts:228` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una fuente con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1033,7 +1169,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-02`
 
 ---
 
@@ -1093,6 +1229,20 @@ La operación no recibe cuerpo.
 | `state` | `string` | Sí | — | — | Estado del ciclo de vida tras la publicación (código de concepto) | sin fuente |
 | `publishedAt` | `string` | Sí | formato date-time | — | Instante de publicación | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: Contexto no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se publica una versión aprobada en revisión de calidad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1101,7 +1251,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-09`
 
 ---
 
@@ -1191,6 +1341,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `contextVersionId` | `string` | Sí | formato uuid | — | Identificador asociado a context version. | `src/modules/health_context/dto/health-context.dto.ts:1019` |
 | `versionStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda la versión | `src/modules/health_context/dto/health-context.dto.ts:1028` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión no está en borrador |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1199,7 +1363,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-08`
 
 ---
 
@@ -1287,6 +1451,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `currentVersionId` | `string` | No | formato uuid | — | Versión que queda vigente | `src/modules/health_context/dto/health-context.dto.ts:1209` |
 | `contextStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el contexto | `src/modules/health_context/dto/health-context.dto.ts:1218` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: Contexto no encontrado; ResourceNotFoundException: Versión de reemplazo no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sustituir exige declarar la versión que reemplaza; PreconditionFailedException: La versión no está publicada; PreconditionFailedException: El reemplazo es de otro contexto; PreconditionFailedException: El reemplazo debe estar aprobado en revisión de calidad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1295,7 +1473,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 44 — Contexto de Salud por País — etapa `UC-44-11`
 
 ---
 

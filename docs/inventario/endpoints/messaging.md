@@ -110,6 +110,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/messaging/dto/messaging.dto.ts:258` |
 | `handledAt` | `string` | No | formato date-time | — | Valor de handled at mantenido por la instancia. | `src/modules/messaging/dto/messaging.dto.ts:264` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Entrega no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un acuse fallido debe declarar qué falló; PreconditionFailedException: La entrega ya está resuelta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -118,7 +132,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-04`
 
 ---
 
@@ -208,6 +222,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `deliveries[].jobId` | `string` | No | formato uuid | — | Job encolado si el modo es cola | `src/modules/messaging/dto/messaging.dto.ts:182` |
 | `deliveries[].duplicate` | `boolean` | Sí | — | — | true si la entrega ya existía y no se duplicó | `src/modules/messaging/dto/messaging.dto.ts:188` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Evento de dominio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El evento todavía no está publicado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -216,7 +244,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-03`
 
 ---
 
@@ -298,6 +326,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/messaging/dto/messaging.dto.ts:360` |
 | `duplicate` | `boolean` | Sí | — | — | true si ya había un job con esa clave y se devuelve el mismo | `src/modules/messaging/dto/messaging.dto.ts:368` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Trabajo no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El trabajo no está en ejecución; PreconditionFailedException: El trabajo está reservado por otro worker |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -306,7 +348,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-07`
 
 ---
 
@@ -393,6 +435,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `availableAt` | `string` | No | formato date-time | — | Cuándo se reintenta; ausente si agotó los intentos | `src/modules/messaging/dto/messaging.dto.ts:530` |
 | `deadLetterJobId` | `string` | No | formato uuid | — | Entrada de cola muerta si agotó | `src/modules/messaging/dto/messaging.dto.ts:539` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Trabajo no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El trabajo no está en ejecución; PreconditionFailedException: El trabajo está reservado por otro worker |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -401,7 +457,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-08`
 
 ---
 
@@ -506,6 +562,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `inAppNotificationId` | `string` | No | formato uuid | — | Notificación in-app creada | `src/modules/messaging/dto/messaging.dto.ts:975` |
 | `duplicate` | `boolean` | Sí | — | — | true si ese intento ya estaba registrado | `src/modules/messaging/dto/messaging.dto.ts:981` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de notificación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal no existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -514,7 +584,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-11`
 
 ---
 
@@ -578,6 +648,18 @@ La operación no recibe cuerpo.
 | `requests[].recipientUserId` | `string` | No | formato uuid | — | Identificador asociado a recipient user. | `src/modules/messaging/dto/messaging.dto.ts:821` |
 | `requests[].channelTypeConceptId` | `string` | No | formato uuid | — | Tipo del canal (correo, in-app…). Viaja con el lote porque el worker necesita saber si hay un tercero al que llamar **antes** de llamarlo: una notificación in-app no sale a ningún proveedor, y sin este dato el adaptador por defecto la marcaba `FAILED` con `PROVIDER_NOT_CONFIGURED` — un fallo inventado por preguntarle a un proveedor que para ese canal no tiene que existir. | `src/modules/messaging/dto/messaging.dto.ts:832` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -586,7 +668,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `ctrl:MessagingInternalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -669,6 +751,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `messages[].statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/messaging/dto/messaging.dto.ts:98` |
 | `messages[].attempts` | `number` | Sí | — | — | Valor de attempts mantenido por la instancia. | `src/modules/messaging/dto/messaging.dto.ts:104` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -678,7 +772,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-02`
 
 ---
 
@@ -764,6 +858,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `jobs[].lockExpiresAt` | `string` | Sí | formato date-time | — | Hasta cuándo el job es de este worker | `src/modules/messaging/dto/messaging.dto.ts:434` |
 | `claimed` | `number` | Sí | — | — | Valor de claimed mantenido por la instancia. | `src/modules/messaging/dto/messaging.dto.ts:457` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cola no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cola no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -772,7 +880,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-06`
 
 ---
 
@@ -831,6 +939,20 @@ La operación no recibe cuerpo.
 | `readAt` | `string` | Sí | formato date-time | — | Se conserva la primera lectura | `src/modules/messaging/dto/messaging.dto.ts:1118` |
 | `alreadyRead` | `boolean` | Sí | — | — | true si ya estaba leída | `src/modules/messaging/dto/messaging.dto.ts:1124` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Notificación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación es de otro destinatario |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -839,7 +961,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-13`
 
 ---
 
@@ -889,13 +1011,24 @@ La operación no recibe cuerpo.
 | `marked` | `number` | Sí | — | — | Cuántas se marcaron en esta pasada. | `src/modules/messaging/dto/in-app.dto.ts:147` |
 | `unreadCount` | `number` | Sí | — | — | Cuántas quedan sin leer después de marcar. | `src/modules/messaging/dto/in-app.dto.ts:151` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `ctrl:MessagingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -966,13 +1099,24 @@ La operación no recibe cuerpo.
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/messaging/dto/in-app.dto.ts:131` |
 | `unreadCount` | `number` | Sí | — | — | Cuántas quedan sin leer **en total**, no en esta página. Viaja con cada página porque es el número del badge, y pedirlo aparte obligaría a la campana a hacer dos llamadas por cada tic de sondeo. | `src/modules/messaging/dto/in-app.dto.ts:140` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `ctrl:MessagingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1026,13 +1170,25 @@ La operación no recibe cuerpo.
 | `quietHours.start` | `string` | No | patrón runtime /^([01]\d\|2[0-3]):[0-5]\d$/ | `@IsString()` `@Matches(/^([01]\d\|2[0-3]):[0-5]\d$/, { message: 'La hora de inicio debe tener el formato HH:mm', })` | — | `src/modules/messaging/dto/in-app.dto.ts:172` |
 | `quietHours.end` | `string` | No | patrón runtime /^([01]\d\|2[0-3]):[0-5]\d$/ | `@IsString()` `@Matches(/^([01]\d\|2[0-3]):[0-5]\d$/, { message: 'La hora de fin debe tener el formato HH:mm', })` | — | `src/modules/messaging/dto/in-app.dto.ts:185` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `ctrl:MessagingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1121,13 +1277,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `quietHours.start` | `string` | No | patrón runtime /^([01]\d\|2[0-3]):[0-5]\d$/ | `@IsString()` `@Matches(/^([01]\d\|2[0-3]):[0-5]\d$/, { message: 'La hora de inicio debe tener el formato HH:mm', })` | — | `src/modules/messaging/dto/in-app.dto.ts:172` |
 | `quietHours.end` | `string` | No | patrón runtime /^([01]\d\|2[0-3]):[0-5]\d$/ | `@IsString()` `@Matches(/^([01]\d\|2[0-3]):[0-5]\d$/, { message: 'La hora de fin debe tener el formato HH:mm', })` | — | `src/modules/messaging/dto/in-app.dto.ts:185` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `ctrl:MessagingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1231,6 +1400,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `suppressionReason` | `string` | No | — | — | Por qué se suprimió | `src/modules/messaging/dto/messaging.dto.ts:771` |
 | `debounced` | `boolean` | Sí | — | — | true si otra solicitud viva tenía la misma clave de rebote | `src/modules/messaging/dto/messaging.dto.ts:779` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1239,7 +1422,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-10`
 
 ---
 
@@ -1339,6 +1522,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/messaging/dto/messaging.dto.ts:360` |
 | `duplicate` | `boolean` | Sí | — | — | true si ya había un job con esa clave y se devuelve el mismo | `src/modules/messaging/dto/messaging.dto.ts:368` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cola no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cola no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1347,7 +1544,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-05`
 
 ---
 
@@ -1432,6 +1629,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/messaging/dto/messaging.dto.ts:589` |
 | `duplicate` | `boolean` | Sí | — | — | true si ese DLQ ya se había reencolado | `src/modules/messaging/dto/messaging.dto.ts:595` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Entrada de cola muerta no encontrada; ResourceNotFoundException: Cola de destino no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cola de destino no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1440,7 +1651,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-09`
 
 ---
 
@@ -1535,6 +1746,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `requestStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda la solicitud | `src/modules/messaging/dto/messaging.dto.ts:1082` |
 | `duplicate` | `boolean` | Sí | — | — | true si el mismo acuse ya se había procesado | `src/modules/messaging/dto/messaging.dto.ts:1088` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Firma del acuse del proveedor inválida |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado; ResourceNotFoundException: No hay entrega con esa referencia de mensaje |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/messaging.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1543,7 +1766,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 35 — Mensajería (outbox, colas y notificación multicanal) — etapa `UC-35-12`
 
 ---
 

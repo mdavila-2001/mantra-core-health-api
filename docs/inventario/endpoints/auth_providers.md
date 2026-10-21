@@ -104,6 +104,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `expiresAt` | `string` | Sí | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/auth_providers/dto/auth-providers.dto.ts:1089` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/auth_providers/dto/auth-providers.dto.ts:1095` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 409 | `CONFLICT` | ConflictException: El sujeto externo ya está vinculado; ConflictException: Ya hay una solicitud de vinculación pendiente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proveedor está deshabilitado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -112,7 +127,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-09`
 
 ---
 
@@ -196,6 +211,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `userId` | `string` | Sí | formato uuid | — | Identificador asociado a user. | `src/modules/auth_providers/dto/auth-providers.dto.ts:1160` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/auth_providers/dto/auth-providers.dto.ts:1166` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de vinculación no encontrada |
+| 409 | `CONFLICT` | ConflictException: El sujeto externo ya está vinculado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud ya no está pendiente; PreconditionFailedException: La solicitud de vinculación caducó |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -204,7 +234,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-10`
 
 ---
 
@@ -285,6 +315,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/auth_providers/dto/auth-providers.dto.ts:1197` |
 | `attemptId` | `string` | Sí | formato uuid | — | Registro del desenlace | `src/modules/auth_providers/dto/auth-providers.dto.ts:1203` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Identidad federada no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La identidad ya está revocada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -293,7 +337,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-12`
 
 ---
 
@@ -383,6 +427,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `state` | `string` | Sí | formato uuid | — | Concept id del estado | sin fuente |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un proveedor con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un proveedor no global necesita el tenant al que pertenece |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -391,7 +449,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-01`
 
 ---
 
@@ -492,6 +550,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `removed` | `number` | Sí | — | — | Mapeos anteriores retirados | `src/modules/auth_providers/dto/auth-providers.dto.ts:593` |
 | `identifierClaim` | `string` | Sí | — | — | Claim que identifica al sujeto | `src/modules/auth_providers/dto/auth-providers.dto.ts:599` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mapeo necesita exactamente un claim identificador; PreconditionFailedException: El claim de origen está repetido en el mapeo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -500,7 +572,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-04`
 
 ---
 
@@ -628,6 +700,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `replaced` | `boolean` | Sí | — | — | true si sustituyó a una configuración existente | `src/modules/auth_providers/dto/auth-providers.dto.ts:363` |
 | `importedKeyIds` | `array<string>` | Sí | formato uuid | — | Claves importadas del JWKS | `src/modules/auth_providers/dto/auth-providers.dto.ts:373` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una configuración SAML necesita entity ID y ACS URL; PreconditionFailedException: La configuración necesita el identificador de cliente; PreconditionFailedException: La configuración necesita los endpoints de autorización y token; PreconditionFailedException: Una configuración OIDC necesita JWKS o documento de descubrimiento |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -636,7 +722,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-02`
 
 ---
 
@@ -729,6 +815,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `effectConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a effect concept. | `src/modules/auth_providers/dto/auth-providers.dto.ts:800` |
 | `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/auth_providers/dto/auth-providers.dto.ts:806` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe una regla con esa prioridad |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una regla DENY no asigna rol ni tenant |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -737,7 +838,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-06`
 
 ---
 
@@ -830,6 +931,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `keyId` | `string` | Sí | — | — | Identificador asociado a key. | `src/modules/auth_providers/dto/auth-providers.dto.ts:447` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/auth_providers/dto/auth-providers.dto.ts:453` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 409 | `CONFLICT` | ConflictException: El proveedor ya tiene una clave con ese identificador |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La vigencia de la clave está invertida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -838,7 +954,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-03`
 
 ---
 
@@ -934,6 +1050,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `retiringCount` | `number` | Sí | — | — | Claves que pasaron a retirándose | `src/modules/auth_providers/dto/auth-providers.dto.ts:487` |
 | `graceUntil` | `string` | No | formato date-time | — | Hasta cuándo se aceptan las salientes | `src/modules/auth_providers/dto/auth-providers.dto.ts:496` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 409 | `CONFLICT` | ConflictException: El proveedor ya tiene una clave con ese identificador |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -942,7 +1072,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-11`
 
 ---
 
@@ -1029,6 +1159,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `authorizeUrl` | `string` | Sí | — | — | URL de autorización del proveedor | `src/modules/auth_providers/dto/auth-providers.dto.ts:884` |
 | `pkceRequired` | `boolean` | Sí | — | — | true si el proveedor exige PKCE | `src/modules/auth_providers/dto/auth-providers.dto.ts:890` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proveedor no está activo; PreconditionFailedException: El proveedor no tiene configuración activa para ese entorno; PreconditionFailedException: La configuración no declara endpoint de autorización; PreconditionFailedException: El proveedor no está habilitado para ese tenant |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1037,7 +1181,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-07`
 
 ---
 
@@ -1142,6 +1286,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `linkToken` | `string` | No | — | — | Token de vinculación cuando hace falta confirmar la cuenta | `src/modules/auth_providers/dto/auth-providers.dto.ts:1019` |
 | `attemptId` | `string` | Sí | formato uuid | — | Intento registrado | `src/modules/auth_providers/dto/auth-providers.dto.ts:1025` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El `state` no corresponde a un login iniciado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1150,7 +1308,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-08`
 
 ---
 
@@ -1240,6 +1398,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 | `isEnabled` | `boolean` | Sí | — | — | Valor de is enabled mantenido por la instancia. | `src/modules/auth_providers/dto/auth-providers.dto.ts:702` |
 | `updated` | `boolean` | Sí | — | — | true si el vínculo ya existía y se actualizó | `src/modules/auth_providers/dto/auth-providers.dto.ts:708` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Aprovisionar automáticamente exige declarar el rol por defecto; PreconditionFailedException: El proveedor está deshabilitado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1248,7 +1420,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 40 — Proveedores de Identidad y Login Federado — etapa `UC-40-05`
 
 ---
 

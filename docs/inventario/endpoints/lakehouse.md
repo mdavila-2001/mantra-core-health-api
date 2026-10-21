@@ -116,13 +116,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:184` |
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:190` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un catálogo con ese código. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-02`
 
 ---
 
@@ -256,13 +269,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `supersededVersionId` | `string` | No | formato uuid | — | Versión anterior que quedó superseded | `src/modules/lakehouse/dto/lakehouse.dto.ts:389` |
 | `qualityRulesCreated` | `number` | Sí | — | — | Reglas de calidad derivadas del SLO | `src/modules/lakehouse/dto/lakehouse.dto.ts:395` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un producto con ese código para el tenant, con otro identificador.; ConflictException: El producto existente tiene otro código o pertenece a otro tenant.; ConflictException: Esa versión del producto ya está publicada.; ConflictException: Dos reglas de calidad comparten el mismo código. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-03`
 
 ---
 
@@ -379,13 +405,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `initialVersionId` | `string` | Sí | formato uuid | — | Versión 1.0.0, creada en la misma transacción | sin fuente |
 | `initialVersion` | `string` | Sí | — | — | Valor de initial version mantenido por la instancia. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de producto no encontrada.; ResourceNotFoundException: Zona no encontrada.; ResourceNotFoundException: Catálogo no encontrado. |
+| 409 | `CONFLICT` | ConflictException: Ya hay un dataset registrado para esa tabla. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión del producto ya no es la vigente.; PreconditionFailedException: La zona no está activa.; PreconditionFailedException: El catálogo no está activo. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-04`
 
 ---
 
@@ -501,13 +542,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `issuesOpened` | `number` | Sí | — | — | Hallazgos abiertos | `src/modules/lakehouse/dto/lakehouse.dto.ts:1057` |
 | `datasetQuarantined` | `boolean` | Sí | — | — | Verdadero si una regla bloqueante puso el dataset en cuarentena | `src/modules/lakehouse/dto/lakehouse.dto.ts:1066` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El hallazgo cita una regla que no está activa para la versión del producto. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-08`
 
 ---
 
@@ -668,13 +723,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `partitionsCommitted` | `number` | Sí | — | — | Valor de partitions committed mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:933` |
 | `filesWritten` | `number` | Sí | — | — | Valor de files written mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:939` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset objetivo no encontrado.; ResourceNotFoundException: Perfil de de-identificación no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El dataset objetivo no está activo; no admite escrituras.; PreconditionFailedException: La ingesta de-identificada sólo puede escribir en la zona curated. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-07`
 
 ---
 
@@ -841,13 +910,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `lineageEdges` | `number` | Sí | — | — | Aristas de linaje registradas (UC-63-06) | `src/modules/lakehouse/dto/lakehouse.dto.ts:799` |
 | `alreadyRunning` | `boolean` | Sí | — | — | Verdadero si ya había una corrida viva sobre el mismo objetivo | `src/modules/lakehouse/dto/lakehouse.dto.ts:808` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición de transformación no encontrada.; ResourceNotFoundException: Dataset objetivo no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición de transformación no está activa.; PreconditionFailedException: El dataset objetivo no está activo; no admite escrituras. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-05`
 
 ---
 
@@ -942,13 +1025,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `zoneType` | `string` | Sí | — | — | Valor de zone type mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:110` |
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:116` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una zona con ese código. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-01`
 
 ---
 
@@ -1045,13 +1141,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:1283` |
 | `requestedAt` | `string` | Sí | formato date-time | — | Valor de requested at mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:1289` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proyecto de investigación no encontrado.; ResourceNotFoundException: La cohorte no pertenece a ese proyecto.; ResourceNotFoundException: Versión de producto no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proyecto no está aprobado.; PreconditionFailedException: La ventana de aprobación ética del proyecto no está vigente.; PreconditionFailedException: La cohorte no está activa.; PreconditionFailedException: El producto contiene datos de paciente y la cohorte no declara perfil de de-identificación. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-10`
 
 ---
 
@@ -1160,13 +1270,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `expiresAt` | `string` | Sí | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:1394` |
 | `alreadyReleased` | `boolean` | Sí | — | — | Verdadero si el release ya estaba materializado | `src/modules/lakehouse/dto/lakehouse.dto.ts:1402` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de release no encontrada.; ResourceNotFoundException: Proyecto de investigación no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud no está en un estado que admita aprobación.; PreconditionFailedException: La aprobación ética del proyecto caducó; el release no puede materializarse.; PreconditionFailedException: La cohorte no declara perfil de de-identificación. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-11`
 
 ---
 
@@ -1257,13 +1381,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:1450` |
 | `alreadyClosed` | `boolean` | Sí | — | — | Verdadero si el release ya estaba cerrado | `src/modules/lakehouse/dto/lakehouse.dto.ts:1456` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de release no encontrada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-12`
 
 ---
 
@@ -1321,13 +1458,25 @@ La operación no recibe cuerpo.
 | `releases[].requestId` | `string` | Sí | formato uuid | — | Identificador asociado a request. | `src/modules/lakehouse/dto/lakehouse.dto.ts:1465` |
 | `releases[].expiresAt` | `string` | Sí | formato date-time | — | Fecha y hora en que venció el manifiesto. | `src/modules/lakehouse/dto/lakehouse.dto.ts:1471` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `ctrl:ResearchController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1416,13 +1565,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `code` | `string` | Sí | — | — | Código único dentro del tenant. | `src/modules/lakehouse/dto/lakehouse.dto.ts:1562` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Concepto de estado: nace activo. | `src/modules/lakehouse/dto/lakehouse.dto.ts:1564` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `ctrl:ResearchController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1549,13 +1710,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `version` | `string` | Sí | — | — | Valor de version mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:1217` |
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/lakehouse/dto/lakehouse.dto.ts:1223` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un proyecto con ese código para el tenant, con otro identificador.; ConflictException: El proyecto existente tiene otro código o pertenece a otro tenant.; ConflictException: Esa versión de la cohorte ya está definida. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana de aprobación ética tiene que empezar antes de terminar.; PreconditionFailedException: La aprobación ética ya está caducada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 63 — Lakehouse, productos de datos analíticos y releases de investigación — etapa `UC-63-09`
 
 ---
 

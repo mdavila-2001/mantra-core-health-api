@@ -61,6 +61,17 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/app.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -69,7 +80,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- app — etapa `ctrl:AppController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -111,6 +122,16 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/app.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -119,7 +140,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- app — etapa `ctrl:AppController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -163,6 +184,18 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. |
+
+El árbol de decisión completo está en [flujos](../flujos/app.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -171,7 +204,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- app — etapa `ctrl:DataSourcesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -215,6 +248,17 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/app.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -223,7 +267,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- app — etapa `ctrl:DataSourcesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -265,13 +309,23 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/app.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- app — etapa `ctrl:AppController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -313,13 +367,25 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: MongoDB no confirmó el ping; Error: Redis no respondió PONG; Error: OpenSearch está en estado red |
+| 503 | `DEPENDENCY_UNAVAILABLE` | ServiceUnavailableException: {{ code: ErrorCode.DEPENDENCY_UNAVAILABLE, message: 'Una o m…} |
+
+El árbol de decisión completo está en [flujos](../flujos/app.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- app — etapa `ctrl:AppController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

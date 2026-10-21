@@ -127,6 +127,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `netAmount` | `string` | Sí | — | — | Importe neto resultante para el intento de pago | `src/modules/promotions/dto/promotions.dto.ts:1335` |
 | `duplicate` | `boolean` | Sí | — | — | true si el descuento ya estaba aplicado a este intento | `src/modules/promotions/dto/promotions.dto.ts:1343` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cupón no encontrado; ResourceNotFoundException: Promoción del cupón no encontrada; ResourceNotFoundException: Promoción no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay que indicar el cupón o la promoción automática a aplicar; PreconditionFailedException: {rejection}; PreconditionFailedException: Ninguna regla aplica al importe de la orden; PreconditionFailedException: La promoción alcanzó su límite de redenciones; PreconditionFailedException: El usuario alcanzó su límite de redenciones en la promoción; PreconditionFailedException: La promoción agotó su presupuesto; PreconditionFailedException: La promoción no está activa; PreconditionFailedException: La promoción está fuera de vigencia; PreconditionFailedException: Ninguna regla de la promoción aplica al importe de la orden |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -135,7 +149,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-10`
 
 ---
 
@@ -221,6 +235,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `discountRuleId` | `string` | No | formato uuid | — | Regla que da el mejor descuento | `src/modules/promotions/dto/promotions.dto.ts:1163` |
 | `discountAmount` | `string` | No | — | — | Descuento que se aplicaría | `src/modules/promotions/dto/promotions.dto.ts:1169` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -229,7 +255,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-09`
 
 ---
 
@@ -306,6 +332,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `affected` | `number` | Sí | — | — | Membresías a las que se les expiraron puntos | `src/modules/promotions/dto/promotions.dto.ts:650` |
 | `pointsExpired` | `string` | Sí | — | — | Total de puntos expirados | `src/modules/promotions/dto/promotions.dto.ts:656` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -314,7 +352,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-06`
 
 ---
 
@@ -412,6 +450,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `currentTierId` | `string` | No | formato uuid | — | Nivel actual tras recalcular | `src/modules/promotions/dto/promotions.dto.ts:559` |
 | `duplicate` | `boolean` | Sí | — | — | true si la clave de idempotencia ya se había usado | `src/modules/promotions/dto/promotions.dto.ts:567` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Membresía no encontrada; ResourceNotFoundException: Regla de acumulación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La membresía no está activa; PreconditionFailedException: La regla pertenece a otro programa; PreconditionFailedException: La regla de acumulación no está activa; PreconditionFailedException: La regla de acumulación está fuera de vigencia; PreconditionFailedException: La regla no otorga puntos; PreconditionFailedException: La regla alcanzó su tope en el periodo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -420,7 +472,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-03`
 
 ---
 
@@ -511,6 +563,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `currentTierId` | `string` | No | formato uuid | — | Nivel actual tras recalcular | `src/modules/promotions/dto/promotions.dto.ts:559` |
 | `duplicate` | `boolean` | Sí | — | — | true si la clave de idempotencia ya se había usado | `src/modules/promotions/dto/promotions.dto.ts:567` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Membresía no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El canje debe ser de puntos positivos; PreconditionFailedException: La membresía no está activa; PreconditionFailedException: Saldo de puntos insuficiente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -519,7 +585,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-04`
 
 ---
 
@@ -581,6 +647,19 @@ La operación no recibe cuerpo.
 | `currentTierId` | `string` | No | formato uuid | — | Identificador asociado a current tier. | `src/modules/promotions/dto/promotions.dto.ts:600` |
 | `tierChanged` | `boolean` | Sí | — | — | true si el nivel cambió al recalcular | `src/modules/promotions/dto/promotions.dto.ts:606` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Membresía no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -589,7 +668,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-05`
 
 ---
 
@@ -646,6 +725,18 @@ La operación no recibe cuerpo.
 | `programs[].code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/promotions/dto/promotions.dto.ts:688` |
 | `programs[].name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/promotions/dto/promotions.dto.ts:694` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Se requiere X-Tenant-Id para listar programas de lealtad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -654,7 +745,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `ctrl:LoyaltyController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -801,6 +892,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `tierIds` | `array<string>` | Sí | formato uuid | — | Niveles creados, de menor a mayor umbral | `src/modules/promotions/dto/promotions.dto.ts:349` |
 | `earningRuleIds` | `array<string>` | Sí | formato uuid | — | Valor de earning rule ids mantenido por la instancia. | `src/modules/promotions/dto/promotions.dto.ts:355` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un programa con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una política de vencimiento ROLLING necesita días de vigencia; PreconditionFailedException: Una regla de puntos necesita pointsAmount; PreconditionFailedException: Una regla de crédito necesita creditAmount |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -809,7 +914,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-01`
 
 ---
 
@@ -900,6 +1005,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `lifetimePoints` | `string` | Sí | — | — | Puntos acumulados de por vida | `src/modules/promotions/dto/promotions.dto.ts:415` |
 | `alreadyEnrolled` | `boolean` | Sí | — | — | true si ya estaba inscrito: la inscripción es idempotente | `src/modules/promotions/dto/promotions.dto.ts:423` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Programa de lealtad no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El programa no está activo; PreconditionFailedException: El programa no tiene niveles definidos |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -908,7 +1027,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-02`
 
 ---
 
@@ -1044,6 +1163,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/promotions/dto/promotions.dto.ts:975` |
 | `ruleIds` | `array<string>` | Sí | formato uuid | — | Valor de rule ids mantenido por la instancia. | `src/modules/promotions/dto/promotions.dto.ts:981` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una promoción con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La promoción debe terminar después de empezar; PreconditionFailedException: Una regla PERCENTAGE necesita porcentaje; PreconditionFailedException: El porcentaje debe estar entre 0 y 100; PreconditionFailedException: Una regla FIXED necesita importe; PreconditionFailedException: Una regla BOGO necesita buyQuantity y getQuantity |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1052,7 +1185,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-07`
 
 ---
 
@@ -1148,6 +1281,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `issued` | `number` | Sí | — | — | Cupones emitidos | `src/modules/promotions/dto/promotions.dto.ts:1087` |
 | `codes` | `array<string>` | Sí | — | — | Códigos generados | `src/modules/promotions/dto/promotions.dto.ts:1093` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Promoción no encontrada |
+| 409 | `CONFLICT` | ConflictException: No se pudieron generar códigos de cupón libres |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un cupón PERSONAL necesita miembro asignado; PreconditionFailedException: Un cupón PERSONAL se emite de uno en uno; PreconditionFailedException: La promoción no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1156,7 +1304,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-08`
 
 ---
 
@@ -1250,6 +1398,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `discountAmount` | `string` | Sí | — | — | Descuento aplicado | `src/modules/promotions/dto/promotions.dto.ts:1228` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/promotions/dto/promotions.dto.ts:1234` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cupón no encontrado; ResourceNotFoundException: Promoción del cupón no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {rejection}; PreconditionFailedException: Ninguna regla aplica al importe de la orden; PreconditionFailedException: La promoción alcanzó su límite de redenciones; PreconditionFailedException: El usuario alcanzó su límite de redenciones en la promoción; PreconditionFailedException: La promoción agotó su presupuesto |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1258,7 +1420,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-09`
 
 ---
 
@@ -1348,6 +1510,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/promotions/dto/promotions.dto.ts:1397` |
 | `ledgerEntryId` | `string` | No | formato uuid | — | Entrada de compensación en el ledger | `src/modules/promotions/dto/promotions.dto.ts:1406` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Redención no encontrada; ResourceNotFoundException: Membresía no encontrada |
+| 409 | `CONFLICT` | ConflictException: La redención ya no está aplicada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1356,7 +1532,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-11`
 
 ---
 
@@ -1435,6 +1611,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `referralCode` | `string` | Sí | — | — | Código a compartir | `src/modules/promotions/dto/promotions.dto.ts:1443` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/promotions/dto/promotions.dto.ts:1449` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Programa de referidos no encontrado |
+| 409 | `CONFLICT` | ConflictException: No se pudo generar un código de referido libre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El programa de referidos no está activo; PreconditionFailedException: El programa de referidos está fuera de vigencia; PreconditionFailedException: El usuario alcanzó su máximo de referidos en el programa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1443,7 +1634,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-12`
 
 ---
 
@@ -1544,6 +1735,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `referrerLedgerEntryId` | `string` | No | formato uuid | — | Entrada del ledger del referidor | `src/modules/promotions/dto/promotions.dto.ts:1518` |
 | `refereeLedgerEntryId` | `string` | No | formato uuid | — | Entrada del ledger del referido | `src/modules/promotions/dto/promotions.dto.ts:1527` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Referido no encontrado; ResourceNotFoundException: Programa de referidos no encontrado; ResourceNotFoundException: Membresía de la recompensa no encontrada |
+| 409 | `CONFLICT` | ConflictException: El referido ya fue calificado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un usuario no puede referirse a sí mismo; PreconditionFailedException: El evento recibido no es el que califica en este programa; PreconditionFailedException: El programa de referidos no define moneda para el crédito de billetera |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1552,7 +1758,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `UC-51-13`
 
 ---
 

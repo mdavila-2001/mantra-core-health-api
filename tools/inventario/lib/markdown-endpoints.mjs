@@ -177,6 +177,21 @@ function renderEndpoint(e, ordinal) {
       ? seccionCampos(e.respuesta.campos)
       : '_No se identificó un DTO de respuesta con campos._',
     '',
+    '### Respuestas posibles',
+    '',
+    e.respuestasPosibles?.length
+      ? tabla(
+          ['HTTP', 'Código', 'Cuándo'],
+          e.respuestasPosibles.map((r) => [
+            String(r.estado),
+            r.codigo ? code(r.codigo) : '—',
+            r.causas.join('; '),
+          ]),
+        )
+      : '_No se pudo derivar (la operación no tiene handler en el código)._',
+    '',
+    `El árbol de decisión completo está en [flujos](../flujos/${e.modulo}.md).`,
+    '',
     '### Pruebas que la mencionan',
     '',
     e.pruebas.length
@@ -189,8 +204,13 @@ function renderEndpoint(e, ordinal) {
     '### Flujos',
     '',
     e.flujos.length
-      ? e.flujos.map((f) => `- ${f.nombre}`).join('\n')
-      : '_Se completa en la fase de flujos._',
+      ? e.flujos
+          .map(
+            (f) =>
+              `- ${md(f.nombre)} — etapa ${code(f.etapa)}${f.agrupacion === 'AGRUPACION_POR_CONTROLADOR' ? ' _(agrupada por controlador: el README no la asigna a un caso de uso)_' : ''}`,
+          )
+          .join('\n')
+      : '_Ningún proceso la incluye._',
     '',
     '---',
     '',

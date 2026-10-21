@@ -118,13 +118,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `diagnosticUnitSiteId` | `string` | Sí | formato uuid | — | Identificador asociado a diagnostic unit site. | `src/modules/diagnostic_units/dto/responses.dto.ts:168` |
 | `operationalStatus` | `string` | Sí | formato uuid | — | Concept id de estado operativo | `src/modules/diagnostic_units/dto/responses.dto.ts:177` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Equipo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-09`
 
 ---
 
@@ -180,13 +193,27 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/diagnostic_units/dto/responses.dto.ts:249` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Oferta no encontrada |
+| 409 | `CONFLICT` | ConflictException: La oferta ya está retirada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-08`
 
 ---
 
@@ -272,13 +299,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:195` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Acreditación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-11`
 
 ---
 
@@ -365,13 +405,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `operationalStatus` | `string` | Sí | — | — | Valor de operational status mantenido por la instancia. | sin fuente |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-02`
 
 ---
 
@@ -467,13 +520,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `diagnosticUnitSiteId` | `string` | Sí | formato uuid | — | Identificador asociado a diagnostic unit site. | `src/modules/diagnostic_units/dto/responses.dto.ts:168` |
 | `operationalStatus` | `string` | Sí | formato uuid | — | Concept id de estado operativo | `src/modules/diagnostic_units/dto/responses.dto.ts:177` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe un equipo con ese número de serie en el sitio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-09`
 
 ---
 
@@ -538,6 +606,17 @@ La operación no recibe cuerpo.
 | `items[].homeCollectionAvailable` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:42` |
 | `count` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:51` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -546,7 +625,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `Directorio P3`
 
 ---
 
@@ -670,6 +749,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `siteCount` | `number` | Sí | — | — | Nº de sitios creados en el alta | `src/modules/diagnostic_units/dto/responses.dto.ts:51` |
 | `accreditationCount` | `number` | Sí | — | — | Nº de acreditaciones creadas en el alta | `src/modules/diagnostic_units/dto/responses.dto.ts:57` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El código ya existe en el tenant |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -678,7 +770,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-01`
 
 ---
 
@@ -806,6 +898,19 @@ La operación no recibe cuerpo.
 | `accreditations[].validFrom` | `object` | No | formato date; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:171` |
 | `accreditations[].validTo` | `object` | No | formato date; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:174` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad diagnóstica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -814,7 +919,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `Directorio P3`
 
 ---
 
@@ -907,6 +1012,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:195` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -915,7 +1034,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-11`
 
 ---
 
@@ -1101,6 +1220,19 @@ La operación no recibe cuerpo.
 | `staff[].status.code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:6` |
 | `staff[].status.display` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad diagnóstica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1109,7 +1241,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:DiagnosticUnitsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1205,6 +1337,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:204` |
 | `status` | `string` | Sí | formato uuid | — | Concept id de estado | `src/modules/diagnostic_units/dto/responses.dto.ts:210` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 409 | `CONFLICT` | ConflictException: El profesional ya tiene una asignación activa en ese rol/sitio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1213,7 +1360,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-10`
 
 ---
 
@@ -1310,6 +1457,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:120` |
 | `status` | `string` | Sí | formato uuid | — | Concept id de estado | `src/modules/diagnostic_units/dto/responses.dto.ts:126` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 409 | `CONFLICT` | ConflictException: El código de cronograma ya existe en la unidad |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1318,7 +1480,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-06`
 
 ---
 
@@ -1374,6 +1536,19 @@ La operación no recibe cuerpo.
 | `diagnosticUnitId` | `string` | Sí | formato uuid | — | Identificador asociado a diagnostic unit. | `src/modules/diagnostic_units/dto/responses.dto.ts:234` |
 | `projected` | `boolean` | Sí | — | — | true si se (re)proyectó el perfil público | `src/modules/diagnostic_units/dto/responses.dto.ts:240` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1382,7 +1557,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-12`
 
 ---
 
@@ -1473,6 +1648,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `operationalStatus` | `string` | Sí | — | — | Valor de operational status mantenido por la instancia. | sin fuente |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1481,7 +1670,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-02`
 
 ---
 
@@ -1573,6 +1762,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `active` | `number` | Sí | — | — | Nº de especialidades vigentes tras el cambio | `src/modules/diagnostic_units/dto/responses.dto.ts:219` |
 | `closed` | `number` | Sí | — | — | Nº de especialidades cerradas (soft) | `src/modules/diagnostic_units/dto/responses.dto.ts:225` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: A lo sumo una especialidad puede ser primaria; PreconditionFailedException: La unidad no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1581,7 +1784,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-04`
 
 ---
 
@@ -1705,6 +1908,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `status` | `string` | Sí | formato uuid | — | Concept id de estado | `src/modules/diagnostic_units/dto/responses.dto.ts:99` |
 | `componentCount` | `number` | Sí | — | — | Nº de componentes del panel | `src/modules/diagnostic_units/dto/responses.dto.ts:105` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 409 | `CONFLICT` | ConflictException: El código de estudio ya existe en la unidad |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa; PreconditionFailedException: Un panel no puede referenciarse a sí mismo como componente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1713,7 +1931,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-05`
 
 ---
 
@@ -1781,6 +1999,20 @@ La operación no recibe cuerpo.
 | `siteCount` | `number` | Sí | — | — | Nº de sitios creados en el alta | `src/modules/diagnostic_units/dto/responses.dto.ts:51` |
 | `accreditationCount` | `number` | Sí | — | — | Nº de acreditaciones creadas en el alta | `src/modules/diagnostic_units/dto/responses.dto.ts:57` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa; PreconditionFailedException: La unidad no tiene ningún sitio activo para publicar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1789,7 +2021,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-03`
 
 ---
 
@@ -1861,6 +2093,17 @@ La operación no recibe cuerpo.
 | `items[].homeCollectionAvailable` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/administration-read.dto.ts:59` |
 | `count` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/administration-read.dto.ts:69` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1869,7 +2112,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:DiagnosticUnitsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1960,13 +2203,24 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:166` |
 | `offset` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:170` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `ctrl:DiagnosticUnitsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2065,13 +2319,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `status` | `string` | Sí | formato uuid | — | Concept id de estado | `src/modules/diagnostic_units/dto/responses.dto.ts:147` |
 | `effectiveFrom` | `string` | Sí | formato date-time | — | Valor de effective from mantenido por la instancia. | `src/modules/diagnostic_units/dto/responses.dto.ts:153` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cronograma no encontrado; ResourceNotFoundException: Oferta de estudio no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El cronograma no está activo; PreconditionFailedException: La oferta no pertenece a la misma unidad que el cronograma |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-07`
 
 ---
 
@@ -2127,13 +2395,27 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/diagnostic_units/dto/responses.dto.ts:249` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Precio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede cerrar una versión de precio activa y aún abierta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 23 — Diagnostic Units, Studies, Specialists and Prices — etapa `UC-23-08`
 
 ---
 

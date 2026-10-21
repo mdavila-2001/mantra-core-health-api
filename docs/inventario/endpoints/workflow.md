@@ -97,13 +97,26 @@ La operación no recibe cuerpo.
 | `total` | `number` | Sí | — | — | Total de transiciones que cumplen el filtro | `src/modules/workflow/dto/workflow.dto.ts:964` |
 | `currentStateConceptId` | `string` | No | formato uuid | — | Estado actual de la instancia asociada | `src/modules/workflow/dto/workflow.dto.ts:973` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No hay una máquina activa con ese código. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-11`
 
 ---
 
@@ -219,13 +232,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | `publishedEffects` | `number` | Sí | — | — | Eventos publicados en el outbox por los efectos de la transición | `src/modules/workflow/dto/workflow.dto.ts:660` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si la clave de idempotencia ya se había aplicado y se devuelve el resultado previo | `src/modules/workflow/dto/workflow.dto.ts:669` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No hay una versión activa de esa máquina de estado.; ResourceNotFoundException: El agregado gobernado no existe. |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: El agregado cambió desde que el llamante lo leyó. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El comando no es aplicable desde el estado actual del agregado.; PreconditionFailedException: Esta transición exige cabecera Idempotency-Key.; PreconditionFailedException: Esta transición exige declarar el motivo.; PreconditionFailedException: Esta transición exige enviar la versión del agregado que vio el llamante.; PreconditionFailedException: {guard.failureMessageKey ?? 'La transición no cumple una gua…} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-05`
 
 ---
 
@@ -321,13 +349,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | `restoredStateConceptId` | `string` | Sí | formato uuid | — | Estado al que vuelve el agregado | `src/modules/workflow/dto/workflow.dto.ts:726` |
 | `publishedEffects` | `number` | Sí | — | — | Eventos de compensación publicados en el outbox | `src/modules/workflow/dto/workflow.dto.ts:734` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La transición original no existe para ese agregado.; ResourceNotFoundException: Máquina de estado no encontrada.; ResourceNotFoundException: El agregado gobernado no existe. |
+| 409 | `CONFLICT` | ConflictException: El agregado ya no está en el estado que dejó la transición que se quiere compensar. |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: El agregado cambió durante la compensación. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La transición no declara compensación, así que no es reversible. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-08`
 
 ---
 
@@ -419,13 +463,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | `idempotencyKey` | `string` | No | — | — | Clave de idempotencia conservada del original, para no duplicar el efecto de negocio | `src/modules/workflow/dto/workflow.dto.ts:781` |
 | `workflowInstanceId` | `string` | No | formato uuid | — | Identificador asociado a workflow instance. | `src/modules/workflow/dto/workflow.dto.ts:787` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La transición original no existe para ese agregado.; ResourceNotFoundException: Instancia de workflow no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La instancia no está en espera de reintento. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-09`
 
 ---
 
@@ -544,13 +602,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/workflow/dto/workflow.dto.ts:1140` |
 | `taskIds` | `array<string>` | Sí | formato uuid | — | Valor de task ids mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:1146` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No hay una versión activa de la máquina de estado para ese workflow. |
+| 409 | `CONFLICT` | ConflictException: Ya hay una instancia viva de ese workflow para el sujeto. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición activa no declara estado inicial. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-12`
 
 ---
 
@@ -632,13 +705,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | `escalatedTasks` | `number` | Sí | — | — | Tareas que quedaron escaladas | `src/modules/workflow/dto/workflow.dto.ts:825` |
 | `instanceIds` | `array<string>` | Sí | formato uuid | — | Valor de instance ids mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:831` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-10`
 
 ---
 
@@ -733,13 +818,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | `versionNumber` | `number` | Sí | — | — | Valor de version number mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:93` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/workflow/dto/workflow.dto.ts:99` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una máquina de estado con ese código. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-01`
 
 ---
 
@@ -829,13 +927,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/workflow/dto/workflow.dto.ts:521` |
 | `retiredVersionId` | `string` | No | formato uuid | — | Versión anterior que quedó retirada | `src/modules/workflow/dto/workflow.dto.ts:530` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Máquina de estado no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición ya no está en borrador.; PreconditionFailedException: La definición debe tener exactamente un estado inicial para publicarse.; PreconditionFailedException: La definición debe tener al menos un estado terminal para publicarse.; PreconditionFailedException: Hay estados inalcanzables desde el estado inicial. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-04`
 
 ---
 
@@ -937,13 +1049,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | `stateIds` | `array<string>` | Sí | formato uuid | — | Valor de state ids mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:194` |
 | `totalStates` | `number` | Sí | — | — | Total de estados definidos en la máquina | `src/modules/workflow/dto/workflow.dto.ts:200` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Máquina de estado no encontrada. |
+| 409 | `CONFLICT` | ConflictException: El estado ya está declarado en esta máquina. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se pueden declarar estados sobre una definición en borrador.; PreconditionFailedException: La máquina debe declarar exactamente un estado inicial. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-02`
 
 ---
 
@@ -1087,13 +1214,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | `guardCount` | `number` | Sí | — | — | Guardas creadas | `src/modules/workflow/dto/workflow.dto.ts:474` |
 | `sideEffectCount` | `number` | Sí | — | — | Efectos creados | `src/modules/workflow/dto/workflow.dto.ts:480` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Máquina de estado no encontrada. |
+| 409 | `CONFLICT` | ConflictException: Ya existe una transición con ese código en la máquina.; ConflictException: Dos guardas comparten el mismo orden de evaluación.; ConflictException: Dos efectos comparten el mismo orden de ejecución. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se pueden declarar transiciones sobre una definición en borrador.; PreconditionFailedException: El estado de origen no está declarado en esta máquina.; PreconditionFailedException: Un estado terminal no puede tener transiciones de salida.; PreconditionFailedException: El estado de destino no está declarado en esta máquina. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-03`
 
 ---
 
@@ -1194,13 +1336,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | `transitionEventId` | `string` | No | formato uuid | — | Transición disparada por el completado, si la tarea la tenía asociada | `src/modules/workflow/dto/workflow.dto.ts:1237` |
 | `remainingOpenTasks` | `number` | Sí | — | — | Tareas que quedan abiertas en la instancia | `src/modules/workflow/dto/workflow.dto.ts:1243` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tarea de workflow no encontrada.; ResourceNotFoundException: Instancia de workflow no encontrada.; ResourceNotFoundException: No hay una versión activa de la máquina de estado para ese workflow. |
+| 409 | `CONFLICT` | ConflictException: La tarea está asignada a otro usuario. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La tarea ya no está abierta.; PreconditionFailedException: La instancia ya no está viva; su tarea no puede completarse.; PreconditionFailedException: El comando no es aplicable desde el estado actual de la instancia. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/workflow.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 32 — Máquinas de estado y flujos entre dominios — etapa `UC-32-13`
 
 ---
 

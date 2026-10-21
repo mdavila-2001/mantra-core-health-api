@@ -115,6 +115,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/clinical_ext/dto/operation-result.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Brecha de cuidado no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La brecha no está abierta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -123,7 +137,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-10`
 
 ---
 
@@ -212,6 +226,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `skipped` | `number` | Sí | — | — | Nº de brechas ya abiertas que se dejaron intactas | `src/modules/clinical_ext/dto/care-gap.dto.ts:218` |
 | `openedIds` | `array<string>` | Sí | — | — | Ids de las brechas abiertas en esta corrida | `src/modules/clinical_ext/dto/care-gap.dto.ts:227` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -220,7 +246,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-09`
 
 ---
 
@@ -273,13 +299,25 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:CareTeamsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -386,6 +424,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `members[].isResponsible` | `boolean` | Sí | — | — | Valor de is responsible mantenido por la instancia. | `src/modules/clinical_ext/dto/care-team.dto.ts:138` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical_ext/dto/care-team.dto.ts:174` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: A lo sumo un miembro puede ser responsable |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -394,7 +445,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-01`
 
 ---
 
@@ -452,6 +503,20 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/clinical_ext/dto/operation-result.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Equipo de cuidado no encontrado; ResourceNotFoundException: Miembro no encontrado en el equipo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El equipo no está activo; PreconditionFailedException: El miembro destino no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -460,7 +525,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-02`
 
 ---
 
@@ -548,6 +613,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/clinical_ext/dto/cds.dto.ts:323` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/cds.dto.ts:329` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El código de regla ya existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -556,7 +634,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -640,6 +718,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/clinical_ext/dto/cds.dto.ts:323` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/cds.dto.ts:329` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Regla CDS no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -648,7 +739,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-13`
 
 ---
 
@@ -708,6 +799,20 @@ La operación no recibe cuerpo.
 | `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/clinical_ext/dto/cds.dto.ts:323` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/cds.dto.ts:329` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Regla CDS no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede hacer rollback de una regla activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -716,7 +821,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -805,6 +910,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `alerts[].ruleId` | `string` | No | formato uuid | — | Identificador asociado a rule. | `src/modules/clinical_ext/dto/cds.dto.ts:356` |
 | `count` | `number` | Sí | — | — | Nº de alertas generadas | `src/modules/clinical_ext/dto/cds.dto.ts:371` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -813,7 +930,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-04`
 
 ---
 
@@ -910,6 +1027,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `alerts[].ruleId` | `string` | No | formato uuid | — | Identificador asociado a rule. | `src/modules/clinical_ext/dto/cds.dto.ts:356` |
 | `count` | `number` | Sí | — | — | Nº de alertas generadas | `src/modules/clinical_ext/dto/cds.dto.ts:371` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | UnparseableCdsRuleError: logic_json no es un objeto; UnparseableCdsRuleError: op 'in' exige un array en value; UnparseableCdsRuleError: op '{op}' exige un número en value; UnparseableCdsRuleError: operador no soportado: {op}; UnparseableCdsRuleError: nodo de lógica no reconocido |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -918,7 +1048,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-03`
 
 ---
 
@@ -975,6 +1105,20 @@ La operación no recibe cuerpo.
 | `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la alerta (concept id) | `src/modules/clinical_ext/dto/clinical-alert.dto.ts:34` |
 | `overriddenAt` | `string` | No | formato date-time | — | Valor de overridden at mantenido por la instancia. | `src/modules/clinical_ext/dto/clinical-alert.dto.ts:40` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Alerta clínica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La alerta no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -983,7 +1127,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-05`
 
 ---
 
@@ -1060,6 +1204,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la alerta (concept id) | `src/modules/clinical_ext/dto/clinical-alert.dto.ts:34` |
 | `overriddenAt` | `string` | No | formato date-time | — | Valor de overridden at mantenido por la instancia. | `src/modules/clinical_ext/dto/clinical-alert.dto.ts:40` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Alerta clínica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La alerta no está activa; PreconditionFailedException: El override de una alerta de alta severidad requiere un motivo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1068,7 +1226,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:ClinicalAlertsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1145,6 +1303,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1153,7 +1323,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1234,6 +1404,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1242,7 +1424,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:CareGapsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1349,6 +1531,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `itemCount` | `number` | Sí | — | — | Nº de ítems creados | `src/modules/clinical_ext/dto/order-set.dto.ts:192` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/order-set.dto.ts:198` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El código de order set ya existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1357,7 +1552,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:OrderSetsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1452,6 +1647,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `appliedOrders[].frequencyText` | `string` | No | — | — | Valor de frequency text mantenido por la instancia. | `src/modules/clinical_ext/dto/order-set.dto.ts:234` |
 | `count` | `number` | Sí | — | — | Nº de órdenes generadas | `src/modules/clinical_ext/dto/order-set.dto.ts:255` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Order set no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El order set no está activo; PreconditionFailedException: No hay ítems seleccionados para aplicar; PreconditionFailedException: Se requiere tenant custodio para materializar las órdenes del order set |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1460,7 +1669,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-06`
 
 ---
 
@@ -1545,6 +1754,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `dosesEvaluated` | `number` | Sí | — | — | Nº de dosis del calendario evaluadas | `src/modules/clinical_ext/dto/care-gap.dto.ts:242` |
 | `openedIds` | `array<string>` | Sí | — | — | Valor de opened ids mantenido por la instancia. | `src/modules/clinical_ext/dto/care-gap.dto.ts:248` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1553,7 +1774,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-11`
 
 ---
 
@@ -1612,13 +1833,24 @@ La operación no recibe cuerpo.
 | `unitConceptId` | `string` | No | formato uuid | — | Identificador asociado a unit concept. | `src/modules/clinical_ext/dto/prescription-favorite.dto.ts:157` |
 | `patientInstructionsText` | `string` | No | — | — | Indicaciones al paciente por defecto. | `src/modules/clinical_ext/dto/prescription-favorite.dto.ts:163` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:PrescriptionFavoritesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1717,13 +1949,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `unitConceptId` | `string` | No | formato uuid | — | Identificador asociado a unit concept. | `src/modules/clinical_ext/dto/prescription-favorite.dto.ts:157` |
 | `patientInstructionsText` | `string` | No | — | — | Indicaciones al paciente por defecto. | `src/modules/clinical_ext/dto/prescription-favorite.dto.ts:163` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
+| 409 | `CONFLICT` | ConflictException: Ya tenés un favorito con ese nombre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lista de favoritos llegó a su máximo; borrá alguno antes de guardar otro |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:PrescriptionFavoritesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1779,13 +2025,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Favorito no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:PrescriptionFavoritesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1838,13 +2097,25 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:ReferralsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1935,6 +2206,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `referralCode` | `string` | Sí | — | — | Código a compartir | sin fuente |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/clinical_ext/dto/referral.dto.ts:148` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una referencia equivalente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1943,7 +2227,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-07`
 
 ---
 
@@ -2021,6 +2305,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/clinical_ext/dto/operation-result.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Referencia no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La referencia no está en estado solicitado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2029,7 +2327,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-08`
 
 ---
 
@@ -2108,6 +2406,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `encounterId` | `string` | Sí | formato uuid | — | Identificador asociado a encounter. | `src/modules/clinical_ext/dto/virtual-encounter.dto.ts:69` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la sesión (concept id) | `src/modules/clinical_ext/dto/virtual-encounter.dto.ts:78` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El encuentro ya tiene una sesión virtual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2116,7 +2427,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-12`
 
 ---
 
@@ -2194,6 +2505,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `encounterId` | `string` | Sí | formato uuid | — | Identificador asociado a encounter. | `src/modules/clinical_ext/dto/virtual-encounter.dto.ts:69` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la sesión (concept id) | `src/modules/clinical_ext/dto/virtual-encounter.dto.ts:78` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión virtual no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no está en progreso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2202,7 +2527,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:VirtualEncountersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2260,6 +2585,20 @@ La operación no recibe cuerpo.
 | `encounterId` | `string` | Sí | formato uuid | — | Identificador asociado a encounter. | `src/modules/clinical_ext/dto/virtual-encounter.dto.ts:69` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Estado de la sesión (concept id) | `src/modules/clinical_ext/dto/virtual-encounter.dto.ts:78` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión virtual no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no está agendada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2268,7 +2607,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:VirtualEncountersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

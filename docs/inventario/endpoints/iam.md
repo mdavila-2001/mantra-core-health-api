@@ -90,13 +90,24 @@ La operación no recibe cuerpo.
 | `refreshToken` | `string` | Sí | — | — | Refresh token en crudo; solo se entrega una vez | `src/modules/iam/dto/token-response.dto.ts:17` |
 | `expiresAt` | `string` | Sí | formato date-time | — | Expiración de la sesión | `src/modules/iam/dto/token-response.dto.ts:27` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -175,13 +186,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | — | — | Estado resultante de la cuenta | `src/modules/iam/dto/activate-account.dto.ts:49` |
 | `activated` | `boolean` | Sí | — | — | true si la activación se aplicó | `src/modules/iam/dto/activate-account.dto.ts:55` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Token de activación inválido; UnauthorizedException: El token de activación ya fue utilizado; UnauthorizedException: El token de activación expiró |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -259,6 +281,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `message` | `string` | Sí | — | — | Mensaje neutro, idéntico exista o no la cuenta, para no confirmar registros | `src/modules/iam/dto/password-reset.dto.ts:42` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 202 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -267,7 +302,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -363,6 +398,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `refreshToken` | `string` | Sí | — | — | Refresh token en crudo; solo se entrega una vez | `src/modules/iam/dto/token-response.dto.ts:17` |
 | `expiresAt` | `string` | Sí | formato date-time | — | Expiración de la sesión | `src/modules/iam/dto/token-response.dto.ts:27` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Credenciales inválidas |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -387,7 +433,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -438,6 +484,17 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `revoked` | `boolean` | Sí | — | — | Si la sesión quedó revocada en esta llamada | `src/modules/iam/dto/operation-result.dto.ts:22` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -446,7 +503,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -497,6 +554,17 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `revokedSessions` | `number` | Sí | — | — | Nº de sesiones revocadas | `src/modules/iam/dto/operation-result.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -506,7 +574,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -725,6 +793,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concepto de estado del tenant (pendiente de verificación) | `src/modules/iam/dto/register-organization.dto.ts:289` |
 | `emailVerificationSent` | `boolean` | Sí | — | — | Si se pudo encolar el correo de verificación | `src/modules/iam/dto/register-organization.dto.ts:297` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 409 | `CONFLICT` | ConflictException: El código de organización ya existe; ConflictException: Ya existe una cuenta con ese correo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología; PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -734,7 +816,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -860,6 +942,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `patientCode` | `string` | Sí | — | — | Código de paciente generado para el perfil. | `src/modules/iam/dto/register-patient.dto.ts:582` |
 | `emailVerificationSent` | `boolean` | Sí | — | — | Si se encoló el correo de verificación. La cuenta es usable igual. | `src/modules/iam/dto/register-patient.dto.ts:591` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese documento de identidad |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -877,7 +973,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1032,6 +1128,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `verificationStatus` | `string` | Sí | — | — | Estado de verificación del perfil al terminar el alta. Siempre PENDING: registrarse no habilita a ejercer. | `src/modules/iam/dto/register-practitioner.dto.ts:409` |
 | `emailVerificationSent` | `boolean` | Sí | — | — | Si se pudo encolar el correo de verificación. | `src/modules/iam/dto/register-practitioner.dto.ts:415` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable; PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1048,7 +1158,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1124,13 +1234,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `message` | `string` | Sí | — | — | Mensaje neutro, idéntico en todos los casos. | `src/modules/iam/dto/resend-verification.dto.ts:36` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 202 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1209,6 +1332,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `userId` | `string` | Sí | formato uuid | — | Usuario cuya clave cambió | `src/modules/iam/dto/password-reset.dto.ts:76` |
 | `revokedSessions` | `number` | Sí | — | — | Sesiones revocadas: cambiar la clave cierra todas las sesiones abiertas | `src/modules/iam/dto/password-reset.dto.ts:85` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Token de restablecimiento inválido; UnauthorizedException: El token de restablecimiento ya fue utilizado; UnauthorizedException: El token de restablecimiento expiró |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1217,7 +1351,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1268,6 +1402,17 @@ La operación no recibe cuerpo.
 | `expiredSessions` | `number` | Sí | — | — | Nº de sesiones expiradas | `src/modules/iam/dto/operation-result.dto.ts:31` |
 | `expiredTokens` | `number` | Sí | — | — | Nº de refresh tokens expirados | `src/modules/iam/dto/operation-result.dto.ts:37` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1277,7 +1422,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1359,6 +1504,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `refreshToken` | `string` | Sí | — | — | Refresh token en crudo; solo se entrega una vez | `src/modules/iam/dto/token-response.dto.ts:17` |
 | `expiresAt` | `string` | Sí | formato date-time | — | Expiración de la sesión | `src/modules/iam/dto/token-response.dto.ts:27` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: No se presentó un refresh token; UnauthorizedException: Refresh token inválido; UnauthorizedException: Reuso de refresh token detectado; UnauthorizedException: Refresh token expirado; UnauthorizedException: Sesión no activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1369,7 +1525,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1441,6 +1597,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `userId` | `string` | Sí | formato uuid | — | Identificador asociado a user. | `src/modules/iam/dto/register-patient.dto.ts:611` |
 | `emailVerified` | `boolean` | Sí | — | — | Valor de email verified mantenido por la instancia. | `src/modules/iam/dto/register-patient.dto.ts:617` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Token de verificación inválido; UnauthorizedException: El token de verificación ya fue utilizado; UnauthorizedException: El token de verificación expiró |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1449,7 +1616,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamAuthController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1518,6 +1685,17 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/iam/dto/iam-user-read.dto.ts:82` |
 | `nextCursor` | `string` | No | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/iam/dto/iam-user-read.dto.ts:88` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1526,7 +1704,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1616,6 +1794,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del usuario | `src/modules/iam/dto/user-response.dto.ts:24` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/iam/dto/user-response.dto.ts:30` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El email ya tiene una credencial de contraseña activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1626,7 +1817,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1690,13 +1881,26 @@ La operación no recibe cuerpo.
 | `anonymizedAt` | `string` | No | formato date-time; admite null | — | Cuándo se anonimizó la cuenta, si se anonimizó. | `src/modules/iam/dto/iam-user-read.dto.ts:145` |
 | `updatedAt` | `string` | Sí | formato date-time | — | Última modificación del registro. | `src/modules/iam/dto/iam-user-read.dto.ts:151` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1758,6 +1962,19 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/iam/dto/operation-result.dto.ts:46` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1767,7 +1984,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1832,13 +2049,26 @@ La operación no recibe cuerpo.
 | `items[].createdAt` | `string` | Sí | formato date-time | — | Alta de la credencial. | `src/modules/iam/dto/iam-user-read.dto.ts:205` |
 | `count` | `number` | Sí | — | — | Cuántas credenciales trae la respuesta. | `src/modules/iam/dto/iam-user-read.dto.ts:358` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1896,6 +2126,19 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/iam/dto/operation-result.dto.ts:46` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Credencial no encontrada para el usuario |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1904,7 +2147,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1990,6 +2233,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `verifiedAt` | `string` | No | formato date-time | — | Valor de verified at mantenido por la instancia. | sin fuente |
 | `practitionerVerified` | `boolean` | Sí | — | — | true si al verificar quedó habilitado todo el perfil profesional | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
+| 409 | `CONFLICT` | ConflictException: La credencial federada ya existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1999,7 +2256,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2062,13 +2319,26 @@ La operación no recibe cuerpo.
 | `items[].createdAt` | `string` | Sí | formato date-time | — | Alta del dispositivo. | `src/modules/iam/dto/iam-user-read.dto.ts:244` |
 | `count` | `number` | Sí | — | — | Cuántos dispositivos trae la respuesta. | `src/modules/iam/dto/iam-user-read.dto.ts:373` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2155,6 +2425,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `userId` | `string` | Sí | formato uuid | — | Identificador asociado a user. | `src/modules/iam/dto/device-response.dto.ts:15` |
 | `trusted` | `boolean` | Sí | — | — | Valor de trusted mantenido por la instancia. | `src/modules/iam/dto/device-response.dto.ts:21` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2164,7 +2447,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2225,13 +2508,26 @@ La operación no recibe cuerpo.
 | `items[].createdAt` | `string` | Sí | formato date-time | — | Cuándo se asignó. | `src/modules/iam/dto/iam-user-read.dto.ts:343` |
 | `count` | `number` | Sí | — | — | Cuántas asignaciones trae la respuesta. | `src/modules/iam/dto/iam-user-read.dto.ts:418` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2315,6 +2611,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/iam/dto/operation-result.dto.ts:46` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado; ResourceNotFoundException: El usuario no tiene ese rol activo |
+| 409 | `CONFLICT` | ConflictException: El rol ya está concedido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2324,7 +2634,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2405,6 +2715,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/iam/dto/operation-result.dto.ts:46` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2414,7 +2737,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2476,13 +2799,26 @@ La operación no recibe cuerpo.
 | `items[].createdAt` | `string` | Sí | formato date-time | — | Alta del factor. | `src/modules/iam/dto/iam-user-read.dto.ts:277` |
 | `count` | `number` | Sí | — | — | Cuántos factores trae la respuesta. | `src/modules/iam/dto/iam-user-read.dto.ts:388` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2575,6 +2911,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `secret` | `string` | No | — | — | Secreto TOTP en base32. Solo se devuelve al enrolar un factor TOTP; | `src/modules/iam/dto/mfa-factor-response.dto.ts:40` |
 | `otpauthUri` | `string` | No | — | — | URI otpauth:// para generar el QR. Solo se devuelve al enrolar un factor TOTP. | `src/modules/iam/dto/mfa-factor-response.dto.ts:49` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado; ResourceNotFoundException: Factor MFA no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: factorId es obligatorio para verificar; PreconditionFailedException: code es obligatorio para verificar; PreconditionFailedException: El factor no tiene un secreto TOTP asociado; PreconditionFailedException: Código MFA inválido; PreconditionFailedException: factorType es obligatorio para enrolar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2584,7 +2934,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2647,13 +2997,26 @@ La operación no recibe cuerpo.
 | `items[].createdAt` | `string` | Sí | formato date-time | — | Apertura de la sesión. | `src/modules/iam/dto/iam-user-read.dto.ts:316` |
 | `count` | `number` | Sí | — | — | Cuántas sesiones trae la respuesta. | `src/modules/iam/dto/iam-user-read.dto.ts:403` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2810,13 +3173,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `activationExpiresAt` | `string` | Sí | formato date-time | — | Cuándo caduca el token. | `src/modules/iam/dto/register-practitioner.dto.ts:502` |
 | `clinicalRoles` | `array<string>` | No | — | — | Roles asistenciales efectivamente concedidos. Se devuelven para que el administrador vea con qué quedó operativo el profesional sin tener que consultarlo aparte. Si alguno de los pedidos no existía, el alta entera falla, así que esta lista coincide siempre con lo solicitado. | `src/modules/iam/dto/register-practitioner.dto.ts:513` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable; PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2913,13 +3291,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `activationExpiresAt` | `string` | Sí | formato date-time | — | Caducidad del token de activación | `src/modules/iam/dto/assisted-registration.dto.ts:168` |
 | `status` | `string` | Sí | — | — | Estado de la cuenta (pendiente de activación) | `src/modules/iam/dto/assisted-registration.dto.ts:177` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese identificador; prefiera invitar en lugar de crear un duplicado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/iam.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- IAM Module — etapa `ctrl:IamUsersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

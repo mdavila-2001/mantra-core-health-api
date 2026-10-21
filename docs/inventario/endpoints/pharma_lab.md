@@ -150,13 +150,24 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/pharma_labs.entity.ts:110` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/pharma_labs.entity.ts:116` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -248,13 +259,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 409 | `CONFLICT` | ConflictException: La organización ya está registrada como laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -324,13 +349,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/pharma_labs.entity.ts:110` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/pharma_labs.entity.ts:116` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -421,13 +459,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -533,13 +584,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Asiento contable no encontrado; ResourceNotFoundException: Producto no encontrado en el catálogo del laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -598,13 +663,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -672,13 +750,26 @@ La operación no recibe cuerpo.
 | `createdAt` | `string` | Sí | formato date-time | `@Property({ fieldName: 'created_at', columnType: 'timestamptz' })` | Fecha y hora en que se creó el registro. | `src/modules/pharma_lab/entities/pharma_lab_link_events.entity.ts:101` |
 | `createdByUserId` | `string` | No | — | `@Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a created by user. | `src/modules/pharma_lab/entities/pharma_lab_link_events.entity.ts:107` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -754,13 +845,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/informational_materials.entity.ts:141` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/informational_materials.entity.ts:147` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -864,13 +968,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Producto no encontrado en el catálogo del laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -936,13 +1054,26 @@ La operación no recibe cuerpo.
 | `createdAt` | `string` | Sí | formato date-time | `@Property({ fieldName: 'created_at', columnType: 'timestamptz' })` | Fecha y hora en que se creó el registro. | `src/modules/pharma_lab/entities/material_approvals.entity.ts:57` |
 | `createdByUserId` | `string` | No | — | `@Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a created by user. | `src/modules/pharma_lab/entities/material_approvals.entity.ts:63` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Material informativo no encontrado en el laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1008,13 +1139,26 @@ La operación no recibe cuerpo.
 | `createdAt` | `string` | Sí | formato date-time | `@Property({ fieldName: 'created_at', columnType: 'timestamptz' })` | Fecha y hora en que se creó el registro. | `src/modules/pharma_lab/entities/material_assets.entity.ts:64` |
 | `createdByUserId` | `string` | No | — | `@Property({ fieldName: 'created_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a created by user. | `src/modules/pharma_lab/entities/material_assets.entity.ts:70` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Material informativo no encontrado en el laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1104,13 +1248,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Material informativo no encontrado en el laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede modificar el contenido de un material ya aprobado; creá una versión nueva |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1199,13 +1357,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Material informativo no encontrado en el laboratorio |
+| 409 | `CONFLICT` | ConflictException: Solo se decide sobre un material en revisión |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La decisión debe ser aprobar o rechazar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1267,13 +1440,28 @@ La operación no recibe cuerpo.
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Material informativo no encontrado en el laboratorio |
+| 409 | `CONFLICT` | ConflictException: Solo se envía a revisión un material en borrador |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El material no tiene ningún adjunto que revisar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1355,13 +1543,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/medical_visitors.entity.ts:185` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/medical_visitors.entity.ts:191` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1482,13 +1683,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Cuenta no encontrada |
+| 409 | `CONFLICT` | ConflictException: La cuenta ya está registrada como visitador; ConflictException: El código interno ya está en uso en el laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Algún producto no pertenece al catálogo del laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1577,13 +1793,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Algún producto no pertenece al catálogo del laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1672,13 +1902,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio |
+| 409 | `CONFLICT` | ConflictException: El visitador ya está vinculado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1766,13 +2011,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1872,13 +2130,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `revokedRefreshTokens` | `number` | Sí | — | — | Tokens de refresco revocados | `src/modules/pharma_lab/dto/common.dto.ts:39` |
 | `cancelledVisitRequests` | `number` | No | — | — | Solicitudes pendientes canceladas | `src/modules/pharma_lab/dto/common.dto.ts:45` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio |
+| 409 | `CONFLICT` | ConflictException: El visitador ya está desvinculado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1963,13 +2235,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2047,13 +2332,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/pharmacovigilance_reports.entity.ts:168` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/pharmacovigilance_reports.entity.ts:174` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2163,13 +2461,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Producto no encontrado en el catálogo del laboratorio |
+| 409 | `CONFLICT` | ConflictException: No se pudo asignar un código de caso libre |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2249,13 +2561,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/pharmacovigilance_reports.entity.ts:168` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/pharmacovigilance_reports.entity.ts:174` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Reporte de farmacovigilancia no encontrado en el laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2349,13 +2674,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Reporte de farmacovigilancia no encontrado en el laboratorio |
+| 409 | `CONFLICT` | ConflictException: La transición de estado del reporte no está permitida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2433,13 +2772,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/pharma_products.entity.ts:179` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/pharma_products.entity.ts:185` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2551,13 +2903,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: No se puede declarar una indicación autorizada en un producto que no está aprobado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2652,13 +3018,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Producto no encontrado en el catálogo del laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede declarar una indicación autorizada en un producto que no está aprobado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2744,13 +3124,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Producto no encontrado en el catálogo del laboratorio |
+| 409 | `CONFLICT` | ConflictException: La transición de estado regulatorio no está permitida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2825,13 +3219,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/regulatory_documents.entity.ts:125` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/regulatory_documents.entity.ts:131` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2945,13 +3352,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3029,13 +3450,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/regulatory_documents.entity.ts:125` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/regulatory_documents.entity.ts:131` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Documento no encontrado en el laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3099,13 +3533,26 @@ La operación no recibe cuerpo.
 | `accessedAt` | `string` | Sí | formato date-time | `@Property({ fieldName: 'accessed_at', columnType: 'timestamptz' })` | Momento del acceso. | `src/modules/pharma_lab/entities/regulatory_document_access_log.entity.ts:52` |
 | `createdAt` | `string` | Sí | formato date-time | `@Property({ fieldName: 'created_at', columnType: 'timestamptz' })` | Fecha y hora en que se creó el registro. | `src/modules/pharma_lab/entities/regulatory_document_access_log.entity.ts:58` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Documento no encontrado en el laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3190,13 +3637,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Documento no encontrado en el laboratorio |
+| 409 | `CONFLICT` | ConflictException: El documento ya está invalidado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3297,13 +3758,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Documento no encontrado en el laboratorio |
+| 409 | `CONFLICT` | ConflictException: Un documento invalidado no admite versiones nuevas |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3379,13 +3854,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/regulatory_document_versions.entity.ts:100` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/regulatory_document_versions.entity.ts:106` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Documento no encontrado en el laboratorio; ResourceNotFoundException: Versión no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3442,13 +3930,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3522,13 +4023,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/pharma_lab_staff.entity.ts:124` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/pharma_lab_staff.entity.ts:130` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3630,13 +4144,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 409 | `CONFLICT` | ConflictException: La cuenta ya está vinculada al laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3727,13 +4256,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Ficha de personal no encontrada en el laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3819,13 +4361,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Ficha de personal no encontrada en el laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3895,13 +4450,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/visitor_post_submissions.entity.ts:109` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/visitor_post_submissions.entity.ts:115` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3992,13 +4560,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Propuesta no encontrada; ResourceNotFoundException: Visitador no encontrado en el laboratorio |
+| 409 | `CONFLICT` | ConflictException: La propuesta ya fue resuelta |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La decisión debe ser aprobar o rechazar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4052,13 +4635,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Aviso no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabNoticesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4120,13 +4716,24 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:111` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:117` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabNoticesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4170,13 +4777,24 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabReferenceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4253,13 +4871,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico; ResourceNotFoundException: Material informativo no encontrado en el laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El visitador no tiene una vinculación activa con un laboratorio; PreconditionFailedException: El laboratorio del visitador no está activo; PreconditionFailedException: Solo se puede adjuntar material científico aprobado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4318,13 +4950,24 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/doctor_visit_blocks.entity.ts:82` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/doctor_visit_blocks.entity.ts:88` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4400,13 +5043,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indicá el laboratorio o el visitador a bloquear |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4465,13 +5121,27 @@ La operación no recibe cuerpo.
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Bloqueo no encontrado |
+| 409 | `CONFLICT` | ConflictException: El bloqueo ya estaba levantado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4525,13 +5195,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El doctor no tiene agenda de visitas habilitada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4578,13 +5261,25 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El doctor no tiene agenda de visitas habilitada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4704,13 +5399,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La hora de fin debe ser posterior a la de inicio; PreconditionFailedException: Dos ventanas del mismo día se superponen |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4823,13 +5531,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico; ResourceNotFoundException: Solicitud no encontrada; ResourceNotFoundException: Material informativo no encontrado en el laboratorio |
+| 409 | `CONFLICT` | ConflictException: La visita ya fue registrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El visitador no tiene una vinculación activa con un laboratorio; PreconditionFailedException: El laboratorio del visitador no está activo; PreconditionFailedException: Solo se registra una visita confirmada; PreconditionFailedException: Un visitador no puede compartir material que no está aprobado; PreconditionFailedException: El material no estaba vigente en la fecha de la visita |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4912,13 +5635,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de visita no encontrado |
+| 409 | `CONFLICT` | ConflictException: El registro ya fue resuelto |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5018,13 +5755,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de visita no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe una calificación de esa naturaleza para la visita |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se califica una visita completada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5093,13 +5845,24 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/visit_records.entity.ts:146` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/visit_records.entity.ts:152` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5176,13 +5939,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/visit_records.entity.ts:146` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/visit_records.entity.ts:152` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5237,13 +6013,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5364,13 +6153,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El visitador no tiene una vinculación activa con un laboratorio; PreconditionFailedException: El laboratorio del visitador no está activo; PreconditionFailedException: El doctor bloqueó las visitas de este laboratorio o visitador; PreconditionFailedException: El doctor solo recibe visitadores de determinadas especialidades; PreconditionFailedException: El visitador no está autorizado a representar alguno de los productos del temario; PreconditionFailedException: Alguno de los productos del temario está suspendido o retirado; PreconditionFailedException: El doctor no recibe visitas de laboratorio; PreconditionFailedException: La visita debe solicitarse con al menos {policy.minNoticeHours} horas de antelación; PreconditionFailedException: La duración máxima admitida es de {policy.maxDurationMinutes} minutos; PreconditionFailedException: El horario solicitado queda fuera de las ventanas de visita del doctor; PreconditionFailedException: La modalidad solicitada no coincide con la de la ventana de visita; PreconditionFailedException: El doctor ya alcanzó el máximo de visitas para ese día; PreconditionFailedException: El horario se superpone con otra visita ya registrada; PreconditionFailedException: La ventana de visita ya está completa; PreconditionFailedException: El horario se superpone con la agenda clínica del doctor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5450,13 +6253,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/visit_requests.entity.ts:163` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/visit_requests.entity.ts:169` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5538,13 +6354,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 409 | `CONFLICT` | ConflictException: La solicitud está en un estado final y ya no admite cambios; ConflictException: La transición solicitada no está permitida para el estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5630,13 +6460,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada; ResourceNotFoundException: El doctor no tiene agenda de visitas habilitada |
+| 409 | `CONFLICT` | ConflictException: La solicitud está en un estado final y ya no admite cambios; ConflictException: La transición solicitada no está permitida para el estado actual |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El plazo para reprogramar o cancelar venció ({cutoffHours} horas antes del inicio) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5731,13 +6576,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 409 | `CONFLICT` | ConflictException: La solicitud está en un estado final y ya no admite cambios; ConflictException: La transición solicitada no está permitida para el estado actual |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El doctor no recibe visitas de laboratorio; PreconditionFailedException: La visita debe solicitarse con al menos {policy.minNoticeHours} horas de antelación; PreconditionFailedException: La duración máxima admitida es de {policy.maxDurationMinutes} minutos; PreconditionFailedException: El horario solicitado queda fuera de las ventanas de visita del doctor; PreconditionFailedException: La modalidad solicitada no coincide con la de la ventana de visita; PreconditionFailedException: El doctor ya alcanzó el máximo de visitas para ese día; PreconditionFailedException: El horario se superpone con otra visita ya registrada; PreconditionFailedException: La ventana de visita ya está completa; PreconditionFailedException: El horario se superpone con la agenda clínica del doctor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5819,13 +6679,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 409 | `CONFLICT` | ConflictException: La solicitud está en un estado final y ya no admite cambios; ConflictException: La transición solicitada no está permitida para el estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5906,13 +6780,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 409 | `CONFLICT` | ConflictException: La solicitud está en un estado final y ya no admite cambios |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6009,13 +6897,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico; ResourceNotFoundException: Solicitud no encontrada |
+| 409 | `CONFLICT` | ConflictException: La solicitud está en un estado final y ya no admite cambios; ConflictException: La transición solicitada no está permitida para el estado actual |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El visitador no tiene una vinculación activa con un laboratorio; PreconditionFailedException: El laboratorio del visitador no está activo; PreconditionFailedException: El doctor no recibe visitas de laboratorio; PreconditionFailedException: La visita debe solicitarse con al menos {policy.minNoticeHours} horas de antelación; PreconditionFailedException: La duración máxima admitida es de {policy.maxDurationMinutes} minutos; PreconditionFailedException: El horario solicitado queda fuera de las ventanas de visita del doctor; PreconditionFailedException: La modalidad solicitada no coincide con la de la ventana de visita; PreconditionFailedException: El doctor ya alcanzó el máximo de visitas para ese día; PreconditionFailedException: El horario se superpone con otra visita ya registrada; PreconditionFailedException: La ventana de visita ya está completa; PreconditionFailedException: El horario se superpone con la agenda clínica del doctor; PreconditionFailedException: El plazo para reprogramar o cancelar venció ({cutoffHours} horas antes del inicio) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6085,13 +6988,24 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/visit_requests.entity.ts:163` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/visit_requests.entity.ts:169` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6162,13 +7076,25 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/visit_requests.entity.ts:163` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/visit_requests.entity.ts:169` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La cuenta no corresponde a un visitador médico |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6240,13 +7166,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/visit_surveys.entity.ts:111` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/visit_surveys.entity.ts:117` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6365,13 +7304,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/pharma_lab/dto/common.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6432,13 +7385,27 @@ La operación no recibe cuerpo.
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Encuesta no encontrada en el laboratorio |
+| 409 | `CONFLICT` | ConflictException: La encuesta ya está cerrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6496,13 +7463,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Encuesta no encontrada en el laboratorio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6561,13 +7541,24 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/visit_survey_responses.entity.ts:83` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/visit_survey_responses.entity.ts:89` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6635,13 +7626,26 @@ La operación no recibe cuerpo.
 | `updatedByUserId` | `string` | No | — | `@Property({ fieldName: 'updated_by_user_id', type: 'uuid', nullable: true })` | Identificador asociado a updated by user. | `src/modules/pharma_lab/entities/visit_survey_responses.entity.ts:83` |
 | `rowVersion` | `number` | Sí | — | `@Property({ fieldName: 'row_version', columnType: 'int', version: true })` | Versión usada para controlar actualizaciones concurrentes. | `src/modules/pharma_lab/entities/visit_survey_responses.entity.ts:89` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuesta no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6739,13 +7743,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso afectado. | `src/modules/pharma_lab/dto/common.dto.ts:18` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado en que quedó el recurso. | `src/modules/pharma_lab/dto/common.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuesta no encontrada |
+| 409 | `CONFLICT` | ConflictException: La encuesta ya fue respondida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Faltan respuestas obligatorias; PreconditionFailedException: Alguna respuesta no corresponde a una pregunta de esta encuesta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

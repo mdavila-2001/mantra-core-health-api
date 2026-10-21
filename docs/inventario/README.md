@@ -7,6 +7,7 @@ Inventario **generado desde el código y el modelo**, no escrito a mano. Aliment
 | Inventario | Qué contiene | Cómo regenerarlo | Documentación |
 |---|---|---|---|
 | Endpoints | 1 operación HTTP = 1 registro: tablas que afecta, DTO y restricciones, requerimientos, payload mínimo, explicación de negocio y de sistema, riesgo, pruebas | `yarn inventario:endpoints` | [endpoints/](endpoints/index.md) |
+| Flujos | Procesos de negocio, máquinas de estado y el árbol de decisión de cada operación (qué comprueba, qué puede fallar con qué estado HTTP, qué escribe), con su mapa y hallazgos | `yarn inventario:flujos` | [flujos/](flujos/index.md) · [mapa](flujos/mapa.md) · [hallazgos](flujos/hallazgos.md) |
 
 `yarn inventario:verificar` falla si lo escrito en `inventario/` y `docs/inventario/` no coincide con el
 código: es la señal de que alguien cambió una ruta, un DTO o una consulta y no regeneró.
@@ -67,3 +68,36 @@ evaluación de seguridad.
 `tools/inventario/curado/sin-tablas.json` explica por qué 11 operaciones no tocan tablas, con la fuente
 leída y la fecha de revisión. Una operación nueva sin tablas y sin motivo hace fallar
 `yarn inventario:test`: hay que mirarla y agregarla ahí.
+
+## Flujos: qué es cada cosa
+
+- **Proceso de módulo:** uno por módulo. Cada etapa es un caso de uso (UC) de la tabla «UC → ruta» del
+  README. Lo que el README no asigna a un UC se agrupa por controlador y se marca
+  `AGRUPACION_POR_CONTROLADOR`: no se inventa un caso de uso.
+- **Proceso crítico:** los dos de `docs/business/critical-workflows.md`, con sus pasos en el orden del
+  documento. Las referencias relativas (`.../revoke`) se resuelven contra la última ruta completa.
+- **Árbol de decisión:** se lee del código del handler y de los métodos que invoca (hasta 4 niveles).
+  Una condición que no falla, no escribe y no llama a nada se poda. El estado de un error sale de la
+  excepción: las del proyecto se leen de `src/common/errors` (la `PreconditionFailedException` del
+  proyecto responde **422**, no 412); las de `@nestjs/common` de la tabla de Nest. Un `Error` común lo
+  atiende el filtro global como `500 INTERNAL`.
+- **Máquina de estados:** tabla `*_TRANSITIONS` del código con forma «estado → destinos». «Esta
+  operación dispara este estado» es `POR_REFERENCIA`: el handler alcanza un método que valida contra la
+  tabla y nombra ese estado. Los nombres son los identificadores del código, no se resuelven al
+  catálogo de conceptos.
+- **Mapa y hallazgos:** cruzan flujos, riesgo, pruebas y consumidores. «Quién la llama» sale del
+  inventario de clientes del frontend (`docs/reports/generated/api-inventory.md`); necesita el repo del
+  frontend como hermano (`../mantra-core-health`) o `FRONT_ROOT`. Sin él, la columna dice «sin dato» y
+  los hallazgos que dependen de él no se calculan.
+
+### Lo que los flujos NO afirman
+
+- **Que el árbol sea exhaustivo:** sólo ve lo que el análisis estático alcanza. Un `throw` dentro de
+  una llamada que depende de un dato en tiempo de ejecución no aparece (queda como «no resuelto» en la
+  ficha de la operación).
+- **Que una rama sea alcanzable:** el árbol muestra las ramas del código, no prueba que existan datos
+  que las activen.
+- **Que el orden de los efectos sea el de ejecución real** cuando hay iteraciones o callbacks: se
+  muestran en el orden del texto.
+- **Que un proceso de módulo sea un flujo de negocio validado:** es la agrupación que declara el
+  README. Queda `AUTO_DETECTADA` hasta que alguien lo revise.

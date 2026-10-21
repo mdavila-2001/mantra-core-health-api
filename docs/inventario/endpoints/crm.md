@@ -118,6 +118,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `primaryContactId` | `string` | No | formato uuid | — | Contacto creado junto con la cuenta | `src/modules/crm/dto/crm.dto.ts:119` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/crm/dto/crm.dto.ts:125` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -126,7 +138,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-01`
 
 ---
 
@@ -186,6 +198,19 @@ La operación no recibe cuerpo.
 | `activityCount` | `number` | Sí | — | — | Actividades recientes | `src/modules/crm/dto/crm.dto.ts:815` |
 | `caseCount` | `number` | Sí | — | — | Casos abiertos y recientes | `src/modules/crm/dto/crm.dto.ts:821` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -194,7 +219,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-14`
 
 ---
 
@@ -281,6 +306,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | sin fuente |
 | `teamSize` | `number` | Sí | — | — | Miembros del equipo tras la asignación | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuenta no encontrada |
+| 409 | `CONFLICT` | ConflictException: El usuario ya pertenece al equipo de la cuenta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -289,7 +328,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-02`
 
 ---
 
@@ -385,6 +424,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `activityType` | `string` | Sí | valores: APPOINTMENT, PROCEDURE, FOLLOW_UP, TELEHEALTH, OTHER | — | Valor de activity type mantenido por la instancia. | `src/modules/crm/dto/crm.dto.ts:468` |
 | `subtypeCreated` | `boolean` | Sí | — | — | true si además se creó la fila del subtipo (tarea o nota) | `src/modules/crm/dto/crm.dto.ts:476` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una nota requiere `bodyText` |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -393,7 +445,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-05`
 
 ---
 
@@ -485,6 +537,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `operatingRoomId` | `string` | Sí | formato uuid | — | Quirófano reservado | sin fuente |
 | `milestoneId` | `string` | Sí | formato uuid | — | Hito de programación creado | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un caso con ese número |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -493,7 +558,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-11`
 
 ---
 
@@ -571,13 +636,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se comenta un caso cerrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-12`
 
 ---
 
@@ -636,6 +715,21 @@ La operación no recibe cuerpo.
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/crm/dto/crm.dto.ts:757` |
 | `closedAt` | `string` | No | formato date-time | — | Valor de closed at mantenido por la instancia. | `src/modules/crm/dto/crm.dto.ts:763` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
+| 409 | `CONFLICT` | ConflictException: Un caso cerrado no se reabre por esta vía |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso ya está en ese estado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -644,7 +738,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-13`
 
 ---
 
@@ -727,13 +821,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/crm/dto/crm.dto.ts:757` |
 | `closedAt` | `string` | No | formato date-time | — | Valor de closed at mantenido por la instancia. | `src/modules/crm/dto/crm.dto.ts:763` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
+| 409 | `CONFLICT` | ConflictException: Un caso cerrado no se reabre por esta vía |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso ya está en ese estado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-12`
 
 ---
 
@@ -814,6 +923,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `endpointId` | `string` | Sí | formato uuid | — | Identificador asociado a endpoint. | `src/modules/crm/dto/crm.dto.ts:786` |
 | `doNotContact` | `boolean` | Sí | — | — | true cuando el canal quedó excluido de comunicaciones | `src/modules/crm/dto/crm.dto.ts:794` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contacto no encontrado; ResourceNotFoundException: Canal de contacto no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El canal no pertenece a ese contacto |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -822,7 +945,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-15`
 
 ---
 
@@ -905,13 +1028,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `leadStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a lead status concept. | `src/modules/crm/dto/crm.dto.ts:277` |
 | `leadScore` | `number` | No | — | — | Valor de lead score mantenido por la instancia. | `src/modules/crm/dto/crm.dto.ts:283` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-03`
 
 ---
 
@@ -1004,6 +1139,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `leadId` | `string` | Sí | formato uuid | — | Identificador asociado a lead. | `src/modules/crm/dto/crm.dto.ts:349` |
 | `opportunityId` | `string` | Sí | formato uuid | — | Identificador asociado a opportunity. | `src/modules/crm/dto/crm.dto.ts:355` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Lead no encontrado |
+| 409 | `CONFLICT` | ConflictException: El lead ya fue convertido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se convierte un lead calificado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1012,7 +1162,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-04`
 
 ---
 
@@ -1095,6 +1245,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `leadStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a lead status concept. | `src/modules/crm/dto/crm.dto.ts:277` |
 | `leadScore` | `number` | No | — | — | Valor de lead score mantenido por la instancia. | `src/modules/crm/dto/crm.dto.ts:283` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Lead no encontrado |
+| 409 | `CONFLICT` | ConflictException: El lead ya fue convertido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1103,7 +1267,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-03`
 
 ---
 
@@ -1185,6 +1349,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `stageId` | `string` | Sí | formato uuid | — | Identificador asociado a stage. | `src/modules/crm/dto/crm.dto.ts:516` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/crm/dto/crm.dto.ts:522` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Oportunidad no encontrada; ResourceNotFoundException: Etapa no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La oportunidad ya está cerrada; PreconditionFailedException: La oportunidad ya está en esa etapa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1193,7 +1371,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-07`
 
 ---
 
@@ -1274,6 +1452,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `stageId` | `string` | Sí | formato uuid | — | Identificador asociado a stage. | `src/modules/crm/dto/crm.dto.ts:516` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/crm/dto/crm.dto.ts:522` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Oportunidad no encontrada |
+| 409 | `CONFLICT` | ConflictException: La oportunidad ya está cerrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1282,7 +1474,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-09`
 
 ---
 
@@ -1341,6 +1533,20 @@ La operación no recibe cuerpo.
 | `stageId` | `string` | Sí | formato uuid | — | Identificador asociado a stage. | `src/modules/crm/dto/crm.dto.ts:516` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/crm/dto/crm.dto.ts:522` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Oportunidad no encontrada |
+| 409 | `CONFLICT` | ConflictException: La oportunidad ya está cerrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1349,7 +1555,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-08`
 
 ---
 
@@ -1438,13 +1644,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 | `name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/crm/dto/crm.dto.ts:597` |
 | `agreementId` | `string` | No | formato uuid | — | Acuerdo marco creado junto con la alianza | `src/modules/crm/dto/crm.dto.ts:606` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/crm.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 49 — CRM — etapa `UC-49-10`
 
 ---
 

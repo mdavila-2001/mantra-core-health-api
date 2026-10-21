@@ -111,6 +111,17 @@ La operación no recibe cuerpo.
 | `items[].label` | `string` | Sí | — | — | Cómo se llama en pantalla, en castellano. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:889` |
 | `items[].tone` | `string` | Sí | valores: primary, secondary, info, warning, success | — | El tono con el que se pinta, del sistema de diseño. `error` queda reservado para los BLOQUEOS —el propietario los pidió «con rojo»— así que ninguna tipología lo usa: si una actividad se pintara igual que un bloqueo, la agenda diría que ese rato está cerrado cuando no lo está. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:899` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -119,7 +130,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -234,13 +245,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Estado con el que nace: confirmada. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:968` |
 | `retractedSlots` | `number` | Sí | — | — | Cupos ofrecidos que esta cita retiró. Si el rato pisaba horarios libres que el doctor mismo ofrecía —en cualquiera de sus sedes—, se retiran en la misma transacción y acá se informa cuántos: el front lo muestra como AVISO («esto quitó N horarios disponibles»), no como pregunta. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:979` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Un profesional solo puede asignar citas en su propia agenda. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado; ResourceNotFoundException: Paciente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Tu vínculo con esta organización todavía está pendiente de aprobación, así que todavía no podés comprometer turnos suyos. / Tu vínculo con esta organización ya…; PreconditionFailedException: El profesional ya tiene {quien} de {horaLocal( primero.startAt, p…} a {horaLocal( primero.endAt, pri…}{primero.resourceName ? ` en «…}. No puede estar en dos l…; PreconditionFailedException: El paciente ya tiene un turno confirmado en ese rato{choque.resourceName ? ` en «$…}. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -333,6 +359,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:245` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:251` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: El tenant indicado no es uno de los del actor. |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -341,7 +380,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-01`
 
 ---
 
@@ -444,6 +483,18 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/scheduling/dto/scheduling-read.dto.ts:403` |
 | `truncated` | `boolean` | Sí | — | — | Si había más citas que el tope pedido | `src/modules/scheduling/dto/scheduling-read.dto.ts:411` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique al menos patientProfileId o resourceId para listar citas; PreconditionFailedException: La ventana debe empezar antes de terminar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -454,7 +505,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -546,6 +597,19 @@ La operación no recibe cuerpo.
 | `delayNotice.announcedAt` | `string` | No | formato date-time | — | Cuándo se informó. | `src/modules/scheduling/dto/scheduling-read.dto.ts:191` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/scheduling/dto/scheduling-read.dto.ts:382` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -555,7 +619,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -668,6 +732,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `occurredAt` | `string` | Sí | formato date-time | — | Valor de occurred at mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:287` |
 | `desplazadas` | `array<object>` | Sí | formato uuid | — | Citas pendientes que quedaron canceladas por chocar con ésta | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:304` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Tu vínculo con esta organización todavía está pendiente de aprobación, así que todavía no podés comprometer turnos suyos. / Tu vínculo con esta organización ya…; PreconditionFailedException: Transición de estado de cita no permitida; PreconditionFailedException: El profesional ya tiene {quien} de {horaLocal( primero.startAt, p…} a {horaLocal( primero.endAt, pri…}{primero.resourceName ? ` en «…}. No puede estar en dos l… |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -677,7 +756,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -787,6 +866,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `feeAmount` | `string` | No | — | — | Cargo aplicado, si la política lo contempla | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:418` |
 | `capacityReleased` | `boolean` | Sí | — | — | Cupo devuelto al slot | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:424` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 409 | `CONFLICT` | ConflictException: La cita ya está cancelada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado de cita no permitida; PreconditionFailedException: Podés cancelar hasta {Math.round(windowMinutes / 60)} horas antes del turno. Si ya no podés asistir, comunicate con el consultorio. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -798,7 +893,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-09`
+- Ciclo de vida de una cita — etapa `A2`
 
 ---
 
@@ -858,6 +954,21 @@ La operación no recibe cuerpo.
 | `bookingId` | `string` | Sí | formato uuid | — | Identificador asociado a booking. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:435` |
 | `checkedInAt` | `string` | Sí | formato date-time | — | Valor de checked in at mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:441` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado de cita no permitida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -866,7 +977,8 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-10`
+- Ciclo de vida de una cita — etapa `P3`
 
 ---
 
@@ -931,13 +1043,28 @@ La operación no recibe cuerpo.
 | `occurredAt` | `string` | Sí | formato date-time | — | Valor de occurred at mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:287` |
 | `desplazadas` | `array<object>` | Sí | formato uuid | — | Citas pendientes que quedaron canceladas por chocar con ésta | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:304` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado de cita no permitida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1041,6 +1168,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `bookingIds` | `array<string>` | Sí | formato uuid | — | Las citas alcanzadas, para que la pantalla pueda decir cuáles fueron. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:811` |
 | `detail` | `string` | Sí | — | — | Qué pasó, en una frase. Incluye por qué un aviso no llegó cuando no llegó. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:817` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: sólo avisa su demora quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una demora mayor a cuatro horas se resuelve reprogramando el turno, no avisando |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1049,7 +1191,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1111,13 +1253,26 @@ La operación no recibe cuerpo.
 | `markedByUserId` | `string` | Sí | formato uuid | — | Quién la dejó en este estado. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:1052` |
 | `markedAt` | `string` | Sí | formato date-time | — | Cuándo. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:1056` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1207,13 +1362,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `markedByUserId` | `string` | Sí | formato uuid | — | Quién la dejó en este estado. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:1052` |
 | `markedAt` | `string` | Sí | formato date-time | — | Cuándo. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:1056` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1304,13 +1474,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `fromSlotId` | `string` | Sí | formato uuid | — | Cupo que se liberó. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:681` |
 | `toSlotId` | `string` | Sí | formato uuid | — | Cupo que quedó tomado. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:685` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Cupo propuesto no encontrado |
+| 409 | `CONFLICT` | ConflictException: El cupo propuesto no tiene lugar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se opera así sobre una solicitud pendiente; PreconditionFailedException: El horario propuesto es el que ya tiene la solicitud; PreconditionFailedException: Transición de estado de cita no permitida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1415,13 +1601,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `feeAmount` | `string` | No | — | — | Cargo aplicado, si la política lo contempla | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:418` |
 | `capacityReleased` | `boolean` | Sí | — | — | Cupo devuelto al slot | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:424` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 409 | `CONFLICT` | ConflictException: La cita ya está cancelada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado de cita no permitida; PreconditionFailedException: Podés cancelar hasta {Math.round(windowMinutes / 60)} horas antes del turno. Si ya no podés asistir, comunicate con el consultorio. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1509,6 +1711,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `bookingId` | `string` | Sí | formato uuid | — | Identificador asociado a booking. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:562` |
 | `scheduled` | `number` | Sí | — | — | Valor de scheduled mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:568` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1517,7 +1732,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-13`
 
 ---
 
@@ -1605,13 +1820,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `occurredAt` | `string` | Sí | formato date-time | — | Valor de occurred at mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:287` |
 | `desplazadas` | `array<object>` | Sí | formato uuid | — | Citas pendientes que quedaron canceladas por chocar con ésta | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:304` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se opera así sobre una solicitud pendiente; PreconditionFailedException: Transición de estado de cita no permitida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1718,6 +1948,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `fromSlotId` | `string` | Sí | formato uuid | — | Identificador asociado a from slot. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:349` |
 | `toSlotId` | `string` | Sí | formato uuid | — | Identificador asociado a to slot. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:355` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Slot destino no encontrado |
+| 409 | `CONFLICT` | ConflictException: El slot destino no tiene cupos |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se reprograma una cita vigente; PreconditionFailedException: El slot destino es el mismo que el actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1727,7 +1973,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-08`
+- Ciclo de vida de una cita — etapa `A1`
 
 ---
 
@@ -1792,13 +2039,28 @@ La operación no recibe cuerpo.
 | `occurredAt` | `string` | Sí | formato date-time | — | Valor de occurred at mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:287` |
 | `desplazadas` | `array<object>` | Sí | formato uuid | — | Citas pendientes que quedaron canceladas por chocar con ésta | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:304` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado de cita no permitida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingBookingsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1860,13 +2122,25 @@ La operación no recibe cuerpo.
 | `enabled` | `boolean` | Sí | — | — | Valor de enabled mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-confirmation.dto.ts:143` |
 | `version` | `number` | Sí | — | — | Valor de version mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-confirmation.dto.ts:149` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingConfirmationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1960,13 +2234,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `enabled` | `boolean` | Sí | — | — | Valor de enabled mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-confirmation.dto.ts:143` |
 | `version` | `number` | Sí | — | — | Valor de version mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-confirmation.dto.ts:149` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingConfirmationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2028,13 +2314,26 @@ La operación no recibe cuerpo.
 | `enabled` | `boolean` | Sí | — | — | Valor de enabled mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-confirmation.dto.ts:143` |
 | `version` | `number` | Sí | — | — | Valor de version mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-confirmation.dto.ts:149` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Regla no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingConfirmationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2096,13 +2395,26 @@ La operación no recibe cuerpo.
 | `enabled` | `boolean` | Sí | — | — | Valor de enabled mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-confirmation.dto.ts:143` |
 | `version` | `number` | Sí | — | — | Valor de version mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-confirmation.dto.ts:149` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Regla no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingConfirmationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2188,13 +2500,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `explanation.variables` | `object` | Sí | — | — | Variables congeladas usadas en la evaluación | `src/modules/scheduling/dto/scheduling-confirmation.dto.ts:236` |
 | `explanation.evaluatedRuleIds` | `array<string>` | Sí | — | — | Ids de reglas evaluadas antes de concluir | `src/modules/scheduling/dto/scheduling-confirmation.dto.ts:245` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingConfirmationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2245,6 +2569,17 @@ La operación no recibe cuerpo.
 | `items[].requiresText` | `boolean` | Sí | — | — | true en «Otro»: exige texto libre | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:835` |
 | `items[].blocks` | `boolean` | Sí | — | — | false en la atención extraordinaria | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:845` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2253,7 +2588,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2308,13 +2643,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Excepción no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2400,6 +2748,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `endAt` | `string` | Sí | formato date-time | — | — | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:1091` |
 | `blockedSlots` | `number` | Sí | — | — | Cupos que se cerraron porque el rango creció. Achicar el rango **no reabre ninguno**, y por eso no hay campo para eso: en este módulo los cupos sólo los crea publicar el horario. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:1100` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Excepción no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El bloqueo termina antes de empezar; PreconditionFailedException: Elegiste «Otro» como motivo: escribí cuál es |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2408,7 +2770,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2514,6 +2876,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:207` |
 | `remindersScheduled` | `number` | Sí | — | — | Recordatorios programados junto con la cita | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:213` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Reserva temporal no encontrada; ResourceNotFoundException: Slot no encontrado |
+| 409 | `CONFLICT` | ConflictException: La reserva temporal ya fue consumida o liberada; ConflictException: La reserva temporal expiró |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese horario ya pasó.; PreconditionFailedException: Ya tenés un turno confirmado ese día a esa hora{choque.resourceName ? ` en «$…}. Cancelalo primero si querés cambiarlo por éste.; PreconditionFailedException: El profesional ya tiene {quien} de {horaLocal( primero.startAt, p…} a {horaLocal( primero.endAt, pri…}{primero.resourceName ? ` en «…}. No puede estar en dos l… |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2525,7 +2902,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-06`
+- Ciclo de vida de una cita — etapa `P2`
 
 ---
 
@@ -2642,6 +3020,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:207` |
 | `remindersScheduled` | `number` | Sí | — | — | Recordatorios programados junto con la cita | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:213` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Reserva temporal no encontrada; ResourceNotFoundException: Slot no encontrado |
+| 409 | `CONFLICT` | ConflictException: La reserva temporal ya fue consumida o liberada; ConflictException: La reserva temporal expiró |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese horario ya pasó.; PreconditionFailedException: Ya tenés un turno confirmado ese día a esa hora{choque.resourceName ? ` en «$…}. Cancelalo primero si querés cambiarlo por éste.; PreconditionFailedException: El profesional ya tiene {quien} de {horaLocal( primero.startAt, p…} a {horaLocal( primero.endAt, pri…}{primero.resourceName ? ` en «…}. No puede estar en dos l… |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2652,7 +3045,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2742,6 +3135,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `processed` | `number` | Sí | — | — | Elementos procesados en el lote | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:577` |
 | `detail` | `string` | Sí | — | — | Detalle de lo que hizo el worker | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:583` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2750,7 +3155,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-14`
 
 ---
 
@@ -2822,6 +3227,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `processed` | `number` | Sí | — | — | Elementos procesados en el lote | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:577` |
 | `detail` | `string` | Sí | — | — | Detalle de lo que hizo el worker | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:583` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2830,7 +3247,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-07`
+- Ciclo de vida de una cita — etapa `A3`
 
 ---
 
@@ -2925,6 +3343,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `processed` | `number` | Sí | — | — | Elementos procesados en el lote | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:577` |
 | `detail` | `string` | Sí | — | — | Detalle de lo que hizo el worker | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:583` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Slot no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2933,7 +3364,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-12`
 
 ---
 
@@ -2988,6 +3419,17 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `slotIds` | `array<string>` | Sí | formato uuid | — | Slots candidatos a promoción, del más próximo al más lejano | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:611` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2997,7 +3439,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingInternalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3077,6 +3519,18 @@ La operación no recibe cuerpo.
 | `items[].site.timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/scheduling/dto/scheduling-agenda.dto.ts:200` |
 | `count` | `number` | Sí | — | — | Cantidad devuelta. | `src/modules/scheduling/dto/scheduling-agenda.dto.ts:215` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3085,7 +3539,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3178,6 +3632,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:117` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:123` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Un profesional solo puede publicar su propia agenda: el recurso debe apuntar a su perfil profesional.; ForbiddenException: El tenant indicado no es uno de los del actor. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Tu vínculo con esta organización todavía está pendiente de aprobación. Cuando la acepten vas a poder publicar tu agenda acá. / Tu vínculo con esta organización… |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3197,7 +3664,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-01`
 
 ---
 
@@ -3288,6 +3755,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `from` | `string` | Sí | formato date-time | — | Desde cuándo cubre la excepción. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:1042` |
 | `to` | `string` | Sí | formato date-time | — | Hasta cuándo. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:1046` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado; ResourceNotFoundException: Ninguno de esos cupos es de esta agenda |
+| 409 | `CONFLICT` | ConflictException: Esos ratos tienen pacientes citados: cancelá cada turno antes de cerrarlos |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Elegiste «Otro» como motivo: escribí cuál es |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3296,7 +3778,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3403,6 +3885,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `bookingIds` | `array<string>` | Sí | formato uuid | — | Las citas alcanzadas, para que la pantalla pueda decir cuáles fueron. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:811` |
 | `detail` | `string` | Sí | — | — | Qué pasó, en una frase. Incluye por qué un aviso no llegó cuando no llegó. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:817` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: sólo avisa su demora quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una demora mayor a cuatro horas se resuelve reprogramando el turno, no avisando; PreconditionFailedException: La ventana de la demora termina antes de empezar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3411,7 +3908,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3480,6 +3977,20 @@ La operación no recibe cuerpo.
 | `items[].isAvailable` | `boolean` | No | — | — | `true` cuando la excepción ABRE disponibilidad en vez de cerrarla. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:552` |
 | `count` | `number` | Sí | — | — | Cuántas son. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:563` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella.; ForbiddenException: No podés ver los bloqueos de esta agenda |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana debe empezar antes de terminar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3489,7 +4000,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3584,6 +4095,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `eventId` | `string` | Sí | formato uuid | — | Identificador asociado a event. | sin fuente |
 | `failedAttemptProofId` | `string` | No | formato uuid | — | Constancia del intento fallido | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Elegiste «Otro» como motivo: escribí cuál es; PreconditionFailedException: La excepción debe empezar antes de terminar; PreconditionFailedException: Tenés una cita confirmada en ese rato{primera.resourceName ? ` en «…}. Reprogramala primero o elegí otro horario. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3594,7 +4119,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-04`
+- Ciclo de vida de una cita — etapa `A4`
 
 ---
 
@@ -3701,6 +4227,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `notified` | `number` | Sí | — | — | A cuántas personas se les avisó. Menor que `movedSlots` es lo corriente: los cupos libres se mueven y no hay a quién avisarle. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:977` |
 | `shiftMinutes` | `number` | Sí | — | — | Los minutos que se aplicaron, para que el cliente confirme lo que pidió. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:981` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana termina antes de empezar; PreconditionFailedException: Mover cero minutos no cambia nada: elegí cuánto correr la agenda |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3709,7 +4249,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3787,6 +4327,20 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/scheduling/dto/scheduling-read.dto.ts:115` |
 | `truncated` | `boolean` | Sí | — | — | Si la ventana tenía más slots que el tope pedido. Se declara en vez de recortar en silencio: una agenda a la que le faltan huecos sin avisar se lee como una agenda llena | `src/modules/scheduling/dto/scheduling-read.dto.ts:124` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la ventana con from y to (ISO 8601); PreconditionFailedException: La ventana debe empezar antes de terminar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3798,7 +4352,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3869,6 +4423,19 @@ La operación no recibe cuerpo.
 | `items[].questions[].scaleMax` | `number` | No | — | — | Máximo de la escala | `src/modules/surveys/dto/responses.dto.ts:91` |
 | `count` | `number` | Sí | — | — | Cuántas son. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:506` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3877,7 +4444,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3991,6 +4558,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `ruleCount` | `number` | Sí | — | — | Franjas creadas | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:586` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:592` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La franja debe empezar antes de terminar; PreconditionFailedException: Dos franjas de esta agenda se solapan entre sí; PreconditionFailedException: Ya tenés «{otra.resourceName}» el {existente.etiqueta}, que se cruza con estehorario. Cambiá el horario o el día, o editá esa otra agenda. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4007,7 +4588,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-02`
 
 ---
 
@@ -4080,13 +4661,26 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado. | `src/modules/scheduling/dto/scheduling-agenda.dto.ts:371` |
 | `truncated` | `boolean` | Sí | — | — | Si la ventana excede el tope y hay que estrecharla | `src/modules/scheduling/dto/scheduling-agenda.dto.ts:381` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana debe empezar antes de terminar; PreconditionFailedException: La ventana no puede superar {MAX_WINDOW_DAYS} días |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4169,6 +4763,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `expiresAt` | `string` | Sí | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:82` |
 | `remainingCapacity` | `number` | Sí | — | — | Cupos que quedan libres en el slot | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:88` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Slot no encontrado |
+| 409 | `CONFLICT` | ConflictException: El slot no tiene cupos disponibles; ConflictException: El paciente alcanzó el máximo de citas activas |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El slot está bloqueado; PreconditionFailedException: Ese horario ya pasó. / Ese turno empieza demasiado pronto: hay que pedirlo con al menos {minutosDeAviso} minutos de anticipación. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4183,7 +4792,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-05`
+- Ciclo de vida de una cita — etapa `P1`
 
 ---
 
@@ -4247,6 +4857,20 @@ La operación no recibe cuerpo.
 | `releasedSlots` | `number` | Sí | — | — | Cupos libres que se soltaron al retirar el horario | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:800` |
 | `keptSlots` | `number` | Sí | — | — | Cupos conservados porque tienen una cita detrás | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:811` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Recurso de la plantilla no encontrado |
+| 409 | `CONFLICT` | ConflictException: El horario tiene citas comprometidas: resolvelas antes de retirarlo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4256,7 +4880,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4345,6 +4969,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `skipped` | `number` | Sí | — | — | Slots que ya existían y se conservaron | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:638` |
 | `omittedByCommitments` | `number` | Sí | — | — | Cupos omitidos por chocar con compromisos del profesional (citas confirmadas en cualquiera de sus sedes) | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:651` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana debe empezar antes de terminar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4360,7 +4998,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-03`
 
 ---
 
@@ -4419,6 +5057,19 @@ La operación no recibe cuerpo.
 | `statusConceptId` | `string` | Sí | formato uuid | — | El estado con el que queda: `TPL_PUBLISHED`. | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:777` |
 | `slotsPendientes` | `boolean` | Sí | — | — | true cuando el horario quedó vigente sin cupos materializados y hay que generarlos | `src/modules/scheduling/dto/scheduling-catalog.dto.ts:784` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Recurso de la plantilla no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4427,7 +5078,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4496,6 +5147,18 @@ La operación no recibe cuerpo.
 | `items[].statusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:877` |
 | `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:880` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4504,7 +5167,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:SchedulingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4587,6 +5250,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 | `priority` | `number` | Sí | — | — | Valor de priority mantenido por la instancia. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:511` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/scheduling/dto/scheduling-bookings.dto.ts:517` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4595,7 +5270,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/schedul
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `UC-41-11`
+- Ciclo de vida de una cita — etapa `A5`
 
 ---
 
@@ -4670,13 +5346,26 @@ La operación no recibe cuerpo.
 | `items[].statusConceptId` | `string` | Sí | formato uuid | — | Estado de la cita. | `src/modules/scheduling/dto/tenant-agenda.dto.ts:109` |
 | `truncated` | `boolean` | Sí | — | — | Si la ventana devolvió tantas citas como el tope permitía. Una agenda a la que le faltan citas sin avisar se lee como una agenda más vacía de lo que está, que es exactamente la lectura contraria a la que una recepción necesita. | `src/modules/scheduling/dto/tenant-agenda.dto.ts:126` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana no es una fecha válida; PreconditionFailedException: La ventana debe empezar antes de terminar; PreconditionFailedException: El rango no puede superar los {MAX_RANGO_AGENDA_DIAS} días |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/scheduling.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 41 — Scheduling — etapa `ctrl:TenantAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

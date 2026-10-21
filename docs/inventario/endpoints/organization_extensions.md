@@ -122,6 +122,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | `decisionReasonText` | `string` | No | admite null | — | Por qué la organización rechazó o dio de baja el vínculo. **Lo lee el profesional**, no es una nota interna. Un rechazo sin motivo es mudo para quien lo recibe, y quien lo escribe tiene que saber que se lee. `null` en cualquier otro estado. | sin fuente |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/organization_extensions/dto/responses.dto.ts:99` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una afiliación activa de ese tipo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenant primario y el participante deben ser distintos; PreconditionFailedException: El tenant participante no tiene una frontera de datos activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/organization_extensions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -130,7 +144,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 22 — Organization Extensions (Healthcare Organization Specializations) — etapa `UC-22-07`
 
 ---
 
@@ -186,6 +200,20 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/organization_extensions/dto/responses.dto.ts:132` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Afiliación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La afiliación no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/organization_extensions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -194,7 +222,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 22 — Organization Extensions (Healthcare Organization Specializations) — etapa `UC-22-09`
 
 ---
 
@@ -288,6 +316,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | `effectiveFrom` | `string` | Sí | formato date-time | — | Valor de effective from mantenido por la instancia. | `src/modules/organization_extensions/dto/responses.dto.ts:120` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/organization_extensions/dto/responses.dto.ts:124` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una frontera de datos activa de ese tipo para el tenant |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/organization_extensions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -296,7 +337,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 22 — Organization Extensions (Healthcare Organization Specializations) — etapa `UC-22-08`
 
 ---
 
@@ -392,6 +433,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | `verificationStatus` | `string` | Sí | formato uuid | — | Estado de verificación (concepto) | `src/modules/organization_extensions/dto/responses.dto.ts:70` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/organization_extensions/dto/responses.dto.ts:74` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una licencia con ese número para el tipo indicado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/organization_extensions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -400,7 +454,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 22 — Organization Extensions (Healthcare Organization Specializations) — etapa `UC-22-05`
 
 ---
 
@@ -478,6 +532,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/organization_extensions/dto/responses.dto.ts:132` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Licencia no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La licencia no está en estado pendiente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/organization_extensions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -486,7 +554,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 22 — Organization Extensions (Healthcare Organization Specializations) — etapa `UC-22-06`
 
 ---
 
@@ -578,6 +646,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | `status` | `string` | Sí | formato uuid | — | Estado (concepto) | `src/modules/organization_extensions/dto/responses.dto.ts:21` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/organization_extensions/dto/responses.dto.ts:25` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El tenant o el practice ya está especializado como hospital |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/organization_extensions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -586,7 +667,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 22 — Organization Extensions (Healthcare Organization Specializations) — etapa `UC-22-01`
 
 ---
 
@@ -669,6 +750,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | `status` | `string` | Sí | formato uuid | — | Estado (concepto) | `src/modules/organization_extensions/dto/responses.dto.ts:21` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/organization_extensions/dto/responses.dto.ts:25` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Hospital no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El hospital no está en estado borrador/inactivo; PreconditionFailedException: El hospital no tiene ninguna licencia de instalación verificada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/organization_extensions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -677,7 +772,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 22 — Organization Extensions (Healthcare Organization Specializations) — etapa `UC-22-02`
 
 ---
 
@@ -766,6 +861,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | `status` | `string` | Sí | formato uuid | — | Estado (concepto) | `src/modules/organization_extensions/dto/responses.dto.ts:42` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/organization_extensions/dto/responses.dto.ts:46` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Hospital no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El hospital no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/organization_extensions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -774,7 +883,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 22 — Organization Extensions (Healthcare Organization Specializations) — etapa `UC-22-03`
 
 ---
 
@@ -831,6 +940,20 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/organization_extensions/dto/responses.dto.ts:132` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Línea de servicio no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La línea de servicio no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/organization_extensions.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -839,7 +962,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 22 — Organization Extensions (Healthcare Organization Specializations) — etapa `UC-22-04`
 
 ---
 

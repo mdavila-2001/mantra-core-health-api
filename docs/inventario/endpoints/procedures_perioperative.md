@@ -114,6 +114,18 @@ La operación no recibe cuerpo.
 | `items[].sites[].description` | `string` | No | — | — | Cara o superficie, si se precisó. | `src/modules/procedures_perioperative/dto/dental.dto.ts:135` |
 | `total` | `number` | Sí | — | — | Procedimientos de la persona, sin paginar | `src/modules/procedures_perioperative/dto/dental.dto.ts:240` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -123,7 +135,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:DentalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -214,6 +226,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Estado del registro. | `src/modules/procedures_perioperative/dto/dental.dto.ts:219` |
 | `createdAt` | `string` | Sí | formato date-time | — | Cuándo quedó registrado. | `src/modules/procedures_perioperative/dto/dental.dto.ts:225` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio tiene que ser una pieza dentaria o un cuadrante del catálogo odontológico; PreconditionFailedException: No se puede precisar la cara tratada sin decir sobre qué pieza |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -223,7 +248,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:DentalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -280,6 +305,17 @@ La operación no recibe cuerpo.
 | `quadrants[].code` | `string` | Sí | — | — | Código estable del concepto. | `src/modules/procedures_perioperative/dto/dental.dto.ts:276` |
 | `quadrants[].display` | `string` | Sí | — | — | Etiqueta legible. | `src/modules/procedures_perioperative/dto/dental.dto.ts:282` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -289,7 +325,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:DentalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -381,6 +417,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pacuStayId` | `string` | Sí | formato uuid | — | Identificador asociado a pacu stay. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2501` |
 | `meetsDischargeCriteria` | `boolean` | Sí | — | — | true si la valoración cumple el criterio de alta | `src/modules/procedures_perioperative/dto/periop.dto.ts:2509` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Estancia en recuperación no encontrada |
+| 409 | `CONFLICT` | ConflictException: El paciente ya salió de recuperación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -389,7 +439,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -499,6 +549,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `ordersCreated` | `number` | Sí | — | — | Órdenes postoperatorias creadas | `src/modules/procedures_perioperative/dto/periop.dto.ts:2631` |
 | `followupsCreated` | `number` | Sí | — | — | Seguimientos agendados | `src/modules/procedures_perioperative/dto/periop.dto.ts:2637` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Estancia en recuperación no encontrada |
+| 409 | `CONFLICT` | ConflictException: El paciente ya salió de recuperación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El alta de recuperación exige al menos una valoración; PreconditionFailedException: La última valoración no cumple el criterio de alta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -507,7 +572,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -577,13 +642,24 @@ La operación no recibe cuerpo.
 | `items[].scheduledEndAt` | `string` | No | formato date-time | — | Valor de scheduled end at mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:720` |
 | `total` | `number` | Sí | — | — | Casos que cumplen el filtro, sin paginar | `src/modules/procedures_perioperative/dto/periop.dto.ts:735` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -697,6 +773,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `operatingRoomId` | `string` | Sí | formato uuid | — | Quirófano reservado | `src/modules/procedures_perioperative/dto/periop.dto.ts:189` |
 | `milestoneId` | `string` | Sí | formato uuid | — | Hito de programación creado | `src/modules/procedures_perioperative/dto/periop.dto.ts:195` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El quirófano ya está reservado en esa franja; ConflictException: No se pudo asignar número de caso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso debe terminar después de empezar; PreconditionFailedException: Un caso urgente o de emergencia necesita justificar su urgencia |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -705,7 +795,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-01`
 
 ---
 
@@ -852,13 +942,26 @@ La operación no recibe cuerpo.
 | `implants[].identifiers[].serialNumber` | `string` | No | — | — | Número de serie, si consta. | sin fuente |
 | `implants[].identifiers[].expirationDate` | `string` | No | formato date-time | — | Vencimiento, si consta. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -960,6 +1063,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `reacceptanceRequired` | `boolean` | Sí | — | — | true si la modificación fue relevante y el equipo debe volver a aceptar | `src/modules/procedures_perioperative/dto/periop.dto.ts:284` |
 | `acceptancesInvalidated` | `number` | Sí | — | — | Aceptaciones que quedaron invalidadas por la modificación relevante | `src/modules/procedures_perioperative/dto/periop.dto.ts:293` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: CAN-INT-001: el paciente de la intervención no puede cambiarse una vez confirmada; cancele el caso y cree uno nuevo; PreconditionFailedException: CAN-INT-001: el paciente no puede cambiarse: el caso ya tiene asignaciones o evidencias asociadas; PreconditionFailedException: El caso debe terminar después de empezar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -968,7 +1085,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1069,6 +1186,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `eventTypeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a event type concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1661` |
 | `milestoneId` | `string` | No | formato uuid | — | Hito creado si el evento fue inducción o despertar | `src/modules/procedures_perioperative/dto/periop.dto.ts:1670` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: La inducción exige un plan de anestesia aprobado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1077,7 +1208,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-07`
 
 ---
 
@@ -1190,6 +1321,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `airwayAssessmentId` | `string` | Sí | formato uuid | — | Identificador asociado a airway assessment. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1526` |
 | `difficultAirwayExpected` | `boolean` | Sí | — | — | true si se anticipa vía aérea difícil | `src/modules/procedures_perioperative/dto/periop.dto.ts:1532` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya tiene plan de anestesia |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una vía aérea difícil anticipada necesita plan de rescate; PreconditionFailedException: El caso está cancelado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1198,7 +1344,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-06`
 
 ---
 
@@ -1259,6 +1405,21 @@ La operación no recibe cuerpo.
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1549` |
 | `anesthesiologistProfileId` | `string` | Sí | formato uuid | — | Anestesiólogo asignado al caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:1558` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plan de anestesia no encontrado; ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El plan ya está aprobado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El plan pertenece a otro caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1267,7 +1428,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1361,6 +1522,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `cancellationId` | `string` | Sí | formato uuid | — | Registro de la cancelación | `src/modules/procedures_perioperative/dto/periop.dto.ts:2710` |
 | `operatingRoomReleased` | `boolean` | Sí | — | — | true si se liberó el quirófano reservado | `src/modules/procedures_perioperative/dto/periop.dto.ts:2716` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya está cancelado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no admite cancelación en su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1369,7 +1545,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-13`
 
 ---
 
@@ -1476,6 +1652,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `actualDurationSeconds` | `number` | No | — | — | Duración real del caso, en segundos | `src/modules/procedures_perioperative/dto/periop.dto.ts:2837` |
 | `scheduleVarianceSeconds` | `number` | No | — | — | Desviación frente a lo programado, en segundos | `src/modules/procedures_perioperative/dto/periop.dto.ts:2845` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya tiene cargos emitidos |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se factura un caso completado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1484,7 +1675,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-14`
 
 ---
 
@@ -1556,6 +1747,20 @@ La operación no recibe cuerpo.
 | `statusConceptId` | `string` | Sí | formato uuid | — | Estado tras confirmar | `src/modules/procedures_perioperative/dto/periop.dto.ts:310` |
 | `teamVerified` | `number` | Sí | — | — | Miembros del equipo con credencial verificada al confirmar | `src/modules/procedures_perioperative/dto/periop.dto.ts:318` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: El caso no admite confirmación en su estado actual; PreconditionFailedException: CAN-INT-002: no puede confirmarse: hay integrantes del equipo sin credencial profesional vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1564,7 +1769,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1667,6 +1872,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `diagnosisIds` | `array<string>` | Sí | formato uuid | — | Valor de diagnosis ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:411` |
 | `skipped` | `number` | Sí | — | — | Diagnósticos que ya estaban registrados y se omitieron | `src/modules/procedures_perioperative/dto/periop.dto.ts:419` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso sólo admite un diagnóstico principal; ConflictException: El paciente ya tiene esa condición activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Indique la condición por `conditionId` o por `conditionCodeConceptId` |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1675,7 +1896,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-02`
 
 ---
 
@@ -1772,6 +1993,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1828` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Paso operatorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso; PreconditionFailedException: El paso pertenece a otro caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1780,7 +2015,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1898,6 +2133,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `identifierIds` | `array<string>` | Sí | formato uuid | — | Valor de identifier ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1996` |
 | `deviceUseId` | `string` | Sí | formato uuid | — | Registro del dispositivo usado | `src/modules/procedures_perioperative/dto/periop.dto.ts:2005` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1906,7 +2155,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-09`
 
 ---
 
@@ -1993,6 +2242,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2128` |
 | `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2134` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso; PreconditionFailedException: El paso no pertenece al caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2001,7 +2264,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-10`
 
 ---
 
@@ -2125,6 +2388,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2325` |
 | `complicationIds` | `array<string>` | Sí | formato uuid | — | Valor de complication ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2331` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Orden de servicio no encontrada; ResourceNotFoundException: Procedimiento padre no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Indique el procedimiento por `procedureId` o por `procedureCodeConceptId` |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2133,7 +2410,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-11`
 
 ---
 
@@ -2220,6 +2497,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2366` |
 | `caseStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:2375` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Reporte operatorio no encontrado; ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El reporte ya está firmado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El reporte pertenece a otro caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2228,7 +2520,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2320,6 +2612,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `stepNumber` | `number` | Sí | — | — | Número del paso dentro del caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:1743` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1749` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2328,7 +2634,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-08`
 
 ---
 
@@ -2412,6 +2718,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2414` |
 | `locationId` | `string` | Sí | formato uuid | — | Ubicación del caso creada | `src/modules/procedures_perioperative/dto/periop.dto.ts:2420` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya tiene estancia en recuperación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2420,7 +2741,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-12`
 
 ---
 
@@ -2539,6 +2860,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `riskScoreIds` | `array<string>` | Sí | formato uuid | — | Valor de risk score ids mantenido por la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1097` |
 | `milestoneId` | `string` | No | formato uuid | — | Hito de aptitud preoperatoria, si el paciente quedó apto | `src/modules/procedures_perioperative/dto/periop.dto.ts:1106` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya tiene valoración preoperatoria |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La valoración exige revisar alergias y medicación; PreconditionFailedException: El caso está cancelado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2547,7 +2883,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-03`
 
 ---
 
@@ -2635,13 +2971,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `serviceRequestId` | `string` | Sí | formato uuid | — | Identificador asociado a service request. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1185` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1191` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Encuentro no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2731,6 +3081,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `pendingMandatory` | `number` | Sí | — | — | Órdenes obligatorias que siguen pendientes | `src/modules/procedures_perioperative/dto/periop.dto.ts:1237` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el caso | `src/modules/procedures_perioperative/dto/periop.dto.ts:1246` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Orden preoperatoria no encontrada en el caso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo un caso programado admite verificación de órdenes |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2739,7 +3103,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-04`
 
 ---
 
@@ -2850,6 +3214,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:1362` |
 | `milestoneId` | `string` | No | formato uuid | — | Hito de time-out, si la fase completada fue esa | `src/modules/procedures_perioperative/dto/periop.dto.ts:1371` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Checklist no encontrado |
+| 409 | `CONFLICT` | ConflictException: El checklist ya está completo; ConflictException: La fase ya está completa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una respuesta de excepción necesita justificación; PreconditionFailedException: El checklist pertenece a otro caso; PreconditionFailedException: La fase no tiene ítems definidos; PreconditionFailedException: El ítem no pertenece a esta fase |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2858,7 +3237,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `UC-53-05`
 
 ---
 
@@ -2952,6 +3331,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2128` |
 | `procedureCaseId` | `string` | Sí | formato uuid | — | Identificador asociado a procedure case. | `src/modules/procedures_perioperative/dto/periop.dto.ts:2134` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso; PreconditionFailedException: El paso no pertenece al caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2960,7 +3353,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3019,13 +3412,26 @@ La operación no recibe cuerpo.
 | `teamRoleConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a team role concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:756` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Asignado o aceptado | `src/modules/procedures_perioperative/dto/periop.dto.ts:762` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3111,6 +3517,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:526` |
 | `teamSize` | `number` | Sí | — | — | Miembros del equipo tras la asignación | `src/modules/procedures_perioperative/dto/periop.dto.ts:532` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El profesional ya tiene ese rol en el caso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3119,7 +3540,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3180,13 +3601,27 @@ La operación no recibe cuerpo.
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:526` |
 | `teamSize` | `number` | Sí | — | — | Miembros del equipo tras la asignación | `src/modules/procedures_perioperative/dto/periop.dto.ts:532` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: El integrante no pertenece al caso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Sólo el propio integrante puede aceptar su participación; PreconditionFailedException: CAN-INT-002: el integrante no tiene credencial profesional vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3282,6 +3717,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/procedures_perioperative/dto/periop.dto.ts:526` |
 | `teamSize` | `number` | Sí | — | — | Miembros del equipo tras la asignación | `src/modules/procedures_perioperative/dto/periop.dto.ts:532` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: El integrante no pertenece al caso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Sólo el propio integrante puede responder a su participación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3290,7 +3739,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 53 — Procedimientos y Perioperatorio — etapa `ctrl:PeriopController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

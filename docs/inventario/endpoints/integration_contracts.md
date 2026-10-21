@@ -111,6 +111,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | `status` | `string` | Sí | formato uuid | — | Concepto de estado del contrato | `src/modules/integration_contracts/dto/responses.dto.ts:30` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/integration_contracts/dto/responses.dto.ts:36` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El código de contrato ya existe para el proveedor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -119,7 +132,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-01`
 
 ---
 
@@ -213,6 +226,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | `integrationContractId` | `string` | Sí | formato uuid | — | Identificador asociado a integration contract. | `src/modules/integration_contracts/dto/responses.dto.ts:87` |
 | `status` | `string` | Sí | formato uuid | — | Concepto de estado del perfil | `src/modules/integration_contracts/dto/responses.dto.ts:93` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -221,7 +247,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-03`
 
 ---
 
@@ -304,6 +330,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/integration_contracts/dto/responses.dto.ts:253` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil de autenticación no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -312,7 +351,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-11`
 
 ---
 
@@ -410,6 +449,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | `replayed` | `boolean` | Sí | — | — | true si la respuesta se devuelve por replay idempotente | `src/modules/integration_contracts/dto/responses.dto.ts:146` |
 | `responseReference` | `string` | No | — | — | Referencia de respuesta previa (replay) | `src/modules/integration_contracts/dto/responses.dto.ts:154` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 409 | `CONFLICT` | ConflictException: La clave de idempotencia se reusó con un payload distinto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta la clave de idempotencia (idempotency-key); PreconditionFailedException: No hay versión ACTIVE del contrato |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -418,7 +472,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-05`
 
 ---
 
@@ -520,6 +574,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | `outcome` | `string` | Sí | formato uuid | — | Concepto de resultado del intento | `src/modules/integration_contracts/dto/responses.dto.ts:184` |
 | `recordOutcome` | `string` | Sí | formato uuid | — | Concepto de resultado del registro tras el intento | `src/modules/integration_contracts/dto/responses.dto.ts:193` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de intercambio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -528,7 +595,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-06`
 
 ---
 
@@ -608,6 +675,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/integration_contracts/dto/responses.dto.ts:253` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contrato ya está retirado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -616,7 +697,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-11`
 
 ---
 
@@ -704,6 +785,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | `cursorValue` | `string` | Sí | — | — | Valor de cursor value mantenido por la instancia. | `src/modules/integration_contracts/dto/responses.dto.ts:214` |
 | `created` | `boolean` | Sí | — | — | true si se creó el cursor en esta operación | `src/modules/integration_contracts/dto/responses.dto.ts:220` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El cursor solo puede avanzar hacia adelante |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -712,7 +807,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-08`
 
 ---
 
@@ -803,6 +898,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | `status` | `string` | Sí | formato uuid | — | Concepto de estado de la versión | `src/modules/integration_contracts/dto/responses.dto.ts:66` |
 | `effectiveFrom` | `string` | No | formato date-time | — | Valor de effective from mantenido por la instancia. | `src/modules/integration_contracts/dto/responses.dto.ts:72` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se pueden publicar versiones en contratos DRAFT o ACTIVE |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -811,7 +920,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-02`
 
 ---
 
@@ -890,6 +999,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/integration_contracts/dto/responses.dto.ts:253` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado; ResourceNotFoundException: Versión no encontrada para el contrato |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede activar una versión DRAFT |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -898,7 +1021,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-10`
 
 ---
 
@@ -989,6 +1112,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | `state` | `string` | Sí | formato uuid | — | Concept id del estado | sin fuente |
 | `updated` | `boolean` | Sí | — | — | true si se actualizó una suscripción existente | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe una suscripción para ese evento y callback |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contrato debe estar ACTIVE para suscribir webhooks |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -997,7 +1135,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-04`
 
 ---
 
@@ -1086,6 +1224,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | `outcome` | `string` | Sí | formato uuid | — | Concepto de resultado del intento | `src/modules/integration_contracts/dto/responses.dto.ts:184` |
 | `recordOutcome` | `string` | Sí | formato uuid | — | Concepto de resultado del registro tras el intento | `src/modules/integration_contracts/dto/responses.dto.ts:193` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de intercambio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se reintenta un intercambio con último intento FAILED; PreconditionFailedException: El último intento marcó fallo permanente (no reintentable) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1094,7 +1246,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-07`
 
 ---
 
@@ -1184,6 +1336,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | `integrationExchangeRecordId` | `string` | Sí | formato uuid | — | Identificador asociado a integration exchange record. | `src/modules/integration_contracts/dto/responses.dto.ts:235` |
 | `outcome` | `string` | Sí | formato uuid | — | Concepto de resultado de la entrega | `src/modules/integration_contracts/dto/responses.dto.ts:244` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Suscripción de webhook no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suscripción no está ACTIVE; PreconditionFailedException: La suscripción aún no es válida; PreconditionFailedException: La suscripción ya expiró; PreconditionFailedException: No hay versión ACTIVE del contrato para entregar; PreconditionFailedException: La suscripción no tiene callbackUri para entregar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1192,7 +1358,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) — etapa `UC-31-09`
 
 ---
 

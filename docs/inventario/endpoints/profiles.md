@@ -136,6 +136,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `verifiedAt` | `string` | No | formato date-time | — | Valor de verified at mantenido por la instancia. | `src/modules/profiles/dto/verify-credential.dto.ts:58` |
 | `practitionerVerified` | `boolean` | Sí | — | — | true si al verificar quedó habilitado todo el perfil profesional | `src/modules/profiles/dto/verify-credential.dto.ts:67` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Credencial no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una credencial verificada debe declarar la fuente consultada; PreconditionFailedException: La credencial no está pendiente de verificación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -144,7 +158,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -215,6 +229,18 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/profiles/dto/read-patients.dto.ts:132` |
 | `nextCursor` | `string` | No | admite null | — | Cursor opaco para la página siguiente; `null` cuando no hay más | `src/modules/profiles/dto/read-patients.dto.ts:142` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Buscá por nombre, código o documento: no se puede listar el padrón completo de pacientes; PreconditionFailedException: El catálogo de departamentos no está disponible; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -223,7 +249,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -310,6 +336,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `recordLinkageStatus` | `string` | Sí | formato uuid | — | Concept id del estado de vinculación | `src/modules/profiles/dto/create-patient.dto.ts:107` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/dto/create-patient.dto.ts:113` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El patient_code ya está en uso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -322,7 +361,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -405,6 +444,19 @@ La operación no recibe cuerpo.
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/dto/read-patients.dto.ts:316` |
 | `updatedAt` | `string` | Sí | formato date-time | — | Fecha y hora de la última actualización. | `src/modules/profiles/dto/read-patients.dto.ts:322` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -413,7 +465,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -509,6 +561,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `verificationStatus` | `string` | Sí | formato uuid | — | Concept id del estado de verificación | `src/modules/profiles/dto/add-identity-link.dto.ts:101` |
 | `created` | `boolean` | Sí | — | — | true si el registro se creó, false si se actualizó (upsert) | `src/modules/profiles/dto/add-identity-link.dto.ts:109` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -517,7 +582,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -613,6 +678,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del proxy | `src/modules/profiles/dto/grant-portal-proxy.dto.ts:97` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/dto/grant-portal-proxy.dto.ts:103` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La persona relacionada no pertenece al paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -621,7 +700,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -715,6 +794,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado | `src/modules/profiles/dto/add-related-person.dto.ts:104` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/dto/add-related-person.dto.ts:110` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil o la plataforma pueden modificarlo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado; ResourceNotFoundException: Persona relacionada no encontrada |
+| 409 | `CONFLICT` | ConflictException: El paciente ya tiene un tutor legal activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -724,7 +817,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -796,6 +889,19 @@ La operación no recibe cuerpo.
 | `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/dto/read-patients.dto.ts:537` |
 | `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/dto/read-patients.dto.ts:546` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -805,7 +911,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -921,6 +1027,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/dto/read-patients.dto.ts:537` |
 | `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/dto/read-patients.dto.ts:546` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -930,7 +1050,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1002,6 +1122,19 @@ La operación no recibe cuerpo.
 | `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/dto/read-patients.dto.ts:537` |
 | `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/dto/read-patients.dto.ts:546` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1011,7 +1144,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1105,6 +1238,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/dto/read-patients.dto.ts:537` |
 | `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/dto/read-patients.dto.ts:546` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado; ResourceNotFoundException: {labels.notFound} |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1114,7 +1260,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1170,6 +1316,19 @@ La operación no recibe cuerpo.
 | `birthDate` | `string` | No | formato date-time | — | Valor de birth date mantenido por la instancia. | `src/modules/profiles/dto/create-patient.dto.ts:167` |
 | `personStatus` | `string` | Sí | formato uuid | — | Identificador asociado a person status concept. | `src/modules/profiles/dto/create-patient.dto.ts:173` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1178,7 +1337,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1265,6 +1424,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `reversalOfEventId` | `string` | No | formato uuid | — | Evento original revertido (si aplica) | `src/modules/profiles/dto/merge-patients.dto.ts:126` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/profiles/dto/merge-patients.dto.ts:132` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente sobreviviente no encontrado; ResourceNotFoundException: Paciente a fusionar no encontrado |
+| 409 | `CONFLICT` | ConflictException: El paciente ya fue fusionado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede fusionar un paciente consigo mismo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1273,7 +1447,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1336,13 +1510,24 @@ La operación no recibe cuerpo.
 | `count` | `number` | Sí | — | — | Cantidad devuelta. | `src/modules/profiles/dto/merge-patients.dto.ts:147` |
 | `limit` | `number` | Sí | — | — | Tope aplicado. | `src/modules/profiles/dto/merge-patients.dto.ts:153` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1427,6 +1612,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `reversalOfEventId` | `string` | No | formato uuid | — | Evento original revertido (si aplica) | `src/modules/profiles/dto/merge-patients.dto.ts:126` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/profiles/dto/merge-patients.dto.ts:132` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Evento de fusión no encontrado |
+| 409 | `CONFLICT` | ConflictException: La fusión ya fue revertida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede revertir una fusión aprobada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1435,7 +1635,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1520,6 +1720,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del vínculo | `src/modules/profiles/dto/link-account.dto.ts:55` |
 | `validFrom` | `string` | Sí | formato date-time | — | Valor de valid from mantenido por la instancia. | `src/modules/profiles/dto/link-account.dto.ts:61` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Persona no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La persona no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1528,7 +1742,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1613,6 +1827,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `revokedAccountLinks` | `number` | Sí | — | — | Nº de vínculos de cuenta revocados | `src/modules/profiles/dto/decease-person.dto.ts:63` |
 | `revokedProxies` | `number` | Sí | — | — | Nº de proxies de portal revocados | `src/modules/profiles/dto/decease-person.dto.ts:69` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Persona no encontrada |
+| 409 | `CONFLICT` | ConflictException: La persona ya está registrada como fallecida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1621,7 +1849,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPatientsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1693,6 +1921,17 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/profiles/dto/list-practitioners.dto.ts:108` |
 | `nextCursor` | `string` | No | admite null | — | Cursor opaco de la página siguiente; null si no hay más | `src/modules/profiles/dto/list-practitioners.dto.ts:118` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1701,7 +1940,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1825,6 +2064,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `credentialId` | `string` | No | formato uuid | — | La credencial creada. Ausente por el mismo motivo que `licenseId`. | `src/modules/profiles/dto/create-practitioner.dto.ts:305` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/dto/create-practitioner.dto.ts:311` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Persona no encontrada |
+| 409 | `CONFLICT` | ConflictException: El practitioner_code ya está en uso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un profesional puede declarar hasta {MAX_SPECIALTIES_PER_PRACTITIO…} especialidades; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1835,7 +2089,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1959,13 +2213,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `decisionReasonText` | `string` | No | admite null | — | Por qué la organización rechazó o dio de baja el vínculo. **Lo lee el profesional**, no es una nota interna. Un rechazo sin motivo es mudo para quien lo recibe, y quien lo escribe tiene que saber que se lee. `null` en cualquier otro estado. | `src/modules/profiles/dto/affiliation.dto.ts:204` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/dto/affiliation.dto.ts:210` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: La sede indicada no existe |
+| 409 | `CONFLICT` | ConflictException: Ese vínculo ya está en el historial laboral; ConflictException: Ya pediste vincularte a esa sede |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El fin del vínculo no puede ser anterior a su inicio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2058,6 +2327,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `state` | `string` | Sí | formato uuid | — | Concept id del estado de la licencia | `src/modules/profiles/dto/create-jurisdiction-authorization.dto.ts:106` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/dto/create-jurisdiction-authorization.dto.ts:112` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil profesional o la plataforma pueden modificarlo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2066,7 +2348,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2209,6 +2491,19 @@ La operación no recibe cuerpo.
 | `activity.documents` | `number` | Sí | — | — | Documentos que publicó en expedientes. | `src/modules/profiles/dto/read-practitioner-profile.dto.ts:186` |
 | `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/dto/read-practitioner-profile.dto.ts:307` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil profesional o la plataforma pueden modificarlo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: Perfil profesional no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2217,7 +2512,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `P5 §3`
 
 ---
 
@@ -2384,6 +2679,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `activity.documents` | `number` | Sí | — | — | Documentos que publicó en expedientes. | `src/modules/profiles/dto/read-practitioner-profile.dto.ts:186` |
 | `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/dto/read-practitioner-profile.dto.ts:307` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil profesional o la plataforma pueden modificarlo; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Perfil profesional no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2392,7 +2701,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `P5 §3`
 
 ---
 
@@ -2487,6 +2796,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `verificationStatus` | `string` | Sí | formato uuid | — | Concept id del estado de verificación | `src/modules/profiles/dto/add-specialty.dto.ts:86` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/dto/add-specialty.dto.ts:92` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil profesional o la plataforma pueden modificarlo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado |
+| 409 | `CONFLICT` | ConflictException: El profesional ya tiene esa especialidad activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La credencial de soporte no pertenece al profesional; PreconditionFailedException: La credencial de soporte no está verificada; PreconditionFailedException: Falta indicar la especialidad; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Un profesional puede declarar hasta {MAX_SPECIALTIES_PER_PRACTITIO…} especialidades |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2495,7 +2819,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2637,13 +2961,26 @@ La operación no recibe cuerpo.
 | `activity.documents` | `number` | Sí | — | — | Documentos que publicó en expedientes. | `src/modules/profiles/dto/read-practitioner-profile.dto.ts:186` |
 | `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/dto/read-practitioner-profile.dto.ts:307` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil profesional no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2809,13 +3146,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `activity.documents` | `number` | Sí | — | — | Documentos que publicó en expedientes. | `src/modules/profiles/dto/read-practitioner-profile.dto.ts:186` |
 | `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/dto/read-practitioner-profile.dto.ts:307` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil profesional no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2880,13 +3231,24 @@ La operación no recibe cuerpo.
 | `items[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/dto/affiliation.dto.ts:210` |
 | `count` | `number` | Sí | — | — | Cantidad devuelta. | `src/modules/profiles/dto/affiliation.dto.ts:225` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3005,6 +3367,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `decisionReasonText` | `string` | No | admite null | — | Por qué la organización rechazó o dio de baja el vínculo. **Lo lee el profesional**, no es una nota interna. Un rechazo sin motivo es mudo para quien lo recibe, y quien lo escribe tiene que saber que se lee. `null` en cualquier otro estado. | `src/modules/profiles/dto/affiliation.dto.ts:204` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/profiles/dto/affiliation.dto.ts:210` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: La sede indicada no existe |
+| 409 | `CONFLICT` | ConflictException: Ese vínculo ya está en el historial laboral; ConflictException: Ya pediste vincularte a esa sede |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El fin del vínculo no puede ser anterior a su inicio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3013,7 +3390,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3101,13 +3478,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `fileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/dto/own-credential.dto.ts:100` |
 | `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/dto/own-credential.dto.ts:103` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {labels.notFound} |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3175,13 +3565,24 @@ La operación no recibe cuerpo.
 | `count` | `number` | Sí | — | — | Cantidad devuelta | `src/modules/profiles/dto/linkable-organization.dto.ts:69` |
 | `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/profiles/dto/linkable-organization.dto.ts:73` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3240,6 +3641,18 @@ La operación no recibe cuerpo.
 | `steps[].missing` | `array<string>` | Sí | — | — | Qué falta, en claves estables que la pantalla traduce. Van en clave y no en prosa porque el texto es del front: acá se dice qué falta, no cómo se le pide a la persona. | `src/modules/profiles/dto/practitioner-onboarding.dto.ts:34` |
 | `firstIncomplete` | `object` | Sí | valores: done | — | La primera etapa incompleta, o `done` si no queda ninguna. Es lo único que la pantalla necesita para decidir dónde aterrizar. | `src/modules/profiles/dto/practitioner-onboarding.dto.ts:64` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene perfil profesional |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3249,7 +3662,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3384,13 +3797,26 @@ La operación no recibe cuerpo.
 | `activity.documents` | `number` | Sí | — | — | Documentos que publicó en expedientes. | `src/modules/profiles/dto/read-practitioner-profile.dto.ts:186` |
 | `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/dto/read-practitioner-profile.dto.ts:307` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil profesional no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:ProfilesPractitionersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3459,6 +3885,18 @@ La operación no recibe cuerpo.
 | `items[].statusConceptId` | `string` | Sí | formato uuid | — | Estado del vínculo. | `src/modules/profiles/dto/affiliation-request.dto.ts:64` |
 | `items[].createdAt` | `string` | Sí | formato date-time | — | Cuándo se pidió. | `src/modules/profiles/dto/affiliation-request.dto.ts:68` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3467,7 +3905,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:TenantPractitionerRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3537,6 +3975,20 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {decision.siNoEsta} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3545,7 +3997,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:TenantPractitionerRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3635,13 +4087,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {decision.siNoEsta} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:TenantPractitionerRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3731,13 +4197,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {decision.siNoEsta} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Profiles Module (05) — etapa `ctrl:TenantPractitionerRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
