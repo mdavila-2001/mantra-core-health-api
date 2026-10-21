@@ -1,0 +1,68 @@
+{
+  "AppController_getHello": {
+    "operacion": "GET /",
+    "motivo": "Devuelve la constante 'Hello World!'; no accede a datos.",
+    "fuente": "src/app.service.ts:12",
+    "revision": "manual, 2026-10-21"
+  },
+  "AppController_readiness": {
+    "operacion": "GET /readiness",
+    "motivo": "Sondas de salud: `select 1` contra PostgreSQL y ping a MongoDB, Redis y OpenSearch; no lee tablas del modelo.",
+    "fuente": "src/app-readiness.service.ts:32",
+    "revision": "manual, 2026-10-21"
+  },
+  "DataSourcesController_dataSources": {
+    "operacion": "GET /health/data-sources",
+    "motivo": "Consulta el estado del registro de conexiones y las reglas de enrutamiento, en memoria.",
+    "fuente": "src/persistence/health/data-sources.health.ts:51",
+    "revision": "manual, 2026-10-21"
+  },
+  "DataSourcesController_metrics": {
+    "operacion": "GET /health/data-sources/metrics",
+    "motivo": "Devuelve el contador de métricas en memoria.",
+    "fuente": "src/persistence/health/data-sources.health.ts:71",
+    "revision": "manual, 2026-10-21"
+  },
+  "AuthzPdpController_invalidateCache": {
+    "operacion": "POST /authz/pdp/cache/invalidate",
+    "motivo": "No escribe ni encola nada: calcula una clave de caché, escribe un log y responde `ok: true`. El comentario del método dice que un consumidor de outbox hace la invalidación, pero el método no publica ningún evento (ver HZ-19).",
+    "fuente": "src/modules/authz/services/authz-pdp.service.ts:128",
+    "revision": "manual, 2026-10-21"
+  },
+  "DentalController_catalog": {
+    "operacion": "GET /dental-procedures/catalog",
+    "motivo": "Devuelve catálogos que viven en constantes del código (códigos, piezas, cuadrantes).",
+    "fuente": "src/modules/procedures_perioperative/services/periop-dental.service.ts:252",
+    "revision": "manual, 2026-10-21"
+  },
+  "SeriesController_queryRange": {
+    "operacion": "GET /ts/series/{seriesId}/query",
+    "motivo": "Lee series temporales de una tabla que elige la petición (`query.dataset`) o de un rollup; el nombre no se conoce antes de ejecutar.",
+    "fuente": "src/modules/time_series/services/series-query.service.ts:122",
+    "revision": "manual, 2026-10-21"
+  },
+  "TimescaleAdminController_configureHypertable": {
+    "operacion": "POST /ts/admin/hypertables",
+    "motivo": "Convierte en hypertable la tabla que indica la petición (`dto.table`); el nombre no se conoce antes de ejecutar.",
+    "fuente": "src/modules/time_series/services/timescale-admin.service.ts:75",
+    "revision": "manual, 2026-10-21"
+  },
+  "TimescaleAdminController_updateHypertable": {
+    "operacion": "PATCH /ts/admin/hypertables/{table}",
+    "motivo": "Modifica la hypertable que indica la ruta (`{table}`); el nombre no se conoce antes de ejecutar.",
+    "fuente": "src/modules/time_series/services/timescale-admin.service.ts:122",
+    "revision": "manual, 2026-10-21"
+  },
+  "SchedulingController_listActivityTypes": {
+    "operacion": "GET /scheduling/activity-types",
+    "motivo": "Devuelve el catálogo de tipologías de actividad, que vive en constantes del código (ACTIVITY_TYPES y sus etiquetas); no accede a datos.",
+    "fuente": "src/modules/scheduling/services/scheduling-catalog.service.ts:1080",
+    "revision": "manual, 2026-10-21"
+  },
+  "SchedulingController_listExceptionTypes": {
+    "operacion": "GET /scheduling/exception-types",
+    "motivo": "Devuelve el catálogo de motivos de bloqueo, que vive en constantes del código (EXCEPTION_TYPES y sus etiquetas); no accede a datos.",
+    "fuente": "src/modules/scheduling/services/scheduling-catalog.service.ts:1091",
+    "revision": "manual, 2026-10-21"
+  }
+}
