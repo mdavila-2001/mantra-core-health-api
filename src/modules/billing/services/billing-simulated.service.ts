@@ -158,9 +158,7 @@ export class BillingSimulatedService {
   private scopeOf(user: AuthenticatedUser): OperatingScope {
     const scope = operatingScope(user);
     if (scope === null) {
-      throw new ForbiddenException(
-        'Su rol no permite operar la facturación',
-      );
+      throw new ForbiddenException('Su rol no permite operar la facturación');
     }
     return scope;
   }
