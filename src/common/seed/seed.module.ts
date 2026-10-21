@@ -55,6 +55,7 @@ import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
+import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
@@ -155,6 +156,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     TerminologySeedService,
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
+    TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
     LegalEntityTypesSeedService,
@@ -185,6 +187,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     TerminologySeedService,
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
+    TelemetryUxHeatmapSeedService,
     GlossarySeedService,
     BoGeographySeedService,
     LegalEntityTypesSeedService,

@@ -6,6 +6,7 @@ import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
+import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
@@ -163,6 +164,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly terminology: TerminologySeedService,
     private readonly dynamicEnums: DynamicEnumSeedService,
     private readonly patientPortalProxy: PatientPortalProxySeedService,
+    private readonly telemetryUxHeatmap: TelemetryUxHeatmapSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
     private readonly legalEntityTypes: LegalEntityTypesSeedService,
@@ -290,6 +292,15 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'apoderamiento de portal',
         kind: 'core',
         run: () => this.patientPortalProxy.run(),
+      },
+      // El propósito y el esquema de evento con los que el portal manda las
+      // interacciones de los mapas de calor. Es `core` porque sin el esquema
+      // cada lote de `POST /telemetry/activity-events` vuelve 404, y va acá
+      // porque sólo depende de los conceptos de telemetría del catálogo.
+      {
+        name: 'mapas de calor del portal',
+        kind: 'core',
+        run: () => this.telemetryUxHeatmap.run(),
       },
       // Depende de `SEED.codeSystemVersionId`, ya materializado por el catálogo
       // de conceptos. No depende de las enumeraciones dinámicas ni al revés,
