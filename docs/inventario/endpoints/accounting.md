@@ -105,13 +105,26 @@ La operación no recibe cuerpo.
 | `count` | `number` | Sí | — | — | — | `src/modules/accounting/dto/ledger-read.dto.ts:132` |
 | `limit` | `number` | Sí | — | — | — | `src/modules/accounting/dto/ledger-read.dto.ts:133` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La práctica consultada pertenece a otra organización |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -201,6 +214,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `primaryContactId` | `string` | No | formato uuid | — | Contacto creado junto con la cuenta | sin fuente |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese código en la práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -209,7 +235,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -321,13 +347,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/accounting/dto/accrual.dto.ts:180` |
 | `scheduleLineIds` | `array<string>` | Sí | — | — | Valor de schedule line ids mantenido por la instancia. | `src/modules/accounting/dto/accrual.dto.ts:184` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El número de objeto ya existe en el tenant |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suma del cronograma no iguala el total |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingAccrualController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -413,13 +453,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `postedLines` | `number` | Sí | — | — | Valor de posted lines mantenido por la instancia. | `src/modules/accounting/dto/accrual.dto.ts:192` |
 | `transactionIds` | `array<string>` | Sí | — | — | Transacciones de devengo generadas | `src/modules/accounting/dto/accrual.dto.ts:200` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Objeto de devengo no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto de devengo no define cuentas; PreconditionFailedException: No hay líneas de devengo pendientes en el periodo; PreconditionFailedException: El asiento generado no balancea (debe != haber) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingAccrualController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -530,13 +584,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `bookValue` | `string` | Sí | — | — | Valor de book value mantenido por la instancia. | `src/modules/accounting/dto/asset.dto.ts:194` |
 | `transactionId` | `string` | Sí | formato uuid | — | Identificador asociado a transaction. | `src/modules/accounting/dto/asset.dto.ts:198` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un activo con ese código en la práctica |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El asiento generado no balancea (debe != haber) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingAssetController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -648,13 +716,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `transactionId` | `string` | Sí | formato uuid | — | Identificador asociado a transaction. | `src/modules/accounting/dto/subledger.dto.ts:225` |
 | `clearedItems` | `number` | Sí | — | — | Valor de cleared items mantenido por la instancia. | `src/modules/accounting/dto/subledger.dto.ts:229` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Partida abierta no encontrada; ResourceNotFoundException: Subledger no encontrado |
+| 409 | `CONFLICT` | ConflictException: La partida ya está compensada; ConflictException: El número de clearing ya existe en el tenant |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Importe compensado inválido; PreconditionFailedException: Las partidas no comparten subledger; PreconditionFailedException: El asiento generado no balancea (debe != haber) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingSubledgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -746,13 +829,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `depreciatedAssets` | `number` | Sí | — | — | Valor de depreciated assets mantenido por la instancia. | `src/modules/accounting/dto/asset.dto.ts:206` |
 | `transactionIds` | `array<string>` | Sí | — | — | Valor de transaction ids mantenido por la instancia. | `src/modules/accounting/dto/asset.dto.ts:210` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El asiento generado no balancea (debe != haber); PreconditionFailedException: No hay activos elegibles para depreciar en el periodo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingAssetController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -838,13 +934,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `validOn` | `string` | Sí | formato date-time | — | Valor de valid on mantenido por la instancia. | `src/modules/accounting/dto/exchange-rate.dto.ts:64` |
 | `created` | `boolean` | Sí | — | — | ¿Se creó (true) o actualizó (false)? | `src/modules/accounting/dto/exchange-rate.dto.ts:69` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingExchangeRateController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -921,13 +1029,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `ok` | `boolean` | Sí | — | — | Valor de ok mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:375` |
 | `id` | `string` | No | formato uuid | — | Identificador único de la instancia. | `src/modules/accounting/dto/journal.dto.ts:379` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Periodo fiscal no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El periodo no está ABIERTO |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingFiscalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1029,13 +1151,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/accounting/dto/fiscal.dto.ts:115` |
 | `periodIds` | `array<string>` | Sí | — | — | Ids de periodos creados | `src/modules/accounting/dto/fiscal.dto.ts:120` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El ejercicio ya existe en la práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingFiscalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1107,13 +1242,26 @@ La operación no recibe cuerpo.
 | `count` | `number` | Sí | — | — | — | `src/modules/accounting/dto/ledger-read.dto.ts:161` |
 | `limit` | `number` | Sí | — | — | — | `src/modules/accounting/dto/ledger-read.dto.ts:162` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La práctica consultada pertenece a otra organización |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1257,6 +1405,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:347` |
 | `postedAt` | `string` | Sí | formato date-time; admite null | — | Valor de posted at mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:351` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Periodo fiscal no encontrado |
+| 409 | `CONFLICT` | ConflictException: El número de asiento ya existe en la práctica |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El asiento no tiene importe; PreconditionFailedException: El asiento no balancea (debe != haber); PreconditionFailedException: El periodo fiscal no está ABIERTO |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1265,7 +1428,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1338,13 +1501,26 @@ La operación no recibe cuerpo.
 | `lines[].costCenterId` | `string` | No | formato uuid; admite null | — | — | `src/modules/accounting/dto/ledger-read.dto.ts:174` |
 | `lines[].currencyConceptId` | `string` | No | formato uuid; admite null | — | — | `src/modules/accounting/dto/ledger-read.dto.ts:176` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La práctica consultada pertenece a otra organización |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado; ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1428,6 +1604,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:347` |
 | `postedAt` | `string` | Sí | formato date-time; admite null | — | Valor de posted at mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:351` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Se requiere un rol con autoridad de aprobación para aprobar el asiento |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1436,7 +1625,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1520,6 +1709,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:347` |
 | `postedAt` | `string` | Sí | formato date-time; admite null | — | Valor de posted at mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:351` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: Transición de estado inválida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1528,7 +1731,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1610,6 +1813,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `ok` | `boolean` | Sí | — | — | Valor de ok mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:375` |
 | `id` | `string` | No | formato uuid | — | Identificador único de la instancia. | `src/modules/accounting/dto/journal.dto.ts:379` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1618,7 +1835,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1705,6 +1922,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:347` |
 | `postedAt` | `string` | Sí | formato date-time; admite null | — | Valor de posted at mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:351` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado; ResourceNotFoundException: Periodo fiscal no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado inválida; PreconditionFailedException: El periodo fiscal no está ABIERTO; PreconditionFailedException: El asiento no balancea (debe != haber) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1713,7 +1944,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1805,6 +2036,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:347` |
 | `postedAt` | `string` | Sí | formato date-time; admite null | — | Valor de posted at mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:351` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado |
+| 409 | `CONFLICT` | ConflictException: El asiento ya fue reversado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado inválida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1813,7 +2059,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1897,6 +2143,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:347` |
 | `postedAt` | `string` | Sí | formato date-time; admite null | — | Valor de posted at mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:351` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: Transición de estado inválida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1905,7 +2165,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2047,6 +2307,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:347` |
 | `postedAt` | `string` | Sí | formato date-time; admite null | — | Valor de posted at mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:351` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El número de asiento ya existe en la práctica |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El asiento no tiene importe; PreconditionFailedException: El asiento no balancea (debe != haber); PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2055,7 +2329,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2161,13 +2435,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `liabilityStatus` | `string` | Sí | — | — | Valor de liability status mantenido por la instancia. | `src/modules/accounting/dto/liability.dto.ts:95` |
 | `outstandingAmount` | `string` | Sí | — | — | Valor de outstanding amount mantenido por la instancia. | `src/modules/accounting/dto/liability.dto.ts:99` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Pasivo no encontrado; ResourceNotFoundException: Cuota no encontrada para el pasivo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: principal + interés no iguala el importe; PreconditionFailedException: El pago debe ser positivo; PreconditionFailedException: El pasivo no está ACTIVO; PreconditionFailedException: El pasivo no tiene cuenta contable; PreconditionFailedException: El asiento generado no balancea (debe != haber) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLiabilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2258,13 +2546,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/accounting/dto/subledger.dto.ts:205` |
 | `outstandingAmount` | `string` | Sí | — | — | Valor de outstanding amount mantenido por la instancia. | `src/modules/accounting/dto/subledger.dto.ts:209` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Subledger no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingSubledgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2341,6 +2642,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `targetAccountId` | `string` | Sí | formato uuid | — | Identificador asociado a target account. | `src/modules/accounting/dto/journal.dto.ts:363` |
 | `priority` | `number` | Sí | admite null | — | Valor de priority mantenido por la instancia. | `src/modules/accounting/dto/journal.dto.ts:367` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No hay regla de determinación vigente para el escenario |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2349,7 +2663,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2456,13 +2770,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `invoiceId` | `string` | No | formato uuid; admite null | — | Factura anclada a este asiento, si el registro fue un ingreso de consulta. | `src/modules/accounting/dto/practitioner-entry.dto.ts:164` |
 | `notificationRequestId` | `string` | No | formato uuid; admite null | — | Notificación in-app generada para el doctor, si la infraestructura de mensajería la aceptó. | `src/modules/accounting/dto/practitioner-entry.dto.ts:167` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada; ResourceNotFoundException: Documento no encontrado; ResourceNotFoundException: Asiento no encontrado; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 409 | `CONFLICT` | ConflictException: La factura ya tiene un asiento contable asociado; ConflictException: El número de asiento ya existe en la práctica; ConflictException: El documento ya fue contabilizado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: La factura no pertenece a esa práctica; PreconditionFailedException: La factura todavía no está pagada; PreconditionFailedException: La factura no está ligada a un encuentro clínico: no se puede confirmar que sea de este profesional; PreconditionFailedException: La consulta de esa factura no es de este profesional; PreconditionFailedException: La factura no registra un importe pagado; PreconditionFailedException: El asiento no tiene importe; PreconditionFailedException: El asiento no balancea (debe != haber); PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingPractitionerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2567,13 +2896,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `invoiceId` | `string` | No | formato uuid; admite null | — | Factura anclada a este asiento, si el registro fue un ingreso de consulta. | `src/modules/accounting/dto/practitioner-entry.dto.ts:164` |
 | `notificationRequestId` | `string` | No | formato uuid; admite null | — | Notificación in-app generada para el doctor, si la infraestructura de mensajería la aceptó. | `src/modules/accounting/dto/practitioner-entry.dto.ts:167` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 409 | `CONFLICT` | ConflictException: El número de asiento ya existe en la práctica |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: El asiento no tiene importe; PreconditionFailedException: El asiento no balancea (debe != haber); PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingPractitionerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2640,13 +2984,26 @@ La operación no recibe cuerpo.
 | `items[].currencyConceptId` | `string` | No | formato uuid; admite null | — | Moneda (concepto), si la factura la declara. | `src/modules/accounting/dto/practitioner-entry.dto.ts:43` |
 | `count` | `number` | Sí | — | — | — | `src/modules/accounting/dto/practitioner-entry.dto.ts:49` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingPractitionerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2720,13 +3077,26 @@ La operación no recibe cuerpo.
 | `transactionsIncluded` | `number` | Sí | — | — | Asientos POSTEADOS incluidos en la agregación | `src/modules/accounting/dto/ledger-read.dto.ts:228` |
 | `truncated` | `boolean` | Sí | — | — | Si se alcanzó el tope y el balance está incompleto | `src/modules/accounting/dto/ledger-read.dto.ts:233` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La práctica consultada pertenece a otra organización |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/accounting.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 16 — Accounting (Libro Mayor y Subledgers) — etapa `ctrl:AccountingLedgerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

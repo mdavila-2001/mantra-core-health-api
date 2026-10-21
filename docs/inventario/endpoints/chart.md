@@ -126,6 +126,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `activityCount` | `number` | Sí | — | — | Nº de actividades creadas | `src/modules/chart/dto/care-plans.dto.ts:208` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/chart/dto/care-plans.dto.ts:214` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -135,7 +147,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartCarePlansController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -220,6 +232,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `activityType` | `string` | Sí | valores: APPOINTMENT, PROCEDURE, FOLLOW_UP, TELEHEALTH, OTHER | — | Valor de activity type mantenido por la instancia. | sin fuente |
 | `subtypeCreated` | `boolean` | Sí | — | — | true si además se creó la fila del subtipo (tarea o nota) | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plan de cuidado no encontrado; ResourceNotFoundException: Actividad no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El plan de cuidado no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -228,7 +254,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartCarePlansController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -337,6 +363,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `updatedAt` | `string` | Sí | formato date-time | — | Fecha y hora de la última actualización. | sin fuente |
 | `deletedAt` | `string` | No | formato date-time; admite null | — | Marca de borrado lógico; null si el documento está vivo | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -345,7 +383,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -440,6 +478,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lifecycleStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del ciclo de vida de la cabecera | `src/modules/chart/dto/notes.dto.ts:423` |
 | `versionStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del estado de la versión | `src/modules/chart/dto/notes.dto.ts:432` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -449,7 +499,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartNotesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -546,6 +596,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lifecycleStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del ciclo de vida de la cabecera | `src/modules/chart/dto/notes.dto.ts:423` |
 | `versionStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del estado de la versión | `src/modules/chart/dto/notes.dto.ts:432` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Nota clínica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La nota no está firmada; edítela como borrador (UC-15-02) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -554,7 +618,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartNotesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -648,6 +712,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lifecycleStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del ciclo de vida de la cabecera | `src/modules/chart/dto/notes.dto.ts:423` |
 | `versionStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del estado de la versión | `src/modules/chart/dto/notes.dto.ts:432` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Nota clínica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La nota ya no está en borrador; use una enmienda (UC-15-05) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -656,7 +734,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartNotesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -745,6 +823,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lifecycleStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del ciclo de vida de la cabecera | `src/modules/chart/dto/notes.dto.ts:423` |
 | `versionStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del estado de la versión | `src/modules/chart/dto/notes.dto.ts:432` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de nota no encontrada; ResourceNotFoundException: Nota clínica no encontrada |
+| 409 | `CONFLICT` | ConflictException: El cofirmante ya firmó esta versión |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión no está firmada (SIGNED); PreconditionFailedException: Falta la firma primaria del autor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -753,7 +846,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartNotesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -841,6 +934,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lifecycleStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del ciclo de vida de la cabecera | `src/modules/chart/dto/notes.dto.ts:423` |
 | `versionStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del estado de la versión | `src/modules/chart/dto/notes.dto.ts:432` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de nota no encontrada; ResourceNotFoundException: Nota clínica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión no está en borrador |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -850,7 +957,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartNotesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -945,6 +1052,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `versionId` | `string` | Sí | formato uuid | — | Identificador asociado a version. | `src/modules/chart/dto/notes.dto.ts:441` |
 | `recordedFindings` | `number` | Sí | — | — | Nº de hallazgos registrados | `src/modules/chart/dto/notes.dto.ts:447` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de nota no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión ya está firmada; los hallazgos quedan sellados |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -953,7 +1074,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartNotesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1033,6 +1154,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `releaseEventId` | `string` | Sí | formato uuid | — | Identificador asociado a release event. | `src/modules/chart/dto/notes.dto.ts:462` |
 | `patientReleaseStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del estado de liberación de la cabecera | `src/modules/chart/dto/notes.dto.ts:471` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de nota no encontrada; ResourceNotFoundException: Nota clínica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión no está firmada; PreconditionFailedException: La versión no es elegible para liberación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1042,7 +1177,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartNotesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1124,6 +1259,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `releaseEventId` | `string` | Sí | formato uuid | — | Identificador asociado a release event. | `src/modules/chart/dto/notes.dto.ts:462` |
 | `patientReleaseStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del estado de liberación de la cabecera | `src/modules/chart/dto/notes.dto.ts:471` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de nota no encontrada; ResourceNotFoundException: Nota clínica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1132,7 +1280,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartNotesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1232,6 +1380,18 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado a cada bloque | `src/modules/chart/dto/chart-read.dto.ts:273` |
 | `truncated` | `array<string>` | Sí | — | — | Qué bloques quedaron recortados por el tope. Vacío si el expediente cabe entero | `src/modules/chart/dto/chart-read.dto.ts:284` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1240,7 +1400,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1322,6 +1482,17 @@ La operación no recibe cuerpo.
 | `provenance.retrievedAt` | `string` | No | — | — | Fecha de descarga, en ISO `YYYY-MM-DD`. | `src/modules/chart/dto/templates.dto.ts:320` |
 | `provenance.note` | `string` | No | — | — | Qué se transcribió y qué quedó afuera, cuando no es obvio. | `src/modules/chart/dto/templates.dto.ts:324` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1330,7 +1501,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartTemplatesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1462,6 +1633,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `provenance.retrievedAt` | `string` | No | — | — | Fecha de descarga, en ISO `YYYY-MM-DD`. | `src/modules/chart/dto/templates.dto.ts:320` |
 | `provenance.note` | `string` | No | — | — | Qué se transcribió y qué quedó afuera, cuando no es obvio. | `src/modules/chart/dto/templates.dto.ts:324` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1470,7 +1653,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartTemplatesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1553,6 +1736,19 @@ La operación no recibe cuerpo.
 | `provenance.retrievedAt` | `string` | No | — | — | Fecha de descarga, en ISO `YYYY-MM-DD`. | `src/modules/chart/dto/templates.dto.ts:320` |
 | `provenance.note` | `string` | No | — | — | Qué se transcribió y qué quedó afuera, cuando no es obvio. | `src/modules/chart/dto/templates.dto.ts:324` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1561,7 +1757,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartTemplatesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1643,6 +1839,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/chart/dto/templates.dto.ts:77` |
 | `status` | `string` | Sí | formato uuid | — | Concept id de estado | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/chart.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1651,7 +1859,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / chart — etapa `ctrl:ChartTemplatesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

@@ -250,6 +250,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | `actionCount` | `number` | Sí | — | — | Acciones publicadas | `src/modules/read_models/dto/read-model-responses.dto.ts:156` |
 | `status` | `string` | Sí | — | — | Estado (concept id) | `src/modules/read_models/dto/read-model-responses.dto.ts:162` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición de read model no encontrada |
+| 409 | `CONFLICT` | ConflictException: La vista ya existe en esa ruta |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición de read model no está ACTIVE |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -258,7 +273,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-02`
 
 ---
 
@@ -320,6 +335,18 @@ La operación no recibe cuerpo.
 | `actionType` | `string` | Sí | — | — | Tipo de acción (concept id) | `src/modules/read_models/dto/read-model-responses.dto.ts:210` |
 | `enabled` | `boolean` | Sí | — | — | Habilitada para el estado + permisos del solicitante | `src/modules/read_models/dto/read-model-responses.dto.ts:218` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Portal no encontrado; ResourceNotFoundException: Ruta no encontrada; ResourceNotFoundException: Vista no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -328,7 +355,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-11`
 
 ---
 
@@ -405,6 +432,18 @@ La operación no recibe cuerpo.
 | `stalenessSeconds` | `number` | Sí | — | — | Antigüedad en segundos respecto a la última materialización | `src/modules/read_models/dto/read-model-responses.dto.ts:307` |
 | `generatedAt` | `string` | Sí | formato date-time | — | Marca de generación de la respuesta | `src/modules/read_models/dto/read-model-responses.dto.ts:313` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Portal no encontrado; ResourceNotFoundException: Ruta no encontrada; ResourceNotFoundException: Vista no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -413,7 +452,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-05`
 
 ---
 
@@ -468,6 +507,16 @@ La operación no recibe cuerpo.
 | `refreshedAt` | `string` | No | formato date-time; admite null | — | Última materialización de la MV pública | `src/modules/read_models/dto/read-model-responses.dto.ts:390` |
 | `generatedAt` | `string` | Sí | formato date-time | — | Marca de generación de la respuesta | `src/modules/read_models/dto/read-model-responses.dto.ts:396` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -476,7 +525,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-10`
 
 ---
 
@@ -525,6 +574,16 @@ La operación no recibe cuerpo.
 | `refreshedAt` | `string` | No | formato date-time; admite null | — | Última materialización de la MV pública | `src/modules/read_models/dto/read-model-responses.dto.ts:390` |
 | `generatedAt` | `string` | Sí | formato date-time | — | Marca de generación de la respuesta | `src/modules/read_models/dto/read-model-responses.dto.ts:396` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -533,7 +592,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-10`
 
 ---
 
@@ -596,6 +655,20 @@ La operación no recibe cuerpo.
 | `inputCount` | `number` | Sí | — | — | Entradas de procedencia registradas | sin fuente |
 | `duplicate` | `boolean` | Sí | — | — | true si la corrida ya existía con esa clave | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Read model no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La operación requiere una materialized view; PreconditionFailedException: La versión está retirada; PreconditionFailedException: El nombre físico de la vista no es un identificador SQL válido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -604,7 +677,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-04`
 
 ---
 
@@ -667,6 +740,20 @@ La operación no recibe cuerpo.
 | `inputCount` | `number` | Sí | — | — | Entradas de procedencia registradas | sin fuente |
 | `duplicate` | `boolean` | Sí | — | — | true si la corrida ya existía con esa clave | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Read model no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La operación requiere una materialized view; PreconditionFailedException: La versión está retirada; PreconditionFailedException: El nombre físico de la vista no es un identificador SQL válido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -675,7 +762,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-06`
 
 ---
 
@@ -738,6 +825,20 @@ La operación no recibe cuerpo.
 | `inputCount` | `number` | Sí | — | — | Entradas de procedencia registradas | sin fuente |
 | `duplicate` | `boolean` | Sí | — | — | true si la corrida ya existía con esa clave | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Read model no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La operación requiere una materialized view; PreconditionFailedException: La versión está retirada; PreconditionFailedException: El nombre físico de la vista no es un identificador SQL válido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -746,7 +847,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-07`
 
 ---
 
@@ -809,6 +910,20 @@ La operación no recibe cuerpo.
 | `inputCount` | `number` | Sí | — | — | Entradas de procedencia registradas | sin fuente |
 | `duplicate` | `boolean` | Sí | — | — | true si la corrida ya existía con esa clave | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Read model no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La operación requiere una materialized view; PreconditionFailedException: La versión está retirada; PreconditionFailedException: El nombre físico de la vista no es un identificador SQL válido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -817,7 +932,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-03`
 
 ---
 
@@ -952,6 +1067,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | `dependencyCount` | `number` | Sí | — | — | Cantidad de dependencias declaradas | `src/modules/read_models/dto/read-model-responses.dto.ts:60` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/read_models/dto/read-model-responses.dto.ts:66` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe esa versión del read model |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -960,7 +1088,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-01`
 
 ---
 
@@ -1018,6 +1146,20 @@ La operación no recibe cuerpo.
 | `ok` | `boolean` | Sí | — | — | Indica éxito | `src/modules/read_models/dto/read-model-responses.dto.ts:9` |
 | `status` | `string` | No | — | — | Nuevo estado del recurso (concept id) | `src/modules/read_models/dto/read-model-responses.dto.ts:15` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Read model no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede retirar: hay vistas apuntando a esta versión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1026,7 +1168,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-13`
 
 ---
 
@@ -1083,6 +1225,20 @@ La operación no recibe cuerpo.
 | `ok` | `boolean` | Sí | — | — | Indica éxito | `src/modules/read_models/dto/read-model-responses.dto.ts:9` |
 | `status` | `string` | No | — | — | Nuevo estado del recurso (concept id) | `src/modules/read_models/dto/read-model-responses.dto.ts:15` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Read model no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión ya está retirada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1091,7 +1247,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-13`
 
 ---
 
@@ -1211,6 +1367,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | `dependencyCount` | `number` | Sí | — | — | Cantidad de dependencias declaradas | `src/modules/read_models/dto/read-model-responses.dto.ts:60` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/read_models/dto/read-model-responses.dto.ts:66` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No existe una versión previa del read model |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No hay una versión ACTIVE previa que respalde el corte de versión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1219,7 +1389,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-08`
 
 ---
 
@@ -1275,6 +1445,17 @@ La operación no recibe cuerpo.
 | `items[].stalenessSeconds` | `number` | Sí | — | — | Valor de staleness seconds mantenido por la instancia. | `src/modules/read_models/dto/read-model-responses.dto.ts:346` |
 | `items[].stale` | `boolean` | Sí | — | — | Excede maximum_staleness_seconds | `src/modules/read_models/dto/read-model-responses.dto.ts:352` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1283,7 +1464,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-12`
 
 ---
 
@@ -1381,6 +1562,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | `created` | `boolean` | Sí | — | — | Se creó (true) o se actualizó (false) | `src/modules/read_models/dto/read-model-responses.dto.ts:183` |
 | `status` | `string` | Sí | — | — | Estado (concept id) | `src/modules/read_models/dto/read-model-responses.dto.ts:189` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Vista no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La vista no está ACTIVE; PreconditionFailedException: visibleFields contiene columnas fuera del contrato |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/read_models.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1389,7 +1584,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 30 · Read Models (Frontend View Contracts & Read Models) — etapa `UC-30-09`
 
 ---
 

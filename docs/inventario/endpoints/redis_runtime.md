@@ -61,13 +61,24 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere X-Tenant-Id para operar sobre el runtime |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/redis_runtime.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- MÓDULO 56 — `redis_runtime` — etapa `ctrl:RedisRuntimeController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -142,6 +153,19 @@ No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales. _(
 | `key` | `string` | Sí | — | — | Clave lógica escrita | `src/modules/redis_runtime/dto/redis-responses.dto.ts:8` |
 | `ttlSec` | `number` | Sí | — | — | TTL aplicado en segundos | `src/modules/redis_runtime/dto/redis-responses.dto.ts:12` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere X-Tenant-Id para operar sobre el runtime |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Operación de runtime sin tenant en contexto; PreconditionFailedException: Clave de runtime vacía |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/redis_runtime.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -150,7 +174,7 @@ No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales. _(
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- MÓDULO 56 — `redis_runtime` — etapa `ctrl:RedisRuntimeController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -203,6 +227,18 @@ La operación no recibe cuerpo.
 | `key` | `string` | Sí | — | — | Valor de key mantenido por la instancia. | `src/modules/redis_runtime/dto/redis-responses.dto.ts:38` |
 | `deleted` | `boolean` | Sí | — | — | La clave existía y fue borrada | `src/modules/redis_runtime/dto/redis-responses.dto.ts:43` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere X-Tenant-Id para operar sobre el runtime |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Operación de runtime sin tenant en contexto; PreconditionFailedException: Clave de runtime vacía |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/redis_runtime.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -211,7 +247,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- MÓDULO 56 — `redis_runtime` — etapa `ctrl:RedisRuntimeController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -265,6 +301,18 @@ La operación no recibe cuerpo.
 | `found` | `boolean` | Sí | — | — | Existe la clave y no ha expirado | `src/modules/redis_runtime/dto/redis-responses.dto.ts:25` |
 | `value` | `string` | No | admite null | — | Valor si existe | `src/modules/redis_runtime/dto/redis-responses.dto.ts:30` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere X-Tenant-Id para operar sobre el runtime |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Operación de runtime sin tenant en contexto; PreconditionFailedException: Clave de runtime vacía |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/redis_runtime.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -273,7 +321,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- MÓDULO 56 — `redis_runtime` — etapa `ctrl:RedisRuntimeController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -346,6 +394,19 @@ No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales. _(
 | `acquired` | `boolean` | Sí | — | — | Se obtuvo el lock | `src/modules/redis_runtime/dto/redis-responses.dto.ts:55` |
 | `token` | `string` | No | — | — | Token del titular; requerido para liberar. Sólo si acquired=true | `src/modules/redis_runtime/dto/redis-responses.dto.ts:63` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere X-Tenant-Id para operar sobre el runtime |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Operación de runtime sin tenant en contexto; PreconditionFailedException: Clave de runtime vacía |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/redis_runtime.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -354,7 +415,7 @@ No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales. _(
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- MÓDULO 56 — `redis_runtime` — etapa `ctrl:RedisRuntimeController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -409,6 +470,19 @@ La operación no recibe cuerpo.
 | `key` | `string` | Sí | — | — | Valor de key mantenido por la instancia. | `src/modules/redis_runtime/dto/redis-responses.dto.ts:71` |
 | `released` | `boolean` | Sí | — | — | Se liberó el lock (el token coincidía) | `src/modules/redis_runtime/dto/redis-responses.dto.ts:76` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere X-Tenant-Id para operar sobre el runtime |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Operación de runtime sin tenant en contexto; PreconditionFailedException: Clave de runtime vacía |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/redis_runtime.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -417,7 +491,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- MÓDULO 56 — `redis_runtime` — etapa `ctrl:RedisRuntimeController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

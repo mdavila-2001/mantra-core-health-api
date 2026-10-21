@@ -125,6 +125,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `contentHash` | `string` | Sí | — | — | Hash del contenido de la versión inicial | `src/modules/system_context/dto/system-context.dto.ts:717` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:723` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un contexto con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -133,7 +146,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-06`
 
 ---
 
@@ -230,6 +243,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `priority` | `number` | Sí | — | — | Valor de priority mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:1098` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:1104` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contexto no encontrado |
+| 409 | `CONFLICT` | ConflictException: El consumidor ya tiene un binding en esa ventana |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana de validez está invertida; PreconditionFailedException: El contexto no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -238,7 +266,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-10`
 
 ---
 
@@ -363,6 +391,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `inputCount` | `number` | Sí | — | — | Entradas de procedencia registradas | `src/modules/system_context/dto/system-context.dto.ts:942` |
 | `duplicate` | `boolean` | Sí | — | — | true si la corrida ya existía con esa clave | `src/modules/system_context/dto/system-context.dto.ts:948` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contexto no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contexto no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -371,7 +413,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-07`
 
 ---
 
@@ -459,6 +501,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `supersededVersionId` | `string` | Sí | formato uuid | — | Versión que queda superseded | `src/modules/system_context/dto/system-context.dto.ts:1158` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:1164` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contexto no encontrado; ResourceNotFoundException: Versión objetivo no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se puede volver a una versión que estuvo vigente; PreconditionFailedException: El contenido de la versión no es el esperado; PreconditionFailedException: El contexto no tiene versión vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -467,7 +523,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-12`
 
 ---
 
@@ -549,6 +605,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:990` |
 | `supersededVersionId` | `string` | No | formato uuid | — | Versión que queda superseded | `src/modules/system_context/dto/system-context.dto.ts:999` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contexto no encontrado; ResourceNotFoundException: Versión del contexto no encontrada |
+| 409 | `CONFLICT` | ConflictException: La versión ya es la vigente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contexto no está activo; PreconditionFailedException: La versión no está en borrador; PreconditionFailedException: El contenido de la versión no es el esperado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -557,7 +628,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-09`
 
 ---
 
@@ -630,6 +701,20 @@ La operación no recibe cuerpo.
 | `options[].ordinal` | `number` | No | — | — | Posición en la que se ofrece, empezando en cero. | `src/modules/system_context/dto/system-context.dto.ts:1199` |
 | `options[].isDefault` | `boolean` | Sí | — | — | Si la opción viene preseleccionada. | `src/modules/system_context/dto/system-context.dto.ts:1205` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: Indique el campo destino (`target`) o el código de la enumeración (`code`); BadRequestException: El campo destino se escribe como `esquema.tabla.columna` |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Enumeración no encontrada; ResourceNotFoundException: La enumeración está retirada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La enumeración no tiene versión publicada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -638,7 +723,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `ctrl:SystemContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -705,6 +790,17 @@ La operación no recibe cuerpo.
 | `items[].validationModeConceptId` | `string` | No | formato uuid | — | Modo de validación con el que se resuelve el valor propuesto. | `src/modules/system_context/dto/system-context.dto.ts:1348` |
 | `count` | `number` | Sí | — | — | Cuántos amarres trae la respuesta. | `src/modules/system_context/dto/system-context.dto.ts:1365` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -713,7 +809,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `ctrl:SystemContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -808,6 +904,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:146` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | La definición nace en borrador | `src/modules/system_context/dto/system-context.dto.ts:155` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una enumeración con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -816,7 +925,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-01`
 
 ---
 
@@ -912,6 +1021,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `dynamicEnumDefinitionId` | `string` | Sí | formato uuid | — | Identificador asociado a dynamic enum definition. | `src/modules/system_context/dto/system-context.dto.ts:429` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:435` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Enumeración no encontrada |
+| 409 | `CONFLICT` | ConflictException: El campo ya está gobernado por otra enumeración |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El modo permisivo exige un concepto de reserva; PreconditionFailedException: La enumeración está retirada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -920,7 +1044,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-04`
 
 ---
 
@@ -1002,6 +1126,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:574` |
 | `disabledBindings` | `number` | Sí | — | — | Bindings que quedan deshabilitados | `src/modules/system_context/dto/system-context.dto.ts:580` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Enumeración no encontrada |
+| 409 | `CONFLICT` | ConflictException: La enumeración ya está retirada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay un campo obligatorio vinculado; migra su enumeración antes de retirarla |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1010,7 +1149,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-11`
 
 ---
 
@@ -1122,6 +1261,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_context/dto/system-context.dto.ts:290` |
 | `optionIds` | `array<string>` | Sí | formato uuid | — | Valor de option ids mantenido por la instancia. | `src/modules/system_context/dto/system-context.dto.ts:296` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Enumeración no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo una opción puede ser la de por defecto; PreconditionFailedException: La opción por defecto no puede estar deshabilitada; PreconditionFailedException: El código de opción está repetido; PreconditionFailedException: El concepto está repetido en las opciones; PreconditionFailedException: La enumeración está retirada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1130,7 +1283,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-02`
 
 ---
 
@@ -1194,6 +1347,20 @@ La operación no recibe cuerpo.
 | `cacheToken` | `string` | Sí | — | — | Token nuevo; invalida la caché de la definición | `src/modules/system_context/dto/system-context.dto.ts:331` |
 | `supersededVersionId` | `string` | No | formato uuid | — | Versión que queda superseded | `src/modules/system_context/dto/system-context.dto.ts:340` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Enumeración no encontrada; ResourceNotFoundException: Versión de la enumeración no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La enumeración está retirada; PreconditionFailedException: La versión no está en borrador; PreconditionFailedException: La versión no tiene ninguna opción habilitada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1202,7 +1369,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-03`
 
 ---
 
@@ -1290,6 +1457,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `cacheToken` | `string` | Sí | — | — | Token de la versión resuelta; identifica la caché | `src/modules/system_context/dto/system-context.dto.ts:537` |
 | `rejectionReason` | `string` | No | — | — | Por qué se rechazó | `src/modules/system_context/dto/system-context.dto.ts:543` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El campo no tiene enumeración vinculada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La enumeración no tiene versión publicada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_context.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1298,7 +1479,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas — etapa `UC-45-05`
 
 ---
 

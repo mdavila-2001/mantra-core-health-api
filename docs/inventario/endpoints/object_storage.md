@@ -89,6 +89,17 @@ La operación no recibe cuerpo.
 | `currentVersionId` | `string` | No | formato uuid | — | Versión vigente del objeto | `src/modules/object_storage/dto/object-storage.dto.ts:704` |
 | `denialReason` | `string` | No | — | — | Por qué se denegó | `src/modules/object_storage/dto/object-storage.dto.ts:710` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -97,7 +108,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-05`
 
 ---
 
@@ -193,6 +204,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:1171` |
 | `duplicate` | `boolean` | Sí | — | — | true si ese lote ya se había archivado | `src/modules/object_storage/dto/object-storage.dto.ts:1177` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Objeto no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto no tiene ninguna versión; PreconditionFailedException: La versión está bajo retención legal: no se puede mover a frío |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -201,7 +226,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-11`
 
 ---
 
@@ -340,6 +365,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `instancesSkipped` | `number` | Sí | — | — | Instancias que ya estaban catalogadas | `src/modules/object_storage/dto/object-storage.dto.ts:659` |
 | `studyCreated` | `boolean` | Sí | — | — | true si el estudio se creó en esta llamada | `src/modules/object_storage/dto/object-storage.dto.ts:665` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El objeto de la instancia no existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -348,7 +386,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-04`
 
 ---
 
@@ -440,6 +478,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `objectManifestId` | `string` | Sí | formato uuid | — | Identificador asociado a object manifest. | `src/modules/object_storage/dto/object-storage.dto.ts:789` |
 | `duplicate` | `boolean` | Sí | — | — | true si ese origen y tipo ya estaban registrados | `src/modules/object_storage/dto/object-storage.dto.ts:797` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Objeto no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -448,7 +499,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-06`
 
 ---
 
@@ -539,6 +590,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:108` |
 | `duplicate` | `boolean` | Sí | — | — | true si esa carga del proveedor ya estaba iniciada | `src/modules/object_storage/dto/object-storage.dto.ts:116` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio de nombres no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El espacio de nombres no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -547,7 +612,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-01`
 
 ---
 
@@ -638,6 +703,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1243` |
 | `duplicate` | `boolean` | Sí | — | — | true si el borrado ya estaba solicitado | `src/modules/object_storage/dto/object-storage.dto.ts:1249` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Objeto no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto está bajo retención legal: no se puede borrar; PreconditionFailedException: El objeto está bajo retención de cumplimiento vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -646,7 +725,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-12`
 
 ---
 
@@ -770,6 +849,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `manifestCreated` | `boolean` | Sí | — | — | true si el manifiesto se creó en esta operación | `src/modules/object_storage/dto/object-storage.dto.ts:322` |
 | `duplicate` | `boolean` | Sí | — | — | true si ese contenido ya estaba versionado y no se duplicó | `src/modules/object_storage/dto/object-storage.dto.ts:330` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Objeto no encontrado; ResourceNotFoundException: Espacio de nombres no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto no está activo; PreconditionFailedException: El espacio de nombres no tiene versionado habilitado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -778,7 +871,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-03`
 
 ---
 
@@ -910,6 +1003,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `manifestCreated` | `boolean` | Sí | — | — | true si el manifiesto se creó en esta operación | `src/modules/object_storage/dto/object-storage.dto.ts:322` |
 | `duplicate` | `boolean` | Sí | — | — | true si ese contenido ya estaba versionado y no se duplicó | `src/modules/object_storage/dto/object-storage.dto.ts:330` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Carga no encontrada; ResourceNotFoundException: Espacio de nombres no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La carga ya no está en curso; PreconditionFailedException: La carga caducó; PreconditionFailedException: El tamaño recibido no coincide con el declarado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -918,7 +1025,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-02`
 
 ---
 
@@ -1008,6 +1115,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `actualHash` | `string` | Sí | — | — | Valor de actual hash mantenido por la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1067` |
 | `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:1073` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: Objeto no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1016,7 +1136,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-10`
 
 ---
 
@@ -1101,6 +1221,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:916` |
 | `activeHolds` | `number` | Sí | — | — | Retenciones legales que siguen vivas sobre la versión | `src/modules/object_storage/dto/object-storage.dto.ts:924` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: Objeto no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1109,7 +1242,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `ctrl:ObjectStorageController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1174,6 +1307,21 @@ La operación no recibe cuerpo.
 | `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:916` |
 | `activeHolds` | `number` | Sí | — | — | Retenciones legales que siguen vivas sobre la versión | `src/modules/object_storage/dto/object-storage.dto.ts:924` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Retención legal no encontrada; ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: Objeto no encontrado |
+| 409 | `CONFLICT` | ConflictException: La retención legal ya está liberada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La retención es de otra versión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1182,7 +1330,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `ctrl:ObjectStorageController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1273,6 +1421,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `retainUntil` | `string` | Sí | formato date-time | — | Valor de retain until mantenido por la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:866` |
 | `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:872` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: Objeto no encontrado |
+| 409 | `CONFLICT` | ConflictException: La versión ya tiene una retención vigente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La retención debe terminar en el futuro; PreconditionFailedException: El espacio de nombres no tiene bloqueo de objetos habilitado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1281,7 +1444,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-07`
 
 ---
 
@@ -1370,6 +1533,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `keyVersion` | `string` | No | — | — | Versión de la clave con la que se descifra | `src/modules/object_storage/dto/object-storage.dto.ts:998` |
 | `accessLogId` | `string` | No | formato uuid | — | Registro del acceso si el objeto es DICOM | `src/modules/object_storage/dto/object-storage.dto.ts:1007` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: Objeto no encontrado; ResourceNotFoundException: La versión no tiene ubicación primaria |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto no está disponible; PreconditionFailedException: La versión está en almacenamiento frío: requiere rehidratación previa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1378,7 +1555,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `UC-60-09`
 
 ---
 

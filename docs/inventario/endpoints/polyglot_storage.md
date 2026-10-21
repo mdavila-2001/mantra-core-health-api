@@ -129,6 +129,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `estimatedCost` | `string` | Sí | — | — | Valor de estimated cost mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1600` |
 | `updated` | `boolean` | Sí | — | — | true si el periodo ya estaba consolidado y se actualizó | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1608` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Región no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El periodo está invertido; PreconditionFailedException: El periodo todavía no ha cerrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -137,7 +151,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-12`
 
 ---
 
@@ -246,6 +260,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `lifecycleState` | `string` | Sí | — | — | Valor de lifecycle state mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:620` |
 | `bindingId` | `string` | Sí | formato uuid | — | Vínculo del tenant creado con la colección | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset no encontrado; ResourceNotFoundException: Backend no encontrado; ResourceNotFoundException: Versión del dataset no encontrada |
+| 409 | `CONFLICT` | ConflictException: El backend ya tiene una colección con ese nombre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El dataset no está activo; PreconditionFailedException: La versión pertenece a otro dataset |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -254,7 +283,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-04`
 
 ---
 
@@ -339,6 +368,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:806` |
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:812` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política de consistencia con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Exigir leer lo propio recién escrito obliga a tolerancia cero de lectura rancia |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -347,7 +390,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-06`
 
 ---
 
@@ -443,6 +486,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `initialVersionId` | `string` | Sí | formato uuid | — | Versión 1.0.0, creada en la misma transacción | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:393` |
 | `initialVersion` | `string` | Sí | — | — | Valor de initial version mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:399` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Clasificación de datos no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe un dataset con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -451,7 +508,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-02`
 
 ---
 
@@ -541,6 +598,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `datasetDefinitionId` | `string` | Sí | formato uuid | — | Identificador asociado a dataset definition. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:887` |
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:893` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política para ese propósito y tipo de principal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El dataset no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -549,7 +621,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-07`
 
 ---
 
@@ -642,6 +714,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `datasetLifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el dataset | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:469` |
 | `supersededVersionId` | `string` | No | formato uuid | — | Versión que queda superseded | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:478` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset no encontrado |
+| 409 | `CONFLICT` | ConflictException: El dataset ya tiene esa versión |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una versión que sucede a otra debe declarar su compatibilidad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -650,7 +737,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-03`
 
 ---
 
@@ -754,6 +841,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1134` |
 | `rotationPolicyId` | `string` | No | formato uuid | — | Política de rotación creada o reutilizada | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1143` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un perfil de cifrado con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -762,7 +862,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-09`
 
 ---
 
@@ -844,6 +944,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1490` |
 | `swappedBindings` | `number` | Sí | — | — | Vínculos cuyo primario se movió | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1496` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Colocación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La colocación no está sirviendo tráfico |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -852,7 +966,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-11`
 
 ---
 
@@ -951,6 +1065,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `placementRole` | `string` | Sí | — | — | Valor de placement role mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:722` |
 | `duplicate` | `boolean` | Sí | — | — | true si la colocación ya estaba aprobada | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:728` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión del dataset no encontrada; ResourceNotFoundException: Colección no encontrada; ResourceNotFoundException: Región no encontrada; ResourceNotFoundException: Política de residencia no encontrada; ResourceNotFoundException: Perfil de cifrado no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión del dataset no está activa; PreconditionFailedException: La política de residencia prohíbe ese país; PreconditionFailedException: El país de la región no está entre los permitidos por la residencia; PreconditionFailedException: La región no está entre las permitidas por la residencia; PreconditionFailedException: Un dataset con datos de paciente exige cifrado a nivel de campo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -959,7 +1087,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-05`
 
 ---
 
@@ -1084,6 +1212,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `retentionPolicyId` | `string` | No | formato uuid | — | Identificador asociado a retention policy. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1378` |
 | `created` | `number` | Sí | — | — | Políticas creadas en esta llamada | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1384` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política de residencia con ese código; ConflictException: Ya existe una política de replicación con ese código; ConflictException: Ya existe una política de retención con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay que declarar al menos una política; PreconditionFailedException: Prohibir la réplica entre regiones exige declarar los países permitidos |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1092,7 +1234,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-10`
 
 ---
 
@@ -1226,6 +1368,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `regionIds` | `array<string>` | Sí | formato uuid | — | Valor de region ids mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:279` |
 | `capabilityCount` | `number` | Sí | — | — | Capacidades registradas, todas pendientes de verificar | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:287` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un backend con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo una región puede ser la primaria; PreconditionFailedException: {message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1234,7 +1390,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-01`
 
 ---
 
@@ -1326,6 +1482,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:975` |
 | `primaryPlacementState` | `string` | Sí | — | — | Estado en el que queda la colocación primaria | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:981` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Colocación primaria no encontrada; ResourceNotFoundException: Colocación secundaria no encontrada |
+| 409 | `CONFLICT` | ConflictException: El tenant ya está vinculado a ese dataset |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La colocación primaria no está aprobada; PreconditionFailedException: La colocación secundaria no puede ser la misma que la primaria |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1334,7 +1505,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-08`
 
 ---
 
@@ -1423,6 +1594,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1687` |
 | `updated` | `boolean` | Sí | — | — | true si la política ya existía y se actualizó | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1693` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El porcentaje de muestra debe estar entre 0 y 100 |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1431,7 +1616,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-13`
 
 ---
 
@@ -1519,6 +1704,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `placementState` | `string` | Sí | — | — | Estado en el que queda la colocación | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1749` |
 | `quarantined` | `boolean` | Sí | — | — | true si la política ordenó cuarentenarla | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1755` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El dataset no tiene política de integridad; ResourceNotFoundException: Colocación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1527,7 +1725,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-13`
 
 ---
 
@@ -1616,6 +1814,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 | `degradedPlacements` | `number` | Sí | — | — | Colocaciones que quedaron degradadas por esta comprobación | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1455` |
 | `swappedBindings` | `number` | Sí | — | — | Vínculos de tenant cuyo primario se movió al secundario | `src/modules/polyglot_storage/dto/polyglot-storage.dto.ts:1463` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Región no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1624,7 +1835,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 54 — Almacenamiento Políglota (gobierno de colocación) — etapa `UC-54-11`
 
 ---
 

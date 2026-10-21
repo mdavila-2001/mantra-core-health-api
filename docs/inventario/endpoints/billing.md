@@ -155,6 +155,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:253` |
 | `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/billing/dto/bill.dto.ts:259` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 409 | `CONFLICT` | ConflictException: La factura del proveedor ya fue capturada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proveedor no está activo; PreconditionFailedException: Three-way match: la línea con orden de compra requiere recepción de bienes |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -163,7 +178,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-04`
 
 ---
 
@@ -249,6 +264,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `transactionId` | `string` | Sí | formato uuid | — | Identificador asociado a transaction. | `src/modules/billing/dto/posting.dto.ts:51` |
 | `posted` | `boolean` | Sí | — | — | Valor de posted mantenido por la instancia. | `src/modules/billing/dto/posting.dto.ts:57` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Documento no encontrado |
+| 409 | `CONFLICT` | ConflictException: El documento ya fue contabilizado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -257,7 +286,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-06`
 
 ---
 
@@ -362,6 +391,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/dunning.dto.ts:136` |
 | `itemCount` | `number` | Sí | — | — | Valor de item count mantenido por la instancia. | `src/modules/billing/dto/dunning.dto.ts:142` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El número de corrida ya existe para el tenant |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -370,7 +412,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-10`
 
 ---
 
@@ -449,6 +491,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `results[].itemCount` | `number` | Sí | — | — | Facturas incluidas en la corrida | `src/modules/billing/dto/dunning.dto.ts:180` |
 | `results[].skipped` | `boolean` | Sí | — | — | true si el tenant ya tenía una corrida automática hoy | `src/modules/billing/dto/dunning.dto.ts:188` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -457,7 +511,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `ctrl:BillingOperationsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -586,6 +640,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:358` |
 | `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:364` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El número de factura ya existe en la práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -594,7 +661,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-01`
 
 ---
 
@@ -708,6 +775,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:358` |
 | `lineCount` | `number` | Sí | — | — | Valor de line count mantenido por la instancia. | `src/modules/billing/dto/invoice.dto.ts:364` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto de la nota de crédito excede el saldo de la factura |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -716,7 +797,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-03`
 
 ---
 
@@ -802,6 +883,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `valueNumeric` | `string` | Sí | — | — | Valor de value numeric mantenido por la instancia. | `src/modules/billing/dto/kpi-snapshot.dto.ts:86` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/billing/dto/kpi-snapshot.dto.ts:92` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El snapshot de KPI ya fue calculado para esa marca |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -810,7 +904,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-12`
 
 ---
 
@@ -903,6 +997,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `payments` | `string` | Sí | — | — | Valor de payments mantenido por la instancia. | `src/modules/billing/dto/patient-statement.dto.ts:108` |
 | `closingBalance` | `string` | Sí | — | — | Valor de closing balance mantenido por la instancia. | `src/modules/billing/dto/patient-statement.dto.ts:114` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un estado de cuenta para el periodo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -911,7 +1018,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-09`
 
 ---
 
@@ -1007,6 +1114,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `installments[].total` | `string` | Sí | — | — | Valor de total mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:86` |
 | `installments[].dueDate` | `string` | Sí | — | — | Valor de due date mantenido por la instancia. | `src/modules/billing/dto/payment-plan.dto.ts:92` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura origen no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La factura origen no tiene saldo; PreconditionFailedException: La suma de cuotas debe igualar el saldo de la factura |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1015,7 +1136,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-11`
 
 ---
 
@@ -1127,6 +1248,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `allocations[].balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:152` |
 | `allocations[].status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/payment-made.dto.ts:158` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura de proveedor no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La suma asignada más retención excede el monto del pago; PreconditionFailedException: La factura de proveedor no tiene saldo; PreconditionFailedException: La asignación excede el saldo de la factura de proveedor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1135,7 +1270,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-05`
 
 ---
 
@@ -1247,6 +1382,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `allocations[].balance` | `string` | No | — | — | Valor de balance mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:155` |
 | `allocations[].status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/billing/dto/payment-received.dto.ts:161` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1255,7 +1404,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-02`
 
 ---
 
@@ -1338,6 +1487,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `reconciledReceived` | `number` | Sí | — | — | Valor de reconciled received mantenido por la instancia. | `src/modules/billing/dto/reconciliation.dto.ts:56` |
 | `reconciledMade` | `number` | Sí | — | — | Valor de reconciled made mantenido por la instancia. | `src/modules/billing/dto/reconciliation.dto.ts:62` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Pago recibido no encontrado; ResourceNotFoundException: Pago emitido no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Debe indicar al menos un pago a conciliar; PreconditionFailedException: El pago recibido ya está conciliado; PreconditionFailedException: El pago emitido ya está conciliado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1346,7 +1509,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-07`
 
 ---
 
@@ -1436,6 +1599,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 | `invoiceBalance` | `string` | No | — | — | Valor de invoice balance mantenido por la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:100` |
 | `invoiceStatus` | `string` | Sí | formato uuid | — | Valor de invoice status mantenido por la instancia. | `src/modules/billing/dto/reimbursement.dto.ts:106` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada |
+| 409 | `CONFLICT` | ConflictException: El reclamo ya tiene un reembolso registrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1444,7 +1621,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/billing
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `UC-17-08`
 
 ---
 
@@ -1516,6 +1693,18 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/billing/dto/service-catalog.dto.ts:179` |
 | `nextCursor` | `string` | Sí | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/billing/dto/service-catalog.dto.ts:185` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1524,7 +1713,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `ctrl:BillingServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1623,6 +1812,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `incomeAccountId` | `string` | No | formato uuid | — | Identificador asociado a income account. | `src/modules/billing/dto/service-catalog.dto.ts:152` |
 | `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/billing/dto/service-catalog.dto.ts:158` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un servicio con ese código en el catálogo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/billing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1631,7 +1833,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Billing (17) — etapa `ctrl:BillingServiceCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

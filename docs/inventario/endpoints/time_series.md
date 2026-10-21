@@ -117,13 +117,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `chunksCompressed` | `number` | Sí | — | — | Chunks comprimidos en esta pasada | `src/modules/time_series/dto/time-series.dto.ts:557` |
 | `remainingChunks` | `array<string>` | Sí | — | — | Chunks candidatos que quedaron para la siguiente | `src/modules/time_series/dto/time-series.dto.ts:566` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La serie no declara por qué columnas se segmenta al comprimir. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | — | InternalServerErrorException: La segmentación de compresión declara una columna que no es válida. |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-05`
 
 ---
 
@@ -200,13 +214,26 @@ No toca tablas relacionales: Convierte en hypertable la tabla que indica la peti
 | `compressionEnabled` | `boolean` | No | — | — | Valor de compression enabled mantenido por la instancia. | `src/modules/time_series/dto/time-series.dto.ts:480` |
 | `spaceDimensionAdded` | `boolean` | Sí | — | — | Verdadero si se declaró la dimensión de espacio | `src/modules/time_series/dto/time-series.dto.ts:488` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | — | InternalServerErrorException: La dimensión de espacio no es un identificador de columna válido. |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-04`
 
 ---
 
@@ -283,13 +310,26 @@ No toca tablas relacionales: Modifica la hypertable que indica la ruta (`{table}
 | `compressionEnabled` | `boolean` | No | — | — | Valor de compression enabled mantenido por la instancia. | `src/modules/time_series/dto/time-series.dto.ts:480` |
 | `spaceDimensionAdded` | `boolean` | Sí | — | — | Verdadero si se declaró la dimensión de espacio | `src/modules/time_series/dto/time-series.dto.ts:488` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: La tabla no pertenece al catálogo de series del módulo. |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La tabla todavía no es una hypertable; conviértela antes de ajustar sus chunks. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-04`
 
 ---
 
@@ -381,13 +421,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `chunksDropped` | `number` | Sí | — | — | Chunks descartados | `src/modules/time_series/dto/time-series.dto.ts:632` |
 | `droppedChunks` | `array<string>` | Sí | — | — | Valor de dropped chunks mantenido por la instancia. | `src/modules/time_series/dto/time-series.dto.ts:638` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-06`
 
 ---
 
@@ -486,13 +538,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `from` | `string` | Sí | formato date-time | — | Valor de from mantenido por la instancia. | `src/modules/time_series/dto/time-series.dto.ts:702` |
 | `to` | `string` | Sí | formato date-time | — | Valor de to mantenido por la instancia. | `src/modules/time_series/dto/time-series.dto.ts:708` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: El rollup debe ser uno de: {ROLLUP_NAMES.join(', ')}. |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana a materializar tiene que empezar antes de terminar. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-07`
 
 ---
 
@@ -585,13 +650,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `from` | `string` | Sí | formato date-time | — | Valor de from mantenido por la instancia. | `src/modules/time_series/dto/time-series.dto.ts:702` |
 | `to` | `string` | Sí | formato date-time | — | Valor de to mantenido por la instancia. | `src/modules/time_series/dto/time-series.dto.ts:708` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana a materializar tiene que empezar antes de terminar. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-08`
 
 ---
 
@@ -714,13 +792,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `rowsIngested` | `number` | Sí | — | — | Filas efectivamente insertadas | `src/modules/time_series/dto/time-series.dto.ts:129` |
 | `rowsSkipped` | `number` | Sí | — | — | Filas descartadas por ser duplicado del origen | `src/modules/time_series/dto/time-series.dto.ts:137` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-10`
 
 ---
 
@@ -844,13 +934,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `rowsIngested` | `number` | Sí | — | — | Filas efectivamente insertadas | `src/modules/time_series/dto/time-series.dto.ts:129` |
 | `rowsSkipped` | `number` | Sí | — | — | Filas descartadas por ser duplicado del origen | `src/modules/time_series/dto/time-series.dto.ts:137` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-02`
 
 ---
 
@@ -972,13 +1074,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `rowsIngested` | `number` | Sí | — | — | Filas efectivamente insertadas | `src/modules/time_series/dto/time-series.dto.ts:129` |
 | `rowsSkipped` | `number` | Sí | — | — | Filas descartadas por ser duplicado del origen | `src/modules/time_series/dto/time-series.dto.ts:137` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-13`
 
 ---
 
@@ -1086,13 +1200,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `rowsIngested` | `number` | Sí | — | — | Filas efectivamente insertadas | `src/modules/time_series/dto/time-series.dto.ts:129` |
 | `rowsSkipped` | `number` | Sí | — | — | Filas descartadas por ser duplicado del origen | `src/modules/time_series/dto/time-series.dto.ts:137` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: El dataset de métricas debe ser uno de: {METRIC_DATASETS.join(', ')}. |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-11`
 
 ---
 
@@ -1204,13 +1330,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `clinicallyPromotedObservationId` | `string` | No | formato uuid | — | Observación clínica creada al promover | `src/modules/time_series/dto/time-series.dto.ts:385` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si la lectura ya se había normalizado antes | `src/modules/time_series/dto/time-series.dto.ts:393` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No hay lectura cruda para ese instante y serie. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lectura cruda está marcada como rechazada; no se normaliza.; PreconditionFailedException: La lectura cruda no tiene valor numérico; no se puede normalizar. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-03`
 
 ---
 
@@ -1327,13 +1467,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `rowsBackfilled` | `number` | Sí | — | — | Correcciones insertadas como eventos nuevos | `src/modules/time_series/dto/time-series.dto.ts:1081` |
 | `sourceVersion` | `string` | Sí | — | — | Versión de origen con la que entraron las correcciones | `src/modules/time_series/dto/time-series.dto.ts:1089` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana de corrección tiene que empezar antes de terminar.; PreconditionFailedException: Una corrección cae fuera de la ventana declarada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-12`
 
 ---
 
@@ -1444,13 +1597,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `rowsIngested` | `number` | Sí | — | — | Filas efectivamente insertadas | `src/modules/time_series/dto/time-series.dto.ts:129` |
 | `rowsSkipped` | `number` | Sí | — | — | Filas descartadas por ser duplicado del origen | `src/modules/time_series/dto/time-series.dto.ts:137` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-01`
 
 ---
 
@@ -1520,13 +1685,27 @@ La operación no recibe cuerpo.
 | `points[].samples` | `number` | Sí | — | — | Muestras que entraron en el bucket | `src/modules/time_series/dto/time-series.dto.ts:795` |
 | `truncated` | `boolean` | Sí | — | — | Verdadero si la respuesta llegó al tope y hay más datos | `src/modules/time_series/dto/time-series.dto.ts:828` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El rango tiene que empezar antes de terminar.; PreconditionFailedException: Esta serie no tiene magnitud que agregar; sólo admite `count`. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | — | InternalServerErrorException: La consulta declara una agregación que no es válida.; InternalServerErrorException: La consulta declara una columna que no es válida.; InternalServerErrorException: La serie no tiene columna numérica: sólo admite conteo. |
+
+El árbol de decisión completo está en [flujos](../flujos/time_series.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 58 — Series temporales de alto volumen y analítica de eventos — etapa `UC-58-09`
 
 ---
 

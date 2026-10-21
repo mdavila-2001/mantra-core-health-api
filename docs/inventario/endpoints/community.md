@@ -136,13 +136,24 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -186,13 +197,24 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -236,13 +258,24 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -299,6 +332,18 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -307,7 +352,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -374,13 +419,25 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-social.dto.ts:483` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-social.dto.ts:487` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -460,6 +517,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 409 | `CONFLICT` | ConflictException: El usuario ya está bloqueado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede bloquear a uno mismo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -469,7 +540,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-14`
 
 ---
 
@@ -529,6 +600,18 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -537,7 +620,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -607,13 +690,25 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-social.dto.ts:445` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-social.dto.ts:449` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -693,6 +788,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 409 | `CONFLICT` | ConflictException: El contenido ya está guardado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -701,7 +809,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-04`
 
 ---
 
@@ -799,6 +907,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `rootCommentId` | `string` | Sí | formato uuid; admite null | — | Identificador asociado a root comment. | `src/modules/community/dto/responses.dto.ts:90` |
 | `threadDepth` | `number` | Sí | — | — | Valor de thread depth mantenido por la instancia. | `src/modules/community/dto/responses.dto.ts:96` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil autor no encontrado; ResourceNotFoundException: Comentario padre no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -808,7 +929,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-02`
 
 ---
 
@@ -886,13 +1007,25 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-messaging.dto.ts:97` |
 | `nextCursor` | `string` | No | admite null | — | Siempre `null`: la bandeja devuelve las conversaciones activas del actor de una vez, acotadas por el tope. Se mantiene el campo para que la forma de la respuesta sea la misma que la de los demás listados. | `src/modules/community/dto/read-messaging.dto.ts:105` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityMessagingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -975,6 +1108,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -984,7 +1129,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityMessagingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1062,13 +1207,26 @@ La operación no recibe cuerpo.
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-messaging.dto.ts:163` |
 | `peerReadUpTo` | `string` | No | formato date-time; admite null | — | Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT. `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios cuyo `sentAt` sea anterior o igual a esta marca. | `src/modules/community/dto/read-messaging.dto.ts:173` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityMessagingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1170,6 +1328,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `conversationId` | `string` | Sí | formato uuid | — | Identificador asociado a conversation. | `src/modules/community/dto/responses.dto.ts:134` |
 | `sentAt` | `string` | Sí | formato date-time | — | Valor de sent at mantenido por la instancia. | `src/modules/community/dto/responses.dto.ts:140` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El remitente no es participante activo; PreconditionFailedException: Existe un bloqueo entre los participantes; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1179,7 +1351,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-06`
 
 ---
 
@@ -1263,6 +1435,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `receiptsRecorded` | `number` | Sí | — | — | Nº de recibos de lectura registrados | `src/modules/community/dto/responses.dto.ts:149` |
 | `lastReadMessageId` | `string` | Sí | formato uuid; admite null | — | Identificador asociado a last read message. | `src/modules/community/dto/responses.dto.ts:155` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El perfil no es participante activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1272,7 +1458,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-07`
 
 ---
 
@@ -1366,6 +1552,18 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-timeline.dto.ts:62` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-timeline.dto.ts:66` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1374,7 +1572,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityTimelineController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1433,6 +1631,18 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1441,7 +1651,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1510,13 +1720,25 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-social.dto.ts:403` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-social.dto.ts:407` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1597,6 +1819,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 409 | `CONFLICT` | ConflictException: Ya sigue este objeto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede seguir a uno mismo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1606,7 +1842,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-05`
 
 ---
 
@@ -1683,6 +1919,18 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-groups.dto.ts:62` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-groups.dto.ts:66` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1691,7 +1939,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityGroupsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1778,6 +2026,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tema no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya hay un grupo con ese slug |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Para crear un grupo necesitás tu perfil público configurado; PreconditionFailedException: Para crear un grupo público necesitás tu perfil público configurado; PreconditionFailedException: Para crear un grupo público, tu perfil público tiene que estar completo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1786,7 +2049,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityGroupsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1865,6 +2128,19 @@ La operación no recibe cuerpo.
 | `viewer.memberRoleConceptId` | `string` | No | formato uuid; admite null | — | Concept id del rol del lector, o `null`. | `src/modules/community/dto/group-wall.dto.ts:101` |
 | `viewer.joinStatusConceptId` | `string` | No | formato uuid; admite null | — | Concept id del estado de la membresía del lector, o `null`. | `src/modules/community/dto/group-wall.dto.ts:105` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1873,7 +2149,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityGroupsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1947,6 +2223,19 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-groups.dto.ts:108` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-groups.dto.ts:112` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1955,7 +2244,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityGroupsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2039,6 +2328,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:258` |
 | `joinStatus` | `string` | Sí | — | — | Estado de la membresía (activa o pendiente) | `src/modules/community/dto/responses.dto.ts:264` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado |
+| 409 | `CONFLICT` | ConflictException: El perfil ya es miembro del grupo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2047,7 +2350,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-13`
 
 ---
 
@@ -2137,6 +2440,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `memberRoleConceptId` | `string` | Sí | formato uuid | — | Concept id del rol resultante. | `src/modules/community/dto/group-wall.dto.ts:271` |
 | `joinStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del estado resultante. | `src/modules/community/dto/group-wall.dto.ts:275` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado; ForbiddenException: Sólo quien administra el grupo puede resolver sus membresías |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado; ResourceNotFoundException: Membresía no encontrada; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay que indicar una decisión o un rol; PreconditionFailedException: La solicitud de ingreso ya estaba resuelta; PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2145,7 +2462,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityGroupsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2207,6 +2524,20 @@ La operación no recibe cuerpo.
 | `memberRoleConceptId` | `string` | Sí | formato uuid | — | Concept id del rol resultante. | `src/modules/community/dto/group-wall.dto.ts:271` |
 | `joinStatusConceptId` | `string` | Sí | formato uuid | — | Concept id del estado resultante. | `src/modules/community/dto/group-wall.dto.ts:275` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado; ForbiddenException: Sólo quien administra el grupo puede resolver sus membresías |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado; ResourceNotFoundException: El perfil no es del grupo |
+| 409 | `CONFLICT` | ConflictException: Al dueño del grupo no lo puede sacar otro: sólo él puede irse, o transferir el grupo antes |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2215,7 +2546,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityGroupsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2290,6 +2621,19 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/group-wall.dto.ts:218` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/group-wall.dto.ts:222` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado; ForbiddenException: Hay que ser integrante del grupo para ver su contenido |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2298,7 +2642,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityGroupsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2397,6 +2741,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `createdAt` | `string` | Sí | formato date-time | — | Cuándo se publicó. | `src/modules/community/dto/group-wall.dto.ts:199` |
 | `replies` | `array<GroupWallItemDto>` | Sí | — | — | Respuestas anidadas. | `src/modules/community/dto/group-wall.dto.ts:203` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado; ForbiddenException: Hay que ser integrante del grupo para publicar en su muro |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Grupo no encontrado; ResourceNotFoundException: Perfil autor no encontrado; ResourceNotFoundException: La publicación a la que responde no es de este grupo; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2405,7 +2763,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityGroupsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2484,6 +2842,17 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-moderation.dto.ts:369` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null` si no hay más. | `src/modules/community/dto/read-moderation.dto.ts:373` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2492,7 +2861,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityModerationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2573,6 +2942,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Apelación no encontrada |
+| 409 | `CONFLICT` | ConflictException: La apelación ya está resuelta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2581,7 +2964,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityModerationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2649,6 +3032,17 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-moderation.dto.ts:302` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null` si no hay más. | `src/modules/community/dto/read-moderation.dto.ts:306` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2657,7 +3051,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityModerationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2742,6 +3136,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Decisión no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe una apelación abierta para esta decisión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2750,7 +3158,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-10`
 
 ---
 
@@ -2827,6 +3235,17 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-moderation.dto.ts:248` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null` si no hay más. | `src/modules/community/dto/read-moderation.dto.ts:252` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2835,7 +3254,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityModerationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2926,6 +3345,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `strikeId` | `string` | Sí | formato uuid; admite null | — | Strike emitido, si aplica | `src/modules/community/dto/responses.dto.ts:192` |
 | `decision` | `string` | Sí | — | — | Valor de decision mantenido por la instancia. | `src/modules/community/dto/responses.dto.ts:198` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Entrada de cola no encontrada |
+| 409 | `CONFLICT` | ConflictException: La entrada de cola ya está resuelta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2934,7 +3367,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-09`
 
 ---
 
@@ -3007,6 +3440,18 @@ La operación no recibe cuerpo.
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-timeline.dto.ts:124` |
 | `unreadCount` | `number` | Sí | — | — | Cuántas hay sin leer en total. Se cuenta sobre la bandeja entera y no sobre la página: el globo de la campana no depende de cuántas notificaciones se estén mostrando. | `src/modules/community/dto/read-timeline.dto.ts:133` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3015,7 +3460,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityTimelineController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3090,13 +3535,26 @@ La operación no recibe cuerpo.
 | `totalVotes` | `number` | Sí | — | — | Total de votos emitidos. | `src/modules/community/dto/read-polls.dto.ts:60` |
 | `actorVotedOptionIds` | `array<string>` | No | formato uuid | — | Opciones que votó el actor, si preguntó por sí mismo. Un arreglo vacío significa «no votó»; `undefined`, «no preguntó». La distinción importa porque una encuesta de opción múltiple tiene que poder marcar cada casilla elegida. | `src/modules/community/dto/read-polls.dto.ts:70` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuesta no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPollsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3181,6 +3639,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:249` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuesta no encontrada; ResourceNotFoundException: La opción no pertenece a la encuesta |
+| 409 | `CONFLICT` | ConflictException: Ya votó por esta opción; ConflictException: La encuesta admite un único voto por votante |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La encuesta está cerrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3189,7 +3662,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-12`
 
 ---
 
@@ -3268,6 +3741,19 @@ La operación no recibe cuerpo.
 | `mentions[].offsetStart` | `number` | No | admite null | — | Posición inicial dentro del texto. | `src/modules/community/dto/read-social.dto.ts:155` |
 | `mentions[].offsetEnd` | `number` | No | admite null | — | Posición final dentro del texto. | `src/modules/community/dto/read-social.dto.ts:159` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Publicación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3276,7 +3762,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3352,6 +3838,19 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-social.dto.ts:357` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-social.dto.ts:361` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Publicación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3360,7 +3859,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3453,6 +3952,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:234` |
 | `optionIds` | `array<string>` | Sí | — | — | Ids de las opciones creadas | `src/modules/community/dto/responses.dto.ts:240` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Post no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3461,7 +3973,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPollsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3528,6 +4040,19 @@ La operación no recibe cuerpo.
 | `actorReactionTypeConceptId` | `string` | No | formato uuid; admite null | — | Concept id de la reacción del propio actor, si preguntó por sí mismo. `null` distingue «no reaccionó» de `undefined` «no preguntó»: la interfaz necesita saber si puede pintar el botón como activo o si directamente no tiene esa información. | `src/modules/community/dto/read-social.dto.ts:205` |
 | `actorReactionType` | `string` | No | admite null | — | El código de la reacción del propio actor, resuelto del concepto. Es lo que la interfaz necesita para pintar activo el botón correcto tras recargar. Sigue la misma distinción que el campo de arriba: ausente si no se preguntó, `null` si no reaccionó. | `src/modules/community/dto/read-social.dto.ts:215` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Publicación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3536,7 +4061,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3616,6 +4141,19 @@ La operación no recibe cuerpo.
 | `prestige.rankPosition` | `number` | No | admite null | — | Posición en el ranking, si se calculó. | `src/modules/community/dto/read-social.dto.ts:43` |
 | `prestige.calculatedAt` | `string` | No | formato date-time; admite null | — | Cuándo se recalculó por última vez. | `src/modules/community/dto/read-social.dto.ts:47` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil público no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3624,7 +4162,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3710,6 +4248,18 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-social.dto.ts:303` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null` si no hay más. | `src/modules/community/dto/read-social.dto.ts:307` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3718,7 +4268,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3843,6 +4393,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `hashtagCount` | `number` | Sí | — | — | Nº de hashtags vinculados | `src/modules/community/dto/responses.dto.ts:69` |
 | `publishedAt` | `string` | Sí | formato date-time; admite null | — | Valor de published at mantenido por la instancia. | `src/modules/community/dto/responses.dto.ts:75` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil autor no encontrado; ResourceNotFoundException: {labels.notFound} |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3852,7 +4416,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-01`
 
 ---
 
@@ -3933,6 +4497,19 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-reviews.dto.ts:99` |
 | `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-reviews.dto.ts:103` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil público no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -3941,7 +4518,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityReviewsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4042,6 +4619,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `rating` | `number` | Sí | — | — | Valor de rating mantenido por la instancia. | sin fuente |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo un paciente con atención registrada puede calificar |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil objetivo no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe una review verificada para este encuentro |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El perfil no acepta reviews; PreconditionFailedException: La atención declarada no habilita una reseña; PreconditionFailedException: La atención todavía no terminó; PreconditionFailedException: La atención declarada no fue con este profesional |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4051,7 +4643,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-11`
 
 ---
 
@@ -4132,6 +4724,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil objetivo no encontrado; ResourceNotFoundException: Reseña no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya respondiste esta reseña |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4140,7 +4746,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityReviewsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4219,13 +4825,25 @@ La operación no recibe cuerpo.
 | `prestige.rankPosition` | `number` | No | admite null | — | Posición en el ranking, si se calculó. | `src/modules/community/dto/read-social.dto.ts:43` |
 | `prestige.calculatedAt` | `string` | No | formato date-time; admite null | — | Cuándo se recalculó por última vez. | `src/modules/community/dto/read-social.dto.ts:47` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil puede leer su contenido privado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil no encontrado; ResourceNotFoundException: Perfil público no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4285,13 +4903,24 @@ La operación no recibe cuerpo.
 | `coverFileId` | `string` | Sí | formato uuid; admite null | — | La portada de la vitrina, o `null` si todavía no subió ninguna. | `src/modules/community/dto/own-public-profile.dto.ts:218` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/community/dto/own-public-profile.dto.ts:221` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4394,6 +5023,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `coverFileId` | `string` | Sí | formato uuid; admite null | — | La portada de la vitrina, o `null` si todavía no subió ninguna. | `src/modules/community/dto/own-public-profile.dto.ts:218` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/community/dto/own-public-profile.dto.ts:221` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {labels.notFound} |
+| 409 | `CONFLICT` | ConflictException: Ese enlace ya está en uso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: No se pudo recuperar el perfil público recién guardado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4402,7 +5046,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4456,13 +5100,25 @@ La operación no recibe cuerpo.
 | `daily[].views` | `number` | Sí | — | — | Visitas a la ficha pública ese día | `src/modules/community/dto/profile-stats.dto.ts:9` |
 | `daily[].searchAppearances` | `number` | Sí | — | — | Veces que apareció en resultados ese día | `src/modules/community/dto/profile-stats.dto.ts:12` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Operación de runtime sin tenant en contexto; PreconditionFailedException: Clave de runtime vacía |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4554,6 +5210,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `displayName` | `string` | Sí | — | — | Valor de display name mantenido por la instancia. | `src/modules/community/dto/responses.dto.ts:30` |
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/community/dto/responses.dto.ts:36` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4563,7 +5231,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4647,6 +5315,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `created` | `boolean` | Sí | — | — | true si se creó, false si se actualizó una existente | `src/modules/community/dto/responses.dto.ts:113` |
 | `reactionType` | `string` | Sí | — | — | Valor de reaction type mantenido por la instancia. | `src/modules/community/dto/responses.dto.ts:119` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4656,7 +5336,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-03`
 
 ---
 
@@ -4737,6 +5417,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:164` |
 | `moderationQueueId` | `string` | Sí | formato uuid | — | Entrada de cola de moderación asociada | `src/modules/community/dto/responses.dto.ts:173` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4745,7 +5437,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-08`
 
 ---
 
@@ -4800,13 +5492,24 @@ La operación no recibe cuerpo.
 | `count` | `number` | Sí | — | — | Cuántos trae. | `src/modules/community/dto/group-wall.dto.ts:256` |
 | `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/group-wall.dto.ts:260` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityTopicsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4909,13 +5612,24 @@ La operación no recibe cuerpo.
 | `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
 | `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:431` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4975,6 +5689,18 @@ La operación no recibe cuerpo.
 | `items[].authorProfileId` | `string` | Sí | formato uuid | — | Perfil autor | `src/modules/community/dto/feed.dto.ts:47` |
 | `items[].followerProfileIds` | `array<string>` | Sí | — | — | Perfiles destinatarios | `src/modules/community/dto/feed.dto.ts:56` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -4983,7 +5709,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-15`
 
 ---
 
@@ -5063,6 +5789,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|---|---|---|---|
 | `itemsCreated` | `number` | Sí | — | — | Nº de items de feed insertados | `src/modules/community/dto/responses.dto.ts:273` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -5072,7 +5810,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `UC-19-15`
 
 ---
 
@@ -5123,13 +5861,27 @@ La operación no recibe cuerpo.
 | `documents` | `number` | Sí | admite null | — | Documentos en el índice; `null` si el índice no responde | `src/modules/community/dto/search-index.dto.ts:48` |
 | `serving` | `boolean` | Sí | — | — | Si el buscador público está sirviéndose del índice (y no del SQL) | `src/modules/community/dto/search-index.dto.ts:54` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: OpenSearch está en estado red |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySearchIndexController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5209,13 +5961,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `errors` | `boolean` | Sí | — | — | Si algún lote reportó errores parciales | `src/modules/community/dto/search-index.dto.ts:30` |
 | `summary` | `string` | Sí | — | — | Rótulo legible: «indexados N de N» | `src/modules/community/dto/search-index.dto.ts:33` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: El documento trae campos no declarados para este índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunitySearchIndexController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5294,6 +6060,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `action` | `string` | Sí | valores: granted, renewed, no-profile | — | `no-profile` si el sujeto no tiene vitrina pública | `src/modules/community/dto/verification.dto.ts:36` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -5302,7 +6080,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityVerificationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5378,6 +6156,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -5386,7 +6176,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityVerificationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5439,13 +6229,24 @@ La operación no recibe cuerpo.
 | `expired` | `number` | Sí | — | — | Sellos que cayeron | `src/modules/community/dto/verification.dto.ts:56` |
 | `profiles` | `number` | Sí | — | — | Perfiles que dejaron de estar verificados | `src/modules/community/dto/verification.dto.ts:59` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityVerificationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5548,13 +6349,24 @@ La operación no recibe cuerpo.
 | `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
 | `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:431` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5657,13 +6469,24 @@ La operación no recibe cuerpo.
 | `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
 | `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:431` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5766,13 +6589,24 @@ La operación no recibe cuerpo.
 | `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
 | `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:431` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5827,6 +6661,18 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Comentario no encontrado; ResourceNotFoundException: Publicación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -5835,7 +6681,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5890,13 +6736,27 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Archivo no encontrado; ResourceNotFoundException: Versión vigente no encontrada; ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: El contenido no está disponible en el almacenamiento local; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: El contenido no está disponible en el almacenamiento configurado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El archivo está borrado; PreconditionFailedException: El archivo no tiene una versión vigente; PreconditionFailedException: La versión vigente todavía no está lista para servirse públicamente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; Error: S3 object body is empty |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5959,13 +6819,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; BadRequestException: Se requieren coordenadas válidas: lat en [-90,90] y lng en [-180,180] |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: Campo de {kind} no permitido para el índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6022,13 +6895,24 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6083,6 +6967,18 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Publicación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -6091,7 +6987,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6146,6 +7042,18 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Publicación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -6154,7 +7062,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6258,13 +7166,24 @@ La operación no recibe cuerpo.
 | `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
 | `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:431` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6330,13 +7249,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: Campo de {kind} no permitido para el índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6402,13 +7334,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: Campo de {kind} no permitido para el índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6474,13 +7419,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: Campo de {kind} no permitido para el índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6546,13 +7504,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: Campo de {kind} no permitido para el índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6618,13 +7589,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: Campo de {kind} no permitido para el índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6690,13 +7674,26 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: Campo de {kind} no permitido para el índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6764,6 +7761,19 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: Campo de {kind} no permitido para el índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -6772,7 +7782,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6875,13 +7885,24 @@ La operación no recibe cuerpo.
 | `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
 | `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:431` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Community (19) — etapa `ctrl:CommunityPublicController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

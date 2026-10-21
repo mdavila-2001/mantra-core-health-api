@@ -133,6 +133,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/reporting/dto/reporting.dto.ts:1082` |
 | `widgetIds` | `array<string>` | Sí | formato uuid | — | Valor de widget ids mantenido por la instancia. | `src/modules/reporting/dto/reporting.dto.ts:1088` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición del widget no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe un tablero con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un widget CHART necesita su tipo de gráfico; PreconditionFailedException: El widget apunta a un reporte deprecado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -141,7 +156,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-10`
 
 ---
 
@@ -230,6 +245,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/reporting/dto/reporting.dto.ts:121` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/reporting/dto/reporting.dto.ts:127` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una fuente con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una fuente READ_MODEL necesita su read model gobernado; PreconditionFailedException: Una fuente VIEW necesita el nombre de la vista |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -238,7 +267,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-01`
 
 ---
 
@@ -378,6 +407,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `parameterIds` | `array<string>` | Sí | formato uuid | — | Valor de parameter ids mantenido por la instancia. | `src/modules/reporting/dto/reporting.dto.ts:399` |
 | `columnIds` | `array<string>` | Sí | formato uuid | — | Valor de column ids mantenido por la instancia. | `src/modules/reporting/dto/reporting.dto.ts:405` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Fuente de datos no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe una definición con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un reporte no público necesita declarar el permiso que exige; PreconditionFailedException: El código de {kind} está repetido; PreconditionFailedException: La fuente de datos no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -386,7 +430,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-02`
 
 ---
 
@@ -468,6 +512,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/reporting/dto/reporting.dto.ts:1161` |
 | `schedulesSuspended` | `number` | Sí | — | — | Programaciones suspendidas junto con la definición | `src/modules/reporting/dto/reporting.dto.ts:1169` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición no encontrada |
+| 409 | `CONFLICT` | ConflictException: La definición ya está deprecada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -476,7 +534,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-12`
 
 ---
 
@@ -561,6 +619,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/reporting/dto/reporting.dto.ts:505` |
 | `outputFormatConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a output format concept. | `src/modules/reporting/dto/reporting.dto.ts:511` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición no está activa; PreconditionFailedException: La definición no tiene versión publicada; PreconditionFailedException: Faltan parámetros obligatorios del reporte |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -569,7 +641,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-04`
 
 ---
 
@@ -666,6 +738,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `nextRunAt` | `string` | Sí | formato date-time | — | Valor de next run at mantenido por la instancia. | `src/modules/reporting/dto/reporting.dto.ts:715` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/reporting/dto/reporting.dto.ts:721` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición no está activa; PreconditionFailedException: Faltan parámetros obligatorios del reporte |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -674,7 +760,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-06`
 
 ---
 
@@ -755,6 +841,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `version` | `number` | Sí | — | — | Valor de version mantenido por la instancia. | `src/modules/reporting/dto/reporting.dto.ts:439` |
 | `definitionStateConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda la definición | `src/modules/reporting/dto/reporting.dto.ts:448` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición no encontrada |
+| 409 | `CONFLICT` | ConflictException: Esa versión ya está publicada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una definición deprecada no admite versiones |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -763,7 +864,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-03`
 
 ---
 
@@ -855,6 +956,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `eventId` | `string` | Sí | formato uuid | — | Evento de despacho registrado | sin fuente |
 | `dispatchedAt` | `string` | Sí | formato date-time | — | Valor de dispatched at mantenido por la instancia. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se distribuye una ejecución que terminó con éxito; PreconditionFailedException: Un destinatario USER necesita su identificador; PreconditionFailedException: Un destinatario ADDRESS necesita su dirección |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -863,7 +978,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-08`
 
 ---
 
@@ -944,6 +1059,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/reporting/dto/reporting.dto.ts:1124` |
 | `distributionsRequeued` | `number` | Sí | — | — | Distribuciones devueltas a pendiente | `src/modules/reporting/dto/reporting.dto.ts:1130` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se reintenta una ejecución fallida; PreconditionFailedException: La definición está deprecada: no se reintenta su corrida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -952,7 +1081,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-11`
 
 ---
 
@@ -1046,6 +1175,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `expiresAt` | `string` | No | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/reporting/dto/reporting.dto.ts:608` |
 | `contentDeduplicated` | `boolean` | Sí | — | — | true si ya existía un artefacto con el mismo contenido | `src/modules/reporting/dto/reporting.dto.ts:616` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución no encontrada |
+| 409 | `CONFLICT` | ConflictException: La ejecución ya está materializada; ConflictException: La ejecución ya tiene snapshot |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una ejecución fallida se reintenta antes de materializar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1054,7 +1198,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-05`
 
 ---
 
@@ -1131,6 +1275,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `skipped` | `number` | Sí | — | — | Programaciones omitidas por no tener versión publicada | `src/modules/reporting/dto/reporting.dto.ts:779` |
 | `executionIds` | `array<string>` | Sí | formato uuid | — | Valor de execution ids mantenido por la instancia. | `src/modules/reporting/dto/reporting.dto.ts:785` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1139,7 +1295,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-07`
 
 ---
 
@@ -1222,6 +1378,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/reporting/dto/reporting.dto.ts:917` |
 | `reactivated` | `boolean` | Sí | — | — | true si la suscripción ya existía y se reactivó | `src/modules/reporting/dto/reporting.dto.ts:925` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Programación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La programación no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/reporting.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1230,7 +1400,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 39 — Reportes, Distribución y Tableros — etapa `UC-39-09`
 
 ---
 

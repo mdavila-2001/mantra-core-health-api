@@ -134,13 +134,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `lifecycleState` | `string` | Sí | — | — | Valor de lifecycle state mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:261` |
 | `bindingId` | `string` | Sí | formato uuid | — | Vínculo del tenant creado con la colección | `src/modules/vector_rag/dto/vector-rag.dto.ts:270` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de modelo no encontrada.; ResourceNotFoundException: Política de acceso RAG no encontrada. |
+| 409 | `CONFLICT` | ConflictException: Ya existe una colección con ese código para el tenant.; ConflictException: El namespace ya está en uso por otro vínculo. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El modelo está retirado; no se pueden crear colecciones nuevas sobre él.; PreconditionFailedException: El modelo no está aprobado para datos de paciente. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-02`
 
 ---
 
@@ -240,13 +255,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:460` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si la clave de idempotencia ya había encolado este job | `src/modules/vector_rag/dto/vector-rag.dto.ts:469` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Colección no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La colección no está activa; no admite jobs de embedding. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-04`
 
 ---
 
@@ -337,13 +366,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lifecycleState` | `string` | Sí | — | — | Valor de lifecycle state mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:1424` |
 | `frozenBindings` | `number` | Sí | — | — | Vínculos de tenant congelados por el cambio | `src/modules/vector_rag/dto/vector-rag.dto.ts:1430` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Colección no encontrada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `ctrl:VectorGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -441,13 +483,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `embeddingModelVersionId` | `string` | Sí | formato uuid | — | Identificador asociado a embedding model version. | `src/modules/vector_rag/dto/vector-rag.dto.ts:1276` |
 | `supersededEmbeddings` | `number` | Sí | — | — | Embeddings del modelo anterior marcados como superados | `src/modules/vector_rag/dto/vector-rag.dto.ts:1284` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Colección no encontrada.; ResourceNotFoundException: Versión de modelo no encontrada. |
+| 409 | `CONFLICT` | ConflictException: La colección ya usa esa versión de modelo. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La colección no está activa.; PreconditionFailedException: El modelo de destino está retirado.; PreconditionFailedException: El modelo de destino no está aprobado para datos de paciente. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-11`
 
 ---
 
@@ -553,13 +610,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `repairJobId` | `string` | No | formato uuid | — | Job encolado para reparar lo que falta | `src/modules/vector_rag/dto/vector-rag.dto.ts:1371` |
 | `purgeJobId` | `string` | No | formato uuid | — | Job encolado para purgar los huérfanos | `src/modules/vector_rag/dto/vector-rag.dto.ts:1380` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Colección no encontrada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-12`
 
 ---
 
@@ -658,13 +728,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `embeddingsPurged` | `number` | Sí | — | — | Valor de embeddings purged mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:1216` |
 | `verified` | `boolean` | Sí | — | — | Verdadero si no quedaba nada por purgar y el borrado queda verificado | `src/modules/vector_rag/dto/vector-rag.dto.ts:1225` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay que declarar qué se borra: un documento fuente o un paciente. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-10`
 
 ---
 
@@ -816,13 +899,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `embeddingsCreated` | `number` | Sí | — | — | Embeddings creados en este lote | `src/modules/vector_rag/dto/vector-rag.dto.ts:756` |
 | `chunksSkipped` | `number` | Sí | — | — | Chunks que ya estaban embebidos y no se repitieron | `src/modules/vector_rag/dto/vector-rag.dto.ts:764` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Job de embedding no encontrado.; ResourceNotFoundException: Colección no encontrada.; ResourceNotFoundException: Versión de modelo no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El job ya no está en cola ni en ejecución.; PreconditionFailedException: El modelo de la colección está retirado; el job no puede seguir.; PreconditionFailedException: La colección no admite datos de paciente y el documento los declara. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-05`
 
 ---
 
@@ -880,13 +977,25 @@ La operación no recibe cuerpo.
 | `jobs[].vectorCollectionId` | `string` | Sí | formato uuid | — | Identificador asociado a vector collection. | `src/modules/vector_rag/dto/vector-rag.dto.ts:484` |
 | `jobs[].jobType` | `string` | Sí | — | — | Valor de job type mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:490` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `ctrl:VectorRuntimeController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -989,13 +1098,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `approvedForPhi` | `boolean` | Sí | — | — | Valor de approved for phi mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:141` |
 | `retiredAt` | `string` | No | formato date-time | — | Valor de retired at mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:147` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Esa versión del modelo ya está registrada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-01`
 
 ---
 
@@ -1088,13 +1210,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `approvedForPhi` | `boolean` | Sí | — | — | Valor de approved for phi mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:141` |
 | `retiredAt` | `string` | No | formato date-time | — | Valor de retired at mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:147` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de modelo no encontrada. |
+| 409 | `CONFLICT` | ConflictException: El modelo ya está retirado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay jobs de embedding vivos que dependen del modelo. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `ctrl:VectorGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1198,13 +1335,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:392` |
 | `reboundCollections` | `number` | Sí | — | — | Colecciones reenlazadas al publicar | `src/modules/vector_rag/dto/vector-rag.dto.ts:398` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política con ese código para el tenant. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Exigir consentimiento obliga a exigir también el ámbito de paciente. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-03`
 
 ---
 
@@ -1296,13 +1447,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:392` |
 | `reboundCollections` | `number` | Sí | — | — | Colecciones reenlazadas al publicar | `src/modules/vector_rag/dto/vector-rag.dto.ts:398` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Política de acceso RAG no encontrada.; ResourceNotFoundException: Colección no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La colección pertenece a otro tenant que la política. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `ctrl:VectorGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1402,13 +1567,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `queryHash` | `string` | Sí | — | — | Hash de la consulta; identifica la pregunta sin guardarla | `src/modules/vector_rag/dto/vector-rag.dto.ts:855` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si ya había una sesión abierta para la misma consulta | `src/modules/vector_rag/dto/vector-rag.dto.ts:864` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Colección no encontrada.; ResourceNotFoundException: Política de acceso RAG no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La colección está deprecada.; PreconditionFailedException: La colección no tiene política de acceso RAG; no se puede consultar.; PreconditionFailedException: La política de acceso RAG no está publicada.; PreconditionFailedException: La política no admite ese tipo de principal.; PreconditionFailedException: La política no admite ese propósito de uso.; PreconditionFailedException: La política exige declarar el paciente sobre el que se consulta.; PreconditionFailedException: La política exige una directiva de consentimiento vigente. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-06`
 
 ---
 
@@ -1515,13 +1694,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:1052` |
 | `citations` | `number` | Sí | — | — | Citas materializadas | `src/modules/vector_rag/dto/vector-rag.dto.ts:1058` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de retrieval no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión tiene que estar ranqueada para materializar evidencia.; PreconditionFailedException: La sesión no tiene ningún candidato seleccionado y autorizado que citar.; PreconditionFailedException: Se intenta citar un chunk que no quedó seleccionado y autorizado. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-08`
 
 ---
 
@@ -1618,13 +1811,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `retrievalSessionId` | `string` | Sí | formato uuid | — | Identificador asociado a retrieval session. | `src/modules/vector_rag/dto/vector-rag.dto.ts:1120` |
 | `flagged` | `boolean` | Sí | — | — | Verdadero si el feedback marcó la sesión para revisión | `src/modules/vector_rag/dto/vector-rag.dto.ts:1128` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de retrieval no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se puede dar feedback de una sesión completada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-09`
 
 ---
 
@@ -1741,13 +1948,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 | `candidates[].selected` | `boolean` | Sí | — | — | Valor de selected mantenido por la instancia. | `src/modules/vector_rag/dto/vector-rag.dto.ts:960` |
 | `deniedByReason` | `object` | Sí | — | — | Candidatos denegados, por motivo | `src/modules/vector_rag/dto/vector-rag.dto.ts:989` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de retrieval no encontrada.; ResourceNotFoundException: Chunk candidato no encontrado.; ResourceNotFoundException: Documento del chunk no encontrado.; ResourceNotFoundException: Política de acceso RAG no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión ya no está abierta.; PreconditionFailedException: La colección no tiene política de acceso RAG; no se puede consultar.; PreconditionFailedException: La política de acceso RAG no está publicada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/vector_rag.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 59 — Búsqueda vectorial, evidencia RAG y gobierno de embeddings — etapa `UC-59-07`
 
 ---
 

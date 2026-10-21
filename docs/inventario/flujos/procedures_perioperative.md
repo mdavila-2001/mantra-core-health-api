@@ -1,0 +1,2677 @@
+<!-- AUTOGENERADO por tools/inventario/flujos.mjs. No editar manualmente. -->
+
+# Flujos del módulo `procedures_perioperative`
+
+- **Procesos:** 1 · **Máquinas de estado:** 0
+- **Operaciones:** 32 (29 con decisiones propias, 3 sin ellas)
+- Inventario de endpoints del módulo: [procedures_perioperative](../endpoints/procedures_perioperative.md)
+
+## Proceso: Módulo 53 — Procedimientos y Perioperatorio
+
+- **Código:** `procedures_perioperative` · **Agrupación:** MIXTO · **Operaciones:** 32
+- **Actores:** ANESTHESIOLOGIST · BILLING · CLINICIAN · PERIOP_ADMIN · PERIOP_NURSE · PRACTITIONER · SURGEON · SURGERY_SCHEDULER
+- **Revisión:** AUTO_DETECTADA
+- **Fuentes:** `src/modules/procedures_perioperative/README.md`
+
+### Para qué sirve
+
+Ciclo completo del caso quirúrgico: programación con reserva de quirófano, valoración y clearance preoperatorio, checklist de seguridad de la OMS, anestesia, intervención con trazabilidad de implantes e insumos, reporte operatorio firmado, recuperación, cancelación y cargos.
+
+_Fuente: `src/modules/procedures_perioperative/README.md:3`_
+
+### Flujo general declarado en el README
+
+```text
+caso (scheduled) ── quirófano reservado + cirujano en el equipo + hito programado
+   │
+   ├─ diagnósticos (un solo principal) + equipo
+   ├─ valoración preoperatoria ──> apto ⇒ hito PreopCleared; no apto ⇒ warn, sin hito
+   ├─ órdenes verificadas ── ninguna pendiente ⇒ ready-for-surgery
+   ├─ checklist WHO: sign-in → time-out (⇒ hito) → sign-out ⇒ completed
+   └─ plan de anestesia (draft) ── approve ──> approved + anestesiólogo en el caso
+            │
+            └─ inducción ──> caso in-progress, actual_start_at, evento OR CaseStart
+                 │
+                 ├─ pasos + hallazgos (⇒ sitio anatómico al procedimiento)
+                 ├─ implantes + identificadores UDI/lote/serie + uso de dispositivo
+                 ├─ medicación y muestras
+                 └─ reporte vN (draft) ── sign ──> signed ⇒ caso completed + hito CaseEnd
+                          │
+                          └─ PACU (in-recovery) ── valoraciones ── alta (Aldrete ≥ 9)
+                                        └─> órdenes y seguimientos postoperatorios
+
+cancelar (desde scheduled | ready | in-progress) ──> cancelled + quirófano liberado
+facturar (sólo completed) ──> cargos + duración real y desviación frente a lo programado
+```
+
+_Fuente: `src/modules/procedures_perioperative/README.md:43`_
+
+### Etapas y operaciones
+
+| Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
+|---|---|---|---|---|---|
+| `UC-53-01` | Programar caso y reservar quirófano | POST /procedure-cases | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 6 |
+| `UC-53-02` | Diagnósticos y equipo | POST /procedure-cases/{id}/diagnoses | SURGEON · PERIOP_ADMIN | MEDIO | 10 |
+| `UC-53-03` | Valoración y riesgo | POST /procedure-cases/{id}/preoperative-assessments | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 5 |
+| `UC-53-04` | Clearance de órdenes | POST /procedure-cases/{id}/preoperative-orders/verify | ANESTHESIOLOGIST · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 4 |
+| `UC-53-05` | Checklist por fases | POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses | PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 6 |
+| `UC-53-06` | Plan de anestesia | POST /procedure-cases/{id}/anesthesia-plans | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 4 |
+| `UC-53-07` | Eventos intraoperatorios | POST /procedure-cases/{id}/anesthesia-events | ANESTHESIOLOGIST · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 8 |
+| `UC-53-08` | Pasos y hallazgos | POST /procedure-cases/{id}/operative-steps | SURGEON · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 3 |
+| `UC-53-09` | Implantes con UDI, lote y serie | POST /procedure-cases/{id}/implants | SURGEON · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 4 |
+| `UC-53-10` | Insumos y muestras | POST /procedure-cases/{id}/medication-uses | ANESTHESIOLOGIST · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 3 |
+| `UC-53-11` | Reporte operatorio | POST /procedure-cases/{id}/operative-reports | SURGEON · PERIOP_ADMIN | MEDIO | 8 |
+| `UC-53-12` | Recuperación | POST /procedure-cases/{id}/pacu-stays | PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 4 |
+| `UC-53-13` | Cancelar y liberar quirófano | POST /procedure-cases/{id}/cancel | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 5 |
+| `UC-53-14` | Cargos y utilización | POST /procedure-cases/{id}/charge-items/post | PERIOP_ADMIN · BILLING | MEDIO | 4 |
+| `ctrl:DentalController` | Operaciones de DentalController que el README no asigna a un caso de uso | GET /dental-procedures | CLINICIAN · PRACTITIONER | BAJO | 2 |
+|  |  | POST /dental-procedures | CLINICIAN · PRACTITIONER | MEDIO | 4 |
+|  |  | GET /dental-procedures/catalog | CLINICIAN · PRACTITIONER | BAJO | 0 |
+| `ctrl:PeriopController` | Operaciones de PeriopController que el README no asigna a un caso de uso | POST /pacu-stays/{stayId}/assessments | PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 2 |
+|  |  | POST /pacu-stays/{stayId}/discharge | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 7 |
+|  |  | GET /procedure-cases | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 1 |
+|  |  | GET /procedure-cases/{id} | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 12 |
+|  |  | PATCH /procedure-cases/{id} | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 9 |
+|  |  | POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 4 |
+|  |  | POST /procedure-cases/{id}/confirm | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 10 |
+|  |  | POST /procedure-cases/{id}/findings | SURGEON · PERIOP_ADMIN | MEDIO | 5 |
+|  |  | POST /procedure-cases/{id}/operative-reports/{reportId}/sign | SURGEON · PERIOP_ADMIN | MEDIO | 6 |
+|  |  | POST /procedure-cases/{id}/preoperative-orders | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 4 |
+|  |  | POST /procedure-cases/{id}/specimens | SURGEON · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 3 |
+|  |  | GET /procedure-cases/{id}/team-members | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 2 |
+|  |  | POST /procedure-cases/{id}/team-members | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 4 |
+|  |  | POST /procedure-cases/{id}/team-members/{memberId}/accept | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 3 |
+|  |  | POST /procedure-cases/{id}/team-members/{memberId}/respond | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | MEDIO | 7 |
+
+### Diagrama 1 de 2 — etapas `UC-53-01`, `UC-53-02`, `UC-53-03`…
+
+```mermaid
+flowchart LR
+  a2(["SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN"]):::actor
+  a9(["SURGEON · PERIOP_ADMIN"]):::actor
+  a15(["ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN"]):::actor
+  a19(["ANESTHESIOLOGIST · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
+  a22(["PERIOP_NURSE · SURGEON · ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
+  a27(["ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
+  a34(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
+  a48(["PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
+  a54(["PERIOP_ADMIN · BILLING"]):::actor
+  a57(["CLINICIAN · PRACTITIONER"]):::actor
+  t3[("procedures_perioperative.operating_room_utilizati…")]:::tabla
+  t4[("procedures_perioperative.procedure_case_milestones")]:::tabla
+  t5[("procedures_perioperative.procedure_case_status_hi…")]:::tabla
+  t6[("procedures_perioperative.procedure_case_team_memb…")]:::tabla
+  t7[("procedures_perioperative.procedure_cases")]:::tabla
+  t10[("audit.audit_log")]:::tabla
+  t11[("audit.conditions_history")]:::tabla
+  t12[("clinical.conditions")]:::tabla
+  t16[("procedures_perioperative.preoperative_assessments")]:::tabla
+  t17[("procedures_perioperative.preoperative_risk_scores")]:::tabla
+  t20[("procedures_perioperative.preoperative_orders")]:::tabla
+  t23[("procedures_perioperative.surgical_safety_checklis…")]:::tabla
+  t24[("procedures_perioperative.surgical_safety_items")]:::tabla
+  t25[("procedures_perioperative.surgical_safety_responses")]:::tabla
+  t28[("procedures_perioperative.anesthesia_airway_assess…")]:::tabla
+  t29[("procedures_perioperative.anesthesia_plans")]:::tabla
+  t31[("procedures_perioperative.anesthesia_events")]:::tabla
+  t35[("procedures_perioperative.operative_steps")]:::tabla
+  t37[("procedures_perioperative.implant_identifiers")]:::tabla
+  t38[("procedures_perioperative.procedure_devices")]:::tabla
+  t39[("procedures_perioperative.procedure_implants")]:::tabla
+  t41[("procedures_perioperative.procedure_medication_uses")]:::tabla
+  t43[("clinical.procedures")]:::tabla
+  t44[("clinical.service_requests")]:::tabla
+  t45[("procedures_perioperative.operative_reports")]:::tabla
+  t49[("procedures_perioperative.pacu_stays")]:::tabla
+  t50[("procedures_perioperative.procedure_case_locations")]:::tabla
+  t52[("procedures_perioperative.procedure_cancellations")]:::tabla
+  t55[("procedures_perioperative.procedure_charge_items")]:::tabla
+  t58[("procedures_perioperative.procedure_body_sites")]:::tabla
+  subgraph s0["UC-53-01 · Programar caso y reservar quirófano"]
+    o1["POST /procedure-cases"]:::op
+  end
+  t13[("+4 tablas más")]
+  subgraph s1["UC-53-02 · Diagnósticos y equipo"]
+    o8["POST /procedure-cases/{id}/diagnoses"]:::op
+  end
+  subgraph s2["UC-53-03 · Valoración y riesgo"]
+    o14["POST /procedure-cases/{id}/preoperative-assessments"]:::op
+  end
+  subgraph s3["UC-53-04 · Clearance de órdenes"]
+    o18["POST /procedure-cases/{id}/preoperative-orders/verify"]:::op
+  end
+  subgraph s4["UC-53-05 · Checklist por fases"]
+    o21["POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses"]:::op
+  end
+  subgraph s5["UC-53-06 · Plan de anestesia"]
+    o26["POST /procedure-cases/{id}/anesthesia-plans"]:::op
+  end
+  t32[("+2 tablas más")]
+  subgraph s6["UC-53-07 · Eventos intraoperatorios"]
+    o30["POST /procedure-cases/{id}/anesthesia-events"]:::op
+  end
+  subgraph s7["UC-53-08 · Pasos y hallazgos"]
+    o33["POST /procedure-cases/{id}/operative-steps"]:::op
+  end
+  subgraph s8["UC-53-09 · Implantes con UDI, lote y serie"]
+    o36["POST /procedure-cases/{id}/implants"]:::op
+  end
+  subgraph s9["UC-53-10 · Insumos y muestras"]
+    o40["POST /procedure-cases/{id}/medication-uses"]:::op
+  end
+  t46[("+2 tablas más")]
+  subgraph s10["UC-53-11 · Reporte operatorio"]
+    o42["POST /procedure-cases/{id}/operative-reports"]:::op
+  end
+  subgraph s11["UC-53-12 · Recuperación"]
+    o47["POST /procedure-cases/{id}/pacu-stays"]:::op
+  end
+  subgraph s12["UC-53-13 · Cancelar y liberar quirófano"]
+    o51["POST /procedure-cases/{id}/cancel"]:::op
+  end
+  subgraph s13["UC-53-14 · Cargos y utilización"]
+    o53["POST /procedure-cases/{id}/charge-items/post"]:::op
+  end
+  subgraph s14["ctrl:DentalController · Operaciones de DentalController que el README no asigna…"]
+    o56["GET /dental-procedures"]:::op
+    o59["POST /dental-procedures"]:::op
+    o60["GET /dental-procedures/catalog"]:::op
+  end
+  a2 --> o1
+  o1 -->|"CREA"| t3
+  o1 -->|"CREA"| t4
+  o1 -->|"CREA"| t5
+  o1 -->|"CREA"| t6
+  o1 -->|"CREA"| t7
+  o1 -->|"LEE"| t7
+  a9 --> o8
+  o8 -->|"CREA"| t10
+  o8 -->|"LEE"| t10
+  o8 -->|"ACTUALIZA"| t11
+  o8 -->|"CREA"| t11
+  o8 -->|"LEE"| t11
+  o8 -->|"CREA"| t12
+  o8 -.-> t13
+  a15 --> o14
+  o14 -->|"CREA"| t16
+  o14 -->|"LEE"| t16
+  o14 -->|"CREA"| t17
+  o14 -->|"CREA"| t4
+  o14 -->|"LEE"| t7
+  a19 --> o18
+  o18 -->|"LEE"| t20
+  o18 -->|"CREA"| t5
+  o18 -->|"ACTUALIZA"| t7
+  o18 -->|"LEE"| t7
+  a22 --> o21
+  o21 -->|"CREA"| t4
+  o21 -->|"ACTUALIZA"| t23
+  o21 -->|"LEE"| t23
+  o21 -->|"LEE"| t24
+  o21 -->|"CREA"| t25
+  o21 -->|"LEE"| t25
+  a27 --> o26
+  o26 -->|"CREA"| t28
+  o26 -->|"CREA"| t29
+  o26 -->|"LEE"| t29
+  o26 -->|"LEE"| t7
+  a19 --> o30
+  o30 -->|"CREA"| t31
+  o30 -->|"LEE"| t29
+  o30 -->|"CREA"| t3
+  o30 -->|"CREA"| t4
+  o30 -->|"LEE"| t4
+  o30 -->|"CREA"| t5
+  o30 -.-> t32
+  a34 --> o33
+  o33 -->|"CREA"| t35
+  o33 -->|"LEE"| t35
+  o33 -->|"LEE"| t7
+  a34 --> o36
+  o36 -->|"CREA"| t37
+  o36 -->|"LEE"| t7
+  o36 -->|"CREA"| t38
+  o36 -->|"CREA"| t39
+  a19 --> o40
+  o40 -->|"LEE"| t35
+  o40 -->|"LEE"| t7
+  o40 -->|"CREA"| t41
+  a9 --> o42
+  o42 -->|"CREA"| t43
+  o42 -->|"LEE"| t43
+  o42 -->|"ACTUALIZA"| t44
+  o42 -->|"LEE"| t44
+  o42 -->|"CREA"| t45
+  o42 -->|"LEE"| t45
+  o42 -.-> t46
+  a48 --> o47
+  o47 -->|"CREA"| t49
+  o47 -->|"LEE"| t49
+  o47 -->|"CREA"| t50
+  o47 -->|"LEE"| t7
+  a2 --> o51
+  o51 -->|"CREA"| t3
+  o51 -->|"CREA"| t52
+  o51 -->|"CREA"| t5
+  o51 -->|"ACTUALIZA"| t7
+  o51 -->|"LEE"| t7
+  a54 --> o53
+  o53 -->|"CREA"| t3
+  o53 -->|"LEE"| t7
+  o53 -->|"CREA"| t55
+  o53 -->|"LEE"| t55
+  a57 --> o56
+  o56 -->|"LEE"| t43
+  o56 -->|"LEE"| t58
+  a57 --> o59
+  o59 -->|"CREA"| t10
+  o59 -->|"LEE"| t10
+  o59 -->|"CREA"| t43
+  o59 -->|"CREA"| t58
+  a57 --> o60
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 2 de 2 — etapas `ctrl:PeriopController`
+
+```mermaid
+flowchart LR
+  a2(["PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
+  a6(["ANESTHESIOLOGIST · PERIOP_ADMIN"]):::actor
+  a12(["SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDUL…"]):::actor
+  a23(["SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN"]):::actor
+  a37(["SURGEON · PERIOP_ADMIN"]):::actor
+  a42(["ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN"]):::actor
+  a47(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
+  t3[("procedures_perioperative.pacu_assessments")]:::tabla
+  t4[("procedures_perioperative.pacu_stays")]:::tabla
+  t7[("procedures_perioperative.postoperative_followups")]:::tabla
+  t8[("procedures_perioperative.postoperative_orders")]:::tabla
+  t9[("procedures_perioperative.procedure_case_locations")]:::tabla
+  t13[("procedures_perioperative.procedure_cases")]:::tabla
+  t15[("procedures_perioperative.anesthesia_plans")]:::tabla
+  t16[("procedures_perioperative.implant_identifiers")]:::tabla
+  t17[("procedures_perioperative.operative_findings")]:::tabla
+  t18[("procedures_perioperative.operative_reports")]:::tabla
+  t19[("procedures_perioperative.operative_steps")]:::tabla
+  t20[("procedures_perioperative.preoperative_assessments")]:::tabla
+  t24[("messaging.domain_events")]:::tabla
+  t25[("messaging.outbox_messages")]:::tabla
+  t26[("procedures_perioperative.procedure_case_diagnoses")]:::tabla
+  t27[("procedures_perioperative.procedure_case_status_hi…")]:::tabla
+  t28[("procedures_perioperative.procedure_case_team_memb…")]:::tabla
+  e30>"periop.case.reacceptance_required"]:::evento
+  t33[("audit.audit_log")]:::tabla
+  e35>"periop.case.confirmation_blocked"]:::evento
+  t38[("procedures_perioperative.procedure_body_sites")]:::tabla
+  t40[("procedures_perioperative.procedure_case_milestones")]:::tabla
+  t43[("clinical.encounters")]:::tabla
+  t44[("clinical.service_requests")]:::tabla
+  t45[("procedures_perioperative.preoperative_orders")]:::tabla
+  t48[("procedures_perioperative.procedure_specimens")]:::tabla
+  t52[("profiles.professional_credentials")]:::tabla
+  e55>"periop.case.team_participation_declined"]:::evento
+  t10[("+1 tablas más")]
+  t21[("+6 tablas más")]
+  t29[("+3 tablas más")]
+  t34[("+4 tablas más")]
+  t54[("+1 tablas más")]
+  subgraph s0["ctrl:PeriopController · Operaciones de PeriopController que el README no asigna…"]
+    o1["POST /pacu-stays/{stayId}/assessments"]:::op
+    o5["POST /pacu-stays/{stayId}/discharge"]:::op
+    o11["GET /procedure-cases"]:::op
+    o14["GET /procedure-cases/{id}"]:::op
+    o22["PATCH /procedure-cases/{id}"]:::op
+    o31["POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve"]:::op
+    o32["POST /procedure-cases/{id}/confirm"]:::op
+    o36["POST /procedure-cases/{id}/findings"]:::op
+    o39["POST /procedure-cases/{id}/operative-reports/{reportId}/sign"]:::op
+    o41["POST /procedure-cases/{id}/preoperative-orders"]:::op
+    o46["POST /procedure-cases/{id}/specimens"]:::op
+    o49["GET /procedure-cases/{id}/team-members"]:::op
+    o50["POST /procedure-cases/{id}/team-members"]:::op
+    o51["POST /procedure-cases/{id}/team-members/{memberId}/accept"]:::op
+    o53["POST /procedure-cases/{id}/team-members/{memberId}/respond"]:::op
+  end
+  a2 --> o1
+  o1 -->|"CREA"| t3
+  o1 -->|"LEE"| t4
+  a6 --> o5
+  o5 -->|"LEE"| t3
+  o5 -->|"ACTUALIZA"| t4
+  o5 -->|"LEE"| t4
+  o5 -->|"CREA"| t7
+  o5 -->|"CREA"| t8
+  o5 -->|"ACTUALIZA"| t9
+  o5 -.-> t10
+  a12 --> o11
+  o11 -->|"LEE"| t13
+  a12 --> o14
+  o14 -->|"LEE"| t15
+  o14 -->|"LEE"| t16
+  o14 -->|"LEE"| t17
+  o14 -->|"LEE"| t18
+  o14 -->|"LEE"| t19
+  o14 -->|"LEE"| t20
+  o14 -.-> t21
+  a23 --> o22
+  o22 -->|"CREA"| t24
+  o22 -->|"CREA"| t25
+  o22 -->|"LEE"| t25
+  o22 -->|"LEE"| t26
+  o22 -->|"CREA"| t27
+  o22 -->|"ACTUALIZA"| t28
+  o22 -.-> t29
+  o22 -->|"evento"| e30
+  a6 --> o31
+  o31 -->|"ACTUALIZA"| t15
+  o31 -->|"LEE"| t15
+  o31 -->|"ACTUALIZA"| t13
+  o31 -->|"LEE"| t13
+  a23 --> o32
+  o32 -->|"CREA"| t33
+  o32 -->|"LEE"| t33
+  o32 -->|"CREA"| t24
+  o32 -->|"CREA"| t25
+  o32 -->|"LEE"| t25
+  o32 -->|"CREA"| t27
+  o32 -.-> t34
+  o32 -->|"evento"| e35
+  a37 --> o36
+  o36 -->|"CREA"| t17
+  o36 -->|"LEE"| t19
+  o36 -->|"CREA"| t38
+  o36 -->|"LEE"| t38
+  o36 -->|"LEE"| t13
+  a37 --> o39
+  o39 -->|"ACTUALIZA"| t18
+  o39 -->|"LEE"| t18
+  o39 -->|"CREA"| t40
+  o39 -->|"CREA"| t27
+  o39 -->|"ACTUALIZA"| t13
+  o39 -->|"LEE"| t13
+  a42 --> o41
+  o41 -->|"LEE"| t43
+  o41 -->|"CREA"| t44
+  o41 -->|"CREA"| t45
+  o41 -->|"LEE"| t13
+  a47 --> o46
+  o46 -->|"LEE"| t19
+  o46 -->|"LEE"| t13
+  o46 -->|"CREA"| t48
+  a12 --> o49
+  o49 -->|"LEE"| t28
+  o49 -->|"LEE"| t13
+  a23 --> o50
+  o50 -->|"CREA"| t28
+  o50 -->|"LEE"| t28
+  o50 -->|"ACTUALIZA"| t13
+  o50 -->|"LEE"| t13
+  a12 --> o51
+  o51 -->|"LEE"| t28
+  o51 -->|"LEE"| t13
+  o51 -->|"LEE"| t52
+  a12 --> o53
+  o53 -->|"CREA"| t33
+  o53 -->|"LEE"| t33
+  o53 -->|"CREA"| t24
+  o53 -->|"CREA"| t25
+  o53 -->|"LEE"| t25
+  o53 -->|"LEE"| t28
+  o53 -.-> t54
+  o53 -->|"evento"| e55
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+## Árbol de decisión por operación
+
+Cada árbol se deriva del código del handler y de los métodos que invoca (hasta 4 niveles). Una rama que no decide, no escribe y no falla se poda. Los accesos y los efectos consecutivos se agrupan en un solo nodo.
+
+### Operaciones con decisiones propias
+
+#### 1. POST /dental-procedures
+
+Registrar un procedimiento odontológico
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio tiene que ser una pieza dentaria o un cuadrante del catálogo odontológico; PreconditionFailedException: No se puede precisar la cara tratada sin decir sobre qué pieza |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopDentalService.record"]:::llamada
+  n2 --> n3
+  n4{"dto.toothSiteConceptId !== undefined && !DENTAL_SITE_CONCEPT_IDS.has(dto.toothSiteConceptId)"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED El sitio tiene que ser una pieza dentaria o un cuadrante del catálogo odontológico"]):::error
+  n4 -->|"sí"| n5
+  n6{"dto.siteDetail !== undefined && dto.toothSiteConceptId === undefined"}:::decision
+  n4 -->|"no"| n6
+  n7(["422 PRECONDITION_FAILED No se puede precisar la cara tratada sin decir sobre qué pieza"]):::error
+  n6 -->|"sí"| n7
+  n8["Transacción: transactional(…)"]:::transaccion
+  n6 -->|"no"| n8
+  n9["Llama a PeriopDentalRepository.createProcedure"]:::llamada
+  n8 --> n9
+  n10[("CREA clinical.procedures")]:::efecto
+  n9 --> n10
+  n11{"dto.toothSiteConceptId !== undefined"}:::decision
+  n10 --> n11
+  n12["Llama a PeriopDentalRepository.createSite"]:::llamada
+  n11 -->|"sí"| n12
+  n13[("CREA procedures_perioperative.procedure_body_sites")]:::efecto
+  n12 --> n13
+  n14["Llama a AuditTrailService.record"]:::llamada
+  n13 --> n14
+  n11 -->|"no"| n14
+  n15["Llama a AuditLogRepository.append"]:::llamada
+  n14 --> n15
+  n16["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n15 --> n16
+  n17[("LEE audit.audit_log")]:::efecto
+  n16 --> n17
+  n18[("CREA audit.audit_log")]:::efecto
+  n17 --> n18
+  n19(("201 Responde con éxito")):::ok
+  n18 --> n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. POST /pacu-stays/{stayId}/assessments
+
+Registrar una valoración de recuperación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Estancia en recuperación no encontrada |
+| 409 | `CONFLICT` | ConflictException: El paciente ya salió de recuperación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopIntraopService.recordPacuAssessment"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopIntraopRepository.findPacuStayForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.pacu_stays")]:::efecto
+  n5 --> n6
+  n7{"!stay"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Estancia en recuperación no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9{"stay.statusConceptId === CONCEPTS.PACU_DISCHARGED"}:::decision
+  n7 -->|"no"| n9
+  n10(["409 CONFLICT El paciente ya salió de recuperación"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopIntraopRepository.createPacuAssessment"]:::llamada
+  n9 -->|"no"| n11
+  n12[("CREA procedures_perioperative.pacu_assessments")]:::efecto
+  n11 --> n12
+  n13(("201 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. POST /pacu-stays/{stayId}/discharge
+
+Dar el alta de recuperación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Estancia en recuperación no encontrada |
+| 409 | `CONFLICT` | ConflictException: El paciente ya salió de recuperación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El alta de recuperación exige al menos una valoración; PreconditionFailedException: La última valoración no cumple el criterio de alta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopIntraopService.dischargeFromPacu"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopIntraopRepository.findPacuStayForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.pacu_stays")]:::efecto
+  n5 --> n6
+  n7{"!stay"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Estancia en recuperación no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9{"stay.statusConceptId === CONCEPTS.PACU_DISCHARGED"}:::decision
+  n7 -->|"no"| n9
+  n10(["409 CONFLICT El paciente ya salió de recuperación"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopIntraopRepository.findAssessmentsByStay"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE procedures_perioperative.pacu_assessments")]:::efecto
+  n11 --> n12
+  n13{"!latest"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED El alta de recuperación exige al menos una valoración"]):::error
+  n13 -->|"sí"| n14
+  n15{"(latest.aldreteScore ?? 0) ‹ ALDRETE_DISCHARGE_THRESHOLD"}:::decision
+  n13 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED La última valoración no cumple el criterio de alta"]):::error
+  n15 -->|"sí"| n16
+  n17[("ACTUALIZA procedures_perioperative.pacu_stays · ACTUALIZA procedures_perioperative.pacu_stays · ACTUALIZA pro…")]:::efecto
+  n15 -->|"no"| n17
+  n18["Llama a PeriopCasesRepository.findOpenLocation"]:::llamada
+  n17 --> n18
+  n19[("LEE procedures_perioperative.procedure_case_locations")]:::efecto
+  n18 --> n19
+  n20[("ACTUALIZA procedures_perioperative.procedure_case_locations")]:::efecto
+  n19 --> n20
+  n21{"location"}:::decision
+  n20 --> n21
+  n22[("ACTUALIZA procedures_perioperative.procedure_case_locations")]:::efecto
+  n21 -->|"sí"| n22
+  n23["Repite: por cada const order de dto.orders ?? []"]:::bucle
+  n22 --> n23
+  n21 -->|"no"| n23
+  n24["Llama a PeriopIntraopRepository.createPostoperativeOrder"]:::llamada
+  n23 -->|"cada elemento"| n24
+  n25[("CREA procedures_perioperative.postoperative_orders")]:::efecto
+  n24 --> n25
+  n26["Repite: por cada const followup de dto.followups ?? []"]:::bucle
+  n25 --> n26
+  n23 -->|"al terminar"| n26
+  n27["Llama a PeriopIntraopRepository.createFollowup"]:::llamada
+  n26 -->|"cada elemento"| n27
+  n28[("CREA procedures_perioperative.postoperative_followups")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
+  n26 -->|"al terminar"| n29
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. POST /procedure-cases
+
+Programar un caso quirúrgico y reservar el quirófano
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El quirófano ya está reservado en esa franja; ConflictException: No se pudo asignar número de caso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso debe terminar después de empezar; PreconditionFailedException: Un caso urgente o de emergencia necesita justificar su urgencia |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.scheduleCase"]:::llamada
+  n2 --> n3
+  n4{"scheduledEndAt ‹= scheduledStartAt"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED El caso debe terminar después de empezar"]):::error
+  n4 -->|"sí"| n5
+  n6{"dto.caseType !== 'ELECTIVE' && !dto.urgencyReasonText"}:::decision
+  n4 -->|"no"| n6
+  n7(["422 PRECONDITION_FAILED Un caso urgente o de emergencia necesita justificar su urgencia"]):::error
+  n6 -->|"sí"| n7
+  n8["Transacción: transactional(…)"]:::transaccion
+  n6 -->|"no"| n8
+  n9["Llama a PeriopCasesRepository.findOverlappingCases"]:::llamada
+  n8 --> n9
+  n10[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n9 --> n10
+  n11{"overlapping.length › 0"}:::decision
+  n10 --> n11
+  n12(["409 CONFLICT El quirófano ya está reservado en esa franja"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PeriopCasesService.nextCaseNumber"]:::llamada
+  n11 -->|"no"| n13
+  n14["Llama a PeriopCasesRepository.countCases"]:::llamada
+  n13 --> n14
+  n15[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n14 --> n15
+  n16["Repite: ciclo for"]:::bucle
+  n15 --> n16
+  n17["Llama a PeriopCasesRepository.findCaseByNumber"]:::llamada
+  n16 -->|"cada elemento"| n17
+  n18[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n17 --> n18
+  n19(["409 CONFLICT No se pudo asignar número de caso"]):::error
+  n18 --> n19
+  n16 -->|"al terminar"| n19
+  n20["Llama a PeriopCasesRepository.createCase"]:::llamada
+  n21[("CREA procedures_perioperative.procedure_cases")]:::efecto
+  n20 --> n21
+  n22["Llama a PeriopCasesRepository.createStatusHistory"]:::llamada
+  n21 --> n22
+  n23[("CREA procedures_perioperative.procedure_case_status_history")]:::efecto
+  n22 --> n23
+  n24["Llama a PeriopCasesRepository.createMilestone"]:::llamada
+  n23 --> n24
+  n25[("CREA procedures_perioperative.procedure_case_milestones")]:::efecto
+  n24 --> n25
+  n26["Llama a PeriopCasesRepository.createUtilizationEvent"]:::llamada
+  n25 --> n26
+  n27[("CREA procedures_perioperative.operating_room_utilization_events")]:::efecto
+  n26 --> n27
+  n28["Llama a PeriopCasesRepository.createTeamMember"]:::llamada
+  n27 --> n28
+  n29[("CREA procedures_perioperative.procedure_case_team_members")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. GET /procedure-cases/{id}
+
+Detalle completo del caso quirúrgico
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.getCaseDetail"]:::llamada
+  n2 --> n3
+  n4["Llama a PeriopCasesRepository.findCaseById"]:::llamada
+  n3 --> n4
+  n5[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n4 --> n5
+  n6{"!surgicalCase"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a PeriopCasesRepository.findDiagnosesByCase"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE procedures_perioperative.procedure_case_diagnoses")]:::efecto
+  n8 --> n9
+  n10["Llama a PeriopCasesRepository.findTeamByCase"]:::llamada
+  n9 --> n10
+  n11[("LEE procedures_perioperative.procedure_case_team_members")]:::efecto
+  n10 --> n11
+  n12["Llama a PeriopCasesRepository.findMilestonesByCase"]:::llamada
+  n11 --> n12
+  n13[("LEE procedures_perioperative.procedure_case_milestones")]:::efecto
+  n12 --> n13
+  n14["Llama a PeriopPreopRepository.findOrdersByCase"]:::llamada
+  n13 --> n14
+  n15[("LEE procedures_perioperative.preoperative_orders")]:::efecto
+  n14 --> n15
+  n16["Llama a PeriopPreopRepository.findAssessmentByCase"]:::llamada
+  n15 --> n16
+  n17[("LEE procedures_perioperative.preoperative_assessments")]:::efecto
+  n16 --> n17
+  n18["Llama a PeriopPreopRepository.findAnesthesiaPlanByCase"]:::llamada
+  n17 --> n18
+  n19[("LEE procedures_perioperative.anesthesia_plans")]:::efecto
+  n18 --> n19
+  n20["Llama a PeriopIntraopRepository.findReportsByCase"]:::llamada
+  n19 --> n20
+  n21[("LEE procedures_perioperative.operative_reports")]:::efecto
+  n20 --> n21
+  n22["Llama a PeriopIntraopRepository.findStepsByCase"]:::llamada
+  n21 --> n22
+  n23[("LEE procedures_perioperative.operative_steps")]:::efecto
+  n22 --> n23
+  n24["Llama a PeriopIntraopRepository.findFindingsByCase"]:::llamada
+  n23 --> n24
+  n25[("LEE procedures_perioperative.operative_findings")]:::efecto
+  n24 --> n25
+  n26["Llama a PeriopIntraopRepository.findImplantsByCase"]:::llamada
+  n25 --> n26
+  n27[("LEE procedures_perioperative.procedure_implants")]:::efecto
+  n26 --> n27
+  n28["Llama a PeriopIntraopRepository.findIdentifiersByImplants"]:::llamada
+  n27 --> n28
+  n29[("LEE procedures_perioperative.implant_identifiers")]:::efecto
+  n28 --> n29
+  n30(("200 Responde con éxito")):::ok
+  n29 --> n30
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. PATCH /procedure-cases/{id}
+
+Modificar el caso quirúrgico
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: CAN-INT-001: el paciente de la intervención no puede cambiarse una vez confirmada; cancele el caso y cree uno nuevo; PreconditionFailedException: CAN-INT-001: el paciente no puede cambiarse: el caso ya tiene asignaciones o evidencias asociadas; PreconditionFailedException: El caso debe terminar después de empezar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.updateCase"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n9 -->|"sí"| n10
+  n11{"dto.patientProfileId && dto.patientProfileId !== surgicalCase.patientProfileId"}:::decision
+  n9 -->|"no"| n11
+  n12{"surgicalCase.statusConceptId !== CASE_DRAFT_STATE"}:::decision
+  n11 -->|"sí"| n12
+  n13(["422 PRECONDITION_FAILED CAN-INT-001: el paciente de la intervención no puede cambiarse una vez confirmada; ca…"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PeriopCasesService.caseHasBlockingDependencies"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a PeriopCasesRepository.findTeamByCase"]:::llamada
+  n14 --> n15
+  n16[("LEE procedures_perioperative.procedure_case_team_members")]:::efecto
+  n15 --> n16
+  n17["Llama a PeriopCasesRepository.findDiagnosesByCase"]:::llamada
+  n16 --> n17
+  n18[("LEE procedures_perioperative.procedure_case_diagnoses")]:::efecto
+  n17 --> n18
+  n19{"await this.caseHasBlockingDependencies(tx, surgicalCase)"}:::decision
+  n18 --> n19
+  n20(["422 PRECONDITION_FAILED CAN-INT-001: el paciente no puede cambiarse: el caso ya tiene asignaciones o evidenci…"]):::error
+  n19 -->|"sí"| n20
+  n21[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n19 -->|"no"| n21
+  n22{"dto.priority"}:::decision
+  n21 --> n22
+  n11 -->|"no"| n22
+  n23[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n22 -->|"sí"| n23
+  n24{"dto.urgencyReasonText !== undefined"}:::decision
+  n23 --> n24
+  n22 -->|"no"| n24
+  n25[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n24 -->|"sí"| n25
+  n26{"dto.scheduledStartAt"}:::decision
+  n25 --> n26
+  n24 -->|"no"| n26
+  n27[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n26 -->|"sí"| n27
+  n28{"dto.scheduledEndAt"}:::decision
+  n27 --> n28
+  n26 -->|"no"| n28
+  n29[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n28 -->|"sí"| n29
+  n30{"surgicalCase.scheduledStartAt && surgicalCase.scheduledEndAt && surgicalCase.scheduledEndAt ‹= surgicalCase.s…"}:::decision
+  n29 --> n30
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED El caso debe terminar después de empezar"]):::error
+  n30 -->|"sí"| n31
+  n32{"relevantChanges.length › 0"}:::decision
+  n30 -->|"no"| n32
+  n33["Llama a PeriopCasesRepository.findTeamByCase"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("LEE procedures_perioperative.procedure_case_team_members")]:::efecto
+  n33 --> n34
+  n35["Repite: por cada const member de team"]:::bucle
+  n34 --> n35
+  n36[("ACTUALIZA procedures_perioperative.procedure_case_team_members · ACTUALIZA procedures_perioperative.procedure…")]:::efecto
+  n35 -->|"cada elemento"| n36
+  n37{"surgicalCase.statusConceptId === CONCEPTS.CASE_READY_FOR_SURGERY"}:::decision
+  n36 --> n37
+  n35 -->|"al terminar"| n37
+  n38["Llama a PeriopCasesRepository.createStatusHistory"]:::llamada
+  n37 -->|"sí"| n38
+  n39[("CREA procedures_perioperative.procedure_case_status_history")]:::efecto
+  n38 --> n39
+  n40[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n39 --> n40
+  n41["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n40 --> n41
+  n37 -->|"no"| n41
+  n42["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n41 --> n42
+  n43["Transacción: startActiveSpan(…)"]:::transaccion
+  n42 --> n43
+  n44["Intenta"]:::intento
+  n43 --> n44
+  n45(["↩ (relanza el error capturado)"]):::error
+  n44 -->|"si falla"| n45
+  n46["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n44 --> n46
+  n47["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n46 --> n47
+  n48[("LEE messaging.outbox_messages")]:::efecto
+  n47 --> n48
+  n49["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n48 --> n49
+  n50[("CREA messaging.domain_events")]:::efecto
+  n49 --> n50
+  n51["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n50 --> n51
+  n52[("CREA messaging.outbox_messages")]:::efecto
+  n51 --> n52
+  n53>"Evento periop.case.reacceptance_required"]:::evento
+  n52 --> n53
+  n54(("200 Responde con éxito")):::ok
+  n53 --> n54
+  n32 -->|"no"| n54
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. POST /procedure-cases/{id}/anesthesia-events
+
+Anotar un evento intraoperatorio de anestesia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: La inducción exige un plan de anestesia aprobado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopPreopService.recordAnesthesiaEvent"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopPreopRepository.findAnesthesiaPlanByCase"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE procedures_perioperative.anesthesia_plans")]:::efecto
+  n11 --> n12
+  n13{"dto.eventType === 'INDUCTION' && plan?.statusConceptId !== CONCEPTS.PLAN_APPROVED"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED La inducción exige un plan de anestesia aprobado"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PeriopPreopRepository.createAnesthesiaEvent"]:::llamada
+  n13 -->|"no"| n15
+  n16[("CREA procedures_perioperative.anesthesia_events")]:::efecto
+  n15 --> n16
+  n17{"milestoneType"}:::decision
+  n16 --> n17
+  n18["Llama a PeriopCasesRepository.findMilestone"]:::llamada
+  n17 -->|"sí"| n18
+  n19[("LEE procedures_perioperative.procedure_case_milestones")]:::efecto
+  n18 --> n19
+  n20{"!existing"}:::decision
+  n19 --> n20
+  n21["Llama a PeriopCasesRepository.createMilestone"]:::llamada
+  n20 -->|"sí"| n21
+  n22[("CREA procedures_perioperative.procedure_case_milestones")]:::efecto
+  n21 --> n22
+  n23{"dto.eventType === 'INDUCTION' && !surgicalCase.actualStartAt"}:::decision
+  n22 --> n23
+  n20 -->|"no"| n23
+  n17 -->|"no"| n23
+  n24[("ACTUALIZA procedures_perioperative.procedure_cases · ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n23 -->|"sí"| n24
+  n25["Llama a PeriopCasesRepository.createStatusHistory"]:::llamada
+  n24 --> n25
+  n26[("CREA procedures_perioperative.procedure_case_status_history")]:::efecto
+  n25 --> n26
+  n27{"surgicalCase.operatingRoomId"}:::decision
+  n26 --> n27
+  n28["Llama a PeriopCasesRepository.createUtilizationEvent"]:::llamada
+  n27 -->|"sí"| n28
+  n29[("CREA procedures_perioperative.operating_room_utilization_events")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
+  n27 -->|"no"| n30
+  n23 -->|"no"| n30
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. POST /procedure-cases/{id}/anesthesia-plans
+
+Registrar el plan de anestesia y la valoración de vía aérea
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya tiene plan de anestesia |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una vía aérea difícil anticipada necesita plan de rescate; PreconditionFailedException: El caso está cancelado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopPreopService.createAnesthesiaPlan"]:::llamada
+  n2 --> n3
+  n4{"dto.airwayAssessment.difficultAirwayExpected && !dto.airwayAssessment.rescuePlanText"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED Una vía aérea difícil anticipada necesita plan de rescate"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n6 --> n7
+  n8[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n7 --> n8
+  n9{"!surgicalCase"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PeriopPreopRepository.findAnesthesiaPlanByCase"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE procedures_perioperative.anesthesia_plans")]:::efecto
+  n13 --> n14
+  n15{"previous"}:::decision
+  n14 --> n15
+  n16(["409 CONFLICT El caso ya tiene plan de anestesia"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PeriopPreopRepository.createAnesthesiaPlan"]:::llamada
+  n15 -->|"no"| n17
+  n18[("CREA procedures_perioperative.anesthesia_plans")]:::efecto
+  n17 --> n18
+  n19["Llama a PeriopPreopRepository.createAirwayAssessment"]:::llamada
+  n18 --> n19
+  n20[("CREA procedures_perioperative.anesthesia_airway_assessments")]:::efecto
+  n19 --> n20
+  n21(("201 Responde con éxito")):::ok
+  n20 --> n21
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 9. POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve
+
+Aprobar el plan de anestesia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plan de anestesia no encontrado; ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El plan ya está aprobado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El plan pertenece a otro caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopPreopService.approveAnesthesiaPlan"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopPreopRepository.findAnesthesiaPlanForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.anesthesia_plans")]:::efecto
+  n5 --> n6
+  n7{"!plan"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Plan de anestesia no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"plan.procedureCaseId !== caseId"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El plan pertenece a otro caso"]):::error
+  n9 -->|"sí"| n10
+  n11{"plan.statusConceptId === CONCEPTS.PLAN_APPROVED"}:::decision
+  n9 -->|"no"| n11
+  n12(["409 CONFLICT El plan ya está aprobado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n13 --> n14
+  n15{"!surgicalCase"}:::decision
+  n14 --> n15
+  n16(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n15 -->|"sí"| n16
+  n17[("ACTUALIZA procedures_perioperative.anesthesia_plans · ACTUALIZA procedures_perioperative.anesthesia_plans · A…")]:::efecto
+  n15 -->|"no"| n17
+  n18(("200 Responde con éxito")):::ok
+  n17 --> n18
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 10. POST /procedure-cases/{id}/cancel
+
+Cancelar el caso quirúrgico
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya está cancelado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no admite cancelación en su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.cancelCase"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["409 CONFLICT El caso ya está cancelado"]):::error
+  n9 -->|"sí"| n10
+  n11{"!CANCELLABLE_CASE_STATES.includes(surgicalCase.statusConceptId)"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El caso no admite cancelación en su estado actual"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PeriopCasesRepository.createCancellation"]:::llamada
+  n11 -->|"no"| n13
+  n14[("CREA procedures_perioperative.procedure_cancellations")]:::efecto
+  n13 --> n14
+  n15["Llama a PeriopCasesRepository.createStatusHistory"]:::llamada
+  n14 --> n15
+  n16[("CREA procedures_perioperative.procedure_case_status_history")]:::efecto
+  n15 --> n16
+  n17{"surgicalCase.operatingRoomId"}:::decision
+  n16 --> n17
+  n18["Llama a PeriopCasesRepository.createUtilizationEvent"]:::llamada
+  n17 -->|"sí"| n18
+  n19[("CREA procedures_perioperative.operating_room_utilization_events")]:::efecto
+  n18 --> n19
+  n20[("ACTUALIZA procedures_perioperative.procedure_cases · ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n19 --> n20
+  n17 -->|"no"| n20
+  n21(("200 Responde con éxito")):::ok
+  n20 --> n21
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 11. POST /procedure-cases/{id}/charge-items/post
+
+Generar los cargos y consolidar el uso del quirófano
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya tiene cargos emitidos |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se factura un caso completado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.postCharges"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId !== CONCEPTS.CASE_COMPLETED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED Sólo se factura un caso completado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopCasesRepository.findChargeItemsForUpdate"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE procedures_perioperative.procedure_charge_items")]:::efecto
+  n11 --> n12
+  n13{"alreadyPosted"}:::decision
+  n12 --> n13
+  n14(["409 CONFLICT El caso ya tiene cargos emitidos"]):::error
+  n13 -->|"sí"| n14
+  n15["Repite: por cada const item de dto.items"]:::bucle
+  n13 -->|"no"| n15
+  n16["Llama a PeriopCasesRepository.createChargeItem"]:::llamada
+  n15 -->|"cada elemento"| n16
+  n17[("CREA procedures_perioperative.procedure_charge_items")]:::efecto
+  n16 --> n17
+  n18{"dto.consolidateUtilization !== false && surgicalCase.operatingRoomId"}:::decision
+  n17 --> n18
+  n15 -->|"al terminar"| n18
+  n19["Llama a PeriopCasesRepository.createUtilizationEvent"]:::llamada
+  n18 -->|"sí"| n19
+  n20[("CREA procedures_perioperative.operating_room_utilization_events")]:::efecto
+  n19 --> n20
+  n21{"dto.turnoverSeconds !== undefined"}:::decision
+  n20 --> n21
+  n22["Llama a PeriopCasesRepository.createUtilizationEvent"]:::llamada
+  n21 -->|"sí"| n22
+  n23[("CREA procedures_perioperative.operating_room_utilization_events")]:::efecto
+  n22 --> n23
+  n24(("201 Responde con éxito")):::ok
+  n23 --> n24
+  n21 -->|"no"| n24
+  n18 -->|"no"| n24
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 12. POST /procedure-cases/{id}/confirm
+
+Confirmar la intervención verificando las credenciales del equipo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: El caso no admite confirmación en su estado actual; PreconditionFailedException: CAN-INT-002: no puede confirmarse: hay integrantes del equipo sin credencial profesional vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.confirmCase"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n9 -->|"sí"| n10
+  n11{"!CONFIRMABLE_CASE_STATES.includes(surgicalCase.statusConceptId)"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El caso no admite confirmación en su estado actual"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PeriopCasesRepository.findTeamByCase"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE procedures_perioperative.procedure_case_team_members")]:::efecto
+  n13 --> n14
+  n15["Repite: por cada const member de team"]:::bucle
+  n14 --> n15
+  n16["Llama a ProfessionalCredentialsRepository.hasCurrentCredential"]:::llamada
+  n15 -->|"cada elemento"| n16
+  n17[("LEE profiles.professional_credentials")]:::efecto
+  n16 --> n17
+  n18{"withoutCurrentCredential.length › 0"}:::decision
+  n17 --> n18
+  n15 -->|"al terminar"| n18
+  n19["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n18 -->|"sí"| n19
+  n20["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n19 --> n20
+  n21["Transacción: startActiveSpan(…)"]:::transaccion
+  n20 --> n21
+  n22["Intenta"]:::intento
+  n21 --> n22
+  n23(["↩ (relanza el error capturado)"]):::error
+  n22 -->|"si falla"| n23
+  n24["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n22 --> n24
+  n25["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n24 --> n25
+  n26[("LEE messaging.outbox_messages")]:::efecto
+  n25 --> n26
+  n27["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n26 --> n27
+  n28[("CREA messaging.domain_events")]:::efecto
+  n27 --> n28
+  n29["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n28 --> n29
+  n30[("CREA messaging.outbox_messages")]:::efecto
+  n29 --> n30
+  n31>"Evento periop.case.confirmation_blocked"]:::evento
+  n30 --> n31
+  n32["Llama a AuditTrailService.record"]:::llamada
+  n31 --> n32
+  n33["Llama a AuditLogRepository.append"]:::llamada
+  n32 --> n33
+  n34["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n33 --> n34
+  n35[("LEE audit.audit_log")]:::efecto
+  n34 --> n35
+  n36[("CREA audit.audit_log")]:::efecto
+  n35 --> n36
+  n37{"statusConceptId === CONCEPTS.CASE_SCHEDULED"}:::decision
+  n36 --> n37
+  n18 -->|"no"| n37
+  n38["Llama a PeriopCasesRepository.createStatusHistory"]:::llamada
+  n37 -->|"sí"| n38
+  n39[("CREA procedures_perioperative.procedure_case_status_history")]:::efecto
+  n38 --> n39
+  n40[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n39 --> n40
+  n41["Llama a AuditTrailService.record"]:::llamada
+  n40 --> n41
+  n37 -->|"no"| n41
+  n42["Llama a AuditLogRepository.append"]:::llamada
+  n41 --> n42
+  n43["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n42 --> n43
+  n44[("LEE audit.audit_log")]:::efecto
+  n43 --> n44
+  n45[("CREA audit.audit_log")]:::efecto
+  n44 --> n45
+  n46{"result.blocked"}:::decision
+  n45 --> n46
+  n47(["422 PRECONDITION_FAILED CAN-INT-002: no puede confirmarse: hay integrantes del equipo sin credencial profesio…"]):::error
+  n46 -->|"sí"| n47
+  n48(("200 Responde con éxito")):::ok
+  n46 -->|"no"| n48
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 13. POST /procedure-cases/{id}/diagnoses
+
+Registrar los diagnósticos del caso
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso sólo admite un diagnóstico principal; ConflictException: El paciente ya tiene esa condición activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Indique la condición por `conditionId` o por `conditionCodeConceptId` |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.addDiagnoses"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopCasesRepository.findDiagnosesByCase"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE procedures_perioperative.procedure_case_diagnoses")]:::efecto
+  n11 --> n12
+  n13{"incomingPrimary › 1 || (incomingPrimary === 1 && hasPrimary)"}:::decision
+  n12 --> n13
+  n14(["409 CONFLICT El caso sólo admite un diagnóstico principal"]):::error
+  n13 -->|"sí"| n14
+  n15["Repite: por cada const diagnosis de dto.diagnoses"]:::bucle
+  n13 -->|"no"| n15
+  n16["Llama a PeriopCasesService.ensureCondition"]:::llamada
+  n15 -->|"cada elemento"| n16
+  n17{"!diagnosis.conditionCodeConceptId"}:::decision
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED Indique la condición por `conditionId` o por `conditionCodeConceptId`"]):::error
+  n17 -->|"sí"| n18
+  n19["Intenta"]:::intento
+  n17 -->|"no"| n19
+  n20["Llama a ConditionsService.create"]:::llamada
+  n19 --> n20
+  n21["Transacción: transactional(…)"]:::transaccion
+  n20 --> n21
+  n22["Llama a ConditionsRepository.findActiveByCode"]:::llamada
+  n21 --> n22
+  n23[("LEE clinical.conditions")]:::efecto
+  n22 --> n23
+  n24{"existing"}:::decision
+  n23 --> n24
+  n25(["409 CONFLICT El paciente ya tiene esa condición activa"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a ConditionsRepository.create"]:::llamada
+  n24 -->|"no"| n26
+  n27[("CREA clinical.conditions")]:::efecto
+  n26 --> n27
+  n28["Llama a HistoryRepository.append"]:::llamada
+  n27 --> n28
+  n29{"!binding"}:::decision
+  n28 --> n29
+  n30(["500 INTERNAL Entidad de historial no registrada: {entity}"]):::error
+  n29 -->|"sí"| n30
+  n31[("LEE audit.conditions_history · ACTUALIZA audit.conditions_history · CREA audit.conditions_history")]:::efecto
+  n29 -->|"no"| n31
+  n32{"!(error instanceof ConflictException)"}:::decision
+  n19 -->|"si falla"| n32
+  n33(["↩ (relanza el error capturado)"]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a ConditionsService.findActiveByCode"]:::llamada
+  n32 -->|"no"| n34
+  n35["Llama a ConditionsRepository.findActiveByCode"]:::llamada
+  n34 --> n35
+  n36[("LEE clinical.conditions")]:::efecto
+  n35 --> n36
+  n37{"!existing"}:::decision
+  n36 --> n37
+  n38(["↩ (relanza el error capturado)"]):::error
+  n37 -->|"sí"| n38
+  n39["Llama a PeriopCasesRepository.createDiagnosis"]:::llamada
+  n31 --> n39
+  n37 -->|"no"| n39
+  n40[("CREA procedures_perioperative.procedure_case_diagnoses")]:::efecto
+  n39 --> n40
+  n41(("201 Responde con éxito")):::ok
+  n40 --> n41
+  n15 -->|"al terminar"| n41
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 14. POST /procedure-cases/{id}/findings
+
+Registrar un hallazgo operatorio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Paso operatorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso; PreconditionFailedException: El paso pertenece a otro caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopIntraopService.recordFinding"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopIntraopService.assertCaseInProgress"]:::llamada
+  n4 --> n5
+  n6["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n5 --> n6
+  n7[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n6 --> n7
+  n8{"!surgicalCase"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"surgicalCase.statusConceptId !== CONCEPTS.SURGICAL_CASE_IN_PROGRESS"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED El caso no está en curso"]):::error
+  n10 -->|"sí"| n11
+  n12{"dto.operativeStepId"}:::decision
+  n10 -->|"no"| n12
+  n13["Llama a PeriopIntraopRepository.findStepById"]:::llamada
+  n12 -->|"sí"| n13
+  n14[("LEE procedures_perioperative.operative_steps")]:::efecto
+  n13 --> n14
+  n15{"!step"}:::decision
+  n14 --> n15
+  n16(["404 NOT_FOUND Paso operatorio no encontrado"]):::error
+  n15 -->|"sí"| n16
+  n17{"step.procedureCaseId !== caseId"}:::decision
+  n15 -->|"no"| n17
+  n18(["422 PRECONDITION_FAILED El paso pertenece a otro caso"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a PeriopIntraopRepository.createFinding"]:::llamada
+  n17 -->|"no"| n19
+  n12 -->|"no"| n19
+  n20[("CREA procedures_perioperative.operative_findings")]:::efecto
+  n19 --> n20
+  n21{"dto.bodySiteConceptId && procedureId"}:::decision
+  n20 --> n21
+  n22["Llama a PeriopIntraopRepository.findBodySite"]:::llamada
+  n21 -->|"sí"| n22
+  n23[("LEE procedures_perioperative.procedure_body_sites")]:::efecto
+  n22 --> n23
+  n24{"!existing"}:::decision
+  n23 --> n24
+  n25["Llama a PeriopIntraopRepository.createBodySite"]:::llamada
+  n24 -->|"sí"| n25
+  n26[("CREA procedures_perioperative.procedure_body_sites")]:::efecto
+  n25 --> n26
+  n27(("201 Responde con éxito")):::ok
+  n26 --> n27
+  n24 -->|"no"| n27
+  n21 -->|"no"| n27
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. POST /procedure-cases/{id}/implants
+
+Registrar un implante con su trazabilidad UDI, lote o serie
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopIntraopService.recordImplant"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopIntraopService.assertCaseInProgress"]:::llamada
+  n4 --> n5
+  n6["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n5 --> n6
+  n7[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n6 --> n7
+  n8{"!surgicalCase"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"surgicalCase.statusConceptId !== CONCEPTS.SURGICAL_CASE_IN_PROGRESS"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED El caso no está en curso"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PeriopIntraopRepository.createImplant"]:::llamada
+  n10 -->|"no"| n12
+  n13[("CREA procedures_perioperative.procedure_implants")]:::efecto
+  n12 --> n13
+  n14["Llama a PeriopIntraopRepository.createImplantIdentifier"]:::llamada
+  n13 --> n14
+  n15[("CREA procedures_perioperative.implant_identifiers")]:::efecto
+  n14 --> n15
+  n16["Llama a PeriopIntraopRepository.createDevice"]:::llamada
+  n15 --> n16
+  n17[("CREA procedures_perioperative.procedure_devices")]:::efecto
+  n16 --> n17
+  n18(("201 Responde con éxito")):::ok
+  n17 --> n18
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 16. POST /procedure-cases/{id}/medication-uses
+
+Registrar el uso de un medicamento en la intervención
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso; PreconditionFailedException: El paso no pertenece al caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopIntraopService.recordMedicationUse"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopIntraopService.assertCaseInProgress"]:::llamada
+  n4 --> n5
+  n6["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n5 --> n6
+  n7[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n6 --> n7
+  n8{"!surgicalCase"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"surgicalCase.statusConceptId !== CONCEPTS.SURGICAL_CASE_IN_PROGRESS"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED El caso no está en curso"]):::error
+  n10 -->|"sí"| n11
+  n12{"dto.operativeStepId"}:::decision
+  n10 -->|"no"| n12
+  n13["Llama a PeriopIntraopRepository.findStepById"]:::llamada
+  n12 -->|"sí"| n13
+  n14[("LEE procedures_perioperative.operative_steps")]:::efecto
+  n13 --> n14
+  n15{"!step || step.procedureCaseId !== caseId"}:::decision
+  n14 --> n15
+  n16(["422 PRECONDITION_FAILED El paso no pertenece al caso"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PeriopIntraopRepository.createMedicationUse"]:::llamada
+  n15 -->|"no"| n17
+  n12 -->|"no"| n17
+  n18[("CREA procedures_perioperative.procedure_medication_uses")]:::efecto
+  n17 --> n18
+  n19(("201 Responde con éxito")):::ok
+  n18 --> n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 17. POST /procedure-cases/{id}/operative-reports
+
+Redactar el reporte operatorio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Orden de servicio no encontrada; ResourceNotFoundException: Procedimiento padre no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Indique el procedimiento por `procedureId` o por `procedureCodeConceptId` |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopIntraopService.draftReport"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopIntraopRepository.findLastReport"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE procedures_perioperative.operative_reports")]:::efecto
+  n11 --> n12
+  n13["Llama a PeriopIntraopService.ensureProcedure"]:::llamada
+  n12 --> n13
+  n14{"!dto.procedureCodeConceptId"}:::decision
+  n13 --> n14
+  n15(["422 PRECONDITION_FAILED Indique el procedimiento por `procedureId` o por `procedureCodeConceptId`"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a ProceduresService.create"]:::llamada
+  n14 -->|"no"| n16
+  n17["Transacción: transactional(…)"]:::transaccion
+  n16 --> n17
+  n18{"dto.serviceRequestId"}:::decision
+  n17 --> n18
+  n19["Llama a ServiceRequestsRepository.findById"]:::llamada
+  n18 -->|"sí"| n19
+  n20[("LEE clinical.service_requests")]:::efecto
+  n19 --> n20
+  n21{"!sr"}:::decision
+  n20 --> n21
+  n22(["404 NOT_FOUND Orden de servicio no encontrada"]):::error
+  n21 -->|"sí"| n22
+  n23[("ACTUALIZA clinical.service_requests")]:::efecto
+  n21 -->|"no"| n23
+  n24{"dto.parentProcedureId"}:::decision
+  n23 --> n24
+  n18 -->|"no"| n24
+  n25["Llama a ProceduresRepository.findById"]:::llamada
+  n24 -->|"sí"| n25
+  n26[("LEE clinical.procedures")]:::efecto
+  n25 --> n26
+  n27{"!parent"}:::decision
+  n26 --> n27
+  n28(["404 NOT_FOUND Procedimiento padre no encontrado"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a ProceduresRepository.create"]:::llamada
+  n27 -->|"no"| n29
+  n24 -->|"no"| n29
+  n30[("CREA clinical.procedures")]:::efecto
+  n29 --> n30
+  n31["Llama a PeriopIntraopRepository.createReport"]:::llamada
+  n30 --> n31
+  n32[("CREA procedures_perioperative.operative_reports")]:::efecto
+  n31 --> n32
+  n33["Repite: map(…)"]:::bucle
+  n32 --> n33
+  n34["Llama a PeriopIntraopRepository.createComplication"]:::llamada
+  n33 -->|"cada elemento"| n34
+  n35[("CREA procedures_perioperative.procedure_complications")]:::efecto
+  n34 --> n35
+  n36(("201 Responde con éxito")):::ok
+  n35 --> n36
+  n33 -->|"al terminar"| n36
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 18. POST /procedure-cases/{id}/operative-reports/{reportId}/sign
+
+Firmar el reporte operatorio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Reporte operatorio no encontrado; ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El reporte ya está firmado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El reporte pertenece a otro caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopIntraopService.signReport"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopIntraopRepository.findReportForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.operative_reports")]:::efecto
+  n5 --> n6
+  n7{"!report"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Reporte operatorio no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"report.procedureCaseId !== caseId"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El reporte pertenece a otro caso"]):::error
+  n9 -->|"sí"| n10
+  n11{"report.statusConceptId === CONCEPTS.OPERATIVE_REPORT_SIGNED"}:::decision
+  n9 -->|"no"| n11
+  n12(["409 CONFLICT El reporte ya está firmado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n13 --> n14
+  n15{"!surgicalCase"}:::decision
+  n14 --> n15
+  n16(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n15 -->|"sí"| n16
+  n17[("ACTUALIZA procedures_perioperative.operative_reports · ACTUALIZA procedures_perioperative.operative_reports ·…")]:::efecto
+  n15 -->|"no"| n17
+  n18{"dto.fileId"}:::decision
+  n17 --> n18
+  n19[("ACTUALIZA procedures_perioperative.operative_reports")]:::efecto
+  n18 -->|"sí"| n19
+  n20{"surgicalCase.statusConceptId !== CONCEPTS.CASE_COMPLETED"}:::decision
+  n19 --> n20
+  n18 -->|"no"| n20
+  n21["Llama a PeriopCasesRepository.createStatusHistory"]:::llamada
+  n20 -->|"sí"| n21
+  n22[("CREA procedures_perioperative.procedure_case_status_history")]:::efecto
+  n21 --> n22
+  n23[("ACTUALIZA procedures_perioperative.procedure_cases · ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n22 --> n23
+  n24["Llama a PeriopCasesRepository.createMilestone"]:::llamada
+  n23 --> n24
+  n25[("CREA procedures_perioperative.procedure_case_milestones")]:::efecto
+  n24 --> n25
+  n26(("200 Responde con éxito")):::ok
+  n25 --> n26
+  n20 -->|"no"| n26
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 19. POST /procedure-cases/{id}/operative-steps
+
+Registrar un paso operatorio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopIntraopService.createStep"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopIntraopService.assertCaseInProgress"]:::llamada
+  n4 --> n5
+  n6["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n5 --> n6
+  n7[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n6 --> n7
+  n8{"!surgicalCase"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"surgicalCase.statusConceptId !== CONCEPTS.SURGICAL_CASE_IN_PROGRESS"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED El caso no está en curso"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PeriopIntraopRepository.findStepsByCase"]:::llamada
+  n10 -->|"no"| n12
+  n13[("LEE procedures_perioperative.operative_steps")]:::efecto
+  n12 --> n13
+  n14["Llama a PeriopIntraopRepository.createStep"]:::llamada
+  n13 --> n14
+  n15[("CREA procedures_perioperative.operative_steps")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
+  n15 --> n16
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. POST /procedure-cases/{id}/pacu-stays
+
+Admitir al paciente en recuperación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya tiene estancia en recuperación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopIntraopService.admitToPacu"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopIntraopRepository.findPacuStayByCase"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE procedures_perioperative.pacu_stays")]:::efecto
+  n11 --> n12
+  n13{"existing"}:::decision
+  n12 --> n13
+  n14(["409 CONFLICT El caso ya tiene estancia en recuperación"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PeriopIntraopRepository.createPacuStay"]:::llamada
+  n13 -->|"no"| n15
+  n16[("CREA procedures_perioperative.pacu_stays")]:::efecto
+  n15 --> n16
+  n17["Llama a PeriopCasesRepository.createLocation"]:::llamada
+  n16 --> n17
+  n18[("CREA procedures_perioperative.procedure_case_locations")]:::efecto
+  n17 --> n18
+  n19(("201 Responde con éxito")):::ok
+  n18 --> n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 21. POST /procedure-cases/{id}/preoperative-assessments
+
+Registrar la valoración preoperatoria y sus puntuaciones de riesgo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya tiene valoración preoperatoria |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La valoración exige revisar alergias y medicación; PreconditionFailedException: El caso está cancelado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopPreopService.createAssessment"]:::llamada
+  n2 --> n3
+  n4{"!dto.allergiesReviewed || !dto.medicationsReviewed"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La valoración exige revisar alergias y medicación"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n6 --> n7
+  n8[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n7 --> n8
+  n9{"!surgicalCase"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PeriopPreopRepository.findAssessmentByCase"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE procedures_perioperative.preoperative_assessments")]:::efecto
+  n13 --> n14
+  n15{"previous"}:::decision
+  n14 --> n15
+  n16(["409 CONFLICT El caso ya tiene valoración preoperatoria"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PeriopPreopRepository.createAssessment"]:::llamada
+  n15 -->|"no"| n17
+  n18[("CREA procedures_perioperative.preoperative_assessments")]:::efecto
+  n17 --> n18
+  n19["Llama a PeriopPreopRepository.createRiskScore"]:::llamada
+  n18 --> n19
+  n20[("CREA procedures_perioperative.preoperative_risk_scores")]:::efecto
+  n19 --> n20
+  n21{"dto.fitnessStatus !== 'UNFIT'"}:::decision
+  n20 --> n21
+  n22["Llama a PeriopCasesRepository.createMilestone"]:::llamada
+  n21 -->|"sí"| n22
+  n23[("CREA procedures_perioperative.procedure_case_milestones")]:::efecto
+  n22 --> n23
+  n24(("201 Responde con éxito")):::ok
+  n23 --> n24
+  n21 -->|"no"| n24
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 22. POST /procedure-cases/{id}/preoperative-orders
+
+Indicar una orden preoperatoria para el caso
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Encuentro no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopPreopService.createOrder"]:::llamada
+  n2 --> n3
+  n4{"!dto.serviceRequestId && !dto.serviceRequestCodeConceptId"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n6 --> n7
+  n8[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n7 --> n8
+  n9{"!surgicalCase"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a ServiceRequestsService.create"]:::llamada
+  n11 -->|"no"| n13
+  n14["Transacción: transactional(…)"]:::transaccion
+  n13 --> n14
+  n15{"dto.encounterId"}:::decision
+  n14 --> n15
+  n16["Llama a EncountersRepository.findById"]:::llamada
+  n15 -->|"sí"| n16
+  n17[("LEE clinical.encounters")]:::efecto
+  n16 --> n17
+  n18{"!encounter"}:::decision
+  n17 --> n18
+  n19(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a ServiceRequestsRepository.create"]:::llamada
+  n18 -->|"no"| n20
+  n15 -->|"no"| n20
+  n21[("CREA clinical.service_requests")]:::efecto
+  n20 --> n21
+  n22["Llama a PeriopPreopRepository.createOrder"]:::llamada
+  n21 --> n22
+  n23[("CREA procedures_perioperative.preoperative_orders")]:::efecto
+  n22 --> n23
+  n24(("201 Responde con éxito")):::ok
+  n23 --> n24
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 23. POST /procedure-cases/{id}/preoperative-orders/verify
+
+Verificar las órdenes preoperatorias
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: Orden preoperatoria no encontrada en el caso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo un caso programado admite verificación de órdenes |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopPreopService.verifyOrders"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId !== CONCEPTS.CASE_SCHEDULED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED Sólo un caso programado admite verificación de órdenes"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopPreopRepository.findOrdersByCaseForUpdate"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE procedures_perioperative.preoperative_orders")]:::efecto
+  n11 --> n12
+  n13["Repite: por cada const orderId de dto.orderIds"]:::bucle
+  n12 --> n13
+  n14{"!order"}:::decision
+  n13 -->|"cada elemento"| n14
+  n15(["404 NOT_FOUND Orden preoperatoria no encontrada en el caso"]):::error
+  n14 -->|"sí"| n15
+  n16{"pendingMandatory === 0 && orders.length › 0"}:::decision
+  n14 -->|"no"| n16
+  n13 -->|"al terminar"| n16
+  n17["Llama a PeriopCasesRepository.createStatusHistory"]:::llamada
+  n16 -->|"sí"| n17
+  n18[("CREA procedures_perioperative.procedure_case_status_history")]:::efecto
+  n17 --> n18
+  n19[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n18 --> n19
+  n20(("200 Responde con éxito")):::ok
+  n19 --> n20
+  n16 -->|"no"| n20
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 24. POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses
+
+Responder una fase del checklist quirúrgico
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Checklist no encontrado |
+| 409 | `CONFLICT` | ConflictException: El checklist ya está completo; ConflictException: La fase ya está completa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una respuesta de excepción necesita justificación; PreconditionFailedException: El checklist pertenece a otro caso; PreconditionFailedException: La fase no tiene ítems definidos; PreconditionFailedException: El ítem no pertenece a esta fase |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopPreopService.submitChecklistPhase"]:::llamada
+  n2 --> n3
+  n4["Repite: por cada const response de dto.responses"]:::bucle
+  n3 --> n4
+  n5{"response.status === 'EXCEPTION' && !response.exceptionReason"}:::decision
+  n4 -->|"cada elemento"| n5
+  n6(["422 PRECONDITION_FAILED Una respuesta de excepción necesita justificación"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n4 -->|"al terminar"| n7
+  n8["Llama a PeriopPreopRepository.findChecklistForUpdate"]:::llamada
+  n7 --> n8
+  n9[("LEE procedures_perioperative.surgical_safety_checklists")]:::efecto
+  n8 --> n9
+  n10{"!checklist"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Checklist no encontrado"]):::error
+  n10 -->|"sí"| n11
+  n12{"checklist.procedureCaseId !== caseId"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED El checklist pertenece a otro caso"]):::error
+  n12 -->|"sí"| n13
+  n14{"checklist.statusConceptId === CONCEPTS.CHECKLIST_COMPLETED"}:::decision
+  n12 -->|"no"| n14
+  n15(["409 CONFLICT El checklist ya está completo"]):::error
+  n14 -->|"sí"| n15
+  n16{"this.phaseCompletedAt(checklist, dto.phase)"}:::decision
+  n14 -->|"no"| n16
+  n17(["409 CONFLICT La fase ya está completa"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a PeriopPreopRepository.findItemsByPhase"]:::llamada
+  n16 -->|"no"| n18
+  n19[("LEE procedures_perioperative.surgical_safety_items")]:::efecto
+  n18 --> n19
+  n20{"items.length === 0"}:::decision
+  n19 --> n20
+  n21(["422 PRECONDITION_FAILED La fase no tiene ítems definidos"]):::error
+  n20 -->|"sí"| n21
+  n22["Repite: por cada const response de dto.responses"]:::bucle
+  n20 -->|"no"| n22
+  n23{"!itemIds.has(response.itemId)"}:::decision
+  n22 -->|"cada elemento"| n23
+  n24(["422 PRECONDITION_FAILED El ítem no pertenece a esta fase"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a PeriopPreopRepository.createResponse"]:::llamada
+  n23 -->|"no"| n25
+  n26[("CREA procedures_perioperative.surgical_safety_responses")]:::efecto
+  n25 --> n26
+  n27["Llama a PeriopPreopRepository.findResponsesByChecklist"]:::llamada
+  n26 --> n27
+  n22 -->|"al terminar"| n27
+  n28[("LEE procedures_perioperative.surgical_safety_responses")]:::efecto
+  n27 --> n28
+  n29{"phaseCompleted"}:::decision
+  n28 --> n29
+  n30[("ACTUALIZA procedures_perioperative.surgical_safety_checklists")]:::efecto
+  n29 -->|"sí"| n30
+  n31{"dto.phase === 'SIGN_IN'"}:::decision
+  n30 --> n31
+  n32[("ACTUALIZA procedures_perioperative.surgical_safety_checklists")]:::efecto
+  n31 -->|"sí"| n32
+  n33{"dto.phase === 'TIME_OUT'"}:::decision
+  n32 --> n33
+  n31 -->|"no"| n33
+  n34[("ACTUALIZA procedures_perioperative.surgical_safety_checklists")]:::efecto
+  n33 -->|"sí"| n34
+  n35["Llama a PeriopCasesRepository.createMilestone"]:::llamada
+  n34 --> n35
+  n36[("CREA procedures_perioperative.procedure_case_milestones")]:::efecto
+  n35 --> n36
+  n37[("ACTUALIZA procedures_perioperative.surgical_safety_checklists")]:::efecto
+  n36 --> n37
+  n33 -->|"no"| n37
+  n38{"dto.phase === 'SIGN_OUT'"}:::decision
+  n37 --> n38
+  n39[("ACTUALIZA procedures_perioperative.surgical_safety_checklists")]:::efecto
+  n38 -->|"sí"| n39
+  n40{"checklist.signInCompletedAt && checklist.timeOutCompletedAt && checklist.signOutCompletedAt"}:::decision
+  n39 --> n40
+  n38 -->|"no"| n40
+  n41[("ACTUALIZA procedures_perioperative.surgical_safety_checklists")]:::efecto
+  n40 -->|"sí"| n41
+  n42[("ACTUALIZA procedures_perioperative.surgical_safety_checklists")]:::efecto
+  n41 --> n42
+  n40 -->|"no"| n42
+  n29 -->|"no"| n42
+  n43(("201 Responde con éxito")):::ok
+  n42 --> n43
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 25. POST /procedure-cases/{id}/specimens
+
+Registrar una muestra tomada en la intervención
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no está en curso; PreconditionFailedException: El paso no pertenece al caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopIntraopService.recordSpecimen"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopIntraopService.assertCaseInProgress"]:::llamada
+  n4 --> n5
+  n6["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n5 --> n6
+  n7[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n6 --> n7
+  n8{"!surgicalCase"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"surgicalCase.statusConceptId !== CONCEPTS.SURGICAL_CASE_IN_PROGRESS"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED El caso no está en curso"]):::error
+  n10 -->|"sí"| n11
+  n12{"dto.operativeStepId"}:::decision
+  n10 -->|"no"| n12
+  n13["Llama a PeriopIntraopRepository.findStepById"]:::llamada
+  n12 -->|"sí"| n13
+  n14[("LEE procedures_perioperative.operative_steps")]:::efecto
+  n13 --> n14
+  n15{"!step || step.procedureCaseId !== caseId"}:::decision
+  n14 --> n15
+  n16(["422 PRECONDITION_FAILED El paso no pertenece al caso"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PeriopIntraopRepository.createSpecimen"]:::llamada
+  n15 -->|"no"| n17
+  n12 -->|"no"| n17
+  n18[("CREA procedures_perioperative.procedure_specimens")]:::efecto
+  n17 --> n18
+  n19(("201 Responde con éxito")):::ok
+  n18 --> n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 26. GET /procedure-cases/{id}/team-members
+
+Listar el equipo del caso quirúrgico
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.listTeamMembers"]:::llamada
+  n2 --> n3
+  n4["Llama a PeriopCasesRepository.findCaseById"]:::llamada
+  n3 --> n4
+  n5[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n4 --> n5
+  n6{"!surgicalCase"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a PeriopCasesRepository.findTeamByCase"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE procedures_perioperative.procedure_case_team_members")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 27. POST /procedure-cases/{id}/team-members
+
+Asignar un miembro al equipo quirúrgico
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El profesional ya tiene ese rol en el caso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.assignTeamMember"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopCasesRepository.findTeamByCase"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE procedures_perioperative.procedure_case_team_members")]:::efecto
+  n11 --> n12
+  n13{"alreadyIn"}:::decision
+  n12 --> n13
+  n14(["409 CONFLICT El profesional ya tiene ese rol en el caso"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PeriopCasesRepository.createTeamMember"]:::llamada
+  n13 -->|"no"| n15
+  n16[("CREA procedures_perioperative.procedure_case_team_members")]:::efecto
+  n15 --> n16
+  n17{"dto.role === 'ANESTHESIOLOGIST' && !surgicalCase.anesthesiologistProfileId"}:::decision
+  n16 --> n17
+  n18[("ACTUALIZA procedures_perioperative.procedure_cases")]:::efecto
+  n17 -->|"sí"| n18
+  n19(("201 Responde con éxito")):::ok
+  n18 --> n19
+  n17 -->|"no"| n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 28. POST /procedure-cases/{id}/team-members/{memberId}/accept
+
+Aceptar la participación en el equipo quirúrgico
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: El integrante no pertenece al caso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Sólo el propio integrante puede aceptar su participación; PreconditionFailedException: CAN-INT-002: el integrante no tiene credencial profesional vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.acceptTeamMember"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopCasesRepository.findTeamByCase"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE procedures_perioperative.procedure_case_team_members")]:::efecto
+  n11 --> n12
+  n13{"!member"}:::decision
+  n12 --> n13
+  n14(["404 NOT_FOUND El integrante no pertenece al caso"]):::error
+  n13 -->|"sí"| n14
+  n15{"!esAdministracion && actor.practitionerProfileId !== member.practitionerProfileId"}:::decision
+  n13 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED Sólo el propio integrante puede aceptar su participación"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a ProfessionalCredentialsRepository.hasCurrentCredential"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE profiles.professional_credentials")]:::efecto
+  n17 --> n18
+  n19{"!credencialVigente"}:::decision
+  n18 --> n19
+  n20(["422 PRECONDITION_FAILED CAN-INT-002: el integrante no tiene credencial profesional vigente"]):::error
+  n19 -->|"sí"| n20
+  n21(("200 Responde con éxito")):::ok
+  n19 -->|"no"| n21
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 29. POST /procedure-cases/{id}/team-members/{memberId}/respond
+
+Rechazar, pedir cambios o informar indisponibilidad
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso quirúrgico no encontrado; ResourceNotFoundException: El integrante no pertenece al caso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso está cancelado; PreconditionFailedException: Sólo el propio integrante puede responder a su participación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopCasesService.respondTeamMember"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PeriopCasesRepository.findCaseForUpdate"]:::llamada
+  n4 --> n5
+  n6[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n5 --> n6
+  n7{"!surgicalCase"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Caso quirúrgico no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED El caso está cancelado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PeriopCasesRepository.findTeamByCase"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE procedures_perioperative.procedure_case_team_members")]:::efecto
+  n11 --> n12
+  n13{"!member"}:::decision
+  n12 --> n13
+  n14(["404 NOT_FOUND El integrante no pertenece al caso"]):::error
+  n13 -->|"sí"| n14
+  n15{"!esAdministracion && actor.practitionerProfileId !== member.practitionerProfileId"}:::decision
+  n13 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED Sólo el propio integrante puede responder a su participación"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n15 -->|"no"| n17
+  n18["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n17 --> n18
+  n19["Transacción: startActiveSpan(…)"]:::transaccion
+  n18 --> n19
+  n20["Intenta"]:::intento
+  n19 --> n20
+  n21(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"si falla"| n21
+  n22["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n20 --> n22
+  n23["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n22 --> n23
+  n24[("LEE messaging.outbox_messages")]:::efecto
+  n23 --> n24
+  n25["Llama a OutboxRepository.createDomainEvent"]:::llamada
+  n24 --> n25
+  n26[("CREA messaging.domain_events")]:::efecto
+  n25 --> n26
+  n27["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n26 --> n27
+  n28[("CREA messaging.outbox_messages")]:::efecto
+  n27 --> n28
+  n29>"Evento periop.case.team_participation_declined"]:::evento
+  n28 --> n29
+  n30["Llama a AuditTrailService.record"]:::llamada
+  n29 --> n30
+  n31["Llama a AuditLogRepository.append"]:::llamada
+  n30 --> n31
+  n32["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n31 --> n32
+  n33[("LEE audit.audit_log")]:::efecto
+  n32 --> n33
+  n34[("CREA audit.audit_log")]:::efecto
+  n33 --> n34
+  n35(("200 Responde con éxito")):::ok
+  n34 --> n35
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+### Operaciones sin decisiones propias
+
+Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
+
+| Operación | Respuestas posibles | Tablas |
+|---|---|---|
+| GET /dental-procedures | 200, 400, 401, 403, 429 | 2 |
+| GET /dental-procedures/catalog | 200, 401, 403, 429 | 0 |
+| GET /procedure-cases | 200, 401, 403, 429 | 1 |

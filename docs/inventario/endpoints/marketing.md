@@ -128,6 +128,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `touches[].attributedValue` | `string` | No | — | — | Valor atribuido a este touchpoint | `src/modules/marketing/dto/marketing.dto.ts:1218` |
 | `touches[].positionConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a position concept. | `src/modules/marketing/dto/marketing.dto.ts:1224` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana de atribución es inválida; PreconditionFailedException: No hay touchpoints del miembro en la ventana de atribución |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -136,7 +149,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-12`
 
 ---
 
@@ -238,6 +251,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/marketing/dto/marketing.dto.ts:323` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/marketing/dto/marketing.dto.ts:329` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Segmento no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe una campaña con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La campaña debe terminar después de empezar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -246,7 +274,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-03`
 
 ---
 
@@ -330,6 +358,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `skipped` | `number` | Sí | — | — | Miembros omitidos por supresión o por estar ya materializados | `src/modules/marketing/dto/marketing.dto.ts:374` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/marketing/dto/marketing.dto.ts:380` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La campaña no admite materializar audiencia en su estado actual; PreconditionFailedException: La campaña no tiene segmento del que derivar audiencia |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -338,7 +380,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-04`
 
 ---
 
@@ -435,6 +477,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `version` | `number` | Sí | — | — | Versión publicada | `src/modules/marketing/dto/marketing.dto.ts:476` |
 | `archivedVersionId` | `string` | No | formato uuid | — | Versión archivada al publicar esta | `src/modules/marketing/dto/marketing.dto.ts:485` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -443,7 +497,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-05`
 
 ---
 
@@ -524,6 +578,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/marketing/dto/marketing.dto.ts:801` |
 | `touchpointId` | `string` | No | formato uuid | — | Touchpoint registrado cuando el paso ejecutado era SEND | `src/modules/marketing/dto/marketing.dto.ts:810` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Inscripción no encontrada o en curso; ResourceNotFoundException: Paso actual no encontrado |
+| 409 | `CONFLICT` | ConflictException: La inscripción ya no está activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La inscripción no tiene paso actual; PreconditionFailedException: La espera del paso aún no ha vencido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -532,7 +601,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-08`
 
 ---
 
@@ -616,6 +685,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/marketing/dto/marketing.dto.ts:852` |
 | `exitReasonConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a exit reason concept. | `src/modules/marketing/dto/marketing.dto.ts:858` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Inscripción no encontrada |
+| 409 | `CONFLICT` | ConflictException: La inscripción ya no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -624,7 +707,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-09`
 
 ---
 
@@ -714,6 +797,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `endedAt` | `string` | No | formato date-time | — | Valor de ended at mantenido por la instancia. | sin fuente |
 | `eventCount` | `number` | Sí | — | — | Valor de event count mantenido por la instancia. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Segmento de entrada no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe un journey con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un journey con entrada por segmento necesita entrySegmentId |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -722,7 +820,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-06`
 
 ---
 
@@ -811,6 +909,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `enrolled` | `number` | Sí | — | — | Inscripciones creadas | `src/modules/marketing/dto/marketing.dto.ts:750` |
 | `skipped` | `number` | Sí | — | — | Miembros omitidos por tener ya una inscripción activa | `src/modules/marketing/dto/marketing.dto.ts:758` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey no encontrado |
+| 409 | `CONFLICT` | ConflictException: El journey ya no está en borrador |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un journey sin pasos no puede activarse |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -819,7 +932,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-07`
 
 ---
 
@@ -921,6 +1034,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `journeyId` | `string` | Sí | formato uuid | — | Identificador asociado a journey. | `src/modules/marketing/dto/marketing.dto.ts:683` |
 | `stepIds` | `array<string>` | Sí | formato uuid | — | Pasos creados, en orden | `src/modules/marketing/dto/marketing.dto.ts:693` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo un journey en borrador admite nuevos pasos; PreconditionFailedException: Un paso SEND necesita plantilla de contenido; PreconditionFailedException: La plantilla del paso SEND no existe o no está publicada; PreconditionFailedException: Un paso WAIT necesita duración; PreconditionFailedException: Un paso BRANCH necesita condición |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -929,7 +1056,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-06`
 
 ---
 
@@ -1015,6 +1142,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/marketing/dto/marketing.dto.ts:106` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/marketing/dto/marketing.dto.ts:112` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un segmento con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1023,7 +1163,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-01`
 
 ---
 
@@ -1120,6 +1260,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `removed` | `number` | Sí | — | — | Miembros dados de baja por salir del segmento | `src/modules/marketing/dto/marketing.dto.ts:177` |
 | `estimatedSize` | `number` | Sí | — | — | Tamaño derivado del segmento tras el refresco | `src/modules/marketing/dto/marketing.dto.ts:183` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Segmento no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El segmento no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1128,7 +1282,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-02`
 
 ---
 
@@ -1223,6 +1377,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `touchTypeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a touch type concept. | `src/modules/marketing/dto/marketing.dto.ts:1088` |
 | `memberStatusConceptId` | `string` | No | formato uuid | — | Estado al que pasó el miembro de campaña, si había campaña | `src/modules/marketing/dto/marketing.dto.ts:1097` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El touchpoint necesita campaña o journey de origen |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1231,7 +1398,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-11`
 
 ---
 
@@ -1317,6 +1484,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/marketing/dto/marketing.dto.ts:941` |
 | `targetUrl` | `string` | Sí | — | — | Valor de target url mantenido por la instancia. | `src/modules/marketing/dto/marketing.dto.ts:947` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un enlace con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1325,7 +1505,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-10`
 
 ---
 
@@ -1383,6 +1563,18 @@ La operación no recibe cuerpo.
 | `clickCount` | `string` | Sí | — | — | Clicks acumulados tras registrar este | `src/modules/marketing/dto/marketing.dto.ts:964` |
 | `touchpointId` | `string` | No | formato uuid | — | Touchpoint del click; ausente si no se identificó al miembro | `src/modules/marketing/dto/marketing.dto.ts:973` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Enlace no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El enlace no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/marketing.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1391,7 +1583,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 50 — Marketing Automation, Journeys y Atribución — etapa `UC-50-10`
 
 ---
 

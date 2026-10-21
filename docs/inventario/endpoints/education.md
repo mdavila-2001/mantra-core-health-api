@@ -108,6 +108,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `outcome` | `string` | Sí | formato uuid | — | Valor de outcome mantenido por la instancia. | sin fuente |
 | `checkStatus` | `string` | Sí | formato uuid | — | Valor de check status mantenido por la instancia. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Evaluación no encontrada; ResourceNotFoundException: Inscripción no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya hay un intento en curso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La inscripción es de otro curso; PreconditionFailedException: La inscripción no está activa; PreconditionFailedException: Se agotaron los intentos permitidos |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -116,7 +131,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-08`
 
 ---
 
@@ -201,6 +216,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `correctAnswers` | `number` | Sí | — | — | Preguntas acertadas | `src/modules/education/dto/education.dto.ts:989` |
 | `totalQuestions` | `number` | Sí | — | — | Preguntas de la evaluación | `src/modules/education/dto/education.dto.ts:995` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Intento no encontrado; ResourceNotFoundException: Evaluación no encontrada |
+| 409 | `CONFLICT` | ConflictException: El intento ya fue corregido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tiempo del intento venció |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -209,7 +239,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-09`
 
 ---
 
@@ -299,6 +329,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1203` |
 | `alreadyAwarded` | `boolean` | Sí | — | — | true si el crédito ya estaba acreditado | `src/modules/education/dto/education.dto.ts:1209` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Certificado no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El certificado no está vigente; PreconditionFailedException: El certificado no otorga créditos CME; PreconditionFailedException: El curso no declara organismo acreditador |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -307,7 +351,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-12`
 
 ---
 
@@ -389,6 +433,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1123` |
 | `cmeRecordsReversed` | `number` | Sí | — | — | Créditos CME revertidos | `src/modules/education/dto/education.dto.ts:1129` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Certificado no encontrado |
+| 409 | `CONFLICT` | ConflictException: El certificado ya está revocado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -397,7 +455,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-14`
 
 ---
 
@@ -514,6 +572,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `questionIds` | `array<string>` | Sí | formato uuid | — | Valor de question ids mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:890` |
 | `totalPoints` | `string` | Sí | — | — | Suma de los puntos de las preguntas | `src/modules/education/dto/education.dto.ts:896` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una evaluación puntuable necesita respuesta correcta en cada pregunta; PreconditionFailedException: El módulo no pertenece al curso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -522,7 +594,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-07`
 
 ---
 
@@ -614,6 +686,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `version` | `string` | Sí | — | — | Valor de version mantenido por la instancia. | sin fuente |
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe una cohorte con ese código en el curso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cohorte debe terminar después de empezar; PreconditionFailedException: El curso no está publicado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -622,7 +709,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-04`
 
 ---
 
@@ -717,6 +804,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `instructorExisted` | `boolean` | Sí | — | — | true si la ficha de instructor ya existía | `src/modules/education/dto/education.dto.ts:441` |
 | `ordinal` | `number` | Sí | — | — | Posición en la lista de instructores del curso | `src/modules/education/dto/education.dto.ts:449` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado |
+| 409 | `CONFLICT` | ConflictException: El instructor ya está asignado al curso; ConflictException: El curso ya tiene instructor titular |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -725,7 +826,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-03`
 
 ---
 
@@ -809,6 +910,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `rating` | `number` | Sí | — | — | Valor de rating mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:1257` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1263` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado |
+| 409 | `CONFLICT` | ConflictException: El usuario ya reseñó este curso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -817,7 +932,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-13`
 
 ---
 
@@ -897,6 +1012,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `courseId` | `string` | Sí | formato uuid | — | Identificador asociado a course. | `src/modules/education/dto/education.dto.ts:348` |
 | `version` | `number` | Sí | — | — | Versión publicada; el curso pasa a apuntar a ella | `src/modules/education/dto/education.dto.ts:356` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado |
+| 409 | `CONFLICT` | ConflictException: Esa versión del curso ya existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un curso archivado no admite versiones |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -905,7 +1035,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-02`
 
 ---
 
@@ -1048,6 +1178,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `lessons` | `number` | Sí | — | — | Lecciones creadas en total | `src/modules/education/dto/education.dto.ts:305` |
 | `durationMinutes` | `number` | Sí | — | — | Duración derivada de la suma de las lecciones, en minutos | `src/modules/education/dto/education.dto.ts:313` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un curso con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un curso acreditado necesita declarar sus horas CME |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1056,7 +1200,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-01`
 
 ---
 
@@ -1148,6 +1292,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `progressPercent` | `string` | Sí | — | — | Progreso del curso, en porcentaje | `src/modules/education/dto/education.dto.ts:625` |
 | `cohortEnrolledCount` | `number` | No | — | — | Plazas ocupadas de la cohorte tras inscribir | `src/modules/education/dto/education.dto.ts:633` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Curso no encontrado; ResourceNotFoundException: Cohorte no encontrada |
+| 409 | `CONFLICT` | ConflictException: El aprendiz ya está inscrito en el curso; ConflictException: La cohorte no tiene plazas disponibles |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una inscripción comprada necesita su intento de pago; PreconditionFailedException: El curso no está publicado; PreconditionFailedException: La cohorte pertenece a otro curso; PreconditionFailedException: La cohorte no está abierta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1156,7 +1315,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-05`
 
 ---
 
@@ -1241,6 +1400,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/education/dto/education.dto.ts:1090` |
 | `alreadyIssued` | `boolean` | Sí | — | — | true si ya estaba emitido | `src/modules/education/dto/education.dto.ts:1096` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Inscripción no encontrada; ResourceNotFoundException: Curso no encontrado |
+| 409 | `CONFLICT` | ConflictException: No se pudo generar un número de certificado libre; ConflictException: No se pudo generar un código de verificación libre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La inscripción no está completada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1249,7 +1423,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-11`
 
 ---
 
@@ -1313,6 +1487,20 @@ La operación no recibe cuerpo.
 | `progressPercent` | `string` | Sí | — | — | Valor de progress percent mantenido por la instancia. | `src/modules/education/dto/education.dto.ts:1022` |
 | `alreadyCompleted` | `boolean` | Sí | — | — | true si ya estaba completada | `src/modules/education/dto/education.dto.ts:1028` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Inscripción no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La inscripción no está activa; PreconditionFailedException: El curso no está completo; PreconditionFailedException: Quedan evaluaciones sin aprobar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1321,7 +1509,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-10`
 
 ---
 
@@ -1416,6 +1604,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 | `completedLessons` | `number` | Sí | — | — | Lecciones completadas | `src/modules/education/dto/education.dto.ts:714` |
 | `totalLessons` | `number` | Sí | — | — | Lecciones publicadas del curso | `src/modules/education/dto/education.dto.ts:720` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Inscripción no encontrada; ResourceNotFoundException: Lección no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La inscripción está cancelada; PreconditionFailedException: El acceso a la inscripción ha caducado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/education.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1424,7 +1626,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 47 — Formación, Evaluación y Acreditación — etapa `UC-47-06`
 
 ---
 

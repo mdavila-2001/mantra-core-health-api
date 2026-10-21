@@ -106,6 +106,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `results[].nextRunAt` | `string` | No | formato date-time | — | Próxima marca calculada a partir del cron de la programación | `src/modules/qa_lab/dto/qa-lab.dto.ts:1175` |
 | `results[].skippedReason` | `string` | No | — | — | Motivo por el que esta marca no llegó a encolar una corrida | `src/modules/qa_lab/dto/qa-lab.dto.ts:1183` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: No se pudo asignar número de corrida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -114,7 +127,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `ctrl:QaLabInternalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -178,6 +191,21 @@ La operación no recibe cuerpo.
 | `assertionsFailed` | `number` | Sí | — | — | Valor de assertions failed mantenido por la instancia. | `src/modules/qa_lab/dto/qa-lab.dto.ts:650` |
 | `failureSignatureHash` | `string` | No | — | — | Firma del fallo, con la que se deduplican defectos | `src/modules/qa_lab/dto/qa-lab.dto.ts:658` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Resultado no encontrado |
+| 409 | `CONFLICT` | ConflictException: El resultado ya fue evaluado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso falló en transporte: no hay respuesta que evaluar; PreconditionFailedException: El caso no tiene aserciones |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -186,7 +214,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-06`
 
 ---
 
@@ -281,6 +309,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `occurrencesCount` | `number` | Sí | — | — | Veces que se ha visto este mismo fallo | `src/modules/qa_lab/dto/qa-lab.dto.ts:891` |
 | `deduplicated` | `boolean` | Sí | — | — | true si el defecto ya existía y sólo subió su contador | `src/modules/qa_lab/dto/qa-lab.dto.ts:899` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
+| 409 | `CONFLICT` | ConflictException: No se pudo asignar número de defecto |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -289,7 +331,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-09`
 
 ---
 
@@ -378,6 +420,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `severityConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a severity concept. | `src/modules/qa_lab/dto/qa-lab.dto.ts:990` |
 | `assignedToUserId` | `string` | No | formato uuid | — | Identificador asociado a assigned to user. | `src/modules/qa_lab/dto/qa-lab.dto.ts:996` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Defecto no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El defecto está en un estado desconocido; PreconditionFailedException: La transición de estado no está permitida; PreconditionFailedException: Un defecto en curso necesita responsable |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -386,7 +442,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-10`
 
 ---
 
@@ -474,6 +530,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/qa_lab/dto/qa-lab.dto.ts:116` |
 | `isProductionSafe` | `boolean` | Sí | — | — | Valor de is production safe mantenido por la instancia. | `src/modules/qa_lab/dto/qa-lab.dto.ts:122` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un entorno con ese código |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un entorno de producción no puede declararse seguro para capturar payloads |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -482,7 +552,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-01`
 
 ---
 
@@ -571,6 +641,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/qa_lab/dto/qa-lab.dto.ts:489` |
 | `totalCases` | `number` | Sí | — | — | Casos activos que la corrida ejercitará | `src/modules/qa_lab/dto/qa-lab.dto.ts:495` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada; ResourceNotFoundException: Entorno no encontrado |
+| 409 | `CONFLICT` | ConflictException: La suite ya tiene una corrida en marcha; ConflictException: No se pudo asignar número de corrida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suite no está publicada; PreconditionFailedException: El entorno no está activo; PreconditionFailedException: La suite no tiene casos activos |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -579,7 +664,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-04`
 
 ---
 
@@ -667,6 +752,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `testRunId` | `string` | Sí | formato uuid | — | Identificador asociado a test run. | `src/modules/qa_lab/dto/qa-lab.dto.ts:773` |
 | `artifactTypeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a artifact type concept. | `src/modules/qa_lab/dto/qa-lab.dto.ts:779` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada; ResourceNotFoundException: Resultado no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El resultado pertenece a otra corrida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -675,7 +774,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-08`
 
 ---
 
@@ -779,6 +878,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `responseBodyHash` | `string` | Sí | — | — | Hash del cuerpo de la respuesta, para detectar manipulación | `src/modules/qa_lab/dto/qa-lab.dto.ts:602` |
 | `masked` | `boolean` | Sí | — | — | true si el entorno no es seguro y los payloads se guardaron enmascarados | `src/modules/qa_lab/dto/qa-lab.dto.ts:611` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada; ResourceNotFoundException: Caso no encontrado |
+| 409 | `CONFLICT` | ConflictException: La corrida ya está cerrada; ConflictException: El caso ya se ejecutó en esta corrida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso pertenece a otra suite |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -787,7 +901,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-05`
 
 ---
 
@@ -850,6 +964,20 @@ La operación no recibe cuerpo.
 | `totalSkipped` | `number` | Sí | — | — | Valor de total skipped mantenido por la instancia. | `src/modules/qa_lab/dto/qa-lab.dto.ts:703` |
 | `durationMs` | `number` | No | — | — | Duración de la corrida, en milisegundos | `src/modules/qa_lab/dto/qa-lab.dto.ts:711` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
+| 409 | `CONFLICT` | ConflictException: La corrida ya está cerrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -858,7 +986,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-07`
 
 ---
 
@@ -942,6 +1070,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `artifactCount` | `number` | Sí | — | — | Artefactos que componen el paquete de evidencia | `src/modules/qa_lab/dto/qa-lab.dto.ts:1268` |
 | `evidenceHash` | `string` | Sí | — | — | Sello del paquete: hash de los artefactos enlazados | `src/modules/qa_lab/dto/qa-lab.dto.ts:1276` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo una corrida que pasó puede respaldar un release; PreconditionFailedException: La corrida no tiene evidencia adjunta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -950,7 +1092,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-12`
 
 ---
 
@@ -1047,6 +1189,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `nextRunAt` | `string` | Sí | formato date-time | — | Valor de next run at mantenido por la instancia. | `src/modules/qa_lab/dto/qa-lab.dto.ts:1114` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/qa_lab/dto/qa-lab.dto.ts:1120` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada; ResourceNotFoundException: Entorno no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe una programación con ese código para la suite y el entorno |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suite no está publicada; PreconditionFailedException: El entorno no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1055,7 +1212,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-11`
 
 ---
 
@@ -1178,6 +1335,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `ordinal` | `number` | Sí | — | — | Valor de ordinal mantenido por la instancia. | `src/modules/qa_lab/dto/qa-lab.dto.ts:343` |
 | `assertionIds` | `array<string>` | Sí | formato uuid | — | Valor de assertion ids mantenido por la instancia. | `src/modules/qa_lab/dto/qa-lab.dto.ts:349` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe un caso con ese código en la suite |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una aserción JSON_PATH necesita su ruta; PreconditionFailedException: La aserción necesita valor esperado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1186,7 +1358,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-02`
 
 ---
 
@@ -1267,6 +1439,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/qa_lab/dto/qa-lab.dto.ts:389` |
 | `casesActivated` | `number` | Sí | — | — | Casos que pasaron de borrador a activos | `src/modules/qa_lab/dto/qa-lab.dto.ts:395` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una suite sin casos no puede publicarse |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1275,7 +1461,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `UC-36-03`
 
 ---
 

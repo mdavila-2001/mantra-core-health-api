@@ -110,13 +110,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `subjectId` | `string` | Sí | formato uuid | — | Identificador asociado a subject. | `src/modules/consent/dto/responses.dto.ts:207` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/consent/dto/responses.dto.ts:213` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-10`
 
 ---
 
@@ -237,13 +249,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `processingPurposeId` | `string` | Sí | formato uuid | — | Identificador asociado a processing purpose. | `src/modules/consent/dto/responses.dto.ts:27` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:33` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un consentimiento activo para este propósito |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-01`
+- Consentimiento y acceso clínico — etapa `P1`
 
 ---
 
@@ -349,13 +375,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:222` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento no encontrado |
+| 409 | `CONFLICT` | ConflictException: El consentimiento no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-09`
 
 ---
 
@@ -436,13 +476,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:222` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento no encontrado |
+| 409 | `CONFLICT` | ConflictException: El consentimiento no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-02`
+- Consentimiento y acceso clínico — etapa `A1`
 
 ---
 
@@ -534,13 +589,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:54` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:60` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: expiresAt es obligatorio cuando expirationType=DATE; PreconditionFailedException: expirationEventText es obligatorio cuando expirationType=EVENT |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-04`
+- Consentimiento y acceso clínico — etapa `A3`
 
 ---
 
@@ -597,13 +666,28 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:222` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Autorización HIPAA no encontrada |
+| 409 | `CONFLICT` | ConflictException: La autorización no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-05`
+- Consentimiento y acceso clínico — etapa `A3`
 
 ---
 
@@ -659,13 +743,25 @@ La operación no recibe cuerpo.
 | `expiredAuthorizations` | `number` | Sí | — | — | Autorizaciones HIPAA expiradas | `src/modules/consent/dto/responses.dto.ts:237` |
 | `expiredRestrictions` | `number` | Sí | — | — | Restricciones de privacidad expiradas | `src/modules/consent/dto/responses.dto.ts:243` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-11`
+- Consentimiento y acceso clínico — etapa `A4`
 
 ---
 
@@ -755,13 +851,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `restrictionId` | `string` | Sí | admite null | — | Restricción de privacidad creada (si aplica) | `src/modules/consent/dto/responses.dto.ts:90` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:96` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una objeción abierta para este propósito |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-03`
+- Consentimiento y acceso clínico — etapa `A2`
 
 ---
 
@@ -844,13 +954,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/consent/dto/responses.dto.ts:222` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Objeción no encontrada |
+| 409 | `CONFLICT` | ConflictException: La objeción no está abierta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-12`
+- Consentimiento y acceso clínico — etapa `A2`
 
 ---
 
@@ -939,13 +1064,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/consent/dto/responses.dto.ts:117` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:123` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-07`
 
 ---
 
@@ -1033,13 +1170,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `supersededId` | `string` | Sí | admite null | — | Versión anterior cerrada (si la había) | `src/modules/consent/dto/responses.dto.ts:153` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:159` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-06`
 
 ---
 
@@ -1130,13 +1279,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `decision` | `string` | Sí | formato uuid | — | Decisión (concept id) | `src/modules/consent/dto/responses.dto.ts:186` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/consent/dto/responses.dto.ts:192` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/consent.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Consent (07 — Privacy Directives, Legal Bases and Consent Evidence) — etapa `UC-07-08`
 
 ---
 

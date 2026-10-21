@@ -114,6 +114,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso | `src/modules/system_ops/dto/common-response.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una regla de anonimización con ese code |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -122,7 +135,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-04`
 
 ---
 
@@ -216,13 +229,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_ops/dto/assessment.dto.ts:368` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_ops/dto/assessment.dto.ts:374` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Evaluación no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe un hallazgo con ese finding_code |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-13`
 
 ---
 
@@ -335,13 +362,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/system_ops/dto/assessment.dto.ts:383` |
 | `actionIds` | `array<string>` | Sí | — | — | Ids de las acciones creadas | `src/modules/system_ops/dto/assessment.dto.ts:389` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Evaluación no encontrada; ResourceNotFoundException: Hallazgo no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe un plan con ese code para el tenant |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-13`
 
 ---
 
@@ -429,13 +470,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso | `src/modules/system_ops/dto/common-response.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: La referencia de transferencia ya fue registrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-07`
 
 ---
 
@@ -521,13 +575,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_ops/dto/draft.dto.ts:105` |
 | `publishedRecordId` | `string` | No | formato uuid | — | Id del registro materializado al publicar | `src/modules/system_ops/dto/draft.dto.ts:114` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-15`
 
 ---
 
@@ -608,13 +674,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/system_ops/dto/draft.dto.ts:105` |
 | `publishedRecordId` | `string` | No | formato uuid | — | Id del registro materializado al publicar | `src/modules/system_ops/dto/draft.dto.ts:114` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Borrador no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo el dueño del borrador puede publicarlo; PreconditionFailedException: El borrador no está en estado DRAFT |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-15`
 
 ---
 
@@ -767,6 +847,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `tableName` | `string` | Sí | — | — | Valor de table name mantenido por la instancia. | `src/modules/system_ops/dto/governance-catalog.dto.ts:282` |
 | `fieldIds` | `array<string>` | Sí | — | — | Ids de los campos catalogados | `src/modules/system_ops/dto/governance-catalog.dto.ts:288` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -775,7 +867,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-01`
 
 ---
 
@@ -858,6 +950,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/system_ops/dto/common-response.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Entidad no encontrada; ResourceNotFoundException: Política de retención no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -866,7 +971,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-03`
 
 ---
 
@@ -948,6 +1053,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/system_ops/dto/common-response.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Entidad no encontrada; ResourceNotFoundException: Política de escritura no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -956,7 +1074,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-02`
 
 ---
 
@@ -1039,6 +1157,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/system_ops/dto/common-response.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1047,7 +1178,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-04`
 
 ---
 
@@ -1125,13 +1256,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/system_ops/dto/common-response.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Hallazgo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-14`
 
 ---
 
@@ -1216,13 +1360,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso | `src/modules/system_ops/dto/common-response.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un legal hold ACTIVE para ese objetivo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-08`
 
 ---
 
@@ -1299,13 +1456,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/system_ops/dto/common-response.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Legal hold no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El legal hold no está ACTIVE |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-08`
 
 ---
 
@@ -1416,13 +1587,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `version` | `string` | Sí | — | — | Valor de version mantenido por la instancia. | `src/modules/system_ops/dto/framework.dto.ts:160` |
 | `controlIds` | `array<string>` | Sí | — | — | Ids de los controles creados | `src/modules/system_ops/dto/framework.dto.ts:166` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un framework con ese code+version |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: parentControlCode no existe en el framework |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-11`
 
 ---
 
@@ -1504,13 +1689,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/system_ops/dto/common-response.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Acción de remediación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción ya está verificada; PreconditionFailedException: El verificador no puede ser el asignado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-14`
 
 ---
 
@@ -1603,13 +1802,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso | `src/modules/system_ops/dto/common-response.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política de residencia con ese code |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-06`
 
 ---
 
@@ -1692,6 +1904,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso | `src/modules/system_ops/dto/common-response.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política de retención con ese code |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1700,7 +1925,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-03`
 
 ---
 
@@ -1780,13 +2005,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso | `src/modules/system_ops/dto/common-response.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-06`
 
 ---
 
@@ -1875,13 +2112,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso | `src/modules/system_ops/dto/common-response.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Framework no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El framework no está publicado (ACTIVE) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-12`
 
 ---
 
@@ -1979,13 +2230,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/system_ops/dto/common-response.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Evaluación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-12`
 
 ---
 
@@ -2077,6 +2341,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso | `src/modules/system_ops/dto/common-response.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política de escritura con ese code |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2085,7 +2362,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-02`
 
 ---
 
@@ -2175,13 +2452,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador del recurso | `src/modules/system_ops/dto/common-response.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El RPO no puede superar al RTO |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-09`
 
 ---
 
@@ -2267,13 +2557,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `totalArchived` | `number` | Sí | — | — | Valor de total archived mantenido por la instancia. | `src/modules/system_ops/dto/retention-execution.dto.ts:72` |
 | `blockedByLegalHold` | `boolean` | No | — | — | true si se detuvo por legal hold activo | `src/modules/system_ops/dto/retention-execution.dto.ts:80` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Política de retención no encontrada; ResourceNotFoundException: Entidad objetivo no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de retención no está ACTIVE |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-05`
 
 ---
 
@@ -2361,13 +2665,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 | `outcomeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a outcome concept. | `src/modules/system_ops/dto/backup.dto.ts:178` |
 | `objectiveBreached` | `boolean` | Sí | — | — | true si el RPO/RTO medido supera el objetivo | `src/modules/system_ops/dto/backup.dto.ts:184` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Política de backup no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de backup no está ACTIVE |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `UC-11-10`
 
 ---
 

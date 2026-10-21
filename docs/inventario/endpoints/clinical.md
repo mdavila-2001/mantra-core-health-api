@@ -138,6 +138,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `reactionIds` | `array<string>` | Sí | — | — | Ids de reacciones creadas | `src/modules/clinical/dto/allergy.dto.ts:141` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/allergy.dto.ts:147` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El paciente ya tiene una alergia activa a esa sustancia |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -147,7 +160,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -232,6 +245,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `startAt` | `string` | Sí | formato date-time; admite null | — | Valor de start at mantenido por la instancia. | `src/modules/clinical/dto/care-episode.dto.ts:93` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/care-episode.dto.ts:99` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El paciente ya tiene un episodio activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -241,7 +267,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalEncountersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -344,6 +370,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinicalCourse` | `string` | Sí | formato uuid; admite null | — | Curso clínico (concept id) | `src/modules/clinical/dto/condition.dto.ts:187` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/condition.dto.ts:193` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El paciente ya tiene esa condición activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -353,7 +393,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -444,13 +484,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinicalCourse` | `string` | Sí | formato uuid; admite null | — | Curso clínico (concept id) | `src/modules/clinical/dto/condition.dto.ts:187` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/condition.dto.ts:193` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Condición no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa transición de estado clínico no es válida desde el estado actual; PreconditionFailedException: Una condición de curso crónico no pasa a resuelta; marcala inactiva o en remisión |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -541,6 +596,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `serviceRequestId` | `string` | No | formato uuid; admite null | — | Identificador asociado a service request. | `src/modules/clinical/dto/diagnostic-report.dto.ts:129` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/diagnostic-report.dto.ts:135` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden de servicio no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -549,7 +617,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -630,6 +698,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `serviceRequestId` | `string` | No | formato uuid; admite null | — | Identificador asociado a service request. | `src/modules/clinical/dto/diagnostic-report.dto.ts:129` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/diagnostic-report.dto.ts:135` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Reporte diagnóstico no encontrado |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: Versión del reporte desactualizada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El reporte no está en estado liberable |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -638,7 +721,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -735,6 +818,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `endAt` | `string` | Sí | formato date-time; admite null | — | Valor de end at mantenido por la instancia. | `src/modules/clinical/dto/encounter.dto.ts:255` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/encounter.dto.ts:261` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: Versión del encuentro desactualizada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El encuentro no está en curso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -743,7 +841,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalEncountersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -861,6 +959,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `endAt` | `string` | Sí | formato date-time; admite null | — | Valor de end at mantenido por la instancia. | `src/modules/clinical/dto/encounter.dto.ts:255` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/encounter.dto.ts:261` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Episodio de cuidado no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -870,7 +981,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalEncountersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -961,6 +1072,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `doseNumber` | `number` | No | admite null | — | Valor de dose number mantenido por la instancia. | `src/modules/clinical/dto/immunization.dto.ts:115` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/immunization.dto.ts:121` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Esa dosis de la vacuna ya fue registrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -969,7 +1093,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1061,6 +1185,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `requestId` | `string` | No | formato uuid; admite null | — | Identificador asociado a request. | `src/modules/clinical/dto/medication.dto.ts:620` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/medication.dto.ts:626` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Prescripción no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La prescripción no está emitida (ISSUED) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1069,7 +1207,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1177,6 +1315,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `signedAt` | `string` | No | formato date-time; admite null | — | Instante de firma de la receta (nulo = sin firmar) | `src/modules/clinical/dto/medication.dto.ts:587` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/medication.dto.ts:593` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La condición indicada no existe o no pertenece a este paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1186,7 +1337,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1294,6 +1445,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `signedAt` | `string` | No | formato date-time; admite null | — | Instante de firma de la receta (nulo = sin firmar) | `src/modules/clinical/dto/medication.dto.ts:587` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/medication.dto.ts:593` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un borrador (DRAFT) admite edición; una receta emitida es inmutable; PreconditionFailedException: La condición indicada no existe o no pertenece a este paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1302,7 +1467,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1392,6 +1557,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `signedAt` | `string` | No | formato date-time; admite null | — | Instante de firma de la receta (nulo = sin firmar) | `src/modules/clinical/dto/medication.dto.ts:587` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/medication.dto.ts:593` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo una receta emitida (ISSUED) puede invalidarse |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1400,7 +1580,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1480,6 +1660,22 @@ La operación no recibe cuerpo.
 | `signedAt` | `string` | No | formato date-time; admite null | — | Instante de firma de la receta (nulo = sin firmar) | `src/modules/clinical/dto/medication.dto.ts:587` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/medication.dto.ts:593` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
+| 409 | `CONFLICT` | ConflictException: La clave de idempotencia ya fue usada para emitir otra receta |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un borrador (DRAFT) puede emitirse; PreconditionFailedException: La política vigente exige firmar la receta antes de emitirla |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1488,7 +1684,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1581,6 +1777,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `signedAt` | `string` | No | formato date-time; admite null | — | Instante de firma de la receta (nulo = sin firmar) | `src/modules/clinical/dto/medication.dto.ts:587` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/medication.dto.ts:593` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo una receta emitida o completada puede renovarse |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1589,7 +1799,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1698,6 +1908,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `signedAt` | `string` | No | formato date-time; admite null | — | Instante de firma de la receta (nulo = sin firmar) | `src/modules/clinical/dto/medication.dto.ts:587` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/medication.dto.ts:593` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo una receta emitida (ISSUED) puede reemplazarse |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Entidad de historial no registrada: {entity} |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1706,7 +1931,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1771,13 +1996,27 @@ La operación no recibe cuerpo.
 | `signedAt` | `string` | No | formato date-time; admite null | — | Instante de firma de la receta (nulo = sin firmar) | `src/modules/clinical/dto/medication.dto.ts:587` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/medication.dto.ts:593` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Receta no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un borrador (DRAFT) puede firmarse antes de emitirse |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1944,6 +2183,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | sin fuente |
 | `duplicate` | `boolean` | Sí | — | — | true si ya se había recogido el mismo contenido en la corrida | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Orden de servicio no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La observación requiere un valor (cantidad, decimal, texto, booleano o concepto) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1953,7 +2206,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalObservationsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2053,6 +2306,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | sin fuente |
 | `duplicate` | `boolean` | Sí | — | — | true si ya se había recogido el mismo contenido en la corrida | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Observación no encontrada |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: Versión de la observación desactualizada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La observación no admite enmienda en su estado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2061,7 +2329,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalObservationsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2126,13 +2394,25 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo podés consultar tu propia historia clínica. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalPrescriptionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2193,6 +2473,19 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo podés consultar tu propia historia clínica. |
+| 413 | `PAYLOAD_TOO_LARGE` | PayloadTooLargeException: El historial supera el máximo operativo de {MAX_HISTORY_PRESCRIPTIONS} recetas. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2201,7 +2494,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalPrescriptionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2339,6 +2632,18 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado a cada bloque | `src/modules/clinical/dto/clinical-read.dto.ts:451` |
 | `truncated` | `array<string>` | Sí | — | — | Qué bloques quedaron recortados por el tope | `src/modules/clinical/dto/clinical-read.dto.ts:461` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo podés consultar tu propia historia clínica. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2347,7 +2652,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2409,13 +2714,25 @@ La operación no recibe cuerpo.
 | `effectiveFrom` | `string` | Sí | formato date-time | — | Valor de effective from mantenido por la instancia. | `src/modules/clinical/dto/prescription-signature-policy.dto.ts:135` |
 | `effectiveTo` | `string` | No | formato date-time; admite null | — | Valor de effective to mantenido por la instancia. | `src/modules/clinical/dto/prescription-signature-policy.dto.ts:141` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalPrescriptionPoliciesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2505,13 +2822,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `effectiveFrom` | `string` | Sí | formato date-time | — | Valor de effective from mantenido por la instancia. | `src/modules/clinical/dto/prescription-signature-policy.dto.ts:135` |
 | `effectiveTo` | `string` | No | formato date-time; admite null | — | Valor de effective to mantenido por la instancia. | `src/modules/clinical/dto/prescription-signature-policy.dto.ts:141` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalPrescriptionPoliciesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2574,13 +2903,26 @@ La operación no recibe cuerpo.
 | `effectiveFrom` | `string` | Sí | formato date-time | — | Valor de effective from mantenido por la instancia. | `src/modules/clinical/dto/prescription-signature-policy.dto.ts:135` |
 | `effectiveTo` | `string` | No | formato date-time; admite null | — | Valor de effective to mantenido por la instancia. | `src/modules/clinical/dto/prescription-signature-policy.dto.ts:141` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Política no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalPrescriptionPoliciesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2644,6 +2986,19 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo podés consultar tu propia historia clínica. |
+| 404 | `NOT_FOUND` | NotFoundException: Receta emitida no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2652,7 +3007,7 @@ _No se identificó un DTO de respuesta con campos._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalPrescriptionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2759,6 +3114,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `serviceRequestId` | `string` | No | formato uuid; admite null | — | Identificador asociado a service request. | `src/modules/clinical/dto/procedure.dto.ts:181` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/procedure.dto.ts:187` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden de servicio no encontrada; ResourceNotFoundException: Procedimiento padre no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2767,7 +3135,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2858,6 +3226,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `intent` | `string` | Sí | formato uuid | — | Intención (concept id) | `src/modules/clinical/dto/service-request.dto.ts:110` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/service-request.dto.ts:116` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2867,7 +3248,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics — etapa `ctrl:ClinicalOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

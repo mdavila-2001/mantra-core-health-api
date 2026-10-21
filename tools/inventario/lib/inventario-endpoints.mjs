@@ -362,7 +362,7 @@ export function construirInventarioDeEndpoints({
       a.metodo.localeCompare(b.metodo),
   );
 
-  return { endpoints, globales };
+  return { endpoints, globales, index, datos, propositos, numeros };
 }
 
 /** Cifras para el índice y para las pruebas de integridad. */

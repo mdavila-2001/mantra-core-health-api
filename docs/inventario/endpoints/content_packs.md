@@ -64,13 +64,24 @@ La operación no recibe cuerpo.
 | `items[].approxRows` | `number` | Sí | — | — | Filas que trae, en orden de magnitud | `src/modules/content_packs/dto/content-packs.dto.ts:24` |
 | `items[].requiresDemoPassword` | `boolean` | Sí | — | — | Si el paquete crea cuentas y necesita una contraseña | `src/modules/content_packs/dto/content-packs.dto.ts:30` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/content_packs.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- content_packs — etapa `ctrl:ContentPacksController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -195,13 +206,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `tookMs` | `number` | Sí | — | — | Duración de la aplicación en milisegundos | `src/modules/content_packs/dto/content-packs.dto.ts:82` |
 | `counters` | `object` | Sí | — | — | Contadores por tipo de fila, con la forma propia del paquete | `src/modules/content_packs/dto/content-packs.dto.ts:89` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paquete de contenido no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Las cuentas de demostración necesitan una contraseña: declarala en la petición o en SEED_DEMO_PASSWORD.; PreconditionFailedException: Las cuentas de demostración no se crean en producción. Si de verdad las querés acá, hace falta habilitarlo explícitamente en el entorno. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: El catálogo del glosario declara el slug "{term.slug}" más de una vez; Error: El directorio declara el código "{facility.code}" más de una vez; Error: El catálogo geográfico declara la sigla "{department.code}" más de una vez; Error: El catálogo geográfico declara el código INE "{municipality.ine}" más de una vez; Error: El municipio "{municipality.name}" ({municipality.ine}) cuelga deldepartamento "{municipality.department}", que no está en el catálogo; Error: El municipio "{municipality.name}" declara el departamento"{municipality.department}" pero su código INE {municipality.ine}corresponde a "{porPrefijo ?? 'ningu…; Error: El catálogo de aseguradoras declara el código "{code}" más de una vez; Error: El nomenclador declara el código "{procedimiento.code}" más de una vez |
+
+El árbol de decisión completo está en [flujos](../flujos/content_packs.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- content_packs — etapa `ctrl:ContentPacksController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

@@ -134,6 +134,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `manifestVersion` | `number` | Sí | — | — | Valor de manifest version mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1617` |
 | `provenanceRecordId` | `string` | Sí | formato uuid | — | Procedencia registrada de la exportación | `src/modules/health_data/dto/health-data.dto.ts:1626` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida de de-identificación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La exportación necesita un paciente o una cohorte; PreconditionFailedException: La corrida de de-identificación no está completada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -142,7 +156,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-12`
 
 ---
 
@@ -210,6 +224,18 @@ La operación no recibe cuerpo.
 | `total` | `number` | Sí | — | — | Recursos incluidos | `src/modules/health_data/dto/health-data.dto.ts:1710` |
 | `contentHash` | `string` | Sí | — | — | Hash del Bundle; permite validar la frescura de una caché | `src/modules/health_data/dto/health-data.dto.ts:1718` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -218,7 +244,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-13`
 
 ---
 
@@ -309,6 +335,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `bindingStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a binding status concept. | `src/modules/health_data/dto/health-data.dto.ts:778` |
 | `lineageEdgeId` | `string` | Sí | formato uuid | — | Arista de linaje versión → entidad de dominio | `src/modules/health_data/dto/health-data.dto.ts:787` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso canónico no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ese enlace ya existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El recurso está retirado; PreconditionFailedException: El recurso no tiene versión vigente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -317,7 +358,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-06`
 
 ---
 
@@ -412,6 +453,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `isPrimary` | `boolean` | Sí | — | — | Valor de is primary mantenido por la instancia. | `src/modules/health_data/dto/health-data.dto.ts:619` |
 | `supersededIdentifierId` | `string` | No | formato uuid | — | Identificador principal que se cerró | `src/modules/health_data/dto/health-data.dto.ts:628` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso canónico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El recurso ya tiene ese identificador |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El recurso está retirado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -420,7 +476,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-04`
 
 ---
 
@@ -513,6 +569,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `relationshipTypeConceptId` | `string` | Sí | — | — | Tipo de relación (concepto) | sin fuente |
 | `ordinal` | `number` | No | — | — | Orden dentro de las relaciones del mismo tipo | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso canónico no encontrado; ResourceNotFoundException: Recurso canónico destino no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un recurso no se relaciona consigo mismo; PreconditionFailedException: Los recursos son de custodios distintos; PreconditionFailedException: Alguno de los recursos está retirado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -521,7 +591,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-05`
 
 ---
 
@@ -609,6 +679,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `closedRelationships` | `number` | Sí | — | — | Relaciones que quedan cerradas | `src/modules/health_data/dto/health-data.dto.ts:1761` |
 | `provenanceRecordId` | `string` | Sí | formato uuid | — | Procedencia registrada del retiro | `src/modules/health_data/dto/health-data.dto.ts:1770` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso canónico no encontrado |
+| 409 | `CONFLICT` | ConflictException: El recurso ya está retirado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -617,7 +701,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-14`
 
 ---
 
@@ -724,6 +808,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `unchanged` | `boolean` | Sí | — | — | true si el payload es idéntico al vigente y no se versionó | `src/modules/health_data/dto/health-data.dto.ts:525` |
 | `provenanceRecordId` | `string` | No | formato uuid | — | Procedencia registrada de la ingesta | `src/modules/health_data/dto/health-data.dto.ts:534` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de ingesta no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El registro no está en cola de proyección; PreconditionFailedException: El recurso está retirado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -732,7 +830,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-03`
 
 ---
 
@@ -835,6 +933,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `provenanceRecordId` | `string` | Sí | formato uuid | — | Procedencia registrada de la de-identificación | `src/modules/health_data/dto/health-data.dto.ts:1441` |
 | `lineageEdgeCount` | `number` | Sí | — | — | Aristas de linaje versión → manifiesto de salida | `src/modules/health_data/dto/health-data.dto.ts:1449` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil de de-identificación no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El perfil de de-identificación no está activo; PreconditionFailedException: Una corrida completada debe declarar su manifiesto de salida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -843,7 +955,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-11`
 
 ---
 
@@ -939,6 +1051,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `clusterCreated` | `boolean` | Sí | — | — | true si el clúster se creó en esta decisión | `src/modules/health_data/dto/health-data.dto.ts:1158` |
 | `addedMemberIds` | `array<string>` | Sí | formato uuid | — | Miembros añadidos al clúster | `src/modules/health_data/dto/health-data.dto.ts:1168` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Candidato no encontrado |
+| 409 | `CONFLICT` | ConflictException: El candidato ya tiene decisión |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El candidato ya está resuelto |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -947,7 +1074,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-09`
 
 ---
 
@@ -1037,6 +1164,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/health_data/dto/health-data.dto.ts:208` |
 | `duplicate` | `boolean` | Sí | — | — | true si el lote ya existía y se devuelve el mismo | `src/modules/health_data/dto/health-data.dto.ts:216` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conexión de origen no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La conexión de origen no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1045,7 +1186,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-01`
 
 ---
 
@@ -1128,6 +1269,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `recordsAccepted` | `string` | Sí | — | — | Cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:368` |
 | `recordsRejected` | `string` | Sí | — | — | Cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:374` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Lote no encontrado |
+| 409 | `CONFLICT` | ConflictException: El lote ya está cerrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1136,7 +1291,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `ctrl:HealthDataController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1229,6 +1384,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `processingStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a processing status concept. | `src/modules/health_data/dto/health-data.dto.ts:303` |
 | `duplicate` | `boolean` | Sí | — | — | true si el registro ya estaba en el lote | `src/modules/health_data/dto/health-data.dto.ts:309` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Lote no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El lote ya no está recibiendo registros |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1237,7 +1406,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-02`
 
 ---
 
@@ -1344,6 +1513,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `issuesOpened` | `number` | Sí | — | — | Hallazgos abiertos | sin fuente |
 | `datasetQuarantined` | `boolean` | Sí | — | — | Verdadero si una regla bloqueante puso el dataset en cuarentena | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conjunto de reglas no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La corrida necesita un ámbito: lote de ingesta o recurso canónico; PreconditionFailedException: El conjunto de reglas no está activo; PreconditionFailedException: El hallazgo apunta a una regla que no está activa en el conjunto |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1352,7 +1535,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-08`
 
 ---
 
@@ -1444,13 +1627,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `healthSourceSystemId` | `string` | Sí | formato uuid | — | Sistema de origen del que cuelga (creado o reutilizado). | `src/modules/health_data/dto/health-data.dto.ts:115` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Concepto de estado: nace activa. | `src/modules/health_data/dto/health-data.dto.ts:117` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `ctrl:HealthDataController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1550,6 +1745,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/health_data/dto/health-data.dto.ts:1301` |
 | `duplicate` | `boolean` | Sí | — | — | true si la entrada ya existía para esa entidad y evento | `src/modules/health_data/dto/health-data.dto.ts:1309` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1558,7 +1765,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-10`
 
 ---
 
@@ -1668,6 +1875,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `quarantined` | `boolean` | Sí | — | — | true si el recurso quedó en cuarentena | `src/modules/health_data/dto/health-data.dto.ts:927` |
 | `duplicate` | `boolean` | Sí | — | — | true si esa validación ya se había corrido | `src/modules/health_data/dto/health-data.dto.ts:933` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión canónica no encontrada; ResourceNotFoundException: Versión del perfil FHIR no encontrada; ResourceNotFoundException: Recurso canónico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión del perfil no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/health_data.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1676,7 +1897,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 52 — Plataforma de Datos de Salud — etapa `UC-52-07`
 
 ---
 

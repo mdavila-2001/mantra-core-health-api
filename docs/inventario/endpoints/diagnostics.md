@@ -119,13 +119,25 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado. | `src/modules/diagnostics/dto/patient-results.dto.ts:104` |
 | `truncated` | `boolean` | Sí | — | — | La lista quedó recortada por el tope. | `src/modules/diagnostics/dto/patient-results.dto.ts:107` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsPatientResultsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -203,13 +215,27 @@ La operación no recibe cuerpo.
 | `files[].presentationFormatConceptId` | `string` | No | formato uuid | — | Formato de presentación (concept id), si se declaró. | `src/modules/diagnostics/dto/patient-results.dto.ts:31` |
 | `files[].ordinal` | `number` | No | — | — | Posición dentro del informe. | `src/modules/diagnostics/dto/patient-results.dto.ts:34` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: El informe no pertenece a esta cuenta |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Informe no encontrado; ResourceNotFoundException: El resultado todavía no está disponible |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsPatientResultsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -274,13 +300,27 @@ La operación no recibe cuerpo.
 | `items[].validTo` | `string` | No | formato date-time | — | Hasta cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:237` |
 | `items[].active` | `boolean` | Sí | — | — | Si el grant está vigente en este momento. | `src/modules/diagnostics/dto/patient-results.dto.ts:240` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: El informe no pertenece a esta cuenta |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Informe no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsPatientResultsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -376,13 +416,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `validTo` | `string` | No | formato date-time | — | Hasta cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:237` |
 | `active` | `boolean` | Sí | — | — | Si el grant está vigente en este momento. | `src/modules/diagnostics/dto/patient-results.dto.ts:240` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: El informe no pertenece a esta cuenta |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Informe no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El vencimiento del acceso compartido tiene que ser futuro; PreconditionFailedException: No hace falta compartirse un resultado con uno mismo; PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene perfil de paciente; PreconditionFailedException: Sólo se puede compartir un resultado ya liberado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsPatientResultsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -447,13 +501,28 @@ La operación no recibe cuerpo.
 | `validTo` | `string` | No | formato date-time | — | Hasta cuándo vale. | `src/modules/diagnostics/dto/patient-results.dto.ts:237` |
 | `active` | `boolean` | Sí | — | — | Si el grant está vigente en este momento. | `src/modules/diagnostics/dto/patient-results.dto.ts:240` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: El informe no pertenece a esta cuenta |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Informe no encontrado; ResourceNotFoundException: Ese resultado no está compartido así |
+| 409 | `CONFLICT` | ConflictException: Ese acceso compartido ya estaba cerrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsPatientResultsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -528,6 +597,18 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado. | `src/modules/diagnostics/dto/patient-results.dto.ts:183` |
 | `truncated` | `boolean` | Sí | — | — | La lista quedó recortada por el tope. | `src/modules/diagnostics/dto/patient-results.dto.ts:186` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -536,7 +617,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsPatientResultsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -627,6 +708,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/diagnostics/dto/responses.dto.ts:42` |
 | `accessionSpecimenIds` | `array<string>` | Sí | formato uuid | — | Ids de accession_specimens | `src/modules/diagnostics/dto/responses.dto.ts:52` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espécimen no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El espécimen está rechazado y no puede acesionarse |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -635,7 +730,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-01`
 
 ---
 
@@ -715,6 +810,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio de la corrida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -723,7 +831,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsLabController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -815,6 +923,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida de analizador no encontrada |
+| 409 | `CONFLICT` | ConflictException: El mensaje ya fue ingerido para esta corrida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -823,7 +945,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-05`
 
 ---
 
@@ -930,6 +1052,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El archivo ya está adjunto como media clínica |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio de la media |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -938,7 +1074,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-12`
 
 ---
 
@@ -1035,6 +1171,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contenedor no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1043,7 +1192,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-03`
 
 ---
 
@@ -1128,6 +1277,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una notificación crítica para la observación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio de la notificación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1136,7 +1299,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-09`
 
 ---
 
@@ -1217,6 +1380,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Notificación crítica no encontrada |
+| 409 | `CONFLICT` | ConflictException: La notificación ya fue reconocida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1225,7 +1402,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-10`
 
 ---
 
@@ -1314,6 +1491,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio del evento de calidad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1322,7 +1512,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-14`
 
 ---
 
@@ -1399,6 +1589,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Falta el tenant del endpoint de imagen |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1407,7 +1610,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsImagingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1498,6 +1701,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Estudio de imagen no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1506,7 +1722,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-13`
 
 ---
 
@@ -1569,13 +1785,25 @@ La operación no recibe cuerpo.
 | `statusConceptId` | `string` | Sí | formato uuid | — | Estado del estudio. | `src/modules/diagnostics/dto/imaging.dto.ts:346` |
 | `studyInstanceUid` | `string` | No | — | — | Identificador DICOM del estudio. | `src/modules/diagnostics/dto/imaging.dto.ts:348` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsImagingController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1656,6 +1884,18 @@ La operación no recibe cuerpo.
 | `limit` | `number` | Sí | — | — | Tope aplicado a cada bloque. | `src/modules/diagnostics/dto/orders.dto.ts:109` |
 | `truncated` | `array<string>` | Sí | — | — | Bloques que quedaron recortados por el tope. | `src/modules/diagnostics/dto/orders.dto.ts:112` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1664,7 +1904,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsOrdersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1775,6 +2015,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La versión que se enmienda no existe en este informe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio del informe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1783,7 +2037,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-07`
 
 ---
 
@@ -1868,6 +2122,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de informe no encontrada |
+| 409 | `CONFLICT` | ConflictException: La versión ya fue liberada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión no es elegible para liberación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1876,7 +2145,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-08`
 
 ---
 
@@ -1966,6 +2235,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio de la verificación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1974,7 +2256,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-06`
 
 ---
 
@@ -2061,6 +2343,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2069,7 +2363,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsSpecimensController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2155,6 +2449,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espécimen no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2163,7 +2470,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsSpecimensController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2252,6 +2559,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/diagnostics/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/diagnostics/dto/responses.dto.ts:18` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espécimen no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El espécimen ya está rechazado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2260,7 +2581,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-02`
 
 ---
 
@@ -2325,13 +2646,24 @@ La operación no recibe cuerpo.
 | `scheduledAt` | `string` | No | formato date-time | — | Cuándo está programada. | `src/modules/diagnostics/dto/lab.dto.ts:376` |
 | `completedAt` | `string` | No | formato date-time | — | Cuándo se completó. | `src/modules/diagnostics/dto/lab.dto.ts:379` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `ctrl:DiagnosticsLabController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2435,6 +2767,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/diagnostics/dto/responses.dto.ts:67` |
 | `testIds` | `array<string>` | Sí | formato uuid | — | Ids de las pruebas creadas | `src/modules/diagnostics/dto/responses.dto.ts:77` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Acesión no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2443,7 +2788,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-04`
 
 ---
 
@@ -2572,6 +2917,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | `numberOfSeries` | `number` | Sí | — | — | Nº de series creadas | `src/modules/diagnostics/dto/responses.dto.ts:98` |
 | `numberOfInstances` | `number` | Sí | — | — | Nº de instancias creadas | `src/modules/diagnostics/dto/responses.dto.ts:104` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Endpoint de imagen no encontrado |
+| 409 | `CONFLICT` | ConflictException: El estudio DICOM ya fue almacenado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/diagnostics.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2580,7 +2939,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica — etapa `UC-20-11`
 
 ---
 

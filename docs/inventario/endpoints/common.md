@@ -133,6 +133,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `longitude` | `number` | No | — | — | Longitud del punto, si se cargó. | `src/modules/common/dto/addresses.dto.ts:186` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/common/dto/addresses.dto.ts:192` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -142,7 +154,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonAddressesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -231,6 +243,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `verified` | `boolean` | Sí | — | — | Valor de verified mantenido por la instancia. | `src/modules/common/dto/contact-points.dto.ts:113` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/common/dto/contact-points.dto.ts:119` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -240,7 +264,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonContactPointsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -322,6 +346,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `verified` | `boolean` | Sí | — | — | Valor de verified mantenido por la instancia. | `src/modules/common/dto/contact-points.dto.ts:113` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/common/dto/contact-points.dto.ts:119` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Punto de contacto no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -331,7 +368,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonContactPointsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -426,6 +463,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lifecycleStatusConceptId` | `string` | Sí | — | — | Estado del ciclo de vida (concept id). | `src/modules/common/dto/files.dto.ts:309` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/common/dto/files.dto.ts:315` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -436,7 +485,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -493,6 +542,20 @@ La operación no recibe cuerpo.
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/common/dto/files.dto.ts:497` |
 | `deletedAt` | `string` | Sí | formato date-time | — | Fecha y hora de la eliminación lógica, si corresponde. | `src/modules/common/dto/files.dto.ts:503` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Archivo no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El archivo está bajo retención legal y no puede borrarse |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -502,7 +565,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -556,13 +619,28 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No tiene acceso a este archivo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Archivo no encontrado; ResourceNotFoundException: Versión vigente no encontrada; ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: El contenido no está disponible en el almacenamiento local; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: El contenido no está disponible en el almacenamiento configurado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El archivo está borrado; PreconditionFailedException: El archivo no tiene una versión vigente; PreconditionFailedException: La versión vigente resultó infectada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; Error: S3 object body is empty |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -619,6 +697,20 @@ La operación no recibe cuerpo.
 | `url` | `string` | Sí | — | — | URL de descarga firmada (simulada). | `src/modules/common/dto/files.dto.ts:512` |
 | `expiresAt` | `string` | Sí | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/common/dto/files.dto.ts:518` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Archivo no encontrado; ResourceNotFoundException: Versión vigente no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El archivo está borrado; PreconditionFailedException: El archivo no tiene una versión vigente; PreconditionFailedException: La versión vigente no ha superado el escaneo antimalware |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -628,7 +720,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -717,6 +809,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `ownerType` | `string` | Sí | valores: USER, PATIENT, TENANT | — | Valor de owner type mantenido por la instancia. | `src/modules/common/dto/files.dto.ts:428` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/common/dto/files.dto.ts:434` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Archivo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -726,7 +831,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -822,6 +927,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `malwareScanStatusConceptId` | `string` | Sí | — | — | Estado del escaneo antimalware (concept id). | `src/modules/common/dto/files.dto.ts:362` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/common/dto/files.dto.ts:368` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Archivo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -831,7 +949,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -927,6 +1045,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `derivativeType` | `string` | Sí | valores: THUMBNAIL, OCR | — | Valor de derivative type mantenido por la instancia. | `src/modules/common/dto/files.dto.ts:395` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/common/dto/files.dto.ts:401` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de archivo no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se pueden generar derivados de versiones con escaneo limpio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -936,7 +1068,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1007,13 +1139,25 @@ La operación no recibe cuerpo.
 | `items[].file.createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/common/dto/files.dto.ts:315` |
 | `count` | `number` | Sí | — | — | Cuántos vinieron en esta página. | `src/modules/common/dto/files.dto.ts:489` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1096,6 +1240,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `lifecycleStatusConceptId` | `string` | Sí | — | — | Estado del ciclo de vida (concept id). | `src/modules/common/dto/files.dto.ts:309` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/common/dto/files.dto.ts:315` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: El contenido no corresponde a ningún formato de archivo permitido; PreconditionFailedException: El formato del archivo no está permitido para esta categoría |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3 |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1104,7 +1262,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1191,6 +1349,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `isPrimary` | `boolean` | Sí | — | — | Valor de is primary mantenido por la instancia. | sin fuente |
 | `supersededIdentifierId` | `string` | No | formato uuid | — | Identificador principal que se cerró | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un identificador activo con ese tipo, sistema y valor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1200,7 +1371,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:CommonIdentifiersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1285,6 +1456,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `malwareScanStatusConceptId` | `string` | Sí | — | — | Estado del escaneo antimalware (concept id). | `src/modules/common/dto/files.dto.ts:362` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/common/dto/files.dto.ts:368` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de archivo no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1294,7 +1478,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:InternalFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1353,13 +1537,24 @@ La operación no recibe cuerpo.
 | `items[].sizeBytes` | `number` | Sí | — | — | Tamaño declarado, para acotar el lote y descartar lo que excede al escáner. | `src/modules/common/dto/files.dto.ts:259` |
 | `items[].mimeType` | `string` | Sí | — | — | Tipo deducido de los bytes al subir. Va sólo para el registro. | `src/modules/common/dto/files.dto.ts:263` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/common.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Common module — etapa `ctrl:InternalFilesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

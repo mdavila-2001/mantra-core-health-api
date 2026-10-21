@@ -8,18 +8,16 @@
 //
 // Variables: MODEL_ROOT apunta al repo del modelo (por defecto, el hermano
 // `../mantra-core-health-model`).
-import fs from 'node:fs';
 import path from 'node:path';
 import {
   buildHandlerTable,
   DELEGACION,
   resumenPorModulo,
 } from './lib/handlers.mjs';
-import {
-  construirInventarioDeEndpoints,
-  resumir,
-} from './lib/inventario-endpoints.mjs';
+import { construirInventarioCompleto } from './lib/inventario-completo.mjs';
+import { resumir } from './lib/inventario-endpoints.mjs';
 import { renderIndice, renderModulo } from './lib/markdown-endpoints.mjs';
+import { escribir, jsonPorLinea, modeloRoot } from './lib/salida.mjs';
 
 function argumentos(argv) {
   const opciones = { modulos: undefined, soloAst: false, verificar: false };
@@ -56,23 +54,6 @@ function imprimirTabla({ filas, huerfanas }) {
   }
 }
 
-/** Un registro por línea: el archivo pesa menos y un cambio se ve como una línea en el diff. */
-function jsonPorLinea(lista) {
-  return `[\n${lista.map((item) => `  ${JSON.stringify(item)}`).join(',\n')}\n]\n`;
-}
-
-function escribir(archivo, contenido, { verificar, diferencias }) {
-  if (verificar) {
-    const actual = fs.existsSync(archivo)
-      ? fs.readFileSync(archivo, 'utf8')
-      : null;
-    if (actual !== contenido) diferencias.push(archivo);
-    return;
-  }
-  fs.mkdirSync(path.dirname(archivo), { recursive: true });
-  fs.writeFileSync(archivo, contenido, 'utf8');
-}
-
 const opciones = argumentos(process.argv.slice(2));
 
 if (opciones.soloAst) {
@@ -89,15 +70,9 @@ if (opciones.soloAst) {
 }
 
 const root = process.cwd();
-const modelRoot = process.env.MODEL_ROOT
-  ? path.resolve(process.env.MODEL_ROOT)
-  : path.resolve(root, '..', 'mantra-core-health-model');
-if (!fs.existsSync(path.join(modelRoot, 'Mantra Core Health Context')))
-  throw new Error(
-    `No se encuentra el repo del modelo en ${modelRoot}. Definí MODEL_ROOT con su ruta: sin él el inventario no puede citar el propósito ni el dominio de cada módulo.`,
-  );
+const modelRoot = modeloRoot(root);
 
-const { endpoints } = construirInventarioDeEndpoints({ root, modelRoot });
+const { endpoints } = construirInventarioCompleto({ root, modelRoot });
 const seleccion = opciones.modulos ? new Set(opciones.modulos) : null;
 const porModulo = new Map();
 for (const e of endpoints) {

@@ -131,13 +131,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `changeStatusConceptId` | `string` | Sí | formato uuid | — | Estado del cambio tras la decisión | sin fuente |
 | `approvedSteps` | `number` | Sí | — | — | Pasos aprobados hasta ahora | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución de agente no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución del agente ya terminó; no admite aprobaciones. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-10`
 
 ---
 
@@ -233,13 +247,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `agentRunStepId` | `string` | Sí | formato uuid | — | Paso de traza que deja constancia de la escritura | `src/modules/automation/dto/automation.dto.ts:1527` |
 | `draft` | `boolean` | Sí | — | — | Verdadero si el modo de escritura es borrador y no se tocó el destino | `src/modules/automation/dto/automation.dto.ts:1536` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución de agente no encontrada.; ResourceNotFoundException: Automatización de registro no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución del agente no está en marcha; no puede escribir registros.; PreconditionFailedException: La automatización de registro no está activa.; PreconditionFailedException: La automatización de registro pertenece a otro agente.; PreconditionFailedException: El agente no tiene identidad de servicio; su escritura no sería atribuible.; PreconditionFailedException: La automatización de registro no declara mapeo de campos.; PreconditionFailedException: El mapeo de campos tiene una regla que no se entiende.; PreconditionFailedException: El origen de un campo mapeado tiene que ser una ruta.; PreconditionFailedException: Una regla de mapeo tiene que declarar `from` o `value`.; PreconditionFailedException: Falta un campo obligatorio del mapeo.; PreconditionFailedException: La validación de la automatización exige un campo que no llegó.; PreconditionFailedException: Un modo de escritura `upsert` necesita una clave de deduplicación. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | — | InternalServerErrorException: La automatización de registro no produjo ninguna columna que escribir. |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-13`
 
 ---
 
@@ -355,13 +384,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `approvalId` | `string` | No | formato uuid | — | Aprobación creada si el paso quedó bloqueado esperando decisión humana | `src/modules/automation/dto/automation.dto.ts:1197` |
 | `paused` | `boolean` | Sí | — | — | Verdadero si el run quedó en pausa por este paso | `src/modules/automation/dto/automation.dto.ts:1205` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución de agente no encontrada.; ResourceNotFoundException: Herramienta no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución del agente no está en marcha; no admite pasos nuevos.; PreconditionFailedException: La herramienta no está enlazada a la versión que se está ejecutando.; PreconditionFailedException: El enlace deniega el uso de esa herramienta para esta versión.; PreconditionFailedException: La herramienta agotó su tope de llamadas para esta ejecución. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-09`
 
 ---
 
@@ -474,13 +517,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/automation/dto/automation.dto.ts:155` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un agente con ese código. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un agente que actúa necesita una identidad de servicio (`actsAsUserId`). |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-01`
 
 ---
 
@@ -574,13 +631,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `guardrailPolicyId` | `string` | Sí | formato uuid | — | Identificador asociado a guardrail policy. | `src/modules/automation/dto/automation.dto.ts:624` |
 | `isEnabled` | `boolean` | Sí | — | — | Valor de is enabled mantenido por la instancia. | `src/modules/automation/dto/automation.dto.ts:630` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Agente no encontrado.; ResourceNotFoundException: Política de guardrail no encontrada. |
+| 409 | `CONFLICT` | ConflictException: La política ya está adjunta a este agente. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de guardrail no está activa. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-05`
 
 ---
 
@@ -686,13 +758,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/automation/dto/automation.dto.ts:1460` |
 | `updated` | `boolean` | Sí | — | — | Verdadero si actualizó una memoria existente en vez de crearla | `src/modules/automation/dto/automation.dto.ts:1469` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Agente no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Fuera del ámbito global la memoria tiene que declarar a qué se refiere. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-12`
 
 ---
 
@@ -799,13 +885,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `agentVersionId` | `string` | Sí | formato uuid | — | Identificador asociado a agent version. | `src/modules/automation/dto/automation.dto.ts:479` |
 | `bindingIds` | `array<string>` | Sí | formato uuid | — | Valor de binding ids mantenido por la instancia. | `src/modules/automation/dto/automation.dto.ts:485` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La versión no existe para ese agente.; ResourceNotFoundException: Herramienta no encontrada. |
+| 409 | `CONFLICT` | ConflictException: La misma herramienta viene dos veces en el lote.; ConflictException: La herramienta ya está enlazada a esta versión. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La herramienta no está activa. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-04`
 
 ---
 
@@ -908,13 +1009,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/automation/dto/automation.dto.ts:274` |
 | `currentVersion` | `number` | Sí | — | — | Versión vigente del agente tras publicar | `src/modules/automation/dto/automation.dto.ts:280` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Agente no encontrado.; ResourceNotFoundException: La versión no existe para ese agente. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión ya no está en borrador.; PreconditionFailedException: Para crear una versión nueva hace falta su plantilla de prompt. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-02`
 
 ---
 
@@ -1013,13 +1128,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `agentRunStatusConceptId` | `string` | Sí | formato uuid | — | Estado en el que queda el agent_run | `src/modules/automation/dto/automation.dto.ts:1355` |
 | `resolutionStepId` | `string` | Sí | formato uuid | — | Paso de resolución añadido a la traza | `src/modules/automation/dto/automation.dto.ts:1364` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Aprobación no encontrada.; ResourceNotFoundException: Ejecución de agente no encontrada. |
+| 409 | `CONFLICT` | ConflictException: La aprobación ya está decidida. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución del agente no está en pausa. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-11`
 
 ---
 
@@ -1109,13 +1239,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/automation/dto/automation.dto.ts:577` |
 | `isActive` | `boolean` | Sí | — | — | Valor de is active mantenido por la instancia. | `src/modules/automation/dto/automation.dto.ts:583` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política de guardrail con ese código. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una política de coste tiene que declarar su tope.; PreconditionFailedException: Una política de datos de paciente tiene que declarar cómo se tratan. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-05`
 
 ---
 
@@ -1204,13 +1348,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `agentVersionId` | `string` | Sí | formato uuid | — | Identificador asociado a agent version. | `src/modules/automation/dto/automation.dto.ts:1083` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/automation/dto/automation.dto.ts:1089` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución de workflow no encontrada.; ResourceNotFoundException: Agente no encontrado.; ResourceNotFoundException: La versión no existe para ese agente. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución del workflow no está en marcha.; PreconditionFailedException: El agente no está activo.; PreconditionFailedException: Sólo se puede ejecutar una versión publicada del agente. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-09`
 
 ---
 
@@ -1304,13 +1462,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `closedAgentRuns` | `number` | Sí | — | — | Agent runs cerrados por esta llamada | `src/modules/automation/dto/automation.dto.ts:1594` |
 | `alreadyFinalized` | `boolean` | Sí | — | — | Verdadero si el run ya estaba cerrado y no se tocó nada | `src/modules/automation/dto/automation.dto.ts:1602` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución de workflow no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución tiene aprobaciones pendientes y no puede cerrarse. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-14`
 
 ---
 
@@ -1412,13 +1584,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `requiresApproval` | `boolean` | Sí | — | — | Valor de requires approval mantenido por la instancia. | `src/modules/automation/dto/automation.dto.ts:401` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/automation/dto/automation.dto.ts:407` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una herramienta con ese código. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una herramienta de llamada HTTP necesita un endpoint de integración. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-03`
 
 ---
 
@@ -1523,13 +1709,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `isEnabled` | `boolean` | Sí | — | — | Valor de is enabled mantenido por la instancia. | `src/modules/automation/dto/automation.dto.ts:921` |
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/automation/dto/automation.dto.ts:927` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Workflow no encontrado. |
+| 409 | `CONFLICT` | ConflictException: Ya existe un disparador con ese código. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede disparar un workflow archivado.; PreconditionFailedException: Un disparador por evento tiene que declarar qué evento suscribe.; PreconditionFailedException: Un disparador por calendario tiene que declarar su cron.; PreconditionFailedException: La expresión cron tiene que tener cinco campos. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-07`
 
 ---
 
@@ -1615,13 +1816,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `firedTriggers[].workflowRunId` | `string` | Sí | formato uuid | — | Identificador asociado a workflow run. | `src/modules/automation/dto/automation.dto.ts:1639` |
 | `firedTriggers[].firedAt` | `string` | Sí | formato date-time | — | Marca del cron que disparó esta ejecución | `src/modules/automation/dto/automation.dto.ts:1648` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `ctrl:AutomationOrchestrationController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1748,13 +1961,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/automation/dto/automation.dto.ts:793` |
 | `stepIds` | `array<string>` | Sí | formato uuid | — | Valor de step ids mantenido por la instancia. | `src/modules/automation/dto/automation.dto.ts:799` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Agente referenciado por un paso no encontrado.; ResourceNotFoundException: Herramienta referenciada por un paso no encontrada. |
+| 409 | `CONFLICT` | ConflictException: Ya existe un workflow de automatización con ese código.; ConflictException: Dos pasos comparten el mismo código. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un paso salta a otro que no está declarado en el workflow.; PreconditionFailedException: Un paso de llamada a agente tiene que declarar qué agente llama.; PreconditionFailedException: Un paso de llamada a herramienta tiene que declarar qué herramienta usa. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-06`
 
 ---
 
@@ -1856,13 +2084,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/automation/dto/automation.dto.ts:1017` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si ya había un run vivo para el mismo contexto | `src/modules/automation/dto/automation.dto.ts:1025` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Workflow no encontrado.; ResourceNotFoundException: Disparador no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El workflow está archivado.; PreconditionFailedException: El disparador está deshabilitado.; PreconditionFailedException: El disparador no pertenece a ese workflow. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/automation.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 48 — Automatización y orquestación multiagente — etapa `UC-48-08`
 
 ---
 

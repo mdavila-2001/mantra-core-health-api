@@ -128,6 +128,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `revokedAt` | `string` | Sí | formato date-time | — | Valor de revoked at mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:244` |
 | `caseStatus` | `string` | Sí | formato uuid | — | Valor de case status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:248` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Aserción de identidad no encontrada; ResourceNotFoundException: Caso de verificación no encontrado |
+| 409 | `CONFLICT` | ConflictException: La aserción ya está revocada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Para derivar una señal de fraude se requieren tipo y severidad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -136,7 +151,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityAssertionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -222,6 +237,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:16` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:20` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -230,7 +257,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityAuthoritiesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -320,6 +347,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:36` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:40` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Autoridad de identidad no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -328,7 +368,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityAuthoritiesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -423,6 +463,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `outcome` | `string` | Sí | formato uuid | — | Valor de outcome mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:128` |
 | `checkStatus` | `string` | Sí | formato uuid | — | Valor de check status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:132` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Check de identidad no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -431,7 +484,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityChecksController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -541,6 +594,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `checkStatus` | `string` | Sí | formato uuid | — | Valor de check status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:152` |
 | `caseStatus` | `string` | No | formato uuid | — | Estado del caso si este resultado lo resolvió | `src/modules/identity_assurance/dto/identity-responses.dto.ts:160` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Check de identidad no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No existe un intento completado para registrar resultado; PreconditionFailedException: No se pudo determinar la autoridad que verificó el caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -549,7 +616,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityChecksController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -654,6 +721,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:204` |
 | `caseStatus` | `string` | Sí | formato uuid | — | Valor de case status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:208` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Revisión manual no encontrada; ResourceNotFoundException: Caso de verificación no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La revisión ya fue decidida; PreconditionFailedException: La revisión está asignada a otro revisor; PreconditionFailedException: La revisión quedó obsoleta: el caso ya no admite aprobación; PreconditionFailedException: No se pudo determinar la autoridad que verificó el caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -663,7 +744,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityManualReviewController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -739,6 +820,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:52` |
 | `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:61` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -747,7 +842,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentitySelfServiceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -824,13 +919,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:52` |
 | `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:61` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentitySelfServiceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -910,13 +1019,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:52` |
 | `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:61` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Matrícula no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional; PreconditionFailedException: Indique qué matrícula quiere verificar; PreconditionFailedException: La matrícula pertenece a otro profesional |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentitySelfServiceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -999,13 +1123,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:52` |
 | `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:61` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No pertenece a esa institución; PreconditionFailedException: Sólo el titular o un administrador de la institución puede pedir su verificación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentitySelfServiceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1058,6 +1196,17 @@ La operación no recibe cuerpo.
 | `openedAt` | `string` | No | formato date-time | — | Valor de opened at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:82` |
 | `completedAt` | `string` | No | formato date-time | — | Valor de completed at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:88` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1066,7 +1215,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentitySelfServiceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1127,13 +1276,26 @@ La operación no recibe cuerpo.
 | `openedAt` | `string` | No | formato date-time | — | Valor de opened at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:82` |
 | `completedAt` | `string` | No | formato date-time | — | Valor de completed at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:88` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentitySelfServiceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1196,6 +1358,17 @@ La operación no recibe cuerpo.
 | `cases[].openedAt` | `string` | No | formato date-time | — | Valor de opened at mantenido por la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:50` |
 | `cases[].expiresAt` | `string` | No | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:56` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1204,7 +1377,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityCasesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1291,6 +1464,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `operatingRoomId` | `string` | Sí | formato uuid | — | Quirófano reservado | sin fuente |
 | `milestoneId` | `string` | Sí | formato uuid | — | Hito de programación creado | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Política de verificación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1300,7 +1486,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityCasesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1389,6 +1575,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `issuedAt` | `string` | No | formato date-time | — | Valor de issued at mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:228` |
 | `caseStatus` | `string` | Sí | formato uuid | — | Valor de case status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:232` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un caso verificado puede emitir una aserción; PreconditionFailedException: No hay checks completados que sustenten la aserción; PreconditionFailedException: No se pudo determinar el nivel de aseguramiento |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1397,7 +1597,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityCasesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1490,6 +1690,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `checkIds` | `array<string>` | Sí | — | — | Valor de check ids mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:108` |
 | `caseStatus` | `string` | Sí | formato uuid | — | Valor de case status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:112` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un caso abierto puede planificar checks |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1499,7 +1713,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityCasesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1591,6 +1805,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | sin fuente |
 | `citations` | `number` | Sí | — | — | Citas materializadas | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no admite evidencia en su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1599,7 +1827,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityCasesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1688,6 +1916,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `resolution` | `string` | Sí | formato uuid | — | Valor de resolution mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:172` |
 | `caseStatus` | `string` | Sí | formato uuid | — | Valor de case status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:176` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1696,7 +1937,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityCasesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1779,6 +2020,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Valor de status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:188` |
 | `caseStatus` | `string` | Sí | formato uuid | — | Valor de case status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:192` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
+| 409 | `CONFLICT` | ConflictException: El caso ya tiene una revisión manual abierta |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no es escalable a revisión manual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1788,7 +2044,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityCasesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1846,6 +2102,17 @@ La operación no recibe cuerpo.
 | `expiredCount` | `number` | Sí | — | — | Valor de expired count mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:256` |
 | `caseIds` | `array<string>` | Sí | — | — | Valor de case ids mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:260` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1854,7 +2121,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityCasesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1945,6 +2212,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | sin fuente |
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1953,7 +2232,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityPoliciesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2048,6 +2327,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `outcome` | `string` | Sí | formato uuid | — | Valor de outcome mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:128` |
 | `checkStatus` | `string` | Sí | formato uuid | — | Valor de check status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:132` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Check de identidad no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2056,7 +2348,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityWorkerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2166,6 +2458,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `checkStatus` | `string` | Sí | formato uuid | — | Valor de check status mantenido por la instancia. | `src/modules/identity_assurance/dto/identity-responses.dto.ts:152` |
 | `caseStatus` | `string` | No | formato uuid | — | Estado del caso si este resultado lo resolvió | `src/modules/identity_assurance/dto/identity-responses.dto.ts:160` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Check de identidad no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No existe un intento completado para registrar resultado; PreconditionFailedException: No se pudo determinar la autoridad que verificó el caso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -2174,7 +2480,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityWorkerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2236,13 +2542,25 @@ La operación no recibe cuerpo.
 | `checks[].identityAuthorityEndpointId` | `string` | Sí | formato uuid | — | Identificador asociado al endpoint de autoridad que atiende este check. | `src/modules/identity_assurance/dto/dispatchable-check.dto.ts:41` |
 | `checks[].awaitingVerdict` | `boolean` | Sí | — | — | true si ya hay un intento en curso pendiente de veredicto | `src/modules/identity_assurance/dto/dispatchable-check.dto.ts:49` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- src / modules / identity assurance — etapa `ctrl:IdentityWorkerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

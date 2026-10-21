@@ -59,13 +59,24 @@ La operación no recibe cuerpo.
 
 _No se identificó un DTO de respuesta con campos._
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La operación de búsqueda exige un tenant de contexto (X-Tenant-Id) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/search_platform.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 57 — Plataforma de búsqueda (`search_platform`) — etapa `ctrl:SearchPlatformController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -161,6 +172,20 @@ No toca tablas relacionales: opera sobre OpenSearch, no sobre tablas relacionale
 | `hits[].source` | `object` | Sí | — | — | Valor de source mantenido por la instancia. | `src/modules/search_platform/dto/search-platform.dto.ts:193` |
 | `facets` | `object` | Sí | — | — | Facetas por campo: `{ campo: [{ key, count }] }`. | `src/modules/search_platform/dto/search-platform.dto.ts:237` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La operación de búsqueda exige un tenant de contexto (X-Tenant-Id) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: Campo de {kind} no permitido para el índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/search_platform.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -169,7 +194,7 @@ No toca tablas relacionales: opera sobre OpenSearch, no sobre tablas relacionale
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 57 — Plataforma de búsqueda (`search_platform`) — etapa `ctrl:SearchPlatformController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -252,6 +277,20 @@ No toca tablas relacionales: opera sobre OpenSearch, no sobre tablas relacionale
 | `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/search_platform/dto/search-platform.dto.ts:162` |
 | `result` | `string` | Sí | — | — | Resultado de OpenSearch: `created` o `updated`. | `src/modules/search_platform/dto/search-platform.dto.ts:170` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La operación de búsqueda exige un tenant de contexto (X-Tenant-Id) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda; PreconditionFailedException: El documento trae campos no declarados para este índice |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/search_platform.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -260,7 +299,7 @@ No toca tablas relacionales: opera sobre OpenSearch, no sobre tablas relacionale
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 57 — Plataforma de búsqueda (`search_platform`) — etapa `ctrl:SearchPlatformController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -315,6 +354,19 @@ La operación no recibe cuerpo.
 | `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/search_platform/dto/search-platform.dto.ts:254` |
 | `deleted` | `boolean` | Sí | — | — | Valor de deleted mantenido por la instancia. | `src/modules/search_platform/dto/search-platform.dto.ts:260` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La operación de búsqueda exige un tenant de contexto (X-Tenant-Id) |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Índice de búsqueda no reconocido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant de contexto para la operación de búsqueda |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/search_platform.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -323,7 +375,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 57 — Plataforma de búsqueda (`search_platform`) — etapa `ctrl:SearchPlatformController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

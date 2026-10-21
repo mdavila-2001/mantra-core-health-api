@@ -111,6 +111,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `duplicate` | `boolean` | Sí | — | — | true si el callback ya se había aplicado antes | `src/modules/payments/dto/payment-transaction.dto.ts:164` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:170` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Firma del webhook inválida |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No hay transacción para la referencia informada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -119,7 +131,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-06`
 
 ---
 
@@ -222,6 +234,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `expiresAt` | `string` | Sí | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:144` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-flow.dto.ts:150` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Deuda no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La deuda ya tiene un checkout abierto; PreconditionFailedException: La deuda ya está saldada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -230,7 +256,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-02`
 
 ---
 
@@ -325,6 +351,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/payments/dto/payment-operations.dto.ts:126` |
 | `supersededId` | `string` | No | — | — | Id de la versión anterior que quedó superseded, si existía | `src/modules/payments/dto/payment-operations.dto.ts:135` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una tarifa porcentual exige `percentage`; PreconditionFailedException: Una tarifa fija exige `fixedAmount` |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -333,7 +372,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-10`
 
 ---
 
@@ -436,6 +475,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `idempotencyKey` | `string` | Sí | — | — | Clave de idempotencia con la que se creó | `src/modules/payments/dto/payment-intent.dto.ts:176` |
 | `reused` | `boolean` | Sí | — | — | true si la petición reutilizó un intent ya existente (reintento idempotente) | `src/modules/payments/dto/payment-intent.dto.ts:185` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -444,7 +495,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-01`
 
 ---
 
@@ -538,6 +589,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `lockedRate` | `string` | Sí | — | — | Valor de locked rate mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:213` |
 | `convertedAmount` | `string` | Sí | — | — | Importe del intent recalculado a la moneda destino | `src/modules/payments/dto/payment-flow.dto.ts:221` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
+| 409 | `CONFLICT` | ConflictException: La intención ya tiene un bloqueo de cambio vigente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El bloqueo de cambio exige monedas distintas; PreconditionFailedException: Solo se puede bloquear el cambio de una intención pendiente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -546,7 +612,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-03`
 
 ---
 
@@ -637,6 +703,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `decision` | `string` | Sí | valores: APPROVE, REVIEW, DECLINE | — | Valor de decision mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:297` |
 | `riskLevel` | `string` | Sí | valores: LOW, MEDIUM, HIGH | — | Nivel derivado del score | `src/modules/payments/dto/payment-flow.dto.ts:306` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -645,7 +724,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-04`
 
 ---
 
@@ -738,6 +817,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `amount` | `string` | Sí | — | — | Importe resuelto del reparto | `src/modules/payments/dto/payment-flow.dto.ts:392` |
 | `isPlatformFee` | `boolean` | Sí | — | — | Valor de is platform fee mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:398` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
+| 409 | `CONFLICT` | ConflictException: Los repartos superan el importe de la intención |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un reparto por importe exige `amount`; PreconditionFailedException: Un reparto por porcentaje exige `percentage` |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -746,7 +840,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-11`
 
 ---
 
@@ -836,6 +930,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:98` |
 | `gatewayTransactionRef` | `string` | No | — | — | Valor de gateway transaction ref mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:104` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
+| 409 | `CONFLICT` | ConflictException: La intención ya fue cobrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La intención está cancelada; PreconditionFailedException: La intención requiere evaluación de riesgo antes de cobrar; PreconditionFailedException: El motor de riesgo rechazó la intención |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -844,7 +953,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-05`
 
 ---
 
@@ -954,6 +1063,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `itemCount` | `number` | Sí | — | — | Valor de item count mantenido por la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:400` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-operations.dto.ts:406` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El importe neto del payout debe ser positivo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -962,7 +1084,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-13`
 
 ---
 
@@ -1077,6 +1199,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `totalLedger` | `string` | Sí | — | — | Total según el ledger local | `src/modules/payments/dto/payment-operations.dto.ts:549` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-operations.dto.ts:555` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1085,7 +1219,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-14`
 
 ---
 
@@ -1198,6 +1332,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `settledTransactions` | `number` | Sí | — | — | Transacciones marcadas como liquidadas | `src/modules/payments/dto/payment-operations.dto.ts:268` |
 | `duplicate` | `boolean` | Sí | — | — | true si el lote ya estaba importado (reintento idempotente) | `src/modules/payments/dto/payment-operations.dto.ts:276` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1206,7 +1352,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-12`
 
 ---
 
@@ -1295,6 +1441,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `requestNumber` | `string` | Sí | — | — | Valor de request number mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:290` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:296` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Transacción no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La transacción está liquidada; corresponde un reembolso en vez de una anulación |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1303,7 +1463,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-09`
 
 ---
 
@@ -1389,6 +1549,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:227` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:233` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Transacción no encontrada |
+| 409 | `CONFLICT` | ConflictException: El reembolso excede el importe capturado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede reembolsar una transacción capturada o liquidada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1397,7 +1572,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-08`
 
 ---
 
@@ -1455,6 +1630,19 @@ La operación no recibe cuerpo.
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:311` |
 | `reconciled` | `boolean` | Sí | — | — | true si la consulta cambió el estado local | `src/modules/payments/dto/payment-transaction.dto.ts:317` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Transacción no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1463,7 +1651,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 42 — Payments — etapa `UC-42-07`
 
 ---
 

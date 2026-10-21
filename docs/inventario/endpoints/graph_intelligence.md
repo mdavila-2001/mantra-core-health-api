@@ -138,13 +138,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `maxHops` | `number` | Sí | — | — | Valor de max hops mantenido por la instancia. | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:660` |
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:666` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un alcance con ese código para el tenant. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-04`
 
 ---
 
@@ -248,13 +261,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `maxHops` | `number` | Sí | — | — | Valor de max hops mantenido por la instancia. | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:660` |
 | `state` | `string` | Sí | — | — | Valor de state mantenido por la instancia. | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:666` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Alcance de acceso no encontrado. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-04`
 
 ---
 
@@ -363,13 +389,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `written` | `number` | Sí | — | — | Comunidades escritas | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:945` |
 | `replaced` | `number` | Sí | — | — | Comunidades de la misma versión que se reemplazaron | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:953` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-06`
 
 ---
 
@@ -480,13 +518,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `updated` | `number` | Sí | — | — | Puntajes actualizados sobre uno anterior del mismo modelo | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:1072` |
 | `alerted` | `number` | Sí | — | — | Puntajes que superaron el umbral y generaron alerta | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:1080` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Nodo no encontrado para ese tenant. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puntúa un nodo que ya no está activo. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-07`
 
 ---
 
@@ -592,13 +644,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `invalidatedPaths` | `number` | Sí | — | — | Entradas de caché invalidadas | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:1417` |
 | `duplicate` | `boolean` | Sí | — | — | Verdadero si ya había un job vivo para esa entidad | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:1425` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-11`
 
 ---
 
@@ -699,13 +763,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `invalidatedPaths` | `number` | Sí | — | — | Entradas de caché de rutas invalidadas | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:1329` |
 | `alreadyClosed` | `boolean` | Sí | — | — | Verdadero si la arista ya estaba cerrada | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:1335` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Arista no encontrada. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-10`
 
 ---
 
@@ -805,13 +882,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `pathEdges` | `array<string>` | Sí | formato uuid | — | Valor de path edges mantenido por la instancia. | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:850` |
 | `fromCache` | `boolean` | Sí | — | — | Verdadero si la ruta salió de la caché | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:856` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Alcance de acceso no encontrado.; ResourceNotFoundException: Nodo de partida no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El alcance de acceso no está activo.; PreconditionFailedException: El alcance no admite ese propósito de uso.; PreconditionFailedException: El alcance exige declarar el paciente del contexto.; PreconditionFailedException: El nodo de partida queda fuera del alcance de acceso. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-05`
 
 ---
 
@@ -893,13 +984,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `edgesWritten` | `string` | Sí | — | — | Valor de edges written mantenido por la instancia. | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:496` |
 | `alreadyRunning` | `boolean` | Sí | — | — | Verdadero si ya había una corrida viva y se devuelve ésa | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:504` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición de proyección no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición de proyección no está activa. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-03`
 
 ---
 
@@ -999,13 +1104,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `edgesWritten` | `string` | Sí | — | — | Valor de edges written mantenido por la instancia. | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:496` |
 | `alreadyRunning` | `boolean` | Sí | — | — | Verdadero si ya había una corrida viva y se devuelve ésa | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:504` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida de proyección no encontrada. |
+| 409 | `CONFLICT` | ConflictException: El checkpoint no puede retroceder. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La corrida ya no está en marcha. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-03`
 
 ---
 
@@ -1129,13 +1249,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `lifecycleState` | `string` | Sí | — | — | Valor de lifecycle state mantenido por la instancia. | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:376` |
 | `evidenceAdded` | `number` | Sí | — | — | Evidencias nuevas añadidas; las repetidas se descartan | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:384` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Los dos extremos de la arista tienen que estar proyectados antes que ella.; PreconditionFailedException: Una arista no puede cruzar dos tenants. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-02`
 
 ---
 
@@ -1248,13 +1381,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `identifiersAdded` | `number` | Sí | — | — | Identificadores nuevos añadidos en esta llamada | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:200` |
 | `stale` | `boolean` | Sí | — | — | Verdadero si el evento traía una versión anterior y se descartó | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:209` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-01`
 
 ---
 
@@ -1352,13 +1497,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `itemsProcessed` | `number` | Sí | — | — | Items procesados | sin fuente |
 | `discrepancies` | `number` | Sí | — | — | Items marcados como discrepancia | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El nodo no está proyectado. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-12`
 
 ---
 
@@ -1450,13 +1608,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `resolvedAt` | `string` | No | formato date-time | — | Valor de resolved at mantenido por la instancia. | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:1239` |
 | `unchanged` | `boolean` | Sí | — | — | Verdadero si el hallazgo ya estaba en ese estado | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:1247` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Hallazgo no encontrado. |
+| 409 | `CONFLICT` | ConflictException: Esa transición del hallazgo no está permitida. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-09`
 
 ---
 
@@ -1572,13 +1744,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `duplicatesSkipped` | `number` | Sí | — | — | Coincidencias descartadas por tener ya un hallazgo vivo | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:1184` |
 | `hitIds` | `array<string>` | Sí | formato uuid | — | Valor de hit ids mantenido por la instancia. | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:1190` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición de regla no encontrada. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición de regla no está activa.; PreconditionFailedException: La regla tiene que evaluarse bajo un alcance de acceso activo. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-08`
 
 ---
 
@@ -1675,13 +1861,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 | `depthReached` | `number` | Sí | — | — | Profundidad efectiva alcanzada | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:807` |
 | `truncated` | `boolean` | Sí | — | — | Verdadero si se alcanzó el tope de nodos y hay más | `src/modules/graph_intelligence/dto/graph-intelligence.dto.ts:815` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Alcance de acceso no encontrado.; ResourceNotFoundException: Nodo de partida no encontrado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El alcance de acceso no está activo.; PreconditionFailedException: El alcance no admite ese propósito de uso.; PreconditionFailedException: El alcance exige declarar el paciente del contexto.; PreconditionFailedException: El nodo de partida queda fuera del alcance de acceso. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/graph_intelligence.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 61 — Inteligencia de grafo (relaciones, referidos y riesgo) — etapa `UC-61-05`
 
 ---
 

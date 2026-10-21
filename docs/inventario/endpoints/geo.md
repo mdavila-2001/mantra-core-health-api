@@ -109,6 +109,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `occurredAt` | `string` | No | formato date-time | — | Valor de occurred at mantenido por la instancia. | `src/modules/geo/dto/geofence-event-response.dto.ts:33` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/geo/dto/geofence-event-response.dto.ts:39` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Geofence no encontrado; ResourceNotFoundException: Sujeto rastreado no encontrado |
+| 409 | `CONFLICT` | ConflictException: El sujeto ya está en ese estado respecto al geofence |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El geofence no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/geo.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -117,7 +132,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Geo (13) — Geolocation and Mobile Tracking — etapa `ctrl:GeoGeofencesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -207,6 +222,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `state` | `string` | Sí | formato uuid | — | Concept id del estado | `src/modules/geo/dto/geofence-response.dto.ts:33` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/geo/dto/geofence-response.dto.ts:39` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un geofence con ese nombre en el tenant |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un geofence circular requiere radiusM, centerLat y centerLng; PreconditionFailedException: Un geofence poligonal requiere geometryJson |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/geo.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -215,7 +244,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Geo (13) — Geolocation and Mobile Tracking — etapa `ctrl:GeoGeofencesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -296,6 +325,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `state` | `string` | Sí | formato uuid | — | Concept id del estado del sujeto | `src/modules/geo/dto/tracked-subject-response.dto.ts:30` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/geo/dto/tracked-subject-response.dto.ts:36` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: El sujeto ya está siendo rastreado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/geo.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -304,7 +346,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Geo (13) — Geolocation and Mobile Tracking — etapa `ctrl:GeoTrackedSubjectsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -366,6 +408,19 @@ La operación no recibe cuerpo.
 | `capturedAt` | `string` | No | formato date-time | — | Valor de captured at mantenido por la instancia. | `src/modules/geo/dto/last-position-response.dto.ts:39` |
 | `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/geo/dto/last-position-response.dto.ts:45` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado; ResourceNotFoundException: El sujeto no tiene posiciones registradas |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/geo.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -374,7 +429,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Geo (13) — Geolocation and Mobile Tracking — etapa `ctrl:GeoTrackedSubjectsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -481,6 +536,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|---|
 | `recorded` | `number` | Sí | — | — | Nº de pings registrados | `src/modules/geo/dto/ingest-pings.dto.ts:144` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sujeto no está activo para rastreo; PreconditionFailedException: No hay una sesión de tracking abierta para el sujeto |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/geo.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -489,7 +558,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Geo (13) — Geolocation and Mobile Tracking — etapa `ctrl:GeoTrackedSubjectsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -547,6 +616,20 @@ La operación no recibe cuerpo.
 |---|---|---|---|---|---|---|
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/geo/dto/operation-result.dto.ts:9` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El rastreo del sujeto ya está suspendido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/geo.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -555,7 +638,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Geo (13) — Geolocation and Mobile Tracking — etapa `ctrl:GeoTrackedSubjectsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -637,6 +720,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `startedAt` | `string` | No | formato date-time | — | Valor de started at mantenido por la instancia. | `src/modules/geo/dto/tracking-session-response.dto.ts:30` |
 | `endedAt` | `string` | No | formato date-time | — | Valor de ended at mantenido por la instancia. | `src/modules/geo/dto/tracking-session-response.dto.ts:36` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado |
+| 409 | `CONFLICT` | ConflictException: El sujeto ya tiene una sesión de tracking abierta |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sujeto no está activo para rastreo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/geo.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -645,7 +743,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Geo (13) — Geolocation and Mobile Tracking — etapa `ctrl:GeoTrackingSessionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -707,6 +805,20 @@ La operación no recibe cuerpo.
 | `startedAt` | `string` | No | formato date-time | — | Valor de started at mantenido por la instancia. | `src/modules/geo/dto/tracking-session-response.dto.ts:30` |
 | `endedAt` | `string` | No | formato date-time | — | Valor de ended at mantenido por la instancia. | `src/modules/geo/dto/tracking-session-response.dto.ts:36` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de tracking no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no está abierta; PreconditionFailedException: La sesión tiene viajes en progreso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/geo.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -715,7 +827,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Geo (13) — Geolocation and Mobile Tracking — etapa `ctrl:GeoTrackingSessionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -797,6 +909,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `startedAt` | `string` | No | formato date-time | — | Valor de started at mantenido por la instancia. | `src/modules/geo/dto/trip-response.dto.ts:42` |
 | `endedAt` | `string` | No | formato date-time | — | Valor de ended at mantenido por la instancia. | `src/modules/geo/dto/trip-response.dto.ts:48` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de tracking no encontrada |
+| 409 | `CONFLICT` | ConflictException: La sesión ya tiene un viaje en progreso |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión de tracking no está abierta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/geo.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -805,7 +932,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Geo (13) — Geolocation and Mobile Tracking — etapa `ctrl:GeoTripsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -889,6 +1016,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `startedAt` | `string` | No | formato date-time | — | Valor de started at mantenido por la instancia. | `src/modules/geo/dto/trip-response.dto.ts:42` |
 | `endedAt` | `string` | No | formato date-time | — | Valor de ended at mantenido por la instancia. | `src/modules/geo/dto/trip-response.dto.ts:48` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Viaje no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El viaje no está en progreso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/geo.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -897,7 +1038,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo Geo (13) — Geolocation and Mobile Tracking — etapa `ctrl:GeoTripsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

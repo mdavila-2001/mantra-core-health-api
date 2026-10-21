@@ -96,13 +96,25 @@ La operación no recibe cuerpo.
 | `validFrom` | `string` | Sí | formato date-time | — | Valor de valid from mantenido por la instancia. | `src/modules/authz/dto/care-relationship-responses.dto.ts:51` |
 | `validTo` | `string` | No | formato date-time | — | Valor de valid to mantenido por la instancia. | `src/modules/authz/dto/care-relationship-responses.dto.ts:57` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzCareRelationshipsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -190,13 +202,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/authz/dto/authz-responses.dto.ts:18` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una relación asistencial activa para ese practicante |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: validTo debe ser posterior a validFrom |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzCareRelationshipsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -253,13 +279,27 @@ La operación no recibe cuerpo.
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/authz/dto/authz-responses.dto.ts:33` |
 | `affected` | `number` | No | — | — | Nº de filas afectadas cuando aplica | `src/modules/authz/dto/authz-responses.dto.ts:39` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Relación asistencial no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La relación asistencial no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzCareRelationshipsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -318,6 +358,20 @@ La operación no recibe cuerpo.
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/authz/dto/authz-responses.dto.ts:33` |
 | `affected` | `number` | No | — | — | Nº de filas afectadas cuando aplica | `src/modules/authz/dto/authz-responses.dto.ts:39` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Acceso clínico no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El acceso clínico no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -326,7 +380,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzClinicalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -434,6 +488,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `cacheKey` | `string` | Sí | — | — | Clave de cache de la decisión (idempotente) | `src/modules/authz/dto/authz-responses.dto.ts:199` |
 | `ttlSeconds` | `number` | Sí | — | — | TTL sugerido en segundos para la entrada de cache | `src/modules/authz/dto/authz-responses.dto.ts:207` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -442,7 +508,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzPdpController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -506,13 +572,25 @@ La operación no recibe cuerpo.
 | `validFrom` | `string` | Sí | formato date-time | — | Valor de valid from mantenido por la instancia. | `src/modules/authz/dto/care-relationship-responses.dto.ts:105` |
 | `validTo` | `string` | No | formato date-time | — | Valor de valid to mantenido por la instancia. | `src/modules/authz/dto/care-relationship-responses.dto.ts:111` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzCareRelationshipsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -600,13 +678,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/authz/dto/authz-responses.dto.ts:18` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una representación legal activa para ese usuario |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: validTo debe ser posterior a validFrom |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzCareRelationshipsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -663,13 +755,27 @@ La operación no recibe cuerpo.
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/authz/dto/authz-responses.dto.ts:33` |
 | `affected` | `number` | No | — | — | Nº de filas afectadas cuando aplica | `src/modules/authz/dto/authz-responses.dto.ts:39` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Representación legal no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La representación legal no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzCareRelationshipsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -768,6 +874,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/authz/dto/authz-responses.dto.ts:18` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -776,7 +894,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzClinicalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -878,6 +996,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/authz/dto/authz-responses.dto.ts:18` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un acceso clínico activo para ese usuario |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: validTo debe ser posterior a validFrom; PreconditionFailedException: Se requiere consentimiento salvo para tratamiento directo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -886,7 +1018,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzClinicalController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -958,6 +1090,18 @@ No toca tablas relacionales: No escribe ni encola nada: calcula una clave de cac
 | `cacheKey` | `string` | Sí | — | — | Clave lógica de cache invalidada | `src/modules/authz/dto/authz-responses.dto.ts:125` |
 | `invalidatedEntries` | `number` | Sí | — | — | Nº de entradas de decisión invalidadas | `src/modules/authz/dto/authz-responses.dto.ts:131` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -966,7 +1110,7 @@ No toca tablas relacionales: No escribe ni encola nada: calcula una clave de cac
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzPdpController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1046,6 +1190,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/authz/dto/authz-responses.dto.ts:18` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una categoría con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1054,7 +1211,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1151,6 +1308,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/authz/dto/authz-responses.dto.ts:18` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un permiso con ese código; ConflictException: La categoría referenciada no existe |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1159,7 +1329,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1254,6 +1424,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/authz/dto/authz-responses.dto.ts:18` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Permiso no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe un grant para ese (sujeto, permiso, recurso) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1262,7 +1446,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGrantsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1314,13 +1498,24 @@ La operación no recibe cuerpo.
 | `isSystem` | `boolean` | Sí | — | — | Rol de sistema (no ligado a un tenant) | `src/modules/authz/dto/authz-responses.dto.ts:72` |
 | `tenantId` | `string` | No | formato uuid | — | Tenant propietario | `src/modules/authz/dto/authz-responses.dto.ts:78` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzRolesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1412,6 +1607,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `permissionCount` | `number` | Sí | — | — | Nº de bindings permiso aplicados | `src/modules/authz/dto/authz-responses.dto.ts:104` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:110` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El rol padre no existe |
+| 409 | `CONFLICT` | ConflictException: Ya existe un rol con ese código |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1420,7 +1629,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzRolesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1523,6 +1732,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/authz/dto/authz-responses.dto.ts:33` |
 | `affected` | `number` | No | — | — | Nº de filas afectadas cuando aplica | `src/modules/authz/dto/authz-responses.dto.ts:39` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Rol no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: canWrite=true requiere canRead=true |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1531,7 +1754,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzRolesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1633,6 +1856,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `permissionCount` | `number` | Sí | — | — | Nº de bindings permiso aplicados | `src/modules/authz/dto/authz-responses.dto.ts:104` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:110` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Rol no encontrado; ResourceNotFoundException: Permiso no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1641,7 +1877,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzRolesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1730,6 +1966,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/authz/dto/authz-responses.dto.ts:18` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una política activa con esa prioridad para el recurso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1738,7 +1987,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzPoliciesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1835,6 +2084,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/authz/dto/authz-responses.dto.ts:18` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Permiso no encontrado |
+| 409 | `CONFLICT` | ConflictException: El usuario ya tiene una excepción activa para ese permiso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1843,7 +2106,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGrantsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1934,6 +2197,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/authz/dto/authz-responses.dto.ts:18` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/authz/dto/authz-responses.dto.ts:24` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Rol no encontrado |
+| 409 | `CONFLICT` | ConflictException: El usuario ya tiene ese rol asignado y activo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique el rol a asignar por `roleId` o por `roleCode`; PreconditionFailedException: El rol no es asignable; PreconditionFailedException: validFrom debe ser anterior a validTo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1942,7 +2220,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGrantsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

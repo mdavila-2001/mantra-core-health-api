@@ -118,6 +118,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `varianceAmount` | `string` | Sí | — | — | Diferencia entre lo facturado y lo ordenado | `src/modules/erp/dto/erp.dto.ts:955` |
 | `matched` | `boolean` | Sí | — | — | true si la diferencia queda dentro de la tolerancia | `src/modules/erp/dto/erp.dto.ts:963` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden de compra no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -126,7 +139,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-13`
 
 ---
 
@@ -217,6 +230,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `partnerNumber` | `string` | Sí | — | — | Valor de partner number mantenido por la instancia. | `src/modules/erp/dto/erp.dto.ts:111` |
 | `bankAccountId` | `string` | No | formato uuid | — | Identificador asociado a bank account. | `src/modules/erp/dto/erp.dto.ts:117` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un socio con ese número |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -225,7 +251,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-01`
 
 ---
 
@@ -284,6 +310,21 @@ La operación no recibe cuerpo.
 | `bankAccountId` | `string` | Sí | formato uuid | — | Identificador asociado a bank account. | `src/modules/erp/dto/erp.dto.ts:128` |
 | `verificationStatusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a verification status concept. | `src/modules/erp/dto/erp.dto.ts:134` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Socio de negocio no encontrado; ResourceNotFoundException: Cuenta bancaria no encontrada |
+| 409 | `CONFLICT` | ConflictException: La cuenta ya está verificada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no pertenece a ese socio |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -292,7 +333,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-02`
 
 ---
 
@@ -389,6 +430,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `status` | `string` | Sí | formato uuid | — | Concepto de estado del contrato | sin fuente |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Socio de negocio no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe un contrato con ese número |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contrato debe terminar después de empezar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -397,7 +453,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-03`
 
 ---
 
@@ -484,6 +540,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `contractId` | `string` | Sí | formato uuid | — | Identificador asociado a contract. | `src/modules/erp/dto/erp.dto.ts:410` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/erp/dto/erp.dto.ts:416` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contrato no admite cambios en su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -492,7 +562,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-05`
 
 ---
 
@@ -574,6 +644,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `changeStatusConceptId` | `string` | Sí | formato uuid | — | Estado del cambio tras la decisión | sin fuente |
 | `approvedSteps` | `number` | Sí | — | — | Pasos aprobados hasta ahora | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contrato está terminado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -582,7 +666,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-04`
 
 ---
 
@@ -670,6 +754,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `created` | `number` | Sí | — | — | Cuotas creadas en esta ejecución | `src/modules/erp/dto/erp.dto.ts:477` |
 | `installmentAmount` | `string` | Sí | — | — | Importe de cada cuota | `src/modules/erp/dto/erp.dto.ts:483` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contrato no tiene valor total del que derivar las cuotas |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -678,7 +776,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-16`
 
 ---
 
@@ -763,6 +861,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `contractId` | `string` | Sí | formato uuid | — | Identificador asociado a contract. | `src/modules/erp/dto/erp.dto.ts:410` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/erp/dto/erp.dto.ts:416` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El contrato no admite cambios en su estado actual; PreconditionFailedException: La renovación debe extender la vigencia más allá del fin actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -771,7 +883,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-06`
 
 ---
 
@@ -859,6 +971,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `contractId` | `string` | Sí | formato uuid | — | Identificador asociado a contract. | `src/modules/erp/dto/erp.dto.ts:410` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/erp/dto/erp.dto.ts:416` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contrato no encontrado |
+| 409 | `CONFLICT` | ConflictException: El contrato ya está terminado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -867,7 +993,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-07`
 
 ---
 
@@ -955,13 +1081,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/erp/dto/erp.dto.ts:605` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/erp/dto/erp.dto.ts:611` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Empleado no encontrado |
+| 409 | `CONFLICT` | ConflictException: El empleado ya tiene una ausencia en esas fechas |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ausencia debe terminar después de empezar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-09`
 
 ---
 
@@ -1041,6 +1182,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/erp/dto/erp.dto.ts:605` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/erp/dto/erp.dto.ts:611` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de ausencia no encontrada |
+| 409 | `CONFLICT` | ConflictException: La solicitud ya fue resuelta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1049,7 +1204,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `ctrl:ErpController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1130,13 +1285,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `fullName` | `string` | Sí | — | — | Valor de full name mantenido por la instancia. | `src/modules/erp/dto/erp.dto.ts:545` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/erp/dto/erp.dto.ts:551` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-08`
 
 ---
 
@@ -1225,13 +1392,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `leaseContractId` | `string` | Sí | formato uuid | — | Identificador asociado a lease contract. | `src/modules/erp/dto/erp.dto.ts:1090` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/erp/dto/erp.dto.ts:1096` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-15`
 
 ---
 
@@ -1337,6 +1516,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `purchaseOrderNumber` | `string` | Sí | — | — | Valor de purchase order number mantenido por la instancia. | `src/modules/erp/dto/erp.dto.ts:724` |
 | `lineIds` | `array<string>` | Sí | — | — | Ids de las líneas creadas | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1345,7 +1537,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-10`
 
 ---
 
@@ -1450,6 +1642,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `lotIds` | `array<string>` | Sí | — | — | Ids de lotes afectados | sin fuente |
 | `ledgerEntryIds` | `array<string>` | Sí | — | — | Ids de asientos del ledger | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden de compra no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La orden de compra está cerrada; PreconditionFailedException: La cantidad aceptada no puede superar la recibida |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1458,7 +1664,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-11`
 
 ---
 
@@ -1545,13 +1751,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `sheetNumber` | `string` | Sí | — | — | Valor de sheet number mantenido por la instancia. | `src/modules/erp/dto/erp.dto.ts:885` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/erp/dto/erp.dto.ts:891` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Orden de compra no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-12`
 
 ---
 
@@ -1634,6 +1853,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 | `salesOrderNumber` | `string` | Sí | — | — | Valor de sales order number mantenido por la instancia. | `src/modules/erp/dto/erp.dto.ts:1024` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/erp/dto/erp.dto.ts:1030` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cliente no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/erp.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1642,7 +1874,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 38 — ERP — etapa `UC-38-14`
 
 ---
 

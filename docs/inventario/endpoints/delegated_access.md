@@ -112,6 +112,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | `decision` | `string` | Sí | — | — | Decisión aplicada (APPROVED\|DENIED) | `src/modules/delegated_access/dto/responses.dto.ts:66` |
 | `grantId` | `string` | No | formato uuid | — | Grant emitido si fue aprobada | `src/modules/delegated_access/dto/responses.dto.ts:75` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud no está abierta |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -120,7 +134,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-05`
 
 ---
 
@@ -206,6 +220,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | `requiresStepUp` | `boolean` | Sí | — | — | Si exige step-up antes de permitir | `src/modules/delegated_access/dto/responses.dto.ts:111` |
 | `reason` | `string` | No | — | — | Motivo cuando no se permite | `src/modules/delegated_access/dto/responses.dto.ts:117` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Delegación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -214,7 +241,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-09`
 
 ---
 
@@ -270,6 +297,17 @@ La operación no recibe cuerpo.
 | `expiredDelegations` | `number` | Sí | — | — | Delegaciones de practitioner expiradas | `src/modules/delegated_access/dto/responses.dto.ts:90` |
 | `expiredOrgAssignments` | `number` | Sí | — | — | Asignaciones de organización expiradas | `src/modules/delegated_access/dto/responses.dto.ts:96` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -278,7 +316,7 @@ La operación no recibe cuerpo.
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-08`
 
 ---
 
@@ -378,6 +416,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | `versionNumber` | `number` | Sí | — | — | Número de versión publicada | `src/modules/delegated_access/dto/responses.dto.ts:36` |
 | `itemCount` | `number` | Sí | — | — | Nº de ítems de permiso de la versión | `src/modules/delegated_access/dto/responses.dto.ts:42` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe un set con ese código en el tenant |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -386,7 +437,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-02`
 
 ---
 
@@ -481,6 +532,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | `versionNumber` | `number` | Sí | — | — | Número de versión publicada | `src/modules/delegated_access/dto/responses.dto.ts:36` |
 | `itemCount` | `number` | Sí | — | — | Nº de ítems de permiso de la versión | `src/modules/delegated_access/dto/responses.dto.ts:42` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Set de permisos no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -489,7 +553,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-02`
 
 ---
 
@@ -586,6 +650,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/delegated_access/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/delegated_access/dto/responses.dto.ts:15` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya existe una asignación activa con ese rol y alcance |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -594,7 +671,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-01`
 
 ---
 
@@ -678,6 +755,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | `ok` | `boolean` | Sí | — | — | Indica éxito | `src/modules/delegated_access/dto/responses.dto.ts:51` |
 | `status` | `string` | No | — | — | Nuevo estado del recurso (concept id) | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asignación no encontrada |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: row_version no coincide |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No hay cambios que aplicar; PreconditionFailedException: La asignación no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -686,7 +778,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-10`
 
 ---
 
@@ -780,6 +872,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/delegated_access/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/delegated_access/dto/responses.dto.ts:15` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asignación de usuario de organización no encontrada; ResourceNotFoundException: Set de permisos no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El usuario de organización no está activo; PreconditionFailedException: El set de permisos no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -788,7 +894,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-03`
 
 ---
 
@@ -875,6 +981,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/delegated_access/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/delegated_access/dto/responses.dto.ts:15` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Delegación no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe una solicitud pendiente equivalente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La delegación no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -883,7 +1004,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-04`
 
 ---
 
@@ -974,6 +1095,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | `id` | `string` | Sí | formato uuid | — | Id del recurso creado | `src/modules/delegated_access/dto/responses.dto.ts:9` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado del recurso | `src/modules/delegated_access/dto/responses.dto.ts:15` |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Delegación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La delegación no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -982,7 +1117,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-06`
 
 ---
 
@@ -1062,6 +1197,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 | `ok` | `boolean` | Sí | — | — | Indica éxito | `src/modules/delegated_access/dto/responses.dto.ts:51` |
 | `status` | `string` | No | — | — | Nuevo estado del recurso (concept id) | sin fuente |
 
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Delegación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/delegated_access.md).
+
 ### Pruebas que la mencionan
 
 | Tipo | Archivo |
@@ -1070,7 +1218,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegat
 
 ### Flujos
 
-_Se completa en la fase de flujos._
+- Módulo 29 — Delegated Access and Scoped Infrastructure Users — etapa `UC-29-07`
 
 ---
 
