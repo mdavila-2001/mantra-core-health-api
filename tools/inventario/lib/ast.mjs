@@ -191,6 +191,12 @@ export function buildSourceIndex(root = process.cwd()) {
   // Dos módulos pueden declarar una clase con el mismo nombre: estos mapas usan
   // la clave `archivo#Clase`, que no se pisa.
   const dtoConstraintsPorClave = new Map();
+  // todos los archivos leídos (también los que no declaran clases, p. ej. constantes)
+  const archivos = new Map();
+  const classesPorClave = new Map();
+  const classesPorNombre = new Map();
+  // puerto (interface o clase abstracta) → claves de las clases que lo implementan
+  const implementaciones = new Map();
   const herenciaPorClave = new Map();
 
   for (const file of sourceFiles) {
@@ -203,6 +209,25 @@ export function buildSourceIndex(root = process.cwd()) {
       ts.ScriptKind.TS,
     );
     const relative = path.relative(root, file).replaceAll(path.sep, '/');
+    archivos.set(relative, sourceFile);
+
+    // identificador local → ruta con la que se importó (para resolver nombres repetidos)
+    const imports = new Map();
+    const importAlias = new Map();
+    for (const statement of sourceFile.statements) {
+      if (!ts.isImportDeclaration(statement) || !statement.importClause)
+        continue;
+      const origen = statement.moduleSpecifier.text;
+      const { name, namedBindings } = statement.importClause;
+      if (name) imports.set(name.text, origen);
+      if (namedBindings && ts.isNamedImports(namedBindings))
+        for (const element of namedBindings.elements) {
+          imports.set(element.name.text, origen);
+          // `import { Original as Local }`: el nombre de la clase es `Original`
+          if (element.propertyName)
+            importAlias.set(element.name.text, element.propertyName.text);
+        }
+    }
 
     for (const statement of sourceFile.statements) {
       if (ts.isTypeAliasDeclaration(statement)) {
@@ -306,15 +331,33 @@ export function buildSourceIndex(root = process.cwd()) {
       const clave = `${relative}#${className}`;
       if (alias) apiSchemaAliases.set(alias, clave);
 
-      classes.set(className, {
+      const info = {
         node: statement,
         sourceFile,
         relative,
+        imports,
+        importAlias,
         methods,
         injected,
         typeParameters:
           statement.typeParameters?.map((item) => item.name.text) ?? [],
-      });
+      };
+      classes.set(className, info);
+      classesPorClave.set(clave, info);
+      for (const clausula of statement.heritageClauses ?? []) {
+        for (const tipo of clausula.types) {
+          const base = tipo.expression.getText(sourceFile);
+          if (!/^[A-Za-z0-9_]+$/.test(base)) continue;
+          implementaciones.set(base, [
+            ...(implementaciones.get(base) ?? []),
+            clave,
+          ]);
+        }
+      }
+      classesPorNombre.set(className, [
+        ...(classesPorNombre.get(className) ?? []),
+        clave,
+      ]);
       if (properties.size) dtoConstraints.set(className, properties);
       dtoConstraintsPorClave.set(clave, properties);
       const herencia = herenciaDe(statement, sourceFile);
@@ -541,6 +584,10 @@ export function buildSourceIndex(root = process.cwd()) {
     apiSchemaAliases,
     dtoConstraintsPorClave,
     herenciaPorClave,
+    archivos,
+    classesPorClave,
+    classesPorNombre,
+    implementaciones,
     extractThrownExceptions,
   };
 }
