@@ -120,6 +120,15 @@ export function leerPropositos(modelRoot) {
  * @returns {Map<string, { dominio: string, numero: number, fuente: string }>} por carpeta.
  */
 export function leerDominios(root, modelRoot) {
+  return dominiosPor(root, modelRoot, 3);
+}
+
+/** Igual que `leerDominios` pero por nombre de schema PostgreSQL (la primera columna de `schemas.catalog.ts`). */
+export function dominiosPorEsquema(root, modelRoot) {
+  return dominiosPor(root, modelRoot, 1);
+}
+
+function dominiosPor(root, modelRoot, columna) {
   const resultado = new Map();
   const catalogo = leer(path.join(root, 'src/orm/catalog/schemas.catalog.ts'));
   const documento = leer(
@@ -146,7 +155,7 @@ export function leerDominios(root, modelRoot) {
   )) {
     const numero = Number(fila[2]);
     const dominio = dominioPorNumero.get(numero);
-    if (dominio) resultado.set(fila[3], { numero, ...dominio });
+    if (dominio) resultado.set(fila[columna], { numero, ...dominio });
   }
   return resultado;
 }

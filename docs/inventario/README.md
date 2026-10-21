@@ -8,6 +8,7 @@ Inventario **generado desde el código y el modelo**, no escrito a mano. Aliment
 |---|---|---|---|
 | Endpoints | 1 operación HTTP = 1 registro: tablas que afecta, DTO y restricciones, requerimientos, payload mínimo, explicación de negocio y de sistema, riesgo, pruebas | `yarn inventario:endpoints` | [endpoints/](endpoints/index.md) |
 | Flujos | Procesos de negocio, máquinas de estado y el árbol de decisión de cada operación (qué comprueba, qué puede fallar con qué estado HTTP, qué escribe), con su mapa y hallazgos | `yarn inventario:flujos` | [flujos/](flujos/index.md) · [mapa](flujos/mapa.md) · [hallazgos](flujos/hallazgos.md) |
+| Catálogo de datos | 1 tabla = 1 ficha: columnas con su rol estructural y su descripción (con fuente o «sin dato»), relaciones, índices con su «para qué», restricciones, operaciones que la tocan, gobierno y deriva contra el ORM y la base | `yarn inventario:catalogo` · `yarn inventario:deriva-bd` | [catalogo/](catalogo/index.md) · [deriva](catalogo/deriva.md) · [glosario](catalogo/glosario.md) |
 
 `yarn inventario:verificar` falla si lo escrito en `inventario/` y `docs/inventario/` no coincide con el
 código: es la señal de que alguien cambió una ruta, un DTO o una consulta y no regeneró.
@@ -101,3 +102,32 @@ leída y la fecha de revisión. Una operación nueva sin tablas y sin motivo hac
   muestran en el orden del texto.
 - **Que un proceso de módulo sea un flujo de negocio validado:** es la agrupación que declara el
   README. Queda `AUTO_DETECTADA` hasta que alguien lo revise.
+
+## Catálogo de datos: de dónde sale cada cosa
+
+La **fuente de verdad es el DDL canónico del modelo** (`SQL/` del repo del modelo; los CSV de
+`docs/data-catalog` son su lectura). El ORM y la base desplegada son vistas que se comparan con él, no
+fuentes: una diferencia no dice quién tiene razón, dice que hay que mirarla.
+
+| Dato | Fuente | Qué pasa si no hay |
+|---|---|---|
+| Tablas, columnas, tipos, nulabilidad, PK, FK, únicos | `docs/data-catalog/*.csv` del modelo | Falla con un mensaje |
+| Índices | `indexes.csv` **más** las sentencias `CREATE INDEX … USING brin\|gin\|gist` de `SQL/*/04_indexes.sql`, que el generador del CSV no lista (431 hoy). Se marcan `SQL_NO_CATALOGADO_EN_CSV` | — |
+| Propósito de la tabla | `business_rationale` del modelo, con su estado (hoy todas `DOMAIN_CURATED_DRAFT`) | «Sin propósito registrado» |
+| Descripción de columna | 1.º comentario del `.puml` justo antes de la columna (`MODELO_PUML`); 2.º JSDoc de la entidad que no sea de plantilla (`JSDOC_ENTIDAD`); 3.º convención de columnas estándar (`JSDOC_ESTANDAR`) | «sin dato». No se infiere por el nombre |
+| «Para qué» de un índice | Regla de `indexing-strategy.md` que el índice cumple de forma verificable (único, cubre una FK, GiST/BRIN/GIN); predicado parcial; consultas de repositorio que filtran por su primera columna (`POR_PREFIJO_DE_FILTRO`, candidatura estática) | «sin uso detectado estáticamente» |
+| Append-only | Lo que el README del módulo declara con una de tres formas explícitas | «no declarado» (no es lo mismo que «no es append-only») |
+| Datos personales, financiera, crítica para auditoría, retención, responsable | **Ninguna**. Las semillas de `system_ops.entity_registry` y `field_registry` son registros de ejemplo cuyo `column_name` es un título («Core Field Registry») | `SIN_FUENTE`. Es una decisión de gobierno de datos, no un dato que falte leer |
+| Deriva contra el ORM | Entidades MikroORM leídas del AST (`fieldName`, tipo, `nullable`) | — |
+| Deriva contra la base | `inventario/catalogo/deriva-bd.json`, generado por `deriva-bd.mjs` con `DERIVA_DATABASE_URL` (sólo `SELECT` sobre el catálogo del sistema) | `SIN_VERIFICAR` |
+
+### Lo que el catálogo NO afirma
+
+- **Que una descripción sea correcta ni vigente:** se cita de dónde sale. Sólo el 23 % de las columnas
+  tiene alguna, y el 70 % de ellas es la convención de columnas estándar (`id`, `created_at`, `updated_at`).
+- **Que un índice «no se use»:** «sin uso detectado» significa que el análisis estático no lo encontró;
+  no hay planes de ejecución ni estadísticas de la base.
+- **Que la base desplegada de verdad esté al día:** la comparación se hizo con una base descartable
+  construida con el DDL canónico. Demuestra que el modelo es coherente consigo mismo.
+- **Que las 32 entidades sin tabla relacional estén mal:** 24 viven en `NoSQL/` (Timescale y pgvector) y
+  el catálogo es sólo relacional. `deriva.md` dice dónde está cada una.
