@@ -61,11 +61,11 @@ select con.conrelid::int8 as oid,
 export const SQL_CLAVES_FORANEAS = `
 select con.conrelid::int8 as oid,
        con.conname as constraint_name,
-       (select array_agg(a.attname order by k.ord) from unnest(con.conkey) with ordinality k(attnum, ord)
+       (select array_agg(a.attname::text order by k.ord) from unnest(con.conkey) with ordinality k(attnum, ord)
           join pg_attribute a on a.attrelid = con.conrelid and a.attnum = k.attnum) as source_columns,
        tn.nspname as target_schema,
        tc.relname as target_table,
-       (select array_agg(a.attname order by k.ord) from unnest(con.confkey) with ordinality k(attnum, ord)
+       (select array_agg(a.attname::text order by k.ord) from unnest(con.confkey) with ordinality k(attnum, ord)
           join pg_attribute a on a.attrelid = con.confrelid and a.attnum = k.attnum) as target_columns
   from pg_constraint con
   join pg_class c on c.oid = con.conrelid

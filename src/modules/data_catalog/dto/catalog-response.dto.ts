@@ -52,14 +52,14 @@ export class AnnotationDto {
   @ApiProperty() currentRevisionNo!: number;
   @ApiPropertyOptional({ nullable: true }) approvedRevisionNo!: number | null;
   @ApiPropertyOptional({ nullable: true, type: String, format: 'date-time' })
-  approvedAt!: Date | null;
+  approvedAt!: string | null;
   @ApiProperty({
     description:
       '`true` si la aprobación es de la revisión vigente: una edición posterior la deja de ser',
   })
   approvalIsCurrent!: boolean;
   @ApiProperty({ type: AnnotationContentDto }) content!: AnnotationContentDto;
-  @ApiProperty({ type: String, format: 'date-time' }) updatedAt!: Date;
+  @ApiProperty({ type: String, format: 'date-time' }) updatedAt!: string;
 }
 
 export class StatisticsDto {
@@ -72,7 +72,7 @@ export class StatisticsDto {
   })
   isEstimate!: boolean;
   @ApiPropertyOptional({ nullable: true, type: String, format: 'date-time' })
-  observedAt!: Date | null;
+  observedAt!: string | null;
 }
 
 export class AnnotationSummaryDto {
@@ -94,7 +94,8 @@ export class CatalogObjectSummaryDto {
   @ApiProperty({ enum: OBSERVATION_STATUSES }) observationStatus!: string;
   @ApiProperty() columnCount!: number;
   @ApiProperty({ type: StatisticsDto }) statistics!: StatisticsDto;
-  @ApiPropertyOptional({ type: String, format: 'date-time' }) lastSeenAt!: Date;
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  lastSeenAt!: string;
   @ApiPropertyOptional({ type: AnnotationSummaryDto, nullable: true })
   annotation!: AnnotationSummaryDto | null;
 }
@@ -155,9 +156,9 @@ export class ObjectTechnicalDto {
 
 export class ObjectObservationDto {
   @ApiProperty({ enum: OBSERVATION_STATUSES }) status!: string;
-  @ApiProperty({ type: String, format: 'date-time' }) lastSeenAt!: Date;
+  @ApiProperty({ type: String, format: 'date-time' }) lastSeenAt!: string;
   @ApiPropertyOptional({ nullable: true, type: String, format: 'date-time' })
-  notObservedSince!: Date | null;
+  notObservedSince!: string | null;
   @ApiPropertyOptional({ nullable: true }) lastScanEngineVersion!:
     string | null;
 }
@@ -214,7 +215,7 @@ export class CatalogColumnDto {
   })
   comment!: string | null;
   @ApiProperty({ enum: OBSERVATION_STATUSES }) observationStatus!: string;
-  @ApiProperty({ type: String, format: 'date-time' }) lastSeenAt!: Date;
+  @ApiProperty({ type: String, format: 'date-time' }) lastSeenAt!: string;
   @ApiPropertyOptional({ type: AnnotationDto, nullable: true })
   annotation!: AnnotationDto | null;
 }
@@ -232,7 +233,7 @@ export class EvidenceDto {
   @ApiPropertyOptional({ nullable: true }) sourceRevision!: string | null;
   @ApiPropertyOptional({ nullable: true, format: 'uuid' }) addedByUserId!:
     string | null;
-  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: string;
 }
 
 export class RevisionDto {
@@ -242,7 +243,7 @@ export class RevisionDto {
   @ApiPropertyOptional({ nullable: true }) changeReason!: string | null;
   @ApiPropertyOptional({ nullable: true, format: 'uuid' }) authorUserId!:
     string | null;
-  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
+  @ApiProperty({ type: String, format: 'date-time' }) createdAt!: string;
 }
 
 export class ReviewDecisionDto {
@@ -250,7 +251,7 @@ export class ReviewDecisionDto {
   @ApiProperty({ enum: ['APPROVED', 'REJECTED'] }) decision!: string;
   @ApiPropertyOptional({ nullable: true }) comment!: string | null;
   @ApiProperty({ format: 'uuid' }) reviewerUserId!: string;
-  @ApiProperty({ type: String, format: 'date-time' }) decidedAt!: Date;
+  @ApiProperty({ type: String, format: 'date-time' }) decidedAt!: string;
 }
 
 export class AnnotationHistoryDto {
@@ -284,7 +285,7 @@ export class ChangeEventDto {
     nullable: true,
   })
   after!: Record<string, unknown> | null;
-  @ApiProperty({ type: String, format: 'date-time' }) detectedAt!: Date;
+  @ApiProperty({ type: String, format: 'date-time' }) detectedAt!: string;
 }
 
 export class ChangesPageDto {
@@ -371,7 +372,7 @@ export class CatalogCoverageDto {
     type: 'object',
     additionalProperties: true,
   })
-  lastScan!: { scanId: string; finishedAt: Date | null } | null;
+  lastScan!: { scanId: string; finishedAt: string | null } | null;
 }
 
 export class ScanLimitationDto {
@@ -385,11 +386,11 @@ export class ScanDto {
   @ApiProperty() sourceCode!: string;
   @ApiProperty({ example: 'FULL' }) mode!: string;
   @ApiProperty({ enum: SCAN_STATUSES }) status!: string;
-  @ApiProperty({ type: String, format: 'date-time' }) requestedAt!: Date;
+  @ApiProperty({ type: String, format: 'date-time' }) requestedAt!: string;
   @ApiPropertyOptional({ nullable: true, type: String, format: 'date-time' })
-  startedAt!: Date | null;
+  startedAt!: string | null;
   @ApiPropertyOptional({ nullable: true, type: String, format: 'date-time' })
-  finishedAt!: Date | null;
+  finishedAt!: string | null;
   @ApiProperty() attempt!: number;
   @ApiProperty() connectorVersion!: string;
   @ApiPropertyOptional({ nullable: true }) engineVersion!: string | null;
@@ -428,6 +429,6 @@ export class ScanAcceptedDto {
       '`false` si la petición repetía una `Idempotency-Key` ya usada y se devolvió el escaneo de entonces',
   })
   created!: boolean;
-  @ApiProperty({ type: String, format: 'date-time' }) acceptedAt!: Date;
+  @ApiProperty({ type: String, format: 'date-time' }) acceptedAt!: string;
   @ApiProperty({ example: '/admin/catalog/scans' }) statusUrl!: string;
 }
