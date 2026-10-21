@@ -6,8 +6,8 @@
 
 - Columnas con descripción: 3889 (23.1 %). Por fuente: JSDOC_ESTANDAR 2716 · JSDOC_ENTIDAD 1119 · MODELO_PUML 54. El resto dice «sin dato»: no se infiere por el nombre.
 - Índices con «para qué»: 7801 de 8267. El resto dice «sin uso detectado estáticamente».
-- Tablas con entidad del ORM: 1208 de 1230. Deriva: [deriva.md](deriva.md).
-- Tablas que alguna operación HTTP toca: 909. Tablas append-only declaradas en un README: 141.
+- Tablas con entidad del ORM: 1216 de 1230. Deriva: [deriva.md](deriva.md).
+- Tablas que alguna operación HTTP toca: 917. Tablas append-only declaradas en un README: 141.
 
 Otras vistas: [glosario](glosario.md).
 

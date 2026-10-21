@@ -21,7 +21,7 @@
 | [data_residency_policies](#data_residency_policies) | Define requisitos de residencia geográfica de datos para controlar dónde pueden almacenarse datos de salud. | 17 | 9 | 2 | COINCIDE |
 | [draft_records](#draft_records) | Almacena registros en estado de borrador para separar preparación de datos de su publicación o uso operativo. | 17 | 6 | 3 | COINCIDE |
 | [encryption_keys](#encryption_keys) | Cataloga claves de cifrado gobernadas que protegen datos y secretos almacenados por la plataforma. | 18 | 4 | 0 | COINCIDE |
-| [entity_registry](#entity_registry) | Registra entidades del modelo para aplicar políticas de gobierno, retención y control operativo. | 21 | 7 | 6 | COINCIDE |
+| [entity_registry](#entity_registry) | Registra entidades del modelo para aplicar políticas de gobierno, retención y control operativo. | 21 | 7 | 7 | COINCIDE |
 | [field_registry](#field_registry) | Cataloga campos de entidades para mantener metadata de sensibilidad, clasificación y uso. | 14 | 6 | 3 | COINCIDE |
 | [governance_change_log](#governance_change_log) | Preserva cambios de gobierno de datos para reconstruir decisiones sobre clasificación, acceso y ciclo de vida. | 10 | 4 | 10 | COINCIDE |
 | [key_rotation_events](#key_rotation_events) | Preserva eventos de rotación de claves para demostrar y operar el ciclo de vida criptográfico. | 9 | 2 | 0 | COINCIDE |
@@ -1165,7 +1165,7 @@ Registra entidades del modelo para aplicar políticas de gobierno, retención y 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_11_system_ops.puml: entity_registry`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_11_system_ops.puml` · **DDL:** `SQL/11_system_ops/02_tables.sql`
 - **Entidad del ORM:** `EntityRegistry` — `src/modules/system_ops/entities/entity_registry.entity.ts`
-- **Resumen:** 21 columnas · 7 índices · 8 FK salientes · 3 entrantes · 6 operaciones
+- **Resumen:** 21 columnas · 7 índices · 8 FK salientes · 3 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -1225,6 +1225,7 @@ Registra entidades del modelo para aplicar políticas de gobierno, retención y 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/catalog/objects/{id} | LEE | POR_SQL |
 | POST /admin/governance/entity-registry | CREA | DIRECTA |
 | PATCH /admin/governance/entity-registry/{id}/retention | ACTUALIZA | POR_TIPO |
 | PATCH /admin/governance/entity-registry/{id}/retention | LEE | DIRECTA |

@@ -3899,6 +3899,254 @@
         "fuente": null
       },
       {
+        "operacion": "AdminCatalogController_review",
+        "metodo": "POST",
+        "ruta": "/admin/catalog/annotations/{id}/review",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_coverage",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/coverage",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_objects",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_object",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_saveAnnotation",
+        "metodo": "PUT",
+        "ruta": "/admin/catalog/objects/{id}/annotation",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_changes",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}/changes",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_columns",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}/columns",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_evidence",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}/evidence",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_addEvidence",
+        "metodo": "POST",
+        "ruta": "/admin/catalog/objects/{id}/evidence",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_history",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}/history",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_impact",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}/impact",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_listScans",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/scans",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_requestScan",
+        "metodo": "POST",
+        "ruta": "/admin/catalog/scans",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_scan",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/scans/{id}",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminCatalogController_schemas",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/schemas",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_deriva",
+        "metodo": "GET",
+        "ruta": "/admin/portal/catalogo/deriva",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_listarTablas",
+        "metodo": "GET",
+        "ruta": "/admin/portal/catalogo/tablas",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_fichaDeTabla",
+        "metodo": "GET",
+        "ruta": "/admin/portal/catalogo/tablas/{schema}/{tabla}",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_listarProcesos",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_detalleDeProceso",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos/{codigo}",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_grafo",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos/{codigo}/grafo",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_hallazgos",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos/hallazgos",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_detalleDeHallazgo",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos/hallazgos/{id}",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_mapa",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos/mapa",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_glosario",
+        "metodo": "GET",
+        "ruta": "/admin/portal/glosario",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_linaje",
+        "metodo": "GET",
+        "ruta": "/admin/portal/linaje",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_linajeDeTabla",
+        "metodo": "GET",
+        "ruta": "/admin/portal/linaje/tablas/{schema}/{tabla}",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_listarOperaciones",
+        "metodo": "GET",
+        "ruta": "/admin/portal/operaciones",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_detalleDeOperacion",
+        "metodo": "GET",
+        "ruta": "/admin/portal/operaciones/{id}",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_arbol",
+        "metodo": "GET",
+        "ruta": "/admin/portal/operaciones/{id}/arbol",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdminPortalController_version",
+        "metodo": "GET",
+        "ruta": "/admin/portal/version",
+        "modulo": "data_catalog",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "DiagnosticEquipmentController_updateEquipment",
         "metodo": "PATCH",
         "ruta": "/diagnostic-equipment/{id}",
@@ -8883,7 +9131,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 860
+    "cuenta": 891
   },
   {
     "id": "FLU-08",
@@ -8962,6 +9210,254 @@
         "modulo": "community",
         "detalle": "handler sin operación en openapi.json",
         "fuente": "src/modules/community/controllers/community-public.controller.ts:101"
+      },
+      {
+        "operacion": "AdminCatalogController_review",
+        "metodo": "POST",
+        "ruta": "/admin/catalog/annotations/{id}/review",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:211"
+      },
+      {
+        "operacion": "AdminCatalogController_coverage",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/coverage",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:239"
+      },
+      {
+        "operacion": "AdminCatalogController_objects",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:91"
+      },
+      {
+        "operacion": "AdminCatalogController_object",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:102"
+      },
+      {
+        "operacion": "AdminCatalogController_saveAnnotation",
+        "metodo": "PUT",
+        "ruta": "/admin/catalog/objects/{id}/annotation",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:187"
+      },
+      {
+        "operacion": "AdminCatalogController_changes",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}/changes",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:164"
+      },
+      {
+        "operacion": "AdminCatalogController_columns",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}/columns",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:115"
+      },
+      {
+        "operacion": "AdminCatalogController_evidence",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}/evidence",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:126"
+      },
+      {
+        "operacion": "AdminCatalogController_addEvidence",
+        "metodo": "POST",
+        "ruta": "/admin/catalog/objects/{id}/evidence",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:137"
+      },
+      {
+        "operacion": "AdminCatalogController_history",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}/history",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:153"
+      },
+      {
+        "operacion": "AdminCatalogController_impact",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/objects/{id}/impact",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:175"
+      },
+      {
+        "operacion": "AdminCatalogController_listScans",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/scans",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:250"
+      },
+      {
+        "operacion": "AdminCatalogController_requestScan",
+        "metodo": "POST",
+        "ruta": "/admin/catalog/scans",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:269"
+      },
+      {
+        "operacion": "AdminCatalogController_scan",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/scans/{id}",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:261"
+      },
+      {
+        "operacion": "AdminCatalogController_schemas",
+        "metodo": "GET",
+        "ruta": "/admin/catalog/schemas",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:79"
+      },
+      {
+        "operacion": "AdminPortalController_deriva",
+        "metodo": "GET",
+        "ruta": "/admin/portal/catalogo/deriva",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:168"
+      },
+      {
+        "operacion": "AdminPortalController_listarTablas",
+        "metodo": "GET",
+        "ruta": "/admin/portal/catalogo/tablas",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:153"
+      },
+      {
+        "operacion": "AdminPortalController_fichaDeTabla",
+        "metodo": "GET",
+        "ruta": "/admin/portal/catalogo/tablas/{schema}/{tabla}",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:160"
+      },
+      {
+        "operacion": "AdminPortalController_listarProcesos",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:126"
+      },
+      {
+        "operacion": "AdminPortalController_detalleDeProceso",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos/{codigo}",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:133"
+      },
+      {
+        "operacion": "AdminPortalController_grafo",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos/{codigo}/grafo",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:145"
+      },
+      {
+        "operacion": "AdminPortalController_hallazgos",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos/hallazgos",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:108"
+      },
+      {
+        "operacion": "AdminPortalController_detalleDeHallazgo",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos/hallazgos/{id}",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:115"
+      },
+      {
+        "operacion": "AdminPortalController_mapa",
+        "metodo": "GET",
+        "ruta": "/admin/portal/flujos/mapa",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:101"
+      },
+      {
+        "operacion": "AdminPortalController_glosario",
+        "metodo": "GET",
+        "ruta": "/admin/portal/glosario",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:192"
+      },
+      {
+        "operacion": "AdminPortalController_linaje",
+        "metodo": "GET",
+        "ruta": "/admin/portal/linaje",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:177"
+      },
+      {
+        "operacion": "AdminPortalController_linajeDeTabla",
+        "metodo": "GET",
+        "ruta": "/admin/portal/linaje/tablas/{schema}/{tabla}",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:184"
+      },
+      {
+        "operacion": "AdminPortalController_listarOperaciones",
+        "metodo": "GET",
+        "ruta": "/admin/portal/operaciones",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:70"
+      },
+      {
+        "operacion": "AdminPortalController_detalleDeOperacion",
+        "metodo": "GET",
+        "ruta": "/admin/portal/operaciones/{id}",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:77"
+      },
+      {
+        "operacion": "AdminPortalController_arbol",
+        "metodo": "GET",
+        "ruta": "/admin/portal/operaciones/{id}/arbol",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:90"
+      },
+      {
+        "operacion": "AdminPortalController_version",
+        "metodo": "GET",
+        "ruta": "/admin/portal/version",
+        "modulo": "data_catalog",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/data_catalog/controllers/admin-portal.controller.ts:63"
       },
       {
         "operacion": "AdminTenantsController_updatePublicProfile",
@@ -9156,7 +9652,7 @@
         "fuente": "src/modules/terminology/controllers/terminology-concepts.controller.ts:202"
       }
     ],
-    "cuenta": 33
+    "cuenta": 64
   },
   {
     "id": "FLU-09",
@@ -9325,6 +9821,22 @@
         "fuente": "src/modules/content_packs/content-packs.controller.ts:69"
       },
       {
+        "operacion": "AdminCatalogController_review",
+        "metodo": "POST",
+        "ruta": "/admin/catalog/annotations/{id}/review",
+        "modulo": "data_catalog",
+        "detalle": "DomainException: {403} (src/modules/data_catalog/services/catalog-governance.service.ts:182) | DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:188)",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:211"
+      },
+      {
+        "operacion": "AdminCatalogController_saveAnnotation",
+        "metodo": "PUT",
+        "ruta": "/admin/catalog/objects/{id}/annotation",
+        "modulo": "data_catalog",
+        "detalle": "DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:77)",
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:187"
+      },
+      {
         "operacion": "PeriopController_addDiagnoses",
         "metodo": "POST",
         "ruta": "/procedure-cases/{id}/diagnoses",
@@ -9437,6 +9949,6 @@
         "fuente": "src/modules/scheduling/controllers/scheduling.controller.ts:633"
       }
     ],
-    "cuenta": 33
+    "cuenta": 35
   }
 ]

@@ -475,6 +475,45 @@ export function buildSourceIndex(root = process.cwd()) {
     return unique;
   }
 
+  // `@Roles(...ROLES_DEL_PORTAL)`: el arreglo vive en un archivo de constantes. Se resuelve por
+  // nombre sólo si es único en el repo; si no, el argumento queda tal cual (nunca se adivina).
+  let arreglosDeTexto;
+  function arreglosConstantes() {
+    if (arreglosDeTexto) return arreglosDeTexto;
+    arreglosDeTexto = new Map();
+    const ambiguos = new Set();
+    for (const [, archivo] of archivos)
+      for (const statement of archivo.statements) {
+        if (!ts.isVariableStatement(statement)) continue;
+        for (const declaracion of statement.declarationList.declarations) {
+          if (!ts.isIdentifier(declaracion.name) || !declaracion.initializer)
+            continue;
+          let valor = declaracion.initializer;
+          while (
+            ts.isAsExpression(valor) ||
+            ts.isSatisfiesExpression(valor) ||
+            ts.isParenthesizedExpression(valor)
+          )
+            valor = valor.expression;
+          if (!ts.isArrayLiteralExpression(valor)) continue;
+          if (!valor.elements.every((e) => ts.isStringLiteralLike(e))) continue;
+          const nombre = declaracion.name.text;
+          if (arreglosDeTexto.has(nombre)) ambiguos.add(nombre);
+          arreglosDeTexto.set(
+            nombre,
+            valor.elements.map((e) => e.text),
+          );
+        }
+      }
+    for (const nombre of ambiguos) arreglosDeTexto.delete(nombre);
+    return arreglosDeTexto;
+  }
+  function rolesDeArgumento(texto) {
+    const spread = /^\.\.\.([A-Za-z_$][\w$]*)$/.exec(texto.trim());
+    const resuelto = spread && arreglosConstantes().get(spread[1]);
+    return resuelto ?? [literal(texto)];
+  }
+
   for (const [className, classInfo] of classes) {
     if (!className.endsWith('Controller')) continue;
     const moduleMatch = classInfo.relative.match(/^src\/modules\/([^/]+)\//);
@@ -492,7 +531,7 @@ export function buildSourceIndex(root = process.cwd()) {
       ];
       const roles = decorators
         .filter((item) => item.name === 'Roles')
-        .flatMap((item) => item.args.map(literal));
+        .flatMap((item) => item.args.flatMap(rolesDeArgumento));
       const throttle = decorators.find(
         (item) => item.name === 'Throttle',
       )?.text;

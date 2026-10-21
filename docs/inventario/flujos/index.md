@@ -2,11 +2,11 @@
 
 # Inventario de flujos
 
-**67 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 65 de módulo), **10 máquinas de estado** y **1223 árboles de decisión**.
+**68 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 66 de módulo), **10 máquinas de estado** y **1254 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1106 · sin ellas: 117
+- Operaciones con decisiones propias: 1134 · sin ellas: 120
 - Operaciones sin proceso asignado: 0
-- Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 22 · CASO_DE_USO_README 20 · MIXTO 23 · CURADO_EN_DOCUMENTO 2
+- Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 22 · CASO_DE_USO_README 21 · MIXTO 23 · CURADO_EN_DOCUMENTO 2
 
 Método y límites: [README del inventario](../README.md). Los procesos de módulo se construyen del README de cada módulo (tabla UC → ruta); lo que el README no asigna a un caso de uso se agrupa por controlador y se marca `AGRUPACION_POR_CONTROLADOR`.
 
@@ -30,6 +30,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `content_packs` | 1 | 2 | 0 | [content_packs.md](content_packs.md) |
 | `crm` | 1 | 16 | 0 | [crm.md](crm.md) |
 | `cross_store_consistency` | 1 | 16 | 0 | [cross_store_consistency.md](cross_store_consistency.md) |
+| `data_catalog` | 1 | 31 | 0 | [data_catalog.md](data_catalog.md) |
 | `delegated_access` | 1 | 11 | 0 | [delegated_access.md](delegated_access.md) |
 | `diagnostic_units` | 1 | 21 | 0 | [diagnostic_units.md](diagnostic_units.md) |
 | `diagnostics` | 1 | 27 | 0 | [diagnostics.md](diagnostics.md) |

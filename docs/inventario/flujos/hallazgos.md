@@ -12,10 +12,10 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 84 |
 | [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 16 |
 | [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 45 |
-| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 860 |
-| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 33 |
+| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 891 |
+| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 64 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 0 |
-| [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 33 |
+| [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 35 |
 
 ## FLU-01
 
@@ -319,7 +319,7 @@ _Ninguno._
 
 ## FLU-07
 
-**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 860 caso(s).
+**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 891 caso(s).
 
 **Qué hacer:** Informativo: pueden ser internas (workers), de otros consumidores (móvil, integraciones) o deuda. Confirmar con el responsable antes de retirar nada.
 
@@ -526,11 +526,11 @@ _Ninguno._
 | POST /consent/hipaa-authorizations/{id}/revoke | consent | ningún cliente del frontend la declara | — |
 | POST /consent/internal/expiration-sweep | consent | ningún cliente del frontend la declara | — |
 
-_Se muestran 200 de 860; la lista completa está en `inventario/flujos/hallazgos.json`._
+_Se muestran 200 de 891; la lista completa está en `inventario/flujos/hallazgos.json`._
 
 ## FLU-08
 
-**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 33 caso(s).
+**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 64 caso(s).
 
 **Qué hacer:** Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.
 
@@ -545,6 +545,37 @@ _Se muestran 200 de 860; la lista completa está en `inventario/flujos/hallazgos
 | GET /public/comments/{commentId}/replies | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:137` |
 | GET /public/posts/{postId}/comments | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:116` |
 | GET /public/posts/{postId}/reactions | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:101` |
+| POST /admin/catalog/annotations/{id}/review | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:211` |
+| GET /admin/catalog/coverage | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:239` |
+| GET /admin/catalog/objects | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:91` |
+| GET /admin/catalog/objects/{id} | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:102` |
+| PUT /admin/catalog/objects/{id}/annotation | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:187` |
+| GET /admin/catalog/objects/{id}/changes | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:164` |
+| GET /admin/catalog/objects/{id}/columns | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:115` |
+| GET /admin/catalog/objects/{id}/evidence | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:126` |
+| POST /admin/catalog/objects/{id}/evidence | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:137` |
+| GET /admin/catalog/objects/{id}/history | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:153` |
+| GET /admin/catalog/objects/{id}/impact | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:175` |
+| GET /admin/catalog/scans | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:250` |
+| POST /admin/catalog/scans | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:269` |
+| GET /admin/catalog/scans/{id} | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:261` |
+| GET /admin/catalog/schemas | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:79` |
+| GET /admin/portal/catalogo/deriva | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:168` |
+| GET /admin/portal/catalogo/tablas | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:153` |
+| GET /admin/portal/catalogo/tablas/{schema}/{tabla} | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:160` |
+| GET /admin/portal/flujos | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:126` |
+| GET /admin/portal/flujos/{codigo} | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:133` |
+| GET /admin/portal/flujos/{codigo}/grafo | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:145` |
+| GET /admin/portal/flujos/hallazgos | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:108` |
+| GET /admin/portal/flujos/hallazgos/{id} | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:115` |
+| GET /admin/portal/flujos/mapa | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:101` |
+| GET /admin/portal/glosario | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:192` |
+| GET /admin/portal/linaje | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:177` |
+| GET /admin/portal/linaje/tablas/{schema}/{tabla} | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:184` |
+| GET /admin/portal/operaciones | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:70` |
+| GET /admin/portal/operaciones/{id} | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:77` |
+| GET /admin/portal/operaciones/{id}/arbol | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:90` |
+| GET /admin/portal/version | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/controllers/admin-portal.controller.ts:63` |
 | PUT /admin/tenants/{tenantId}/public-profile | directory | handler sin operación en openapi.json | `src/modules/directory/controllers/admin-tenants.controller.ts:148` |
 | DESCONOCIDO /iam/auth | iam | handler sin operación en openapi.json | `src/modules/iam/controllers/iam-auth.controller.ts:311` |
 | GET /insurance-carrier-catalog | insurance | handler sin operación en openapi.json | `src/modules/insurance/controllers/insurance-catalog.controller.ts:37` |
@@ -580,7 +611,7 @@ _Ninguno._
 
 ## FLU-10
 
-**Operaciones que pueden terminar en un 500 por una excepción sin tipar** — severidad BAJA — 33 caso(s).
+**Operaciones que pueden terminar en un 500 por una excepción sin tipar** — severidad BAJA — 35 caso(s).
 
 **Qué hacer:** Cambiar el `new Error(...)` por una excepción del proyecto con estado y código estables (regla 96.4.4). El cliente hoy recibe INTERNAL sin poder distinguir la causa.
 
@@ -605,6 +636,8 @@ _Ninguno._
 | GET /internal/community/search/health | community | Error: OpenSearch está en estado red (src/modules/search_platform/services/search-index.service.ts:174) | `src/modules/community/controllers/community-search-index.controller.ts:72` |
 | GET /public/media/{id} | community | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3 (src/common/storage/s3-file-storage.adapter.ts:114) \| Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:77) | `src/modules/community/controllers/community-public.controller.ts:379` |
 | POST /admin/content-packs/{code}/apply | content_packs | Error: El catálogo del glosario declara el slug "{term.slug}" más de una vez (src/common/seed/glossary-seed.service.ts:244) \| Error: El directorio declara el código "{facility.code}" más de una vez (src/common/seed/bolivia-facilities-seed.service.ts:184) \| Error: El catálogo geográfico declara la sigla "{department.code}" más de una vez (src/common/seed/bo-geography-seed.service.ts:274) | `src/modules/content_packs/content-packs.controller.ts:69` |
+| POST /admin/catalog/annotations/{id}/review | data_catalog | DomainException: {403} (src/modules/data_catalog/services/catalog-governance.service.ts:182) \| DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:188) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:211` |
+| PUT /admin/catalog/objects/{id}/annotation | data_catalog | DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:77) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:187` |
 | POST /procedure-cases/{id}/diagnoses | procedures_perioperative | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/procedures_perioperative/controllers/periop.controller.ts:185` |
 | POST /scheduling/appointments/direct | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/controllers/scheduling.controller.ts:515` |
 | POST /scheduling/bookings/{id}/accept | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) \| Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/controllers/scheduling-bookings.controller.ts:144` |
