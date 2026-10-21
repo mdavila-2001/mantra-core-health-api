@@ -1,8 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { AdminCatalogController } from './controllers/admin-catalog.controller';
 import { AdminPortalController } from './controllers/admin-portal.controller';
 import * as entities from './entities';
 import { InventoryRepository } from './inventory/inventory.repository';
+import { CatalogRepository } from './repositories/catalog.repository';
+import { CatalogGovernanceService } from './services/catalog-governance.service';
+import { CatalogReadService } from './services/catalog-read.service';
+import { CatalogScanService } from './services/catalog-scan.service';
 import { PortalInventoryService } from './services/portal-inventory.service';
 
 /**
@@ -19,8 +24,15 @@ import { PortalInventoryService } from './services/portal-inventory.service';
  */
 @Module({
   imports: [MikroOrmModule.forFeature(Object.values(entities))],
-  controllers: [AdminPortalController],
-  providers: [InventoryRepository, PortalInventoryService],
+  controllers: [AdminPortalController, AdminCatalogController],
+  providers: [
+    InventoryRepository,
+    PortalInventoryService,
+    CatalogRepository,
+    CatalogReadService,
+    CatalogGovernanceService,
+    CatalogScanService,
+  ],
   exports: [InventoryRepository],
 })
 export class DataCatalogModule {}
