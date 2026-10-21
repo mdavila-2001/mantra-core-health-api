@@ -543,7 +543,7 @@ describe('PharmacyOrdersService', () => {
       ]) {
         expect(
           Reflect.getMetadata(ROLES_KEY, Reflect.get(controller, handler)),
-        ).toEqual(['SECURITY_ADMIN']);
+        ).toEqual(['SECURITY_ADMIN', 'PHARMACY_STAFF']);
       }
       for (const handler of [
         'create',
@@ -936,10 +936,10 @@ describe('PharmacyOrdersService', () => {
       expect(d.ordersRepo.findOrdersByPatient).toHaveBeenCalledTimes(2);
     });
 
-    it('requires the tenant in the request', async () => {
+    it('does not require a tenant: the patient orders travel across organizations', async () => {
       const d = build();
-      await expect(d.service.listMine(patient)).rejects.toBeInstanceOf(
-        PreconditionFailedException,
+      await expect(d.service.listMine(patient)).resolves.toEqual(
+        expect.objectContaining({ count: 0 }),
       );
     });
   });

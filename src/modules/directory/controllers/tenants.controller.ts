@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -34,6 +35,7 @@ import {
   BranchResponseDto,
   ChangeMembershipRoleDto,
   CreateBranchDto,
+  UpdateBranchDto,
   CreateChildTenantDto,
   CreateMembershipDto,
   MembershipResponseDto,
@@ -230,6 +232,23 @@ export class TenantsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<BranchResponseDto> {
     return this.branchesService.create(tenantId, dto, actor);
+  }
+
+  /** Edición de una sucursal (P54): nombre, descripción, enlace y punto. */
+  @Audited({
+    action: 'BRANCH_UPDATED',
+    entity: 'branch',
+    entityId: 'param:branchId',
+  })
+  @Patch(':tenantId/branches/:branchId')
+  @ApiOperation({ summary: 'Editar una sucursal' })
+  updateBranch(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @Param('branchId', ParseUUIDPipe) branchId: string,
+    @Body() dto: UpdateBranchDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<BranchResponseDto> {
+    return this.branchesService.update(tenantId, branchId, dto, actor);
   }
 
   /** UC-04-05. */

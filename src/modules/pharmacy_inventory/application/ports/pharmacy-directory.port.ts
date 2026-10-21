@@ -67,11 +67,11 @@ export interface PharmacyAddressSnapshot {
 export interface PharmacyDirectoryPort {
   findVisibleByTenant(
     uow: UnitOfWork,
-    tenantId: string,
+    tenantId: string | undefined,
   ): Promise<PharmacySnapshot[]>;
   findVisibleById(
     uow: UnitOfWork,
-    tenantId: string,
+    tenantId: string | undefined,
     id: string,
   ): Promise<PharmacySnapshot | null>;
   findActiveSites(

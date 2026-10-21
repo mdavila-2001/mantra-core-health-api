@@ -45,6 +45,7 @@ function build() {
     pricingService as any,
     integrationService as any,
     catalogService as any,
+    { listCategories: mockFn() } as any,
   );
   return {
     controller,
