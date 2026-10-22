@@ -1,0 +1,18 @@
+[
+  {"id":"InsuranceCampaignsController_list[1]","metodo":"GET","ruta":"/insurance-campaigns","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_create[1]","metodo":"POST","ruta":"/insurance-campaigns","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_getById[1]","metodo":"GET","ruta":"/insurance-campaigns/{id}","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_update[1]","metodo":"PATCH","ruta":"/insurance-campaigns/{id}","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_changeStatus[1]","metodo":"PATCH","ruta":"/insurance-campaigns/{id}/status","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_listActive[1]","metodo":"GET","ruta":"/insurance-campaigns/active","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_myBenefits[1]","metodo":"GET","ruta":"/insurance-campaigns/my-benefits","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_listForPatient[1]","metodo":"GET","ruta":"/insurance-campaigns/patient/{patientProfileId}","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_list[0]","metodo":"GET","ruta":"/insurance/campaigns","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_create[0]","metodo":"POST","ruta":"/insurance/campaigns","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_getById[0]","metodo":"GET","ruta":"/insurance/campaigns/{id}","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_update[0]","metodo":"PATCH","ruta":"/insurance/campaigns/{id}","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_changeStatus[0]","metodo":"PATCH","ruta":"/insurance/campaigns/{id}/status","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_listActive[0]","metodo":"GET","ruta":"/insurance/campaigns/active","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_myBenefits[0]","metodo":"GET","ruta":"/insurance/campaigns/my-benefits","nodos":[],"respuestas":[],"truncado":false},
+  {"id":"InsuranceCampaignsController_listForPatient[0]","metodo":"GET","ruta":"/insurance/campaigns/patient/{patientProfileId}","nodos":[],"respuestas":[],"truncado":false}
+]

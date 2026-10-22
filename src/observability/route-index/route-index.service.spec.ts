@@ -3,7 +3,7 @@ import { Controller, Get, Post, All } from '@nestjs/common';
 import { MetadataScanner, type DiscoveryService } from '@nestjs/core';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { DataCatalogController } from '../../modules/data_catalog/controllers/data-catalog.controller';
+import { AdminCatalogController } from '../../modules/data_catalog/controllers/admin-catalog.controller';
 import { OpsConsoleController } from '../../modules/ops_console/ops-console.controller';
 import { QaLabReadController } from '../../modules/qa_lab/controllers/qa-lab-read.controller';
 import { RouteIndexService, normalizeTemplate } from './route-index.service';
@@ -187,7 +187,7 @@ describe('RouteIndexService contra openapi.json', () => {
       ?.operationId;
 
   it.each([
-    ['DataCatalogController', DataCatalogController],
+    ['AdminCatalogController', AdminCatalogController],
     ['OpsConsoleController', OpsConsoleController],
     ['QaLabReadController', QaLabReadController],
   ])('%s: cada ruta coincide con su operationId publicado', (_name, cls) => {
@@ -208,10 +208,10 @@ describe('RouteIndexService contra openapi.json', () => {
   });
 
   it('el ejemplo del plan: GET /admin/catalog/schemas', () => {
-    const index = indexOf(DataCatalogController);
+    const index = indexOf(AdminCatalogController);
 
     expect(index.lookup('GET', '/admin/catalog/schemas')?.operationId).toBe(
-      'DataCatalogController_listSchemas',
+      'AdminCatalogController_schemas',
     );
   });
 });
