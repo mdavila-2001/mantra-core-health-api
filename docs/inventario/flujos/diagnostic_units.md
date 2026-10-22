@@ -24,11 +24,11 @@ _Fuente: `src/modules/diagnostic_units/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `Directorio P3` | Listar unidades activas y verificadas del tenant activo | GET /diagnostic-units | Cualquier sesión válida | BAJO | 5 |
-|  |  | GET /diagnostic-units/{id} | Cualquier sesión válida | BAJO | 9 |
+|  |  | GET /diagnostic-units/{id} | Cualquier sesión válida | BAJO | 10 |
 | `UC-23-01` | Alta de unidad con sitios (1..N) y acreditaciones (0..N) | POST /diagnostic-units | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-23-02` | Actualizar sitio | PATCH /diagnostic-unit-sites/{siteId} | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | POST /diagnostic-units/{id}/sites | SECURITY_ADMIN | MEDIO | 2 |
-| `UC-23-03` | Verificar y publicar perfil público | POST /diagnostic-units/{id}/verify-and-publish | SECURITY_ADMIN | MEDIO | 7 |
+| `UC-23-03` | Verificar y publicar perfil público | POST /diagnostic-units/{id}/verify-and-publish | SECURITY_ADMIN | MEDIO | 8 |
 | `UC-23-04` | Declarar especialidades (upsert + soft-close) | PUT /diagnostic-units/{id}/specialties | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-23-05` | Publicar oferta con componentes (panel) | POST /diagnostic-units/{id}/study-offerings | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-23-06` | Crear cronograma de precios | POST /diagnostic-units/{id}/price-schedules | SECURITY_ADMIN | MEDIO | 3 |
@@ -43,71 +43,72 @@ _Fuente: `src/modules/diagnostic_units/README.md:3`_
 | `UC-23-12` | Reconstruir proyección del perfil público | POST /diagnostic-units/{id}/reproject | SECURITY_ADMIN | BAJO | 1 |
 | `ctrl:DiagnosticUnitsController` | Operaciones de DiagnosticUnitsController que el README no asigna a un caso de uso | GET /diagnostic-units/{id}/administration | SECURITY_ADMIN | BAJO | 11 |
 |  |  | GET /diagnostic-units/administration | SECURITY_ADMIN | BAJO | 5 |
-|  |  | GET /diagnostic-units/search | Cualquier sesión válida | BAJO | 8 |
+|  |  | GET /diagnostic-units/search | Cualquier sesión válida | BAJO | 10 |
 
 ### Diagrama 1 de 2 — etapas `Directorio P3`, `UC-23-01`, `UC-23-02`…
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a14(["SECURITY_ADMIN"]):::actor
+  a15(["SECURITY_ADMIN"]):::actor
   t3[("diagnostic_units.diagnostic_equipment")]:::tabla
   t4[("diagnostic_units.diagnostic_study_offerings")]:::tabla
   t5[("diagnostic_units.diagnostic_unit_sites")]:::tabla
   t6[("diagnostic_units.diagnostic_units")]:::tabla
   t7[("terminology.catalog_concepts")]:::tabla
-  t9[("diagnostic_units.diagnostic_price_schedules")]:::tabla
-  t10[("diagnostic_units.diagnostic_study_prices")]:::tabla
-  t11[("diagnostic_units.diagnostic_unit_accreditations")]:::tabla
-  t18[("community.public_profiles")]:::tabla
-  t19[("diagnostic_units.diagnostic_unit_specialties")]:::tabla
-  t23[("diagnostic_units.diagnostic_study_components")]:::tabla
-  t31[("diagnostic_units.diagnostic_unit_practitioner_ass…")]:::tabla
-  t12[("+3 tablas más")]
+  t9[("common.addresses")]:::tabla
+  t10[("diagnostic_units.diagnostic_price_schedules")]:::tabla
+  t11[("diagnostic_units.diagnostic_study_prices")]:::tabla
+  t12[("diagnostic_units.diagnostic_unit_accreditations")]:::tabla
+  t19[("community.public_profiles")]:::tabla
+  t20[("diagnostic_units.diagnostic_unit_specialties")]:::tabla
+  t24[("diagnostic_units.diagnostic_study_components")]:::tabla
+  t32[("diagnostic_units.diagnostic_unit_practitioner_ass…")]:::tabla
+  t13[("+4 tablas más")]
   subgraph s0["Directorio P3 · Listar unidades activas y verificadas del tenant activo"]
     o1["GET /diagnostic-units"]:::op
     o8["GET /diagnostic-units/{id}"]:::op
   end
   subgraph s1["UC-23-01 · Alta de unidad con sitios (1..N) y acreditaciones (0..N)"]
-    o13["POST /diagnostic-units"]:::op
+    o14["POST /diagnostic-units"]:::op
   end
   subgraph s2["UC-23-02 · Actualizar sitio"]
-    o15["PATCH /diagnostic-unit-sites/{siteId}"]:::op
-    o16["POST /diagnostic-units/{id}/sites"]:::op
+    o16["PATCH /diagnostic-unit-sites/{siteId}"]:::op
+    o17["POST /diagnostic-units/{id}/sites"]:::op
   end
-  t20[("+1 tablas más")]
+  t21[("+2 tablas más")]
   subgraph s3["UC-23-03 · Verificar y publicar perfil público"]
-    o17["POST /diagnostic-units/{id}/verify-and-publish"]:::op
+    o18["POST /diagnostic-units/{id}/verify-and-publish"]:::op
   end
   subgraph s4["UC-23-04 · Declarar especialidades (upsert + soft-close)"]
-    o21["PUT /diagnostic-units/{id}/specialties"]:::op
+    o22["PUT /diagnostic-units/{id}/specialties"]:::op
   end
   subgraph s5["UC-23-05 · Publicar oferta con componentes (panel)"]
-    o22["POST /diagnostic-units/{id}/study-offerings"]:::op
+    o23["POST /diagnostic-units/{id}/study-offerings"]:::op
   end
   subgraph s6["UC-23-06 · Crear cronograma de precios"]
-    o24["POST /diagnostic-units/{id}/price-schedules"]:::op
+    o25["POST /diagnostic-units/{id}/price-schedules"]:::op
   end
   subgraph s7["UC-23-07 · Fijar/versionar precio (append-only)"]
-    o25["POST /price-schedules/{scheduleId}/study-prices"]:::op
+    o26["POST /price-schedules/{scheduleId}/study-prices"]:::op
   end
   subgraph s8["UC-23-08 · Retirar (soft-delete) oferta"]
-    o26["DELETE /diagnostic-study-offerings/{id}"]:::op
-    o27["POST /study-prices/{priceId}/close"]:::op
+    o27["DELETE /diagnostic-study-offerings/{id}"]:::op
+    o28["POST /study-prices/{priceId}/close"]:::op
   end
   subgraph s9["UC-23-09 · Actualizar estado/calibración de equipo"]
-    o28["PATCH /diagnostic-equipment/{id}"]:::op
-    o29["POST /diagnostic-unit-sites/{siteId}/equipment"]:::op
+    o29["PATCH /diagnostic-equipment/{id}"]:::op
+    o30["POST /diagnostic-unit-sites/{siteId}/equipment"]:::op
   end
   subgraph s10["UC-23-10 · Asignar especialista"]
-    o30["POST /diagnostic-units/{id}/practitioner-assignments"]:::op
+    o31["POST /diagnostic-units/{id}/practitioner-assignments"]:::op
   end
   subgraph s11["UC-23-11 · Renovar acreditación"]
-    o32["POST /diagnostic-unit-accreditations/{id}/renew"]:::op
-    o33["POST /diagnostic-units/{id}/accreditations"]:::op
+    o33["POST /diagnostic-unit-accreditations/{id}/renew"]:::op
+    o34["POST /diagnostic-units/{id}/accreditations"]:::op
   end
   subgraph s12["UC-23-12 · Reconstruir proyección del perfil público"]
-    o34["POST /diagnostic-units/{id}/reproject"]:::op
+    o35["POST /diagnostic-units/{id}/reproject"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -116,81 +117,81 @@ flowchart LR
   o1 -->|"LEE"| t6
   o1 -->|"LEE"| t7
   a2 --> o8
-  o8 -->|"LEE"| t3
   o8 -->|"LEE"| t9
-  o8 -->|"LEE"| t4
+  o8 -->|"LEE"| t3
   o8 -->|"LEE"| t10
+  o8 -->|"LEE"| t4
   o8 -->|"LEE"| t11
-  o8 -->|"LEE"| t5
-  o8 -.-> t12
-  a14 --> o13
-  o13 -->|"CREA"| t11
-  o13 -->|"CREA"| t5
-  o13 -->|"CREA"| t6
-  o13 -->|"LEE"| t6
-  a14 --> o15
-  o15 -->|"ACTUALIZA"| t5
-  o15 -->|"LEE"| t5
-  a14 --> o16
-  o16 -->|"CREA"| t5
-  o16 -->|"LEE"| t6
-  a14 --> o17
-  o17 -->|"CREA"| t18
-  o17 -->|"LEE"| t18
-  o17 -->|"ACTUALIZA"| t11
-  o17 -->|"LEE"| t5
-  o17 -->|"ACTUALIZA"| t19
-  o17 -->|"ACTUALIZA"| t6
-  o17 -.-> t20
-  a14 --> o21
-  o21 -->|"ACTUALIZA"| t19
-  o21 -->|"CREA"| t19
-  o21 -->|"LEE"| t19
-  o21 -->|"LEE"| t6
-  a14 --> o22
-  o22 -->|"CREA"| t23
-  o22 -->|"CREA"| t4
-  o22 -->|"LEE"| t4
+  o8 -->|"LEE"| t12
+  o8 -.-> t13
+  a15 --> o14
+  o14 -->|"CREA"| t12
+  o14 -->|"CREA"| t5
+  o14 -->|"CREA"| t6
+  o14 -->|"LEE"| t6
+  a15 --> o16
+  o16 -->|"ACTUALIZA"| t5
+  o16 -->|"LEE"| t5
+  a15 --> o17
+  o17 -->|"CREA"| t5
+  o17 -->|"LEE"| t6
+  a15 --> o18
+  o18 -->|"ACTUALIZA"| t19
+  o18 -->|"CREA"| t19
+  o18 -->|"LEE"| t19
+  o18 -->|"ACTUALIZA"| t12
+  o18 -->|"LEE"| t5
+  o18 -->|"ACTUALIZA"| t20
+  o18 -.-> t21
+  a15 --> o22
+  o22 -->|"ACTUALIZA"| t20
+  o22 -->|"CREA"| t20
+  o22 -->|"LEE"| t20
   o22 -->|"LEE"| t6
-  a14 --> o24
-  o24 -->|"CREA"| t9
-  o24 -->|"LEE"| t9
-  o24 -->|"LEE"| t6
-  a14 --> o25
-  o25 -->|"LEE"| t9
-  o25 -->|"LEE"| t4
-  o25 -->|"ACTUALIZA"| t10
+  a15 --> o23
+  o23 -->|"CREA"| t24
+  o23 -->|"CREA"| t4
+  o23 -->|"LEE"| t4
+  o23 -->|"LEE"| t6
+  a15 --> o25
   o25 -->|"CREA"| t10
   o25 -->|"LEE"| t10
-  a14 --> o26
-  o26 -->|"ACTUALIZA"| t4
+  o25 -->|"LEE"| t6
+  a15 --> o26
+  o26 -->|"LEE"| t10
   o26 -->|"LEE"| t4
-  a14 --> o27
-  o27 -->|"ACTUALIZA"| t10
-  o27 -->|"LEE"| t10
-  a14 --> o28
-  o28 -->|"ACTUALIZA"| t3
-  o28 -->|"LEE"| t3
-  a14 --> o29
-  o29 -->|"CREA"| t3
+  o26 -->|"ACTUALIZA"| t11
+  o26 -->|"CREA"| t11
+  o26 -->|"LEE"| t11
+  a15 --> o27
+  o27 -->|"ACTUALIZA"| t4
+  o27 -->|"LEE"| t4
+  a15 --> o28
+  o28 -->|"ACTUALIZA"| t11
+  o28 -->|"LEE"| t11
+  a15 --> o29
+  o29 -->|"ACTUALIZA"| t3
   o29 -->|"LEE"| t3
-  o29 -->|"ACTUALIZA"| t5
-  o29 -->|"LEE"| t5
-  a14 --> o30
-  o30 -->|"CREA"| t31
-  o30 -->|"LEE"| t31
-  o30 -->|"CREA"| t19
-  o30 -->|"LEE"| t19
-  o30 -->|"LEE"| t6
-  a14 --> o32
-  o32 -->|"ACTUALIZA"| t11
-  o32 -->|"CREA"| t11
-  o32 -->|"LEE"| t11
-  a14 --> o33
-  o33 -->|"CREA"| t11
-  o33 -->|"LEE"| t6
-  a14 --> o34
+  a15 --> o30
+  o30 -->|"CREA"| t3
+  o30 -->|"LEE"| t3
+  o30 -->|"ACTUALIZA"| t5
+  o30 -->|"LEE"| t5
+  a15 --> o31
+  o31 -->|"CREA"| t32
+  o31 -->|"LEE"| t32
+  o31 -->|"CREA"| t20
+  o31 -->|"LEE"| t20
+  o31 -->|"LEE"| t6
+  a15 --> o33
+  o33 -->|"ACTUALIZA"| t12
+  o33 -->|"CREA"| t12
+  o33 -->|"LEE"| t12
+  a15 --> o34
+  o34 -->|"CREA"| t12
   o34 -->|"LEE"| t6
+  a15 --> o35
+  o35 -->|"LEE"| t6
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -212,9 +213,10 @@ flowchart LR
   t11[("diagnostic_units.diagnostic_unit_sites")]:::tabla
   t12[("diagnostic_units.diagnostic_units")]:::tabla
   t13[("terminology.catalog_concepts")]:::tabla
-  t16[("community.service_reviews")]:::tabla
+  t16[("common.addresses")]:::tabla
+  t17[("community.service_reviews")]:::tabla
   t9[("+5 tablas más")]
-  t17[("+2 tablas más")]
+  t18[("+4 tablas más")]
   subgraph s0["ctrl:DiagnosticUnitsController · Operaciones de DiagnosticUnitsController que e…"]
     o1["GET /diagnostic-units/{id}/administration"]:::op
     o10["GET /diagnostic-units/administration"]:::op
@@ -236,12 +238,12 @@ flowchart LR
   o10 -->|"LEE"| t13
   a15 --> o14
   o14 -->|"LEE"| t16
+  o14 -->|"LEE"| t17
   o14 -->|"LEE"| t3
   o14 -->|"LEE"| t4
   o14 -->|"LEE"| t5
   o14 -->|"LEE"| t6
-  o14 -->|"LEE"| t11
-  o14 -.-> t17
+  o14 -.-> t18
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -654,12 +656,16 @@ flowchart TD
   n19 --> n20
   n21[("LEE practice.practice_sites")]:::efecto
   n20 --> n21
-  n22["Llama a DiagnosticUnitsReadRepository.findConcepts"]:::llamada
+  n22["Llama a DiagnosticUnitsReadRepository.findAddresses"]:::llamada
   n21 --> n22
-  n23[("LEE terminology.catalog_concepts")]:::efecto
+  n23[("LEE common.addresses")]:::efecto
   n22 --> n23
-  n24(("200 Responde con éxito")):::ok
+  n24["Llama a DiagnosticUnitsReadRepository.findConcepts"]:::llamada
   n23 --> n24
+  n25[("LEE terminology.catalog_concepts")]:::efecto
+  n24 --> n25
+  n26(("200 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1221,23 +1227,31 @@ flowchart TD
   n18 --> n19
   n20[("LEE community.public_profiles")]:::efecto
   n19 --> n20
-  n21["Llama a PublicProfilesRepository.create"]:::llamada
+  n21{"existing"}:::decision
   n20 --> n21
-  n22[("CREA community.public_profiles")]:::efecto
-  n21 --> n22
-  n23[("ACTUALIZA diagnostic_units.diagnostic_units")]:::efecto
-  n22 --> n23
-  n24["Llama a DiagnosticUnitSpecialtiesRepository.verifyOpenForUnit"]:::llamada
+  n22{"existing.visibilityConceptId == null && existing.statusConceptId === CONCEPTS.STATE_PENDING"}:::decision
+  n21 -->|"sí"| n22
+  n23[("ACTUALIZA community.public_profiles · ACTUALIZA community.public_profiles · ACTUALIZA community.public_profil…")]:::efecto
+  n22 -->|"sí"| n23
+  n24["Llama a PublicProfilesRepository.create"]:::llamada
   n23 --> n24
-  n17 -->|"no"| n24
-  n25[("ACTUALIZA diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n22 -->|"no"| n24
+  n21 -->|"no"| n24
+  n25[("CREA community.public_profiles")]:::efecto
   n24 --> n25
-  n26["Llama a DiagnosticUnitAccreditationsRepository.verifyOpenForUnit"]:::llamada
+  n26[("ACTUALIZA diagnostic_units.diagnostic_units")]:::efecto
   n25 --> n26
-  n27[("ACTUALIZA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
+  n27["Llama a DiagnosticUnitSpecialtiesRepository.verifyOpenForUnit"]:::llamada
   n26 --> n27
-  n28(("200 Responde con éxito")):::ok
+  n17 -->|"no"| n27
+  n28[("ACTUALIZA diagnostic_units.diagnostic_unit_specialties")]:::efecto
   n27 --> n28
+  n29["Llama a DiagnosticUnitAccreditationsRepository.verifyOpenForUnit"]:::llamada
+  n28 --> n29
+  n30[("ACTUALIZA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1286,7 +1300,7 @@ flowchart TD
   n11 --> n12
   n13[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n12 --> n13
-  n14["Llama a DiagnosticUnitsSearchService.proyectar"]:::llamada
+  n14["Llama a DiagnosticUnitsSearchService.project"]:::llamada
   n13 --> n14
   n15["Llama a DiagnosticUnitsReadRepository.findActiveSites"]:::llamada
   n14 --> n15
@@ -1318,8 +1332,20 @@ flowchart TD
   n27 --> n28
   n29[("LEE diagnostic_units.diagnostic_study_prices")]:::efecto
   n28 --> n29
-  n30(("200 Responde con éxito")):::ok
+  n30["Llama a DiagnosticUnitsReadRepository.findPracticeSites"]:::llamada
   n29 --> n30
+  n31[("LEE practice.practice_sites")]:::efecto
+  n30 --> n31
+  n32["Llama a DiagnosticUnitsReadRepository.findAddresses"]:::llamada
+  n31 --> n32
+  n33[("LEE common.addresses")]:::efecto
+  n32 --> n33
+  n34["Llama a DiagnosticUnitsReadRepository.findConcepts"]:::llamada
+  n33 --> n34
+  n35[("LEE terminology.catalog_concepts")]:::efecto
+  n34 --> n35
+  n36(("200 Responde con éxito")):::ok
+  n35 --> n36
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

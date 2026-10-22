@@ -4,10 +4,10 @@
 
 **1230 tablas** en **61 schemas**, con 16851 columnas, 8267 índices y 7069 claves foráneas, leídas del DDL canónico del modelo.
 
-- Columnas con descripción: 3889 (23.1 %). Por fuente: JSDOC_ESTANDAR 2716 · JSDOC_ENTIDAD 1119 · MODELO_PUML 54. El resto dice «sin dato»: no se infiere por el nombre.
-- Índices con «para qué»: 7801 de 8267. El resto dice «sin uso detectado estáticamente».
-- Tablas con entidad del ORM: 1216 de 1230. Deriva: [deriva.md](deriva.md).
-- Tablas que alguna operación HTTP toca: 917. Tablas append-only declaradas en un README: 141.
+- Columnas con descripción: 3989 (23.7 %). Por fuente: JSDOC_ESTANDAR 2727 · JSDOC_ENTIDAD 1208 · MODELO_PUML 54. El resto dice «sin dato»: no se infiere por el nombre.
+- Índices con «para qué»: 7803 de 8267. El resto dice «sin uso detectado estáticamente».
+- Tablas con entidad del ORM: 1230 de 1230. Deriva: [deriva.md](deriva.md).
+- Tablas que alguna operación HTTP toca: 940. Tablas append-only declaradas en un README: 140.
 
 Otras vistas: [glosario](glosario.md).
 

@@ -414,7 +414,7 @@ Registra revisiones de calidad de contexto sanitario antes de aprobar su uso por
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/health_context/README.md:30` |
+| Append-only | no declarado | — |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |

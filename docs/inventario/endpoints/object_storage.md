@@ -3,9 +3,9 @@
 # Endpoints del módulo `object_storage`
 
 - **Bloque:** Datos y NoSQL (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
-- **Operaciones:** 13 (13 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 13 · BAJO 0
-- **Tablas distintas que tocan:** 17
+- **Operaciones:** 14 (14 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 0 · MEDIO 14 · BAJO 0
+- **Tablas distintas que tocan:** 37
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/object-storage.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -20,11 +20,12 @@
 | 6 | POST | `/object-storage/objects/{manifestId}/request-deletion` | Solicitar el borrado gobernado | MEDIO | 7 | COMPLIANCE_OFFICER, STORAGE_ADMIN |
 | 7 | POST | `/object-storage/objects/{manifestId}/versions` | Crear una versión nueva del objeto | MEDIO | 8 | SYSTEM, STORAGE_ADMIN |
 | 8 | POST | `/object-storage/uploads/{id}/complete` | Completar la carga y materializar la versión del objeto | MEDIO | 11 | STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN |
-| 9 | POST | `/object-storage/versions/{versionId}/integrity-checks` | Registrar la verificación de integridad | MEDIO | 8 | SYSTEM, STORAGE_ADMIN |
-| 10 | POST | `/object-storage/versions/{versionId}/legal-holds` | Colocar una retención legal | MEDIO | 5 | LEGAL_COUNSEL, STORAGE_ADMIN |
-| 11 | DELETE | `/object-storage/versions/{versionId}/legal-holds/{holdId}` | Liberar una retención legal | MEDIO | 6 | LEGAL_COUNSEL, STORAGE_ADMIN |
-| 12 | POST | `/object-storage/versions/{versionId}/retention-lock` | Aplicar retención WORM sobre la versión | MEDIO | 6 | COMPLIANCE_OFFICER, STORAGE_ADMIN |
-| 13 | POST | `/object-storage/versions/{versionId}/signed-url` | Emitir acceso firmado a una versión | MEDIO | 5 | DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN |
+| 9 | GET | `/object-storage/versions/{versionId}/content/{token}` | Descargar el contenido de una versión con el enlace emitido | MEDIO | 30 | DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN |
+| 10 | POST | `/object-storage/versions/{versionId}/integrity-checks` | Registrar la verificación de integridad | MEDIO | 8 | SYSTEM, STORAGE_ADMIN |
+| 11 | POST | `/object-storage/versions/{versionId}/legal-holds` | Colocar una retención legal | MEDIO | 5 | LEGAL_COUNSEL, STORAGE_ADMIN |
+| 12 | DELETE | `/object-storage/versions/{versionId}/legal-holds/{holdId}` | Liberar una retención legal | MEDIO | 6 | LEGAL_COUNSEL, STORAGE_ADMIN |
+| 13 | POST | `/object-storage/versions/{versionId}/retention-lock` | Aplicar retención WORM sobre la versión | MEDIO | 6 | COMPLIANCE_OFFICER, STORAGE_ADMIN |
+| 14 | POST | `/object-storage/versions/{versionId}/signed-url` | Emitir acceso firmado a una versión | MEDIO | 30 | DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN |
 
 ---
 
@@ -35,26 +36,26 @@
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `DicomWebController.resolveInstance` — `src/modules/object_storage/controllers/dicomweb.controller.ts:36`
+- **Implementación:** `DicomWebController.resolveInstance` — `src/modules/object_storage/controllers/dicomweb.controller.ts:41`
 
 ### Qué es y para qué sirve (negocio)
 
 Resolver una instancia DICOM y registrar el acceso (WADO-RS). Caso de uso UC-60-05: Acceso DICOMweb. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`GET /dicomweb/studies/{studyUid}/series/{seriesUid}/instances/{sopUid}` la atiende `DicomWebController.resolveInstance` (src/modules/object_storage/controllers/dicomweb.controller.ts:36). Exige sesión con alguno de los roles DICOM_VIEWER, CLINICIAN, STORAGE_ADMIN. Delega en `DicomCatalogService.resolveInstance`. Crea filas en object_storage.dicomweb_access_logs. Lee object_storage.dicom_instance_manifests, object_storage.dicom_series_manifests, object_storage.dicom_study_manifests, object_storage.object_manifests.
+`GET /dicomweb/studies/{studyUid}/series/{seriesUid}/instances/{sopUid}` la atiende `DicomWebController.resolveInstance` (src/modules/object_storage/controllers/dicomweb.controller.ts:41). Exige sesión con alguno de los roles DICOM_VIEWER, CLINICIAN, STORAGE_ADMIN. Delega en `DicomCatalogService.resolveInstance`. Crea filas en object_storage.dicomweb_access_logs. Lee object_storage.dicom_instance_manifests, object_storage.dicom_series_manifests, object_storage.dicom_study_manifests, object_storage.object_manifests.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DICOM_VIEWER, CLINICIAN, STORAGE_ADMIN | `src/modules/object_storage/controllers/dicomweb.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: DICOM_VIEWER, CLINICIAN, STORAGE_ADMIN | `src/modules/object_storage/controllers/dicomweb.controller.ts:41` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -63,7 +64,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.findInstanceByUid | `src/modules/object_storage/repositories/dicom.repository.ts:285` |
 | `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.findSeriesByUid | `src/modules/object_storage/repositories/dicom.repository.ts:197` |
 | `object_storage.dicom_study_manifests` | LEE | LEE | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.findStudyByUid | `src/modules/object_storage/repositories/dicom.repository.ts:108` |
-| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:348` |
+| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:391` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | DicomWebController.resolveInstance → DicomCatalogService.resolveInstance → ObjectStorageRepository.findManifestById | `src/modules/object_storage/repositories/object-storage.repository.ts:258` |
 
 ### Parámetros
@@ -119,28 +120,28 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.buildArchiveJob` — `src/modules/object_storage/controllers/object-storage.controller.ts:226`
+- **Implementación:** `ObjectStorageController.buildArchiveJob` — `src/modules/object_storage/controllers/object-storage.controller.ts:265`
 
 ### Qué es y para qué sirve (negocio)
 
 Archivar el objeto a almacenamiento frío. Caso de uso UC-60-11: Archivar a frío. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/archive-jobs/build` la atiende `ObjectStorageController.buildArchiveJob` (src/modules/object_storage/controllers/object-storage.controller.ts:226). Exige sesión con alguno de los roles SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `BuildArchiveJobDto` (7 campos, 5 obligatorios). Delega en `ObjectGovernanceService.buildArchiveJob`. Crea filas en object_storage.archive_manifests, object_storage.object_locations. Actualiza object_storage.object_manifests. Lee object_storage.archive_manifests, object_storage.object_legal_holds, object_storage.object_manifests, object_storage.object_versions.
+`POST /object-storage/archive-jobs/build` la atiende `ObjectStorageController.buildArchiveJob` (src/modules/object_storage/controllers/object-storage.controller.ts:265). Exige sesión con alguno de los roles SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `BuildArchiveJobDto` (7 campos, 5 obligatorios). Delega en `ObjectGovernanceService.buildArchiveJob`. Crea filas en object_storage.archive_manifests, object_storage.object_locations. Actualiza object_storage.object_manifests. Lee object_storage.archive_manifests, object_storage.object_legal_holds, object_storage.object_manifests, object_storage.object_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:226` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:265` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -149,8 +150,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `object_storage.archive_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.buildArchiveJob → ObjectGovernanceService.buildArchiveJob → ObjectGovernanceRepository.createArchiveManifest | `src/modules/object_storage/repositories/object-governance.repository.ts:324` |
 | `object_storage.archive_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.buildArchiveJob → ObjectGovernanceService.buildArchiveJob → ObjectGovernanceRepository.findArchiveManifestByHash | `src/modules/object_storage/repositories/object-governance.repository.ts:346` |
 | `object_storage.object_legal_holds` | LEE | LEE | DIRECTA | ObjectStorageController.buildArchiveJob → ObjectGovernanceService.buildArchiveJob → ObjectGovernanceRepository.findActiveLegalHolds | `src/modules/object_storage/repositories/object-governance.repository.ts:159` |
-| `object_storage.object_locations` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.buildArchiveJob → ObjectGovernanceService.buildArchiveJob → ObjectStorageRepository.createLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:528` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.buildArchiveJob → ObjectGovernanceService.buildArchiveJob | `src/modules/object_storage/services/object-governance.service.ts:489` |
+| `object_storage.object_locations` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.buildArchiveJob → ObjectGovernanceService.buildArchiveJob → ObjectStorageRepository.createLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:540` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.buildArchiveJob → ObjectGovernanceService.buildArchiveJob | `src/modules/object_storage/services/object-governance.service.ts:503` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.buildArchiveJob → ObjectGovernanceService.buildArchiveJob → ObjectStorageRepository.findManifestForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:266` |
 | `object_storage.object_versions` | LEE | LEE | DIRECTA | ObjectStorageController.buildArchiveJob → ObjectGovernanceService.buildArchiveJob → ObjectStorageRepository.findLatestVersion | `src/modules/object_storage/repositories/object-storage.repository.ts:338` |
 
@@ -158,13 +159,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `objectManifestId` | `string` | Sí | formato uuid | `@IsUUID()` | Objeto que se archiva | `src/modules/object_storage/dto/object-storage.dto.ts:1087` |
-| `archiveType` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Naturaleza del archivado | `src/modules/object_storage/dto/object-storage.dto.ts:1095` |
-| `archiveNamespaceId` | `string` | Sí | formato uuid | `@IsUUID()` | Espacio frío de destino | `src/modules/object_storage/dto/object-storage.dto.ts:1102` |
-| `manifestHash` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Hash del lote; lo hace idempotente | `src/modules/object_storage/dto/object-storage.dto.ts:1113` |
-| `providerUri` | `string` | Sí | — | `@IsString()` | URI de la copia fría | `src/modules/object_storage/dto/object-storage.dto.ts:1120` |
-| `sourceScopeJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Qué entra en el lote | `src/modules/object_storage/dto/object-storage.dto.ts:1128` |
-| `storageClass` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Clase fría de destino | `src/modules/object_storage/dto/object-storage.dto.ts:1140` |
+| `objectManifestId` | `string` | Sí | formato uuid | `@IsUUID()` | Objeto que se archiva | `src/modules/object_storage/dto/object-storage.dto.ts:1114` |
+| `archiveType` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Naturaleza del archivado | `src/modules/object_storage/dto/object-storage.dto.ts:1122` |
+| `archiveNamespaceId` | `string` | Sí | formato uuid | `@IsUUID()` | Espacio frío de destino | `src/modules/object_storage/dto/object-storage.dto.ts:1129` |
+| `manifestHash` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Hash del lote; lo hace idempotente | `src/modules/object_storage/dto/object-storage.dto.ts:1140` |
+| `providerUri` | `string` | Sí | — | `@IsString()` | URI de la copia fría | `src/modules/object_storage/dto/object-storage.dto.ts:1147` |
+| `sourceScopeJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Qué entra en el lote | `src/modules/object_storage/dto/object-storage.dto.ts:1155` |
+| `storageClass` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Clase fría de destino | `src/modules/object_storage/dto/object-storage.dto.ts:1167` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -198,11 +199,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1151` |
-| `objectManifestId` | `string` | Sí | formato uuid | — | Identificador asociado a object manifest. | `src/modules/object_storage/dto/object-storage.dto.ts:1157` |
-| `recordCount` | `string` | Sí | — | — | Versiones movidas a frío; cadena por ser bigint | `src/modules/object_storage/dto/object-storage.dto.ts:1165` |
-| `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:1171` |
-| `duplicate` | `boolean` | Sí | — | — | true si ese lote ya se había archivado | `src/modules/object_storage/dto/object-storage.dto.ts:1177` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1178` |
+| `objectManifestId` | `string` | Sí | formato uuid | — | Identificador asociado a object manifest. | `src/modules/object_storage/dto/object-storage.dto.ts:1184` |
+| `recordCount` | `string` | Sí | — | — | Versiones movidas a frío; cadena por ser bigint | `src/modules/object_storage/dto/object-storage.dto.ts:1192` |
+| `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:1198` |
+| `duplicate` | `boolean` | Sí | — | — | true si ese lote ya se había archivado | `src/modules/object_storage/dto/object-storage.dto.ts:1204` |
 
 ### Respuestas posibles
 
@@ -237,28 +238,28 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.catalogDicomStudy` — `src/modules/object_storage/controllers/object-storage.controller.ts:115`
+- **Implementación:** `ObjectStorageController.catalogDicomStudy` — `src/modules/object_storage/controllers/object-storage.controller.ts:119`
 
 ### Qué es y para qué sirve (negocio)
 
 Catalogar la jerarquía DICOM estudio/serie/instancia. Caso de uso UC-60-04: Catalogar jerarquía DICOM. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/dicom/studies/catalog` la atiende `ObjectStorageController.catalogDicomStudy` (src/modules/object_storage/controllers/object-storage.controller.ts:115). Exige sesión con alguno de los roles PACS_GATEWAY, SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `CatalogDicomStudyDto` (20 campos, 6 obligatorios). Delega en `DicomCatalogService.catalogStudy`. Crea filas en object_storage.dicom_instance_manifests, object_storage.dicom_series_manifests, object_storage.dicom_study_manifests. Actualiza object_storage.dicom_series_manifests, object_storage.dicom_study_manifests. Lee object_storage.dicom_instance_manifests, object_storage.dicom_series_manifests, object_storage.dicom_study_manifests, object_storage.object_manifests.
+`POST /object-storage/dicom/studies/catalog` la atiende `ObjectStorageController.catalogDicomStudy` (src/modules/object_storage/controllers/object-storage.controller.ts:119). Exige sesión con alguno de los roles PACS_GATEWAY, SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `CatalogDicomStudyDto` (20 campos, 6 obligatorios). Delega en `DicomCatalogService.catalogStudy`. Crea filas en object_storage.dicom_instance_manifests, object_storage.dicom_series_manifests, object_storage.dicom_study_manifests. Actualiza object_storage.dicom_series_manifests, object_storage.dicom_study_manifests. Lee object_storage.dicom_instance_manifests, object_storage.dicom_series_manifests, object_storage.dicom_study_manifests, object_storage.object_manifests.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PACS_GATEWAY, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:115` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PACS_GATEWAY, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:119` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -397,36 +398,36 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.registerLargePayload` — `src/modules/object_storage/controllers/object-storage.controller.ts:130`
+- **Implementación:** `ObjectStorageController.registerLargePayload` — `src/modules/object_storage/controllers/object-storage.controller.ts:134`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar un payload grande y vincularlo a su entidad de origen. Caso de uso UC-60-06: Registrar payload grande. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/large-payloads` la atiende `ObjectStorageController.registerLargePayload` (src/modules/object_storage/controllers/object-storage.controller.ts:130). Exige sesión con alguno de los roles SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `RegisterLargePayloadDto` (7 campos, 6 obligatorios). Delega en `ObjectStorageService.registerLargePayload`. Crea filas en object_storage.large_payload_manifests. Actualiza object_storage.object_manifests. Lee object_storage.large_payload_manifests, object_storage.object_manifests.
+`POST /object-storage/large-payloads` la atiende `ObjectStorageController.registerLargePayload` (src/modules/object_storage/controllers/object-storage.controller.ts:134). Exige sesión con alguno de los roles SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `RegisterLargePayloadDto` (7 campos, 6 obligatorios). Delega en `ObjectStorageService.registerLargePayload`. Crea filas en object_storage.large_payload_manifests. Actualiza object_storage.object_manifests. Lee object_storage.large_payload_manifests, object_storage.object_manifests.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:130` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:134` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `object_storage.large_payload_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload → ObjectStorageRepository.createLargePayload | `src/modules/object_storage/repositories/object-storage.repository.ts:616` |
-| `object_storage.large_payload_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload → ObjectStorageRepository.findLargePayloadBySource | `src/modules/object_storage/repositories/object-storage.repository.ts:641` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload | `src/modules/object_storage/services/object-storage.service.ts:386` |
+| `object_storage.large_payload_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload → ObjectStorageRepository.createLargePayload | `src/modules/object_storage/repositories/object-storage.repository.ts:628` |
+| `object_storage.large_payload_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload → ObjectStorageRepository.findLargePayloadBySource | `src/modules/object_storage/repositories/object-storage.repository.ts:653` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload | `src/modules/object_storage/services/object-storage.service.ts:508` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.registerLargePayload → ObjectStorageService.registerLargePayload → ObjectStorageRepository.findManifestForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:266` |
 
 ### Cuerpo — DTO `RegisterLargePayloadDto` · `application/json`
@@ -510,28 +511,28 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.initiateUpload` — `src/modules/object_storage/controllers/object-storage.controller.ts:69`
+- **Implementación:** `ObjectStorageController.initiateUpload` — `src/modules/object_storage/controllers/object-storage.controller.ts:73`
 
 ### Qué es y para qué sirve (negocio)
 
 Iniciar una carga multiparte. Caso de uso UC-60-01: Iniciar carga multiparte. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/namespaces/{code}/uploads/initiate` la atiende `ObjectStorageController.initiateUpload` (src/modules/object_storage/controllers/object-storage.controller.ts:69). Exige sesión con alguno de los roles STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `InitiateUploadDto` (5 campos, 3 obligatorios). Delega en `ObjectStorageService.initiateUpload`. Crea filas en object_storage.multipart_uploads. Lee object_storage.multipart_uploads, object_storage.object_namespaces.
+`POST /object-storage/namespaces/{code}/uploads/initiate` la atiende `ObjectStorageController.initiateUpload` (src/modules/object_storage/controllers/object-storage.controller.ts:73). Exige sesión con alguno de los roles STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `InitiateUploadDto` (5 campos, 3 obligatorios). Delega en `ObjectStorageService.initiateUpload`. Crea filas en object_storage.multipart_uploads. Lee object_storage.multipart_uploads, object_storage.object_namespaces.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:73` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -608,6 +609,7 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/hardening/mch-021.int-spec.ts:47` |
 | CONTROLADOR | `src/modules/object_storage/controllers/object-storage.controller.spec.ts:56` |
 
 ### Flujos
@@ -623,29 +625,29 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.requestDeletion` — `src/modules/object_storage/controllers/object-storage.controller.ts:240`
+- **Implementación:** `ObjectStorageController.requestDeletion` — `src/modules/object_storage/controllers/object-storage.controller.ts:279`
 
 ### Qué es y para qué sirve (negocio)
 
 Solicitar el borrado gobernado. Caso de uso UC-60-12: Borrado gobernado. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/objects/{manifestId}/request-deletion` la atiende `ObjectStorageController.requestDeletion` (src/modules/object_storage/controllers/object-storage.controller.ts:240). Exige sesión con alguno de los roles COMPLIANCE_OFFICER, STORAGE_ADMIN. Valida el cuerpo como `ObjectStorageRequestDeletionDto` (3 campos, 1 obligatorio). Delega en `ObjectGovernanceService.requestDeletion`. Crea filas en object_storage.object_deletion_markers. Actualiza object_storage.object_manifests. Lee object_storage.object_deletion_markers, object_storage.object_legal_holds, object_storage.object_manifests, object_storage.object_retention_locks, object_storage.object_versions.
+`POST /object-storage/objects/{manifestId}/request-deletion` la atiende `ObjectStorageController.requestDeletion` (src/modules/object_storage/controllers/object-storage.controller.ts:279). Exige sesión con alguno de los roles COMPLIANCE_OFFICER, STORAGE_ADMIN. Valida el cuerpo como `ObjectStorageRequestDeletionDto` (3 campos, 1 obligatorio). Delega en `ObjectGovernanceService.requestDeletion`. Crea filas en object_storage.object_deletion_markers. Actualiza object_storage.object_manifests. Lee object_storage.object_deletion_markers, object_storage.object_legal_holds, object_storage.object_manifests, object_storage.object_retention_locks, object_storage.object_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: COMPLIANCE_OFFICER, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:240` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: manifestId | `src/modules/object_storage/controllers/object-storage.controller.ts:240` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: COMPLIANCE_OFFICER, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:279` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: manifestId | `src/modules/object_storage/controllers/object-storage.controller.ts:279` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -654,7 +656,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | `object_storage.object_deletion_markers` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.requestDeletion → ObjectGovernanceService.requestDeletion → ObjectGovernanceRepository.createDeletionMarker | `src/modules/object_storage/repositories/object-governance.repository.ts:265` |
 | `object_storage.object_deletion_markers` | LEE | LEE | DIRECTA | ObjectStorageController.requestDeletion → ObjectGovernanceService.requestDeletion → ObjectGovernanceRepository.findDeletionMarker | `src/modules/object_storage/repositories/object-governance.repository.ts:285` |
 | `object_storage.object_legal_holds` | LEE | LEE | DIRECTA | ObjectStorageController.requestDeletion → ObjectGovernanceService.requestDeletion → ObjectGovernanceRepository.findActiveLegalHolds | `src/modules/object_storage/repositories/object-governance.repository.ts:159` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.requestDeletion → ObjectGovernanceService.requestDeletion | `src/modules/object_storage/services/object-governance.service.ts:579` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.requestDeletion → ObjectGovernanceService.requestDeletion | `src/modules/object_storage/services/object-governance.service.ts:594` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.requestDeletion → ObjectGovernanceService.requestDeletion → ObjectStorageRepository.findManifestForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:266` |
 | `object_storage.object_retention_locks` | LEE | LEE | DIRECTA | ObjectStorageController.requestDeletion → ObjectGovernanceService.requestDeletion → ObjectGovernanceRepository.findActiveRetentionLockForUpdate | `src/modules/object_storage/repositories/object-governance.repository.ts:74` |
 | `object_storage.object_versions` | LEE | LEE | DIRECTA | ObjectStorageController.requestDeletion → ObjectGovernanceService.requestDeletion → ObjectStorageRepository.findLatestVersion | `src/modules/object_storage/repositories/object-storage.repository.ts:338` |
@@ -669,9 +671,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | Sí | — | `@IsString()` | Por qué se borra | `src/modules/object_storage/dto/object-storage.dto.ts:1192` |
-| `requestedByJobId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Job que ejecutará el borrado | `src/modules/object_storage/dto/object-storage.dto.ts:1203` |
-| `effectiveAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo se hace efectivo | `src/modules/object_storage/dto/object-storage.dto.ts:1214` |
+| `reason` | `string` | Sí | — | `@IsString()` | Por qué se borra | `src/modules/object_storage/dto/object-storage.dto.ts:1219` |
+| `requestedByJobId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Job que ejecutará el borrado | `src/modules/object_storage/dto/object-storage.dto.ts:1230` |
+| `effectiveAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Cuándo se hace efectivo | `src/modules/object_storage/dto/object-storage.dto.ts:1241` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -697,11 +699,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1225` |
-| `objectManifestId` | `string` | Sí | formato uuid | — | Identificador asociado a object manifest. | `src/modules/object_storage/dto/object-storage.dto.ts:1231` |
-| `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:1237` |
-| `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1243` |
-| `duplicate` | `boolean` | Sí | — | — | true si el borrado ya estaba solicitado | `src/modules/object_storage/dto/object-storage.dto.ts:1249` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1252` |
+| `objectManifestId` | `string` | Sí | formato uuid | — | Identificador asociado a object manifest. | `src/modules/object_storage/dto/object-storage.dto.ts:1258` |
+| `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:1264` |
+| `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1270` |
+| `duplicate` | `boolean` | Sí | — | — | true si el borrado ya estaba solicitado | `src/modules/object_storage/dto/object-storage.dto.ts:1276` |
 
 ### Respuestas posibles
 
@@ -736,38 +738,38 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.createVersion` — `src/modules/object_storage/controllers/object-storage.controller.ts:100`
+- **Implementación:** `ObjectStorageController.createVersion` — `src/modules/object_storage/controllers/object-storage.controller.ts:104`
 
 ### Qué es y para qué sirve (negocio)
 
 Crear una versión nueva del objeto. Caso de uso UC-60-03: Nueva versión inmutable. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/objects/{manifestId}/versions` la atiende `ObjectStorageController.createVersion` (src/modules/object_storage/controllers/object-storage.controller.ts:100). Exige sesión con alguno de los roles SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `CreateVersionDto` (15 campos, 7 obligatorios). Delega en `ObjectStorageService.createVersion`. Crea filas en object_storage.object_checksums, object_storage.object_encryption_envelopes, object_storage.object_locations, object_storage.object_versions. Actualiza object_storage.object_manifests. Lee object_storage.object_manifests, object_storage.object_namespaces, object_storage.object_versions.
+`POST /object-storage/objects/{manifestId}/versions` la atiende `ObjectStorageController.createVersion` (src/modules/object_storage/controllers/object-storage.controller.ts:104). Exige sesión con alguno de los roles SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `CreateVersionDto` (15 campos, 7 obligatorios). Delega en `ObjectStorageService.createVersion`. Crea filas en object_storage.object_checksums, object_storage.object_encryption_envelopes, object_storage.object_locations, object_storage.object_versions. Actualiza object_storage.object_manifests. Lee object_storage.object_manifests, object_storage.object_namespaces, object_storage.object_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:100` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: manifestId | `src/modules/object_storage/controllers/object-storage.controller.ts:100` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:104` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: manifestId | `src/modules/object_storage/controllers/object-storage.controller.ts:104` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `object_storage.object_checksums` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createChecksum | `src/modules/object_storage/repositories/object-storage.repository.ts:392` |
-| `object_storage.object_encryption_envelopes` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createEncryptionEnvelope | `src/modules/object_storage/repositories/object-storage.repository.ts:462` |
-| `object_storage.object_locations` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:528` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.createVersion → ObjectStorageService.createVersion | `src/modules/object_storage/services/object-storage.service.ts:328` |
+| `object_storage.object_encryption_envelopes` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createEncryptionEnvelope | `src/modules/object_storage/repositories/object-storage.repository.ts:474` |
+| `object_storage.object_locations` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:540` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.createVersion → ObjectStorageService.createVersion | `src/modules/object_storage/services/object-storage.service.ts:449` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageRepository.findManifestForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:266` |
 | `object_storage.object_namespaces` | LEE | LEE | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageRepository.findNamespaceById | `src/modules/object_storage/repositories/object-storage.repository.ts:95` |
 | `object_storage.object_versions` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.createVersion → ObjectStorageService.createVersion → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createVersion | `src/modules/object_storage/repositories/object-storage.repository.ts:293` |
@@ -858,8 +860,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Objeto no encontrado; ResourceNotFoundException: Espacio de nombres no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto no está activo; PreconditionFailedException: El espacio de nombres no tiene versionado habilitado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto no está activo; PreconditionFailedException: El espacio de nombres no tiene versionado habilitado; PreconditionFailedException: La URI declarada no es la ubicación del objeto; PreconditionFailedException: El objeto no está en el almacenamiento; PreconditionFailedException: La versión del proveedor no coincide con la declarada; PreconditionFailedException: El tamaño almacenado no coincide con el declarado; PreconditionFailedException: El contenido almacenado no coincide con el SHA-256 declarado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | ObjectContentUnavailableError: BACKEND_UNSUPPORTED; ObjectContentUnavailableError: SIZE_UNKNOWN; ObjectContentUnavailableError: PROVIDER_ERROR; ObjectContentUnavailableError: BODY_UNREADABLE; ObjectContentUnavailableError: NOT_FOUND / PROVIDER_ERROR; ObjectContentUnavailableError: READ_INTERRUPTED |
+| 503 | `DEPENDENCY_UNAVAILABLE` | ServiceUnavailableException: No se pudo verificar el objeto en el almacenamiento |
 
 El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
@@ -882,40 +886,40 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.completeUpload` — `src/modules/object_storage/controllers/object-storage.controller.ts:85`
+- **Implementación:** `ObjectStorageController.completeUpload` — `src/modules/object_storage/controllers/object-storage.controller.ts:89`
 
 ### Qué es y para qué sirve (negocio)
 
 Completar la carga y materializar la versión del objeto. Caso de uso UC-60-02: Completar y materializar versión. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/uploads/{id}/complete` la atiende `ObjectStorageController.completeUpload` (src/modules/object_storage/controllers/object-storage.controller.ts:85). Exige sesión con alguno de los roles STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `CompleteUploadDto` (17 campos, 8 obligatorios). Delega en `ObjectStorageService.completeUpload`. Crea filas en object_storage.object_checksums, object_storage.object_encryption_envelopes, object_storage.object_locations, object_storage.object_manifests, object_storage.object_versions. Actualiza object_storage.multipart_uploads, object_storage.object_manifests. Lee object_storage.multipart_uploads, object_storage.object_manifests, object_storage.object_namespaces, object_storage.object_versions.
+`POST /object-storage/uploads/{id}/complete` la atiende `ObjectStorageController.completeUpload` (src/modules/object_storage/controllers/object-storage.controller.ts:89). Exige sesión con alguno de los roles STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `CompleteUploadDto` (17 campos, 8 obligatorios). Delega en `ObjectStorageService.completeUpload`. Crea filas en object_storage.object_checksums, object_storage.object_encryption_envelopes, object_storage.object_locations, object_storage.object_manifests, object_storage.object_versions. Actualiza object_storage.multipart_uploads, object_storage.object_manifests. Lee object_storage.multipart_uploads, object_storage.object_manifests, object_storage.object_namespaces, object_storage.object_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:85` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/object_storage/controllers/object-storage.controller.ts:85` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: STORAGE_CLIENT, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:89` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/object_storage/controllers/object-storage.controller.ts:89` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `object_storage.multipart_uploads` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload | `src/modules/object_storage/services/object-storage.service.ts:194` |
+| `object_storage.multipart_uploads` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload | `src/modules/object_storage/services/object-storage.service.ts:300` |
 | `object_storage.multipart_uploads` | LEE | LEE | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageRepository.findUploadForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:180` |
 | `object_storage.object_checksums` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createChecksum | `src/modules/object_storage/repositories/object-storage.repository.ts:392` |
-| `object_storage.object_encryption_envelopes` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createEncryptionEnvelope | `src/modules/object_storage/repositories/object-storage.repository.ts:462` |
-| `object_storage.object_locations` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:528` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload | `src/modules/object_storage/services/object-storage.service.ts:236` |
+| `object_storage.object_encryption_envelopes` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createEncryptionEnvelope | `src/modules/object_storage/repositories/object-storage.repository.ts:474` |
+| `object_storage.object_locations` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageService.materialiseVersion → ObjectStorageRepository.createLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:540` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload | `src/modules/object_storage/services/object-storage.service.ts:342` |
 | `object_storage.object_manifests` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageRepository.createManifest | `src/modules/object_storage/repositories/object-storage.repository.ts:229` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageRepository.findManifestByLogicalIdForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:279` |
 | `object_storage.object_namespaces` | LEE | LEE | DIRECTA | ObjectStorageController.completeUpload → ObjectStorageService.completeUpload → ObjectStorageRepository.findNamespaceById | `src/modules/object_storage/repositories/object-storage.repository.ts:95` |
@@ -1012,8 +1016,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Carga no encontrada; ResourceNotFoundException: Espacio de nombres no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La carga ya no está en curso; PreconditionFailedException: La carga caducó; PreconditionFailedException: El tamaño recibido no coincide con el declarado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La carga ya no está en curso; PreconditionFailedException: La carga caducó; PreconditionFailedException: El tamaño recibido no coincide con el declarado; PreconditionFailedException: La URI declarada no es la ubicación del objeto; PreconditionFailedException: El objeto no está en el almacenamiento; PreconditionFailedException: La versión del proveedor no coincide con la declarada; PreconditionFailedException: El tamaño almacenado no coincide con el declarado; PreconditionFailedException: El contenido almacenado no coincide con el SHA-256 declarado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | ObjectContentUnavailableError: BACKEND_UNSUPPORTED; ObjectContentUnavailableError: SIZE_UNKNOWN; ObjectContentUnavailableError: PROVIDER_ERROR; ObjectContentUnavailableError: BODY_UNREADABLE; ObjectContentUnavailableError: NOT_FOUND / PROVIDER_ERROR; ObjectContentUnavailableError: READ_INTERRUPTED |
+| 503 | `DEPENDENCY_UNAVAILABLE` | ServiceUnavailableException: No se pudo verificar el objeto en el almacenamiento |
 
 El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
@@ -1021,6 +1027,7 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/hardening/mch-021.int-spec.ts:67` |
 | CONTROLADOR | `src/modules/object_storage/controllers/object-storage.controller.spec.ts:69` |
 
 ### Flujos
@@ -1029,47 +1036,155 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
 ---
 
-## 9. POST /object-storage/versions/{versionId}/integrity-checks
+## 9. GET /object-storage/versions/{versionId}/content/{token}
 
 - **Origen:** CONTRATO
-- **Nombre:** Registrar la verificación de integridad
+- **Nombre:** Descargar el contenido de una versión con el enlace emitido
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.recordIntegrityCheck` — `src/modules/object_storage/controllers/object-storage.controller.ts:210`
+- **Implementación:** `ObjectStorageController.downloadSignedContent` — `src/modules/object_storage/controllers/object-storage.controller.ts:223`
 
 ### Qué es y para qué sirve (negocio)
 
-Registrar la verificación de integridad. Caso de uso UC-60-10: Verificar integridad. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
+Descargar el contenido de una versión con el enlace emitido. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/versions/{versionId}/integrity-checks` la atiende `ObjectStorageController.recordIntegrityCheck` (src/modules/object_storage/controllers/object-storage.controller.ts:210). Exige sesión con alguno de los roles SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `RecordIntegrityCheckDto` (2 campos, 1 obligatorio). Delega en `ObjectGovernanceService.recordIntegrityCheck`. Crea filas en object_storage.object_integrity_checks. Actualiza object_storage.object_checksums, object_storage.object_locations, object_storage.object_manifests. Lee object_storage.object_checksums, object_storage.object_locations, object_storage.object_manifests, object_storage.object_versions.
+`GET /object-storage/versions/{versionId}/content/{token}` la atiende `ObjectStorageController.downloadSignedContent` (src/modules/object_storage/controllers/object-storage.controller.ts:223). Exige sesión con alguno de los roles DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN. Delega en `ObjectStorageService.redeemSignedAccess`. Crea filas en audit.audit_log, object_storage.dicomweb_access_logs. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 20 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:210` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:210` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:223` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:223` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `object_storage.object_checksums` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck | `src/modules/object_storage/services/object-governance.service.ts:370` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:81` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:90` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:78` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:327` |
+| `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:331` |
+| `object_storage.dicom_study_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:335` |
+| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.recordDicomAccess → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:391` |
+| `object_storage.object_checksums` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findChecksum | `src/modules/object_storage/repositories/object-storage.repository.ts:435` |
+| `object_storage.object_locations` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findPrimaryLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:580` |
+| `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findManifestById | `src/modules/object_storage/repositories/object-storage.repository.ts:258` |
+| `object_storage.object_namespaces` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageRepository.findNamespaceById | `src/modules/object_storage/repositories/object-storage.repository.ts:95` |
+| `object_storage.object_versions` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findVersionById | `src/modules/object_storage/repositories/object-storage.repository.ts:324` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:969` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:995` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ObjectStorageController.downloadSignedContent → ObjectStorageService.redeemSignedAccess → ObjectStorageService.redeemSignedAccessAudited → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:969` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `versionId` | path | Sí | `string` | — |
+| `token` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<void>`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Enlace de acceso no válido; ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: Objeto no encontrado; ResourceNotFoundException: La versión no tiene ubicación primaria; ResourceNotFoundException: El espacio de nombres de la versión no existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto no está disponible; PreconditionFailedException: La versión no tiene la integridad verificada; PreconditionFailedException: La versión está en almacenamiento frío: requiere rehidratación previa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | ObjectContentUnavailableError: BODY_UNREADABLE; ObjectContentUnavailableError: NOT_FOUND / PROVIDER_ERROR |
+| 503 | `DEPENDENCY_UNAVAILABLE` | ServiceUnavailableException: No se pudo leer el objeto en el almacenamiento |
+
+El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/hardening/mch-009.int-spec.ts:129` |
+| INTEGRACION | `test/integration/hardening/mch-010.int-spec.ts:117` |
+
+### Flujos
+
+- Módulo 60 — Almacenamiento de Objetos (blobs, PACS y WORM) — etapa `ctrl:ObjectStorageController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 10. POST /object-storage/versions/{versionId}/integrity-checks
+
+- **Origen:** CONTRATO
+- **Nombre:** Registrar la verificación de integridad
+- **Bloque:** Datos y NoSQL
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `ObjectStorageController.recordIntegrityCheck` — `src/modules/object_storage/controllers/object-storage.controller.ts:249`
+
+### Qué es y para qué sirve (negocio)
+
+Registrar la verificación de integridad. Caso de uso UC-60-10: Verificar integridad. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+
+### Cómo se atiende (sistema)
+
+`POST /object-storage/versions/{versionId}/integrity-checks` la atiende `ObjectStorageController.recordIntegrityCheck` (src/modules/object_storage/controllers/object-storage.controller.ts:249). Exige sesión con alguno de los roles SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `RecordIntegrityCheckDto` (2 campos, 1 obligatorio). Delega en `ObjectGovernanceService.recordIntegrityCheck`. Crea filas en object_storage.object_integrity_checks. Actualiza object_storage.object_checksums, object_storage.object_locations, object_storage.object_manifests. Lee object_storage.object_checksums, object_storage.object_locations, object_storage.object_manifests, object_storage.object_versions.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:249` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:249` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `object_storage.object_checksums` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck | `src/modules/object_storage/services/object-governance.service.ts:379` |
 | `object_storage.object_checksums` | LEE | LEE | DIRECTA | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck → ObjectStorageRepository.findChecksumForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:419` |
 | `object_storage.object_integrity_checks` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck → ObjectGovernanceRepository.createIntegrityCheck | `src/modules/object_storage/repositories/object-governance.repository.ts:216` |
-| `object_storage.object_locations` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck | `src/modules/object_storage/services/object-governance.service.ts:382` |
-| `object_storage.object_locations` | LEE | LEE | DIRECTA | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck → ObjectStorageRepository.findPrimaryLocationForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:548` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck | `src/modules/object_storage/services/object-governance.service.ts:387` |
+| `object_storage.object_locations` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck | `src/modules/object_storage/services/object-governance.service.ts:395` |
+| `object_storage.object_locations` | LEE | LEE | DIRECTA | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck → ObjectStorageRepository.findPrimaryLocationForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:560` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck | `src/modules/object_storage/services/object-governance.service.ts:400` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck → ObjectStorageRepository.findManifestForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:266` |
 | `object_storage.object_versions` | LEE | LEE | DIRECTA | ObjectStorageController.recordIntegrityCheck → ObjectGovernanceService.recordIntegrityCheck → ObjectStorageRepository.findVersionById | `src/modules/object_storage/repositories/object-storage.repository.ts:324` |
 
@@ -1083,8 +1198,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `actualHash` | `string` | Sí | patrón runtime SHA256_PATTERN | `@Matches(SHA256_PATTERN, { message: 'actualHash debe ser un hexadecimal de 64 caracteres', })` | SHA-256 recomputado sobre el objeto almacenado | `src/modules/object_storage/dto/object-storage.dto.ts:1025` |
-| `repairJobId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Job de reparación si hay que repararlo | `src/modules/object_storage/dto/object-storage.dto.ts:1036` |
+| `actualHash` | `string` | Sí | patrón runtime SHA256_PATTERN | `@Matches(SHA256_PATTERN, { message: 'actualHash debe ser un hexadecimal de 64 caracteres', })` | SHA-256 recomputado sobre el objeto almacenado | `src/modules/object_storage/dto/object-storage.dto.ts:1052` |
+| `repairJobId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Job de reparación si hay que repararlo | `src/modules/object_storage/dto/object-storage.dto.ts:1063` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1109,11 +1224,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1047` |
-| `status` | `string` | Sí | — | — | Derivado de comparar el hash esperado con el recomputado | `src/modules/object_storage/dto/object-storage.dto.ts:1055` |
-| `expectedHash` | `string` | Sí | — | — | Valor de expected hash mantenido por la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1061` |
-| `actualHash` | `string` | Sí | — | — | Valor de actual hash mantenido por la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1067` |
-| `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:1073` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1074` |
+| `status` | `string` | Sí | — | — | Derivado de comparar el hash esperado con el recomputado | `src/modules/object_storage/dto/object-storage.dto.ts:1082` |
+| `expectedHash` | `string` | Sí | — | — | Valor de expected hash mantenido por la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1088` |
+| `actualHash` | `string` | Sí | — | — | Valor de actual hash mantenido por la instancia. | `src/modules/object_storage/dto/object-storage.dto.ts:1094` |
+| `lifecycleState` | `string` | Sí | — | — | Ciclo de vida en el que queda el objeto | `src/modules/object_storage/dto/object-storage.dto.ts:1100` |
 
 ### Respuestas posibles
 
@@ -1140,14 +1255,14 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
 ---
 
-## 10. POST /object-storage/versions/{versionId}/legal-holds
+## 11. POST /object-storage/versions/{versionId}/legal-holds
 
 - **Origen:** CONTRATO
 - **Nombre:** Colocar una retención legal
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.placeLegalHold` — `src/modules/object_storage/controllers/object-storage.controller.ts:160`
+- **Implementación:** `ObjectStorageController.placeLegalHold` — `src/modules/object_storage/controllers/object-storage.controller.ts:164`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1157,19 +1272,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/versions/{versionId}/legal-holds` la atiende `ObjectStorageController.placeLegalHold` (src/modules/object_storage/controllers/object-storage.controller.ts:160). Exige sesión con alguno de los roles LEGAL_COUNSEL, STORAGE_ADMIN. Valida el cuerpo como `PlaceLegalHoldDto` (1 campo, 1 obligatorio). Delega en `ObjectGovernanceService.placeLegalHold`. Crea filas en object_storage.object_legal_holds. Actualiza object_storage.object_manifests. Lee object_storage.object_legal_holds, object_storage.object_manifests, object_storage.object_versions.
+`POST /object-storage/versions/{versionId}/legal-holds` la atiende `ObjectStorageController.placeLegalHold` (src/modules/object_storage/controllers/object-storage.controller.ts:164). Exige sesión con alguno de los roles LEGAL_COUNSEL, STORAGE_ADMIN. Valida el cuerpo como `PlaceLegalHoldDto` (1 campo, 1 obligatorio). Delega en `ObjectGovernanceService.placeLegalHold`. Crea filas en object_storage.object_legal_holds. Actualiza object_storage.object_manifests. Lee object_storage.object_legal_holds, object_storage.object_manifests, object_storage.object_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: LEGAL_COUNSEL, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:160` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:160` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: LEGAL_COUNSEL, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:164` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:164` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1177,7 +1292,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `object_storage.object_legal_holds` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.placeLegalHold → ObjectGovernanceService.placeLegalHold → ObjectGovernanceRepository.createLegalHold | `src/modules/object_storage/repositories/object-governance.repository.ts:122` |
 | `object_storage.object_legal_holds` | LEE | LEE | DIRECTA | ObjectStorageController.placeLegalHold → ObjectGovernanceService.placeLegalHold → ObjectGovernanceRepository.findActiveLegalHolds | `src/modules/object_storage/repositories/object-governance.repository.ts:159` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.placeLegalHold → ObjectGovernanceService.placeLegalHold | `src/modules/object_storage/services/object-governance.service.ts:200` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.placeLegalHold → ObjectGovernanceService.placeLegalHold | `src/modules/object_storage/services/object-governance.service.ts:208` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.placeLegalHold → ObjectGovernanceService.placeLegalHold → ObjectStorageRepository.findManifestForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:266` |
 | `object_storage.object_versions` | LEE | LEE | DIRECTA | ObjectStorageController.placeLegalHold → ObjectGovernanceService.placeLegalHold → ObjectStorageRepository.findVersionById | `src/modules/object_storage/repositories/object-storage.repository.ts:324` |
 
@@ -1246,14 +1361,14 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
 ---
 
-## 11. DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}
+## 12. DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Liberar una retención legal
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.releaseLegalHold` — `src/modules/object_storage/controllers/object-storage.controller.ts:176`
+- **Implementación:** `ObjectStorageController.releaseLegalHold` — `src/modules/object_storage/controllers/object-storage.controller.ts:180`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1263,25 +1378,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}` la atiende `ObjectStorageController.releaseLegalHold` (src/modules/object_storage/controllers/object-storage.controller.ts:176). Exige sesión con alguno de los roles LEGAL_COUNSEL, STORAGE_ADMIN. Delega en `ObjectGovernanceService.releaseLegalHold`. Actualiza object_storage.object_legal_holds, object_storage.object_manifests. Lee object_storage.object_legal_holds, object_storage.object_manifests, object_storage.object_retention_locks, object_storage.object_versions.
+`DELETE /object-storage/versions/{versionId}/legal-holds/{holdId}` la atiende `ObjectStorageController.releaseLegalHold` (src/modules/object_storage/controllers/object-storage.controller.ts:180). Exige sesión con alguno de los roles LEGAL_COUNSEL, STORAGE_ADMIN. Delega en `ObjectGovernanceService.releaseLegalHold`. Actualiza object_storage.object_legal_holds, object_storage.object_manifests. Lee object_storage.object_legal_holds, object_storage.object_manifests, object_storage.object_retention_locks, object_storage.object_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: LEGAL_COUNSEL, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:176` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: versionId, holdId | `src/modules/object_storage/controllers/object-storage.controller.ts:176` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: LEGAL_COUNSEL, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: versionId, holdId | `src/modules/object_storage/controllers/object-storage.controller.ts:180` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `object_storage.object_legal_holds` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.releaseLegalHold → ObjectGovernanceService.releaseLegalHold | `src/modules/object_storage/services/object-governance.service.ts:279` |
+| `object_storage.object_legal_holds` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.releaseLegalHold → ObjectGovernanceService.releaseLegalHold | `src/modules/object_storage/services/object-governance.service.ts:288` |
 | `object_storage.object_legal_holds` | LEE | LEE | DIRECTA | ObjectStorageController.releaseLegalHold → ObjectGovernanceService.releaseLegalHold → ObjectGovernanceRepository.findLegalHoldForUpdate | `src/modules/object_storage/repositories/object-governance.repository.ts:146` |
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.releaseLegalHold → ObjectGovernanceService.releaseLegalHold | `src/modules/object_storage/services/object-governance.service.ts:296` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.releaseLegalHold → ObjectGovernanceService.releaseLegalHold | `src/modules/object_storage/services/object-governance.service.ts:305` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.releaseLegalHold → ObjectGovernanceService.releaseLegalHold → ObjectStorageRepository.findManifestForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:266` |
 | `object_storage.object_retention_locks` | LEE | LEE | DIRECTA | ObjectStorageController.releaseLegalHold → ObjectGovernanceService.releaseLegalHold → ObjectGovernanceRepository.findActiveRetentionLockForUpdate | `src/modules/object_storage/repositories/object-governance.repository.ts:74` |
 | `object_storage.object_versions` | LEE | LEE | DIRECTA | ObjectStorageController.releaseLegalHold → ObjectGovernanceService.releaseLegalHold → ObjectStorageRepository.findVersionById | `src/modules/object_storage/repositories/object-storage.repository.ts:324` |
@@ -1334,42 +1449,42 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
 ---
 
-## 12. POST /object-storage/versions/{versionId}/retention-lock
+## 13. POST /object-storage/versions/{versionId}/retention-lock
 
 - **Origen:** CONTRATO
 - **Nombre:** Aplicar retención WORM sobre la versión
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.applyRetentionLock` — `src/modules/object_storage/controllers/object-storage.controller.ts:144`
+- **Implementación:** `ObjectStorageController.applyRetentionLock` — `src/modules/object_storage/controllers/object-storage.controller.ts:148`
 
 ### Qué es y para qué sirve (negocio)
 
 Aplicar retención WORM sobre la versión. Caso de uso UC-60-07: Retención WORM. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/versions/{versionId}/retention-lock` la atiende `ObjectStorageController.applyRetentionLock` (src/modules/object_storage/controllers/object-storage.controller.ts:144). Exige sesión con alguno de los roles COMPLIANCE_OFFICER, STORAGE_ADMIN. Valida el cuerpo como `ApplyRetentionLockDto` (3 campos, 2 obligatorios). Delega en `ObjectGovernanceService.applyRetentionLock`. Crea filas en object_storage.object_retention_locks. Actualiza object_storage.object_manifests. Lee object_storage.object_manifests, object_storage.object_namespaces, object_storage.object_retention_locks, object_storage.object_versions.
+`POST /object-storage/versions/{versionId}/retention-lock` la atiende `ObjectStorageController.applyRetentionLock` (src/modules/object_storage/controllers/object-storage.controller.ts:148). Exige sesión con alguno de los roles COMPLIANCE_OFFICER, STORAGE_ADMIN. Valida el cuerpo como `ApplyRetentionLockDto` (3 campos, 2 obligatorios). Delega en `ObjectGovernanceService.applyRetentionLock`. Crea filas en object_storage.object_retention_locks. Actualiza object_storage.object_manifests. Lee object_storage.object_manifests, object_storage.object_namespaces, object_storage.object_retention_locks, object_storage.object_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: COMPLIANCE_OFFICER, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:144` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:144` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: COMPLIANCE_OFFICER, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:148` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:148` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.applyRetentionLock → ObjectGovernanceService.applyRetentionLock | `src/modules/object_storage/services/object-governance.service.ts:144` |
+| `object_storage.object_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ObjectStorageController.applyRetentionLock → ObjectGovernanceService.applyRetentionLock | `src/modules/object_storage/services/object-governance.service.ts:151` |
 | `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.applyRetentionLock → ObjectGovernanceService.applyRetentionLock → ObjectStorageRepository.findManifestForUpdate | `src/modules/object_storage/repositories/object-storage.repository.ts:266` |
 | `object_storage.object_namespaces` | LEE | LEE | DIRECTA | ObjectStorageController.applyRetentionLock → ObjectGovernanceService.applyRetentionLock → ObjectStorageRepository.findNamespaceById | `src/modules/object_storage/repositories/object-storage.repository.ts:95` |
 | `object_storage.object_retention_locks` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.applyRetentionLock → ObjectGovernanceService.applyRetentionLock → ObjectGovernanceRepository.createRetentionLock | `src/modules/object_storage/repositories/object-governance.repository.ts:53` |
@@ -1448,46 +1563,71 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
 ---
 
-## 13. POST /object-storage/versions/{versionId}/signed-url
+## 14. POST /object-storage/versions/{versionId}/signed-url
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir acceso firmado a una versión
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ObjectStorageController.issueSignedUrl` — `src/modules/object_storage/controllers/object-storage.controller.ts:193`
+- **Implementación:** `ObjectStorageController.issueSignedUrl` — `src/modules/object_storage/controllers/object-storage.controller.ts:197`
 
 ### Qué es y para qué sirve (negocio)
 
 Emitir acceso firmado a una versión. Caso de uso UC-60-09: Emitir acceso firmado. Dentro del módulo (descripción del modelo, en inglés): «Stores large immutable or versioned binaries: DICOM, reports, PDFs, videos, signed evidence, exports, backups and raw payloads.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_storage/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_60_object_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /object-storage/versions/{versionId}/signed-url` la atiende `ObjectStorageController.issueSignedUrl` (src/modules/object_storage/controllers/object-storage.controller.ts:193). Exige sesión con alguno de los roles DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `IssueSignedUrlDto` (3 campos, 1 obligatorio). Delega en `ObjectStorageService.issueSignedUrl`. Crea filas en object_storage.dicomweb_access_logs. Lee object_storage.object_encryption_envelopes, object_storage.object_locations, object_storage.object_manifests, object_storage.object_versions.
+`POST /object-storage/versions/{versionId}/signed-url` la atiende `ObjectStorageController.issueSignedUrl` (src/modules/object_storage/controllers/object-storage.controller.ts:197). Exige sesión con alguno de los roles DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN. Valida el cuerpo como `IssueSignedUrlDto` (3 campos, 1 obligatorio). Delega en `ObjectStorageService.issueSignedUrl`. Crea filas en audit.audit_log, object_storage.dicomweb_access_logs. Lee audit.audit_log, authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants y 20 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:193` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:193` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: DICOM_VIEWER, CLINICIAN, SYSTEM, STORAGE_ADMIN | `src/modules/object_storage/controllers/object-storage.controller.ts:197` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: versionId | `src/modules/object_storage/controllers/object-storage.controller.ts:197` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:348` |
-| `object_storage.object_encryption_envelopes` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageRepository.findEncryptionEnvelope | `src/modules/object_storage/repositories/object-storage.repository.ts:489` |
-| `object_storage.object_locations` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageRepository.findPrimaryLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:568` |
-| `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageRepository.findManifestById | `src/modules/object_storage/repositories/object-storage.repository.ts:258` |
-| `object_storage.object_versions` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageRepository.findVersionById | `src/modules/object_storage/repositories/object-storage.repository.ts:324` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:81` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:90` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:78` |
+| `authz.permissions` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.auditedAccess → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `object_storage.dicom_instance_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:327` |
+| `object_storage.dicom_series_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:331` |
+| `object_storage.dicom_study_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.findDicomCoordinates | `src/modules/object_storage/repositories/dicom.repository.ts:335` |
+| `object_storage.dicomweb_access_logs` | ESCRIBE | CREA | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.recordDicomAccess → DicomRepository.createAccessLog | `src/modules/object_storage/repositories/dicom.repository.ts:391` |
+| `object_storage.object_checksums` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findChecksum | `src/modules/object_storage/repositories/object-storage.repository.ts:435` |
+| `object_storage.object_encryption_envelopes` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageRepository.findEncryptionEnvelope | `src/modules/object_storage/repositories/object-storage.repository.ts:501` |
+| `object_storage.object_locations` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findPrimaryLocation | `src/modules/object_storage/repositories/object-storage.repository.ts:580` |
+| `object_storage.object_manifests` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findManifestById | `src/modules/object_storage/repositories/object-storage.repository.ts:258` |
+| `object_storage.object_versions` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageRepository.findVersionById | `src/modules/object_storage/repositories/object-storage.repository.ts:324` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:969` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:995` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | ObjectStorageController.issueSignedUrl → ObjectStorageService.issueSignedUrl → ObjectStorageService.issueSignedUrlAuthorised → ObjectStorageService.resolveServableVersion → ObjectStorageService.assertActorMayAccess → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:969` |
 
 ### Parámetros
 
@@ -1501,7 +1641,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 |---|---|---|---|---|---|---|
 | `purposeOfUseCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Propósito de uso; sin él no se emite | `src/modules/object_storage/dto/object-storage.dto.ts:942` |
 | `expiresInSeconds` | `number` | No | mínimo 30 | `@IsOptional()` `@IsInt()` `@Min(30)` | Segundos de validez | `src/modules/object_storage/dto/object-storage.dto.ts:955` |
-| `studyInstanceUid` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Study UID si el objeto es DICOM | `src/modules/object_storage/dto/object-storage.dto.ts:967` |
+| `studyInstanceUid` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Ignorado: el estudio se resuelve desde el objeto en el servidor | `src/modules/object_storage/dto/object-storage.dto.ts:977` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1527,11 +1667,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `objectVersionId` | `string` | Sí | formato uuid | — | Identificador asociado a object version. | `src/modules/object_storage/dto/object-storage.dto.ts:978` |
-| `providerUri` | `string` | Sí | — | — | URI del proveedor sobre la que se firma | `src/modules/object_storage/dto/object-storage.dto.ts:984` |
-| `expiresAt` | `string` | Sí | formato date-time | — | Cuándo caduca el acceso | `src/modules/object_storage/dto/object-storage.dto.ts:990` |
-| `keyVersion` | `string` | No | — | — | Versión de la clave con la que se descifra | `src/modules/object_storage/dto/object-storage.dto.ts:998` |
-| `accessLogId` | `string` | No | formato uuid | — | Registro del acceso si el objeto es DICOM | `src/modules/object_storage/dto/object-storage.dto.ts:1007` |
+| `objectVersionId` | `string` | Sí | formato uuid | — | Identificador asociado a object version. | `src/modules/object_storage/dto/object-storage.dto.ts:988` |
+| `url` | `string` | Sí | — | — | Ruta de descarga con el token firmado; caduca en expiresAt | `src/modules/object_storage/dto/object-storage.dto.ts:1002` |
+| `method` | `string` | Sí | — | — | Único método que el enlace habilita | `src/modules/object_storage/dto/object-storage.dto.ts:1011` |
+| `expiresAt` | `string` | Sí | formato date-time | — | Cuándo caduca el acceso | `src/modules/object_storage/dto/object-storage.dto.ts:1017` |
+| `keyVersion` | `string` | No | — | — | Versión de la clave con la que se descifra | `src/modules/object_storage/dto/object-storage.dto.ts:1025` |
+| `accessLogId` | `string` | No | formato uuid | — | Registro del acceso si el objeto es DICOM | `src/modules/object_storage/dto/object-storage.dto.ts:1034` |
 
 ### Respuestas posibles
 
@@ -1542,7 +1683,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/object_
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: Objeto no encontrado; ResourceNotFoundException: La versión no tiene ubicación primaria |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto no está disponible; PreconditionFailedException: La versión está en almacenamiento frío: requiere rehidratación previa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto no está disponible; PreconditionFailedException: La versión no tiene la integridad verificada; PreconditionFailedException: La versión está en almacenamiento frío: requiere rehidratación previa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
@@ -1551,6 +1692,10 @@ El árbol de decisión completo está en [flujos](../flujos/object_storage.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/hardening/mch-009.int-spec.ts:52` |
+| INTEGRACION | `test/integration/hardening/mch-010.int-spec.ts:61` |
+| INTEGRACION | `test/integration/hardening/mch-020.int-spec.ts:61` |
+| INTEGRACION | `test/integration/hardening/mch-021.int-spec.ts:209` |
 | CONTROLADOR | `src/modules/object_storage/controllers/object-storage.controller.spec.ts:149` |
 
 ### Flujos

@@ -3,8 +3,8 @@
 # Endpoints del módulo `qa_lab`
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
-- **Operaciones:** 13 (13 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 13 · BAJO 0
+- **Operaciones:** 21 (21 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 0 · MEDIO 13 · BAJO 8
 - **Tablas distintas que tocan:** 12
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/qa-lab.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -12,23 +12,596 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/internal/qa/schedules/run-due` | Evaluar programaciones vencidas y encolar sus corridas | MEDIO | 7 | SYSTEM, QA_ADMIN |
-| 2 | POST | `/qa/case-results/{resultId}/evaluate` | Evaluar las aserciones y fijar el resultado del caso | MEDIO | 5 | SYSTEM, QA_ENGINEER |
-| 3 | POST | `/qa/defects` | Registrar un defecto detectado | MEDIO | 4 | SYSTEM, QA_ENGINEER, QA_ADMIN |
-| 4 | PATCH | `/qa/defects/{defectId}` | Triage y transición de estado del defecto | MEDIO | 2 | QA_ADMIN, QA_ENGINEER |
-| 5 | POST | `/qa/environments` | Registrar un entorno de pruebas gobernado | MEDIO | 2 | QA_ADMIN |
-| 6 | POST | `/qa/runs` | Disparar una corrida de pruebas | MEDIO | 5 | QA_ADMIN, QA_ENGINEER, SYSTEM |
-| 7 | POST | `/qa/runs/{runId}/artifacts` | Adjuntar un artefacto de evidencia a la corrida | MEDIO | 3 | SYSTEM, QA_ENGINEER |
-| 8 | POST | `/qa/runs/{runId}/cases/{caseId}/execute` | Registrar la ejecución del caso con sus payloads | MEDIO | 8 | SYSTEM, QA_ENGINEER |
-| 9 | POST | `/qa/runs/{runId}/finalize` | Cerrar la corrida y consolidar totales | MEDIO | 3 | SYSTEM, QA_ENGINEER |
-| 10 | POST | `/qa/runs/{runId}/link-release` | Enlazar la evidencia de la corrida a un release | MEDIO | 3 | RELEASE_MANAGER, QA_ADMIN |
-| 11 | POST | `/qa/schedules` | Programar la ejecución automática de la suite | MEDIO | 4 | QA_ADMIN, QA_ENGINEER |
-| 12 | POST | `/qa/suites/{suiteId}/cases` | Definir un caso de prueba con sus aserciones | MEDIO | 4 | QA_ADMIN, QA_ENGINEER |
-| 13 | POST | `/qa/suites/{suiteId}/publish` | Publicar la suite y activar sus casos | MEDIO | 4 | QA_ADMIN, QA_ENGINEER |
+| 1 | GET | `/admin/qa/defects` | Defectos deduplicados por firma | BAJO | 1 | QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN |
+| 2 | GET | `/admin/qa/environments` | Entornos de prueba | BAJO | 1 | QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN |
+| 3 | GET | `/admin/qa/flows` | Catálogo de flujos: recorridos del usuario con su cobertura de contrato y de pruebas | BAJO | 5 | QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN |
+| 4 | GET | `/admin/qa/flows/{flowId}` | Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su último veredicto | BAJO | 5 | QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN |
+| 5 | GET | `/admin/qa/runs` | Corridas recientes | BAJO | 1 | QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN |
+| 6 | GET | `/admin/qa/runs/{runId}` | Corrida con resultados por caso y veredicto por aserción (valor observado) | BAJO | 4 | QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN |
+| 7 | GET | `/admin/qa/suites` | Suites con conteo de casos y última corrida | BAJO | 3 | QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN |
+| 8 | GET | `/admin/qa/suites/{suiteId}` | Suite con casos y aserciones | BAJO | 3 | QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN |
+| 9 | POST | `/internal/qa/schedules/run-due` | Evaluar programaciones vencidas y encolar sus corridas | MEDIO | 7 | SYSTEM, QA_ADMIN |
+| 10 | POST | `/qa/case-results/{resultId}/evaluate` | Evaluar las aserciones y fijar el resultado del caso | MEDIO | 5 | SYSTEM, QA_ENGINEER |
+| 11 | POST | `/qa/defects` | Registrar un defecto detectado | MEDIO | 4 | SYSTEM, QA_ENGINEER, QA_ADMIN |
+| 12 | PATCH | `/qa/defects/{defectId}` | Triage y transición de estado del defecto | MEDIO | 2 | QA_ADMIN, QA_ENGINEER |
+| 13 | POST | `/qa/environments` | Registrar un entorno de pruebas gobernado | MEDIO | 2 | QA_ADMIN |
+| 14 | POST | `/qa/runs` | Disparar una corrida de pruebas | MEDIO | 5 | QA_ADMIN, QA_ENGINEER, SYSTEM |
+| 15 | POST | `/qa/runs/{runId}/artifacts` | Adjuntar un artefacto de evidencia a la corrida | MEDIO | 3 | SYSTEM, QA_ENGINEER |
+| 16 | POST | `/qa/runs/{runId}/cases/{caseId}/execute` | Registrar la ejecución del caso con sus payloads | MEDIO | 8 | SYSTEM, QA_ENGINEER |
+| 17 | POST | `/qa/runs/{runId}/finalize` | Cerrar la corrida y consolidar totales | MEDIO | 3 | SYSTEM, QA_ENGINEER |
+| 18 | POST | `/qa/runs/{runId}/link-release` | Enlazar la evidencia de la corrida a un release | MEDIO | 3 | RELEASE_MANAGER, QA_ADMIN |
+| 19 | POST | `/qa/schedules` | Programar la ejecución automática de la suite | MEDIO | 4 | QA_ADMIN, QA_ENGINEER |
+| 20 | POST | `/qa/suites/{suiteId}/cases` | Definir un caso de prueba con sus aserciones | MEDIO | 4 | QA_ADMIN, QA_ENGINEER |
+| 21 | POST | `/qa/suites/{suiteId}/publish` | Publicar la suite y activar sus casos | MEDIO | 4 | QA_ADMIN, QA_ENGINEER |
 
 ---
 
-## 1. POST /internal/qa/schedules/run-due
+## 1. GET /admin/qa/defects
+
+- **Origen:** CONTRATO
+- **Nombre:** Defectos deduplicados por firma
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `QaLabReadController.defects` — `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:127`
+
+### Qué es y para qué sirve (negocio)
+
+Defectos deduplicados por firma. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/qa/defects` la atiende `QaLabReadController.defects` (src/modules/qa_lab/controllers/qa-lab-read.controller.ts:127). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. Delega en `QaLabReadService.listDefects`. Lee qa_lab.test_defects.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:127` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `qa_lab.test_defects` | LEE | LEE | DIRECTA | QaLabReadController.defects → QaLabReadService.listDefects | `src/modules/qa_lab/services/qa-lab-read.service.ts:218` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `status` | query | No | `string` | Código: DEFECT_OPEN, DEFECT_TRIAGED, … |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `ctrl:QaLabReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 2. GET /admin/qa/environments
+
+- **Origen:** CONTRATO
+- **Nombre:** Entornos de prueba
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `QaLabReadController.environments` — `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:89`
+
+### Qué es y para qué sirve (negocio)
+
+Entornos de prueba. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/qa/environments` la atiende `QaLabReadController.environments` (src/modules/qa_lab/controllers/qa-lab-read.controller.ts:89). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. Delega en `QaLabReadService.listEnvironments`. Lee qa_lab.test_environments.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:89` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `qa_lab.test_environments` | LEE | LEE | DIRECTA | QaLabReadController.environments → QaLabReadService.listEnvironments | `src/modules/qa_lab/services/qa-lab-read.service.ts:30` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `ctrl:QaLabReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 3. GET /admin/qa/flows
+
+- **Origen:** CONTRATO
+- **Nombre:** Catálogo de flujos: recorridos del usuario con su cobertura de contrato y de pruebas
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `QaLabReadController.listFlows` — `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:134`
+
+### Qué es y para qué sirve (negocio)
+
+Catálogo de flujos: recorridos del usuario con su cobertura de contrato y de pruebas. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/qa/flows` la atiende `QaLabReadController.listFlows` (src/modules/qa_lab/controllers/qa-lab-read.controller.ts:134). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. Delega en `QaFlowsService.list`. Lee qa_lab.assertion_results, qa_lab.test_case_results, qa_lab.test_cases, qa_lab.test_runs, qa_lab.test_suites.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:134` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `qa_lab.assertion_results` | LEE | LEE | DIRECTA | QaLabReadController.listFlows → QaFlowsService.list → QaFlowsService.loadState | `src/modules/qa_lab/services/qa-flows.service.ts:375` |
+| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabReadController.listFlows → QaFlowsService.list → QaFlowsService.loadState | `src/modules/qa_lab/services/qa-flows.service.ts:371` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.listFlows → QaFlowsService.list → QaFlowsService.loadState | `src/modules/qa_lab/services/qa-flows.service.ts:332` |
+| `qa_lab.test_runs` | LEE | LEE | POR_SQL | QaLabReadController.listFlows → QaFlowsService.list → QaFlowsService.loadState | `src/modules/qa_lab/services/qa-flows.service.ts:354` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabReadController.listFlows → QaFlowsService.list → QaFlowsService.loadState | `src/modules/qa_lab/services/qa-flows.service.ts:325` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `module` | query | No | `string` | Módulo del Registro: «2 · Médico» |
+| `search` | query | No | `string` | Texto en el id, el título o el módulo |
+| `coverage` | query | No | `string` | SEEDED/NOT_SEEDED: la suite FLOW-<id> existe en qa_lab o no. RAN/NEVER_RAN: tuvo alguna corrida o no. |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `ctrl:QaLabReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 4. GET /admin/qa/flows/{flowId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su último veredicto
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `QaLabReadController.flow` — `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:144`
+
+### Qué es y para qué sirve (negocio)
+
+Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su último veredicto. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/qa/flows/{flowId}` la atiende `QaLabReadController.flow` (src/modules/qa_lab/controllers/qa-lab-read.controller.ts:144). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. Delega en `QaFlowsService.detail`. Lee qa_lab.assertion_results, qa_lab.test_case_results, qa_lab.test_cases, qa_lab.test_runs, qa_lab.test_suites.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:144` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `qa_lab.assertion_results` | LEE | LEE | DIRECTA | QaLabReadController.flow → QaFlowsService.detail → QaFlowsService.loadState | `src/modules/qa_lab/services/qa-flows.service.ts:375` |
+| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabReadController.flow → QaFlowsService.detail → QaFlowsService.loadState | `src/modules/qa_lab/services/qa-flows.service.ts:371` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.flow → QaFlowsService.detail → QaFlowsService.loadState | `src/modules/qa_lab/services/qa-flows.service.ts:332` |
+| `qa_lab.test_runs` | LEE | LEE | POR_SQL | QaLabReadController.flow → QaFlowsService.detail → QaFlowsService.loadState | `src/modules/qa_lab/services/qa-flows.service.ts:354` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabReadController.flow → QaFlowsService.detail → QaFlowsService.loadState | `src/modules/qa_lab/services/qa-flows.service.ts:325` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `flowId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Flujo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `ctrl:QaLabReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. GET /admin/qa/runs
+
+- **Origen:** CONTRATO
+- **Nombre:** Corridas recientes
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `QaLabReadController.runs` — `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:110`
+
+### Qué es y para qué sirve (negocio)
+
+Corridas recientes. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/qa/runs` la atiende `QaLabReadController.runs` (src/modules/qa_lab/controllers/qa-lab-read.controller.ts:110). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. Delega en `QaLabReadService.listRuns`. Lee qa_lab.test_runs.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:110` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabReadController.runs → QaLabReadService.listRuns | `src/modules/qa_lab/services/qa-lab-read.service.ts:148` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `suiteId` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `ctrl:QaLabReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. GET /admin/qa/runs/{runId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Corrida con resultados por caso y veredicto por aserción (valor observado)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `QaLabReadController.run` — `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:117`
+
+### Qué es y para qué sirve (negocio)
+
+Corrida con resultados por caso y veredicto por aserción (valor observado). Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/qa/runs/{runId}` la atiende `QaLabReadController.run` (src/modules/qa_lab/controllers/qa-lab-read.controller.ts:117). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. Delega en `QaLabReadService.getRun`. Lee qa_lab.assertion_results, qa_lab.test_case_results, qa_lab.test_cases, qa_lab.test_runs.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:117` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: runId | `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:117` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `qa_lab.assertion_results` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:188` |
+| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:183` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:191` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabReadController.run → QaLabReadService.getRun | `src/modules/qa_lab/services/qa-lab-read.service.ts:180` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `runId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `ctrl:QaLabReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. GET /admin/qa/suites
+
+- **Origen:** CONTRATO
+- **Nombre:** Suites con conteo de casos y última corrida
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `QaLabReadController.suites` — `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:96`
+
+### Qué es y para qué sirve (negocio)
+
+Suites con conteo de casos y última corrida. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/qa/suites` la atiende `QaLabReadController.suites` (src/modules/qa_lab/controllers/qa-lab-read.controller.ts:96). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. Delega en `QaLabReadService.listSuites`. Lee qa_lab.test_cases, qa_lab.test_runs, qa_lab.test_suites.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:96` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.suites → QaLabReadService.listSuites | `src/modules/qa_lab/services/qa-lab-read.service.ts:52` |
+| `qa_lab.test_runs` | LEE | LEE | POR_SQL | QaLabReadController.suites → QaLabReadService.listSuites | `src/modules/qa_lab/services/qa-lab-read.service.ts:64` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabReadController.suites → QaLabReadService.listSuites | `src/modules/qa_lab/services/qa-lab-read.service.ts:47` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `ctrl:QaLabReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 8. GET /admin/qa/suites/{suiteId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Suite con casos y aserciones
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `QaLabReadController.suite` — `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:103`
+
+### Qué es y para qué sirve (negocio)
+
+Suite con casos y aserciones. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/qa/suites/{suiteId}` la atiende `QaLabReadController.suite` (src/modules/qa_lab/controllers/qa-lab-read.controller.ts:103). Exige sesión con alguno de los roles QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. Delega en `QaLabReadService.getSuite`. Lee qa_lab.test_assertions, qa_lab.test_cases, qa_lab.test_suites.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:103` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: suiteId | `src/modules/qa_lab/controllers/qa-lab-read.controller.ts:103` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `qa_lab.test_assertions` | LEE | LEE | DIRECTA | QaLabReadController.suite → QaLabReadService.getSuite | `src/modules/qa_lab/services/qa-lab-read.service.ts:109` |
+| `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabReadController.suite → QaLabReadService.getSuite | `src/modules/qa_lab/services/qa-lab-read.service.ts:104` |
+| `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabReadController.suite → QaLabReadService.getSuite | `src/modules/qa_lab/services/qa-lab-read.service.ts:101` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `suiteId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 36 — Laboratorio de Pruebas y Defectos — etapa `ctrl:QaLabReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 9. POST /internal/qa/schedules/run-due
 
 - **Origen:** CONTRATO
 - **Nombre:** Evaluar programaciones vencidas y encolar sus corridas
@@ -45,7 +618,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/qa/schedules/run-due` la atiende `QaLabInternalController.runDueSchedules` (src/modules/qa_lab/controllers/qa-lab-internal.controller.ts:31). Exige sesión con alguno de los roles SYSTEM, QA_ADMIN. Valida el cuerpo como `RunDueSchedulesDto` (1 campo, 0 obligatorios). Delega en `QaCatalogService.runDueSchedules`. Crea filas en qa_lab.test_runs. Actualiza qa_lab.test_schedules. Lee qa_lab.test_cases, qa_lab.test_environments, qa_lab.test_runs, qa_lab.test_schedules, qa_lab.test_suites.
+`POST /internal/qa/schedules/run-due` la atiende `QaLabInternalController.runDueSchedules` (src/modules/qa_lab/controllers/qa-lab-internal.controller.ts:31). Exige sesión con alguno de los roles SYSTEM, QA_ADMIN. Valida el cuerpo como `QaLabRunDueSchedulesDto` (1 campo, 0 obligatorios). Delega en `QaCatalogService.runDueSchedules`. Crea filas en qa_lab.test_runs. Actualiza qa_lab.test_schedules. Lee qa_lab.test_cases, qa_lab.test_environments, qa_lab.test_runs, qa_lab.test_schedules, qa_lab.test_suites.
 
 ### Requerimientos
 
@@ -53,10 +626,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab-internal.controller.ts:31` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -70,11 +643,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `qa_lab.test_schedules` | LEE | LEE | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogRepository.claimDueSchedules | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:483` |
 | `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaLabInternalController.runDueSchedules → QaCatalogService.runDueSchedules → QaCatalogService.runDueSchedule → QaCatalogRepository.findSuiteById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:245` |
 
-### Cuerpo — DTO `RunDueSchedulesDto` · `application/json`
+### Cuerpo — DTO `QaLabRunDueSchedulesDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `limit` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(100)` | Tamaño máximo del lote de programaciones a evaluar | `src/modules/qa_lab/dto/qa-lab.dto.ts:1142` |
+| `limit` | `number` | No | mínimo 1; máximo 100 | — | Tamaño máximo del lote de programaciones a evaluar | sin fuente |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -131,7 +704,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 2. POST /qa/case-results/{resultId}/evaluate
+## 10. POST /qa/case-results/{resultId}/evaluate
 
 - **Origen:** CONTRATO
 - **Nombre:** Evaluar las aserciones y fijar el resultado del caso
@@ -144,7 +717,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Evaluar las aserciones y fijar el resultado del caso. Caso de uso UC-36-06: Evaluar aserciones. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -156,9 +729,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: resultId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:139` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -167,7 +740,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `qa_lab.assertion_results` | ESCRIBE | CREA | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaRunsRepository.createAssertionResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:364` |
 | `qa_lab.assertion_results` | LEE | LEE | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaRunsRepository.countAssertionResults | `src/modules/qa_lab/repositories/qa-runs.repository.ts:390` |
 | `qa_lab.test_assertions` | LEE | LEE | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaCatalogRepository.findAssertionsByCase | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:420` |
-| `qa_lab.test_case_results` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.evaluateResult → QaRunsService.evaluateResult | `src/modules/qa_lab/services/qa-runs.service.ts:408` |
+| `qa_lab.test_case_results` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.evaluateResult → QaRunsService.evaluateResult | `src/modules/qa_lab/services/qa-runs.service.ts:443` |
 | `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.evaluateResult → QaRunsService.evaluateResult → QaRunsRepository.findCaseResultForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:310` |
 
 ### Parámetros
@@ -218,7 +791,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 3. POST /qa/defects
+## 11. POST /qa/defects
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un defecto detectado
@@ -231,7 +804,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Registrar un defecto detectado. Caso de uso UC-36-09: Registrar y deduplicar defecto. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -243,17 +816,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, QA_ENGINEER, QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab.controller.ts:183` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaCatalogRepository.findCaseById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:300` |
-| `qa_lab.test_defects` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.registerDefect → QaRunsService.registerDefect | `src/modules/qa_lab/services/qa-runs.service.ts:596` |
+| `qa_lab.test_defects` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.registerDefect → QaRunsService.registerDefect | `src/modules/qa_lab/services/qa-runs.service.ts:635` |
 | `qa_lab.test_defects` | ESCRIBE | CREA | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaRunsRepository.createDefect | `src/modules/qa_lab/repositories/qa-runs.repository.ts:598` |
 | `qa_lab.test_defects` | LEE | LEE | DIRECTA | QaLabController.registerDefect → QaRunsService.registerDefect → QaRunsRepository.findDefectBySignatureForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:649` |
 
@@ -335,7 +908,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 4. PATCH /qa/defects/{defectId}
+## 12. PATCH /qa/defects/{defectId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Triage y transición de estado del defecto
@@ -348,7 +921,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Triage y transición de estado del defecto. Caso de uso UC-36-10: Triage y transición. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -360,17 +933,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:199` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: defectId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:199` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `qa_lab.test_defects` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.triageDefect → QaRunsService.triageDefect | `src/modules/qa_lab/services/qa-runs.service.ts:701` |
+| `qa_lab.test_defects` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.triageDefect → QaRunsService.triageDefect | `src/modules/qa_lab/services/qa-runs.service.ts:740` |
 | `qa_lab.test_defects` | LEE | LEE | DIRECTA | QaLabController.triageDefect → QaRunsService.triageDefect → QaRunsRepository.findDefectForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:633` |
 
 ### Parámetros
@@ -446,7 +1019,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 5. POST /qa/environments
+## 13. POST /qa/environments
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un entorno de pruebas gobernado
@@ -459,7 +1032,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Registrar un entorno de pruebas gobernado. Caso de uso UC-36-01: Registrar entorno gobernado. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:10`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -471,10 +1044,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -556,7 +1129,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 6. POST /qa/runs
+## 14. POST /qa/runs
 
 - **Origen:** CONTRATO
 - **Nombre:** Disparar una corrida de pruebas
@@ -569,7 +1142,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Disparar una corrida de pruebas. Caso de uso UC-36-04: Disparar corrida. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -581,10 +1154,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER, SYSTEM | `src/modules/qa_lab/controllers/qa-lab.controller.ts:105` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -668,7 +1241,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 7. POST /qa/runs/{runId}/artifacts
+## 15. POST /qa/runs/{runId}/artifacts
 
 - **Origen:** CONTRATO
 - **Nombre:** Adjuntar un artefacto de evidencia a la corrida
@@ -681,7 +1254,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Adjuntar un artefacto de evidencia a la corrida. Caso de uso UC-36-08: Adjuntar evidencia. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -693,11 +1266,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:170` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: runId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:170` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -778,7 +1351,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 8. POST /qa/runs/{runId}/cases/{caseId}/execute
+## 16. POST /qa/runs/{runId}/cases/{caseId}/execute
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar la ejecución del caso con sus payloads
@@ -791,7 +1364,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Registrar la ejecución del caso con sus payloads. Caso de uso UC-36-05: Capturar ejecución y payloads. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -803,11 +1376,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:121` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: runId, caseId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:121` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -819,7 +1392,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 | `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.findCaseResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:323` |
 | `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaCatalogRepository.findCaseById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:300` |
 | `qa_lab.test_environments` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaCatalogRepository.findEnvironmentById | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:218` |
-| `qa_lab.test_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.executeCase → QaRunsService.executeCase | `src/modules/qa_lab/services/qa-runs.service.ts:326` |
+| `qa_lab.test_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.executeCase → QaRunsService.executeCase | `src/modules/qa_lab/services/qa-runs.service.ts:349` |
 | `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.executeCase → QaRunsService.executeCase → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:172` |
 
 ### Parámetros
@@ -905,7 +1478,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 9. POST /qa/runs/{runId}/finalize
+## 17. POST /qa/runs/{runId}/finalize
 
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar la corrida y consolidar totales
@@ -918,7 +1491,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Cerrar la corrida y consolidar totales. Caso de uso UC-36-07: Cerrar corrida y consolidar. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -930,16 +1503,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:155` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: runId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:155` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaLabController.finalizeRun → QaRunsService.finalizeRun → QaRunsRepository.findResultsByRun | `src/modules/qa_lab/repositories/qa-runs.repository.ts:331` |
-| `qa_lab.test_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.finalizeRun → QaRunsService.finalizeRun | `src/modules/qa_lab/services/qa-runs.service.ts:480` |
+| `qa_lab.test_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.finalizeRun → QaRunsService.finalizeRun | `src/modules/qa_lab/services/qa-runs.service.ts:515` |
 | `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.finalizeRun → QaRunsService.finalizeRun → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:172` |
 
 ### Parámetros
@@ -990,7 +1563,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 10. POST /qa/runs/{runId}/link-release
+## 18. POST /qa/runs/{runId}/link-release
 
 - **Origen:** CONTRATO
 - **Nombre:** Enlazar la evidencia de la corrida a un release
@@ -1003,7 +1576,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Enlazar la evidencia de la corrida a un release. Caso de uso UC-36-12: Enlazar evidencia a release. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1015,18 +1588,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RELEASE_MANAGER, QA_ADMIN | `src/modules/qa_lab/controllers/qa-lab.controller.ts:227` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: runId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:227` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `qa_lab.run_artifacts` | LEE | LEE | DIRECTA | QaLabController.linkRelease → QaRunsService.linkRelease → QaRunsRepository.findArtifactsByRun | `src/modules/qa_lab/repositories/qa-runs.repository.ts:585` |
-| `qa_lab.test_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.linkRelease → QaRunsService.linkRelease | `src/modules/qa_lab/services/qa-runs.service.ts:760` |
+| `qa_lab.test_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | QaLabController.linkRelease → QaRunsService.linkRelease | `src/modules/qa_lab/services/qa-runs.service.ts:799` |
 | `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaLabController.linkRelease → QaRunsService.linkRelease → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:172` |
 
 ### Parámetros
@@ -1096,7 +1669,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 11. POST /qa/schedules
+## 19. POST /qa/schedules
 
 - **Origen:** CONTRATO
 - **Nombre:** Programar la ejecución automática de la suite
@@ -1109,7 +1682,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Programar la ejecución automática de la suite. Caso de uso UC-36-11: Programar ejecución automática. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1121,10 +1694,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:215` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1216,7 +1789,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 12. POST /qa/suites/{suiteId}/cases
+## 20. POST /qa/suites/{suiteId}/cases
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir un caso de prueba con sus aserciones
@@ -1229,7 +1802,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Definir un caso de prueba con sus aserciones. Caso de uso UC-36-02: Definir caso con aserciones. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1241,11 +1814,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:72` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: suiteId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:72` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1362,7 +1935,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 ---
 
-## 13. POST /qa/suites/{suiteId}/publish
+## 21. POST /qa/suites/{suiteId}/publish
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar la suite y activar sus casos
@@ -1375,7 +1948,7 @@ El árbol de decisión completo está en [flujos](../flujos/qa_lab.md).
 
 Publicar la suite y activar sus casos. Caso de uso UC-36-03: Publicar suite y activar casos. Dentro del módulo (descripción del modelo, en inglés): «A governed quality-assurance laboratory for the platform's integrations and critical workflows.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_36_qa_lab.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1387,11 +1960,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/qa_lab/
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_lab/controllers/qa-lab.controller.ts:88` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: suiteId | `src/modules/qa_lab/controllers/qa-lab.controller.ts:88` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

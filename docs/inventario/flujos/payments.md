@@ -2,7 +2,7 @@
 
 # Flujos del módulo `payments`
 
-- **Procesos:** 1 · **Máquinas de estado:** 0
+- **Procesos:** 1 · **Máquinas de estado:** 1
 - **Operaciones:** 14 (13 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [payments](../endpoints/payments.md)
 
@@ -36,7 +36,7 @@ payouts           -> importe derivado de los ítems, neto de comisiones
 reconciliation    -> registros del proveedor vs ledger; descuadres abren excepción
 ```
 
-_Fuente: `src/modules/payments/README.md:36`_
+_Fuente: `src/modules/payments/README.md:70`_
 
 ### Etapas y operaciones
 
@@ -46,11 +46,11 @@ _Fuente: `src/modules/payments/README.md:36`_
 | `UC-42-02` | Abrir sesión de checkout con contexto de cajero | POST /payments/checkout-sessions | PAYMENTS_ADMIN · CASHIER | MEDIO | 4 |
 | `UC-42-03` | Bloquear tipo de cambio | POST /payments/intents/{id}/fx-lock | PAYMENTS_ADMIN | MEDIO | 4 |
 | `UC-42-04` | Evaluar riesgo y 3-D Secure | POST /payments/intents/{id}/risk-assessment | PAYMENTS_ADMIN | MEDIO | 3 |
-| `UC-42-05` | Procesar transacción (authorize/capture/sale) | POST /payments/intents/{id}/transactions | PAYMENTS_ADMIN · CASHIER | MEDIO | 4 |
-| `UC-42-06` | Recibir callback del gateway (idempotente) | POST /payments/callbacks/{callbackPath} | Público (sin sesión) | ALTO | 4 |
-| `UC-42-07` | Consulta independiente de estado | POST /payments/transactions/{id}/status-inquiry | PAYMENTS_ADMIN | MEDIO | 2 |
+| `UC-42-05` | Procesar transacción (authorize/capture/sale) | POST /payments/intents/{id}/transactions | PAYMENTS_ADMIN · CASHIER | MEDIO | 5 |
+| `UC-42-06` | Recibir callback del gateway (idempotente) | POST /payments/callbacks/{callbackPath} | Público (sin sesión) | ALTO | 6 |
+| `UC-42-07` | Consulta independiente de estado | POST /payments/transactions/{id}/status-inquiry | PAYMENTS_ADMIN | BAJO | 1 |
 | `UC-42-08` | Reembolso total o parcial | POST /payments/transactions/{id}/refunds | PAYMENTS_ADMIN | MEDIO | 3 |
-| `UC-42-09` | Solicitar anulación | POST /payments/transactions/{id}/cancellation-requests | PAYMENTS_ADMIN · CASHIER | MEDIO | 3 |
+| `UC-42-09` | Solicitar anulación | POST /payments/transactions/{id}/cancellation-requests | PAYMENTS_ADMIN · CASHIER | MEDIO | 2 |
 | `UC-42-10` | Publicar versión del tarifario | POST /payments/fee-schedules | PAYMENTS_ADMIN | MEDIO | 3 |
 | `UC-42-11` | Reparto multi-party | POST /payments/intents/{id}/splits | PAYMENTS_ADMIN | MEDIO | 3 |
 | `UC-42-12` | Importar liquidación del gateway | POST /payments/settlements/import | PAYMENTS_ADMIN | MEDIO | 5 |
@@ -71,17 +71,18 @@ flowchart LR
   t10[("payments.fx_rate_locks")]:::tabla
   t12[("payments.risk_assessments")]:::tabla
   t14[("payments.payment_transactions")]:::tabla
-  t19[("payments.refunds")]:::tabla
-  t21[("payments.payment_cancellation_requests")]:::tabla
-  t23[("payments.fee_schedules")]:::tabla
-  t25[("payments.payment_splits")]:::tabla
-  t27[("payments.gateway_settlements")]:::tabla
-  t28[("payments.settlement_lines")]:::tabla
-  t30[("payments.payout_items")]:::tabla
-  t31[("payments.payouts")]:::tabla
-  t33[("payments.provider_reconciliation_records")]:::tabla
-  t34[("payments.reconciliation_exceptions")]:::tabla
-  t35[("payments.reconciliation_runs")]:::tabla
+  t17[("payments.payment_webhook_events")]:::tabla
+  t20[("payments.refunds")]:::tabla
+  t22[("payments.payment_cancellation_requests")]:::tabla
+  t24[("payments.fee_schedules")]:::tabla
+  t26[("payments.payment_splits")]:::tabla
+  t28[("payments.gateway_settlements")]:::tabla
+  t29[("payments.settlement_lines")]:::tabla
+  t31[("payments.payout_items")]:::tabla
+  t32[("payments.payouts")]:::tabla
+  t34[("payments.provider_reconciliation_records")]:::tabla
+  t35[("payments.reconciliation_exceptions")]:::tabla
+  t36[("payments.reconciliation_runs")]:::tabla
   subgraph s0["UC-42-01 · Crear intención de pago idempotente"]
     o1["POST /payments/intents"]:::op
   end
@@ -101,28 +102,28 @@ flowchart LR
     o15["POST /payments/callbacks/{callbackPath}"]:::op
   end
   subgraph s6["UC-42-07 · Consulta independiente de estado"]
-    o17["POST /payments/transactions/{id}/status-inquiry"]:::op
+    o18["POST /payments/transactions/{id}/status-inquiry"]:::op
   end
   subgraph s7["UC-42-08 · Reembolso total o parcial"]
-    o18["POST /payments/transactions/{id}/refunds"]:::op
+    o19["POST /payments/transactions/{id}/refunds"]:::op
   end
   subgraph s8["UC-42-09 · Solicitar anulación"]
-    o20["POST /payments/transactions/{id}/cancellation-requests"]:::op
+    o21["POST /payments/transactions/{id}/cancellation-requests"]:::op
   end
   subgraph s9["UC-42-10 · Publicar versión del tarifario"]
-    o22["POST /payments/fee-schedules"]:::op
+    o23["POST /payments/fee-schedules"]:::op
   end
   subgraph s10["UC-42-11 · Reparto multi-party"]
-    o24["POST /payments/intents/{id}/splits"]:::op
+    o25["POST /payments/intents/{id}/splits"]:::op
   end
   subgraph s11["UC-42-12 · Importar liquidación del gateway"]
-    o26["POST /payments/settlements/import"]:::op
+    o27["POST /payments/settlements/import"]:::op
   end
   subgraph s12["UC-42-13 · Ejecutar payout a cuenta conectada"]
-    o29["POST /payments/payouts"]:::op
+    o30["POST /payments/payouts"]:::op
   end
   subgraph s13["UC-42-14 · Conciliar gateway vs ledger"]
-    o32["POST /payments/reconciliation-runs"]:::op
+    o33["POST /payments/reconciliation-runs"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -145,51 +146,80 @@ flowchart LR
   o13 -->|"ACTUALIZA"| t3
   o13 -->|"LEE"| t3
   o13 -->|"CREA"| t14
+  o13 -->|"LEE"| t14
   o13 -->|"LEE"| t12
   a16 --> o15
   o15 -->|"ACTUALIZA"| t3
   o15 -->|"LEE"| t3
   o15 -->|"ACTUALIZA"| t14
   o15 -->|"LEE"| t14
-  a9 --> o17
-  o17 -->|"ACTUALIZA"| t14
-  o17 -->|"LEE"| t14
+  o15 -->|"CREA"| t17
+  o15 -->|"LEE"| t17
   a9 --> o18
   o18 -->|"LEE"| t14
-  o18 -->|"CREA"| t19
-  o18 -->|"LEE"| t19
-  a2 --> o20
-  o20 -->|"CREA"| t21
-  o20 -->|"ACTUALIZA"| t14
-  o20 -->|"LEE"| t14
-  a9 --> o22
-  o22 -->|"ACTUALIZA"| t23
-  o22 -->|"CREA"| t23
-  o22 -->|"LEE"| t23
-  a9 --> o24
-  o24 -->|"LEE"| t3
-  o24 -->|"CREA"| t25
-  o24 -->|"LEE"| t25
-  a9 --> o26
-  o26 -->|"CREA"| t27
-  o26 -->|"LEE"| t27
-  o26 -->|"ACTUALIZA"| t14
-  o26 -->|"LEE"| t14
-  o26 -->|"CREA"| t28
-  a9 --> o29
-  o29 -->|"CREA"| t30
-  o29 -->|"CREA"| t31
-  a9 --> o32
-  o32 -->|"LEE"| t14
-  o32 -->|"CREA"| t33
-  o32 -->|"CREA"| t34
-  o32 -->|"ACTUALIZA"| t35
-  o32 -->|"CREA"| t35
+  a9 --> o19
+  o19 -->|"LEE"| t14
+  o19 -->|"CREA"| t20
+  o19 -->|"LEE"| t20
+  a2 --> o21
+  o21 -->|"CREA"| t22
+  o21 -->|"LEE"| t14
+  a9 --> o23
+  o23 -->|"ACTUALIZA"| t24
+  o23 -->|"CREA"| t24
+  o23 -->|"LEE"| t24
+  a9 --> o25
+  o25 -->|"LEE"| t3
+  o25 -->|"CREA"| t26
+  o25 -->|"LEE"| t26
+  a9 --> o27
+  o27 -->|"CREA"| t28
+  o27 -->|"LEE"| t28
+  o27 -->|"ACTUALIZA"| t14
+  o27 -->|"LEE"| t14
+  o27 -->|"CREA"| t29
+  a9 --> o30
+  o30 -->|"CREA"| t31
+  o30 -->|"CREA"| t32
+  a9 --> o33
+  o33 -->|"LEE"| t14
+  o33 -->|"CREA"| t34
+  o33 -->|"CREA"| t35
+  o33 -->|"ACTUALIZA"| t36
+  o33 -->|"CREA"| t36
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
+
+## Máquinas de estado
+
+### Máquina de estados `TRANSITIONS`
+
+Declarada en `src/modules/payments/services/payment-callback-machine.ts:43`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+
+```mermaid
+stateDiagram-v2
+  [*] --> TXN_PROCESSING
+  [*] --> TXN_VOIDED
+  TXN_PROCESSING --> TXN_AUTHORIZED
+  TXN_PROCESSING --> TXN_CAPTURED
+  TXN_PROCESSING --> TXN_FAILED
+  TXN_AUTHORIZED --> TXN_CAPTURED
+  TXN_AUTHORIZED --> TXN_FAILED
+  TXN_CAPTURED --> TXN_SETTLED
+  TXN_FAILED --> [*]
+  TXN_SETTLED --> [*]
+  TXN_VOIDED --> [*]
+```
+
+**Operaciones que ejercen esta máquina** _(POR_REFERENCIA: el handler alcanza un método que valida contra la tabla; «sin destino nombrado» significa que el estado de destino llega por el cuerpo de la petición)_:
+
+| Operación | Estados de destino que nombra | A través de |
+|---|---|---|
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | sin destino nombrado | InsuranceCampaignsService.changeStatus |
+| POST /payments/callbacks/{callbackPath} | sin destino nombrado | PaymentsTransactionsService.applyCallback |
 
 ## Árbol de decisión por operación
 
@@ -226,30 +256,47 @@ flowchart TD
   n6 --> n7
   n8(["404 NOT_FOUND No hay transacción para la referencia informada"]):::error
   n7 -->|"sí"| n8
-  n9{"!dto.signature || !verifySignature(webhookSecret, signedBody, dto.signature)"}:::decision
+  n9{"!signature || !secrets.some((secret) =› verifySignature(secret, signedBody, signature), )"}:::decision
   n7 -->|"no"| n9
   n10(["401 UNAUTHENTICATED Firma del webhook inválida"]):::error
   n9 -->|"sí"| n10
-  n11[("ACTUALIZA payments.payment_transactions")]:::efecto
+  n11["Llama a PaymentTransactionsRepository.findWebhookEventByRef"]:::llamada
   n9 -->|"no"| n11
-  n12{"dto.authorizationCode"}:::decision
+  n12[("LEE payments.payment_webhook_events")]:::efecto
   n11 --> n12
-  n13[("ACTUALIZA payments.payment_transactions")]:::efecto
-  n12 -->|"sí"| n13
-  n14[("ACTUALIZA payments.payment_transactions")]:::efecto
-  n13 --> n14
-  n12 -->|"no"| n14
-  n15["Llama a PaymentIntentsRepository.findByIdForUpdate"]:::llamada
+  n13{"!archived"}:::decision
+  n12 --> n13
+  n14["Llama a PaymentTransactionsRepository.recordWebhookEvent"]:::llamada
+  n13 -->|"sí"| n14
+  n15[("CREA payments.payment_webhook_events")]:::efecto
   n14 --> n15
-  n16[("LEE payments.payment_intents")]:::efecto
+  n16[("ACTUALIZA payments.payment_transactions")]:::efecto
   n15 --> n16
-  n17{"intent"}:::decision
+  n13 -->|"no"| n16
+  n17{"dto.authorizationCode"}:::decision
   n16 --> n17
-  n18[("ACTUALIZA payments.payment_intents")]:::efecto
+  n18[("ACTUALIZA payments.payment_transactions")]:::efecto
   n17 -->|"sí"| n18
-  n19(("200 Responde con éxito")):::ok
+  n19[("ACTUALIZA payments.payment_transactions")]:::efecto
   n18 --> n19
   n17 -->|"no"| n19
+  n20["Llama a PaymentIntentsRepository.findByIdForUpdate"]:::llamada
+  n19 --> n20
+  n21[("LEE payments.payment_intents")]:::efecto
+  n20 --> n21
+  n22{"intent"}:::decision
+  n21 --> n22
+  n23["Llama a PaymentsTransactionsService.intentCaptured"]:::llamada
+  n22 -->|"sí"| n23
+  n24["Llama a PaymentTransactionsRepository.findByIntent"]:::llamada
+  n23 --> n24
+  n25[("LEE payments.payment_transactions")]:::efecto
+  n24 --> n25
+  n26[("ACTUALIZA payments.payment_intents")]:::efecto
+  n25 --> n26
+  n27(("200 Responde con éxito")):::ok
+  n26 --> n27
+  n22 -->|"no"| n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -559,8 +606,8 @@ Procesar la transacción contra el gateway (authorize/capture)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
-| 409 | `CONFLICT` | ConflictException: La intención ya fue cobrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La intención está cancelada; PreconditionFailedException: La intención requiere evaluación de riesgo antes de cobrar; PreconditionFailedException: El motor de riesgo rechazó la intención |
+| 409 | `CONFLICT` | ConflictException: La intención ya fue cobrada; ConflictException: La intención tiene una operación abierta en el gateway; ConflictException: El importe excede el saldo pendiente de la intención; ConflictException: La captura excede el importe autorizado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La intención está cancelada; PreconditionFailedException: La intención requiere evaluación de riesgo antes de cobrar; PreconditionFailedException: El motor de riesgo rechazó la intención; PreconditionFailedException: El importe a procesar debe ser mayor que cero |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -588,26 +635,52 @@ flowchart TD
   n9 -->|"no"| n11
   n12(["422 PRECONDITION_FAILED La intención está cancelada"]):::error
   n11 -->|"sí"| n12
-  n13["Llama a PaymentFlowRepository.findLatestRiskAssessment"]:::llamada
+  n13["Llama a PaymentTransactionsRepository.findPendingByIntent"]:::llamada
   n11 -->|"no"| n13
-  n14[("LEE payments.risk_assessments")]:::efecto
+  n14[("LEE payments.payment_transactions")]:::efecto
   n13 --> n14
-  n15{"!risk"}:::decision
+  n15{"open && (open.statusConceptId === CONCEPTS.TXN_PROCESSING || dto.operation !== 'CAPTURE')"}:::decision
   n14 --> n15
-  n16(["422 PRECONDITION_FAILED La intención requiere evaluación de riesgo antes de cobrar"]):::error
+  n16(["409 CONFLICT La intención tiene una operación abierta en el gateway"]):::error
   n15 -->|"sí"| n16
-  n17{"risk.decisionConceptId === CONCEPTS.RISK_DECLINE"}:::decision
+  n17["Llama a PaymentFlowRepository.findLatestRiskAssessment"]:::llamada
   n15 -->|"no"| n17
-  n18(["422 PRECONDITION_FAILED El motor de riesgo rechazó la intención"]):::error
-  n17 -->|"sí"| n18
-  n19["Llama a PaymentTransactionsRepository.create"]:::llamada
-  n17 -->|"no"| n19
-  n20[("CREA payments.payment_transactions")]:::efecto
-  n19 --> n20
-  n21[("ACTUALIZA payments.payment_intents")]:::efecto
-  n20 --> n21
-  n22(("201 Responde con éxito")):::ok
-  n21 --> n22
+  n18[("LEE payments.risk_assessments")]:::efecto
+  n17 --> n18
+  n19{"!risk"}:::decision
+  n18 --> n19
+  n20(["422 PRECONDITION_FAILED La intención requiere evaluación de riesgo antes de cobrar"]):::error
+  n19 -->|"sí"| n20
+  n21{"risk.decisionConceptId === CONCEPTS.RISK_DECLINE"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED El motor de riesgo rechazó la intención"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a PaymentsTransactionsService.intentCaptured"]:::llamada
+  n21 -->|"no"| n23
+  n24["Llama a PaymentTransactionsRepository.findByIntent"]:::llamada
+  n23 --> n24
+  n25[("LEE payments.payment_transactions")]:::efecto
+  n24 --> n25
+  n26{"!isPositiveAmount(requested)"}:::decision
+  n25 --> n26
+  n27(["422 PRECONDITION_FAILED El importe a procesar debe ser mayor que cero"]):::error
+  n26 -->|"sí"| n27
+  n28{"compareAmounts(requested, balance) › 0"}:::decision
+  n26 -->|"no"| n28
+  n29(["409 CONFLICT El importe excede el saldo pendiente de la intención"]):::error
+  n28 -->|"sí"| n29
+  n30{"dto.operation === 'CAPTURE' && open?.statusConceptId === CONCEPTS.TXN_AUTHORIZED && compareAmounts(requested,…"}:::decision
+  n28 -->|"no"| n30
+  n31(["409 CONFLICT La captura excede el importe autorizado"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a PaymentTransactionsRepository.create"]:::llamada
+  n30 -->|"no"| n32
+  n33[("CREA payments.payment_transactions")]:::efecto
+  n32 --> n33
+  n34[("ACTUALIZA payments.payment_intents")]:::efecto
+  n33 --> n34
+  n35(("201 Responde con éxito")):::ok
+  n34 --> n35
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -822,10 +895,8 @@ flowchart TD
   n9 -->|"no"| n11
   n12[("CREA payments.payment_cancellation_requests")]:::efecto
   n11 --> n12
-  n13[("ACTUALIZA payments.payment_transactions")]:::efecto
+  n13(("201 Responde con éxito")):::ok
   n12 --> n13
-  n14(("201 Responde con éxito")):::ok
-  n13 --> n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -846,7 +917,7 @@ Emitir un reembolso total o parcial
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Transacción no encontrada |
 | 409 | `CONFLICT` | ConflictException: El reembolso excede el importe capturado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede reembolsar una transacción capturada o liquidada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede reembolsar una transacción capturada o liquidada; PreconditionFailedException: El importe del reembolso debe ser mayor que cero |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -870,20 +941,24 @@ flowchart TD
   n7 -->|"no"| n9
   n10(["422 PRECONDITION_FAILED Solo se puede reembolsar una transacción capturada o liquidada"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a PaymentTransactionsRepository.findRefundsByTransaction"]:::llamada
+  n11{"!isPositiveAmount(dto.amount)"}:::decision
   n9 -->|"no"| n11
-  n12[("LEE payments.refunds")]:::efecto
-  n11 --> n12
-  n13{"refunded + Number(dto.amount) › Number(transaction.amount)"}:::decision
-  n12 --> n13
-  n14(["409 CONFLICT El reembolso excede el importe capturado"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a PaymentTransactionsRepository.createRefund"]:::llamada
-  n13 -->|"no"| n15
-  n16[("CREA payments.refunds")]:::efecto
-  n15 --> n16
-  n17(("201 Responde con éxito")):::ok
-  n16 --> n17
+  n12(["422 PRECONDITION_FAILED El importe del reembolso debe ser mayor que cero"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PaymentTransactionsRepository.findRefundsByTransaction"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE payments.refunds")]:::efecto
+  n13 --> n14
+  n15{"compareAmounts(addAmounts([refunded, dto.amount]), transaction.amount) › 0"}:::decision
+  n14 --> n15
+  n16(["409 CONFLICT El reembolso excede el importe capturado"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PaymentTransactionsRepository.createRefund"]:::llamada
+  n15 -->|"no"| n17
+  n18[("CREA payments.refunds")]:::efecto
+  n17 --> n18
+  n19(("201 Responde con éxito")):::ok
+  n18 --> n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -922,13 +997,8 @@ flowchart TD
   n6 --> n7
   n8(["404 NOT_FOUND Transacción no encontrada"]):::error
   n7 -->|"sí"| n8
-  n9{"reconciled"}:::decision
+  n9(("200 Responde con éxito")):::ok
   n7 -->|"no"| n9
-  n10[("ACTUALIZA payments.payment_transactions")]:::efecto
-  n9 -->|"sí"| n10
-  n11(("200 Responde con éxito")):::ok
-  n10 --> n11
-  n9 -->|"no"| n11
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

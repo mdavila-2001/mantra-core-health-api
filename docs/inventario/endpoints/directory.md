@@ -3,9 +3,9 @@
 # Endpoints del módulo `directory`
 
 - **Bloque:** Núcleo y Terminología (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
-- **Operaciones:** 19 (18 en el contrato, 1 sólo en el código)
-- **Riesgo:** ALTO 7 · MEDIO 5 · BAJO 7
-- **Tablas distintas que tocan:** 8
+- **Operaciones:** 23 (23 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 9 · MEDIO 5 · BAJO 9
+- **Tablas distintas que tocan:** 24
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/directory.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,24 +13,28 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | GET | `/admin/tenants` | Listado paginado de organizaciones | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN |
-| 2 | POST | `/admin/tenants` | Aprovisionar un tenant raíz con su membership owner | MEDIO | 6 | SUPERADMIN |
-| 3 | PUT | `/admin/tenants/{tenantId}/public-profile` | Llena la vitrina pública de la organización. `PUT` y no `PATCH` porque es idempotente y la pantalla que la edita no necesita saber si ya había algo escrito; los campos omitidos se conservan, que es la misma regla que `PUT /community/profiles/me`. | MEDIO | 3 | SUPERADMIN, SECURITY_ADMIN |
+| 2 | POST | `/admin/tenants` | Aprovisionar un tenant raíz con su membership owner | MEDIO | 13 | SUPERADMIN |
+| 3 | PUT | `/admin/tenants/{tenantId}/public-profile` | Completar la ficha pública de una organización verificada | MEDIO | 3 | SUPERADMIN, SECURITY_ADMIN |
 | 4 | POST | `/admin/tenants/{tenantId}/suspend` | Suspender un tenant con cascada de revocación | MEDIO | 6 | SUPERADMIN |
-| 5 | POST | `/admin/tenants/{tenantId}/verification` | Verificar y activar un tenant | MEDIO | 4 | SECURITY_ADMIN |
+| 5 | POST | `/admin/tenants/{tenantId}/verification` | Verificar y activar un tenant | MEDIO | 7 | SECURITY_ADMIN |
 | 6 | GET | `/tenants/{tenantId}` | Ficha de una organización | BAJO | 2 | sesión (sin roles) |
 | 7 | PATCH | `/tenants/{tenantId}` | Editar los datos de la propia organización | ALTO | 5 | sesión (sin roles) |
 | 8 | GET | `/tenants/{tenantId}/branches` | Sucursales de la organización | BAJO | 3 | sesión (sin roles) |
 | 9 | POST | `/tenants/{tenantId}/branches` | Crear una branch / sede física con geolocalización | ALTO | 4 | sesión (sin roles) |
-| 10 | GET | `/tenants/{tenantId}/child-tenants` | Sub-organizaciones de una organización | BAJO | 2 | sesión (sin roles) |
-| 11 | POST | `/tenants/{tenantId}/child-tenants` | Crear una organización hija / sub-tenant | MEDIO | 6 | SECURITY_ADMIN |
-| 12 | GET | `/tenants/{tenantId}/memberships` | Plantilla de la organización | BAJO | 2 | sesión (sin roles) |
-| 13 | POST | `/tenants/{tenantId}/memberships` | Incorporar un usuario al tenant (membership) | ALTO | 2 | sesión (sin roles) |
-| 14 | GET | `/tenants/{tenantId}/memberships/{membershipId}/branch-assignments` | Sucursales asignadas a una membresía | BAJO | 3 | sesión (sin roles) |
-| 15 | POST | `/tenants/{tenantId}/memberships/{membershipId}/branch-assignments` | Asignar la membresía a una branch | ALTO | 5 | sesión (sin roles) |
-| 16 | POST | `/tenants/{tenantId}/memberships/{membershipId}/offboard` | Revocar / offboarding de un miembro | ALTO | 4 | sesión (sin roles) |
-| 17 | PATCH | `/tenants/{tenantId}/memberships/{membershipId}/role` | Cambiar rol / scope de la membresía | ALTO | 2 | sesión (sin roles) |
-| 18 | POST | `/tenants/{tenantId}/memberships/{membershipId}/transfer` | Transferir la membresía entre branches | ALTO | 6 | sesión (sin roles) |
-| 19 | GET | `/tenants/me` | Las organizaciones del actor, con su rol en cada una | BAJO | 3 | sesión (sin roles) |
+| 10 | PATCH | `/tenants/{tenantId}/branches/{branchId}` | Editar una sucursal | ALTO | 3 | sesión (sin roles) |
+| 11 | GET | `/tenants/{tenantId}/child-tenants` | Sub-organizaciones de una organización | BAJO | 2 | sesión (sin roles) |
+| 12 | POST | `/tenants/{tenantId}/child-tenants` | Crear una organización hija / sub-tenant | MEDIO | 13 | SECURITY_ADMIN |
+| 13 | GET | `/tenants/{tenantId}/logo` | Logo de la propia organización | BAJO | 3 | sesión (sin roles) |
+| 14 | PUT | `/tenants/{tenantId}/logo` | Cambiar o quitar el logo como administrador de la organización | ALTO | 7 | sesión (sin roles) |
+| 15 | GET | `/tenants/{tenantId}/logo/content` | Imagen del logo para miembros de la organización | BAJO | 5 | sesión (sin roles) |
+| 16 | GET | `/tenants/{tenantId}/memberships` | Plantilla de la organización | BAJO | 2 | sesión (sin roles) |
+| 17 | POST | `/tenants/{tenantId}/memberships` | Incorporar un usuario al tenant (membership) | ALTO | 2 | sesión (sin roles) |
+| 18 | GET | `/tenants/{tenantId}/memberships/{membershipId}/branch-assignments` | Sucursales asignadas a una membresía | BAJO | 3 | sesión (sin roles) |
+| 19 | POST | `/tenants/{tenantId}/memberships/{membershipId}/branch-assignments` | Asignar la membresía a una branch | ALTO | 5 | sesión (sin roles) |
+| 20 | POST | `/tenants/{tenantId}/memberships/{membershipId}/offboard` | Revocar / offboarding de un miembro | ALTO | 4 | sesión (sin roles) |
+| 21 | PATCH | `/tenants/{tenantId}/memberships/{membershipId}/role` | Cambiar rol / scope de la membresía | ALTO | 2 | sesión (sin roles) |
+| 22 | POST | `/tenants/{tenantId}/memberships/{membershipId}/transfer` | Transferir la membresía entre branches | ALTO | 6 | sesión (sin roles) |
+| 23 | GET | `/tenants/me` | Las organizaciones del actor, con su rol en cada una | BAJO | 12 | sesión (sin roles) |
 
 ---
 
@@ -59,8 +63,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN, SECURITY_ADMIN | `src/modules/directory/controllers/admin-tenants.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -139,7 +143,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/tenants` la atiende `AdminTenantsController.provision` (src/modules/directory/controllers/admin-tenants.controller.ts:110). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `CreateTenantDto` (50 campos, 4 obligatorios). Delega en `DirectoryTenantsService.provision`. Crea filas en directory.tenant_memberships, directory.tenants, insurance.insurance_brokers, insurance.insurance_carriers. Lee directory.tenants, terminology.catalog_concepts.
+`POST /admin/tenants` la atiende `AdminTenantsController.provision` (src/modules/directory/controllers/admin-tenants.controller.ts:110). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `CreateTenantDto` (53 campos, 4 obligatorios). Delega en `DirectoryTenantsService.provision`. Crea filas en common.addresses, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.tenant_memberships, directory.tenants, insurance.insurance_brokers, insurance.insurance_carriers y 2 más. Lee directory.tenants, practice.practice_sites, terminology.catalog_concepts.
 
 ### Requerimientos
 
@@ -147,76 +151,86 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/directory/controllers/admin-tenants.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `common.addresses` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → TenantTypeProfileService.materializePayerHeadquarters → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:118` |
+| `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticStudyOfferingsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:119` |
+| `diagnostic_units.diagnostic_unit_sites` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticUnitSitesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:72` |
+| `diagnostic_units.diagnostic_units` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticUnitsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:83` |
 | `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:131` |
 | `directory.tenants` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantsRepository.create | `src/modules/directory/repositories/tenants.repository.ts:131` |
 | `directory.tenants` | LEE | LEE | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantsRepository.findByCode | `src/modules/directory/repositories/tenants.repository.ts:76` |
-| `insurance.insurance_brokers` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → CatalogRepository.createBroker | `src/modules/insurance/repositories/catalog.repository.ts:213` |
-| `insurance.insurance_carriers` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → CatalogRepository.createCarrier | `src/modules/insurance/repositories/catalog.repository.ts:62` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.assertConceptsExist → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:172` |
+| `insurance.insurance_brokers` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → CatalogRepository.createBroker | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:256` |
+| `insurance.insurance_carriers` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → CatalogRepository.createCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:62` |
+| `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:111` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → PracticeSitesRepository.findByPracticeAndCode | `src/modules/practice/repositories/practice-sites.repository.ts:85` |
+| `practice.practices` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:130` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.assertConceptsExist → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
 
 ### Cuerpo — DTO `CreateTenantDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `code` | `string` | Sí | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Código único global del tenant | `src/modules/directory/dto/create-tenant.dto.ts:27` |
-| `legalName` | `string` | Sí | longitud mínima 1; longitud máxima 300 | `@IsString()` `@MinLength(1)` `@MaxLength(300)` | Razón social / nombre legal | `src/modules/directory/dto/create-tenant.dto.ts:36` |
-| `ownerUserId` | `string` | Sí | formato uuid | `@IsUUID()` | Usuario que será owner inicial del tenant | `src/modules/directory/dto/create-tenant.dto.ts:46` |
-| `tradeName` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Nombre comercial | `src/modules/directory/dto/create-tenant.dto.ts:55` |
-| `tenantType` | `string` | Sí | valores: PROVIDER, PAYER, BROKER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS | `@IsIn(TENANT_TYPE_CODES)` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS— país y jurisdicción). | `src/modules/directory/dto/create-tenant.dto.ts:70` |
-| `tenantTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id del tipo de tenant. Escotilla para tipos fuera del catálogo interno; si viene `tenantType`, este campo se ignora. | `src/modules/directory/dto/create-tenant.dto.ts:83` |
-| `legalEntityTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id del tipo de entidad legal | `src/modules/directory/dto/create-tenant.dto.ts:94` |
-| `dataResidencyRegionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de la región de residencia de datos | `src/modules/directory/dto/create-tenant.dto.ts:105` |
-| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Zona horaria IANA | `src/modules/directory/dto/create-tenant.dto.ts:114` |
-| `payer` | `PayerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => PayerProfileDto)` | — | `src/modules/directory/dto/create-tenant.dto.ts:124` |
-| `payer.carrierCode` | `string` | No | longitud mínima 1; longitud máxima 60 | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | Código de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:25` |
-| `payer.sigla` | `string` | No | longitud mínima 1; longitud máxima 20 | `@IsString()` `@MinLength(1)` `@MaxLength(20)` | Sigla de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:38` |
-| `payer.address` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsString()` `@MinLength(1)` `@MaxLength(300)` | Dirección de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:47` |
-| `payer.regulatorIdentifier` | `string` | No | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Identificador ante el regulador de seguros | `src/modules/directory/dto/tenant-type-profile.dto.ts:59` |
-| `payer.jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:67` |
-| `broker` | `BrokerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => BrokerProfileDto)` | — | `src/modules/directory/dto/create-tenant.dto.ts:134` |
+| `code` | `string` | Sí | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Código único global del tenant | `src/modules/directory/dto/create-tenant.dto.ts:31` |
+| `legalName` | `string` | Sí | longitud mínima 1; longitud máxima 300 | `@IsString()` `@MinLength(1)` `@MaxLength(300)` | Razón social / nombre legal | `src/modules/directory/dto/create-tenant.dto.ts:40` |
+| `ownerUserId` | `string` | Sí | formato uuid | `@IsUUID()` | Usuario que será owner inicial del tenant | `src/modules/directory/dto/create-tenant.dto.ts:50` |
+| `tradeName` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Nombre comercial | `src/modules/directory/dto/create-tenant.dto.ts:59` |
+| `tenantType` | `string` | Sí | valores: PROVIDER, PAYER, BROKER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER | `@IsIn(TENANT_TYPE_CODES)` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto. | `src/modules/directory/dto/create-tenant.dto.ts:76` |
+| `tenantTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id del tipo de tenant. Escotilla para tipos fuera del catálogo interno; si viene `tenantType`, este campo se ignora. | `src/modules/directory/dto/create-tenant.dto.ts:89` |
+| `legalEntityType` | `string` | No | valores: UNIPERSONAL, SRL, LTDA, SA, SOCIEDAD_COLECTIVA, COMANDITA_SIMPLE, COMANDITA_ACCIONES, SUCURSAL_EXTRANJERA, BR_LTDA, BR_SA, BR_MEI, BR_EI, BR_SLU, BR_FILIAL_EST, US_LLC, US_CORP, US_SOLE_PROP, US_LLP, US_BRANCH, AR_SAS, MX_S_RL | `@IsOptional()` `@IsIn(LEGAL_ENTITY_TYPE_CODES)` | Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Si viene, se ignora `legalEntityTypeConceptId`. | `src/modules/directory/dto/create-tenant.dto.ts:104` |
+| `legalEntityTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id del tipo de entidad legal | `src/modules/directory/dto/create-tenant.dto.ts:116` |
+| `dataResidencyRegionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de la región de residencia de datos | `src/modules/directory/dto/create-tenant.dto.ts:127` |
+| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Zona horaria IANA | `src/modules/directory/dto/create-tenant.dto.ts:136` |
+| `payer` | `PayerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => PayerProfileDto)` | — | `src/modules/directory/dto/create-tenant.dto.ts:146` |
+| `payer.carrierCode` | `string` | No | longitud mínima 1; longitud máxima 60 | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | Código de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:37` |
+| `payer.sigla` | `string` | No | longitud mínima 1; longitud máxima 20 | `@IsString()` `@MinLength(1)` `@MaxLength(20)` | Sigla de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:50` |
+| `payer.address` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsString()` `@MinLength(1)` `@MaxLength(300)` | Dirección de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:59` |
+| `payer.latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: PayerProfileDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | Latitud de la casa matriz (-90 a 90); va junto con longitude o no va | `src/modules/directory/dto/tenant-type-profile.dto.ts:85` |
+| `payer.longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: PayerProfileDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | Longitud de la casa matriz (-180 a 180); va junto con latitude o no va | `src/modules/directory/dto/tenant-type-profile.dto.ts:102` |
+| `payer.regulatorIdentifier` | `string` | No | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Identificador ante el regulador de seguros | `src/modules/directory/dto/tenant-type-profile.dto.ts:114` |
+| `payer.jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:122` |
+| `broker` | `BrokerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => BrokerProfileDto)` | — | `src/modules/directory/dto/create-tenant.dto.ts:156` |
 | `broker.id` | `string` | No | formato uuid | — | — | sin fuente |
-| `broker.brokerCode` | `string` | No | — | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:85` |
+| `broker.brokerCode` | `string` | No | — | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:140` |
 | `broker.legalName` | `string` | No | — | — | — | sin fuente |
-| `broker.licenseNumber` | `string` | No | admite null | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:97` |
+| `broker.licenseNumber` | `string` | No | admite null | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:152` |
 | `broker.jurisdiction` | `InsuranceConceptDto` | No | admite null | — | — | sin fuente |
 | `broker.jurisdiction.code` | `string` | No | — | — | — | sin fuente |
 | `broker.jurisdiction.display` | `string` | No | — | — | — | sin fuente |
 | `broker.status` | `InsuranceConceptDto` | No | — | — | — | sin fuente |
-| `broker.status.code` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:14` |
-| `broker.status.display` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:18` |
+| `broker.status.code` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `broker.status.display` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
 | `broker.verification` | `InsuranceConceptDto` | No | — | — | — | sin fuente |
-| `broker.verification.code` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:14` |
-| `broker.verification.display` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:18` |
+| `broker.verification.code` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `broker.verification.display` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
 | `broker.independent` | `boolean` | No | — | — | — | sin fuente |
 | `broker.currentCarrierCount` | `number` | No | — | — | — | sin fuente |
 | `broker.createdAt` | `string` | No | formato date-time | — | — | sin fuente |
 | `broker.agreements` | `array<BrokerAgreementDto>` | No | — | — | — | sin fuente |
-| `broker.agreements[].id` | `string` | No | formato uuid | — | — | `src/modules/insurance/dto/read.dto.ts:273` |
-| `broker.agreements[].insuranceCarrierId` | `string` | No | formato uuid | — | — | `src/modules/insurance/dto/read.dto.ts:277` |
-| `broker.agreements[].carrierLegalName` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:281` |
-| `broker.agreements[].agreementCode` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:285` |
-| `broker.agreements[].commissionModel` | `InsuranceConceptDto` | No | admite null | — | — | `src/modules/insurance/dto/read.dto.ts:289` |
+| `broker.agreements[].id` | `string` | No | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:314` |
+| `broker.agreements[].insuranceCarrierId` | `string` | No | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:318` |
+| `broker.agreements[].carrierLegalName` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:322` |
+| `broker.agreements[].agreementCode` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:326` |
+| `broker.agreements[].commissionModel` | `InsuranceConceptDto` | No | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:330` |
 | `broker.agreements[].commissionModel.code` | `string` | No | — | — | — | sin fuente |
 | `broker.agreements[].commissionModel.display` | `string` | No | — | — | — | sin fuente |
-| `broker.agreements[].effectiveFrom` | `string` | No | admite null | — | — | `src/modules/insurance/dto/read.dto.ts:293` |
-| `broker.agreements[].effectiveTo` | `string` | No | admite null | — | — | `src/modules/insurance/dto/read.dto.ts:297` |
-| `broker.agreements[].status` | `InsuranceConceptDto` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:301` |
-| `broker.agreements[].status.code` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:14` |
-| `broker.agreements[].status.display` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:18` |
-| `broker.agreements[].current` | `boolean` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:312` |
-| `broker.agreements[].contractFileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/insurance/dto/read.dto.ts:316` |
+| `broker.agreements[].effectiveFrom` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:334` |
+| `broker.agreements[].effectiveTo` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:338` |
+| `broker.agreements[].status` | `InsuranceConceptDto` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:342` |
+| `broker.agreements[].status.code` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `broker.agreements[].status.display` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
+| `broker.agreements[].current` | `boolean` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:353` |
+| `broker.agreements[].contractFileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:357` |
 | `broker.publicProfileId` | `string` | No | formato uuid; admite null | — | — | sin fuente |
-| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/create-tenant.dto.ts:143` |
-| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/create-tenant.dto.ts:151` |
+| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/create-tenant.dto.ts:165` |
+| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/create-tenant.dto.ts:173` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -239,6 +253,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "tradeName": "Nombre de ejemplo",
   "tenantType": "PROVIDER",
   "tenantTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "legalEntityType": "SRL",
   "legalEntityTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "dataResidencyRegionConceptId": "00000000-0000-4000-8000-000000000001",
   "timeZone": "America/La_Paz",
@@ -246,6 +261,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
     "carrierCode": "CODIGO_EJEMPLO",
     "sigla": "BUPA",
     "address": "valor-ejemplo",
+    "latitude": -17.7833,
+    "longitude": -63.1821,
     "regulatorIdentifier": "valor-ejemplo",
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001"
   },
@@ -319,7 +336,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: El código de tenant ya existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/directory.md).
@@ -338,8 +355,8 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ## 3. PUT /admin/tenants/{tenantId}/public-profile
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Llena la vitrina pública de la organización. `PUT` y no `PATCH` porque es idempotente y la pantalla que la edita no necesita saber si ya había algo escrito; los campos omitidos se conservan, que es la misma regla que `PUT /community/profiles/me`.
+- **Origen:** CONTRATO
+- **Nombre:** Completar la ficha pública de una organización verificada
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -347,7 +364,7 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Llena la vitrina pública de la organización. `PUT` y no `PATCH` porque es idempotente y la pantalla que la edita no necesita saber si ya había algo escrito; los campos omitidos se conservan, que es la misma regla que `PUT /community/profiles/me`. Dentro del módulo (descripción del modelo, en inglés): «Models each client organization and its sites, and keeps every organization's data strictly isolated.» Dominio: Núcleo y Terminología.
+Completar la ficha pública de una organización verificada. Dentro del módulo (descripción del modelo, en inglés): «Models each client organization and its sites, and keeps every organization's data strictly isolated.» Dominio: Núcleo y Terminología.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_04_directory.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
@@ -361,16 +378,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN, SECURITY_ADMIN | `src/modules/directory/controllers/admin-tenants.controller.ts:148` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/admin-tenants.controller.ts:148` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.updatePublicProfile → DirectoryTenantsService.updatePublicProfile → PublicProfileProjectionService.updateOrganizationVitrina | `src/modules/community/services/public-profile-projection.service.ts:144` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | AdminTenantsController.updatePublicProfile → DirectoryTenantsService.updatePublicProfile → PublicProfileProjectionService.updateOrganizationVitrina → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:189` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.updatePublicProfile → DirectoryTenantsService.updatePublicProfile → PublicProfileProjectionService.updateOrganizationShowcase | `src/modules/community/services/public-profile-projection.service.ts:200` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | AdminTenantsController.updatePublicProfile → DirectoryTenantsService.updatePublicProfile → PublicProfileProjectionService.updateOrganizationShowcase → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
 | `directory.tenants` | LEE | LEE | DIRECTA | AdminTenantsController.updatePublicProfile → DirectoryTenantsService.updatePublicProfile → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 
 ### Parámetros
@@ -379,7 +398,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|
 | `tenantId` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `UpdateTenantPublicProfileDto`
+### Cuerpo — DTO `UpdateTenantPublicProfileDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
@@ -426,7 +445,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant no encontrado; ResourceNotFoundException: Esta organización todavía no tiene vitrina pública: se proyecta al verificarla |
@@ -469,21 +488,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/directory/controllers/admin-tenants.controller.ts:163` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/admin-tenants.controller.ts:163` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.branches` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.suspend → DirectoryTenantsService.suspend | `src/modules/directory/services/directory-tenants.service.ts:502` |
-| `directory.branches` | LEE | LEE | DIRECTA | AdminTenantsController.suspend → DirectoryTenantsService.suspend → BranchesRepository.findByTenantAndStatus | `src/modules/directory/repositories/branches.repository.ts:69` |
-| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.suspend → DirectoryTenantsService.suspend | `src/modules/directory/services/directory-tenants.service.ts:512` |
+| `directory.branches` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.suspend → DirectoryTenantsService.suspend | `src/modules/directory/services/directory-tenants.service.ts:546` |
+| `directory.branches` | LEE | LEE | DIRECTA | AdminTenantsController.suspend → DirectoryTenantsService.suspend → BranchesRepository.findByTenantAndStatus | `src/modules/directory/repositories/branches.repository.ts:71` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.suspend → DirectoryTenantsService.suspend | `src/modules/directory/services/directory-tenants.service.ts:556` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | AdminTenantsController.suspend → DirectoryTenantsService.suspend → TenantMembershipsRepository.findByTenantAndStatus | `src/modules/directory/repositories/tenant-memberships.repository.ts:126` |
-| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.suspend → DirectoryTenantsService.suspend | `src/modules/directory/services/directory-tenants.service.ts:493` |
+| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.suspend → DirectoryTenantsService.suspend | `src/modules/directory/services/directory-tenants.service.ts:537` |
 | `directory.tenants` | LEE | LEE | DIRECTA | AdminTenantsController.suspend → DirectoryTenantsService.suspend → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 
 ### Parámetros
@@ -565,7 +584,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/tenants/{tenantId}/verification` la atiende `AdminTenantsController.verify` (src/modules/directory/controllers/admin-tenants.controller.ts:124). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyTenantDto` (2 campos, 0 obligatorios). Delega en `DirectoryTenantsService.verify`. Crea filas en community.public_profiles. Actualiza directory.tenants. Lee community.public_profiles, directory.tenants.
+`POST /admin/tenants/{tenantId}/verification` la atiende `AdminTenantsController.verify` (src/modules/directory/controllers/admin-tenants.controller.ts:124). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyTenantDto` (2 campos, 0 obligatorios). Delega en `DirectoryTenantsService.verify`. Crea filas en community.public_profiles. Actualiza community.public_profiles, directory.tenants, pharmacy.pharmacies. Lee community.public_profiles, directory.tenants, pharmacy.pharmacies.
 
 ### Requerimientos
 
@@ -573,20 +592,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/directory/controllers/admin-tenants.controller.ts:124` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/admin-tenants.controller.ts:124` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:231` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:189` |
-| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.verify → DirectoryTenantsService.verify | `src/modules/directory/services/directory-tenants.service.ts:261` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.verify → DirectoryTenantsService.verify → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:133` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:344` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
+| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.verify → DirectoryTenantsService.verify | `src/modules/directory/services/directory-tenants.service.ts:276` |
 | `directory.tenants` | LEE | LEE | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
+| `pharmacy.pharmacies` | ESCRIBE | ACTUALIZA | POR_TIPO | AdminTenantsController.verify → DirectoryTenantsService.verify | `src/modules/directory/services/directory-tenants.service.ts:321` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | AdminTenantsController.verify → DirectoryTenantsService.verify | `src/modules/directory/services/directory-tenants.service.ts:316` |
 
 ### Parámetros
 
@@ -663,7 +685,7 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.getTenant` — `src/modules/directory/controllers/tenants.controller.ts:131`
+- **Implementación:** `TenantsController.getTenant` — `src/modules/directory/controllers/tenants.controller.ts:133`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -673,17 +695,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /tenants/{tenantId}` la atiende `TenantsController.getTenant` (src/modules/directory/controllers/tenants.controller.ts:131). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.getTenantById`. Lee directory.tenant_memberships, directory.tenants.
+`GET /tenants/{tenantId}` la atiende `TenantsController.getTenant` (src/modules/directory/controllers/tenants.controller.ts:133). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.getTenantById`. Lee directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:131` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:131` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:133` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:133` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -746,7 +768,7 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.updateTenant` — `src/modules/directory/controllers/tenants.controller.ts:121`
+- **Implementación:** `TenantsController.updateTenant` — `src/modules/directory/controllers/tenants.controller.ts:123`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -756,29 +778,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /tenants/{tenantId}` la atiende `TenantsController.updateTenant` (src/modules/directory/controllers/tenants.controller.ts:121). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateTenantDto` (8 campos, 0 obligatorios). Delega en `DirectoryTenantsService.updateTenant`. Actualiza directory.tenants, insurance.insurance_carriers. Lee directory.tenant_memberships, directory.tenants, insurance.insurance_carriers.
+`PATCH /tenants/{tenantId}` la atiende `TenantsController.updateTenant` (src/modules/directory/controllers/tenants.controller.ts:123). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateTenantDto` (8 campos, 0 obligatorios). Delega en `DirectoryTenantsService.updateTenant`. Actualiza directory.tenants, insurance.insurance_carriers. Lee directory.tenant_memberships, directory.tenants, insurance.insurance_carriers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:121` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:121` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:123` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:123` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.updateTenant → DirectoryTenantsService.updateTenant → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
-| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantsController.updateTenant → DirectoryTenantsService.updateTenant | `src/modules/directory/services/directory-tenants.service.ts:354` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.updateTenant → DirectoryTenantsService.updateTenant → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenants` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantsController.updateTenant → DirectoryTenantsService.updateTenant | `src/modules/directory/services/directory-tenants.service.ts:389` |
 | `directory.tenants` | LEE | LEE | DIRECTA | TenantsController.updateTenant → DirectoryTenantsService.updateTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
-| `insurance.insurance_carriers` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantsController.updateTenant → DirectoryTenantsService.updateTenant | `src/modules/directory/services/directory-tenants.service.ts:371` |
-| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | TenantsController.updateTenant → DirectoryTenantsService.updateTenant → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/repositories/catalog.repository.ts:49` |
+| `insurance.insurance_carriers` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantsController.updateTenant → DirectoryTenantsService.updateTenant | `src/modules/directory/services/directory-tenants.service.ts:406` |
+| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | TenantsController.updateTenant → DirectoryTenantsService.updateTenant → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
 
 ### Parámetros
 
@@ -790,14 +812,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `legalName` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:184` |
-| `tradeName` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:193` |
-| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/directory/dto/my-organizations.dto.ts:204` |
-| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/my-organizations.dto.ts:212` |
-| `payer` | `UpdatePayerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => UpdatePayerProfileDto)` | — | `src/modules/directory/dto/my-organizations.dto.ts:222` |
-| `payer.sigla` | `string` | No | longitud máxima 20 | `@IsOptional()` `@IsString()` `@MaxLength(20)` | — | `src/modules/directory/dto/my-organizations.dto.ts:134` |
-| `payer.address` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:143` |
-| `payer.regulatorIdentifier` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/directory/dto/my-organizations.dto.ts:152` |
+| `legalName` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:301` |
+| `tradeName` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:310` |
+| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/directory/dto/my-organizations.dto.ts:321` |
+| `currencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/my-organizations.dto.ts:329` |
+| `payer` | `UpdatePayerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => UpdatePayerProfileDto)` | — | `src/modules/directory/dto/my-organizations.dto.ts:339` |
+| `payer.sigla` | `string` | No | longitud máxima 20 | `@IsOptional()` `@IsString()` `@MaxLength(20)` | — | `src/modules/directory/dto/my-organizations.dto.ts:251` |
+| `payer.address` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | — | `src/modules/directory/dto/my-organizations.dto.ts:260` |
+| `payer.regulatorIdentifier` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/directory/dto/my-organizations.dto.ts:269` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -865,7 +887,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.listBranches` — `src/modules/directory/controllers/tenants.controller.ts:159`
+- **Implementación:** `TenantsController.listBranches` — `src/modules/directory/controllers/tenants.controller.ts:161`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -875,23 +897,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /tenants/{tenantId}/branches` la atiende `TenantsController.listBranches` (src/modules/directory/controllers/tenants.controller.ts:159). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listBranches`. Lee directory.branches, directory.tenant_memberships, directory.tenants.
+`GET /tenants/{tenantId}/branches` la atiende `TenantsController.listBranches` (src/modules/directory/controllers/tenants.controller.ts:161). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listBranches`. Lee directory.branches, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:161` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:161` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.branches` | LEE | LEE | DIRECTA | TenantsController.listBranches → DirectoryReadService.listBranches → BranchesRepository.findByTenant | `src/modules/directory/repositories/branches.repository.ts:98` |
+| `directory.branches` | LEE | LEE | DIRECTA | TenantsController.listBranches → DirectoryReadService.listBranches → BranchesRepository.findByTenant | `src/modules/directory/repositories/branches.repository.ts:102` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.listBranches → DirectoryReadService.listBranches → DirectoryReadService.forkForReadableTenant → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `directory.tenants` | LEE | LEE | DIRECTA | TenantsController.listBranches → DirectoryReadService.listBranches → DirectoryReadService.forkForReadableTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 
@@ -909,15 +931,19 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<BranchListItemDto>` | Sí | — | — | Sucursales, ordenadas por código. | `src/modules/directory/dto/directory-read.dto.ts:275` |
+| `items` | `array<BranchListItemDto>` | Sí | — | — | Sucursales, ordenadas por código. | `src/modules/directory/dto/directory-read.dto.ts:287` |
 | `items[].id` | `string` | Sí | formato uuid | — | Identificador de la sucursal. | `src/modules/directory/dto/directory-read.dto.ts:230` |
 | `items[].code` | `string` | Sí | — | — | Código de la sucursal dentro de la organización. | `src/modules/directory/dto/directory-read.dto.ts:236` |
 | `items[].name` | `string` | Sí | — | — | Nombre de la sucursal. | `src/modules/directory/dto/directory-read.dto.ts:242` |
 | `items[].branchTypeConceptId` | `string` | No | formato uuid | — | Tipo de sucursal. | `src/modules/directory/dto/directory-read.dto.ts:248` |
 | `items[].statusConceptId` | `string` | Sí | formato uuid | — | Estado de la sucursal. | `src/modules/directory/dto/directory-read.dto.ts:254` |
 | `items[].timeZone` | `string` | No | — | — | Zona horaria de la sucursal. | `src/modules/directory/dto/directory-read.dto.ts:260` |
-| `items[].createdAt` | `string` | Sí | formato date-time | — | Alta de la sucursal. | `src/modules/directory/dto/directory-read.dto.ts:266` |
-| `count` | `number` | Sí | — | — | Cuántas sucursales trae la respuesta. | `src/modules/directory/dto/directory-read.dto.ts:281` |
+| `items[].description` | `string` | No | — | — | Alta de la sucursal. | `src/modules/directory/dto/directory-read.dto.ts:266` |
+| `items[].locationUrl` | `string` | No | — | — | — | `src/modules/directory/dto/directory-read.dto.ts:269` |
+| `items[].latitude` | `number` | No | — | — | — | `src/modules/directory/dto/directory-read.dto.ts:272` |
+| `items[].longitude` | `number` | No | — | — | — | `src/modules/directory/dto/directory-read.dto.ts:275` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/directory/dto/directory-read.dto.ts:278` |
+| `count` | `number` | Sí | — | — | Cuántas sucursales trae la respuesta. | `src/modules/directory/dto/directory-read.dto.ts:293` |
 
 ### Respuestas posibles
 
@@ -951,7 +977,7 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.createBranch` — `src/modules/directory/controllers/tenants.controller.ts:222`
+- **Implementación:** `TenantsController.createBranch` — `src/modules/directory/controllers/tenants.controller.ts:224`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -961,27 +987,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/branches` la atiende `TenantsController.createBranch` (src/modules/directory/controllers/tenants.controller.ts:222). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateBranchDto` (6 campos, 2 obligatorios). Delega en `DirectoryBranchesService.create`. Crea filas en directory.branches. Lee directory.branches, directory.tenant_memberships, directory.tenants.
+`POST /tenants/{tenantId}/branches` la atiende `TenantsController.createBranch` (src/modules/directory/controllers/tenants.controller.ts:224). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateBranchDto` (8 campos, 2 obligatorios). Delega en `DirectoryBranchesService.create`. Crea filas en directory.branches. Lee directory.branches, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:222` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:222` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:224` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:224` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.branches` | ESCRIBE | CREA | DIRECTA | TenantsController.createBranch → DirectoryBranchesService.create → BranchesRepository.create | `src/modules/directory/repositories/branches.repository.ts:74` |
-| `directory.branches` | LEE | LEE | DIRECTA | TenantsController.createBranch → DirectoryBranchesService.create → BranchesRepository.findByTenantAndCode | `src/modules/directory/repositories/branches.repository.ts:60` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.createBranch → DirectoryBranchesService.create → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.branches` | ESCRIBE | CREA | DIRECTA | TenantsController.createBranch → DirectoryBranchesService.create → BranchesRepository.create | `src/modules/directory/repositories/branches.repository.ts:76` |
+| `directory.branches` | LEE | LEE | DIRECTA | TenantsController.createBranch → DirectoryBranchesService.create → BranchesRepository.findByTenantAndCode | `src/modules/directory/repositories/branches.repository.ts:62` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.createBranch → DirectoryBranchesService.create → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `directory.tenants` | LEE | LEE | DIRECTA | TenantsController.createBranch → DirectoryBranchesService.create → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 
 ### Parámetros
@@ -994,12 +1020,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `code` | `string` | Sí | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Código de la sede, único dentro del tenant | `src/modules/directory/dto/create-branch.dto.ts:28` |
-| `name` | `string` | Sí | longitud mínima 1; longitud máxima 300 | `@IsString()` `@MinLength(1)` `@MaxLength(300)` | Nombre de la sede | `src/modules/directory/dto/create-branch.dto.ts:37` |
-| `branchType` | `string` | No | valores: CLINIC, OFFICE | `@IsOptional()` `@IsIn(['CLINIC', 'OFFICE'])` | Tipo de sede | `src/modules/directory/dto/create-branch.dto.ts:48` |
-| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Zona horaria IANA | `src/modules/directory/dto/create-branch.dto.ts:57` |
-| `latitude` | `number` | No | mínimo -90; máximo 90 | `@IsOptional()` `@IsNumber()` `@Min(-90)` `@Max(90)` | Latitud geográfica | `src/modules/directory/dto/create-branch.dto.ts:72` |
-| `longitude` | `number` | No | mínimo -180; máximo 180 | `@IsOptional()` `@IsNumber()` `@Min(-180)` `@Max(180)` | Longitud geográfica | `src/modules/directory/dto/create-branch.dto.ts:87` |
+| `code` | `string` | Sí | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Código de la sede, único dentro del tenant | `src/modules/directory/dto/create-branch.dto.ts:29` |
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 300 | `@IsString()` `@MinLength(1)` `@MaxLength(300)` | Nombre de la sede | `src/modules/directory/dto/create-branch.dto.ts:38` |
+| `branchType` | `string` | No | valores: CLINIC, OFFICE | `@IsOptional()` `@IsIn(['CLINIC', 'OFFICE'])` | Tipo de sede | `src/modules/directory/dto/create-branch.dto.ts:49` |
+| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Zona horaria IANA | `src/modules/directory/dto/create-branch.dto.ts:58` |
+| `latitude` | `number` | No | mínimo -90; máximo 90 | `@IsOptional()` `@IsNumber()` `@Min(-90)` `@Max(90)` | Latitud geográfica | `src/modules/directory/dto/create-branch.dto.ts:73` |
+| `longitude` | `number` | No | mínimo -180; máximo 180 | `@IsOptional()` `@IsNumber()` `@Min(-180)` `@Max(180)` | Longitud geográfica | `src/modules/directory/dto/create-branch.dto.ts:88` |
+| `description` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | Descripción: horario, piso… | `src/modules/directory/dto/create-branch.dto.ts:97` |
+| `locationUrl` | `string` | No | longitud máxima 2000; patrón runtime /^https?:\/\//i | `@IsOptional()` `@IsString()` `@MaxLength(2000)` `@Matches(/^https?:\/\//i, { message: 'locationUrl debe ser http o https' })` | Enlace de ubicación (http/https) | `src/modules/directory/dto/create-branch.dto.ts:107` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1019,7 +1047,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "branchType": "CLINIC",
   "timeZone": "America/La_Paz",
   "latitude": -12.0464,
-  "longitude": -77.0428
+  "longitude": -77.0428,
+  "description": "Texto descriptivo de ejemplo",
+  "locationUrl": "valor-ejemplo"
 }
 ```
 
@@ -1035,6 +1065,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/directory/dto/branch-response.dto.ts:27` |
 | `status` | `string` | Sí | formato uuid | — | Concept id del estado de la branch | `src/modules/directory/dto/branch-response.dto.ts:36` |
 | `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/directory/dto/branch-response.dto.ts:42` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Mismo valor que `status`: la forma del listado, que el front reutiliza. | `src/modules/directory/dto/branch-response.dto.ts:46` |
+| `branchTypeConceptId` | `string` | No | formato uuid | — | — | `src/modules/directory/dto/branch-response.dto.ts:49` |
+| `timeZone` | `string` | No | — | — | — | `src/modules/directory/dto/branch-response.dto.ts:52` |
+| `description` | `string` | No | — | — | — | `src/modules/directory/dto/branch-response.dto.ts:55` |
+| `locationUrl` | `string` | No | — | — | — | `src/modules/directory/dto/branch-response.dto.ts:58` |
+| `latitude` | `number` | No | — | — | — | `src/modules/directory/dto/branch-response.dto.ts:61` |
+| `longitude` | `number` | No | — | — | — | `src/modules/directory/dto/branch-response.dto.ts:64` |
 
 ### Respuestas posibles
 
@@ -1063,14 +1100,131 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ---
 
-## 10. GET /tenants/{tenantId}/child-tenants
+## 10. PATCH /tenants/{tenantId}/branches/{branchId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar una sucursal
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `TenantsController.updateBranch` — `src/modules/directory/controllers/tenants.controller.ts:238`
+
+### Qué es y para qué sirve (negocio)
+
+Editar una sucursal. Dentro del módulo (descripción del modelo, en inglés): «Models each client organization and its sites, and keeps every organization's data strictly isolated.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_04_directory.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /tenants/{tenantId}/branches/{branchId}` la atiende `TenantsController.updateBranch` (src/modules/directory/controllers/tenants.controller.ts:238). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateBranchDto` (5 campos, 0 obligatorios). Delega en `DirectoryBranchesService.update`. Actualiza directory.branches. Lee directory.branches, directory.tenant_memberships.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:238` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, branchId | `src/modules/directory/controllers/tenants.controller.ts:238` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `directory.branches` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantsController.updateBranch → DirectoryBranchesService.update | `src/modules/directory/services/directory-branches.service.ts:126` |
+| `directory.branches` | LEE | LEE | DIRECTA | TenantsController.updateBranch → DirectoryBranchesService.update → BranchesRepository.findById | `src/modules/directory/repositories/branches.repository.ts:53` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.updateBranch → DirectoryBranchesService.update → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `tenantId` | path | Sí | `string` | — |
+| `branchId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdateBranchDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(300)` | — | `src/modules/directory/dto/update-branch.dto.ts:24` |
+| `description` | `object` | No | longitud máxima 1000; admite null | `@ValidateIf((_o, v) => v !== null)` `@IsOptional()` `@IsString()` `@MaxLength(1000)` | — | `src/modules/directory/dto/update-branch.dto.ts:31` |
+| `locationUrl` | `object` | No | longitud máxima 2000; patrón runtime /^https?:\/\//i; admite null | `@ValidateIf((_o, v) => v !== null)` `@IsOptional()` `@IsString()` `@MaxLength(2000)` `@Matches(/^https?:\/\//i, { message: 'locationUrl debe ser http o https' })` | — | `src/modules/directory/dto/update-branch.dto.ts:39` |
+| `latitude` | `object` | No | mínimo -90; máximo 90; admite null | `@ValidateIf((_o, v) => v !== null)` `@IsOptional()` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/directory/dto/update-branch.dto.ts:47` |
+| `longitude` | `object` | No | mínimo -180; máximo 180; admite null | `@ValidateIf((_o, v) => v !== null)` `@IsOptional()` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/directory/dto/update-branch.dto.ts:55` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Nombre de ejemplo",
+  "description": {},
+  "locationUrl": {},
+  "latitude": {},
+  "longitude": {}
+}
+```
+
+</details>
+
+### Respuesta — `Promise<BranchResponseDto>` · DTO `BranchResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/directory/dto/branch-response.dto.ts:9` |
+| `tenantId` | `string` | Sí | formato uuid | — | Identificador asociado a tenant. | `src/modules/directory/dto/branch-response.dto.ts:15` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/directory/dto/branch-response.dto.ts:21` |
+| `name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/directory/dto/branch-response.dto.ts:27` |
+| `status` | `string` | Sí | formato uuid | — | Concept id del estado de la branch | `src/modules/directory/dto/branch-response.dto.ts:36` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/directory/dto/branch-response.dto.ts:42` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Mismo valor que `status`: la forma del listado, que el front reutiliza. | `src/modules/directory/dto/branch-response.dto.ts:46` |
+| `branchTypeConceptId` | `string` | No | formato uuid | — | — | `src/modules/directory/dto/branch-response.dto.ts:49` |
+| `timeZone` | `string` | No | — | — | — | `src/modules/directory/dto/branch-response.dto.ts:52` |
+| `description` | `string` | No | — | — | — | `src/modules/directory/dto/branch-response.dto.ts:55` |
+| `locationUrl` | `string` | No | — | — | — | `src/modules/directory/dto/branch-response.dto.ts:58` |
+| `latitude` | `number` | No | — | — | — | `src/modules/directory/dto/branch-response.dto.ts:61` |
+| `longitude` | `number` | No | — | — | — | `src/modules/directory/dto/branch-response.dto.ts:64` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sucursal no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/directory.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 04 — Directory (Tenants, Sub-tenants, Branches y Membresías) — etapa `ctrl:TenantsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 11. GET /tenants/{tenantId}/child-tenants
 
 - **Origen:** CONTRATO
 - **Nombre:** Sub-organizaciones de una organización
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.listChildTenants` — `src/modules/directory/controllers/tenants.controller.ts:141`
+- **Implementación:** `TenantsController.listChildTenants` — `src/modules/directory/controllers/tenants.controller.ts:143`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1080,17 +1234,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /tenants/{tenantId}/child-tenants` la atiende `TenantsController.listChildTenants` (src/modules/directory/controllers/tenants.controller.ts:141). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listChildTenants`. Lee directory.tenant_memberships, directory.tenants.
+`GET /tenants/{tenantId}/child-tenants` la atiende `TenantsController.listChildTenants` (src/modules/directory/controllers/tenants.controller.ts:143). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listChildTenants`. Lee directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:141` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:141` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1154,14 +1308,14 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ---
 
-## 11. POST /tenants/{tenantId}/child-tenants
+## 12. POST /tenants/{tenantId}/child-tenants
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una organización hija / sub-tenant
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.createChild` — `src/modules/directory/controllers/tenants.controller.ts:209`
+- **Implementación:** `TenantsController.createChild` — `src/modules/directory/controllers/tenants.controller.ts:211`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1171,30 +1325,37 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/child-tenants` la atiende `TenantsController.createChild` (src/modules/directory/controllers/tenants.controller.ts:209). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateChildTenantDto` (48 campos, 4 obligatorios). Delega en `DirectoryTenantsService.createChild`. Crea filas en directory.tenant_memberships, directory.tenants, insurance.insurance_brokers, insurance.insurance_carriers. Lee directory.tenants, terminology.catalog_concepts.
+`POST /tenants/{tenantId}/child-tenants` la atiende `TenantsController.createChild` (src/modules/directory/controllers/tenants.controller.ts:211). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateChildTenantDto` (51 campos, 4 obligatorios). Delega en `DirectoryTenantsService.createChild`. Crea filas en common.addresses, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.tenant_memberships, directory.tenants, insurance.insurance_brokers, insurance.insurance_carriers y 2 más. Lee directory.tenants, practice.practice_sites, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/directory/controllers/tenants.controller.ts:209` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:209` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/directory/controllers/tenants.controller.ts:211` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:211` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `common.addresses` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → TenantTypeProfileService.materializePayerHeadquarters → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:118` |
+| `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticStudyOfferingsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:119` |
+| `diagnostic_units.diagnostic_unit_sites` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticUnitSitesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:72` |
+| `diagnostic_units.diagnostic_units` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticUnitsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:83` |
 | `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:131` |
 | `directory.tenants` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantsRepository.create | `src/modules/directory/repositories/tenants.repository.ts:131` |
 | `directory.tenants` | LEE | LEE | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
-| `insurance.insurance_brokers` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → CatalogRepository.createBroker | `src/modules/insurance/repositories/catalog.repository.ts:213` |
-| `insurance.insurance_carriers` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → CatalogRepository.createCarrier | `src/modules/insurance/repositories/catalog.repository.ts:62` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.assertConceptsExist → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:172` |
+| `insurance.insurance_brokers` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → CatalogRepository.createBroker | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:256` |
+| `insurance.insurance_carriers` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → CatalogRepository.createCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:62` |
+| `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:111` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → PracticeSitesRepository.findByPracticeAndCode | `src/modules/practice/repositories/practice-sites.repository.ts:85` |
+| `practice.practices` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:130` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.assertConceptsExist → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
 
 ### Parámetros
 
@@ -1206,54 +1367,57 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `code` | `string` | Sí | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Código único global del sub-tenant | `src/modules/directory/dto/create-child-tenant.dto.ts:27` |
-| `legalName` | `string` | Sí | longitud mínima 1; longitud máxima 300 | `@IsString()` `@MinLength(1)` `@MaxLength(300)` | Razón social / nombre legal del sub-tenant | `src/modules/directory/dto/create-child-tenant.dto.ts:39` |
-| `adminUserId` | `string` | Sí | formato uuid | `@IsUUID()` | Usuario administrador inicial del sub-tenant | `src/modules/directory/dto/create-child-tenant.dto.ts:49` |
-| `tenantType` | `string` | Sí | valores: PROVIDER, PAYER, BROKER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS | `@IsIn(TENANT_TYPE_CODES)` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS— país y jurisdicción). | `src/modules/directory/dto/create-child-tenant.dto.ts:67` |
-| `tenantTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id del tipo de tenant. Si viene `tenantType`, se ignora. | `src/modules/directory/dto/create-child-tenant.dto.ts:79` |
-| `legalEntityTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id del tipo de entidad legal | `src/modules/directory/dto/create-child-tenant.dto.ts:90` |
-| `dataResidencyRegionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Región de residencia de datos (por defecto hereda la del padre) | `src/modules/directory/dto/create-child-tenant.dto.ts:102` |
-| `payer` | `PayerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => PayerProfileDto)` | — | `src/modules/directory/dto/create-child-tenant.dto.ts:112` |
-| `payer.carrierCode` | `string` | No | longitud mínima 1; longitud máxima 60 | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | Código de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:25` |
-| `payer.sigla` | `string` | No | longitud mínima 1; longitud máxima 20 | `@IsString()` `@MinLength(1)` `@MaxLength(20)` | Sigla de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:38` |
-| `payer.address` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsString()` `@MinLength(1)` `@MaxLength(300)` | Dirección de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:47` |
-| `payer.regulatorIdentifier` | `string` | No | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Identificador ante el regulador de seguros | `src/modules/directory/dto/tenant-type-profile.dto.ts:59` |
-| `payer.jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:67` |
-| `broker` | `BrokerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => BrokerProfileDto)` | — | `src/modules/directory/dto/create-child-tenant.dto.ts:122` |
+| `code` | `string` | Sí | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Código único global del sub-tenant | `src/modules/directory/dto/create-child-tenant.dto.ts:31` |
+| `legalName` | `string` | Sí | longitud mínima 1; longitud máxima 300 | `@IsString()` `@MinLength(1)` `@MaxLength(300)` | Razón social / nombre legal del sub-tenant | `src/modules/directory/dto/create-child-tenant.dto.ts:43` |
+| `adminUserId` | `string` | Sí | formato uuid | `@IsUUID()` | Usuario administrador inicial del sub-tenant | `src/modules/directory/dto/create-child-tenant.dto.ts:53` |
+| `tenantType` | `string` | Sí | valores: PROVIDER, PAYER, BROKER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER | `@IsIn(TENANT_TYPE_CODES)` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto. | `src/modules/directory/dto/create-child-tenant.dto.ts:73` |
+| `tenantTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id del tipo de tenant. Si viene `tenantType`, se ignora. | `src/modules/directory/dto/create-child-tenant.dto.ts:85` |
+| `legalEntityType` | `string` | No | valores: UNIPERSONAL, SRL, LTDA, SA, SOCIEDAD_COLECTIVA, COMANDITA_SIMPLE, COMANDITA_ACCIONES, SUCURSAL_EXTRANJERA, BR_LTDA, BR_SA, BR_MEI, BR_EI, BR_SLU, BR_FILIAL_EST, US_LLC, US_CORP, US_SOLE_PROP, US_LLP, US_BRANCH, AR_SAS, MX_S_RL | `@IsOptional()` `@IsIn(LEGAL_ENTITY_TYPE_CODES)` | Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Si viene, se ignora `legalEntityTypeConceptId`. | `src/modules/directory/dto/create-child-tenant.dto.ts:100` |
+| `legalEntityTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id del tipo de entidad legal | `src/modules/directory/dto/create-child-tenant.dto.ts:112` |
+| `dataResidencyRegionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Región de residencia de datos (por defecto hereda la del padre) | `src/modules/directory/dto/create-child-tenant.dto.ts:124` |
+| `payer` | `PayerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => PayerProfileDto)` | — | `src/modules/directory/dto/create-child-tenant.dto.ts:134` |
+| `payer.carrierCode` | `string` | No | longitud mínima 1; longitud máxima 60 | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | Código de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:37` |
+| `payer.sigla` | `string` | No | longitud mínima 1; longitud máxima 20 | `@IsString()` `@MinLength(1)` `@MaxLength(20)` | Sigla de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:50` |
+| `payer.address` | `string` | No | longitud mínima 1; longitud máxima 300 | `@IsString()` `@MinLength(1)` `@MaxLength(300)` | Dirección de la aseguradora | `src/modules/directory/dto/tenant-type-profile.dto.ts:59` |
+| `payer.latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: PayerProfileDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | Latitud de la casa matriz (-90 a 90); va junto con longitude o no va | `src/modules/directory/dto/tenant-type-profile.dto.ts:85` |
+| `payer.longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: PayerProfileDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | Longitud de la casa matriz (-180 a 180); va junto con latitude o no va | `src/modules/directory/dto/tenant-type-profile.dto.ts:102` |
+| `payer.regulatorIdentifier` | `string` | No | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Identificador ante el regulador de seguros | `src/modules/directory/dto/tenant-type-profile.dto.ts:114` |
+| `payer.jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:122` |
+| `broker` | `BrokerProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => BrokerProfileDto)` | — | `src/modules/directory/dto/create-child-tenant.dto.ts:144` |
 | `broker.id` | `string` | No | formato uuid | — | — | sin fuente |
-| `broker.brokerCode` | `string` | No | — | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:85` |
+| `broker.brokerCode` | `string` | No | — | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:140` |
 | `broker.legalName` | `string` | No | — | — | — | sin fuente |
-| `broker.licenseNumber` | `string` | No | admite null | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:97` |
+| `broker.licenseNumber` | `string` | No | admite null | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | — | `src/modules/directory/dto/tenant-type-profile.dto.ts:152` |
 | `broker.jurisdiction` | `InsuranceConceptDto` | No | admite null | — | — | sin fuente |
 | `broker.jurisdiction.code` | `string` | No | — | — | — | sin fuente |
 | `broker.jurisdiction.display` | `string` | No | — | — | — | sin fuente |
 | `broker.status` | `InsuranceConceptDto` | No | — | — | — | sin fuente |
-| `broker.status.code` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:14` |
-| `broker.status.display` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:18` |
+| `broker.status.code` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `broker.status.display` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
 | `broker.verification` | `InsuranceConceptDto` | No | — | — | — | sin fuente |
-| `broker.verification.code` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:14` |
-| `broker.verification.display` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:18` |
+| `broker.verification.code` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `broker.verification.display` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
 | `broker.independent` | `boolean` | No | — | — | — | sin fuente |
 | `broker.currentCarrierCount` | `number` | No | — | — | — | sin fuente |
 | `broker.createdAt` | `string` | No | formato date-time | — | — | sin fuente |
 | `broker.agreements` | `array<BrokerAgreementDto>` | No | — | — | — | sin fuente |
-| `broker.agreements[].id` | `string` | No | formato uuid | — | — | `src/modules/insurance/dto/read.dto.ts:273` |
-| `broker.agreements[].insuranceCarrierId` | `string` | No | formato uuid | — | — | `src/modules/insurance/dto/read.dto.ts:277` |
-| `broker.agreements[].carrierLegalName` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:281` |
-| `broker.agreements[].agreementCode` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:285` |
-| `broker.agreements[].commissionModel` | `InsuranceConceptDto` | No | admite null | — | — | `src/modules/insurance/dto/read.dto.ts:289` |
+| `broker.agreements[].id` | `string` | No | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:314` |
+| `broker.agreements[].insuranceCarrierId` | `string` | No | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:318` |
+| `broker.agreements[].carrierLegalName` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:322` |
+| `broker.agreements[].agreementCode` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:326` |
+| `broker.agreements[].commissionModel` | `InsuranceConceptDto` | No | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:330` |
 | `broker.agreements[].commissionModel.code` | `string` | No | — | — | — | sin fuente |
 | `broker.agreements[].commissionModel.display` | `string` | No | — | — | — | sin fuente |
-| `broker.agreements[].effectiveFrom` | `string` | No | admite null | — | — | `src/modules/insurance/dto/read.dto.ts:293` |
-| `broker.agreements[].effectiveTo` | `string` | No | admite null | — | — | `src/modules/insurance/dto/read.dto.ts:297` |
-| `broker.agreements[].status` | `InsuranceConceptDto` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:301` |
-| `broker.agreements[].status.code` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:14` |
-| `broker.agreements[].status.display` | `string` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:18` |
-| `broker.agreements[].current` | `boolean` | No | — | — | — | `src/modules/insurance/dto/read.dto.ts:312` |
-| `broker.agreements[].contractFileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/insurance/dto/read.dto.ts:316` |
+| `broker.agreements[].effectiveFrom` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:334` |
+| `broker.agreements[].effectiveTo` | `string` | No | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:338` |
+| `broker.agreements[].status` | `InsuranceConceptDto` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:342` |
+| `broker.agreements[].status.code` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `broker.agreements[].status.display` | `string` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
+| `broker.agreements[].current` | `boolean` | No | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:353` |
+| `broker.agreements[].contractFileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:357` |
 | `broker.publicProfileId` | `string` | No | formato uuid; admite null | — | — | sin fuente |
-| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/create-child-tenant.dto.ts:131` |
-| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/create-child-tenant.dto.ts:139` |
+| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/create-child-tenant.dto.ts:153` |
+| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/directory/dto/create-child-tenant.dto.ts:161` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1275,12 +1439,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "adminUserId": "00000000-0000-4000-8000-000000000001",
   "tenantType": "PROVIDER",
   "tenantTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "legalEntityType": "SRL",
   "legalEntityTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "dataResidencyRegionConceptId": "00000000-0000-4000-8000-000000000001",
   "payer": {
     "carrierCode": "CODIGO_EJEMPLO",
     "sigla": "BUPA",
     "address": "valor-ejemplo",
+    "latitude": -17.7833,
+    "longitude": -63.1821,
     "regulatorIdentifier": "valor-ejemplo",
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001"
   },
@@ -1355,7 +1522,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant padre no encontrado |
 | 409 | `CONFLICT` | ConflictException: El código de tenant ya existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenant padre no está activo; PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenant padre no está activo; PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/directory.md).
@@ -1372,14 +1539,267 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ---
 
-## 12. GET /tenants/{tenantId}/memberships
+## 13. GET /tenants/{tenantId}/logo
+
+- **Origen:** CONTRATO
+- **Nombre:** Logo de la propia organización
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OrganizationLogoController.get` — `src/modules/directory/controllers/organization-logo.controller.ts:23`
+
+### Qué es y para qué sirve (negocio)
+
+Logo de la propia organización. Dentro del módulo (descripción del modelo, en inglés): «Models each client organization and its sites, and keeps every organization's data strictly isolated.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_04_directory.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /tenants/{tenantId}/logo` la atiende `OrganizationLogoController.get` (src/modules/directory/controllers/organization-logo.controller.ts:23). Exige sesión; el controlador no declara roles. Delega en `OrganizationLogoService.get`. Lee community.public_profiles, directory.tenant_memberships, directory.tenants.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/organization-logo.controller.ts:23` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/organization-logo.controller.ts:23` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.public_profiles` | LEE | LEE | DIRECTA | OrganizationLogoController.get → OrganizationLogoService.get → PublicProfileProjectionService.getOrganizationLogo → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | OrganizationLogoController.get → OrganizationLogoService.get → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenants` | LEE | LEE | DIRECTA | OrganizationLogoController.get → OrganizationLogoService.get → OrganizationLogoService.assertTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `tenantId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/directory.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 04 — Directory (Tenants, Sub-tenants, Branches y Membresías) — etapa `ctrl:OrganizationLogoController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 14. PUT /tenants/{tenantId}/logo
+
+- **Origen:** CONTRATO
+- **Nombre:** Cambiar o quitar el logo como administrador de la organización
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OrganizationLogoController.set` — `src/modules/directory/controllers/organization-logo.controller.ts:32`
+
+### Qué es y para qué sirve (negocio)
+
+Cambiar o quitar el logo como administrador de la organización. Dentro del módulo (descripción del modelo, en inglés): «Models each client organization and its sites, and keeps every organization's data strictly isolated.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_04_directory.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`PUT /tenants/{tenantId}/logo` la atiende `OrganizationLogoController.set` (src/modules/directory/controllers/organization-logo.controller.ts:32). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetOrganizationLogoDto` (1 campo, 1 obligatorio). Delega en `OrganizationLogoService.set`. Crea filas en community.public_profiles. Actualiza community.public_profiles. Lee common.file_versions, common.files, community.public_profiles, directory.tenant_memberships, directory.tenants.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/organization-logo.controller.ts:32` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/organization-logo.controller.ts:32` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.file_versions` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
+| `common.files` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | OrganizationLogoController.set → OrganizationLogoService.set → PublicProfileProjectionService.setOrganizationLogo | `src/modules/community/services/public-profile-projection.service.ts:104` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → PublicProfileProjectionService.setOrganizationLogo → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:344` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → PublicProfileProjectionService.setOrganizationLogo → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenants` | LEE | LEE | DIRECTA | OrganizationLogoController.set → OrganizationLogoService.set → OrganizationLogoService.assertTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `tenantId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SetOrganizationLogoDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `fileId` | `object` | Sí | formato uuid; admite null | `@ValidateIf((_object, value) => value !== null)` `@IsUUID()` | — | `src/modules/directory/dto/set-organization-logo.dto.ts:9` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "fileId": {}
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "fileId": {}
+}
+```
+
+</details>
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada; ResourceNotFoundException: {labels.notFound} |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: El logo debe ser una imagen de sensibilidad NORMAL; PreconditionFailedException: El logo supera los 2 MB |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/directory.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 04 — Directory (Tenants, Sub-tenants, Branches y Membresías) — etapa `ctrl:OrganizationLogoController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 15. GET /tenants/{tenantId}/logo/content
+
+- **Origen:** CONTRATO
+- **Nombre:** Imagen del logo para miembros de la organización
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OrganizationLogoController.content` — `src/modules/directory/controllers/organization-logo.controller.ts:44`
+
+### Qué es y para qué sirve (negocio)
+
+Imagen del logo para miembros de la organización. Dentro del módulo (descripción del modelo, en inglés): «Models each client organization and its sites, and keeps every organization's data strictly isolated.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_04_directory.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /tenants/{tenantId}/logo/content` la atiende `OrganizationLogoController.content` (src/modules/directory/controllers/organization-logo.controller.ts:44). Exige sesión; el controlador no declara roles. Delega en `OrganizationLogoService.content`. Lee common.file_versions, common.files, community.public_profiles, directory.tenant_memberships, directory.tenants.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/organization-logo.controller.ts:44` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/organization-logo.controller.ts:44` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.file_versions` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → AttachableFileService.assertUsableForAuthorizedContext → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
+| `common.files` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → AttachableFileService.assertUsableForAuthorizedContext → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → OrganizationLogoService.get → PublicProfileProjectionService.getOrganizationLogo → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → OrganizationLogoService.get → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenants` | LEE | LEE | DIRECTA | OrganizationLogoController.content → OrganizationLogoService.content → OrganizationLogoService.get → OrganizationLogoService.assertTenant → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `tenantId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<void>`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada; ResourceNotFoundException: La organización no tiene logo; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Archivo no encontrado; ResourceNotFoundException: El contenido no está disponible en el almacenamiento local; ResourceNotFoundException: El contenido no está disponible en el almacenamiento configurado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: El logo debe ser una imagen de sensibilidad NORMAL |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: S3 object body is empty |
+
+El árbol de decisión completo está en [flujos](../flujos/directory.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 04 — Directory (Tenants, Sub-tenants, Branches y Membresías) — etapa `ctrl:OrganizationLogoController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 16. GET /tenants/{tenantId}/memberships
 
 - **Origen:** CONTRATO
 - **Nombre:** Plantilla de la organización
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.listMemberships` — `src/modules/directory/controllers/tenants.controller.ts:169`
+- **Implementación:** `TenantsController.listMemberships` — `src/modules/directory/controllers/tenants.controller.ts:171`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1389,17 +1809,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /tenants/{tenantId}/memberships` la atiende `TenantsController.listMemberships` (src/modules/directory/controllers/tenants.controller.ts:169). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listMemberships`. Lee directory.tenant_memberships, directory.tenants.
+`GET /tenants/{tenantId}/memberships` la atiende `TenantsController.listMemberships` (src/modules/directory/controllers/tenants.controller.ts:171). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listMemberships`. Lee directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:169` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:169` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:171` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:171` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1456,7 +1876,7 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/fx2-medico-multisede-publica-agenda.int-spec.ts:254` |
+| INTEGRACION | `test/integration/fx2-medico-multisede-publica-agenda.int-spec.ts:258` |
 | CONTROLADOR | `src/modules/directory/controllers/tenants.controller.spec.ts:149` |
 
 ### Flujos
@@ -1465,14 +1885,14 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ---
 
-## 13. POST /tenants/{tenantId}/memberships
+## 17. POST /tenants/{tenantId}/memberships
 
 - **Origen:** CONTRATO
 - **Nombre:** Incorporar un usuario al tenant (membership)
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.invite` — `src/modules/directory/controllers/tenants.controller.ts:236`
+- **Implementación:** `TenantsController.invite` — `src/modules/directory/controllers/tenants.controller.ts:255`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1482,19 +1902,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/memberships` la atiende `TenantsController.invite` (src/modules/directory/controllers/tenants.controller.ts:236). Exige sesión; el controlador no declara roles. Valida el cuerpo como `DirectoryCreateMembershipDto` (4 campos, 1 obligatorio). Delega en `DirectoryMembershipsService.invite`. Crea filas en directory.tenant_memberships. Lee directory.tenant_memberships.
+`POST /tenants/{tenantId}/memberships` la atiende `TenantsController.invite` (src/modules/directory/controllers/tenants.controller.ts:255). Exige sesión; el controlador no declara roles. Valida el cuerpo como `DirectoryCreateMembershipDto` (4 campos, 1 obligatorio). Delega en `DirectoryMembershipsService.invite`. Crea filas en directory.tenant_memberships. Lee directory.tenant_memberships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:236` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:236` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:255` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/directory/controllers/tenants.controller.ts:255` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1574,14 +1994,14 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ---
 
-## 14. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+## 18. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Sucursales asignadas a una membresía
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.listBranchAssignments` — `src/modules/directory/controllers/tenants.controller.ts:194`
+- **Implementación:** `TenantsController.listBranchAssignments` — `src/modules/directory/controllers/tenants.controller.ts:196`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1591,17 +2011,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments` la atiende `TenantsController.listBranchAssignments` (src/modules/directory/controllers/tenants.controller.ts:194). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listBranchAssignments`. Lee directory.branch_memberships, directory.tenant_memberships, directory.tenants.
+`GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments` la atiende `TenantsController.listBranchAssignments` (src/modules/directory/controllers/tenants.controller.ts:196). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listBranchAssignments`. Lee directory.branch_memberships, directory.tenant_memberships, directory.tenants.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:194` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, membershipId | `src/modules/directory/controllers/tenants.controller.ts:194` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:196` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, membershipId | `src/modules/directory/controllers/tenants.controller.ts:196` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1626,13 +2046,13 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<BranchAssignmentListItemDto>` | Sí | — | — | Asignaciones, de la más reciente a la más antigua. | `src/modules/directory/dto/directory-read.dto.ts:323` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador de la asignación. | `src/modules/directory/dto/directory-read.dto.ts:290` |
-| `items[].branchId` | `string` | Sí | formato uuid | — | Sucursal asignada. | `src/modules/directory/dto/directory-read.dto.ts:296` |
-| `items[].localRoleConceptId` | `string` | No | formato uuid | — | Rol local en esa sucursal. | `src/modules/directory/dto/directory-read.dto.ts:302` |
-| `items[].statusConceptId` | `string` | Sí | formato uuid | — | Estado de la asignación. | `src/modules/directory/dto/directory-read.dto.ts:308` |
-| `items[].createdAt` | `string` | Sí | formato date-time | — | Alta de la asignación. | `src/modules/directory/dto/directory-read.dto.ts:314` |
-| `count` | `number` | Sí | — | — | Cuántas asignaciones trae la respuesta. | `src/modules/directory/dto/directory-read.dto.ts:329` |
+| `items` | `array<BranchAssignmentListItemDto>` | Sí | — | — | Asignaciones, de la más reciente a la más antigua. | `src/modules/directory/dto/directory-read.dto.ts:335` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador de la asignación. | `src/modules/directory/dto/directory-read.dto.ts:302` |
+| `items[].branchId` | `string` | Sí | formato uuid | — | Sucursal asignada. | `src/modules/directory/dto/directory-read.dto.ts:308` |
+| `items[].localRoleConceptId` | `string` | No | formato uuid | — | Rol local en esa sucursal. | `src/modules/directory/dto/directory-read.dto.ts:314` |
+| `items[].statusConceptId` | `string` | Sí | formato uuid | — | Estado de la asignación. | `src/modules/directory/dto/directory-read.dto.ts:320` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | Alta de la asignación. | `src/modules/directory/dto/directory-read.dto.ts:326` |
+| `count` | `number` | Sí | — | — | Cuántas asignaciones trae la respuesta. | `src/modules/directory/dto/directory-read.dto.ts:341` |
 
 ### Respuestas posibles
 
@@ -1659,14 +2079,14 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ---
 
-## 15. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+## 19. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Asignar la membresía a una branch
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.assignBranch` — `src/modules/directory/controllers/tenants.controller.ts:248`
+- **Implementación:** `TenantsController.assignBranch` — `src/modules/directory/controllers/tenants.controller.ts:267`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1676,19 +2096,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments` la atiende `TenantsController.assignBranch` (src/modules/directory/controllers/tenants.controller.ts:248). Exige sesión; el controlador no declara roles. Valida el cuerpo como `BranchAssignmentDto` (2 campos, 1 obligatorio). Delega en `DirectoryMembershipsService.assignBranch`. Crea filas en directory.branch_memberships. Actualiza directory.tenant_memberships. Lee directory.branch_memberships, directory.branches, directory.tenant_memberships.
+`POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments` la atiende `TenantsController.assignBranch` (src/modules/directory/controllers/tenants.controller.ts:267). Exige sesión; el controlador no declara roles. Valida el cuerpo como `BranchAssignmentDto` (2 campos, 1 obligatorio). Delega en `DirectoryMembershipsService.assignBranch`. Crea filas en directory.branch_memberships. Actualiza directory.tenant_memberships. Lee directory.branch_memberships, directory.branches, directory.tenant_memberships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:248` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, membershipId | `src/modules/directory/controllers/tenants.controller.ts:248` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:267` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, membershipId | `src/modules/directory/controllers/tenants.controller.ts:267` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1696,7 +2116,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `directory.branch_memberships` | ESCRIBE | CREA | DIRECTA | TenantsController.assignBranch → DirectoryMembershipsService.assignBranch → BranchMembershipsRepository.create | `src/modules/directory/repositories/branch-memberships.repository.ts:61` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | TenantsController.assignBranch → DirectoryMembershipsService.assignBranch → BranchMembershipsRepository.findByMembershipBranchStatus | `src/modules/directory/repositories/branch-memberships.repository.ts:49` |
-| `directory.branches` | LEE | LEE | DIRECTA | TenantsController.assignBranch → DirectoryMembershipsService.assignBranch → DirectoryMembershipsService.requireBranchInTenant → BranchesRepository.findById | `src/modules/directory/repositories/branches.repository.ts:51` |
+| `directory.branches` | LEE | LEE | DIRECTA | TenantsController.assignBranch → DirectoryMembershipsService.assignBranch → DirectoryMembershipsService.requireBranchInTenant → BranchesRepository.findById | `src/modules/directory/repositories/branches.repository.ts:53` |
 | `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantsController.assignBranch → DirectoryMembershipsService.assignBranch | `src/modules/directory/services/directory-memberships.service.ts:234` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.assignBranch → DirectoryMembershipsService.assignBranch → DirectoryMembershipsService.requireActiveMembership → TenantMembershipsRepository.findByIdInTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:60` |
 
@@ -1770,14 +2190,14 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ---
 
-## 16. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
+## 20. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
 
 - **Origen:** CONTRATO
 - **Nombre:** Revocar / offboarding de un miembro
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.offboard` — `src/modules/directory/controllers/tenants.controller.ts:297`
+- **Implementación:** `TenantsController.offboard` — `src/modules/directory/controllers/tenants.controller.ts:316`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1787,17 +2207,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/memberships/{membershipId}/offboard` la atiende `TenantsController.offboard` (src/modules/directory/controllers/tenants.controller.ts:297). Exige sesión; el controlador no declara roles. Delega en `DirectoryMembershipsService.offboard`. Actualiza directory.branch_memberships, directory.tenant_memberships. Lee directory.branch_memberships, directory.tenant_memberships.
+`POST /tenants/{tenantId}/memberships/{membershipId}/offboard` la atiende `TenantsController.offboard` (src/modules/directory/controllers/tenants.controller.ts:316). Exige sesión; el controlador no declara roles. Delega en `DirectoryMembershipsService.offboard`. Actualiza directory.branch_memberships, directory.tenant_memberships. Lee directory.branch_memberships, directory.tenant_memberships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:297` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, membershipId | `src/modules/directory/controllers/tenants.controller.ts:297` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:316` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, membershipId | `src/modules/directory/controllers/tenants.controller.ts:316` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1851,14 +2271,14 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ---
 
-## 17. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
+## 21. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
 
 - **Origen:** CONTRATO
 - **Nombre:** Cambiar rol / scope de la membresía
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.changeRole` — `src/modules/directory/controllers/tenants.controller.ts:279`
+- **Implementación:** `TenantsController.changeRole` — `src/modules/directory/controllers/tenants.controller.ts:298`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1868,19 +2288,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /tenants/{tenantId}/memberships/{membershipId}/role` la atiende `TenantsController.changeRole` (src/modules/directory/controllers/tenants.controller.ts:279). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ChangeMembershipRoleDto` (2 campos, 0 obligatorios). Delega en `DirectoryMembershipsService.changeRole`. Actualiza directory.tenant_memberships. Lee directory.tenant_memberships.
+`PATCH /tenants/{tenantId}/memberships/{membershipId}/role` la atiende `TenantsController.changeRole` (src/modules/directory/controllers/tenants.controller.ts:298). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ChangeMembershipRoleDto` (2 campos, 0 obligatorios). Delega en `DirectoryMembershipsService.changeRole`. Actualiza directory.tenant_memberships. Lee directory.tenant_memberships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:279` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, membershipId | `src/modules/directory/controllers/tenants.controller.ts:279` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:298` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, membershipId | `src/modules/directory/controllers/tenants.controller.ts:298` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1956,14 +2376,14 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ---
 
-## 18. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
+## 22. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
 
 - **Origen:** CONTRATO
 - **Nombre:** Transferir la membresía entre branches
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.transfer` — `src/modules/directory/controllers/tenants.controller.ts:266`
+- **Implementación:** `TenantsController.transfer` — `src/modules/directory/controllers/tenants.controller.ts:285`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1973,19 +2393,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/memberships/{membershipId}/transfer` la atiende `TenantsController.transfer` (src/modules/directory/controllers/tenants.controller.ts:266). Exige sesión; el controlador no declara roles. Valida el cuerpo como `TransferMembershipDto` (2 campos, 2 obligatorios). Delega en `DirectoryMembershipsService.transfer`. Crea filas en directory.branch_memberships. Actualiza directory.branch_memberships, directory.tenant_memberships. Lee directory.branch_memberships, directory.branches, directory.tenant_memberships.
+`POST /tenants/{tenantId}/memberships/{membershipId}/transfer` la atiende `TenantsController.transfer` (src/modules/directory/controllers/tenants.controller.ts:285). Exige sesión; el controlador no declara roles. Valida el cuerpo como `TransferMembershipDto` (2 campos, 2 obligatorios). Delega en `DirectoryMembershipsService.transfer`. Crea filas en directory.branch_memberships. Actualiza directory.branch_memberships, directory.tenant_memberships. Lee directory.branch_memberships, directory.branches, directory.tenant_memberships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:266` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, membershipId | `src/modules/directory/controllers/tenants.controller.ts:266` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:285` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, membershipId | `src/modules/directory/controllers/tenants.controller.ts:285` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1994,7 +2414,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `directory.branch_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantsController.transfer → DirectoryMembershipsService.transfer | `src/modules/directory/services/directory-memberships.service.ts:301` |
 | `directory.branch_memberships` | ESCRIBE | CREA | DIRECTA | TenantsController.transfer → DirectoryMembershipsService.transfer → BranchMembershipsRepository.create | `src/modules/directory/repositories/branch-memberships.repository.ts:61` |
 | `directory.branch_memberships` | LEE | LEE | DIRECTA | TenantsController.transfer → DirectoryMembershipsService.transfer → BranchMembershipsRepository.findByMembershipBranchStatus | `src/modules/directory/repositories/branch-memberships.repository.ts:49` |
-| `directory.branches` | LEE | LEE | DIRECTA | TenantsController.transfer → DirectoryMembershipsService.transfer → DirectoryMembershipsService.requireBranchInTenant → BranchesRepository.findById | `src/modules/directory/repositories/branches.repository.ts:51` |
+| `directory.branches` | LEE | LEE | DIRECTA | TenantsController.transfer → DirectoryMembershipsService.transfer → DirectoryMembershipsService.requireBranchInTenant → BranchesRepository.findById | `src/modules/directory/repositories/branches.repository.ts:53` |
 | `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantsController.transfer → DirectoryMembershipsService.transfer | `src/modules/directory/services/directory-memberships.service.ts:313` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.transfer → DirectoryMembershipsService.transfer → DirectoryMembershipsService.requireActiveMembership → TenantMembershipsRepository.findByIdInTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:60` |
 
@@ -2064,14 +2484,14 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ---
 
-## 19. GET /tenants/me
+## 23. GET /tenants/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Las organizaciones del actor, con su rol en cada una
 - **Bloque:** Núcleo y Terminología
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TenantsController.listMyTenants` — `src/modules/directory/controllers/tenants.controller.ts:102`
+- **Implementación:** `TenantsController.listMyTenants` — `src/modules/directory/controllers/tenants.controller.ts:104`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2081,24 +2501,33 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /tenants/me` la atiende `TenantsController.listMyTenants` (src/modules/directory/controllers/tenants.controller.ts:102). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listMyTenants`. Lee directory.tenant_memberships, directory.tenants, insurance.insurance_carriers.
+`GET /tenants/me` la atiende `TenantsController.listMyTenants` (src/modules/directory/controllers/tenants.controller.ts:104). Exige sesión; el controlador no declara roles. Delega en `DirectoryReadService.listMyTenants`. Lee common.addresses, common.contact_points, common.identifiers, directory.tenant_legal_representatives, directory.tenant_memberships, directory.tenants, insurance.insurance_carriers, profiles.persons y 4 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/directory/controllers/tenants.controller.ts:104` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.contact_points` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → ContactPointsRepository.findAllCurrentByOwners | `src/modules/common/repositories/contact-points.repository.ts:96` |
+| `common.identifiers` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → IdentifiersRepository.findByIds | `src/modules/common/repositories/identifiers.repository.ts:104` |
+| `directory.tenant_legal_representatives` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → DirectoryTenantLegalRepository.listLegalRepsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:84` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → TenantMembershipsRepository.findActiveByUser | `src/modules/directory/repositories/tenant-memberships.repository.ts:99` |
 | `directory.tenants` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
-| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/repositories/catalog.repository.ts:49` |
+| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
+| `profiles.persons` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → DirectoryTenantLegalRepository.findPersonsByIds | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:167` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
+| `terminology.value_set_versions` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
+| `terminology.value_sets` | LEE | LEE | DIRECTA | TenantsController.listMyTenants → DirectoryReadService.listMyTenants → DirectoryReadService.loadRepresentation → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
 
 ### Cuerpo
 
@@ -2108,15 +2537,37 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<MyOrganizationDto>` | Sí | — | — | Sus organizaciones, de la más recientemente creada a la más antigua. | `src/modules/directory/dto/my-organizations.dto.ts:118` |
-| `items[].myRoleConceptId` | `string` | Sí | formato uuid | — | Concepto del rol de la membresía activa (owner/admin/staff) | `src/modules/directory/dto/my-organizations.dto.ts:67` |
-| `items[].canAdminister` | `boolean` | Sí | — | — | Verdadero para owner y admin de la organización | `src/modules/directory/dto/my-organizations.dto.ts:75` |
-| `items[].isVerified` | `boolean` | Sí | — | — | Verdadero cuando la plataforma verificó la organización | `src/modules/directory/dto/my-organizations.dto.ts:89` |
-| `items[].payer` | `PayerOrganizationProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => PayerOrganizationProfileDto)` | Datos propios de la aseguradora. Presente sólo si el tenant es `PAYER`. | `src/modules/directory/dto/my-organizations.dto.ts:98` |
+| `items` | `array<MyOrganizationDto>` | Sí | — | — | Sus organizaciones, de la más recientemente creada a la más antigua. | `src/modules/directory/dto/my-organizations.dto.ts:235` |
+| `items[].myRoleConceptId` | `string` | Sí | formato uuid | — | Concepto del rol de la membresía activa (owner/admin/staff) | `src/modules/directory/dto/my-organizations.dto.ts:161` |
+| `items[].canAdminister` | `boolean` | Sí | — | — | Verdadero para owner y admin de la organización | `src/modules/directory/dto/my-organizations.dto.ts:169` |
+| `items[].isVerified` | `boolean` | Sí | — | — | Verdadero cuando la plataforma verificó la organización | `src/modules/directory/dto/my-organizations.dto.ts:183` |
+| `items[].payer` | `PayerOrganizationProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => PayerOrganizationProfileDto)` | Datos propios de la aseguradora. Presente sólo si el tenant es `PAYER`. | `src/modules/directory/dto/my-organizations.dto.ts:192` |
 | `items[].payer.carrierCode` | `string` | No | — | — | Código de la aseguradora | `src/modules/directory/dto/my-organizations.dto.ts:25` |
 | `items[].payer.regulatorIdentifier` | `string` | No | — | — | Identificador ante el regulador de seguros | `src/modules/directory/dto/my-organizations.dto.ts:31` |
 | `items[].payer.sigla` | `string` | No | — | — | Sigla de la aseguradora | `src/modules/directory/dto/my-organizations.dto.ts:37` |
 | `items[].payer.address` | `string` | No | — | — | Dirección de la aseguradora | `src/modules/directory/dto/my-organizations.dto.ts:43` |
+| `items[].payer.latitude` | `number` | No | — | — | Latitud de la casa matriz (-90 a 90) | `src/modules/directory/dto/my-organizations.dto.ts:53` |
+| `items[].payer.longitude` | `number` | No | — | — | Longitud de la casa matriz (-180 a 180) | `src/modules/directory/dto/my-organizations.dto.ts:59` |
+| `items[].legalRepresentative` | `OrganizationContactPersonDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => OrganizationContactPersonDto)` | Quién representa legalmente a la organización (subtarea 1.4). Va al nivel de la organización y no dentro de `payer` porque no es un dato de aseguradora: el registro de procesos pide el mismo bloque para farmacia, laboratorio e imagenología. | `src/modules/directory/dto/my-organizations.dto.ts:205` |
+| `items[].legalRepresentative.role` | `string` | No | — | — | Rol canónico del contacto dentro de la organización | `src/modules/directory/dto/my-organizations.dto.ts:83` |
+| `items[].legalRepresentative.fullName` | `string` | No | — | — | Nombre completo del contacto | `src/modules/directory/dto/my-organizations.dto.ts:93` |
+| `items[].legalRepresentative.name` | `string` | No | — | — | Nombre de pila, si se declaró en partes | `src/modules/directory/dto/my-organizations.dto.ts:105` |
+| `items[].legalRepresentative.middleName` | `string` | No | — | — | Segundo nombre, si se declaró | `src/modules/directory/dto/my-organizations.dto.ts:109` |
+| `items[].legalRepresentative.lastName` | `string` | No | — | — | Apellido paterno, si se declaró en partes | `src/modules/directory/dto/my-organizations.dto.ts:115` |
+| `items[].legalRepresentative.motherLastName` | `string` | No | — | — | Apellido materno, si se declaró | `src/modules/directory/dto/my-organizations.dto.ts:119` |
+| `items[].legalRepresentative.email` | `string` | No | formato email | — | Correo de contacto | `src/modules/directory/dto/my-organizations.dto.ts:125` |
+| `items[].legalRepresentative.phone` | `string` | No | — | — | Celular o teléfono de contacto | `src/modules/directory/dto/my-organizations.dto.ts:131` |
+| `items[].legalRepresentative.idNumber` | `string` | No | — | — | Documento de identidad declarado | `src/modules/directory/dto/my-organizations.dto.ts:137` |
+| `items[].executives` | `array<OrganizationContactPersonDto>` | No | — | `@IsOptional()` `@ValidateNested({ each: true })` `@Type(() => OrganizationContactPersonDto)` | Las gerencias de contacto declaradas, en orden canónico (general, comercial, marketing). | `src/modules/directory/dto/my-organizations.dto.ts:215` |
+| `items[].executives[].role` | `string` | No | — | — | Rol canónico del contacto dentro de la organización | `src/modules/directory/dto/my-organizations.dto.ts:83` |
+| `items[].executives[].fullName` | `string` | No | — | — | Nombre completo del contacto | `src/modules/directory/dto/my-organizations.dto.ts:93` |
+| `items[].executives[].name` | `string` | No | — | — | Nombre de pila, si se declaró en partes | `src/modules/directory/dto/my-organizations.dto.ts:105` |
+| `items[].executives[].middleName` | `string` | No | — | — | Segundo nombre, si se declaró | `src/modules/directory/dto/my-organizations.dto.ts:109` |
+| `items[].executives[].lastName` | `string` | No | — | — | Apellido paterno, si se declaró en partes | `src/modules/directory/dto/my-organizations.dto.ts:115` |
+| `items[].executives[].motherLastName` | `string` | No | — | — | Apellido materno, si se declaró | `src/modules/directory/dto/my-organizations.dto.ts:119` |
+| `items[].executives[].email` | `string` | No | formato email | — | Correo de contacto | `src/modules/directory/dto/my-organizations.dto.ts:125` |
+| `items[].executives[].phone` | `string` | No | — | — | Celular o teléfono de contacto | `src/modules/directory/dto/my-organizations.dto.ts:131` |
+| `items[].executives[].idNumber` | `string` | No | — | — | Documento de identidad declarado | `src/modules/directory/dto/my-organizations.dto.ts:137` |
 
 ### Respuestas posibles
 
@@ -2131,7 +2582,10 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/organization-headquarters-location.int-spec.ts:272` |
+| INTEGRACION | `test/integration/organization-legal-representative.int-spec.ts:650` |
 
 ### Flujos
 

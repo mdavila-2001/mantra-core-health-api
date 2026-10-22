@@ -41,7 +41,7 @@
 
 Registrar el catálogo / metastore. Caso de uso UC-63-02: Catálogo / metastore. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -53,10 +53,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -152,7 +152,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Publicar el producto de datos y su versión. Caso de uso UC-63-03: Producto y versión con contrato y SLO. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -164,11 +164,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PRODUCT_OWNER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/lakehouse.controller.ts:75` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -305,7 +305,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar el dataset y su esquema inicial. Caso de uso UC-63-04: Dataset y versión de esquema. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -317,10 +317,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -443,11 +443,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Evaluar la calidad del dataset y abrir hallazgos. Caso de uso UC-63-08: Calidad y hallazgos. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /lakehouse/datasets/{id}/quality-runs` la atiende `LakehouseController.runQualityCheck` (src/modules/lakehouse/controllers/lakehouse.controller.ts:140). Exige sesión con alguno de los roles DATA_STEWARD, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RunQualityCheckDto` (9 campos, 2 obligatorios). Delega en `TransformationService.runQualityCheck`. Crea filas en lakehouse.lakehouse_quality_issues, lakehouse.lakehouse_quality_runs, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.lakehouse_datasets, lakehouse.lakehouse_quality_runs. Lee lakehouse.lakehouse_datasets, lakehouse.lakehouse_quality_rules, messaging.outbox_messages. Publica QualityRunEvaluated.
+`POST /lakehouse/datasets/{id}/quality-runs` la atiende `LakehouseController.runQualityCheck` (src/modules/lakehouse/controllers/lakehouse.controller.ts:140). Exige sesión con alguno de los roles DATA_STEWARD, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RunQualityCheckDto` (8 campos, 2 obligatorios). Delega en `TransformationService.runQualityCheck`. Crea filas en lakehouse.lakehouse_quality_issues, lakehouse.lakehouse_quality_runs, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.lakehouse_datasets, lakehouse.lakehouse_quality_runs. Lee lakehouse.lakehouse_datasets, lakehouse.lakehouse_quality_rules, messaging.outbox_messages. Publica QualityRunEvaluated.
 
 ### Requerimientos
 
@@ -455,11 +455,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_STEWARD, SYSTEM, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:140` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/lakehouse.controller.ts:140` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -494,12 +494,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:994` |
 | `transformationRunId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Corrida de transformación evaluada | `src/modules/lakehouse/dto/lakehouse.dto.ts:1005` |
 | `evaluatedRecordCount` | `string` | Sí | — | `@IsNumberString({ no_symbols: true })` | Registros evaluados; cadena por ser bigint | `src/modules/lakehouse/dto/lakehouse.dto.ts:1012` |
-| `findings` | `array<QualityFindingDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => QualityFindingDto)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:1022` |
-| `findings[].healthDataQualityRuleId` | `string` | No | formato uuid | — | Regla que se incumple | sin fuente |
-| `findings[].canonicalHealthResourceId` | `string` | No | formato uuid | — | — | sin fuente |
-| `findings[].canonicalResourceVersionId` | `string` | No | formato uuid | — | — | sin fuente |
-| `findings[].fieldPath` | `string` | No | longitud máxima 500 | — | Campo afectado | sin fuente |
-| `findings[].observedValueHash` | `string` | No | longitud máxima 200 | — | Hash del valor observado; el valor en claro no se guarda | sin fuente |
+| `findings` | `array<LakehouseQualityFindingDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => QualityFindingDto)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:1022` |
+| `findings[].ruleCode` | `string` | No | longitud máxima 100 | — | Código de la regla violada | sin fuente |
+| `findings[].partitionId` | `string` | No | formato uuid | — | — | sin fuente |
+| `findings[].issueCount` | `string` | No | — | — | Registros que incumplen; cadena por ser bigint | sin fuente |
+| `findings[].sampleObjectManifestId` | `string` | No | formato uuid | — | Muestra para diagnosticar | sin fuente |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -519,11 +518,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
   "evaluatedRecordCount": "valor-ejemplo",
   "findings": [
     {
-      "healthDataQualityRuleId": "00000000-0000-4000-8000-000000000001",
-      "canonicalHealthResourceId": "00000000-0000-4000-8000-000000000001",
-      "canonicalResourceVersionId": "00000000-0000-4000-8000-000000000001",
-      "fieldPath": "valor-ejemplo",
-      "observedValueHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      "ruleCode": "CODIGO_EJEMPLO",
+      "partitionId": "00000000-0000-4000-8000-000000000001",
+      "issueCount": "valor-ejemplo",
+      "sampleObjectManifestId": "00000000-0000-4000-8000-000000000001"
     }
   ]
 }
@@ -579,7 +577,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ingerir dato de salud de-identificado en la zona curada. Caso de uso UC-63-07: Ingesta de salud de-identificada. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -591,10 +589,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DEIDENTIFICATION_WORKER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:124` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -760,7 +758,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar la corrida con sus particiones, archivos y linaje. Caso de uso UC-63-05: Corrida: particiones y archivos. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -772,11 +770,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, TRANSFORMATION_WORKER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/lakehouse/controllers/lakehouse.controller.ts:107` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -947,7 +945,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir una zona del data lake. Caso de uso UC-63-01: Zona del data lake. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -959,10 +957,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1061,7 +1059,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Solicitar el release de un dataset para investigación. Caso de uso UC-63-10: Solicitar release. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1073,10 +1071,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:95` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1178,7 +1176,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Aprobar y materializar el manifiesto de-identificado. Caso de uso UC-63-11: Aprobar y materializar. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1190,11 +1188,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/research.controller.ts:111` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1307,7 +1305,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Expirar o revocar el release. Caso de uso UC-63-12: Expirar o revocar. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1319,11 +1317,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:143` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/research.controller.ts:143` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1429,9 +1427,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:131` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1505,10 +1503,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1600,7 +1598,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir el proyecto de investigación y su cohorte. Caso de uso UC-63-09: Proyecto y cohorte. Dentro del módulo (descripción del modelo, en inglés): «Separates raw, standardized, curated and research-ready data while preserving lineage, quality contracts, de-identification and controlled release.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehouse/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_63_lakehouse.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1612,11 +1610,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRINCIPAL_INVESTIGATOR, RESEARCH_GOVERNANCE, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/research.controller.ts:78` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

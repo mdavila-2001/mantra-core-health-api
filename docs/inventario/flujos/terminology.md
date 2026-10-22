@@ -3,12 +3,12 @@
 # Flujos del módulo `terminology`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 21 (18 con decisiones propias, 3 sin ellas)
+- **Operaciones:** 25 (21 con decisiones propias, 4 sin ellas)
 - Inventario de endpoints del módulo: [terminology](../endpoints/terminology.md)
 
 ## Proceso: Terminology module
 
-- **Código:** `terminology` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 21
+- **Código:** `terminology` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 25
 - **Actores:** Cualquier sesión válida · Público (sin sesión) · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/terminology/README.md`
@@ -31,16 +31,20 @@ _Fuente: `src/modules/terminology/README.md:3`_
 |  |  | GET /terminology/concepts/{conceptId} | Cualquier sesión válida | BAJO | 7 |
 |  |  | POST /terminology/concepts/{conceptId}/$deprecate | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /terminology/concepts/{conceptId}/designations | SECURITY_ADMIN | MEDIO | 5 |
+|  |  | GET /terminology/concepts/{conceptId}/glossary-article | Cualquier sesión válida | BAJO | 1 |
+|  |  | GET /terminology/concepts/{conceptId}/glossary-neighborhood | Cualquier sesión válida | BAJO | 7 |
 |  |  | POST /terminology/concepts/{conceptId}/properties | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /terminology/concepts/{conceptId}/relationships | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | GET /terminology/concepts/glossary-graph | Cualquier sesión válida | BAJO | 7 |
 | `ctrl:TerminologyFhirController` | Operaciones de TerminologyFhirController que el README no asigna a un caso de uso | GET /terminology/CodeSystem/$lookup | Cualquier sesión válida | BAJO | 5 |
 |  |  | POST /terminology/ConceptMap/$translate | Cualquier sesión válida | ALTO | 4 |
 |  |  | POST /terminology/ValueSet/{id}/$expand | SECURITY_ADMIN | ALTO | 10 |
+| `ctrl:TerminologyImportTemplateController` | Operaciones de TerminologyImportTemplateController que el README no asigna a un caso de uso | GET /terminology/import-template | SECURITY_ADMIN | BAJO | 0 |
 | `ctrl:TerminologyTenantCatalogController` | Operaciones de TerminologyTenantCatalogController que el README no asigna a un caso de uso | PUT /terminology/tenants/{tenantId}/catalog-policies | SECURITY_ADMIN | MEDIO | 8 |
 | `ctrl:TerminologyValueSetsController` | Operaciones de TerminologyValueSetsController que el README no asigna a un caso de uso | GET /terminology/value-sets | Público (sin sesión) | BAJO | 3 |
 |  |  | POST /terminology/value-sets | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | GET /terminology/value-sets/{id}/$expand | Público (sin sesión) | BAJO | 5 |
+|  |  | GET /terminology/value-sets/$glossary-facets | Público (sin sesión) | BAJO | 5 |
 | `ctrl:TerminologyVersionsController` | Operaciones de TerminologyVersionsController que el README no asigna a un caso de uso | POST /terminology/versions/{versionId}/import | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /terminology/versions/{versionId}/import-file | SECURITY_ADMIN | MEDIO | 7 |
 |  |  | POST /terminology/versions/{versionId}/publish | SECURITY_ADMIN | MEDIO | 4 |
@@ -51,7 +55,7 @@ _Fuente: `src/modules/terminology/README.md:3`_
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a10(["Cualquier sesión válida"]):::actor
-  a36(["Público (sin sesión)"]):::actor
+  a40(["Público (sin sesión)"]):::actor
   t3[("terminology.code_systems")]:::tabla
   t5[("terminology.terminology_sources")]:::tabla
   t7[("terminology.code_system_versions")]:::tabla
@@ -61,12 +65,12 @@ flowchart LR
   t14[("terminology.concept_relationships")]:::tabla
   t15[("terminology.value_set_members")]:::tabla
   t16[("terminology.value_set_versions")]:::tabla
-  t28[("terminology.concept_maps")]:::tabla
-  t32[("terminology.tenant_catalog_policies")]:::tabla
-  t33[("terminology.tenant_concept_config")]:::tabla
-  t37[("terminology.value_sets")]:::tabla
-  t39[("terminology.value_set_rules")]:::tabla
-  t43[("terminology.catalog_import_batches")]:::tabla
+  t31[("terminology.concept_maps")]:::tabla
+  t36[("terminology.tenant_catalog_policies")]:::tabla
+  t37[("terminology.tenant_concept_config")]:::tabla
+  t41[("terminology.value_sets")]:::tabla
+  t43[("terminology.value_set_rules")]:::tabla
+  t48[("terminology.catalog_import_batches")]:::tabla
   subgraph s0["ctrl:TerminologyCodeSystemsController · Operaciones de TerminologyCodeSystemsCo…"]
     o1["GET /terminology/code-systems"]:::op
     o4["POST /terminology/code-systems"]:::op
@@ -75,36 +79,43 @@ flowchart LR
   end
   t17[("+1 tablas más")]
   t19[("+1 tablas más")]
-  t25[("+1 tablas más")]
+  t24[("+1 tablas más")]
+  t28[("+1 tablas más")]
   subgraph s1["ctrl:TerminologyConceptsController · Operaciones de TerminologyConceptsControll…"]
     o9["GET /terminology/concepts"]:::op
     o18["GET /terminology/concepts/{conceptId}"]:::op
     o20["POST /terminology/concepts/{conceptId}/$deprecate"]:::op
     o21["POST /terminology/concepts/{conceptId}/designations"]:::op
-    o22["POST /terminology/concepts/{conceptId}/properties"]:::op
-    o23["POST /terminology/concepts/{conceptId}/relationships"]:::op
-    o24["GET /terminology/concepts/glossary-graph"]:::op
+    o22["GET /terminology/concepts/{conceptId}/glossary-article"]:::op
+    o23["GET /terminology/concepts/{conceptId}/glossary-neighborhood"]:::op
+    o25["POST /terminology/concepts/{conceptId}/properties"]:::op
+    o26["POST /terminology/concepts/{conceptId}/relationships"]:::op
+    o27["GET /terminology/concepts/glossary-graph"]:::op
   end
-  t30[("+4 tablas más")]
+  t33[("+4 tablas más")]
   subgraph s2["ctrl:TerminologyFhirController · Operaciones de TerminologyFhirController que e…"]
-    o26["GET /terminology/CodeSystem/$lookup"]:::op
-    o27["POST /terminology/ConceptMap/$translate"]:::op
-    o29["POST /terminology/ValueSet/{id}/$expand"]:::op
+    o29["GET /terminology/CodeSystem/$lookup"]:::op
+    o30["POST /terminology/ConceptMap/$translate"]:::op
+    o32["POST /terminology/ValueSet/{id}/$expand"]:::op
   end
-  t34[("+2 tablas más")]
-  subgraph s3["ctrl:TerminologyTenantCatalogController · Operaciones de TerminologyTenantCatal…"]
-    o31["PUT /terminology/tenants/{tenantId}/catalog-policies"]:::op
+  subgraph s3["ctrl:TerminologyImportTemplateController · Operaciones de TerminologyImportTemp…"]
+    o34["GET /terminology/import-template"]:::op
   end
-  subgraph s4["ctrl:TerminologyValueSetsController · Operaciones de TerminologyValueSetsContro…"]
-    o35["GET /terminology/value-sets"]:::op
-    o38["POST /terminology/value-sets"]:::op
-    o40["GET /terminology/value-sets/{id}/$expand"]:::op
+  t38[("+2 tablas más")]
+  subgraph s4["ctrl:TerminologyTenantCatalogController · Operaciones de TerminologyTenantCatal…"]
+    o35["PUT /terminology/tenants/{tenantId}/catalog-policies"]:::op
   end
-  t44[("+1 tablas más")]
-  subgraph s5["ctrl:TerminologyVersionsController · Operaciones de TerminologyVersionsControll…"]
-    o41["POST /terminology/versions/{versionId}/import"]:::op
-    o42["POST /terminology/versions/{versionId}/import-file"]:::op
-    o45["POST /terminology/versions/{versionId}/publish"]:::op
+  subgraph s5["ctrl:TerminologyValueSetsController · Operaciones de TerminologyValueSetsContro…"]
+    o39["GET /terminology/value-sets"]:::op
+    o42["POST /terminology/value-sets"]:::op
+    o44["GET /terminology/value-sets/{id}/$expand"]:::op
+    o45["GET /terminology/value-sets/$glossary-facets"]:::op
+  end
+  t49[("+1 tablas más")]
+  subgraph s6["ctrl:TerminologyVersionsController · Operaciones de TerminologyVersionsControll…"]
+    o46["POST /terminology/versions/{versionId}/import"]:::op
+    o47["POST /terminology/versions/{versionId}/import-file"]:::op
+    o50["POST /terminology/versions/{versionId}/publish"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -146,82 +157,99 @@ flowchart LR
   o21 -->|"CREA"| t12
   o21 -->|"LEE"| t12
   o21 -->|"CREA"| t13
-  a2 --> o22
-  o22 -->|"LEE"| t11
-  o22 -->|"ACTUALIZA"| t13
-  o22 -->|"CREA"| t13
+  a10 --> o22
   o22 -->|"LEE"| t13
-  a2 --> o23
+  a10 --> o23
   o23 -->|"LEE"| t11
-  o23 -->|"CREA"| t14
+  o23 -->|"LEE"| t12
+  o23 -->|"LEE"| t13
   o23 -->|"LEE"| t14
-  a10 --> o24
-  o24 -->|"LEE"| t11
-  o24 -->|"LEE"| t12
-  o24 -->|"LEE"| t13
-  o24 -->|"LEE"| t14
-  o24 -->|"LEE"| t15
-  o24 -->|"LEE"| t16
-  o24 -.-> t25
-  a10 --> o26
+  o23 -->|"LEE"| t15
+  o23 -->|"LEE"| t16
+  o23 -.-> t24
+  a2 --> o25
+  o25 -->|"LEE"| t11
+  o25 -->|"ACTUALIZA"| t13
+  o25 -->|"CREA"| t13
+  o25 -->|"LEE"| t13
+  a2 --> o26
   o26 -->|"LEE"| t11
-  o26 -->|"LEE"| t7
-  o26 -->|"LEE"| t3
-  o26 -->|"LEE"| t12
-  o26 -->|"LEE"| t13
+  o26 -->|"CREA"| t14
+  o26 -->|"LEE"| t14
   a10 --> o27
   o27 -->|"LEE"| t11
-  o27 -->|"ACTUALIZA"| t28
-  o27 -->|"CREA"| t28
-  o27 -->|"LEE"| t28
-  a2 --> o29
+  o27 -->|"LEE"| t12
+  o27 -->|"LEE"| t13
+  o27 -->|"LEE"| t14
+  o27 -->|"LEE"| t15
+  o27 -->|"LEE"| t16
+  o27 -.-> t28
+  a10 --> o29
   o29 -->|"LEE"| t11
   o29 -->|"LEE"| t7
+  o29 -->|"LEE"| t3
+  o29 -->|"LEE"| t12
   o29 -->|"LEE"| t13
-  o29 -->|"LEE"| t14
-  o29 -->|"BORRA"| t15
-  o29 -->|"CREA"| t15
-  o29 -.-> t30
-  a2 --> o31
-  o31 -->|"LEE"| t11
-  o31 -->|"ACTUALIZA"| t32
-  o31 -->|"CREA"| t32
-  o31 -->|"LEE"| t32
-  o31 -->|"ACTUALIZA"| t33
-  o31 -->|"CREA"| t33
-  o31 -.-> t34
-  a36 --> o35
-  o35 -->|"LEE"| t15
-  o35 -->|"LEE"| t16
-  o35 -->|"LEE"| t37
-  a2 --> o38
-  o38 -->|"CREA"| t39
-  o38 -->|"CREA"| t16
-  o38 -->|"CREA"| t37
-  o38 -->|"LEE"| t37
-  a36 --> o40
-  o40 -->|"LEE"| t11
-  o40 -->|"LEE"| t13
-  o40 -->|"LEE"| t15
-  o40 -->|"LEE"| t16
-  o40 -->|"LEE"| t37
-  a2 --> o41
-  o41 -->|"CREA"| t11
-  o41 -->|"LEE"| t11
-  o41 -->|"LEE"| t7
+  a10 --> o30
+  o30 -->|"LEE"| t11
+  o30 -->|"ACTUALIZA"| t31
+  o30 -->|"CREA"| t31
+  o30 -->|"LEE"| t31
+  a2 --> o32
+  o32 -->|"LEE"| t11
+  o32 -->|"LEE"| t7
+  o32 -->|"LEE"| t13
+  o32 -->|"LEE"| t14
+  o32 -->|"BORRA"| t15
+  o32 -->|"CREA"| t15
+  o32 -.-> t33
+  a2 --> o34
+  a2 --> o35
+  o35 -->|"LEE"| t11
+  o35 -->|"ACTUALIZA"| t36
+  o35 -->|"CREA"| t36
+  o35 -->|"LEE"| t36
+  o35 -->|"ACTUALIZA"| t37
+  o35 -->|"CREA"| t37
+  o35 -.-> t38
+  a40 --> o39
+  o39 -->|"LEE"| t15
+  o39 -->|"LEE"| t16
+  o39 -->|"LEE"| t41
   a2 --> o42
-  o42 -->|"CREA"| t11
-  o42 -->|"LEE"| t11
   o42 -->|"CREA"| t43
-  o42 -->|"ACTUALIZA"| t43
-  o42 -->|"LEE"| t43
-  o42 -->|"LEE"| t7
-  o42 -.-> t44
-  a2 --> o45
-  o45 -->|"ACTUALIZA"| t11
+  o42 -->|"CREA"| t16
+  o42 -->|"CREA"| t41
+  o42 -->|"LEE"| t41
+  a40 --> o44
+  o44 -->|"LEE"| t11
+  o44 -->|"LEE"| t13
+  o44 -->|"LEE"| t15
+  o44 -->|"LEE"| t16
+  o44 -->|"LEE"| t41
+  a40 --> o45
   o45 -->|"LEE"| t11
-  o45 -->|"ACTUALIZA"| t7
-  o45 -->|"LEE"| t7
+  o45 -->|"LEE"| t12
+  o45 -->|"LEE"| t15
+  o45 -->|"LEE"| t16
+  o45 -->|"LEE"| t41
+  a2 --> o46
+  o46 -->|"CREA"| t11
+  o46 -->|"LEE"| t11
+  o46 -->|"LEE"| t7
+  a2 --> o47
+  o47 -->|"CREA"| t11
+  o47 -->|"LEE"| t11
+  o47 -->|"CREA"| t48
+  o47 -->|"ACTUALIZA"| t48
+  o47 -->|"LEE"| t48
+  o47 -->|"LEE"| t7
+  o47 -.-> t49
+  a2 --> o50
+  o50 -->|"ACTUALIZA"| t11
+  o50 -->|"LEE"| t11
+  o50 -->|"ACTUALIZA"| t7
+  o50 -->|"LEE"| t7
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -518,7 +546,7 @@ UC-03-13: busca conceptos por código/denominación, o resuelve ids a etiqueta
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: El conjunto de valores no existe o no tiene versión vigente |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El conjunto de valores no existe o no tiene versión vigente; ResourceNotFoundException: La etiqueta no existe o no tiene versión vigente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -537,74 +565,124 @@ flowchart TD
   n7{"scopingValueSetId !== undefined"}:::decision
   n6 --> n7
   n4 -->|"no"| n7
-  n8["Llama a ValueSetsRepository.findIncludedConceptIdsByValueSet"]:::llamada
+  n8["Llama a ConceptsService.searchGlossaryPage"]:::llamada
   n7 -->|"sí"| n8
-  n9["Llama a ValueSetsRepository.findDefaultVersion"]:::llamada
+  n9["Llama a ValueSetsRepository.findById"]:::llamada
   n8 --> n9
-  n10[("LEE terminology.value_set_versions")]:::efecto
+  n10[("LEE terminology.value_sets")]:::efecto
   n9 --> n10
-  n11[("LEE terminology.value_set_members")]:::efecto
+  n11["Llama a ValueSetsRepository.findDefaultVersion"]:::llamada
   n10 --> n11
-  n12["Llama a ValueSetsRepository.findById"]:::llamada
+  n12[("LEE terminology.value_set_versions")]:::efecto
   n11 --> n12
-  n13[("LEE terminology.value_sets")]:::efecto
+  n13{"version === null"}:::decision
   n12 --> n13
-  n14{"miembros === null"}:::decision
-  n13 --> n14
-  n15{"requestedValueSetId !== undefined"}:::decision
-  n14 -->|"sí"| n15
-  n16(["404 NOT_FOUND El conjunto de valores no existe o no tiene versión vigente"]):::error
+  n14(["404 NOT_FOUND El conjunto de valores no existe o no tiene versión vigente"]):::error
+  n13 -->|"sí"| n14
+  n15{"options.tagValueSetId !== undefined"}:::decision
+  n13 -->|"no"| n15
+  n16["Llama a ValueSetsRepository.findDefaultVersion"]:::llamada
   n15 -->|"sí"| n16
-  n17["Llama a CatalogConceptsRepository.search"]:::llamada
-  n15 -->|"no"| n17
-  n14 -->|"no"| n17
-  n7 -->|"no"| n17
-  n18[("LEE terminology.catalog_concepts")]:::efecto
+  n17[("LEE terminology.value_set_versions")]:::efecto
+  n16 --> n17
+  n18{"tagVersion === null"}:::decision
   n17 --> n18
-  n19["Llama a ConceptsService.resolveTexts"]:::llamada
-  n18 --> n19
-  n20["Llama a ConceptDesignationsRepository.findPreferredByLanguageForConcepts"]:::llamada
-  n19 --> n20
-  n21[("LEE terminology.concept_designations")]:::efecto
+  n19(["404 NOT_FOUND La etiqueta no existe o no tiene versión vigente"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a CatalogConceptsRepository.searchGlossaryPage"]:::llamada
+  n18 -->|"no"| n20
+  n15 -->|"no"| n20
+  n21{"filters.tagValueSetVersionId !== undefined"}:::decision
   n20 --> n21
-  n22["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
-  n21 --> n22
-  n23[("LEE terminology.concept_properties")]:::efecto
+  n22[("LEE terminology.value_set_members")]:::efecto
+  n21 -->|"sí"| n22
+  n23{"normalized !== ''"}:::decision
   n22 --> n23
-  n24["Llama a ValueSetsRepository.findValueSetsByConceptIds"]:::llamada
-  n23 --> n24
-  n25[("LEE terminology.value_set_members · LEE terminology.value_set_versions · LEE terminology.value_sets")]:::efecto
+  n21 -->|"no"| n23
+  n24[("LEE terminology.concept_designations")]:::efecto
+  n23 -->|"sí"| n24
+  n25[("LEE terminology.value_set_members · LEE terminology.catalog_concepts · LEE terminology.concept_designations")]:::efecto
   n24 --> n25
-  n26["Llama a ConceptsService.resolveGlossaryTexts"]:::llamada
+  n23 -->|"no"| n25
+  n26["Llama a CatalogConceptsRepository.findByIds"]:::llamada
   n25 --> n26
-  n27["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n27[("LEE terminology.catalog_concepts")]:::efecto
   n26 --> n27
-  n28[("LEE terminology.concept_properties")]:::efecto
+  n28["Llama a ConceptsService.buildSearchItems"]:::llamada
   n27 --> n28
-  n29["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n29["Llama a ValueSetsRepository.findValueSetsByConceptIds"]:::llamada
   n28 --> n29
-  n30[("LEE terminology.concept_properties")]:::efecto
+  n30[("LEE terminology.value_set_members · LEE terminology.value_set_versions · LEE terminology.value_sets")]:::efecto
   n29 --> n30
   n31["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
   n30 --> n31
   n32[("LEE terminology.concept_properties")]:::efecto
   n31 --> n32
-  n33["Llama a ConceptsService.resolveGlossaryRelations"]:::llamada
+  n33{"scopingValueSetId !== undefined"}:::decision
   n32 --> n33
-  n34["Llama a ConceptRelationshipsRepository.findByTypesForSources"]:::llamada
-  n33 --> n34
-  n35[("LEE terminology.concept_relationships")]:::efecto
+  n7 -->|"no"| n33
+  n34["Llama a ValueSetsRepository.findIncludedConceptIdsByValueSet"]:::llamada
+  n33 -->|"sí"| n34
+  n35["Llama a ValueSetsRepository.findDefaultVersion"]:::llamada
   n34 --> n35
-  n36["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n36[("LEE terminology.value_set_versions")]:::efecto
   n35 --> n36
-  n37[("LEE terminology.catalog_concepts")]:::efecto
+  n37[("LEE terminology.value_set_members")]:::efecto
   n36 --> n37
-  n38["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n38{"members === null"}:::decision
   n37 --> n38
-  n39[("LEE terminology.concept_properties")]:::efecto
-  n38 --> n39
-  n40(("200 Responde con éxito")):::ok
-  n39 --> n40
+  n39{"requestedValueSetId !== undefined"}:::decision
+  n38 -->|"sí"| n39
+  n40(["404 NOT_FOUND El conjunto de valores no existe o no tiene versión vigente"]):::error
+  n39 -->|"sí"| n40
+  n41["Llama a CatalogConceptsRepository.search"]:::llamada
+  n39 -->|"no"| n41
+  n38 -->|"no"| n41
+  n33 -->|"no"| n41
+  n42[("LEE terminology.catalog_concepts")]:::efecto
+  n41 --> n42
+  n43["Llama a ConceptsService.buildSearchItems"]:::llamada
+  n42 --> n43
+  n44["Llama a ConceptsService.resolveTexts"]:::llamada
+  n43 --> n44
+  n45["Llama a ConceptDesignationsRepository.findPreferredByLanguageForConcepts"]:::llamada
+  n44 --> n45
+  n46[("LEE terminology.concept_designations")]:::efecto
+  n45 --> n46
+  n47["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n46 --> n47
+  n48[("LEE terminology.concept_properties")]:::efecto
+  n47 --> n48
+  n49["Llama a ValueSetsRepository.findValueSetsByConceptIds"]:::llamada
+  n48 --> n49
+  n50[("LEE terminology.value_set_members · LEE terminology.value_set_versions · LEE terminology.value_sets")]:::efecto
+  n49 --> n50
+  n51["Llama a ConceptsService.resolveGlossaryTexts"]:::llamada
+  n50 --> n51
+  n52["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n51 --> n52
+  n53[("LEE terminology.concept_properties")]:::efecto
+  n52 --> n53
+  n54["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n53 --> n54
+  n55[("LEE terminology.concept_properties")]:::efecto
+  n54 --> n55
+  n56["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n55 --> n56
+  n57[("LEE terminology.concept_properties")]:::efecto
+  n56 --> n57
+  n58["Llama a ConceptsService.resolveGlossaryRelations"]:::llamada
+  n57 --> n58
+  n59["Llama a ConceptRelationshipsRepository.findByTypesForSources"]:::llamada
+  n58 --> n59
+  n60[("LEE terminology.concept_relationships")]:::efecto
+  n59 --> n60
+  n61["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n60 --> n61
+  n62[("LEE terminology.concept_properties")]:::efecto
+  n61 --> n62
+  n63(("200 Responde con éxito")):::ok
+  n62 --> n63
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -679,24 +757,26 @@ flowchart TD
   n24 --> n25
   n26[("LEE terminology.concept_relationships")]:::efecto
   n25 --> n26
-  n27["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n27["Llama a ConceptsService.resolveGlossaryTerms"]:::llamada
   n26 --> n27
-  n28[("LEE terminology.catalog_concepts")]:::efecto
+  n28["Llama a CatalogConceptsRepository.findByIds"]:::llamada
   n27 --> n28
-  n29["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n29[("LEE terminology.catalog_concepts")]:::efecto
   n28 --> n29
-  n30[("LEE terminology.concept_properties")]:::efecto
+  n30["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
   n29 --> n30
-  n31["Llama a ConceptDesignationsRepository.findPropertiesByConcept"]:::llamada
+  n31[("LEE terminology.concept_properties")]:::efecto
   n30 --> n31
-  n32[("LEE terminology.concept_properties")]:::efecto
+  n32["Llama a ConceptDesignationsRepository.findPropertiesByConcept"]:::llamada
   n31 --> n32
-  n33{"esTerminoDelGlosario && concept.stateConceptId !== CONCEPTS.TERM_ACTIVE"}:::decision
+  n33[("LEE terminology.concept_properties")]:::efecto
   n32 --> n33
-  n34(["404 NOT_FOUND Concepto no encontrado"]):::error
-  n33 -->|"sí"| n34
-  n35(("200 Responde con éxito")):::ok
-  n33 -->|"no"| n35
+  n34{"isGlossaryTerm && concept.stateConceptId !== CONCEPTS.TERM_ACTIVE"}:::decision
+  n33 --> n34
+  n35(["404 NOT_FOUND Concepto no encontrado"]):::error
+  n34 -->|"sí"| n35
+  n36(("200 Responde con éxito")):::ok
+  n34 -->|"no"| n36
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -845,7 +925,162 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /terminology/concepts/{conceptId}/properties
+#### 9. GET /terminology/concepts/{conceptId}/glossary-article
+
+Lee el artículo enciclopédico de un término del glosario
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Artículo del glosario no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ConceptsService.readGlossaryArticle"]:::llamada
+  n2 --> n3
+  n4["Llama a ConceptDesignationsRepository.findProperty"]:::llamada
+  n3 --> n4
+  n5[("LEE terminology.concept_properties")]:::efecto
+  n4 --> n5
+  n6{"!property"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Artículo del glosario no encontrado"]):::error
+  n6 -->|"sí"| n7
+  n8(("200 Responde con éxito")):::ok
+  n6 -->|"no"| n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 10. GET /terminology/concepts/{conceptId}/glossary-neighborhood
+
+Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ConceptsService.readGlossaryNeighborhood"]:::llamada
+  n2 --> n3
+  n4["Llama a ConceptsService.readGlossaryFocus"]:::llamada
+  n3 --> n4
+  n5["Llama a CatalogConceptsRepository.findById"]:::llamada
+  n4 --> n5
+  n6[("LEE terminology.catalog_concepts")]:::efecto
+  n5 --> n6
+  n7{"!concept"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a ConceptsService.resolveTexts"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a ConceptDesignationsRepository.findPreferredByLanguageForConcepts"]:::llamada
+  n9 --> n10
+  n11[("LEE terminology.concept_designations")]:::efecto
+  n10 --> n11
+  n12["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n11 --> n12
+  n13[("LEE terminology.concept_properties")]:::efecto
+  n12 --> n13
+  n14["Llama a ValueSetsRepository.findValueSetsByConceptIds"]:::llamada
+  n13 --> n14
+  n15[("LEE terminology.value_set_members · LEE terminology.value_set_versions · LEE terminology.value_sets")]:::efecto
+  n14 --> n15
+  n16["Llama a ConceptsService.resolveGlossaryTexts"]:::llamada
+  n15 --> n16
+  n17["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n16 --> n17
+  n18[("LEE terminology.concept_properties")]:::efecto
+  n17 --> n18
+  n19["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n18 --> n19
+  n20[("LEE terminology.concept_properties")]:::efecto
+  n19 --> n20
+  n21["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n20 --> n21
+  n22[("LEE terminology.concept_properties")]:::efecto
+  n21 --> n22
+  n23{"!isGlossaryTerm || concept.stateConceptId !== CONCEPTS.TERM_ACTIVE || glossaryText?.slug === undefined"}:::decision
+  n22 --> n23
+  n24(["↩ (relanza el error capturado)"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a ConceptRelationshipsRepository.countNeighborsByType"]:::llamada
+  n23 -->|"no"| n25
+  n26["Llama a ConceptRelationshipsRepository.countNeighborsInDirection"]:::llamada
+  n25 --> n26
+  n27[("LEE terminology.concept_relationships · LEE terminology.catalog_concepts · LEE terminology.concept_properties")]:::efecto
+  n26 --> n27
+  n28["Llama a ConceptRelationshipsRepository.countNeighborsInDirection"]:::llamada
+  n27 --> n28
+  n29[("LEE terminology.concept_relationships · LEE terminology.catalog_concepts · LEE terminology.concept_properties")]:::efecto
+  n28 --> n29
+  n30["Llama a ConceptsService.collectSortedNeighbors"]:::llamada
+  n29 --> n30
+  n31["Llama a ConceptRelationshipsRepository.findByTypesForSources"]:::llamada
+  n30 --> n31
+  n32[("LEE terminology.concept_relationships")]:::efecto
+  n31 --> n32
+  n33["Llama a ConceptRelationshipsRepository.findByTypesForTargets"]:::llamada
+  n32 --> n33
+  n34[("LEE terminology.concept_relationships")]:::efecto
+  n33 --> n34
+  n35["Llama a ConceptsService.resolveGlossaryTerms"]:::llamada
+  n34 --> n35
+  n36["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n35 --> n36
+  n37[("LEE terminology.catalog_concepts")]:::efecto
+  n36 --> n37
+  n38["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n37 --> n38
+  n39[("LEE terminology.concept_properties")]:::efecto
+  n38 --> n39
+  n40["Llama a ConceptsService.resolveTexts"]:::llamada
+  n39 --> n40
+  n41["Llama a ConceptDesignationsRepository.findPreferredByLanguageForConcepts"]:::llamada
+  n40 --> n41
+  n42[("LEE terminology.concept_designations")]:::efecto
+  n41 --> n42
+  n43["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n42 --> n43
+  n44[("LEE terminology.concept_properties")]:::efecto
+  n43 --> n44
+  n45["Llama a ConceptsService.resolveNeighborCategories"]:::llamada
+  n44 --> n45
+  n46["Llama a ValueSetsRepository.findValueSetsByConceptIds"]:::llamada
+  n45 --> n46
+  n47[("LEE terminology.value_set_members · LEE terminology.value_set_versions · LEE terminology.value_sets")]:::efecto
+  n46 --> n47
+  n48(("200 Responde con éxito")):::ok
+  n47 --> n48
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 11. POST /terminology/concepts/{conceptId}/properties
 
 UC-03-05: alta o actualización de propiedades del concepto
 
@@ -901,7 +1136,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /terminology/concepts/{conceptId}/relationships
+#### 12. POST /terminology/concepts/{conceptId}/relationships
 
 UC-03-06: crea una relación dirigida entre conceptos
 
@@ -966,16 +1201,16 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. GET /terminology/concepts/glossary-graph
+#### 13. GET /terminology/concepts/glossary-graph
 
-Lee los nodos activos del glosario y las relaciones entre ellos.
+Lee el grafo de términos publicados del glosario médico
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: El conjunto de valores no existe o no tiene versión vigente |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El conjunto de valores no existe o no tiene versión vigente; ResourceNotFoundException: La etiqueta no existe o no tiene versión vigente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -996,88 +1231,100 @@ flowchart TD
   n8{"scopingValueSetId !== undefined"}:::decision
   n7 --> n8
   n5 -->|"no"| n8
-  n9["Llama a ValueSetsRepository.findIncludedConceptIdsByValueSet"]:::llamada
+  n9["Llama a ConceptsService.searchGlossaryPage"]:::llamada
   n8 -->|"sí"| n9
-  n10["Llama a ValueSetsRepository.findDefaultVersion"]:::llamada
+  n10["Llama a ValueSetsRepository.findById"]:::llamada
   n9 --> n10
-  n11[("LEE terminology.value_set_versions")]:::efecto
+  n11[("LEE terminology.value_sets")]:::efecto
   n10 --> n11
-  n12[("LEE terminology.value_set_members")]:::efecto
+  n12["Llama a ValueSetsRepository.findDefaultVersion"]:::llamada
   n11 --> n12
-  n13["Llama a ValueSetsRepository.findById"]:::llamada
+  n13[("LEE terminology.value_set_versions")]:::efecto
   n12 --> n13
-  n14[("LEE terminology.value_sets")]:::efecto
+  n14{"version === null"}:::decision
   n13 --> n14
-  n15{"miembros === null"}:::decision
-  n14 --> n15
-  n16{"requestedValueSetId !== undefined"}:::decision
-  n15 -->|"sí"| n16
-  n17(["404 NOT_FOUND El conjunto de valores no existe o no tiene versión vigente"]):::error
+  n15(["404 NOT_FOUND El conjunto de valores no existe o no tiene versión vigente"]):::error
+  n14 -->|"sí"| n15
+  n16{"options.tagValueSetId !== undefined"}:::decision
+  n14 -->|"no"| n16
+  n17["Llama a ValueSetsRepository.findDefaultVersion"]:::llamada
   n16 -->|"sí"| n17
-  n18["Llama a CatalogConceptsRepository.search"]:::llamada
-  n16 -->|"no"| n18
-  n15 -->|"no"| n18
-  n8 -->|"no"| n18
-  n19[("LEE terminology.catalog_concepts")]:::efecto
+  n18[("LEE terminology.value_set_versions")]:::efecto
+  n17 --> n18
+  n19{"tagVersion === null"}:::decision
   n18 --> n19
-  n20["Llama a ConceptsService.resolveTexts"]:::llamada
-  n19 --> n20
-  n21["Llama a ConceptDesignationsRepository.findPreferredByLanguageForConcepts"]:::llamada
-  n20 --> n21
-  n22[("LEE terminology.concept_designations")]:::efecto
+  n20(["404 NOT_FOUND La etiqueta no existe o no tiene versión vigente"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a CatalogConceptsRepository.searchGlossaryPage"]:::llamada
+  n19 -->|"no"| n21
+  n16 -->|"no"| n21
+  n22{"filters.tagValueSetVersionId !== undefined"}:::decision
   n21 --> n22
-  n23["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
-  n22 --> n23
-  n24[("LEE terminology.concept_properties")]:::efecto
+  n23[("LEE terminology.value_set_members")]:::efecto
+  n22 -->|"sí"| n23
+  n24{"normalized !== ''"}:::decision
   n23 --> n24
-  n25["Llama a ValueSetsRepository.findValueSetsByConceptIds"]:::llamada
-  n24 --> n25
-  n26[("LEE terminology.value_set_members · LEE terminology.value_set_versions · LEE terminology.value_sets")]:::efecto
+  n22 -->|"no"| n24
+  n25[("LEE terminology.concept_designations")]:::efecto
+  n24 -->|"sí"| n25
+  n26[("LEE terminology.value_set_members · LEE terminology.catalog_concepts · LEE terminology.concept_designations")]:::efecto
   n25 --> n26
-  n27["Llama a ConceptsService.resolveGlossaryTexts"]:::llamada
+  n24 -->|"no"| n26
+  n27["Llama a CatalogConceptsRepository.findByIds"]:::llamada
   n26 --> n27
-  n28["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n28[("LEE terminology.catalog_concepts")]:::efecto
   n27 --> n28
-  n29[("LEE terminology.concept_properties")]:::efecto
+  n29{"scopingValueSetId !== undefined"}:::decision
   n28 --> n29
-  n30["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
-  n29 --> n30
-  n31[("LEE terminology.concept_properties")]:::efecto
+  n8 -->|"no"| n29
+  n30["Llama a ValueSetsRepository.findIncludedConceptIdsByValueSet"]:::llamada
+  n29 -->|"sí"| n30
+  n31["Llama a ValueSetsRepository.findDefaultVersion"]:::llamada
   n30 --> n31
-  n32["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n32[("LEE terminology.value_set_versions")]:::efecto
   n31 --> n32
-  n33[("LEE terminology.concept_properties")]:::efecto
+  n33[("LEE terminology.value_set_members")]:::efecto
   n32 --> n33
-  n34["Llama a ConceptsService.resolveGlossaryRelations"]:::llamada
+  n34{"members === null"}:::decision
   n33 --> n34
-  n35["Llama a ConceptRelationshipsRepository.findByTypesForSources"]:::llamada
-  n34 --> n35
-  n36[("LEE terminology.concept_relationships")]:::efecto
-  n35 --> n36
-  n37["Llama a CatalogConceptsRepository.findByIds"]:::llamada
-  n36 --> n37
+  n35{"requestedValueSetId !== undefined"}:::decision
+  n34 -->|"sí"| n35
+  n36(["404 NOT_FOUND El conjunto de valores no existe o no tiene versión vigente"]):::error
+  n35 -->|"sí"| n36
+  n37["Llama a CatalogConceptsRepository.search"]:::llamada
+  n35 -->|"no"| n37
+  n34 -->|"no"| n37
+  n29 -->|"no"| n37
   n38[("LEE terminology.catalog_concepts")]:::efecto
   n37 --> n38
-  n39["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n39["Llama a ConceptsService.buildSearchItems"]:::llamada
   n38 --> n39
-  n40[("LEE terminology.concept_properties")]:::efecto
+  n40["Llama a ValueSetsRepository.findValueSetsByConceptIds"]:::llamada
   n39 --> n40
-  n41["Llama a ConceptsService.resolveGlossaryRelations"]:::llamada
+  n41[("LEE terminology.value_set_members · LEE terminology.value_set_versions · LEE terminology.value_sets")]:::efecto
   n40 --> n41
-  n42["Llama a ConceptRelationshipsRepository.findByTypesForSources"]:::llamada
+  n42["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
   n41 --> n42
-  n43[("LEE terminology.concept_relationships")]:::efecto
+  n43[("LEE terminology.concept_properties")]:::efecto
   n42 --> n43
-  n44["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n44["Llama a ConceptsService.resolveGlossaryRelations"]:::llamada
   n43 --> n44
-  n45[("LEE terminology.catalog_concepts")]:::efecto
+  n45["Llama a ConceptRelationshipsRepository.findByTypesForSources"]:::llamada
   n44 --> n45
-  n46["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n46[("LEE terminology.concept_relationships")]:::efecto
   n45 --> n46
-  n47[("LEE terminology.concept_properties")]:::efecto
+  n47["Llama a ConceptsService.resolveGlossaryTerms"]:::llamada
   n46 --> n47
-  n48(("200 Responde con éxito")):::ok
+  n48["Llama a CatalogConceptsRepository.findByIds"]:::llamada
   n47 --> n48
+  n49[("LEE terminology.catalog_concepts")]:::efecto
+  n48 --> n49
+  n50["Llama a ConceptDesignationsRepository.findPropertyForConcepts"]:::llamada
+  n49 --> n50
+  n51[("LEE terminology.concept_properties")]:::efecto
+  n50 --> n51
+  n52(("200 Responde con éxito")):::ok
+  n51 --> n52
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1086,7 +1333,44 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. PUT /terminology/tenants/{tenantId}/catalog-policies
+#### 14. GET /terminology/import-template
+
+UC-03-03: descarga la plantilla de importación de un perfil
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | ImportFileRejectedException: {ErrorCode.IMPORT_PROFILE_UNKNOWN}; ImportFileRejectedException: {ErrorCode.IMPORT_FORMAT_UNSUPPORTED} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ImportTemplateService.generate"]:::llamada
+  n2 --> n3
+  n4{"importProfile === undefined"}:::decision
+  n3 --> n4
+  n5(["500 INTERNAL {ErrorCode.IMPORT_PROFILE_UNKNOWN}"]):::error
+  n4 -->|"sí"| n5
+  n6{"generator === undefined"}:::decision
+  n4 -->|"no"| n6
+  n7(["500 INTERNAL {ErrorCode.IMPORT_FORMAT_UNSUPPORTED}"]):::error
+  n6 -->|"sí"| n7
+  n8(("200 Responde con éxito")):::ok
+  n6 -->|"no"| n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. PUT /terminology/tenants/{tenantId}/catalog-policies
 
 UC-03-12: define la política de catálogo del tenant
 
@@ -1187,7 +1471,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /terminology/value-sets
+#### 16. POST /terminology/value-sets
 
 UC-03-07: crea un conjunto de valores con versión y reglas
 
@@ -1242,7 +1526,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. GET /terminology/value-sets/{id}/$expand
+#### 17. GET /terminology/value-sets/{id}/$expand
 
 UC-03-08: lee la expansión vigente de un conjunto de valores
 
@@ -1308,7 +1592,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /terminology/ValueSet/{id}/$expand
+#### 18. POST /terminology/ValueSet/{id}/$expand
 
 UC-03-08: materializa los miembros de la expansión
 
@@ -1418,7 +1702,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /terminology/versions/{versionId}/import
+#### 19. POST /terminology/versions/{versionId}/import
 
 UC-03-03: importa conceptos en una versión en borrador
 
@@ -1474,9 +1758,9 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /terminology/versions/{versionId}/import-file
+#### 20. POST /terminology/versions/{versionId}/import-file
 
-UC-03-03: importa conceptos desde un archivo NDJSON
+UC-03-03: importa filas desde un archivo, o las valida sin escribir
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1485,8 +1769,9 @@ UC-03-03: importa conceptos desde un archivo NDJSON
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Versión no encontrada; ResourceNotFoundException: El sistema de codificación de la versión no existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el archivo; PreconditionFailedException: El archivo llegó vacío; PreconditionFailedException: Solo se puede importar en una versión en borrador; PreconditionFailedException: Ninguna línea del archivo es un concepto válido: se esperaba NDJSON con «code» y «display» por línea. / El archivo no tiene ninguna línea con contenido. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el archivo; PreconditionFailedException: Solo se puede importar en una versión en borrador |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | ImportFileRejectedException: {ErrorCode.IMPORT_PROFILE_UNKNOWN}; ImportFileRejectedException: {ErrorCode.IMPORT_EMPTY_FILE}; ImportFileRejectedException: {ErrorCode.IMPORT_FORMAT_UNSUPPORTED} |
 
 ```mermaid
 flowchart TD
@@ -1499,64 +1784,90 @@ flowchart TD
   n3 -->|"sí"| n4
   n5["Llama a ConceptFileImportService.importFromFile"]:::llamada
   n3 -->|"no"| n5
-  n6{"buffer.byteLength === 0"}:::decision
+  n6["Llama a ConceptFileImportService.requireProfile"]:::llamada
   n5 --> n6
-  n7(["422 PRECONDITION_FAILED El archivo llegó vacío"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a ConceptFileImportService.exigirVersionEnBorrador"]:::llamada
-  n6 -->|"no"| n8
-  n9["Llama a CodeSystemVersionsRepository.findById"]:::llamada
-  n8 --> n9
-  n10[("LEE terminology.code_system_versions")]:::efecto
-  n9 --> n10
-  n11{"!version"}:::decision
-  n10 --> n11
-  n12(["404 NOT_FOUND Versión no encontrada"]):::error
-  n11 -->|"sí"| n12
-  n13{"version.stateConceptId != null && version.stateConceptId !== CONCEPTS.TERM_DRAFT"}:::decision
-  n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED Solo se puede importar en una versión en borrador"]):::error
+  n7{"profile === undefined"}:::decision
+  n6 --> n7
+  n8(["500 INTERNAL {ErrorCode.IMPORT_PROFILE_UNKNOWN}"]):::error
+  n7 -->|"sí"| n8
+  n9{"withoutContent(buffer)"}:::decision
+  n7 -->|"no"| n9
+  n10(["500 INTERNAL {ErrorCode.IMPORT_EMPTY_FILE}"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a ConceptFileImportService.requireFormat"]:::llamada
+  n9 -->|"no"| n11
+  n12["Intenta"]:::intento
+  n11 --> n12
+  n13{"error instanceof FormatoNoAdmitidoError"}:::decision
+  n12 -->|"si falla"| n13
+  n14(["500 INTERNAL {ErrorCode.IMPORT_FORMAT_UNSUPPORTED}"]):::error
   n13 -->|"sí"| n14
-  n15["Llama a CodeSystemsRepository.findById"]:::llamada
+  n15(["↩ (relanza el error capturado)"]):::error
   n13 -->|"no"| n15
-  n16[("LEE terminology.code_systems")]:::efecto
-  n15 --> n16
-  n17{"!codeSystem"}:::decision
-  n16 --> n17
-  n18(["404 NOT_FOUND El sistema de codificación de la versión no existe"]):::error
-  n17 -->|"sí"| n18
-  n19{"conceptos.length === 0"}:::decision
-  n17 -->|"no"| n19
-  n20(["422 PRECONDITION_FAILED Ninguna línea del archivo es un concepto válido: se esperaba NDJSON con «code» y «dis…"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a ConceptFileImportService.abrirLote"]:::llamada
-  n19 -->|"no"| n21
-  n22[("CREA terminology.catalog_import_batches")]:::efecto
-  n21 --> n22
-  n23["Llama a ConceptFileImportService.escribir"]:::llamada
-  n22 --> n23
-  n24["Repite: ciclo for"]:::bucle
-  n23 --> n24
-  n25["Transacción: transactional(…)"]:::transaccion
-  n24 -->|"cada elemento"| n25
-  n26["Llama a CatalogConceptsRepository.findExistingCodes"]:::llamada
+  n16{"parser === undefined"}:::decision
+  n12 --> n16
+  n17(["500 INTERNAL {ErrorCode.IMPORT_FORMAT_UNSUPPORTED}"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a ConceptFileImportService.requireVersionInDraft"]:::llamada
+  n16 -->|"no"| n18
+  n19["Llama a CodeSystemVersionsRepository.findById"]:::llamada
+  n18 --> n19
+  n20[("LEE terminology.code_system_versions")]:::efecto
+  n19 --> n20
+  n21{"!version"}:::decision
+  n20 --> n21
+  n22(["404 NOT_FOUND Versión no encontrada"]):::error
+  n21 -->|"sí"| n22
+  n23{"version.stateConceptId != null && version.stateConceptId !== CONCEPTS.TERM_DRAFT"}:::decision
+  n21 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED Solo se puede importar en una versión en borrador"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a CodeSystemsRepository.findById"]:::llamada
+  n23 -->|"no"| n25
+  n26[("LEE terminology.code_systems")]:::efecto
   n25 --> n26
-  n27[("LEE terminology.catalog_concepts")]:::efecto
+  n27{"!codeSystem"}:::decision
   n26 --> n27
-  n28["Repite: por cada const concepto de tanda"]:::bucle
-  n27 --> n28
-  n29["Llama a CatalogConceptsRepository.create"]:::llamada
-  n28 -->|"cada elemento"| n29
-  n30[("CREA terminology.catalog_concepts")]:::efecto
+  n28(["404 NOT_FOUND El sistema de codificación de la versión no existe"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a ConceptFileImportService.readWithParser"]:::llamada
+  n27 -->|"no"| n29
+  n30["Intenta"]:::intento
   n29 --> n30
-  n31["Llama a ConceptFileImportService.cerrarLote"]:::llamada
-  n30 --> n31
-  n28 -->|"al terminar"| n31
-  n24 -->|"al terminar"| n31
-  n32[("LEE terminology.catalog_import_batches · ACTUALIZA terminology.catalog_import_batches")]:::efecto
-  n31 --> n32
-  n33(("201 Responde con éxito")):::ok
-  n32 --> n33
+  n31(["500 INTERNAL {ErrorCode.IMPORT_FORMAT_UNSUPPORTED}"]):::error
+  n30 -->|"si falla"| n31
+  n32{"totalRead === 0"}:::decision
+  n30 --> n32
+  n33(["500 INTERNAL {ErrorCode.IMPORT_EMPTY_FILE}"]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a ConceptFileImportService.openBatch"]:::llamada
+  n32 -->|"no"| n34
+  n35[("CREA terminology.catalog_import_batches")]:::efecto
+  n34 --> n35
+  n36["Llama a ConceptFileImportService.write"]:::llamada
+  n35 --> n36
+  n37["Repite: ciclo for"]:::bucle
+  n36 --> n37
+  n38["Transacción: transactional(…)"]:::transaccion
+  n37 -->|"cada elemento"| n38
+  n39["Llama a CatalogConceptsRepository.findExistingCodes"]:::llamada
+  n38 --> n39
+  n40[("LEE terminology.catalog_concepts")]:::efecto
+  n39 --> n40
+  n41["Repite: por cada const row de batch"]:::bucle
+  n40 --> n41
+  n42["Llama a CatalogConceptsRepository.create"]:::llamada
+  n41 -->|"cada elemento"| n42
+  n43[("CREA terminology.catalog_concepts")]:::efecto
+  n42 --> n43
+  n44["Llama a ConceptFileImportService.closeBatch"]:::llamada
+  n43 --> n44
+  n41 -->|"al terminar"| n44
+  n37 -->|"al terminar"| n44
+  n45[("LEE terminology.catalog_import_batches · ACTUALIZA terminology.catalog_import_batches")]:::efecto
+  n44 --> n45
+  n46(("201 Responde con éxito")):::ok
+  n45 --> n46
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1565,7 +1876,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /terminology/versions/{versionId}/publish
+#### 21. POST /terminology/versions/{versionId}/publish
 
 UC-03-04: publica una versión (borrador → activa)
 
@@ -1635,3 +1946,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /terminology/code-systems | 200, 401, 403, 429 | 1 |
 | GET /terminology/code-systems/{id}/versions | 200, 400, 401, 403, 429 | 1 |
 | GET /terminology/value-sets | 200, 401, 429 | 3 |
+| GET /terminology/value-sets/$glossary-facets | 200, 401, 429 | 5 |

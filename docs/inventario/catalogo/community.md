@@ -2,7 +2,7 @@
 
 # Catálogo del schema `community`
 
-- **Tablas:** 41 · **Columnas:** 534 (138 con descripción: 25.8 %) · **Índices:** 266
+- **Tablas:** 41 · **Columnas:** 534 (157 con descripción: 29.4 %) · **Índices:** 266
 - **Dominio:** Marketing y Crecimiento
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -11,15 +11,15 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [bookmarks](#bookmarks) | Permite a usuarios guardar contenido comunitario para consultarlo después. | 10 | 4 | 5 | COINCIDE |
-| [chat_auto_replies](#chat_auto_replies) | Guarda la respuesta automática asociada a un perfil público para atender mensajes entrantes y orientar la interacción en la comunidad de profesionales de salud. | 15 | 4 | 0 | SIN_ENTIDAD |
-| [comment_media](#comment_media) | Vincula archivos multimedia con comentarios de la comunidad, para adjuntar evidencia o material contextual a una conversación sin mezclarlo con la historia clínica. | 8 | 4 | 0 | SIN_ENTIDAD |
-| [comments](#comments) | Almacena comentarios sobre publicaciones o conversaciones comunitarias para habilitar diálogo público. | 20 | 11 | 20 | COINCIDE |
+| [chat_auto_replies](#chat_auto_replies) | Guarda la respuesta automática asociada a un perfil público para atender mensajes entrantes y orientar la interacción en la comunidad de profesionales de salud. | 15 | 4 | 4 | COINCIDE |
+| [comment_media](#comment_media) | Vincula archivos multimedia con comentarios de la comunidad, para adjuntar evidencia o material contextual a una conversación sin mezclarlo con la historia clínica. | 8 | 4 | 6 | COINCIDE |
+| [comments](#comments) | Almacena comentarios sobre publicaciones o conversaciones comunitarias para habilitar diálogo público. | 20 | 11 | 23 | COINCIDE |
 | [content_hashtags](#content_hashtags) | Asocia etiquetas a contenidos para habilitar clasificación y búsqueda temática. | 9 | 4 | 2 | COINCIDE |
 | [content_reports](#content_reports) | Registra reportes de contenido para solicitar evaluación de publicaciones potencialmente inadecuadas. | 11 | 5 | 4 | COINCIDE |
-| [conversation_participants](#conversation_participants) | Relaciona usuarios con conversaciones para controlar participantes y acceso a mensajes. | 17 | 8 | 7 | DIVERGE |
-| [conversations](#conversations) | Representa conversaciones comunitarias entre usuarios para habilitar comunicación fuera del expediente clínico. | 13 | 8 | 7 | DIVERGE |
-| [direct_messages](#direct_messages) | Conserva mensajes directos entre usuarios para la comunicación privada del producto, separados de las notas clínicas. | 16 | 9 | 4 | COINCIDE |
-| [feed_items](#feed_items) | Compone elementos del feed para presentar publicaciones relevantes a cada usuario. | 15 | 6 | 4 | COINCIDE |
+| [conversation_participants](#conversation_participants) | Relaciona usuarios con conversaciones para controlar participantes y acceso a mensajes. | 17 | 8 | 40 | COINCIDE |
+| [conversations](#conversations) | Representa conversaciones comunitarias entre usuarios para habilitar comunicación fuera del expediente clínico. | 13 | 8 | 38 | COINCIDE |
+| [direct_messages](#direct_messages) | Conserva mensajes directos entre usuarios para la comunicación privada del producto, separados de las notas clínicas. | 16 | 9 | 13 | COINCIDE |
+| [feed_items](#feed_items) | Compone elementos del feed para presentar publicaciones relevantes a cada usuario. | 15 | 6 | 6 | COINCIDE |
 | [feedback_ticket_comments](#feedback_ticket_comments) | Conserva intercambios y observaciones asociados a tickets de feedback para documentar su atención. | 11 | 3 | 0 | COINCIDE |
 | [feedback_ticket_events](#feedback_ticket_events) | Mantiene eventos de cambio de tickets para reconstruir su ciclo de vida y resolución. | 9 | 4 | 0 | COINCIDE |
 | [feedback_tickets](#feedback_tickets) | Gestiona tickets de comentarios o soporte generados por participantes del producto comunitario. | 23 | 7 | 0 | COINCIDE |
@@ -27,12 +27,12 @@
 | [groups](#groups) | Representa grupos comunitarios que reúnen usuarios alrededor de intereses o áreas de salud. | 18 | 12 | 12 | COINCIDE |
 | [hashtags](#hashtags) | Cataloga etiquetas temáticas que organizan y hacen descubrible contenido comunitario. | 11 | 5 | 4 | COINCIDE |
 | [mentions](#mentions) | Relaciona usuarios mencionados en publicaciones o comentarios para facilitar notificaciones y navegación. | 12 | 5 | 3 | COINCIDE |
-| [message_receipts](#message_receipts) | Registra estados de recepción o lectura de mensajes directos para dar seguimiento a su entrega. | 7 | 5 | 2 | COINCIDE |
-| [moderation_appeals](#moderation_appeals) | Gestiona apelaciones de usuarios a decisiones de moderación para habilitar revisión y resolución. | 13 | 7 | 5 | COINCIDE |
-| [moderation_decisions](#moderation_decisions) | Preserva decisiones de moderación para explicar acciones tomadas sobre contenido o usuarios. | 13 | 7 | 5 | COINCIDE |
+| [message_receipts](#message_receipts) | Registra estados de recepción o lectura de mensajes directos para dar seguimiento a su entrega. | 7 | 5 | 3 | COINCIDE |
+| [moderation_appeals](#moderation_appeals) | Gestiona apelaciones de usuarios a decisiones de moderación para habilitar revisión y resolución. | 13 | 7 | 6 | COINCIDE |
+| [moderation_decisions](#moderation_decisions) | Preserva decisiones de moderación para explicar acciones tomadas sobre contenido o usuarios. | 13 | 7 | 6 | COINCIDE |
 | [moderation_queue](#moderation_queue) | Encola contenido que requiere revisión para aplicar normas de participación y seguridad comunitaria. | 16 | 10 | 9 | COINCIDE |
-| [moderation_strikes](#moderation_strikes) | Cuenta infracciones atribuidas a usuarios para aplicar medidas progresivas de moderación. | 12 | 6 | 1 | COINCIDE |
-| [party_ratings](#party_ratings) | Registra valoraciones entre pacientes, profesionales y prácticas; el vínculo opcional con un encuentro verificado permite respaldar reputación con una interacción asistencial real. | 17 | 12 | 0 | SIN_ENTIDAD |
+| [moderation_strikes](#moderation_strikes) | Cuenta infracciones atribuidas a usuarios para aplicar medidas progresivas de moderación. | 12 | 6 | 3 | COINCIDE |
+| [party_ratings](#party_ratings) | Registra valoraciones entre pacientes, profesionales y prácticas; el vínculo opcional con un encuentro verificado permite respaldar reputación con una interacción asistencial real. | 17 | 12 | 6 | COINCIDE |
 | [poll_options](#poll_options) | Define opciones disponibles para responder una encuesta comunitaria. | 10 | 3 | 4 | COINCIDE |
 | [poll_votes](#poll_votes) | Registra votos emitidos en encuestas para resumir participación comunitaria. | 9 | 5 | 3 | COINCIDE |
 | [polls](#polls) | Representa encuestas comunitarias para recopilar respuestas no clínicas dentro de la interacción social. | 12 | 4 | 4 | COINCIDE |
@@ -40,16 +40,16 @@
 | [post_shares](#post_shares) | Registra compartidos de publicaciones para conocer cómo circula contenido público entre usuarios. | 11 | 6 | 0 | COINCIDE |
 | [prestige_awards](#prestige_awards) | Registra reconocimientos otorgados a perfiles para comunicar logros o contribuciones comunitarias. | 17 | 6 | 0 | COINCIDE |
 | [prestige_scores](#prestige_scores) | Mantiene puntajes de reputación o participación asociados a perfiles según reglas del producto. | 16 | 4 | 2 | COINCIDE |
-| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 87 | COINCIDE |
-| [reactions](#reactions) | Registra reacciones de usuarios a contenido comunitario para expresar interacción social. | 10 | 6 | 15 | COINCIDE |
-| [review_dimension_scores](#review_dimension_scores) | Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de atención. | 5 | 2 | 2 | COINCIDE |
-| [review_responses](#review_responses) | Conserva respuestas de prestadores a reseñas para sostener interacción y gestión de reputación. | 11 | 5 | 3 | COINCIDE |
-| [service_reviews](#service_reviews) | Registra reseñas sobre prestadores y servicios, con verificación de experiencia cuando corresponde y sin publicar identificadores de encuentros. | 17 | 11 | 20 | COINCIDE |
-| [social_follows](#social_follows) | Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actualizaciones públicas. | 11 | 7 | 15 | COINCIDE |
+| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 148 | COINCIDE |
+| [reactions](#reactions) | Registra reacciones de usuarios a contenido comunitario para expresar interacción social. | 10 | 6 | 16 | COINCIDE |
+| [review_dimension_scores](#review_dimension_scores) | Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de atención. | 5 | 2 | 4 | COINCIDE |
+| [review_responses](#review_responses) | Conserva respuestas de prestadores a reseñas para sostener interacción y gestión de reputación. | 11 | 5 | 4 | COINCIDE |
+| [service_reviews](#service_reviews) | Registra reseñas sobre prestadores y servicios, con verificación de experiencia cuando corresponde y sin publicar identificadores de encuentros. | 17 | 11 | 23 | COINCIDE |
+| [social_follows](#social_follows) | Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actualizaciones públicas. | 11 | 7 | 16 | COINCIDE |
 | [social_notifications](#social_notifications) | Genera avisos sobre interacciones sociales para que usuarios conozcan menciones, respuestas o actividad relevante. | 16 | 8 | 1 | COINCIDE |
-| [social_posts](#social_posts) | Conserva publicaciones públicas de profesionales y organizaciones para informar y facilitar su descubrimiento, sin incorporarlas a la historia clínica. | 16 | 10 | 21 | COINCIDE |
+| [social_posts](#social_posts) | Conserva publicaciones públicas de profesionales y organizaciones para informar y facilitar su descubrimiento, sin incorporarlas a la historia clínica. | 16 | 10 | 23 | COINCIDE |
 | [topics](#topics) | Define temas comunitarios para clasificar contenido y espacios de conversación. | 12 | 7 | 2 | COINCIDE |
-| [user_blocks](#user_blocks) | Registra bloqueos entre usuarios para controlar interacciones y seguridad en espacios comunitarios. | 10 | 6 | 16 | COINCIDE |
+| [user_blocks](#user_blocks) | Registra bloqueos entre usuarios para controlar interacciones y seguridad en espacios comunitarios. | 10 | 6 | 32 | COINCIDE |
 | [verified_badges](#verified_badges) | Representa insignias de verificación pública para indicar atributos revisados de perfiles sanitarios. | 15 | 7 | 37 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -539,28 +539,28 @@ Guarda la respuesta automática asociada a un perfil público para atender mensa
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml:594: entity chat_auto_replies {`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 15 columnas · 4 índices · 4 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `ChatAutoReplies` — `src/modules/community/entities/chat_auto_replies.entity.ts`
+- **Resumen:** 15 columnas · 4 índices · 4 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `public_profile_id` | `uuid` | Clave foránea → community.public_profiles.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `is_active` | `boolean` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `inactivity_minutes` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `body_text` | `text` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `cooldown_hours` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `only_outside_business_hours` | `boolean` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `business_hours_from` | `time` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `business_hours_to` | `time` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/community/entities/chat_auto_replies.entity.ts:17`)_ | coincide |
+| 2 | `public_profile_id` | `uuid` | Clave foránea → community.public_profiles.id; Obligatoria | De quién es esta configuración. _(JSDOC_ENTIDAD, `src/modules/community/entities/chat_auto_replies.entity.ts:23`)_ | coincide |
+| 3 | `is_active` | `boolean` | Obligatoria | Si contestar solo. Apagada, nada de lo demás importa. _(JSDOC_ENTIDAD, `src/modules/community/entities/chat_auto_replies.entity.ts:27`)_ | coincide |
+| 4 | `inactivity_minutes` | `integer` | Obligatoria | Cuántos minutos sin actividad del titular hacen falta para contestar solo. _(JSDOC_ENTIDAD, `src/modules/community/entities/chat_auto_replies.entity.ts:33`)_ | coincide |
+| 5 | `body_text` | `text` | Obligatoria | Lo que se contesta. _(JSDOC_ENTIDAD, `src/modules/community/entities/chat_auto_replies.entity.ts:37`)_ | coincide |
+| 6 | `cooldown_hours` | `integer` | Obligatoria | Cuántas horas esperar antes de volver a avisarle a la misma conversación. _(JSDOC_ENTIDAD, `src/modules/community/entities/chat_auto_replies.entity.ts:43`)_ | coincide |
+| 7 | `only_outside_business_hours` | `boolean` | Obligatoria | Si sólo contestar fuera de la franja declarada abajo. _(JSDOC_ENTIDAD, `src/modules/community/entities/chat_auto_replies.entity.ts:47`)_ | coincide |
+| 8 | `business_hours_from` | `time` | Opcional | Desde qué hora atiende, `HH:MM`. `columnType: 'time'` y no una fecha: es una hora del día, sin día ni zona. Viaja como texto, que es lo que devuelve Postgres para `time`. _(JSDOC_ENTIDAD, `src/modules/community/entities/chat_auto_replies.entity.ts:56`)_ | coincide |
+| 9 | `business_hours_to` | `time` | Opcional | Hasta qué hora atiende, `HH:MM`. **Puede ser menor que `businessHoursFrom`**: eso significa que la franja cruza la medianoche, que es el turno noche y no un error. _(JSDOC_ENTIDAD, `src/modules/community/entities/chat_auto_replies.entity.ts:69`)_ | coincide |
+| 10 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/community/entities/chat_auto_replies.entity.ts:85`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/community/entities/chat_auto_replies.entity.ts:91`)_ | coincide |
+| 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/community/entities/chat_auto_replies.entity.ts:109`)_ | coincide |
 
 #### Relaciones
 
@@ -575,7 +575,7 @@ Guarda la respuesta automática asociada a un perfil público para atender mensa
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ux_chat_auto_replies_public_profile_id` | sí | public_profile_id | Garantiza que no se repita la combinación (public_profile_id) _(DOCUMENTO)_; Soporta la clave foránea fk_chat_auto_replies_public_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_chat_auto_replies_public_profile_id` | sí | public_profile_id | Garantiza que no se repita la combinación (public_profile_id) _(DOCUMENTO)_; Soporta la clave foránea fk_chat_auto_replies_public_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «public_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_chat_auto_replies_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_chat_auto_replies_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_chat_auto_replies_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_chat_auto_replies_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_chat_auto_replies_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_chat_auto_replies_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -588,7 +588,12 @@ Guarda la respuesta automática asociada a un perfil público para atender mensa
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| GET /community/profiles/{profileId}/auto-reply | LEE | DIRECTA |
+| PUT /community/profiles/{profileId}/auto-reply | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -612,21 +617,21 @@ Vincula archivos multimedia con comentarios de la comunidad, para adjuntar evide
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml:1511: entity comment_media {`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 8 columnas · 4 índices · 4 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `CommentMedia` — `src/modules/community/entities/comment_media.entity.ts`
+- **Resumen:** 8 columnas · 4 índices · 4 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `comment_id` | `uuid` | Clave foránea → community.comments.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `file_id` | `uuid` | Clave foránea → common.files.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `media_role_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `alt_text` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `ordinal` | `integer` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/community/entities/comment_media.entity.ts:14`)_ | coincide |
+| 2 | `comment_id` | `uuid` | Clave foránea → community.comments.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `file_id` | `uuid` | Clave foránea → common.files.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `media_role_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `alt_text` | `varchar` | Opcional | _sin dato_ | coincide |
+| 6 | `ordinal` | `integer` | Opcional | _sin dato_ | coincide |
+| 7 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/community/entities/comment_media.entity.ts:50`)_ | coincide |
+| 8 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -641,14 +646,21 @@ Vincula archivos multimedia con comentarios de la comunidad, para adjuntar evide
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_comment_media_comment_id` | no | comment_id | Soporta la clave foránea fk_comment_media_comment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_comment_media_file_id` | no | file_id | Soporta la clave foránea fk_comment_media_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_comment_media_comment_id` | no | comment_id | Soporta la clave foránea fk_comment_media_comment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «comment_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_comment_media_file_id` | no | file_id | Soporta la clave foránea fk_comment_media_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «file_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_comment_media_media_role_concept_id` | no | media_role_concept_id | Soporta la clave foránea fk_comment_media_media_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_comment_media_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_comment_media_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /community/comments | CREA | DIRECTA |
+| GET /community/comments/media/{fileId}/content | LEE | DIRECTA |
+| GET /community/posts/{postId}/comments | LEE | DIRECTA |
+| GET /public/comments/{commentId}/replies | LEE | POR_SQL |
+| GET /public/media/{id} | LEE | POR_SQL |
+| GET /public/posts/{postId}/comments | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -673,7 +685,7 @@ Almacena comentarios sobre publicaciones o conversaciones comunitarias para habi
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: comments`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `Comments` — `src/modules/community/entities/comments.entity.ts`
-- **Resumen:** 20 columnas · 11 índices · 8 FK salientes · 4 entrantes · 20 operaciones
+- **Resumen:** 20 columnas · 11 índices · 8 FK salientes · 4 entrantes · 23 operaciones
 
 #### Columnas
 
@@ -740,6 +752,7 @@ Almacena comentarios sobre publicaciones o conversaciones comunitarias para habi
 | POST /community/comments | ACTUALIZA | POR_TIPO |
 | POST /community/comments | CREA | DIRECTA |
 | POST /community/comments | LEE | DIRECTA |
+| GET /community/comments/media/{fileId}/content | LEE | DIRECTA |
 | GET /community/feed | LEE | POR_SQL |
 | GET /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /community/groups/{groupId}/posts | ACTUALIZA | POR_TIPO |
@@ -749,10 +762,12 @@ Almacena comentarios sobre publicaciones o conversaciones comunitarias para habi
 | GET /community/posts/{postId}/comments | LEE | DIRECTA |
 | GET /community/profiles/{profileId}/posts | LEE | POR_SQL |
 | GET /f/{slug} | LEE | POR_SQL |
+| GET /internal/community/feed/ranking/pending | LEE | POR_SQL |
 | GET /l/{slug} | LEE | POR_SQL |
 | GET /o/{slug} | LEE | POR_SQL |
 | GET /p/{slug} | LEE | POR_SQL |
 | GET /public/comments/{commentId}/replies | LEE | POR_SQL |
+| GET /public/media/{id} | LEE | POR_SQL |
 | GET /public/posts | LEE | POR_SQL |
 | GET /public/posts/{postId}/comments | LEE | POR_SQL |
 | GET /public/profiles/{prefijo}/{slug} | LEE | POR_SQL |
@@ -916,7 +931,7 @@ Relaciona usuarios con conversaciones para controlar participantes y acceso a me
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: conversation_participants`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ConversationParticipants` — `src/modules/community/entities/conversation_participants.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 7 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 17 columnas · 8 índices · 7 FK salientes · 0 entrantes · 40 operaciones
 
 #### Columnas
 
@@ -929,16 +944,16 @@ Relaciona usuarios con conversaciones para controlar participantes y acceso a me
 | 5 | `joined_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 6 | `last_read_message_id` | `uuid` | Clave foránea → community.direct_messages.id; Opcional | _sin dato_ | coincide |
 | 7 | `muted_until` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 8 | `last_auto_reply_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 9 | `is_favorite` | `boolean = false` | Obligatoria | _sin dato_ | **AUSENTE_EN_ORM** |
-| 10 | `is_pinned` | `boolean = false` | Obligatoria | _sin dato_ | **AUSENTE_EN_ORM** |
-| 11 | `archived_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 8 | `last_auto_reply_at` | `timestamptz` | Opcional | Cuándo se mandó la última respuesta automática en esta conversación (F4.7). Es la marca del descanso entre avisos, y vive en la fila del participante **que responde**: eso la hace única por (conversación, perfil) sin una tabla de bitácora que diría lo mismo con un join. _(JSDOC_ENTIDAD, `src/modules/community/entities/conversation_participants.entity.ts:66`)_ | coincide |
+| 9 | `is_favorite` | `boolean = false` | Obligatoria | Marcada como favorita por este participante (F4.4). _(JSDOC_ENTIDAD, `src/modules/community/entities/conversation_participants.entity.ts:74`)_ | coincide |
+| 10 | `is_pinned` | `boolean = false` | Obligatoria | Fijada arriba de la bandeja de este participante (F4.4). _(JSDOC_ENTIDAD, `src/modules/community/entities/conversation_participants.entity.ts:78`)_ | coincide |
+| 11 | `archived_at` | `timestamptz` | Opcional | Desde cuándo la archivó este participante; `null` si no está archivada. _(JSDOC_ENTIDAD, `src/modules/community/entities/conversation_participants.entity.ts:82`)_ | coincide |
 | 12 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/community/entities/conversation_participants.entity.ts:68`)_ | coincide |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/community/entities/conversation_participants.entity.ts:74`)_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/community/entities/conversation_participants.entity.ts:98`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/community/entities/conversation_participants.entity.ts:104`)_ | coincide |
 | 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/community/entities/conversation_participants.entity.ts:92`)_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/community/entities/conversation_participants.entity.ts:122`)_ | coincide |
 
 #### Relaciones
 
@@ -956,9 +971,9 @@ Relaciona usuarios con conversaciones para controlar participantes y acceso a me
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_conversation_participants_profile_pinned` | no | participant_profile_id, is_pinned donde WHERE is_pinned | Soporta la clave foránea fk_conversation_participants_participant_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE is_pinned _(ESTRUCTURAL)_; 4 consulta(s) de repositorio filtran u ordenan por «participant_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_conversation_participants_conversation_id` | no | conversation_id | Soporta la clave foránea fk_conversation_participants_conversation_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «conversation_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_conversation_participants_participant_profile_id` | no | participant_profile_id | Soporta la clave foránea fk_conversation_participants_participant_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «participant_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_conversation_participants_profile_pinned` | no | participant_profile_id, is_pinned donde WHERE is_pinned | Soporta la clave foránea fk_conversation_participants_participant_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE is_pinned _(ESTRUCTURAL)_; 6 consulta(s) de repositorio filtran u ordenan por «participant_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_conversation_participants_conversation_id` | no | conversation_id | Soporta la clave foránea fk_conversation_participants_conversation_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «conversation_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_conversation_participants_participant_profile_id` | no | participant_profile_id | Soporta la clave foránea fk_conversation_participants_participant_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «participant_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_conversation_participants_role_concept_id` | no | role_concept_id | Soporta la clave foránea fk_conversation_participants_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_conversation_participants_last_read_message_id` | no | last_read_message_id | Soporta la clave foránea fk_conversation_participants_last_read_message_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_conversation_participants_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_conversation_participants_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
@@ -972,10 +987,43 @@ Relaciona usuarios con conversaciones para controlar participantes y acceso a me
 | GET /community/conversations | LEE | DIRECTA |
 | POST /community/conversations | CREA | DIRECTA |
 | POST /community/conversations | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/attachments/{fileId}/content | LEE | DIRECTA |
 | GET /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/messages | ACTUALIZA | POR_TIPO |
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PATCH /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PATCH /community/conversations/{conversationId}/participant | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/pin | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/presence | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/read | ACTUALIZA | POR_TIPO |
 | POST /community/conversations/{conversationId}/read | LEE | DIRECTA |
+| POST /insurance/patients/conversation | CREA | DIRECTA |
+| POST /insurance/patients/conversation | LEE | DIRECTA |
+| POST /scheduling/appointments/direct | CREA | DIRECTA |
+| POST /scheduling/appointments/direct | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reject | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/reject | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | CREA | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | CREA | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | CREA | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/delay | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1000,7 +1048,7 @@ Representa conversaciones comunitarias entre usuarios para habilitar comunicaci�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: conversations`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `Conversations` — `src/modules/community/entities/conversations.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 3 entrantes · 7 operaciones
+- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 3 entrantes · 38 operaciones
 
 #### Columnas
 
@@ -1012,13 +1060,13 @@ Representa conversaciones comunitarias entre usuarios para habilitar comunicaci�
 | 4 | `group_id` | `uuid` | Clave foránea → community.groups.id; Opcional | _sin dato_ | coincide |
 | 5 | `last_message_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 6 | `message_count` | `integer` | Opcional | _sin dato_ | coincide |
-| 7 | `pinned_message_id` | `uuid` | Clave foránea → community.direct_messages.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 7 | `pinned_message_id` | `uuid` | Clave foránea → community.direct_messages.id; Opcional | El mensaje fijado en la barra superior del hilo, si hay uno (F4.6). Es de la conversación y no de un lado: lo ven todos los participantes. _(JSDOC_ENTIDAD, `src/modules/community/entities/conversations.entity.ts:53`)_ | coincide |
 | 8 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 9 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/community/entities/conversations.entity.ts:58`)_ | coincide |
-| 10 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/community/entities/conversations.entity.ts:64`)_ | coincide |
+| 9 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/community/entities/conversations.entity.ts:65`)_ | coincide |
+| 10 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/community/entities/conversations.entity.ts:71`)_ | coincide |
 | 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 13 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/community/entities/conversations.entity.ts:82`)_ | coincide |
+| 13 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/community/entities/conversations.entity.ts:89`)_ | coincide |
 
 #### Relaciones
 
@@ -1058,7 +1106,38 @@ Representa conversaciones comunitarias entre usuarios para habilitar comunicaci�
 | GET /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/messages | ACTUALIZA | POR_TIPO |
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/messages/{messageId} | ACTUALIZA | POR_TIPO |
+| DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/pin | ACTUALIZA | POR_TIPO |
+| DELETE /community/conversations/{conversationId}/pin | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/pin | ACTUALIZA | POR_TIPO |
+| POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/read | LEE | DIRECTA |
+| POST /insurance/patients/conversation | CREA | DIRECTA |
+| POST /insurance/patients/conversation | LEE | DIRECTA |
+| POST /scheduling/appointments/direct | CREA | DIRECTA |
+| POST /scheduling/appointments/direct | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reject | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/reject | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | CREA | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | CREA | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | CREA | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/delay | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1083,7 +1162,7 @@ Conserva mensajes directos entre usuarios para la comunicación privada del prod
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: direct_messages`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `DirectMessages` — `src/modules/community/entities/direct_messages.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 4 entrantes · 4 operaciones
+- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 4 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -1127,11 +1206,11 @@ Conserva mensajes directos entre usuarios para la comunicación privada del prod
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_direct_messages_conversation_id` | no | conversation_id | Soporta la clave foránea fk_direct_messages_conversation_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «conversation_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_direct_messages_conversation_id` | no | conversation_id | Soporta la clave foránea fk_direct_messages_conversation_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «conversation_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_direct_messages_sender_profile_id` | no | sender_profile_id | Soporta la clave foránea fk_direct_messages_sender_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_direct_messages_reply_to_message_id` | no | reply_to_message_id | Soporta la clave foránea fk_direct_messages_reply_to_message_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_direct_messages_content_type_concept_id` | no | content_type_concept_id | Soporta la clave foránea fk_direct_messages_content_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_direct_messages_attachment_file_id` | no | attachment_file_id | Soporta la clave foránea fk_direct_messages_attachment_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_direct_messages_attachment_file_id` | no | attachment_file_id | Soporta la clave foránea fk_direct_messages_attachment_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «attachment_file_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_direct_messages_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_direct_messages_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_direct_messages_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_direct_messages_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_direct_messages_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_direct_messages_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1142,9 +1221,18 @@ Conserva mensajes directos entre usuarios para la comunicación privada del prod
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /community/conversations | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/attachments/{fileId}/content | LEE | DIRECTA |
 | GET /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/messages | CREA | DIRECTA |
+| POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/messages/{messageId} | ACTUALIZA | POR_TIPO |
+| DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PATCH /community/conversations/{conversationId}/messages/{messageId} | ACTUALIZA | POR_TIPO |
+| PATCH /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/read | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1169,7 +1257,7 @@ Compone elementos del feed para presentar publicaciones relevantes a cada usuari
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: feed_items`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `FeedItems` — `src/modules/community/entities/feed_items.entity.ts`
-- **Resumen:** 15 columnas · 6 índices · 6 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 15 columnas · 6 índices · 6 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -1219,6 +1307,8 @@ Compone elementos del feed para presentar publicaciones relevantes a cada usuari
 |---|---|---|
 | GET /community/feed | LEE | DIRECTA |
 | GET /internal/community/feed/pending | LEE | DIRECTA |
+| POST /internal/community/feed/ranking/apply | ACTUALIZA | DIRECTA |
+| GET /internal/community/feed/ranking/pending | LEE | DIRECTA |
 | POST /internal/community/feed/rebuild | CREA | DIRECTA |
 | POST /internal/community/feed/rebuild | LEE | DIRECTA |
 
@@ -1521,10 +1611,10 @@ Asocia usuarios a grupos para administrar membresía, participación y alcance d
 | POST /community/groups/{groupId}/members | ACTUALIZA | POR_TIPO |
 | POST /community/groups/{groupId}/members | CREA | DIRECTA |
 | POST /community/groups/{groupId}/members | LEE | DIRECTA |
-| PATCH /community/groups/{groupId}/members/{memberId} | ACTUALIZA | POR_TIPO |
-| PATCH /community/groups/{groupId}/members/{memberId} | LEE | DIRECTA |
-| DELETE /community/groups/{groupId}/members/{memberProfileId} | ACTUALIZA | POR_TIPO |
-| DELETE /community/groups/{groupId}/members/{memberProfileId} | LEE | DIRECTA |
+| DELETE /community/groups/{groupId}/members/{member} | ACTUALIZA | POR_TIPO |
+| DELETE /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
+| PATCH /community/groups/{groupId}/members/{member} | ACTUALIZA | POR_TIPO |
+| PATCH /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
 | GET /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 
@@ -1629,9 +1719,9 @@ Representa grupos comunitarios que reúnen usuarios alrededor de intereses o ár
 | GET /community/groups/{groupId}/members | LEE | DIRECTA |
 | POST /community/groups/{groupId}/members | ACTUALIZA | POR_TIPO |
 | POST /community/groups/{groupId}/members | LEE | DIRECTA |
-| PATCH /community/groups/{groupId}/members/{memberId} | LEE | DIRECTA |
-| DELETE /community/groups/{groupId}/members/{memberProfileId} | ACTUALIZA | POR_TIPO |
-| DELETE /community/groups/{groupId}/members/{memberProfileId} | LEE | DIRECTA |
+| DELETE /community/groups/{groupId}/members/{member} | ACTUALIZA | POR_TIPO |
+| DELETE /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
+| PATCH /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
 | GET /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 
@@ -1804,7 +1894,7 @@ Registra estados de recepción o lectura de mensajes directos para dar seguimien
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: message_receipts`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `MessageReceipts` — `src/modules/community/entities/message_receipts.entity.ts`
-- **Resumen:** 7 columnas · 5 índices · 4 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 7 columnas · 5 índices · 4 FK salientes · 0 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -1843,6 +1933,7 @@ Registra estados de recepción o lectura de mensajes directos para dar seguimien
 |---|---|---|
 | POST /community/conversations/{conversationId}/messages | CREA | DIRECTA |
 | POST /community/conversations/{conversationId}/read | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -1867,7 +1958,7 @@ Gestiona apelaciones de usuarios a decisiones de moderación para habilitar revi
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: moderation_appeals`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ModerationAppeals` — `src/modules/community/entities/moderation_appeals.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 7 FK salientes · 0 entrantes · 5 operaciones
+- **Resumen:** 13 columnas · 7 índices · 7 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -1920,6 +2011,7 @@ Gestiona apelaciones de usuarios a decisiones de moderación para habilitar revi
 | POST /community/moderation/appeals/{appealId}/resolve | LEE | DIRECTA |
 | POST /community/moderation/decisions/{decisionId}/appeal | CREA | DIRECTA |
 | POST /community/moderation/decisions/{decisionId}/appeal | LEE | DIRECTA |
+| GET /community/moderation/decisions/mine | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1944,7 +2036,7 @@ Preserva decisiones de moderación para explicar acciones tomadas sobre contenid
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: moderation_decisions`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ModerationDecisions` — `src/modules/community/entities/moderation_decisions.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 7 FK salientes · 3 entrantes · 5 operaciones
+- **Resumen:** 13 columnas · 7 índices · 7 FK salientes · 3 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -1999,6 +2091,7 @@ Preserva decisiones de moderación para explicar acciones tomadas sobre contenid
 | POST /community/moderation/appeals/{appealId}/resolve | LEE | DIRECTA |
 | GET /community/moderation/decisions | LEE | DIRECTA |
 | POST /community/moderation/decisions/{decisionId}/appeal | LEE | DIRECTA |
+| GET /community/moderation/decisions/mine | LEE | DIRECTA |
 | POST /community/moderation/queue/{queueId}/decision | CREA | DIRECTA |
 
 #### Gobierno
@@ -2114,7 +2207,7 @@ Cuenta infracciones atribuidas a usuarios para aplicar medidas progresivas de mo
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: moderation_strikes`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ModerationStrikes` — `src/modules/community/entities/moderation_strikes.entity.ts`
-- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 0 entrantes · 1 operaciones
+- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 0 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -2148,8 +2241,8 @@ Cuenta infracciones atribuidas a usuarios para aplicar medidas progresivas de mo
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_moderation_strikes_subject_profile_id` | no | subject_profile_id | Soporta la clave foránea fk_moderation_strikes_subject_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_moderation_strikes_moderation_decision_id` | no | moderation_decision_id | Soporta la clave foránea fk_moderation_strikes_moderation_decision_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_moderation_strikes_subject_profile_id` | no | subject_profile_id | Soporta la clave foránea fk_moderation_strikes_subject_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «subject_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_moderation_strikes_moderation_decision_id` | no | moderation_decision_id | Soporta la clave foránea fk_moderation_strikes_moderation_decision_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «moderation_decision_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_moderation_strikes_severity_concept_id` | no | severity_concept_id | Soporta la clave foránea fk_moderation_strikes_severity_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_moderation_strikes_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_moderation_strikes_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_moderation_strikes_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_moderation_strikes_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2159,6 +2252,8 @@ Cuenta infracciones atribuidas a usuarios para aplicar medidas progresivas de mo
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /community/moderation/decisions/{decisionId}/appeal | LEE | DIRECTA |
+| GET /community/moderation/decisions/mine | LEE | DIRECTA |
 | POST /community/moderation/queue/{queueId}/decision | CREA | DIRECTA |
 
 #### Gobierno
@@ -2183,30 +2278,30 @@ Registra valoraciones entre pacientes, profesionales y prácticas; el vínculo o
 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml:157: entity party_ratings {`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
-- **Entidad del ORM:** **sin entidad** (deriva)
-- **Resumen:** 17 columnas · 12 índices · 11 FK salientes · 0 entrantes · 0 operaciones
+- **Entidad del ORM:** `PartyRatings` — `src/modules/community/entities/party_ratings.entity.ts`
+- **Resumen:** 17 columnas · 12 índices · 11 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 2 | `reviewer_patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 3 | `reviewer_practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Parte de la restricción única uq_party_ratings_basis; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 4 | `reviewer_practice_id` | `uuid` | Clave foránea → practice.practices.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 5 | `target_patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 6 | `target_practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Parte de la restricción única uq_party_ratings_basis; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 7 | `target_practice_id` | `uuid` | Clave foránea → practice.practices.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 8 | `verified_encounter_id` | `uuid` | Clave foránea → clinical.encounters.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 9 | `verified_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 10 | `overall_rating` | `smallint` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 11 | `comment_text` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 12 | `moderation_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
-| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
-| 17 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `reviewer_patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Opcional | _sin dato_ | coincide |
+| 3 | `reviewer_practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Parte de la restricción única uq_party_ratings_basis; Opcional | _sin dato_ | coincide |
+| 4 | `reviewer_practice_id` | `uuid` | Clave foránea → practice.practices.id; Opcional | _sin dato_ | coincide |
+| 5 | `target_patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Opcional | _sin dato_ | coincide |
+| 6 | `target_practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Parte de la restricción única uq_party_ratings_basis; Opcional | _sin dato_ | coincide |
+| 7 | `target_practice_id` | `uuid` | Clave foránea → practice.practices.id; Opcional | _sin dato_ | coincide |
+| 8 | `verified_encounter_id` | `uuid` | Clave foránea → clinical.encounters.id; Opcional | _sin dato_ | coincide |
+| 9 | `verified_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Opcional | _sin dato_ | coincide |
+| 10 | `overall_rating` | `smallint` | Obligatoria | _sin dato_ | coincide |
+| 11 | `comment_text` | `text` | Opcional | _sin dato_ | coincide |
+| 12 | `moderation_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
 
 #### Relaciones
 
@@ -2234,9 +2329,9 @@ Registra valoraciones entre pacientes, profesionales y prácticas; el vínculo o
 | `ix_party_ratings_target_patient_profile_id` | no | target_patient_profile_id | Soporta la clave foránea fk_party_ratings_target_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_party_ratings_target_practitioner_profile_id` | no | target_practitioner_profile_id | Soporta la clave foránea fk_party_ratings_target_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_party_ratings_target_practice_id` | no | target_practice_id | Soporta la clave foránea fk_party_ratings_target_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_party_ratings_verified_encounter_id` | no | verified_encounter_id | Soporta la clave foránea fk_party_ratings_verified_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_party_ratings_verified_role_assignment_id` | no | verified_role_assignment_id | Soporta la clave foránea fk_party_ratings_verified_role_assignment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_party_ratings_moderation_status_concept_id` | no | moderation_status_concept_id | Soporta la clave foránea fk_party_ratings_moderation_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_party_ratings_verified_encounter_id` | no | verified_encounter_id | Soporta la clave foránea fk_party_ratings_verified_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «verified_encounter_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_party_ratings_verified_role_assignment_id` | no | verified_role_assignment_id | Soporta la clave foránea fk_party_ratings_verified_role_assignment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «verified_role_assignment_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_party_ratings_moderation_status_concept_id` | no | moderation_status_concept_id | Soporta la clave foránea fk_party_ratings_moderation_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «moderation_status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_party_ratings_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_party_ratings_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_party_ratings_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_party_ratings_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `uq_party_ratings_basis` | sí | (coalesce(reviewer_patient_profile_id, reviewer_practitioner_profile_id, reviewer_practice_id)), (coalesce(target_patient_profile_id, target_practitioner_profile_id, target_practice_id)), (coalesce(verified_encounter_id, verified_role_assignment_id)) | Garantiza que no se repita la combinación (coalesce(reviewer_patient_profile_id, reviewer_practitioner_profile_id, reviewer_practice_id), coalesce(target_patient_profile_id, target_practitioner_profile_id, target_practice_id), coalesce(verified_encounter_id, verified_role_assignment_id)) _(DOCUMENTO)_ |
@@ -2249,7 +2344,14 @@ Registra valoraciones entre pacientes, profesionales y prácticas; el vínculo o
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /community/ratings | LEE | DIRECTA |
+| PUT /community/ratings | ACTUALIZA | POR_TIPO |
+| PUT /community/ratings | CREA | DIRECTA |
+| PUT /community/ratings | LEE | DIRECTA |
+| GET /community/ratings/mine | LEE | DIRECTA |
+| GET /community/ratings/summary | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2778,7 +2880,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: public_profiles; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `PublicProfiles` — `src/modules/community/entities/public_profiles.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 87 operaciones
+- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 148 operaciones
 
 #### Columnas
 
@@ -2857,7 +2959,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 |---|---|---|---|
 | `uq_public_profiles_slug` | sí | slug | Garantiza que no se repita la combinación (slug) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «slug», la primera columna del índice _(CONSULTA)_ |
 | `ix_public_profiles_tenant_id` | no | tenant_id | Soporta la clave foránea fk_public_profiles_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_public_profiles_target_type_concept_id` | no | target_type_concept_id | Soporta la clave foránea fk_public_profiles_target_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «target_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_public_profiles_target_type_concept_id` | no | target_type_concept_id | Soporta la clave foránea fk_public_profiles_target_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «target_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_public_profiles_avatar_file_id` | no | avatar_file_id | Soporta la clave foránea fk_public_profiles_avatar_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_cover_file_id` | no | cover_file_id | Soporta la clave foránea fk_public_profiles_cover_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_public_profiles_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2885,9 +2987,20 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | GET /community/bookmarks | LEE | DIRECTA |
 | POST /community/bookmarks | LEE | DIRECTA |
 | POST /community/comments | LEE | DIRECTA |
+| GET /community/comments/media/{fileId}/content | LEE | DIRECTA |
 | GET /community/conversations | LEE | DIRECTA |
+| POST /community/conversations | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/attachments/{fileId}/content | LEE | DIRECTA |
 | GET /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PATCH /community/conversations/{conversationId}/messages/{messageId} | LEE | DIRECTA |
+| PATCH /community/conversations/{conversationId}/participant | LEE | DIRECTA |
+| DELETE /community/conversations/{conversationId}/pin | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/pin | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/presence | LEE | DIRECTA |
+| POST /community/conversations/{conversationId}/read | LEE | DIRECTA |
+| POST /community/conversations/contacts/search | LEE | DIRECTA |
 | GET /community/feed | LEE | DIRECTA |
 | DELETE /community/follows | LEE | DIRECTA |
 | GET /community/follows | LEE | DIRECTA |
@@ -2895,17 +3008,20 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | POST /community/groups | LEE | DIRECTA |
 | GET /community/groups/{groupId} | LEE | DIRECTA |
 | GET /community/groups/{groupId}/members | LEE | DIRECTA |
-| PATCH /community/groups/{groupId}/members/{memberId} | LEE | DIRECTA |
-| DELETE /community/groups/{groupId}/members/{memberProfileId} | LEE | DIRECTA |
+| DELETE /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
+| PATCH /community/groups/{groupId}/members/{member} | LEE | DIRECTA |
 | GET /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /community/groups/{groupId}/posts | LEE | DIRECTA |
 | POST /community/moderation/decisions/{decisionId}/appeal | LEE | DIRECTA |
+| GET /community/moderation/decisions/mine | LEE | DIRECTA |
 | GET /community/notifications | LEE | DIRECTA |
 | GET /community/polls/{pollId} | LEE | DIRECTA |
 | GET /community/posts/{postId} | LEE | DIRECTA |
 | GET /community/posts/{postId}/comments | LEE | DIRECTA |
 | GET /community/posts/{postId}/reactions | LEE | DIRECTA |
 | GET /community/profiles/{profileId} | LEE | DIRECTA |
+| GET /community/profiles/{profileId}/auto-reply | LEE | DIRECTA |
+| PUT /community/profiles/{profileId}/auto-reply | LEE | DIRECTA |
 | GET /community/profiles/{profileId}/posts | LEE | DIRECTA |
 | POST /community/profiles/{profileId}/posts | LEE | DIRECTA |
 | GET /community/profiles/{profileId}/reviews | LEE | DIRECTA |
@@ -2930,6 +3046,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | GET /l/{slug} | LEE | DIRECTA |
 | GET /o/{slug} | LEE | DIRECTA |
 | GET /p/{slug} | LEE | DIRECTA |
+| POST /patients/me/reviews | LEE | DIRECTA |
 | GET /public/comments/{commentId}/replies | LEE | POR_SQL |
 | GET /public/media/{id} | LEE | DIRECTA |
 | GET /public/nearby | LEE | DIRECTA |
@@ -2937,6 +3054,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | GET /public/posts/{postId}/comments | LEE | POR_SQL |
 | GET /public/posts/{postId}/reactions | LEE | POR_SQL |
 | GET /public/profiles/{prefijo}/{slug} | LEE | DIRECTA |
+| GET /public/profiles/{prefijo}/{slug}/reviews | LEE | DIRECTA |
 | GET /public/search | LEE | DIRECTA |
 | GET /public/search/diagnostic-units | LEE | DIRECTA |
 | GET /public/search/insurers | LEE | DIRECTA |
@@ -2945,12 +3063,19 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | GET /public/search/pharmacies | LEE | DIRECTA |
 | GET /public/search/practitioners | LEE | DIRECTA |
 | GET /s/{slug} | LEE | DIRECTA |
+| POST /diagnostic-units/{id}/verify-and-publish | ACTUALIZA | POR_TIPO |
 | POST /diagnostic-units/{id}/verify-and-publish | CREA | DIRECTA |
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
 | PUT /admin/tenants/{tenantId}/public-profile | ACTUALIZA | POR_TIPO |
 | PUT /admin/tenants/{tenantId}/public-profile | LEE | DIRECTA |
+| POST /admin/tenants/{tenantId}/verification | ACTUALIZA | POR_TIPO |
 | POST /admin/tenants/{tenantId}/verification | CREA | DIRECTA |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
+| GET /tenants/{tenantId}/logo | LEE | DIRECTA |
+| PUT /tenants/{tenantId}/logo | ACTUALIZA | POR_TIPO |
+| PUT /tenants/{tenantId}/logo | CREA | DIRECTA |
+| PUT /tenants/{tenantId}/logo | LEE | DIRECTA |
+| GET /tenants/{tenantId}/logo/content | LEE | DIRECTA |
 | POST /identity/assertions/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /identity/assertions/{id}/revoke | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
@@ -2961,10 +3086,48 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | POST /identity/verification-cases/expire-sweep | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
+| POST /insurance/patients/conversation | LEE | DIRECTA |
+| POST /insurance/patients/search | LEE | POR_SQL |
 | POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | CREA | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | LEE | DIRECTA |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
+| GET /practitioners/me/role-assignments | LEE | DIRECTA |
+| GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
+| GET /public/profiles/o/{slug}/services | LEE | POR_SQL |
+| POST /scheduling/appointments/direct | ACTUALIZA | POR_TIPO |
+| POST /scheduling/appointments/direct | CREA | DIRECTA |
+| POST /scheduling/appointments/direct | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/cancel | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/delay | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reject | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/reject | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/reject | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/reschedule | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | ACTUALIZA | POR_TIPO |
+| POST /scheduling/holds/{holdToken}/request | CREA | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | ACTUALIZA | POR_TIPO |
+| POST /scheduling/internal/dispatch-reminders | CREA | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | ACTUALIZA | POR_TIPO |
+| POST /scheduling/internal/promote-waitlist/{slotId} | CREA | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/delay | ACTUALIZA | POR_TIPO |
+| POST /scheduling/resources/{id}/delay | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | ACTUALIZA | POR_TIPO |
+| POST /scheduling/resources/{id}/shift-slots | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2989,7 +3152,7 @@ Registra reacciones de usuarios a contenido comunitario para expresar interacci�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: reactions`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `Reactions` — `src/modules/community/entities/reactions.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 5 FK salientes · 0 entrantes · 15 operaciones
+- **Resumen:** 10 columnas · 6 índices · 5 FK salientes · 0 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -3045,6 +3208,7 @@ Registra reacciones de usuarios a contenido comunitario para expresar interacci�
 | PUT /community/reactions | CREA | DIRECTA |
 | PUT /community/reactions | LEE | DIRECTA |
 | GET /f/{slug} | LEE | POR_SQL |
+| GET /internal/community/feed/ranking/pending | LEE | POR_SQL |
 | GET /l/{slug} | LEE | POR_SQL |
 | GET /o/{slug} | LEE | POR_SQL |
 | GET /p/{slug} | LEE | POR_SQL |
@@ -3076,7 +3240,7 @@ Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: review_dimension_scores`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ReviewDimensionScores` — `src/modules/community/entities/review_dimension_scores.entity.ts`
-- **Resumen:** 5 columnas · 2 índices · 2 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 5 columnas · 2 índices · 2 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -3108,6 +3272,8 @@ Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de 
 |---|---|---|
 | GET /community/profiles/{profileId}/reviews | LEE | DIRECTA |
 | POST /community/profiles/{profileId}/reviews | CREA | DIRECTA |
+| POST /patients/me/reviews | CREA | DIRECTA |
+| GET /public/profiles/{prefijo}/{slug}/reviews | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -3132,7 +3298,7 @@ Conserva respuestas de prestadores a reseñas para sostener interacción y gesti
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: review_responses`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ReviewResponses` — `src/modules/community/entities/review_responses.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -3177,6 +3343,7 @@ Conserva respuestas de prestadores a reseñas para sostener interacción y gesti
 | GET /community/profiles/{profileId}/reviews | LEE | DIRECTA |
 | POST /community/profiles/{profileId}/reviews/{reviewId}/responses | CREA | DIRECTA |
 | POST /community/profiles/{profileId}/reviews/{reviewId}/responses | LEE | DIRECTA |
+| GET /public/profiles/{prefijo}/{slug}/reviews | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -3201,7 +3368,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: service_reviews; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ServiceReviews` — `src/modules/community/entities/service_reviews.entity.ts`
-- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 3 entrantes · 20 operaciones
+- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 3 entrantes · 23 operaciones
 
 #### Columnas
 
@@ -3251,7 +3418,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 | `ix_service_reviews_verified_encounter_id` | no | verified_encounter_id | Soporta la clave foránea fk_service_reviews_verified_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «verified_encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_reviews_reviewer_display_mode_concept_id` | no | reviewer_display_mode_concept_id | Soporta la clave foránea fk_service_reviews_reviewer_display_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_reviews_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_service_reviews_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_service_reviews_moderation_status_concept_id` | no | moderation_status_concept_id | Soporta la clave foránea fk_service_reviews_moderation_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_service_reviews_moderation_status_concept_id` | no | moderation_status_concept_id | Soporta la clave foránea fk_service_reviews_moderation_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «moderation_status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_reviews_publication_status_concept_id` | no | publication_status_concept_id | Soporta la clave foránea fk_service_reviews_publication_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «publication_status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_reviews_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_service_reviews_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_reviews_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_service_reviews_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3277,8 +3444,11 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 | GET /l/{slug} | LEE | POR_SQL |
 | GET /o/{slug} | LEE | POR_SQL |
 | GET /p/{slug} | LEE | POR_SQL |
+| POST /patients/me/reviews | CREA | DIRECTA |
+| POST /patients/me/reviews | LEE | DIRECTA |
 | GET /public/nearby | LEE | POR_SQL |
 | GET /public/profiles/{prefijo}/{slug} | LEE | POR_SQL |
+| GET /public/profiles/{prefijo}/{slug}/reviews | LEE | DIRECTA |
 | GET /public/search | LEE | POR_SQL |
 | GET /public/search/diagnostic-units | LEE | POR_SQL |
 | GET /public/search/insurers | LEE | POR_SQL |
@@ -3312,7 +3482,7 @@ Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actual
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: social_follows`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `SocialFollows` — `src/modules/community/entities/social_follows.entity.ts`
-- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 0 entrantes · 15 operaciones
+- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 0 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -3365,6 +3535,7 @@ Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actual
 |---|---|---|
 | POST /community/blocks | ACTUALIZA | POR_TIPO |
 | POST /community/blocks | LEE | DIRECTA |
+| GET /community/comments/media/{fileId}/content | LEE | DIRECTA |
 | GET /community/feed | LEE | DIRECTA |
 | DELETE /community/follows | ACTUALIZA | POR_TIPO |
 | DELETE /community/follows | LEE | DIRECTA |
@@ -3480,7 +3651,7 @@ Conserva publicaciones públicas de profesionales y organizaciones para informar
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: social_posts; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `SocialPosts` — `src/modules/community/entities/social_posts.entity.ts`
-- **Resumen:** 16 columnas · 10 índices · 8 FK salientes · 5 entrantes · 21 operaciones
+- **Resumen:** 16 columnas · 10 índices · 8 FK salientes · 5 entrantes · 23 operaciones
 
 #### Columnas
 
@@ -3540,6 +3711,7 @@ Conserva publicaciones públicas de profesionales y organizaciones para informar
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /community/comments/media/{fileId}/content | LEE | DIRECTA |
 | GET /community/feed | LEE | DIRECTA |
 | GET /community/polls/{pollId} | LEE | DIRECTA |
 | GET /community/posts/{postId} | LEE | DIRECTA |
@@ -3550,6 +3722,7 @@ Conserva publicaciones públicas de profesionales y organizaciones para informar
 | POST /community/profiles/{profileId}/posts | CREA | DIRECTA |
 | GET /f/{slug} | LEE | DIRECTA |
 | GET /internal/community/feed/pending | LEE | DIRECTA |
+| GET /internal/community/feed/ranking/pending | LEE | DIRECTA |
 | GET /l/{slug} | LEE | DIRECTA |
 | GET /o/{slug} | LEE | DIRECTA |
 | GET /p/{slug} | LEE | DIRECTA |
@@ -3666,7 +3839,7 @@ Registra bloqueos entre usuarios para controlar interacciones y seguridad en esp
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: user_blocks`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `UserBlocks` — `src/modules/community/entities/user_blocks.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 6 FK salientes · 0 entrantes · 16 operaciones
+- **Resumen:** 10 columnas · 6 índices · 6 FK salientes · 0 entrantes · 32 operaciones
 
 #### Columnas
 
@@ -3715,8 +3888,12 @@ Registra bloqueos entre usuarios para controlar interacciones y seguridad en esp
 | POST /community/blocks | ACTUALIZA | POR_TIPO |
 | POST /community/blocks | CREA | DIRECTA |
 | POST /community/blocks | LEE | DIRECTA |
+| GET /community/comments/media/{fileId}/content | LEE | DIRECTA |
+| POST /community/conversations | LEE | DIRECTA |
+| GET /community/conversations/{conversationId}/attachments/{fileId}/content | LEE | DIRECTA |
 | GET /community/conversations/{conversationId}/messages | LEE | DIRECTA |
 | POST /community/conversations/{conversationId}/messages | LEE | DIRECTA |
+| POST /community/conversations/contacts/search | LEE | POR_SQL |
 | GET /community/feed | LEE | DIRECTA |
 | GET /community/polls/{pollId} | LEE | DIRECTA |
 | GET /community/posts/{postId} | LEE | DIRECTA |
@@ -3725,6 +3902,18 @@ Registra bloqueos entre usuarios para controlar interacciones y seguridad en esp
 | GET /community/profiles/{profileId} | LEE | DIRECTA |
 | GET /community/profiles/{profileId}/posts | LEE | DIRECTA |
 | GET /community/profiles/by-slug/{slug} | LEE | DIRECTA |
+| POST /insurance/patients/conversation | LEE | DIRECTA |
+| POST /scheduling/appointments/direct | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reject | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 
 #### Gobierno
 

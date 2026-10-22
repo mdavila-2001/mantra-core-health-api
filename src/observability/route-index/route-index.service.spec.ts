@@ -211,7 +211,7 @@ describe('RouteIndexService contra openapi.json', () => {
     const index = indexOf(AdminCatalogController);
 
     expect(index.lookup('GET', '/admin/catalog/schemas')?.operationId).toBe(
-      'AdminCatalogController_listSchemas',
+      'AdminCatalogController_schemas',
     );
   });
 });

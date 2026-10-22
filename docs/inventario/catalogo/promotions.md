@@ -10,15 +10,15 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [coupons](#coupons) | Administra cupones y códigos promocionales para redimir descuentos con uso controlado. | 16 | 8 | 8 | COINCIDE |
-| [discount_rules](#discount_rules) | Define condiciones y cálculos de descuentos para aplicar promociones en checkout o facturación. | 17 | 6 | 4 | COINCIDE |
+| [coupons](#coupons) | Administra cupones y códigos promocionales para redimir descuentos con uso controlado. | 16 | 8 | 9 | COINCIDE |
+| [discount_rules](#discount_rules) | Define condiciones y cálculos de descuentos para aplicar promociones en checkout o facturación. | 17 | 6 | 5 | COINCIDE |
 | [earning_rules](#earning_rules) | Define reglas para ganar puntos o créditos por actividades elegibles del producto. | 20 | 8 | 2 | COINCIDE |
-| [loyalty_memberships](#loyalty_memberships) | Relaciona personas o cuentas con programas de fidelidad para controlar nivel y vigencia de participación. | 14 | 6 | 15 | COINCIDE |
-| [loyalty_programs](#loyalty_programs) | Define programas de fidelidad para premiar interacciones elegibles con la plataforma y sus prestadores. | 16 | 10 | 5 | COINCIDE |
-| [loyalty_tiers](#loyalty_tiers) | Organiza niveles de beneficios dentro de programas de fidelidad según criterios de participación. | 13 | 4 | 5 | COINCIDE |
+| [loyalty_memberships](#loyalty_memberships) | Relaciona personas o cuentas con programas de fidelidad para controlar nivel y vigencia de participación. | 14 | 6 | 19 | COINCIDE |
+| [loyalty_programs](#loyalty_programs) | Define programas de fidelidad para premiar interacciones elegibles con la plataforma y sus prestadores. | 16 | 10 | 8 | COINCIDE |
+| [loyalty_tiers](#loyalty_tiers) | Organiza niveles de beneficios dentro de programas de fidelidad según criterios de participación. | 13 | 4 | 6 | COINCIDE |
 | [member_referrals](#member_referrals) | Relaciona miembros que recomiendan con personas referidas para seguir atribución y recompensas. | 15 | 9 | 4 | COINCIDE |
-| [points_ledger_entries](#points_ledger_entries) | Registra acumulaciones y consumos de puntos para auditar el saldo de recompensas. | 14 | 7 | 12 | COINCIDE |
-| [promotions](#promotions) | Cataloga promociones temporales que aplican descuentos o incentivos en pagos de servicios. | 21 | 9 | 6 | COINCIDE |
+| [points_ledger_entries](#points_ledger_entries) | Registra acumulaciones y consumos de puntos para auditar el saldo de recompensas. | 14 | 7 | 15 | COINCIDE |
+| [promotions](#promotions) | Cataloga promociones temporales que aplican descuentos o incentivos en pagos de servicios. | 21 | 9 | 7 | COINCIDE |
 | [redemptions](#redemptions) | Registra redenciones de cupones o promociones para evitar duplicaciones y conservar evidencia de uso. | 18 | 9 | 7 | COINCIDE |
 | [referral_programs](#referral_programs) | Define programas de recomendación para invitar nuevos participantes mediante incentivos gobernados. | 19 | 11 | 2 | COINCIDE |
 
@@ -163,7 +163,7 @@ Administra cupones y códigos promocionales para redimir descuentos con uso cont
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_51_promotions.puml: coupons`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_51_promotions.puml` · **DDL:** `SQL/51_promotions/02_tables.sql`
 - **Entidad del ORM:** `Coupons` — `src/modules/promotions/entities/coupons.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 6 FK salientes · 2 entrantes · 8 operaciones
+- **Resumen:** 16 columnas · 8 índices · 6 FK salientes · 2 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -203,11 +203,11 @@ Administra cupones y códigos promocionales para redimir descuentos con uso cont
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_coupons_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
-| `ix_coupons_promotion_id` | no | promotion_id | Soporta la clave foránea fk_coupons_promotion_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uq_coupons_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `ix_coupons_promotion_id` | no | promotion_id | Soporta la clave foránea fk_coupons_promotion_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «promotion_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_coupons_coupon_type_concept_id` | no | coupon_type_concept_id | Soporta la clave foránea fk_coupons_coupon_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_coupons_assigned_member_type_concept_id` | no | assigned_member_type_concept_id | Soporta la clave foránea fk_coupons_assigned_member_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_coupons_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_coupons_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_coupons_assigned_member_type_concept_id` | no | assigned_member_type_concept_id | Soporta la clave foránea fk_coupons_assigned_member_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «assigned_member_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_coupons_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_coupons_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_coupons_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_coupons_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_coupons_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_coupons_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `gin_coupons_search` | no | (to_tsvector('simple', (coalesce(code, '')))) | GIN para búsqueda textual gobernada _(DOCUMENTO)_ |
@@ -227,6 +227,7 @@ Administra cupones y códigos promocionales para redimir descuentos con uso cont
 | POST /coupons/validate | LEE | DIRECTA |
 | POST /promotions/{id}/coupons/batch | CREA | DIRECTA |
 | POST /promotions/{id}/coupons/batch | LEE | DIRECTA |
+| GET /promotions/me | LEE | DIRECTA |
 | POST /redemptions | LEE | DIRECTA |
 | POST /redemptions/{id}/reverse | ACTUALIZA | POR_TIPO |
 | POST /redemptions/{id}/reverse | LEE | DIRECTA |
@@ -254,7 +255,7 @@ Define condiciones y cálculos de descuentos para aplicar promociones en checkou
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_51_promotions.puml: discount_rules`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_51_promotions.puml` · **DDL:** `SQL/51_promotions/02_tables.sql`
 - **Entidad del ORM:** `DiscountRules` — `src/modules/promotions/entities/discount_rules.entity.ts`
-- **Resumen:** 17 columnas · 6 índices · 6 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 17 columnas · 6 índices · 6 FK salientes · 1 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -294,7 +295,7 @@ Define condiciones y cálculos de descuentos para aplicar promociones en checkou
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_discount_rules_promotion_id` | no | promotion_id | Soporta la clave foránea fk_discount_rules_promotion_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «promotion_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_discount_rules_promotion_id` | no | promotion_id | Soporta la clave foránea fk_discount_rules_promotion_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «promotion_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_discount_rules_discount_type_concept_id` | no | discount_type_concept_id | Soporta la clave foránea fk_discount_rules_discount_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_discount_rules_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_discount_rules_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_discount_rules_applies_to_concept_id` | no | applies_to_concept_id | Soporta la clave foránea fk_discount_rules_applies_to_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -308,6 +309,7 @@ Define condiciones y cálculos de descuentos para aplicar promociones en checkou
 | POST /checkout/{orderId}/apply-discount | LEE | DIRECTA |
 | POST /coupons/validate | LEE | DIRECTA |
 | POST /promotions | CREA | DIRECTA |
+| GET /promotions/me | LEE | DIRECTA |
 | POST /redemptions | LEE | DIRECTA |
 
 #### Gobierno
@@ -416,7 +418,7 @@ Relaciona personas o cuentas con programas de fidelidad para controlar nivel y v
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_51_promotions.puml: loyalty_memberships`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_51_promotions.puml` · **DDL:** `SQL/51_promotions/02_tables.sql`
 - **Entidad del ORM:** `LoyaltyMemberships` — `src/modules/promotions/entities/loyalty_memberships.entity.ts`
-- **Resumen:** 14 columnas · 6 índices · 6 FK salientes · 4 entrantes · 15 operaciones
+- **Resumen:** 14 columnas · 6 índices · 6 FK salientes · 4 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -456,8 +458,8 @@ Relaciona personas o cuentas con programas de fidelidad para controlar nivel y v
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_loyalty_memberships_loyalty_program_id` | no | loyalty_program_id | Soporta la clave foránea fk_loyalty_memberships_loyalty_program_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «loyalty_program_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_loyalty_memberships_member_type_concept_id` | no | member_type_concept_id | Soporta la clave foránea fk_loyalty_memberships_member_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «member_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_loyalty_memberships_loyalty_program_id` | no | loyalty_program_id | Soporta la clave foránea fk_loyalty_memberships_loyalty_program_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «loyalty_program_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_loyalty_memberships_member_type_concept_id` | no | member_type_concept_id | Soporta la clave foránea fk_loyalty_memberships_member_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «member_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_loyalty_memberships_current_tier_id` | no | current_tier_id | Soporta la clave foránea fk_loyalty_memberships_current_tier_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_loyalty_memberships_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_loyalty_memberships_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_loyalty_memberships_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_loyalty_memberships_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -469,6 +471,10 @@ Relaciona personas o cuentas con programas de fidelidad para controlar nivel y v
 |---|---|---|
 | POST /loyalty/jobs/expire-points | ACTUALIZA | POR_TIPO |
 | POST /loyalty/jobs/expire-points | LEE | DIRECTA |
+| GET /loyalty/me | LEE | DIRECTA |
+| GET /loyalty/me/points | LEE | DIRECTA |
+| POST /loyalty/me/points/redeem | ACTUALIZA | POR_TIPO |
+| POST /loyalty/me/points/redeem | LEE | DIRECTA |
 | POST /loyalty/memberships/{id}/points/earn | ACTUALIZA | POR_TIPO |
 | POST /loyalty/memberships/{id}/points/earn | LEE | DIRECTA |
 | POST /loyalty/memberships/{id}/points/redeem | ACTUALIZA | POR_TIPO |
@@ -506,7 +512,7 @@ Define programas de fidelidad para premiar interacciones elegibles con la plataf
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_51_promotions.puml: loyalty_programs`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_51_promotions.puml` · **DDL:** `SQL/51_promotions/02_tables.sql`
 - **Entidad del ORM:** `LoyaltyPrograms` — `src/modules/promotions/entities/loyalty_programs.entity.ts`
-- **Resumen:** 16 columnas · 10 índices · 7 FK salientes · 4 entrantes · 5 operaciones
+- **Resumen:** 16 columnas · 10 índices · 7 FK salientes · 4 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -570,6 +576,9 @@ Define programas de fidelidad para premiar interacciones elegibles con la plataf
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /loyalty/me | LEE | DIRECTA |
+| GET /loyalty/me/points | LEE | DIRECTA |
+| POST /loyalty/me/points/redeem | LEE | DIRECTA |
 | POST /loyalty/memberships/{id}/points/earn | LEE | DIRECTA |
 | GET /loyalty/programs | LEE | DIRECTA |
 | POST /loyalty/programs | CREA | DIRECTA |
@@ -599,7 +608,7 @@ Organiza niveles de beneficios dentro de programas de fidelidad según criterios
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_51_promotions.puml: loyalty_tiers`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_51_promotions.puml` · **DDL:** `SQL/51_promotions/02_tables.sql`
 - **Entidad del ORM:** `LoyaltyTiers` — `src/modules/promotions/entities/loyalty_tiers.entity.ts`
-- **Resumen:** 13 columnas · 4 índices · 3 FK salientes · 1 entrantes · 5 operaciones
+- **Resumen:** 13 columnas · 4 índices · 3 FK salientes · 1 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -641,6 +650,7 @@ Organiza niveles de beneficios dentro de programas de fidelidad según criterios
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /loyalty/me | LEE | DIRECTA |
 | POST /loyalty/memberships/{id}/points/earn | LEE | DIRECTA |
 | POST /loyalty/memberships/{id}/recompute | LEE | DIRECTA |
 | POST /loyalty/programs | CREA | DIRECTA |
@@ -757,7 +767,7 @@ Registra acumulaciones y consumos de puntos para auditar el saldo de recompensas
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_51_promotions.puml: points_ledger_entries`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_51_promotions.puml` · **DDL:** `SQL/51_promotions/02_tables.sql`
 - **Entidad del ORM:** `PointsLedgerEntries` — `src/modules/promotions/entities/points_ledger_entries.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 5 FK salientes · 0 entrantes · 12 operaciones
+- **Resumen:** 14 columnas · 7 índices · 5 FK salientes · 0 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -793,12 +803,12 @@ Registra acumulaciones y consumos de puntos para auditar el saldo de recompensas
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_points_ledger_entries_idempotency_key` | sí | idempotency_key | Garantiza que no se repita la combinación (idempotency_key) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «idempotency_key», la primera columna del índice _(CONSULTA)_ |
-| `ix_points_ledger_entries_loyalty_membership_id` | no | loyalty_membership_id | Soporta la clave foránea fk_points_ledger_entries_loyalty_membership_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «loyalty_membership_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_points_ledger_entries_loyalty_membership_id` | no | loyalty_membership_id | Soporta la clave foránea fk_points_ledger_entries_loyalty_membership_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «loyalty_membership_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_points_ledger_entries_direction_concept_id` | no | direction_concept_id | Soporta la clave foránea fk_points_ledger_entries_direction_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «direction_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_points_ledger_entries_reason_concept_id` | no | reason_concept_id | Soporta la clave foránea fk_points_ledger_entries_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_points_ledger_entries_earning_rule_id` | no | earning_rule_id | Soporta la clave foránea fk_points_ledger_entries_earning_rule_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «earning_rule_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_points_ledger_entries_recorded_by_user_id` | no | recorded_by_user_id | Soporta la clave foránea fk_points_ledger_entries_recorded_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `brin_points_ledger_entries_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «recorded_at», la primera columna del índice _(CONSULTA)_ |
+| `brin_points_ledger_entries_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «recorded_at», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -812,6 +822,9 @@ Registra acumulaciones y consumos de puntos para auditar el saldo de recompensas
 |---|---|---|
 | POST /loyalty/jobs/expire-points | CREA | DIRECTA |
 | POST /loyalty/jobs/expire-points | LEE | DIRECTA |
+| GET /loyalty/me/points | LEE | DIRECTA |
+| POST /loyalty/me/points/redeem | CREA | DIRECTA |
+| POST /loyalty/me/points/redeem | LEE | DIRECTA |
 | POST /loyalty/memberships/{id}/points/earn | CREA | DIRECTA |
 | POST /loyalty/memberships/{id}/points/earn | LEE | DIRECTA |
 | POST /loyalty/memberships/{id}/points/redeem | CREA | DIRECTA |
@@ -846,7 +859,7 @@ Cataloga promociones temporales que aplican descuentos o incentivos en pagos de 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_51_promotions.puml: promotions`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_51_promotions.puml` · **DDL:** `SQL/51_promotions/02_tables.sql`
 - **Entidad del ORM:** `Promotions` — `src/modules/promotions/entities/promotions.entity.ts`
-- **Resumen:** 21 columnas · 9 índices · 6 FK salientes · 5 entrantes · 6 operaciones
+- **Resumen:** 21 columnas · 9 índices · 6 FK salientes · 5 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -894,11 +907,11 @@ Cataloga promociones temporales que aplican descuentos o incentivos en pagos de 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_promotions_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
-| `ix_promotions_tenant_id` | no | tenant_id | Soporta la clave foránea fk_promotions_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_promotions_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `ix_promotions_tenant_id` | no | tenant_id | Soporta la clave foránea fk_promotions_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_promotions_promotion_type_concept_id` | no | promotion_type_concept_id | Soporta la clave foránea fk_promotions_promotion_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_promotions_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_promotions_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_promotions_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_promotions_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_promotions_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_promotions_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_promotions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_promotions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_promotions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_promotions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_promotions_tenant_id_status_concept_id` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -919,6 +932,7 @@ Cataloga promociones temporales que aplican descuentos o incentivos en pagos de 
 | POST /promotions | CREA | DIRECTA |
 | POST /promotions | LEE | DIRECTA |
 | POST /promotions/{id}/coupons/batch | LEE | DIRECTA |
+| GET /promotions/me | LEE | DIRECTA |
 | POST /redemptions | LEE | DIRECTA |
 
 #### Gobierno

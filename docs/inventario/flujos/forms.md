@@ -3,12 +3,12 @@
 # Flujos del módulo `forms`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 21 (18 con decisiones propias, 3 sin ellas)
+- **Operaciones:** 25 (22 con decisiones propias, 3 sin ellas)
 - Inventario de endpoints del módulo: [forms](../endpoints/forms.md)
 
 ## Proceso: Módulo Forms (09) — Dynamic Forms & Extensibility Governance
 
-- **Código:** `forms` · **Agrupación:** MIXTO · **Operaciones:** 21
+- **Código:** `forms` · **Agrupación:** MIXTO · **Operaciones:** 25
 - **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/forms/README.md`
@@ -24,10 +24,10 @@ _Fuente: `src/modules/forms/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `UC-09-01` | Crea set + versión inicial (draft, inmutable) | POST /forms/definition-sets | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-09-02` | Declara campo con reglas de validación | POST /forms/field-definitions | Cualquier sesión válida | ALTO | 3 |
+| `UC-09-02` | clínico, practitioner o SECURITY_ADMIN | POST /forms/field-definitions | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 3 |
 | `UC-09-03` | Compone miembros y publica la versión | POST /forms/definition-sets/{id}/versions/{ver}/publish | SECURITY_ADMIN | MEDIO | 5 |
-| `UC-09-04` | Define dependencia condicional entre campos | POST /forms/fields/{id}/dependencies | Cualquier sesión válida | ALTO | 3 |
-| `UC-09-05` | Upsert de localización i18n (es/en) | PUT /forms/fields/{id}/localizations/{lang} | Cualquier sesión válida | ALTO | 4 |
+| `UC-09-04` | Define dependencia condicional entre campos | POST /forms/fields/{id}/dependencies | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 3 |
+| `UC-09-05` | Upsert de localización i18n (es/en) | PUT /forms/fields/{id}/localizations/{lang} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 4 |
 | `UC-09-06` | Asigna campo a target con enforcement de política | POST /forms/assignments | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 5 |
 | `UC-09-07` | Abre instancia de formulario para un recurso | POST /forms/instances | CLINICIAN · PRACTITIONER | MEDIO | 3 |
 | `UC-09-08` | Captura valores (value[x] exclusivo) | POST /forms/instances/{id}/values | CLINICIAN · PRACTITIONER | MEDIO | 3 |
@@ -37,9 +37,13 @@ _Fuente: `src/modules/forms/README.md:3`_
 | `UC-09-12` | Define regla de acceso / enmascarado por campo | POST /forms/fields/{id}/access-rules | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-09-13` | Ejecuta migración entre versiones | POST /forms/definition-sets/{id}/migrations/{migrationId}/run | SECURITY_ADMIN | MEDIO | 4 |
 | `ctrl:FormsAssignmentsController` | Operaciones de FormsAssignmentsController que el README no asigna a un caso de uso | GET /forms/assignments | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 2 |
+|  |  | DELETE /forms/assignments/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 2 |
+|  |  | PATCH /forms/assignments/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 2 |
 |  |  | GET /forms/assignments/budget | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 2 |
+|  |  | PUT /forms/assignments/order | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 1 |
 | `ctrl:FormsDefinitionSetsController` | Operaciones de FormsDefinitionSetsController que el README no asigna a un caso de uso | GET /forms/definition-sets | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 1 |
 |  |  | GET /forms/definition-sets/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | BAJO | 8 |
+| `ctrl:FormsFieldsController` | Operaciones de FormsFieldsController que el README no asigna a un caso de uso | PATCH /forms/field-definitions/{id} | CLINICIAN · PRACTITIONER · SECURITY_ADMIN | MEDIO | 4 |
 | `ctrl:FormsInstancesController` | Operaciones de FormsInstancesController que el README no asigna a un caso de uso | GET /forms/instances | CLINICIAN · PRACTITIONER | BAJO | 2 |
 |  |  | GET /forms/instances/{id} | CLINICIAN · PRACTITIONER | BAJO | 5 |
 | `ctrl:FormsMeController` | Operaciones de FormsMeController que el README no asigna a un caso de uso | GET /forms/me/instances | Cualquier sesión válida | BAJO | 2 |
@@ -50,9 +54,8 @@ _Fuente: `src/modules/forms/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a6(["Cualquier sesión válida"]):::actor
-  a16(["CLINICIAN · PRACTITIONER · SECURITY_ADMIN"]):::actor
-  a21(["CLINICIAN · PRACTITIONER"]):::actor
+  a6(["CLINICIAN · PRACTITIONER · SECURITY_ADMIN"]):::actor
+  a20(["CLINICIAN · PRACTITIONER"]):::actor
   t3[("forms.field_definition_set_versions")]:::tabla
   t4[("forms.field_definition_sets")]:::tabla
   t7[("forms.dynamic_field_definitions")]:::tabla
@@ -60,20 +63,20 @@ flowchart LR
   t10[("forms.field_set_members")]:::tabla
   t12[("forms.field_dependencies")]:::tabla
   t14[("forms.field_definition_localizations")]:::tabla
-  t17[("forms.dynamic_field_sections")]:::tabla
-  t18[("forms.extension_target_policies")]:::tabla
-  t19[("forms.field_assignments")]:::tabla
-  t22[("clinical.encounters")]:::tabla
-  t23[("forms.form_instances")]:::tabla
-  t25[("forms.field_value_audit")]:::tabla
-  t26[("forms.field_values")]:::tabla
-  t29[("forms.field_value_provenance")]:::tabla
-  t32[("forms.field_value_access_rules")]:::tabla
-  t34[("forms.field_schema_migrations")]:::tabla
+  t16[("forms.dynamic_field_sections")]:::tabla
+  t17[("forms.extension_target_policies")]:::tabla
+  t18[("forms.field_assignments")]:::tabla
+  t21[("clinical.encounters")]:::tabla
+  t22[("forms.form_instances")]:::tabla
+  t24[("forms.field_value_audit")]:::tabla
+  t25[("forms.field_values")]:::tabla
+  t28[("forms.field_value_provenance")]:::tabla
+  t31[("forms.field_value_access_rules")]:::tabla
+  t33[("forms.field_schema_migrations")]:::tabla
   subgraph s0["UC-09-01 · Crea set + versión inicial (draft, inmutable)"]
     o1["POST /forms/definition-sets"]:::op
   end
-  subgraph s1["UC-09-02 · Declara campo con reglas de validación"]
+  subgraph s1["UC-09-02 · clínico, practitioner o SECURITY_ADMIN"]
     o5["POST /forms/field-definitions"]:::op
   end
   subgraph s2["UC-09-03 · Compone miembros y publica la versión"]
@@ -89,38 +92,37 @@ flowchart LR
     o15["POST /forms/assignments"]:::op
   end
   subgraph s6["UC-09-07 · Abre instancia de formulario para un recurso"]
-    o20["POST /forms/instances"]:::op
+    o19["POST /forms/instances"]:::op
   end
   subgraph s7["UC-09-08 · Captura valores (value[x] exclusivo)"]
-    o24["POST /forms/instances/{id}/values"]:::op
+    o23["POST /forms/instances/{id}/values"]:::op
   end
   subgraph s8["UC-09-09 · Corrige valor con supersede y snapshot inmutable"]
-    o27["PATCH /forms/values/{id}"]:::op
+    o26["PATCH /forms/values/{id}"]:::op
   end
   subgraph s9["UC-09-10 · Importa valores externos (batch ETL) con procedencia"]
-    o28["POST /forms/values/import"]:::op
+    o27["POST /forms/values/import"]:::op
   end
   subgraph s10["UC-09-11 · Cierra formulario y finaliza valores preliminares"]
-    o30["POST /forms/instances/{id}/close"]:::op
+    o29["POST /forms/instances/{id}/close"]:::op
   end
   subgraph s11["UC-09-12 · Define regla de acceso / enmascarado por campo"]
-    o31["POST /forms/fields/{id}/access-rules"]:::op
+    o30["POST /forms/fields/{id}/access-rules"]:::op
   end
   subgraph s12["UC-09-13 · Ejecuta migración entre versiones"]
-    o33["POST /forms/definition-sets/{id}/migrations/{migrationId}/run"]:::op
+    o32["POST /forms/definition-sets/{id}/migrations/{migrationId}/run"]:::op
   end
   subgraph s13["ctrl:FormsAssignmentsController · Operaciones de FormsAssignmentsController que…"]
-    o35["GET /forms/assignments"]:::op
-    o36["GET /forms/assignments/budget"]:::op
+    o34["GET /forms/assignments"]:::op
+    o35["DELETE /forms/assignments/{id}"]:::op
+    o36["PATCH /forms/assignments/{id}"]:::op
+    o37["GET /forms/assignments/budget"]:::op
+    o38["PUT /forms/assignments/order"]:::op
   end
-  t39[("+2 tablas más")]
+  t41[("+2 tablas más")]
   subgraph s14["ctrl:FormsDefinitionSetsController · Operaciones de FormsDefinitionSetsControll…"]
-    o37["GET /forms/definition-sets"]:::op
-    o38["GET /forms/definition-sets/{id}"]:::op
-  end
-  subgraph s15["ctrl:FormsInstancesController · Operaciones de FormsInstancesController que el…"]
-    o40["GET /forms/instances"]:::op
-    o41["GET /forms/instances/{id}"]:::op
+    o39["GET /forms/definition-sets"]:::op
+    o40["GET /forms/definition-sets/{id}"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -145,97 +147,120 @@ flowchart LR
   o13 -->|"ACTUALIZA"| t14
   o13 -->|"CREA"| t14
   o13 -->|"LEE"| t14
-  a16 --> o15
+  a6 --> o15
   o15 -->|"LEE"| t7
-  o15 -->|"CREA"| t17
+  o15 -->|"CREA"| t16
+  o15 -->|"LEE"| t17
+  o15 -->|"CREA"| t18
   o15 -->|"LEE"| t18
-  o15 -->|"CREA"| t19
-  o15 -->|"LEE"| t19
-  a21 --> o20
-  o20 -->|"LEE"| t22
-  o20 -->|"CREA"| t23
-  o20 -->|"LEE"| t23
-  a21 --> o24
-  o24 -->|"CREA"| t25
-  o24 -->|"CREA"| t26
-  o24 -->|"LEE"| t23
-  a21 --> o27
+  a20 --> o19
+  o19 -->|"LEE"| t21
+  o19 -->|"CREA"| t22
+  o19 -->|"LEE"| t22
+  a20 --> o23
+  o23 -->|"CREA"| t24
+  o23 -->|"CREA"| t25
+  o23 -->|"LEE"| t22
+  a20 --> o26
+  o26 -->|"CREA"| t24
+  o26 -->|"ACTUALIZA"| t25
+  o26 -->|"CREA"| t25
+  o26 -->|"LEE"| t25
+  a20 --> o27
+  o27 -->|"CREA"| t24
+  o27 -->|"CREA"| t28
   o27 -->|"CREA"| t25
-  o27 -->|"ACTUALIZA"| t26
-  o27 -->|"CREA"| t26
-  o27 -->|"LEE"| t26
-  a21 --> o28
-  o28 -->|"CREA"| t25
-  o28 -->|"CREA"| t29
-  o28 -->|"CREA"| t26
-  o28 -->|"LEE"| t23
-  a21 --> o30
-  o30 -->|"ACTUALIZA"| t26
-  o30 -->|"LEE"| t26
-  o30 -->|"ACTUALIZA"| t23
-  o30 -->|"LEE"| t23
-  a2 --> o31
-  o31 -->|"LEE"| t7
-  o31 -->|"CREA"| t32
-  a2 --> o33
-  o33 -->|"LEE"| t3
-  o33 -->|"LEE"| t4
-  o33 -->|"CREA"| t34
-  o33 -->|"LEE"| t34
-  a16 --> o35
-  o35 -->|"LEE"| t17
-  o35 -->|"LEE"| t19
-  a16 --> o36
+  o27 -->|"LEE"| t22
+  a20 --> o29
+  o29 -->|"ACTUALIZA"| t25
+  o29 -->|"LEE"| t25
+  o29 -->|"ACTUALIZA"| t22
+  o29 -->|"LEE"| t22
+  a2 --> o30
+  o30 -->|"LEE"| t7
+  o30 -->|"CREA"| t31
+  a2 --> o32
+  o32 -->|"LEE"| t3
+  o32 -->|"LEE"| t4
+  o32 -->|"CREA"| t33
+  o32 -->|"LEE"| t33
+  a6 --> o34
+  o34 -->|"LEE"| t16
+  o34 -->|"LEE"| t18
+  a6 --> o35
+  o35 -->|"ACTUALIZA"| t18
+  o35 -->|"LEE"| t18
+  a6 --> o36
+  o36 -->|"ACTUALIZA"| t18
   o36 -->|"LEE"| t18
-  o36 -->|"LEE"| t19
-  a16 --> o37
-  o37 -->|"LEE"| t4
-  a16 --> o38
-  o38 -->|"LEE"| t7
-  o38 -->|"LEE"| t17
-  o38 -->|"LEE"| t14
-  o38 -->|"LEE"| t3
-  o38 -->|"LEE"| t4
-  o38 -->|"LEE"| t12
-  o38 -.-> t39
-  a21 --> o40
-  o40 -->|"LEE"| t22
-  o40 -->|"LEE"| t23
-  a21 --> o41
-  o41 -->|"LEE"| t22
-  o41 -->|"LEE"| t7
-  o41 -->|"LEE"| t32
-  o41 -->|"LEE"| t26
-  o41 -->|"LEE"| t23
+  a6 --> o37
+  o37 -->|"LEE"| t17
+  o37 -->|"LEE"| t18
+  a6 --> o38
+  o38 -->|"LEE"| t18
+  a6 --> o39
+  o39 -->|"LEE"| t4
+  a6 --> o40
+  o40 -->|"LEE"| t7
+  o40 -->|"LEE"| t16
+  o40 -->|"LEE"| t14
+  o40 -->|"LEE"| t3
+  o40 -->|"LEE"| t4
+  o40 -->|"LEE"| t12
+  o40 -.-> t41
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:FormsMeController`
+### Diagrama 2 de 2 — etapas `ctrl:FormsFieldsController`, `ctrl:FormsInstancesController`, `ctrl:FormsMeController`
 
 ```mermaid
 flowchart LR
-  a2(["Cualquier sesión válida"]):::actor
-  t3[("clinical.encounters")]:::tabla
-  t4[("forms.form_instances")]:::tabla
-  t6[("forms.dynamic_field_definitions")]:::tabla
-  t7[("forms.field_value_access_rules")]:::tabla
-  t8[("forms.field_values")]:::tabla
-  subgraph s0["ctrl:FormsMeController · Operaciones de FormsMeController que el README no asig…"]
-    o1["GET /forms/me/instances"]:::op
-    o5["GET /forms/me/instances/{id}"]:::op
+  a2(["CLINICIAN · PRACTITIONER · SECURITY_ADMIN"]):::actor
+  a7(["CLINICIAN · PRACTITIONER"]):::actor
+  a13(["Cualquier sesión válida"]):::actor
+  t3[("forms.dynamic_field_definitions")]:::tabla
+  t4[("forms.field_assignments")]:::tabla
+  t5[("forms.field_values")]:::tabla
+  t8[("clinical.encounters")]:::tabla
+  t9[("forms.form_instances")]:::tabla
+  t11[("forms.field_value_access_rules")]:::tabla
+  subgraph s0["ctrl:FormsFieldsController · Operaciones de FormsFieldsController que el README…"]
+    o1["PATCH /forms/field-definitions/{id}"]:::op
+  end
+  subgraph s1["ctrl:FormsInstancesController · Operaciones de FormsInstancesController que el…"]
+    o6["GET /forms/instances"]:::op
+    o10["GET /forms/instances/{id}"]:::op
+  end
+  subgraph s2["ctrl:FormsMeController · Operaciones de FormsMeController que el README no asig…"]
+    o12["GET /forms/me/instances"]:::op
+    o14["GET /forms/me/instances/{id}"]:::op
   end
   a2 --> o1
+  o1 -->|"ACTUALIZA"| t3
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
-  a2 --> o5
-  o5 -->|"LEE"| t3
-  o5 -->|"LEE"| t6
-  o5 -->|"LEE"| t7
-  o5 -->|"LEE"| t8
-  o5 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  a7 --> o6
+  o6 -->|"LEE"| t8
+  o6 -->|"LEE"| t9
+  a7 --> o10
+  o10 -->|"LEE"| t8
+  o10 -->|"LEE"| t3
+  o10 -->|"LEE"| t11
+  o10 -->|"LEE"| t5
+  o10 -->|"LEE"| t9
+  a13 --> o12
+  o12 -->|"LEE"| t8
+  o12 -->|"LEE"| t9
+  a13 --> o14
+  o14 -->|"LEE"| t8
+  o14 -->|"LEE"| t3
+  o14 -->|"LEE"| t11
+  o14 -->|"LEE"| t5
+  o14 -->|"LEE"| t9
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -269,7 +294,7 @@ flowchart TD
   n1 --> n2
   n3["Llama a FormsAssignmentsService.createAssignment"]:::llamada
   n2 --> n3
-  n4{"!gobierna && dto.tenantId !== undefined && dto.tenantId !== tenantId"}:::decision
+  n4{"!governs && dto.tenantId !== undefined && dto.tenantId !== tenantId"}:::decision
   n3 --> n4
   n5(["403 FORBIDDEN Sólo se pueden asignar campos dentro de la propia organización"]):::error
   n4 -->|"sí"| n5
@@ -287,11 +312,11 @@ flowchart TD
   n9 -->|"no"| n11
   n12[("LEE forms.extension_target_policies")]:::efecto
   n11 --> n12
-  n13{"!gobierna && !policy"}:::decision
+  n13{"!governs && !policy"}:::decision
   n12 --> n13
   n14(["403 FORBIDDEN Este formulario no admite campos propios: no tiene política de extensión activa"]):::error
   n13 -->|"sí"| n14
-  n15{"!gobierna && policy?.allowTenantFields !== true"}:::decision
+  n15{"!governs && policy?.allowTenantFields !== true"}:::decision
   n13 -->|"no"| n15
   n16(["403 FORBIDDEN La política de este formulario no permite campos del tenant"]):::error
   n15 -->|"sí"| n16
@@ -327,7 +352,175 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. POST /forms/definition-sets
+#### 2. DELETE /forms/assignments/{id}
+
+Quitar una asignación propia (baja lógica)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Los campos del formulario estándar no se editan desde una organización; ForbiddenException: Sólo se pueden editar los campos propios de la organización |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asignación no encontrada |
+| 409 | `CONFLICT` | ConflictException: La asignación ya fue retirada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a FormsAssignmentsService.retireAssignment"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a FormsAssignmentsService.loadOwnedAssignment"]:::llamada
+  n4 --> n5
+  n6["Llama a AssignmentsRepository.findAssignmentById"]:::llamada
+  n5 --> n6
+  n7[("LEE forms.field_assignments")]:::efecto
+  n6 --> n7
+  n8{"!assignment"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Asignación no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10{"!assignment.tenantId"}:::decision
+  n8 -->|"no"| n10
+  n11(["403 FORBIDDEN Los campos del formulario estándar no se editan desde una organización"]):::error
+  n10 -->|"sí"| n11
+  n12{"assignment.tenantId !== requireTenantId()"}:::decision
+  n10 -->|"no"| n12
+  n13(["403 FORBIDDEN Sólo se pueden editar los campos propios de la organización"]):::error
+  n12 -->|"sí"| n13
+  n14{"assignment.stateConceptId === FORMS.ASSIGNMENT_RETIRED"}:::decision
+  n12 -->|"no"| n14
+  n15(["409 CONFLICT La asignación ya fue retirada"]):::error
+  n14 -->|"sí"| n15
+  n16[("ACTUALIZA forms.field_assignments · ACTUALIZA forms.field_assignments")]:::efecto
+  n14 -->|"no"| n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. PATCH /forms/assignments/{id}
+
+Editar una asignación propia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Los campos del formulario estándar no se editan desde una organización; ForbiddenException: Sólo se pueden editar los campos propios de la organización |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asignación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a FormsAssignmentsService.updateAssignment"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a FormsAssignmentsService.loadOwnedAssignment"]:::llamada
+  n4 --> n5
+  n6["Llama a AssignmentsRepository.findAssignmentById"]:::llamada
+  n5 --> n6
+  n7[("LEE forms.field_assignments")]:::efecto
+  n6 --> n7
+  n8{"!assignment"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Asignación no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10{"!assignment.tenantId"}:::decision
+  n8 -->|"no"| n10
+  n11(["403 FORBIDDEN Los campos del formulario estándar no se editan desde una organización"]):::error
+  n10 -->|"sí"| n11
+  n12{"assignment.tenantId !== requireTenantId()"}:::decision
+  n10 -->|"no"| n12
+  n13(["403 FORBIDDEN Sólo se pueden editar los campos propios de la organización"]):::error
+  n12 -->|"sí"| n13
+  n14[("ACTUALIZA forms.field_assignments")]:::efecto
+  n12 -->|"no"| n14
+  n15{"dto.required !== undefined"}:::decision
+  n14 --> n15
+  n16[("ACTUALIZA forms.field_assignments")]:::efecto
+  n15 -->|"sí"| n16
+  n17[("ACTUALIZA forms.field_assignments")]:::efecto
+  n16 --> n17
+  n15 -->|"no"| n17
+  n18{"dto.visible !== undefined"}:::decision
+  n17 --> n18
+  n19[("ACTUALIZA forms.field_assignments")]:::efecto
+  n18 -->|"sí"| n19
+  n20[("ACTUALIZA forms.field_assignments")]:::efecto
+  n19 --> n20
+  n18 -->|"no"| n20
+  n21{"dto.editable !== undefined"}:::decision
+  n20 --> n21
+  n22[("ACTUALIZA forms.field_assignments")]:::efecto
+  n21 -->|"sí"| n22
+  n23(("200 Responde con éxito")):::ok
+  n22 --> n23
+  n21 -->|"no"| n23
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. PUT /forms/assignments/order
+
+Reordenar los campos propios de un formulario
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay asignaciones que no son campos propios y activos de este formulario |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a FormsAssignmentsService.reorderAssignments"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a AssignmentsRepository.findActiveOwnAssignmentsForTarget"]:::llamada
+  n4 --> n5
+  n6[("LEE forms.field_assignments")]:::efecto
+  n5 --> n6
+  n7{"unknown.length › 0"}:::decision
+  n6 --> n7
+  n8(["422 PRECONDITION_FAILED Hay asignaciones que no son campos propios y activos de este formulario"]):::error
+  n7 -->|"sí"| n8
+  n9(("200 Responde con éxito")):::ok
+  n7 -->|"no"| n9
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. POST /forms/definition-sets
 
 Definir un set de campos dinámicos y su versión inicial
 
@@ -375,7 +568,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. GET /forms/definition-sets/{id}
+#### 6. GET /forms/definition-sets/{id}
 
 Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones
 
@@ -441,7 +634,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /forms/definition-sets/{id}/migrations/{migrationId}/run
+#### 7. POST /forms/definition-sets/{id}/migrations/{migrationId}/run
 
 Migrar valores entre versiones de schema
 
@@ -510,7 +703,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /forms/definition-sets/{id}/versions/{ver}/publish
+#### 8. POST /forms/definition-sets/{id}/versions/{ver}/publish
 
 Componer miembros del set y publicar la versión
 
@@ -572,7 +765,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /forms/field-definitions
+#### 9. POST /forms/field-definitions
 
 Declarar una definición de campo con reglas de validación
 
@@ -623,7 +816,79 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /forms/fields/{id}/access-rules
+#### 10. PATCH /forms/field-definitions/{id}
+
+Corregir el nombre o el tipo de un campo propio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan desde acá |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campo no encontrado |
+| 409 | `CONFLICT` | ConflictException: El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a FormsFieldsService.updateFieldDefinition"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a FieldDefinitionsRepository.findFieldById"]:::llamada
+  n4 --> n5
+  n6[("LEE forms.dynamic_field_definitions")]:::efecto
+  n5 --> n6
+  n7{"!field"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Campo no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"!governs"}:::decision
+  n7 -->|"no"| n9
+  n10["Llama a AssignmentsRepository.findAssignmentsByField"]:::llamada
+  n9 -->|"sí"| n10
+  n11[("LEE forms.field_assignments")]:::efecto
+  n10 --> n11
+  n12{"foreign"}:::decision
+  n11 --> n12
+  n13(["403 FORBIDDEN Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan de…"]):::error
+  n12 -->|"sí"| n13
+  n14{"dto.dataType !== undefined && dto.dataType !== field.dataType"}:::decision
+  n12 -->|"no"| n14
+  n9 -->|"no"| n14
+  n15["Llama a FieldValuesRepository.countByField"]:::llamada
+  n14 -->|"sí"| n15
+  n16[("LEE forms.field_values")]:::efecto
+  n15 --> n16
+  n17{"captured › 0"}:::decision
+  n16 --> n17
+  n18(["409 CONFLICT El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia"]):::error
+  n17 -->|"sí"| n18
+  n19[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n17 -->|"no"| n19
+  n20[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n19 --> n20
+  n14 -->|"no"| n20
+  n21{"dto.name !== undefined"}:::decision
+  n20 --> n21
+  n22[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n21 -->|"sí"| n22
+  n23(("200 Responde con éxito")):::ok
+  n22 --> n23
+  n21 -->|"no"| n23
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 11. POST /forms/fields/{id}/access-rules
 
 Definir reglas de acceso y enmascarado por campo
 
@@ -667,7 +932,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /forms/fields/{id}/dependencies
+#### 12. POST /forms/fields/{id}/dependencies
 
 Definir dependencias condicionales entre campos
 
@@ -733,7 +998,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. PUT /forms/fields/{id}/localizations/{lang}
+#### 13. PUT /forms/fields/{id}/localizations/{lang}
 
 Localizar (i18n) una definición de campo
 
@@ -791,7 +1056,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. GET /forms/instances
+#### 14. GET /forms/instances
 
 Listar las instancias de formulario de un encuentro
 
@@ -833,7 +1098,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /forms/instances
+#### 15. POST /forms/instances
 
 Abrir una instancia de formulario para un recurso
 
@@ -855,7 +1120,7 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a FormsInstancesService.tipoDelRecurso"]:::llamada
+  n5["Llama a FormsInstancesService.resourceType"]:::llamada
   n4 --> n5
   n6[("LEE clinical.encounters")]:::efecto
   n5 --> n6
@@ -881,7 +1146,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. GET /forms/instances/{id}
+#### 16. GET /forms/instances/{id}
 
 Leer una instancia con sus valores vigentes, por tipo resuelto
 
@@ -941,7 +1206,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /forms/instances/{id}/close
+#### 17. POST /forms/instances/{id}/close
 
 Cerrar formulario y proyectar vista de recurso
 
@@ -997,7 +1262,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /forms/instances/{id}/values
+#### 18. POST /forms/instances/{id}/values
 
 Capturar valores de formulario (value[x] exclusivo)
 
@@ -1053,7 +1318,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. GET /forms/me/instances
+#### 19. GET /forms/me/instances
 
 Ver mis formularios clínicos
 
@@ -1094,7 +1359,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /forms/me/instances/{id}
+#### 20. GET /forms/me/instances/{id}
 
 Leer un formulario propio con sus respuestas
 
@@ -1159,7 +1424,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. PATCH /forms/values/{id}
+#### 21. PATCH /forms/values/{id}
 
 Corregir valor con supersede y snapshot inmutable
 
@@ -1214,7 +1479,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /forms/values/import
+#### 22. POST /forms/values/import
 
 Registrar procedencia de valores importados (batch ETL)
 

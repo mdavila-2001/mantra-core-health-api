@@ -39,7 +39,7 @@ inscripción (active, 0%) ── lesson-progress (append-only) ──> % recalcu
                                                                     └─ revoke ──> revoked + CME reversed
 ```
 
-_Fuente: `src/modules/education/README.md:31`_
+_Fuente: `src/modules/education/README.md:65`_
 
 ### Etapas y operaciones
 

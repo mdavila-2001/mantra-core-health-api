@@ -14,7 +14,7 @@
 | [business_partner_relationships](#business_partner_relationships) | Relaciona socios de negocio para representar grupos, afiliaciones o vínculos comerciales. | 12 | 7 | 0 | COINCIDE |
 | [business_partner_roles](#business_partner_roles) | Asigna roles a socios de negocio para expresar si actúan como clientes, proveedores u otras partes. | 12 | 7 | 0 | COINCIDE |
 | [business_partner_tax_registrations](#business_partner_tax_registrations) | Conserva registros tributarios de socios para documentos de compra, venta y cumplimiento fiscal. | 13 | 6 | 0 | COINCIDE |
-| [business_partners](#business_partners) | Cataloga empresas y personas con las que la organización intercambia contratos, compras o ventas. | 16 | 11 | 6 | COINCIDE |
+| [business_partners](#business_partners) | Cataloga empresas y personas con las que la organización intercambia contratos, compras o ventas. | 16 | 11 | 7 | COINCIDE |
 | [contract_accounting_terms](#contract_accounting_terms) | Conserva parámetros contables de contratos para determinar tratamiento financiero de sus obligaciones. | 20 | 15 | 0 | COINCIDE |
 | [contract_amendments](#contract_amendments) | Registra modificaciones formales de contratos y su justificación o vigencia. | 16 | 10 | 1 | COINCIDE |
 | [contract_approval_requests](#contract_approval_requests) | Gestiona solicitudes de aprobación de contratos antes de su formalización o cambio. | 11 | 8 | 1 | COINCIDE |
@@ -992,7 +992,7 @@ Cataloga empresas y personas con las que la organización intercambia contratos,
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_38_erp.puml: business_partners`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_38_erp.puml` · **DDL:** `SQL/38_erp/02_tables.sql`
 - **Entidad del ORM:** `BusinessPartners` — `src/modules/erp/entities/business_partners.entity.ts`
-- **Resumen:** 16 columnas · 11 índices · 8 FK salientes · 28 entrantes · 6 operaciones
+- **Resumen:** 16 columnas · 11 índices · 8 FK salientes · 28 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -1082,6 +1082,7 @@ Cataloga empresas y personas con las que la organización intercambia contratos,
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /accounting/open-items | LEE | DIRECTA |
 | POST /erp/business-partners | CREA | DIRECTA |
 | POST /erp/business-partners | LEE | DIRECTA |
 | POST /erp/business-partners/{id}/bank-accounts/{accId}/verify | LEE | DIRECTA |

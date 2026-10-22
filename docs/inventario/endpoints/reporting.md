@@ -40,7 +40,7 @@
 
 Componer un tablero con sus widgets. Caso de uso UC-39-10: Componer tablero con widgets. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -52,10 +52,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:201` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -173,7 +173,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Registrar una fuente de datos gobernada. Caso de uso UC-39-01: Registrar fuente gobernada. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:10`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:42`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -185,10 +185,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, DATA_STEWARD | `src/modules/reporting/controllers/reporting.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -284,7 +284,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Autorar una definición con sus parámetros y columnas. Caso de uso UC-39-02: Autorar definición con parámetros y columnas. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:43`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -296,10 +296,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -447,7 +447,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Deprecar la definición y suspender sus programaciones. Caso de uso UC-39-12: Deprecar definición. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -459,11 +459,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:229` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:229` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -551,7 +551,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Encolar una corrida parametrizada. Caso de uso UC-39-04: Encolar corrida parametrizada. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -563,11 +563,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, REPORT_VIEWER | `src/modules/reporting/controllers/reporting.controller.ts:105` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:105` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -658,7 +658,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Programar la distribución periódica del reporte. Caso de uso UC-39-06: Programar distribución. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -670,11 +670,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:139` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -777,7 +777,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Publicar una versión del reporte. Caso de uso UC-39-03: Publicar versión. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:44`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -789,11 +789,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:88` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:88` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -881,7 +881,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Crear las distribuciones del reporte por destinatario. Caso de uso UC-39-08: Crear distribuciones. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -893,11 +893,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:168` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:168` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -995,7 +995,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Devolver a la cola una corrida fallida. Caso de uso UC-39-11: Reintentar corrida fallida. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1007,11 +1007,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:213` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:213` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1098,7 +1098,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Registrar el artefacto materializado y cerrar la corrida. Caso de uso UC-39-05: Materializar el artefacto. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1110,11 +1110,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/reporting/controllers/reporting.controller.ts:122` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:122` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1215,7 +1215,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Disparar las programaciones vencidas. Caso de uso UC-39-07: Disparar corridas vencidas. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1227,10 +1227,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/reporting/controllers/reporting.controller.ts:152` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1312,7 +1312,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 
 Suscribirse a una programación. Caso de uso UC-39-09: Suscribirse. Dentro del módulo (descripción del modelo, en inglés): «A configuration-driven reporting engine so the application supports dynamic reports without code changes.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporting/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_39_reporting.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1324,11 +1324,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: REPORT_VIEWER, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:184` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:184` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

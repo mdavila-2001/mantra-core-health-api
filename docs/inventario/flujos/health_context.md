@@ -6,186 +6,137 @@
 - **Operaciones:** 13 (13 con decisiones propias, 0 sin ellas)
 - Inventario de endpoints del módulo: [health_context](../endpoints/health_context.md)
 
-## Proceso: Módulo 44 — Contexto de Salud por País
+## Proceso: Contexto de salud por país
 
-- **Código:** `health_context` · **Agrupación:** MIXTO · **Operaciones:** 13
+- **Código:** `health_context` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 13
 - **Actores:** CONTEXT_CONSUMER · CONTEXT_CURATOR · PLATFORM_ADMIN · QUALITY_REVIEWER · SOURCE_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/health_context/README.md`
 
 ### Para qué sirve
 
-Recolección gobernada de contexto sanitario público: agentes recolectores, fuentes con su licencia y su nivel de confianza, programaciones, corridas idempotentes, observaciones inmutables, y contextos de país versionados con hechos trazables a la evidencia que los respalda, revisión de calidad, publicación y resolución para consumo.
+Este módulo registra contexto sanitario agregado: agentes y fuentes, agendas, corridas, observaciones, versiones con hechos y evidencia, revisión, publicación y resolución. No tiene endpoints de paciente. Persiste diez tablas bajo el esquema `health_context` y el worker `health_context` llama cada 30 segundos a `POST /health-context/internal/schedules/run-due`.
 
 _Fuente: `src/modules/health_context/README.md:3`_
-
-### Flujo general declarado en el README
-
-```text
-agente + fuente + programación
-   │
-collection-runs (idempotente por clave) ──> corrida running
-   ├─ observations ──> observación inmutable, deduplicada por hash en la corrida
-   │                   contadores del run al vuelo
-   └─ finish ────────> contadores reconciliados contra la tabla; succeeded | partial | failed
-
-contexto (draft)
-   └─ versions (de una corrida del mismo país)
-        └─ versión draft + hechos + evidencia (cada hecho, a observaciones aceptadas del run)
-             └─ quality-reviews ──> approved | rejected
-                  └─ publish ─────> versión published, contexto active
-                                    la publicada anterior queda superseded
-                       └─ supersede ──> con reemplazo: sigue active
-                                        sin reemplazo (expired): contexto stale
-
-contexts/resolve?country&domain&key ──> versión vigente + hechos + trazabilidad
-                                        caducada ⇒ se devuelve marcada `stale`
-```
-
-_Fuente: `src/modules/health_context/README.md:32`_
 
 ### Etapas y operaciones
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-44-01` | Registrar agente recolector | POST /health-context/agents | SOURCE_ADMIN · PLATFORM_ADMIN | MEDIO | 2 |
-| `UC-44-02` | Registrar fuente de contexto | POST /health-context/sources | SOURCE_ADMIN · PLATFORM_ADMIN | MEDIO | 2 |
-| `UC-44-03` | Programar recolección de país | POST /health-context/schedules | CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 2 |
-| `UC-44-04` | Crear contexto de país (raíz) | POST /health-context/contexts | CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 2 |
-| `UC-44-05` | Disparar corrida idempotente | POST /health-context/collection-runs | SYSTEM · CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 5 |
-| `UC-44-06` | Observación inmutable de fuente | POST /health-context/collection-runs/{id}/observations | SYSTEM · PLATFORM_ADMIN | MEDIO | 5 |
-| `UC-44-07` | Versión borrador + hechos + evidencia | POST /health-context/contexts/{id}/versions | SYSTEM · CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 7 |
-| `UC-44-08` | Revisar calidad de la versión | POST /health-context/versions/{id}/quality-reviews | QUALITY_REVIEWER · SYSTEM · PLATFORM_ADMIN | MEDIO | 3 |
-| `UC-44-09` | Publicar y avanzar la versión vigente | POST /health-context/versions/{id}/publish | CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 4 |
-| `UC-44-10` | Cerrar corrida conciliando contadores | POST /health-context/collection-runs/{id}/finish | SYSTEM · PLATFORM_ADMIN | MEDIO | 5 |
-| `UC-44-11` | Sustituir o expirar la versión vigente | POST /health-context/versions/{id}/supersede | CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 4 |
-| `UC-44-12` | Resolver contexto vigente para consumo | GET /health-context/contexts/resolve | CONTEXT_CONSUMER · CONTEXT_CURATOR · SYSTEM · PLATFORM_ADMIN | BAJO | 4 |
-| `ctrl:HealthContextController` | Operaciones de HealthContextController que el README no asigna a un caso de uso | POST /health-context/internal/schedules/run-due | SYSTEM | MEDIO | 5 |
+| `ctrl:HealthContextController` | Operaciones de HealthContextController que el README no asigna a un caso de uso | POST /health-context/agents | SOURCE_ADMIN · PLATFORM_ADMIN | MEDIO | 2 |
+|  |  | POST /health-context/collection-runs | SYSTEM · CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 5 |
+|  |  | POST /health-context/collection-runs/{id}/finish | SYSTEM · PLATFORM_ADMIN | MEDIO | 5 |
+|  |  | POST /health-context/collection-runs/{id}/observations | SYSTEM · PLATFORM_ADMIN | MEDIO | 5 |
+|  |  | POST /health-context/contexts | CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 2 |
+|  |  | POST /health-context/contexts/{id}/versions | SYSTEM · CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 7 |
+|  |  | GET /health-context/contexts/resolve | CONTEXT_CONSUMER · CONTEXT_CURATOR · SYSTEM · PLATFORM_ADMIN | BAJO | 4 |
+|  |  | POST /health-context/internal/schedules/run-due | SYSTEM | MEDIO | 5 |
+|  |  | POST /health-context/schedules | CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 2 |
+|  |  | POST /health-context/sources | SOURCE_ADMIN · PLATFORM_ADMIN | MEDIO | 2 |
+|  |  | POST /health-context/versions/{id}/publish | CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 4 |
+|  |  | POST /health-context/versions/{id}/quality-reviews | QUALITY_REVIEWER · SYSTEM · PLATFORM_ADMIN | MEDIO | 3 |
+|  |  | POST /health-context/versions/{id}/supersede | CONTEXT_CURATOR · PLATFORM_ADMIN | MEDIO | 4 |
 
-### Diagrama — etapas `UC-44-01`, `UC-44-02`, `UC-44-03`…
+### Diagrama — etapas `ctrl:HealthContextController`
 
 ```mermaid
 flowchart LR
   a2(["SOURCE_ADMIN · PLATFORM_ADMIN"]):::actor
-  a7(["CONTEXT_CURATOR · PLATFORM_ADMIN"]):::actor
-  a12(["SYSTEM · CONTEXT_CURATOR · PLATFORM_ADMIN"]):::actor
-  a15(["SYSTEM · PLATFORM_ADMIN"]):::actor
-  a22(["QUALITY_REVIEWER · SYSTEM · PLATFORM_ADMIN"]):::actor
-  a28(["CONTEXT_CONSUMER · CONTEXT_CURATOR · SYSTEM · PLATFORM_ADMIN"]):::actor
-  a31(["SYSTEM"]):::actor
+  a5(["SYSTEM · CONTEXT_CURATOR · PLATFORM_ADMIN"]):::actor
+  a9(["SYSTEM · PLATFORM_ADMIN"]):::actor
+  a14(["CONTEXT_CURATOR · PLATFORM_ADMIN"]):::actor
+  a21(["CONTEXT_CONSUMER · CONTEXT_CURATOR · SYSTEM · PLATFORM_ADMIN"]):::actor
+  a24(["SYSTEM"]):::actor
+  a29(["QUALITY_REVIEWER · SYSTEM · PLATFORM_ADMIN"]):::actor
   t3[("health_context.context_agents")]:::tabla
-  t5[("health_context.health_context_sources")]:::tabla
-  t8[("health_context.country_context_schedules")]:::tabla
-  t10[("health_context.country_health_contexts")]:::tabla
-  t13[("health_context.context_collection_runs")]:::tabla
-  t16[("health_context.context_source_observations")]:::tabla
-  t18[("health_context.context_fact_evidence")]:::tabla
-  t19[("health_context.country_health_context_versions")]:::tabla
-  t23[("health_context.context_quality_reviews")]:::tabla
-  t29[("health_context.health_context_facts")]:::tabla
-  subgraph s0["UC-44-01 · Registrar agente recolector"]
+  t6[("health_context.context_collection_runs")]:::tabla
+  t7[("health_context.country_context_schedules")]:::tabla
+  t10[("health_context.context_source_observations")]:::tabla
+  t12[("health_context.health_context_sources")]:::tabla
+  t15[("health_context.country_health_contexts")]:::tabla
+  t17[("health_context.context_fact_evidence")]:::tabla
+  t18[("health_context.country_health_context_versions")]:::tabla
+  t22[("health_context.health_context_facts")]:::tabla
+  t30[("health_context.context_quality_reviews")]:::tabla
+  t19[("+1 tablas más")]
+  subgraph s0["ctrl:HealthContextController · Operaciones de HealthContextController que el RE…"]
     o1["POST /health-context/agents"]:::op
-  end
-  subgraph s1["UC-44-02 · Registrar fuente de contexto"]
-    o4["POST /health-context/sources"]:::op
-  end
-  subgraph s2["UC-44-03 · Programar recolección de país"]
-    o6["POST /health-context/schedules"]:::op
-  end
-  subgraph s3["UC-44-04 · Crear contexto de país (raíz)"]
-    o9["POST /health-context/contexts"]:::op
-  end
-  subgraph s4["UC-44-05 · Disparar corrida idempotente"]
-    o11["POST /health-context/collection-runs"]:::op
-  end
-  subgraph s5["UC-44-06 · Observación inmutable de fuente"]
-    o14["POST /health-context/collection-runs/{id}/observations"]:::op
-  end
-  t20[("+1 tablas más")]
-  subgraph s6["UC-44-07 · Versión borrador + hechos + evidencia"]
-    o17["POST /health-context/contexts/{id}/versions"]:::op
-  end
-  subgraph s7["UC-44-08 · Revisar calidad de la versión"]
-    o21["POST /health-context/versions/{id}/quality-reviews"]:::op
-  end
-  subgraph s8["UC-44-09 · Publicar y avanzar la versión vigente"]
-    o24["POST /health-context/versions/{id}/publish"]:::op
-  end
-  subgraph s9["UC-44-10 · Cerrar corrida conciliando contadores"]
-    o25["POST /health-context/collection-runs/{id}/finish"]:::op
-  end
-  subgraph s10["UC-44-11 · Sustituir o expirar la versión vigente"]
-    o26["POST /health-context/versions/{id}/supersede"]:::op
-  end
-  subgraph s11["UC-44-12 · Resolver contexto vigente para consumo"]
-    o27["GET /health-context/contexts/resolve"]:::op
-  end
-  subgraph s12["ctrl:HealthContextController · Operaciones de HealthContextController que el RE…"]
-    o30["POST /health-context/internal/schedules/run-due"]:::op
+    o4["POST /health-context/collection-runs"]:::op
+    o8["POST /health-context/collection-runs/{id}/finish"]:::op
+    o11["POST /health-context/collection-runs/{id}/observations"]:::op
+    o13["POST /health-context/contexts"]:::op
+    o16["POST /health-context/contexts/{id}/versions"]:::op
+    o20["GET /health-context/contexts/resolve"]:::op
+    o23["POST /health-context/internal/schedules/run-due"]:::op
+    o25["POST /health-context/schedules"]:::op
+    o26["POST /health-context/sources"]:::op
+    o27["POST /health-context/versions/{id}/publish"]:::op
+    o28["POST /health-context/versions/{id}/quality-reviews"]:::op
+    o31["POST /health-context/versions/{id}/supersede"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
   o1 -->|"LEE"| t3
-  a2 --> o4
-  o4 -->|"CREA"| t5
-  o4 -->|"LEE"| t5
-  a7 --> o6
-  o6 -->|"LEE"| t3
-  o6 -->|"CREA"| t8
-  a7 --> o9
-  o9 -->|"CREA"| t10
-  o9 -->|"LEE"| t10
-  a12 --> o11
-  o11 -->|"LEE"| t3
-  o11 -->|"CREA"| t13
-  o11 -->|"LEE"| t13
-  o11 -->|"ACTUALIZA"| t8
-  o11 -->|"LEE"| t8
-  a15 --> o14
-  o14 -->|"ACTUALIZA"| t13
-  o14 -->|"LEE"| t13
-  o14 -->|"CREA"| t16
-  o14 -->|"LEE"| t16
-  o14 -->|"LEE"| t5
-  a12 --> o17
-  o17 -->|"LEE"| t13
-  o17 -->|"CREA"| t18
-  o17 -->|"LEE"| t16
-  o17 -->|"CREA"| t19
-  o17 -->|"LEE"| t19
-  o17 -->|"LEE"| t10
-  o17 -.-> t20
-  a22 --> o21
-  o21 -->|"CREA"| t23
-  o21 -->|"ACTUALIZA"| t19
-  o21 -->|"LEE"| t19
-  a7 --> o24
-  o24 -->|"ACTUALIZA"| t19
-  o24 -->|"LEE"| t19
-  o24 -->|"ACTUALIZA"| t10
-  o24 -->|"LEE"| t10
-  a15 --> o25
-  o25 -->|"ACTUALIZA"| t13
-  o25 -->|"LEE"| t13
-  o25 -->|"LEE"| t16
-  o25 -->|"ACTUALIZA"| t8
-  o25 -->|"LEE"| t8
-  a7 --> o26
-  o26 -->|"ACTUALIZA"| t19
-  o26 -->|"LEE"| t19
-  o26 -->|"ACTUALIZA"| t10
-  o26 -->|"LEE"| t10
-  a28 --> o27
+  a5 --> o4
+  o4 -->|"LEE"| t3
+  o4 -->|"CREA"| t6
+  o4 -->|"LEE"| t6
+  o4 -->|"ACTUALIZA"| t7
+  o4 -->|"LEE"| t7
+  a9 --> o8
+  o8 -->|"ACTUALIZA"| t6
+  o8 -->|"LEE"| t6
+  o8 -->|"LEE"| t10
+  o8 -->|"ACTUALIZA"| t7
+  o8 -->|"LEE"| t7
+  a9 --> o11
+  o11 -->|"ACTUALIZA"| t6
+  o11 -->|"LEE"| t6
+  o11 -->|"CREA"| t10
+  o11 -->|"LEE"| t10
+  o11 -->|"LEE"| t12
+  a14 --> o13
+  o13 -->|"CREA"| t15
+  o13 -->|"LEE"| t15
+  a5 --> o16
+  o16 -->|"LEE"| t6
+  o16 -->|"CREA"| t17
+  o16 -->|"LEE"| t10
+  o16 -->|"CREA"| t18
+  o16 -->|"LEE"| t18
+  o16 -->|"LEE"| t15
+  o16 -.-> t19
+  a21 --> o20
+  o20 -->|"LEE"| t17
+  o20 -->|"LEE"| t18
+  o20 -->|"LEE"| t15
+  o20 -->|"LEE"| t22
+  a24 --> o23
+  o23 -->|"LEE"| t3
+  o23 -->|"CREA"| t6
+  o23 -->|"LEE"| t6
+  o23 -->|"ACTUALIZA"| t7
+  o23 -->|"LEE"| t7
+  a14 --> o25
+  o25 -->|"LEE"| t3
+  o25 -->|"CREA"| t7
+  a2 --> o26
+  o26 -->|"CREA"| t12
+  o26 -->|"LEE"| t12
+  a14 --> o27
+  o27 -->|"ACTUALIZA"| t18
   o27 -->|"LEE"| t18
-  o27 -->|"LEE"| t19
-  o27 -->|"LEE"| t10
-  o27 -->|"LEE"| t29
-  a31 --> o30
-  o30 -->|"LEE"| t3
-  o30 -->|"CREA"| t13
-  o30 -->|"LEE"| t13
-  o30 -->|"ACTUALIZA"| t8
-  o30 -->|"LEE"| t8
+  o27 -->|"ACTUALIZA"| t15
+  o27 -->|"LEE"| t15
+  a29 --> o28
+  o28 -->|"CREA"| t30
+  o28 -->|"ACTUALIZA"| t18
+  o28 -->|"LEE"| t18
+  a14 --> o31
+  o31 -->|"ACTUALIZA"| t18
+  o31 -->|"LEE"| t18
+  o31 -->|"ACTUALIZA"| t15
+  o31 -->|"LEE"| t15
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3

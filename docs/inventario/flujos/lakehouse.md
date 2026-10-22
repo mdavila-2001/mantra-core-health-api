@@ -50,7 +50,7 @@ INVESTIGACIÓN
     └─ /revoke ─────────────────> expired (fin de plazo) ≠ revoked (decisión)
 ```
 
-_Fuente: `src/modules/lakehouse/README.md:36`_
+_Fuente: `src/modules/lakehouse/README.md:72`_
 
 ### Etapas y operaciones
 

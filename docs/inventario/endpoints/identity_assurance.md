@@ -3,9 +3,9 @@
 # Endpoints del módulo `identity_assurance`
 
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
-- **Operaciones:** 24 (24 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 4 · MEDIO 16 · BAJO 4
-- **Tablas distintas que tocan:** 19
+- **Operaciones:** 28 (28 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 5 · MEDIO 17 · BAJO 6
+- **Tablas distintas que tocan:** 40
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/identity-assurance.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -18,24 +18,28 @@
 | 4 | POST | `/identity/checks/{id}/attempts` | Ejecutar un intento contra la autoridad externa (idempotente) | MEDIO | 4 | SECURITY_ADMIN |
 | 5 | POST | `/identity/checks/{id}/results` | Registrar el resultado inmutable del check (con supersede) | MEDIO | 22 | SECURITY_ADMIN |
 | 6 | POST | `/identity/manual-review/{id}/decision` | Resolver una revisión manual (decisión) | MEDIO | 25 | SECURITY_ADMIN |
-| 7 | POST | `/identity/me/identity-verification` | Solicitar la verificación de la propia identidad (paciente) | ALTO | 5 | sesión (sin roles) |
-| 8 | POST | `/identity/me/practitioner/identity-verification` | Solicitar la verificación de la propia identidad (profesional) | ALTO | 6 | sesión (sin roles) |
-| 9 | POST | `/identity/me/practitioner/license-verification` | Solicitar la verificación de la propia matrícula | ALTO | 7 | sesión (sin roles) |
-| 10 | POST | `/identity/me/tenants/{tenantId}/verification` | Solicitar la verificación de una institución propia | ALTO | 5 | sesión (sin roles) |
-| 11 | GET | `/identity/me/verification-cases` | Listar los casos de verificación propios | BAJO | 3 | sesión (sin roles) |
-| 12 | GET | `/identity/me/verification-cases/{caseId}` | Consultar el estado de un caso propio | BAJO | 4 | sesión (sin roles) |
-| 13 | GET | `/identity/verification-cases` | Listar los casos que esperan revisión | BAJO | 1 | SECURITY_ADMIN |
-| 14 | POST | `/identity/verification-cases` | Iniciar un caso de verificación de identidad | MEDIO | 2 | SECURITY_ADMIN |
-| 15 | POST | `/identity/verification-cases/{id}/assertions` | Emitir una aserción de identidad con nivel de aseguramiento | MEDIO | 3 | SECURITY_ADMIN |
-| 16 | POST | `/identity/verification-cases/{id}/checks:plan` | Planificar los checks requeridos del caso | MEDIO | 2 | SECURITY_ADMIN |
-| 17 | POST | `/identity/verification-cases/{id}/evidence` | Aportar evidencia documental bajo consentimiento | MEDIO | 2 | SECURITY_ADMIN |
-| 18 | POST | `/identity/verification-cases/{id}/fraud-signals` | Detectar y registrar una señal de fraude | MEDIO | 2 | SECURITY_ADMIN |
-| 19 | POST | `/identity/verification-cases/{id}/manual-review` | Escalar el caso a revisión manual | MEDIO | 3 | SECURITY_ADMIN |
-| 20 | POST | `/identity/verification-cases/expire-sweep` | Expirar por lote los casos vencidos (job programado) | MEDIO | 10 | SYSTEM, SECURITY_ADMIN |
-| 21 | POST | `/identity/verification-policies` | Crear una política de verificación de identidad (IAL/AAL) | MEDIO | 1 | SECURITY_ADMIN |
-| 22 | POST | `/internal/identity/checks/{id}/attempts` | Registrar el intento del worker contra la autoridad externa | MEDIO | 4 | SYSTEM, SECURITY_ADMIN |
-| 23 | POST | `/internal/identity/checks/{id}/results` | Registrar el veredicto que devolvió la autoridad externa | MEDIO | 22 | SYSTEM, SECURITY_ADMIN |
-| 24 | GET | `/internal/identity/checks/dispatchable` | Listar los checks que el worker debe atender en este tick | BAJO | 2 | SYSTEM, SECURITY_ADMIN |
+| 7 | POST | `/identity/me/identity-verification` | Solicitar la verificación de la propia identidad (paciente) | ALTO | 8 | sesión (sin roles) |
+| 8 | POST | `/identity/me/practitioner/identity-verification` | Solicitar la verificación de la propia identidad (profesional) | ALTO | 9 | sesión (sin roles) |
+| 9 | POST | `/identity/me/practitioner/license-verification` | Solicitar la verificación de la propia matrícula | ALTO | 10 | sesión (sin roles) |
+| 10 | POST | `/identity/me/tenants/{tenantId}/verification` | Solicitar la verificación de una institución propia | ALTO | 8 | sesión (sin roles) |
+| 11 | GET | `/identity/me/verification-cases` | Listar los casos de verificación propios | BAJO | 7 | sesión (sin roles) |
+| 12 | GET | `/identity/me/verification-cases/{caseId}` | Consultar el estado de un caso propio | BAJO | 8 | sesión (sin roles) |
+| 13 | GET | `/identity/me/verification-types` | Listar los tipos de solicitud de verificación disponibles | BAJO | 4 | sesión (sin roles) |
+| 14 | GET | `/identity/verification-cases` | Listar los casos que esperan revisión | BAJO | 1 | SECURITY_ADMIN |
+| 15 | POST | `/identity/verification-cases` | Iniciar un caso de verificación de identidad | MEDIO | 2 | SECURITY_ADMIN |
+| 16 | GET | `/identity/verification-cases/{id}` | Consultar expediente y evidencias de un caso | BAJO | 2 | SECURITY_ADMIN |
+| 17 | POST | `/identity/verification-cases/{id}/assertions` | Emitir una aserción de identidad con nivel de aseguramiento | MEDIO | 3 | SECURITY_ADMIN |
+| 18 | POST | `/identity/verification-cases/{id}/checks:plan` | Planificar los checks requeridos del caso | MEDIO | 2 | SECURITY_ADMIN |
+| 19 | POST | `/identity/verification-cases/{id}/evidence` | Aportar evidencia documental bajo consentimiento | MEDIO | 5 | SECURITY_ADMIN |
+| 20 | POST | `/identity/verification-cases/{id}/fraud-signals` | Detectar y registrar una señal de fraude | MEDIO | 2 | SECURITY_ADMIN |
+| 21 | POST | `/identity/verification-cases/{id}/manual-review` | Escalar el caso a revisión manual | MEDIO | 3 | SECURITY_ADMIN |
+| 22 | POST | `/identity/verification-cases/expire-sweep` | Expirar por lote los casos vencidos (job programado) | MEDIO | 10 | SYSTEM, SECURITY_ADMIN |
+| 23 | POST | `/identity/verification-policies` | Crear una política de verificación de identidad (IAL/AAL) | MEDIO | 1 | SECURITY_ADMIN |
+| 24 | POST | `/internal/identity/checks/{id}/attempts` | Registrar el intento del worker contra la autoridad externa | MEDIO | 4 | SYSTEM, SECURITY_ADMIN |
+| 25 | POST | `/internal/identity/checks/{id}/results` | Registrar el veredicto que devolvió la autoridad externa | MEDIO | 22 | SYSTEM, SECURITY_ADMIN |
+| 26 | GET | `/internal/identity/checks/dispatchable` | Listar los checks que el worker debe atender en este tick | BAJO | 2 | SYSTEM, SECURITY_ADMIN |
+| 27 | POST | `/internal/identity/evidence/lifecycle-scan` | Evaluate configured evidence lifecycle; destructive runtime remains blocked | ALTO | 36 | SYSTEM |
+| 28 | POST | `/internal/identity/evidence/storage-purge-review` | Recheck retired evidence objects; never grants physical delete | MEDIO | 21 | SYSTEM |
 
 ---
 
@@ -46,7 +50,7 @@
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityAssertionsController.revoke` — `src/modules/identity_assurance/controllers/identity-assertions.controller.ts:28`
+- **Implementación:** `IdentityAssertionsController.revoke` — `src/modules/identity_assurance/controllers/identity-assertions.controller.ts:33`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -56,19 +60,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/assertions/{id}/revoke` la atiende `IdentityAssertionsController.revoke` (src/modules/identity_assurance/controllers/identity-assertions.controller.ts:28). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RevokeAssertionDto` (4 campos, 0 obligatorios). Delega en `IdentityAssertionsService.revoke`. Crea filas en audit.verified_badges_history, identity_assurance.identity_fraud_signals. Actualiza community.public_profiles, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_verification_cases. Lee community.public_profiles, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations.
+`POST /identity/assertions/{id}/revoke` la atiende `IdentityAssertionsController.revoke` (src/modules/identity_assurance/controllers/identity-assertions.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RevokeAssertionDto` (4 campos, 0 obligatorios). Delega en `IdentityAssertionsService.revoke`. Crea filas en audit.verified_badges_history, identity_assurance.identity_fraud_signals. Actualiza community.public_profiles, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_verification_cases. Lee community.public_profiles, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-assertions.controller.ts:28` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-assertions.controller.ts:28` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-assertions.controller.ts:33` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-assertions.controller.ts:33` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -84,7 +88,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `identity_assurance.identity_fraud_signals` | ESCRIBE | CREA | DIRECTA | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke → IdentityFraudSignalsRepository.create | `src/modules/identity_assurance/repositories/identity-fraud-signals.repository.ts:52` |
 | `identity_assurance.identity_verification_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke | `src/modules/identity_assurance/services/identity-assertions.service.ts:88` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke → IdentityVerificationCasesRepository.findById | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:64` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke → IdentityVerificationEffectsService.applyRevoked → IdentityVerificationEffectsService.publicSubjectOf → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/repositories/jurisdiction-authorizations.repository.ts:60` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityAssertionsController.revoke → IdentityAssertionsService.revoke → IdentityVerificationEffectsService.applyRevoked → IdentityVerificationEffectsService.publicSubjectOf → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:65` |
 
 ### Parámetros
 
@@ -162,7 +166,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityAuthoritiesController.register` — `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:35`
+- **Implementación:** `IdentityAuthoritiesController.register` — `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:40`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -172,18 +176,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/authorities` la atiende `IdentityAuthoritiesController.register` (src/modules/identity_assurance/controllers/identity-authorities.controller.ts:35). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RegisterAuthorityDto` (6 campos, 4 obligatorios). Delega en `IdentityAuthoritiesService.registerAuthority`. Crea filas en identity_assurance.identity_authorities.
+`POST /identity/authorities` la atiende `IdentityAuthoritiesController.register` (src/modules/identity_assurance/controllers/identity-authorities.controller.ts:40). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RegisterAuthorityDto` (6 campos, 4 obligatorios). Delega en `IdentityAuthoritiesService.registerAuthority`. Crea filas en identity_assurance.identity_authorities.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:35` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:40` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -268,7 +272,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityAuthoritiesController.addEndpoint` — `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:47`
+- **Implementación:** `IdentityAuthoritiesController.addEndpoint` — `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:57`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -278,19 +282,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/authorities/{id}/endpoints` la atiende `IdentityAuthoritiesController.addEndpoint` (src/modules/identity_assurance/controllers/identity-authorities.controller.ts:47). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAuthorityEndpointDto` (5 campos, 2 obligatorios). Delega en `IdentityAuthoritiesService.addEndpoint`. Crea filas en identity_assurance.identity_authority_endpoints. Lee identity_assurance.identity_authorities.
+`POST /identity/authorities/{id}/endpoints` la atiende `IdentityAuthoritiesController.addEndpoint` (src/modules/identity_assurance/controllers/identity-authorities.controller.ts:57). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAuthorityEndpointDto` (5 campos, 2 obligatorios). Delega en `IdentityAuthoritiesService.addEndpoint`. Crea filas en identity_assurance.identity_authority_endpoints. Lee identity_assurance.identity_authorities.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:47` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:57` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-authorities.controller.ts:57` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -379,7 +383,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityChecksController.recordAttempt` — `src/modules/identity_assurance/controllers/identity-checks.controller.ts:33`
+- **Implementación:** `IdentityChecksController.recordAttempt` — `src/modules/identity_assurance/controllers/identity-checks.controller.ts:38`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -389,19 +393,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/checks/{id}/attempts` la atiende `IdentityChecksController.recordAttempt` (src/modules/identity_assurance/controllers/identity-checks.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IdentityAssuranceRecordAttemptDto` (7 campos, 1 obligatorio). Delega en `IdentityChecksService.recordAttempt`. Crea filas en identity_assurance.identity_verification_attempts. Actualiza identity_assurance.identity_checks. Lee identity_assurance.identity_checks, identity_assurance.identity_verification_attempts.
+`POST /identity/checks/{id}/attempts` la atiende `IdentityChecksController.recordAttempt` (src/modules/identity_assurance/controllers/identity-checks.controller.ts:38). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IdentityAssuranceRecordAttemptDto` (7 campos, 1 obligatorio). Delega en `IdentityChecksService.recordAttempt`. Crea filas en identity_assurance.identity_verification_attempts. Actualiza identity_assurance.identity_checks. Lee identity_assurance.identity_checks, identity_assurance.identity_verification_attempts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:33` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:38` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:38` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -495,7 +499,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityChecksController.recordResult` — `src/modules/identity_assurance/controllers/identity-checks.controller.ts:48`
+- **Implementación:** `IdentityChecksController.recordResult` — `src/modules/identity_assurance/controllers/identity-checks.controller.ts:58`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -505,19 +509,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/checks/{id}/results` la atiende `IdentityChecksController.recordResult` (src/modules/identity_assurance/controllers/identity-checks.controller.ts:48). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordResultDto` (4 campos, 1 obligatorio). Delega en `IdentityChecksService.recordResult`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations. Lee community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_authority_endpoints, identity_assurance.identity_check_results, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases y 2 más.
+`POST /identity/checks/{id}/results` la atiende `IdentityChecksController.recordResult` (src/modules/identity_assurance/controllers/identity-checks.controller.ts:58). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordResultDto` (4 campos, 1 obligatorio). Delega en `IdentityChecksService.recordResult`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations. Lee community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_authority_endpoints, identity_assurance.identity_check_results, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases y 2 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:48` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:58` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:58` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -542,9 +546,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `identity_assurance.identity_verification_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase | `src/modules/identity_assurance/services/identity-checks.service.ts:376` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityVerificationCasesRepository.findById | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:64` |
 | `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:198` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/repositories/health-practitioner-profiles.repository.ts:64` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:188` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/repositories/jurisdiction-authorizations.repository.ts:60` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityChecksController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:65` |
 
 ### Parámetros
 
@@ -627,7 +631,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityManualReviewController.decide` — `src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:28`
+- **Implementación:** `IdentityManualReviewController.decide` — `src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:33`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -637,19 +641,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/manual-review/{id}/decision` la atiende `IdentityManualReviewController.decide` (src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:28). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReviewDecisionDto` (2 campos, 1 obligatorio). Delega en `IdentityManualReviewService.decide`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_fraud_signals, identity_assurance.identity_manual_review_cases, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles y 1 más. Lee community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_authority_endpoints, identity_assurance.identity_check_results, identity_assurance.identity_checks, identity_assurance.identity_fraud_signals, identity_assurance.identity_manual_review_cases y 4 más.
+`POST /identity/manual-review/{id}/decision` la atiende `IdentityManualReviewController.decide` (src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReviewDecisionDto` (2 campos, 1 obligatorio). Delega en `IdentityManualReviewService.decide`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_fraud_signals, identity_assurance.identity_manual_review_cases, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles y 1 más. Lee community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_authority_endpoints, identity_assurance.identity_check_results, identity_assurance.identity_checks, identity_assurance.identity_fraud_signals, identity_assurance.identity_manual_review_cases y 4 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:28` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:28` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:33` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-manual-review.controller.ts:33` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -677,9 +681,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `identity_assurance.identity_verification_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide | `src/modules/identity_assurance/services/identity-manual-review.service.ts:108` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityVerificationCasesRepository.findById | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:64` |
 | `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:198` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/repositories/health-practitioner-profiles.repository.ts:64` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:188` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/repositories/jurisdiction-authorizations.repository.ts:60` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityManualReviewController.decide → IdentityManualReviewService.decide → IdentityChecksService.settleManualApproval → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:65` |
 
 ### Parámetros
 
@@ -755,7 +759,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentitySelfServiceController.requestPatientIdentity` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:41`
+- **Implementación:** `IdentitySelfServiceController.requestPatientIdentity` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:42`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -765,48 +769,59 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/me/identity-verification` la atiende `IdentitySelfServiceController.requestPatientIdentity` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:41). Exige sesión; el controlador no declara roles. Valida el cuerpo como `IdentityAssuranceRequestVerificationDto` (1 campo, 1 obligatorio). Delega en `IdentitySelfServiceService.requestPatientIdentity`. Crea filas en identity_assurance.identity_checks, identity_assurance.identity_evidence_records, identity_assurance.identity_verification_cases. Lee identity_assurance.identity_verification_cases, profiles.person_account_links.
+`POST /identity/me/identity-verification` la atiende `IdentitySelfServiceController.requestPatientIdentity` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:42). Exige sesión; el controlador no declara roles. Valida el cuerpo como `IdentityAssuranceRequestVerificationDto` (6 campos, 0 obligatorios). Delega en `IdentitySelfServiceService.requestPatientIdentity`. Crea filas en identity_assurance.identity_checks, identity_assurance.identity_evidence_records, identity_assurance.identity_verification_cases. Lee common.file_versions, common.files, identity_assurance.identity_verification_cases, messaging.queued_jobs, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:42` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `common.file_versions` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPatientIdentity → IdentitySelfServiceService.requestPatientIdentity → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
+| `common.files` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPatientIdentity → IdentitySelfServiceService.requestPatientIdentity → IdentitySelfServiceService.openVerification → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `identity_assurance.identity_checks` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPatientIdentity → IdentitySelfServiceService.requestPatientIdentity → IdentitySelfServiceService.openVerification → IdentityChecksRepository.create | `src/modules/identity_assurance/repositories/identity-checks.repository.ts:152` |
-| `identity_assurance.identity_evidence_records` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPatientIdentity → IdentitySelfServiceService.requestPatientIdentity → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:68` |
+| `identity_assurance.identity_evidence_records` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPatientIdentity → IdentitySelfServiceService.requestPatientIdentity → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:81` |
 | `identity_assurance.identity_verification_cases` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPatientIdentity → IdentitySelfServiceService.requestPatientIdentity → IdentitySelfServiceService.openVerification → IdentityVerificationCasesRepository.create | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:75` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPatientIdentity → IdentitySelfServiceService.requestPatientIdentity → IdentitySelfServiceService.openVerification → IdentityVerificationCasesRepository.countLiveForSubject | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:111` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPatientIdentity → IdentitySelfServiceService.requestPatientIdentity → IdentitySelfServiceService.resolvePersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/repositories/person-account-links.repository.ts:80` |
+| `messaging.queued_jobs` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPatientIdentity → IdentitySelfServiceService.requestPatientIdentity → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPatientIdentity → IdentitySelfServiceService.requestPatientIdentity → IdentitySelfServiceService.resolvePersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo — DTO `IdentityAssuranceRequestVerificationDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `evidenceFileId` | `string` | Sí | formato uuid | `@IsUUID()` | Archivo de evidencia ya subido a POST /common/files/upload | `src/modules/identity_assurance/dto/request-verification.dto.ts:21` |
+| `evidenceFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Archivo único para clientes anteriores. Los clientes nuevos envían frente, reverso y tres capturas del reto de vida. | `src/modules/identity_assurance/dto/request-verification.dto.ts:24` |
+| `documentFrontFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:29` |
+| `documentBackFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:34` |
+| `livenessCenterFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:39` |
+| `livenessTurnLeftFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:44` |
+| `livenessTurnRightFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:49` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
-{
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 <details><summary>Payload completo de ejemplo</summary>
 
 ```json
 {
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
+  "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+  "documentFrontFileId": "00000000-0000-4000-8000-000000000001",
+  "documentBackFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessCenterFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnLeftFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnRightFileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -816,9 +831,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `caseId` | `string` | Sí | formato uuid | — | Identificador asociado a case. | `src/modules/identity_assurance/dto/request-verification.dto.ts:46` |
-| `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:52` |
-| `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:61` |
+| `caseId` | `string` | Sí | formato uuid | — | Identificador asociado a case. | `src/modules/identity_assurance/dto/request-verification.dto.ts:74` |
+| `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:80` |
+| `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:89` |
 
 ### Respuestas posibles
 
@@ -829,8 +844,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
 El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
 
@@ -838,7 +854,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:104` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:115` |
 
 ### Flujos
 
@@ -853,7 +869,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentitySelfServiceController.requestPractitionerIdentity` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:54`
+- **Implementación:** `IdentitySelfServiceController.requestPractitionerIdentity` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:60`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -863,49 +879,60 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/me/practitioner/identity-verification` la atiende `IdentitySelfServiceController.requestPractitionerIdentity` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:54). Exige sesión; el controlador no declara roles. Valida el cuerpo como `IdentityAssuranceRequestVerificationDto` (1 campo, 1 obligatorio). Delega en `IdentitySelfServiceService.requestPractitionerIdentity`. Crea filas en identity_assurance.identity_checks, identity_assurance.identity_evidence_records, identity_assurance.identity_verification_cases. Lee identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.person_account_links.
+`POST /identity/me/practitioner/identity-verification` la atiende `IdentitySelfServiceController.requestPractitionerIdentity` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:60). Exige sesión; el controlador no declara roles. Valida el cuerpo como `IdentityAssuranceRequestVerificationDto` (6 campos, 0 obligatorios). Delega en `IdentitySelfServiceService.requestPractitionerIdentity`. Crea filas en identity_assurance.identity_checks, identity_assurance.identity_evidence_records, identity_assurance.identity_verification_cases. Lee common.file_versions, common.files, identity_assurance.identity_verification_cases, messaging.queued_jobs, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:54` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:60` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `common.file_versions` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
+| `common.files` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.openVerification → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `identity_assurance.identity_checks` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.openVerification → IdentityChecksRepository.create | `src/modules/identity_assurance/repositories/identity-checks.repository.ts:152` |
-| `identity_assurance.identity_evidence_records` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:68` |
+| `identity_assurance.identity_evidence_records` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:81` |
 | `identity_assurance.identity_verification_cases` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.openVerification → IdentityVerificationCasesRepository.create | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:75` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.openVerification → IdentityVerificationCasesRepository.countLiveForSubject | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:111` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.assertIsPractitioner → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/repositories/health-practitioner-profiles.repository.ts:64` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.resolvePersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/repositories/person-account-links.repository.ts:80` |
+| `messaging.queued_jobs` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.assertIsPractitioner → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerIdentity → IdentitySelfServiceService.requestPractitionerIdentity → IdentitySelfServiceService.resolvePersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo — DTO `IdentityAssuranceRequestVerificationDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `evidenceFileId` | `string` | Sí | formato uuid | `@IsUUID()` | Archivo de evidencia ya subido a POST /common/files/upload | `src/modules/identity_assurance/dto/request-verification.dto.ts:21` |
+| `evidenceFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Archivo único para clientes anteriores. Los clientes nuevos envían frente, reverso y tres capturas del reto de vida. | `src/modules/identity_assurance/dto/request-verification.dto.ts:24` |
+| `documentFrontFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:29` |
+| `documentBackFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:34` |
+| `livenessCenterFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:39` |
+| `livenessTurnLeftFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:44` |
+| `livenessTurnRightFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:49` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
-{
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 <details><summary>Payload completo de ejemplo</summary>
 
 ```json
 {
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
+  "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+  "documentFrontFileId": "00000000-0000-4000-8000-000000000001",
+  "documentBackFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessCenterFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnLeftFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnRightFileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -915,9 +942,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `caseId` | `string` | Sí | formato uuid | — | Identificador asociado a case. | `src/modules/identity_assurance/dto/request-verification.dto.ts:46` |
-| `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:52` |
-| `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:61` |
+| `caseId` | `string` | Sí | formato uuid | — | Identificador asociado a case. | `src/modules/identity_assurance/dto/request-verification.dto.ts:74` |
+| `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:80` |
+| `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:89` |
 
 ### Respuestas posibles
 
@@ -928,8 +955,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
 El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
 
@@ -950,7 +978,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentitySelfServiceController.requestPractitionerLicense` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:67`
+- **Implementación:** `IdentitySelfServiceController.requestPractitionerLicense` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -960,44 +988,50 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/me/practitioner/license-verification` la atiende `IdentitySelfServiceController.requestPractitionerLicense` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:67). Exige sesión; el controlador no declara roles. Valida el cuerpo como `IdentityAssuranceRequestLicenseVerificationDto` (2 campos, 1 obligatorio). Delega en `IdentitySelfServiceService.requestPractitionerLicense`. Crea filas en identity_assurance.identity_checks, identity_assurance.identity_evidence_records, identity_assurance.identity_verification_cases. Lee identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_account_links.
+`POST /identity/me/practitioner/license-verification` la atiende `IdentitySelfServiceController.requestPractitionerLicense` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78). Exige sesión; el controlador no declara roles. Valida el cuerpo como `IdentityAssuranceRequestLicenseVerificationDto` (7 campos, 0 obligatorios). Delega en `IdentitySelfServiceService.requestPractitionerLicense`. Crea filas en identity_assurance.identity_checks, identity_assurance.identity_evidence_records, identity_assurance.identity_verification_cases. Lee common.file_versions, common.files, identity_assurance.identity_verification_cases, messaging.queued_jobs, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `common.file_versions` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
+| `common.files` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.openVerification → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `identity_assurance.identity_checks` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.openVerification → IdentityChecksRepository.create | `src/modules/identity_assurance/repositories/identity-checks.repository.ts:152` |
-| `identity_assurance.identity_evidence_records` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:68` |
+| `identity_assurance.identity_evidence_records` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:81` |
 | `identity_assurance.identity_verification_cases` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.openVerification → IdentityVerificationCasesRepository.create | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:75` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.openVerification → IdentityVerificationCasesRepository.countLiveForSubject | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:111` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.assertIsPractitioner → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/repositories/health-practitioner-profiles.repository.ts:64` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/repositories/jurisdiction-authorizations.repository.ts:60` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.resolvePersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/repositories/person-account-links.repository.ts:80` |
+| `messaging.queued_jobs` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.assertIsPractitioner → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:65` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestPractitionerLicense → IdentitySelfServiceService.requestPractitionerLicense → IdentitySelfServiceService.resolvePersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo — DTO `IdentityAssuranceRequestLicenseVerificationDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `evidenceFileId` | `string` | Sí | formato uuid | `@IsUUID()` | Archivo de evidencia ya subido a POST /common/files/upload | `src/modules/identity_assurance/dto/request-verification.dto.ts:21` |
-| `jurisdictionAuthorizationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Matrícula a verificar. Si se omite se usa la única del profesional. | `src/modules/identity_assurance/dto/request-verification.dto.ts:37` |
+| `evidenceFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Archivo único para clientes anteriores. Los clientes nuevos envían frente, reverso y tres capturas del reto de vida. | `src/modules/identity_assurance/dto/request-verification.dto.ts:24` |
+| `documentFrontFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:29` |
+| `documentBackFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:34` |
+| `livenessCenterFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:39` |
+| `livenessTurnLeftFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:44` |
+| `livenessTurnRightFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:49` |
+| `jurisdictionAuthorizationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Matrícula a verificar. Si se omite se usa la única del profesional. | `src/modules/identity_assurance/dto/request-verification.dto.ts:65` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
-{
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 <details><summary>Payload completo de ejemplo</summary>
@@ -1005,6 +1039,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 ```json
 {
   "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+  "documentFrontFileId": "00000000-0000-4000-8000-000000000001",
+  "documentBackFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessCenterFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnLeftFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnRightFileId": "00000000-0000-4000-8000-000000000001",
   "jurisdictionAuthorizationId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -1015,9 +1054,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `caseId` | `string` | Sí | formato uuid | — | Identificador asociado a case. | `src/modules/identity_assurance/dto/request-verification.dto.ts:46` |
-| `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:52` |
-| `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:61` |
+| `caseId` | `string` | Sí | formato uuid | — | Identificador asociado a case. | `src/modules/identity_assurance/dto/request-verification.dto.ts:74` |
+| `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:80` |
+| `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:89` |
 
 ### Respuestas posibles
 
@@ -1029,8 +1068,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Matrícula no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional; PreconditionFailedException: Indique qué matrícula quiere verificar; PreconditionFailedException: La matrícula pertenece a otro profesional |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional; PreconditionFailedException: Indique qué matrícula quiere verificar; PreconditionFailedException: La matrícula pertenece a otro profesional; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
 El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
 
@@ -1051,7 +1091,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentitySelfServiceController.requestTenantVerification` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78`
+- **Implementación:** `IdentitySelfServiceController.requestTenantVerification` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1061,29 +1101,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/me/tenants/{tenantId}/verification` la atiende `IdentitySelfServiceController.requestTenantVerification` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78). Exige sesión; el controlador no declara roles. Valida el cuerpo como `IdentityAssuranceRequestVerificationDto` (1 campo, 1 obligatorio). Delega en `IdentitySelfServiceService.requestTenantVerification`. Crea filas en identity_assurance.identity_checks, identity_assurance.identity_evidence_records, identity_assurance.identity_verification_cases. Lee directory.tenant_memberships, identity_assurance.identity_verification_cases.
+`POST /identity/me/tenants/{tenantId}/verification` la atiende `IdentitySelfServiceController.requestTenantVerification` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94). Exige sesión; el controlador no declara roles. Valida el cuerpo como `IdentityAssuranceRequestVerificationDto` (6 campos, 0 obligatorios). Delega en `IdentitySelfServiceService.requestTenantVerification`. Crea filas en identity_assurance.identity_checks, identity_assurance.identity_evidence_records, identity_assurance.identity_verification_cases. Lee common.file_versions, common.files, directory.tenant_memberships, identity_assurance.identity_verification_cases, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `common.file_versions` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestTenantVerification → IdentitySelfServiceService.requestTenantVerification → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
+| `common.files` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestTenantVerification → IdentitySelfServiceService.requestTenantVerification → IdentitySelfServiceService.openVerification → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestTenantVerification → IdentitySelfServiceService.requestTenantVerification → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `identity_assurance.identity_checks` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestTenantVerification → IdentitySelfServiceService.requestTenantVerification → IdentitySelfServiceService.openVerification → IdentityChecksRepository.create | `src/modules/identity_assurance/repositories/identity-checks.repository.ts:152` |
-| `identity_assurance.identity_evidence_records` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestTenantVerification → IdentitySelfServiceService.requestTenantVerification → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:68` |
+| `identity_assurance.identity_evidence_records` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestTenantVerification → IdentitySelfServiceService.requestTenantVerification → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:81` |
 | `identity_assurance.identity_verification_cases` | ESCRIBE | CREA | DIRECTA | IdentitySelfServiceController.requestTenantVerification → IdentitySelfServiceService.requestTenantVerification → IdentitySelfServiceService.openVerification → IdentityVerificationCasesRepository.create | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:75` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestTenantVerification → IdentitySelfServiceService.requestTenantVerification → IdentitySelfServiceService.openVerification → IdentityVerificationCasesRepository.countLiveForSubject | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:111` |
+| `messaging.queued_jobs` | LEE | LEE | DIRECTA | IdentitySelfServiceController.requestTenantVerification → IdentitySelfServiceService.requestTenantVerification → IdentitySelfServiceService.openVerification → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 
 ### Parámetros
 
@@ -1095,21 +1138,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `evidenceFileId` | `string` | Sí | formato uuid | `@IsUUID()` | Archivo de evidencia ya subido a POST /common/files/upload | `src/modules/identity_assurance/dto/request-verification.dto.ts:21` |
+| `evidenceFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Archivo único para clientes anteriores. Los clientes nuevos envían frente, reverso y tres capturas del reto de vida. | `src/modules/identity_assurance/dto/request-verification.dto.ts:24` |
+| `documentFrontFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:29` |
+| `documentBackFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:34` |
+| `livenessCenterFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:39` |
+| `livenessTurnLeftFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:44` |
+| `livenessTurnRightFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:49` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
-{
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
-}
+{}
 ```
 
 <details><summary>Payload completo de ejemplo</summary>
 
 ```json
 {
-  "evidenceFileId": "00000000-0000-4000-8000-000000000001"
+  "evidenceFileId": "00000000-0000-4000-8000-000000000001",
+  "documentFrontFileId": "00000000-0000-4000-8000-000000000001",
+  "documentBackFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessCenterFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnLeftFileId": "00000000-0000-4000-8000-000000000001",
+  "livenessTurnRightFileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1119,9 +1170,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `caseId` | `string` | Sí | formato uuid | — | Identificador asociado a case. | `src/modules/identity_assurance/dto/request-verification.dto.ts:46` |
-| `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:52` |
-| `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:61` |
+| `caseId` | `string` | Sí | formato uuid | — | Identificador asociado a case. | `src/modules/identity_assurance/dto/request-verification.dto.ts:74` |
+| `checkId` | `string` | Sí | formato uuid | — | Identificador asociado a check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:80` |
+| `status` | `string` | Sí | formato uuid | — | Estado del caso recién abierto | `src/modules/identity_assurance/dto/request-verification.dto.ts:89` |
 
 ### Respuestas posibles
 
@@ -1132,8 +1183,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No pertenece a esa institución; PreconditionFailedException: Sólo el titular o un administrador de la institución puede pedir su verificación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No pertenece a esa institución; PreconditionFailedException: Sólo el titular o un administrador de la institución puede pedir su verificación; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
 El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
 
@@ -1154,7 +1206,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentitySelfServiceController.listOwnCases` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:96`
+- **Implementación:** `IdentitySelfServiceController.listOwnCases` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:131`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1164,24 +1216,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /identity/me/verification-cases` la atiende `IdentitySelfServiceController.listOwnCases` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:96). Exige sesión; el controlador no declara roles. Delega en `IdentitySelfServiceService.listOwnCases`. Lee identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations, profiles.person_account_links.
+`GET /identity/me/verification-cases` la atiende `IdentitySelfServiceController.listOwnCases` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:131). Exige sesión; el controlador no declara roles. Delega en `IdentitySelfServiceService.listOwnCases`. Lee identity_assurance.identity_check_results, identity_assurance.identity_checks, identity_assurance.identity_evidence_records, identity_assurance.identity_manual_review_cases, identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:96` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:131` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `identity_assurance.identity_check_results` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listOwnCases → IdentitySelfServiceService.listOwnCases → IdentitySelfServiceService.toStatusResponse → IdentityCheckResultsRepository.findLatestByCheck | `src/modules/identity_assurance/repositories/identity-checks.repository.ts:381` |
+| `identity_assurance.identity_checks` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listOwnCases → IdentitySelfServiceService.listOwnCases → IdentitySelfServiceService.toStatusResponse → IdentityChecksRepository.findRequiredByCase | `src/modules/identity_assurance/repositories/identity-checks.repository.ts:238` |
+| `identity_assurance.identity_evidence_records` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listOwnCases → IdentitySelfServiceService.listOwnCases → IdentitySelfServiceService.toStatusResponse → IdentityEvidenceRecordsRepository.findByCase | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:129` |
+| `identity_assurance.identity_manual_review_cases` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listOwnCases → IdentitySelfServiceService.listOwnCases → IdentitySelfServiceService.toStatusResponse → IdentityManualReviewCasesRepository.findLatestDecidedByCase | `src/modules/identity_assurance/repositories/identity-manual-review.repository.ts:110` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listOwnCases → IdentitySelfServiceService.listOwnCases → IdentityVerificationCasesRepository.findBySubjects | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:137` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listOwnCases → IdentitySelfServiceService.listOwnCases → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/repositories/jurisdiction-authorizations.repository.ts:85` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listOwnCases → IdentitySelfServiceService.listOwnCases → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/repositories/person-account-links.repository.ts:80` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listOwnCases → IdentitySelfServiceService.listOwnCases → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listOwnCases → IdentitySelfServiceService.listOwnCases → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo
 
@@ -1191,10 +1247,24 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:70` |
-| `status` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/identity_assurance/dto/request-verification.dto.ts:76` |
-| `openedAt` | `string` | No | formato date-time | — | Valor de opened at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:82` |
-| `completedAt` | `string` | No | formato date-time | — | Valor de completed at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:88` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:147` |
+| `status` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/identity_assurance/dto/request-verification.dto.ts:153` |
+| `type` | `string` | Sí | — | — | Tipo de solicitud, derivado del sujeto del caso | `src/modules/identity_assurance/dto/request-verification.dto.ts:163` |
+| `evidenceFileId` | `string` | No | formato uuid | — | Archivo de evidencia aportado con la solicitud (`common.files`). Se descarga con `GET /common/files/:id/content`, que ya exige ser quien lo subió o tener un rol revisor: no hace falta un endpoint de descarga propio. | `src/modules/identity_assurance/dto/request-verification.dto.ts:172` |
+| `evidence` | `array<VerificationEvidenceDto>` | No | — | — | Evidencias asociadas al expediente, en el orden de captura. | `src/modules/identity_assurance/dto/request-verification.dto.ts:176` |
+| `evidence[].id` | `string` | No | formato uuid | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:95` |
+| `evidence[].evidenceTypeConceptId` | `string` | No | formato uuid | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:98` |
+| `evidence[].evidenceFileId` | `string` | No | formato uuid | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:101` |
+| `evidence[].createdAt` | `string` | No | formato date-time | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:104` |
+| `evidence[].sequence` | `number` | No | — | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:107` |
+| `reasonText` | `string` | No | — | — | Motivo registrado por quien decidió el caso en revisión manual, cuando lo hubo. Un caso resuelto automáticamente (sin escalar) no tiene motivo de texto: el trace de `checks` es la explicación disponible en ese caso. | `src/modules/identity_assurance/dto/request-verification.dto.ts:184` |
+| `checks` | `array<CaseCheckDto>` | No | — | — | Traza de los checks del caso, del planificado al más reciente. Sólo se completa en la consulta de detalle (`getOwnCaseStatus`); la lista no la trae para no pagar N+1 por fila que nadie mira. | `src/modules/identity_assurance/dto/request-verification.dto.ts:192` |
+| `checks[].checkTypeConceptId` | `string` | No | formato uuid | — | Identificador asociado a check type concept. | `src/modules/identity_assurance/dto/request-verification.dto.ts:120` |
+| `checks[].status` | `string` | No | formato uuid | — | Identificador asociado a status concept del check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:126` |
+| `checks[].resultConceptId` | `string` | No | formato uuid | — | Resultado del check, cuando ya corrió (`identity_check_results`). | `src/modules/identity_assurance/dto/request-verification.dto.ts:132` |
+| `checks[].checkedAt` | `string` | No | formato date-time | — | Cuándo se registró ese resultado. | `src/modules/identity_assurance/dto/request-verification.dto.ts:138` |
+| `openedAt` | `string` | No | formato date-time | — | Valor de opened at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:198` |
+| `completedAt` | `string` | No | formato date-time | — | Valor de completed at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:204` |
 
 ### Respuestas posibles
 
@@ -1211,7 +1281,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:149` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:160` |
 
 ### Flujos
 
@@ -1226,7 +1296,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentitySelfServiceController.getOwnCaseStatus` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:104`
+- **Implementación:** `IdentitySelfServiceController.getOwnCaseStatus` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:139`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1236,26 +1306,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /identity/me/verification-cases/{caseId}` la atiende `IdentitySelfServiceController.getOwnCaseStatus` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:104). Exige sesión; el controlador no declara roles. Delega en `IdentitySelfServiceService.getOwnCaseStatus`. Lee directory.tenant_memberships, identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations, profiles.person_account_links.
+`GET /identity/me/verification-cases/{caseId}` la atiende `IdentitySelfServiceController.getOwnCaseStatus` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:139). Exige sesión; el controlador no declara roles. Delega en `IdentitySelfServiceService.getOwnCaseStatus`. Lee directory.tenant_memberships, identity_assurance.identity_check_results, identity_assurance.identity_checks, identity_assurance.identity_evidence_records, identity_assurance.identity_manual_review_cases, identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:104` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: caseId | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:104` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:139` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: caseId | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:139` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | IdentitySelfServiceController.getOwnCaseStatus → IdentitySelfServiceService.getOwnCaseStatus → IdentitySelfServiceService.isOwnSubject → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `identity_assurance.identity_check_results` | LEE | LEE | DIRECTA | IdentitySelfServiceController.getOwnCaseStatus → IdentitySelfServiceService.getOwnCaseStatus → IdentitySelfServiceService.toStatusResponse → IdentityCheckResultsRepository.findLatestByCheck | `src/modules/identity_assurance/repositories/identity-checks.repository.ts:381` |
+| `identity_assurance.identity_checks` | LEE | LEE | DIRECTA | IdentitySelfServiceController.getOwnCaseStatus → IdentitySelfServiceService.getOwnCaseStatus → IdentitySelfServiceService.toStatusResponse → IdentityChecksRepository.findRequiredByCase | `src/modules/identity_assurance/repositories/identity-checks.repository.ts:238` |
+| `identity_assurance.identity_evidence_records` | LEE | LEE | DIRECTA | IdentitySelfServiceController.getOwnCaseStatus → IdentitySelfServiceService.getOwnCaseStatus → IdentitySelfServiceService.toStatusResponse → IdentityEvidenceRecordsRepository.findByCase | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:129` |
+| `identity_assurance.identity_manual_review_cases` | LEE | LEE | DIRECTA | IdentitySelfServiceController.getOwnCaseStatus → IdentitySelfServiceService.getOwnCaseStatus → IdentitySelfServiceService.toStatusResponse → IdentityManualReviewCasesRepository.findLatestDecidedByCase | `src/modules/identity_assurance/repositories/identity-manual-review.repository.ts:110` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentitySelfServiceController.getOwnCaseStatus → IdentitySelfServiceService.getOwnCaseStatus → IdentityVerificationCasesRepository.findById | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:64` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentitySelfServiceController.getOwnCaseStatus → IdentitySelfServiceService.getOwnCaseStatus → IdentitySelfServiceService.isOwnSubject → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/repositories/jurisdiction-authorizations.repository.ts:60` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.getOwnCaseStatus → IdentitySelfServiceService.getOwnCaseStatus → IdentitySelfServiceService.isOwnSubject → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/repositories/person-account-links.repository.ts:80` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentitySelfServiceController.getOwnCaseStatus → IdentitySelfServiceService.getOwnCaseStatus → IdentitySelfServiceService.isOwnSubject → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:65` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.getOwnCaseStatus → IdentitySelfServiceService.getOwnCaseStatus → IdentitySelfServiceService.isOwnSubject → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Parámetros
 
@@ -1271,10 +1345,24 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:70` |
-| `status` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/identity_assurance/dto/request-verification.dto.ts:76` |
-| `openedAt` | `string` | No | formato date-time | — | Valor de opened at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:82` |
-| `completedAt` | `string` | No | formato date-time | — | Valor de completed at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:88` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:147` |
+| `status` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/identity_assurance/dto/request-verification.dto.ts:153` |
+| `type` | `string` | Sí | — | — | Tipo de solicitud, derivado del sujeto del caso | `src/modules/identity_assurance/dto/request-verification.dto.ts:163` |
+| `evidenceFileId` | `string` | No | formato uuid | — | Archivo de evidencia aportado con la solicitud (`common.files`). Se descarga con `GET /common/files/:id/content`, que ya exige ser quien lo subió o tener un rol revisor: no hace falta un endpoint de descarga propio. | `src/modules/identity_assurance/dto/request-verification.dto.ts:172` |
+| `evidence` | `array<VerificationEvidenceDto>` | No | — | — | Evidencias asociadas al expediente, en el orden de captura. | `src/modules/identity_assurance/dto/request-verification.dto.ts:176` |
+| `evidence[].id` | `string` | No | formato uuid | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:95` |
+| `evidence[].evidenceTypeConceptId` | `string` | No | formato uuid | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:98` |
+| `evidence[].evidenceFileId` | `string` | No | formato uuid | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:101` |
+| `evidence[].createdAt` | `string` | No | formato date-time | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:104` |
+| `evidence[].sequence` | `number` | No | — | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:107` |
+| `reasonText` | `string` | No | — | — | Motivo registrado por quien decidió el caso en revisión manual, cuando lo hubo. Un caso resuelto automáticamente (sin escalar) no tiene motivo de texto: el trace de `checks` es la explicación disponible en ese caso. | `src/modules/identity_assurance/dto/request-verification.dto.ts:184` |
+| `checks` | `array<CaseCheckDto>` | No | — | — | Traza de los checks del caso, del planificado al más reciente. Sólo se completa en la consulta de detalle (`getOwnCaseStatus`); la lista no la trae para no pagar N+1 por fila que nadie mira. | `src/modules/identity_assurance/dto/request-verification.dto.ts:192` |
+| `checks[].checkTypeConceptId` | `string` | No | formato uuid | — | Identificador asociado a check type concept. | `src/modules/identity_assurance/dto/request-verification.dto.ts:120` |
+| `checks[].status` | `string` | No | formato uuid | — | Identificador asociado a status concept del check. | `src/modules/identity_assurance/dto/request-verification.dto.ts:126` |
+| `checks[].resultConceptId` | `string` | No | formato uuid | — | Resultado del check, cuando ya corrió (`identity_check_results`). | `src/modules/identity_assurance/dto/request-verification.dto.ts:132` |
+| `checks[].checkedAt` | `string` | No | formato date-time | — | Cuándo se registró ese resultado. | `src/modules/identity_assurance/dto/request-verification.dto.ts:138` |
+| `openedAt` | `string` | No | formato date-time | — | Valor de opened at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:198` |
+| `completedAt` | `string` | No | formato date-time | — | Valor de completed at mantenido por la instancia. | `src/modules/identity_assurance/dto/request-verification.dto.ts:204` |
 
 ### Respuestas posibles
 
@@ -1299,14 +1387,86 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. GET /identity/verification-cases
+## 13. GET /identity/me/verification-types
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar los tipos de solicitud de verificación disponibles
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `IdentitySelfServiceController.listAvailableTypes` — `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:116`
+
+### Qué es y para qué sirve (negocio)
+
+Listar los tipos de solicitud de verificación disponibles. Dentro del módulo (descripción del modelo, en inglés): «Verifies patients, practitioners, representatives and organization operators against authoritative ministries, civil registries, professional boards and government data platforms.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_27_identity_assurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /identity/me/verification-types` la atiende `IdentitySelfServiceController.listAvailableTypes` (src/modules/identity_assurance/controllers/identity-self-service.controller.ts:116). Exige sesión; el controlador no declara roles. Delega en `IdentitySelfServiceService.listAvailableTypes`. Lee identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_account_links.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:116` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listAvailableTypes → IdentitySelfServiceService.listAvailableTypes → IdentityVerificationCasesRepository.countLiveForSubject | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:111` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listAvailableTypes → IdentitySelfServiceService.listAvailableTypes → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listAvailableTypes → IdentitySelfServiceService.listAvailableTypes → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentitySelfServiceController.listAvailableTypes → IdentitySelfServiceService.listAvailableTypes → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<VerificationTypesResponseDto>` · DTO `VerificationTypesResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `types` | `array<VerificationTypeDto>` | Sí | — | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:236` |
+| `types[].code` | `string` | Sí | — | — | Código estable del tipo, el mismo que `VerificationStatusResponseDto.type`. | `src/modules/identity_assurance/dto/request-verification.dto.ts:211` |
+| `types[].label` | `string` | Sí | — | — | Etiqueta legible para el selector de "nueva solicitud". | `src/modules/identity_assurance/dto/request-verification.dto.ts:215` |
+| `types[].jurisdictionAuthorizationId` | `string` | No | formato uuid | — | Matrícula concreta a la que aplica este tipo, sólo para `PRACTITIONER_LICENSE`: un profesional puede tener más de una. | `src/modules/identity_assurance/dto/request-verification.dto.ts:222` |
+| `types[].hasPendingRequest` | `boolean` | Sí | — | — | Ya hay una solicitud viva (abierta o en verificación) para este tipo concreto. El backend igual rechaza con 409 si se manda de todas formas: esto es lo que deja a la pantalla no ofrecer el envío desde antes. | `src/modules/identity_assurance/dto/request-verification.dto.ts:230` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / identity assurance — etapa `ctrl:IdentitySelfServiceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 14. GET /identity/verification-cases
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los casos que esperan revisión
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityCasesController.listQueue` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:66`
+- **Implementación:** `IdentityCasesController.listQueue` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:68`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1316,16 +1476,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /identity/verification-cases` la atiende `IdentityCasesController.listQueue` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:66). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IdentityCasesService.listQueue`. Lee identity_assurance.identity_verification_cases.
+`GET /identity/verification-cases` la atiende `IdentityCasesController.listQueue` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:68). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IdentityCasesService.listQueue`. Lee identity_assurance.identity_verification_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:68` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1348,15 +1508,15 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `cases` | `array<QueuedCaseDto>` | Sí | — | — | Valor de cases mantenido por la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:65` |
-| `cases[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:14` |
-| `cases[].status` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/identity_assurance/dto/case-queue.dto.ts:20` |
-| `cases[].subjectTypeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a subject type concept. | `src/modules/identity_assurance/dto/case-queue.dto.ts:26` |
-| `cases[].subjectEntityId` | `string` | Sí | formato uuid | — | Identificador asociado a subject entity. | `src/modules/identity_assurance/dto/case-queue.dto.ts:32` |
-| `cases[].identityVerificationPolicyId` | `string` | Sí | formato uuid | — | Identificador asociado a identity verification policy. | `src/modules/identity_assurance/dto/case-queue.dto.ts:38` |
-| `cases[].riskScore` | `string` | No | — | — | Valor de risk score mantenido por la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:44` |
-| `cases[].openedAt` | `string` | No | formato date-time | — | Valor de opened at mantenido por la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:50` |
-| `cases[].expiresAt` | `string` | No | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:56` |
+| `cases` | `array<QueuedCaseDto>` | Sí | — | — | Valor de cases mantenido por la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:66` |
+| `cases[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:15` |
+| `cases[].status` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/identity_assurance/dto/case-queue.dto.ts:21` |
+| `cases[].subjectTypeConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a subject type concept. | `src/modules/identity_assurance/dto/case-queue.dto.ts:27` |
+| `cases[].subjectEntityId` | `string` | Sí | formato uuid | — | Identificador asociado a subject entity. | `src/modules/identity_assurance/dto/case-queue.dto.ts:33` |
+| `cases[].identityVerificationPolicyId` | `string` | Sí | formato uuid | — | Identificador asociado a identity verification policy. | `src/modules/identity_assurance/dto/case-queue.dto.ts:39` |
+| `cases[].riskScore` | `string` | No | — | — | Valor de risk score mantenido por la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:45` |
+| `cases[].openedAt` | `string` | No | formato date-time | — | Valor de opened at mantenido por la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:51` |
+| `cases[].expiresAt` | `string` | No | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/identity_assurance/dto/case-queue.dto.ts:57` |
 
 ### Respuestas posibles
 
@@ -1381,14 +1541,14 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 14. POST /identity/verification-cases
+## 15. POST /identity/verification-cases
 
 - **Origen:** CONTRATO
 - **Nombre:** Iniciar un caso de verificación de identidad
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityCasesController.open` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:101`
+- **Implementación:** `IdentityCasesController.open` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:123`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1398,18 +1558,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/verification-cases` la atiende `IdentityCasesController.open` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:101). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `OpenCaseDto` (6 campos, 3 obligatorios). Delega en `IdentityCasesService.openCase`. Crea filas en identity_assurance.identity_verification_cases. Lee identity_assurance.identity_verification_policies.
+`POST /identity/verification-cases` la atiende `IdentityCasesController.open` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:123). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `OpenCaseDto` (6 campos, 3 obligatorios). Delega en `IdentityCasesService.openCase`. Crea filas en identity_assurance.identity_verification_cases. Lee identity_assurance.identity_verification_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:101` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:123` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1490,14 +1650,94 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 15. POST /identity/verification-cases/{id}/assertions
+## 16. GET /identity/verification-cases/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Consultar expediente y evidencias de un caso
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `IdentityCasesController.getCaseDetail` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:90`
+
+### Qué es y para qué sirve (negocio)
+
+Consultar expediente y evidencias de un caso. Dentro del módulo (descripción del modelo, en inglés): «Verifies patients, practitioners, representatives and organization operators against authoritative ministries, civil registries, professional boards and government data platforms.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_27_identity_assurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /identity/verification-cases/{id}` la atiende `IdentityCasesController.getCaseDetail` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:90). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IdentityCasesService.getCaseDetail`. Lee identity_assurance.identity_evidence_records, identity_assurance.identity_verification_cases.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:90` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:90` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `identity_assurance.identity_evidence_records` | LEE | LEE | DIRECTA | IdentityCasesController.getCaseDetail → IdentityCasesService.getCaseDetail → IdentityEvidenceRecordsRepository.findByCase | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:129` |
+| `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityCasesController.getCaseDetail → IdentityCasesService.getCaseDetail → IdentityVerificationCasesRepository.findById | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:64` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<VerificationCaseDetailDto>` · DTO `VerificationCaseDetailDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `evidence` | `array<VerificationEvidenceDto>` | Sí | — | — | — | `src/modules/identity_assurance/dto/case-queue.dto.ts:72` |
+| `evidence[].id` | `string` | Sí | formato uuid | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:95` |
+| `evidence[].evidenceTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:98` |
+| `evidence[].evidenceFileId` | `string` | No | formato uuid | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:101` |
+| `evidence[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:104` |
+| `evidence[].sequence` | `number` | Sí | — | — | — | `src/modules/identity_assurance/dto/request-verification.dto.ts:107` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / identity assurance — etapa `ctrl:IdentityCasesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 17. POST /identity/verification-cases/{id}/assertions
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir una aserción de identidad con nivel de aseguramiento
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityCasesController.issueAssertion` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:165`
+- **Implementación:** `IdentityCasesController.issueAssertion` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:212`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1507,19 +1747,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/verification-cases/{id}/assertions` la atiende `IdentityCasesController.issueAssertion` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:165). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IssueAssertionDto` (4 campos, 1 obligatorio). Delega en `IdentityCasesService.issueAssertion`. Crea filas en identity_assurance.identity_assertions. Lee identity_assurance.identity_checks, identity_assurance.identity_verification_cases.
+`POST /identity/verification-cases/{id}/assertions` la atiende `IdentityCasesController.issueAssertion` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:212). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `IssueAssertionDto` (4 campos, 1 obligatorio). Delega en `IdentityCasesService.issueAssertion`. Crea filas en identity_assurance.identity_assertions. Lee identity_assurance.identity_checks, identity_assurance.identity_verification_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:165` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:165` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:212` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:212` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1601,14 +1841,14 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 16. POST /identity/verification-cases/{id}/checks:plan
+## 18. POST /identity/verification-cases/{id}/checks:plan
 
 - **Origen:** CONTRATO
 - **Nombre:** Planificar los checks requeridos del caso
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityCasesController.planChecks` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:126`
+- **Implementación:** `IdentityCasesController.planChecks` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:158`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1618,19 +1858,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/verification-cases/{id}/checks:plan` la atiende `IdentityCasesController.planChecks` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:126). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PlanChecksDto` (4 campos, 2 obligatorios). Delega en `IdentityCasesService.planChecks`. Crea filas en identity_assurance.identity_checks. Lee identity_assurance.identity_verification_cases.
+`POST /identity/verification-cases/{id}/checks:plan` la atiende `IdentityCasesController.planChecks` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:158). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PlanChecksDto` (4 campos, 2 obligatorios). Delega en `IdentityCasesService.planChecks`. Crea filas en identity_assurance.identity_checks. Lee identity_assurance.identity_verification_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:126` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:126` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:158` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:158` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1717,14 +1957,14 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 17. POST /identity/verification-cases/{id}/evidence
+## 19. POST /identity/verification-cases/{id}/evidence
 
 - **Origen:** CONTRATO
 - **Nombre:** Aportar evidencia documental bajo consentimiento
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityCasesController.submitEvidence` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:113`
+- **Implementación:** `IdentityCasesController.submitEvidence` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:140`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1734,26 +1974,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/verification-cases/{id}/evidence` la atiende `IdentityCasesController.submitEvidence` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:113). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `SubmitEvidenceDto` (7 campos, 1 obligatorio). Delega en `IdentityCasesService.submitEvidence`. Crea filas en identity_assurance.identity_evidence_records. Lee identity_assurance.identity_verification_cases.
+`POST /identity/verification-cases/{id}/evidence` la atiende `IdentityCasesController.submitEvidence` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:140). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `SubmitEvidenceDto` (7 campos, 1 obligatorio). Delega en `IdentityCasesService.submitEvidence`. Crea filas en identity_assurance.identity_evidence_records. Lee common.file_versions, common.files, identity_assurance.identity_verification_cases, messaging.queued_jobs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:113` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:113` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:140` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:140` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `identity_assurance.identity_evidence_records` | ESCRIBE | CREA | DIRECTA | IdentityCasesController.submitEvidence → IdentityCasesService.submitEvidence → IdentityEvidenceRecordsRepository.create | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:68` |
+| `common.file_versions` | LEE | LEE | DIRECTA | IdentityCasesController.submitEvidence → IdentityCasesService.submitEvidence → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
+| `common.files` | LEE | LEE | DIRECTA | IdentityCasesController.submitEvidence → IdentityCasesService.submitEvidence → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:182` |
+| `identity_assurance.identity_evidence_records` | ESCRIBE | CREA | DIRECTA | IdentityCasesController.submitEvidence → IdentityCasesService.submitEvidence → IdentityEvidenceRecordsRepository.create | `src/modules/identity_assurance/repositories/identity-evidence.repository.ts:81` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityCasesController.submitEvidence → IdentityCasesService.submitEvidence → IdentityCasesService.loadCase → IdentityVerificationCasesRepository.findById | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:64` |
+| `messaging.queued_jobs` | LEE | LEE | DIRECTA | IdentityCasesController.submitEvidence → IdentityCasesService.submitEvidence → IdentityEvidenceRecordsRepository.create → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 
 ### Parámetros
 
@@ -1816,6 +2059,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no admite evidencia en su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT |
 
 El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
 
@@ -1831,14 +2075,14 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 18. POST /identity/verification-cases/{id}/fraud-signals
+## 20. POST /identity/verification-cases/{id}/fraud-signals
 
 - **Origen:** CONTRATO
 - **Nombre:** Detectar y registrar una señal de fraude
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityCasesController.raiseFraudSignal` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:139`
+- **Implementación:** `IdentityCasesController.raiseFraudSignal` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:176`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1848,19 +2092,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/verification-cases/{id}/fraud-signals` la atiende `IdentityCasesController.raiseFraudSignal` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:139). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RaiseFraudSignalDto` (5 campos, 2 obligatorios). Delega en `IdentityCasesService.raiseFraudSignal`. Crea filas en identity_assurance.identity_fraud_signals. Lee identity_assurance.identity_verification_cases.
+`POST /identity/verification-cases/{id}/fraud-signals` la atiende `IdentityCasesController.raiseFraudSignal` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:176). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RaiseFraudSignalDto` (5 campos, 2 obligatorios). Delega en `IdentityCasesService.raiseFraudSignal`. Crea filas en identity_assurance.identity_fraud_signals. Lee identity_assurance.identity_verification_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:139` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1941,14 +2185,14 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 19. POST /identity/verification-cases/{id}/manual-review
+## 21. POST /identity/verification-cases/{id}/manual-review
 
 - **Origen:** CONTRATO
 - **Nombre:** Escalar el caso a revisión manual
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityCasesController.openManualReview` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:152`
+- **Implementación:** `IdentityCasesController.openManualReview` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:194`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1958,19 +2202,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/verification-cases/{id}/manual-review` la atiende `IdentityCasesController.openManualReview` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:152). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `OpenManualReviewDto` (2 campos, 1 obligatorio). Delega en `IdentityCasesService.openManualReview`. Crea filas en identity_assurance.identity_manual_review_cases. Lee identity_assurance.identity_manual_review_cases, identity_assurance.identity_verification_cases.
+`POST /identity/verification-cases/{id}/manual-review` la atiende `IdentityCasesController.openManualReview` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:194). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `OpenManualReviewDto` (2 campos, 1 obligatorio). Delega en `IdentityCasesService.openManualReview`. Crea filas en identity_assurance.identity_manual_review_cases. Lee identity_assurance.identity_manual_review_cases, identity_assurance.identity_verification_cases.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:152` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:152` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:194` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:194` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2048,14 +2292,14 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 20. POST /identity/verification-cases/expire-sweep
+## 22. POST /identity/verification-cases/expire-sweep
 
 - **Origen:** CONTRATO
 - **Nombre:** Expirar por lote los casos vencidos (job programado)
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityCasesController.expireSweep` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:88`
+- **Implementación:** `IdentityCasesController.expireSweep` — `src/modules/identity_assurance/controllers/identity-cases.controller.ts:105`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2065,16 +2309,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/verification-cases/expire-sweep` la atiende `IdentityCasesController.expireSweep` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:88). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IdentityCasesService.expireSweep`. Crea filas en audit.verified_badges_history. Actualiza community.public_profiles, community.verified_badges, identity_assurance.identity_checks, identity_assurance.identity_verification_cases. Lee community.public_profiles, community.verified_badges, identity_assurance.identity_checks, identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations.
+`POST /identity/verification-cases/expire-sweep` la atiende `IdentityCasesController.expireSweep` (src/modules/identity_assurance/controllers/identity-cases.controller.ts:105). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IdentityCasesService.expireSweep`. Crea filas en audit.verified_badges_history. Actualiza community.public_profiles, community.verified_badges, identity_assurance.identity_checks, identity_assurance.identity_verification_cases. Lee community.public_profiles, community.verified_badges, identity_assurance.identity_checks, identity_assurance.identity_verification_cases, profiles.jurisdiction_authorizations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:88` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:105` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2085,11 +2329,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.public_profiles` | LEE | LEE | DIRECTA | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
 | `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.revoke | `src/modules/community/repositories/verified-badges.repository.ts:140` |
 | `community.verified_badges` | LEE | LEE | DIRECTA | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.findAllBySubject | `src/modules/community/repositories/verified-badges.repository.ts:73` |
-| `identity_assurance.identity_checks` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep | `src/modules/identity_assurance/services/identity-cases.service.ts:484` |
+| `identity_assurance.identity_checks` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep | `src/modules/identity_assurance/services/identity-cases.service.ts:519` |
 | `identity_assurance.identity_checks` | LEE | LEE | DIRECTA | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityChecksRepository.findPendingByCase | `src/modules/identity_assurance/repositories/identity-checks.repository.ts:173` |
-| `identity_assurance.identity_verification_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep | `src/modules/identity_assurance/services/identity-cases.service.ts:476` |
+| `identity_assurance.identity_verification_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep | `src/modules/identity_assurance/services/identity-cases.service.ts:511` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationCasesRepository.findExpirable | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:177` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → IdentityVerificationEffectsService.publicSubjectOf → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/repositories/jurisdiction-authorizations.repository.ts:60` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityCasesController.expireSweep → IdentityCasesService.expireSweep → IdentityVerificationEffectsService.applyRevoked → IdentityVerificationEffectsService.publicSubjectOf → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:65` |
 
 ### Cuerpo
 
@@ -2125,14 +2369,14 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 21. POST /identity/verification-policies
+## 23. POST /identity/verification-policies
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una política de verificación de identidad (IAL/AAL)
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityPoliciesController.create` — `src/modules/identity_assurance/controllers/identity-policies.controller.ts:26`
+- **Implementación:** `IdentityPoliciesController.create` — `src/modules/identity_assurance/controllers/identity-policies.controller.ts:31`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2142,18 +2386,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /identity/verification-policies` la atiende `IdentityPoliciesController.create` (src/modules/identity_assurance/controllers/identity-policies.controller.ts:26). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePolicyDto` (9 campos, 4 obligatorios). Delega en `IdentityPoliciesService.createPolicy`. Crea filas en identity_assurance.identity_verification_policies.
+`POST /identity/verification-policies` la atiende `IdentityPoliciesController.create` (src/modules/identity_assurance/controllers/identity-policies.controller.ts:31). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePolicyDto` (9 campos, 4 obligatorios). Delega en `IdentityPoliciesService.createPolicy`. Crea filas en identity_assurance.identity_verification_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-policies.controller.ts:26` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-policies.controller.ts:31` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2236,14 +2480,14 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 22. POST /internal/identity/checks/{id}/attempts
+## 24. POST /internal/identity/checks/{id}/attempts
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar el intento del worker contra la autoridad externa
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityWorkerController.recordAttempt` — `src/modules/identity_assurance/controllers/identity-worker.controller.ts:61`
+- **Implementación:** `IdentityWorkerController.recordAttempt` — `src/modules/identity_assurance/controllers/identity-worker.controller.ts:109`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2253,19 +2497,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/identity/checks/{id}/attempts` la atiende `IdentityWorkerController.recordAttempt` (src/modules/identity_assurance/controllers/identity-worker.controller.ts:61). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Valida el cuerpo como `IdentityAssuranceRecordAttemptDto` (7 campos, 1 obligatorio). Delega en `IdentityChecksService.recordAttempt`. Crea filas en identity_assurance.identity_verification_attempts. Actualiza identity_assurance.identity_checks. Lee identity_assurance.identity_checks, identity_assurance.identity_verification_attempts.
+`POST /internal/identity/checks/{id}/attempts` la atiende `IdentityWorkerController.recordAttempt` (src/modules/identity_assurance/controllers/identity-worker.controller.ts:109). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Valida el cuerpo como `IdentityAssuranceRecordAttemptDto` (7 campos, 1 obligatorio). Delega en `IdentityChecksService.recordAttempt`. Crea filas en identity_assurance.identity_verification_attempts. Actualiza identity_assurance.identity_checks. Lee identity_assurance.identity_checks, identity_assurance.identity_verification_attempts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:61` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:109` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:109` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2344,7 +2588,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:117` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:128` |
 
 ### Flujos
 
@@ -2352,14 +2596,14 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 23. POST /internal/identity/checks/{id}/results
+## 25. POST /internal/identity/checks/{id}/results
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar el veredicto que devolvió la autoridad externa
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityWorkerController.recordResult` — `src/modules/identity_assurance/controllers/identity-worker.controller.ts:79`
+- **Implementación:** `IdentityWorkerController.recordResult` — `src/modules/identity_assurance/controllers/identity-worker.controller.ts:132`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2369,19 +2613,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/identity/checks/{id}/results` la atiende `IdentityWorkerController.recordResult` (src/modules/identity_assurance/controllers/identity-worker.controller.ts:79). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Valida el cuerpo como `RecordResultDto` (4 campos, 1 obligatorio). Delega en `IdentityChecksService.recordResult`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations. Lee community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_authority_endpoints, identity_assurance.identity_check_results, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases y 2 más.
+`POST /internal/identity/checks/{id}/results` la atiende `IdentityWorkerController.recordResult` (src/modules/identity_assurance/controllers/identity-worker.controller.ts:132). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Valida el cuerpo como `RecordResultDto` (4 campos, 1 obligatorio). Delega en `IdentityChecksService.recordResult`. Crea filas en audit.verified_badges_history, community.verified_badges, identity_assurance.identity_assertions, identity_assurance.identity_check_results. Actualiza community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations. Lee community.public_profiles, community.verified_badges, directory.tenants, identity_assurance.identity_authority_endpoints, identity_assurance.identity_check_results, identity_assurance.identity_checks, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases y 2 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:79` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:132` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:132` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2406,9 +2650,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `identity_assurance.identity_verification_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase | `src/modules/identity_assurance/services/identity-checks.service.ts:376` |
 | `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityVerificationCasesRepository.findById | `src/modules/identity_assurance/repositories/identity-cases.repository.ts:64` |
 | `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:198` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/repositories/health-practitioner-profiles.repository.ts:64` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense | `src/modules/identity_assurance/services/identity-verification-effects.service.ts:188` |
-| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/repositories/jurisdiction-authorizations.repository.ts:60` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityWorkerController.recordResult → IdentityChecksService.recordResult → IdentityChecksService.settleCase → IdentityChecksService.verifyCase → IdentityVerificationEffectsService.applyVerified → IdentityVerificationEffectsService.activateLicense → JurisdictionAuthorizationsRepository.findById | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:65` |
 
 ### Parámetros
 
@@ -2476,7 +2720,7 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:136` |
+| INTEGRACION | `test/integration/identity-verification-self-service.int-spec.ts:147` |
 
 ### Flujos
 
@@ -2484,14 +2728,14 @@ El árbol de decisión completo está en [flujos](../flujos/identity_assurance.m
 
 ---
 
-## 24. GET /internal/identity/checks/dispatchable
+## 26. GET /internal/identity/checks/dispatchable
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los checks que el worker debe atender en este tick
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IdentityWorkerController.listDispatchable` — `src/modules/identity_assurance/controllers/identity-worker.controller.ts:49`
+- **Implementación:** `IdentityWorkerController.listDispatchable` — `src/modules/identity_assurance/controllers/identity-worker.controller.ts:97`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2501,17 +2745,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /internal/identity/checks/dispatchable` la atiende `IdentityWorkerController.listDispatchable` (src/modules/identity_assurance/controllers/identity-worker.controller.ts:49). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IdentityChecksService.listDispatchable`. Lee identity_assurance.identity_checks, identity_assurance.identity_verification_attempts.
+`GET /internal/identity/checks/dispatchable` la atiende `IdentityWorkerController.listDispatchable` (src/modules/identity_assurance/controllers/identity-worker.controller.ts:97). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `IdentityChecksService.listDispatchable`. Lee identity_assurance.identity_checks, identity_assurance.identity_verification_attempts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:97` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2551,6 +2795,199 @@ La operación no recibe cuerpo.
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / identity assurance — etapa `ctrl:IdentityWorkerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 27. POST /internal/identity/evidence/lifecycle-scan
+
+- **Origen:** CONTRATO
+- **Nombre:** Evaluate configured evidence lifecycle; destructive runtime remains blocked
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** ALTO — Borra filas
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `IdentityWorkerController.lifecycleScan` — `src/modules/identity_assurance/controllers/identity-worker.controller.ts:79`
+
+### Qué es y para qué sirve (negocio)
+
+Evaluate configured evidence lifecycle; destructive runtime remains blocked. Dentro del módulo (descripción del modelo, en inglés): «Verifies patients, practitioners, representatives and organization operators against authoritative ministries, civil registries, professional boards and government data platforms.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_27_identity_assurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /internal/identity/evidence/lifecycle-scan` la atiende `IdentityWorkerController.lifecycleScan` (src/modules/identity_assurance/controllers/identity-worker.controller.ts:79). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `EvidenceLifecycleScanDto` (0 campos, 0 obligatorios). Delega en `IdentityEvidenceLifecycleService.scan`. Crea filas en messaging.queued_jobs, system_ops.record_revisions. Actualiza common.files, identity_assurance.identity_evidence_records. Borra de common.file_derivatives, common.file_versions, common.files, identity_assurance.identity_evidence_records. Lee audio_assets.audio_assets, common.file_derivatives, common.file_versions, common.files, consent.consents, cross_store_consistency.deletion_targets, directory.tenant_memberships, directory.tenants y 20 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SYSTEM | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:79` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audio_assets.audio_assets` | LEE | LEE | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → StorageReferenceRepository.snapshot | `src/common/storage/storage-reference.repository.ts:76` |
+| `common.file_derivatives` | BORRA | BORRA | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute → IdentityEvidenceDispositionRepository.apply | `src/modules/identity_assurance/repositories/identity-evidence-disposition.repository.ts:142` |
+| `common.file_derivatives` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:161` |
+| `common.file_versions` | BORRA | BORRA | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute → IdentityEvidenceDispositionRepository.apply | `src/modules/identity_assurance/repositories/identity-evidence-disposition.repository.ts:147` |
+| `common.file_versions` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:138` |
+| `common.files` | BORRA | BORRA | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute → IdentityEvidenceDispositionRepository.apply | `src/modules/identity_assurance/repositories/identity-evidence-disposition.repository.ts:151` |
+| `common.files` | ESCRIBE | ACTUALIZA | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute → IdentityEvidenceDispositionRepository.apply | `src/modules/identity_assurance/repositories/identity-evidence-disposition.repository.ts:129` |
+| `common.files` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:176` |
+| `consent.consents` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:287` |
+| `cross_store_consistency.deletion_targets` | LEE | LEE | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → StorageReferenceRepository.snapshot | `src/common/storage/storage-reference.repository.ts:93` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:258` |
+| `directory.tenants` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:221` |
+| `identity_assurance.identity_evidence_records` | BORRA | BORRA | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute → IdentityEvidenceDispositionRepository.apply | `src/modules/identity_assurance/repositories/identity-evidence-disposition.repository.ts:124` |
+| `identity_assurance.identity_evidence_records` | ESCRIBE | ACTUALIZA | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute → IdentityEvidenceDispositionRepository.apply | `src/modules/identity_assurance/repositories/identity-evidence-disposition.repository.ts:67` |
+| `identity_assurance.identity_evidence_records` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan | `src/modules/identity_assurance/services/identity-evidence-lifecycle.service.ts:213` |
+| `identity_assurance.identity_verification_attempts` | LEE | LEE | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → StorageReferenceRepository.snapshot | `src/common/storage/storage-reference.repository.ts:97` |
+| `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:118` |
+| `messaging.message_queues` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute → IdentityEvidenceDispositionRepository.apply → StorageLifecycleCoordinator.preparePurgeRetirement → QueuesRepository.findQueueByCode | `src/modules/messaging/repositories/queues.repository.ts:77` |
+| `messaging.queued_jobs` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute → IdentityEvidenceDispositionRepository.apply → StorageLifecycleCoordinator.preparePurgeRetirement → QueuesRepository.createJob | `src/modules/messaging/repositories/queues.repository.ts:101` |
+| `messaging.queued_jobs` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
+| `object_storage.multipart_uploads` | LEE | LEE | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → StorageReferenceRepository.snapshot | `src/common/storage/storage-reference.repository.ts:97` |
+| `object_storage.object_legal_holds` | LEE | LEE | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceHoldResolver.resolveWithObjects | `src/modules/system_ops/services/identity-evidence-hold-resolver.service.ts:65` |
+| `object_storage.object_locations` | LEE | LEE | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceHoldResolver.resolveWithObjects | `src/modules/system_ops/services/identity-evidence-hold-resolver.service.ts:65` |
+| `object_storage.object_retention_locks` | LEE | LEE | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceHoldResolver.resolveWithObjects | `src/modules/system_ops/services/identity-evidence-hold-resolver.service.ts:65` |
+| `object_storage.object_versions` | LEE | LEE | POR_SQL | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceHoldResolver.resolveWithObjects | `src/modules/system_ops/services/identity-evidence-hold-resolver.service.ts:65` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:196` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:242` |
+| `profiles.persons` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceLifecycleRepository.graph | `src/modules/identity_assurance/repositories/identity-evidence-lifecycle.repository.ts:235` |
+| `system_ops.anonymization_rules` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findAnonymizationRuleById | `src/modules/system_ops/repositories/governance.repository.ts:31` |
+| `system_ops.entity_registry` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve | `src/modules/identity_assurance/identity-evidence-lifecycle.config.ts:160` |
+| `system_ops.field_registry` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:259` |
+| `system_ops.legal_holds` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceHoldResolver.resolveWithObjects → IdentityEvidenceHoldResolver.resolve → LegalHoldRepository.findForLifecycleGraph | `src/modules/system_ops/repositories/legal-hold.repository.ts:17` |
+| `system_ops.record_revisions` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute → RetentionExecutionRepository.createRevision | `src/modules/system_ops/repositories/retention-execution.repository.ts:88` |
+| `system_ops.record_revisions` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityEvidenceDispositionExecutor.execute | `src/modules/identity_assurance/services/identity-evidence-disposition.executor.ts:63` |
+| `system_ops.retention_policies` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan → IdentityEvidenceLifecycleService.executeRule → IdentityEvidenceLifecycleService.execute → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findRetentionPolicyByCode | `src/modules/system_ops/repositories/governance.repository.ts:419` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IdentityWorkerController.lifecycleScan → IdentityEvidenceLifecycleService.scan | `src/modules/identity_assurance/services/identity-evidence-lifecycle.service.ts:204` |
+
+### Cuerpo — DTO `EvidenceLifecycleScanDto` · `application/json`
+
+_El DTO no declara campos documentables, o no se pudo leer._
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: MISSING_CONFIGURATION; StorageLifecycleDenied: MISSING_OR_DUPLICATE_BINDING; StorageLifecycleDenied: CONFIGURATION_INVALID; StorageLifecycleDenied: REGISTRY_BINDING_INVALID; StorageLifecycleDenied: RETENTION_POLICY_INVALID; StorageLifecycleDenied: POLICY_DISPOSITION_MISMATCH; StorageLifecycleDenied: OPERATION_NOT_AUTHORIZED; StorageLifecycleDenied: DUPLICATE_FIELD_RULE; StorageLifecycleDenied: FIELD_RULE_BINDING_INVALID; StorageLifecycleDenied: FIELD_OPERATION_UNSUPPORTED; StorageLifecycleDenied: ANONYMIZATION_RULES_MISSING; StorageLifecycleDenied: PURGE_METADATA_RULE_MISSING; StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: EVIDENCE_NOT_FOUND; StorageLifecycleDenied: CASE_UNKNOWN; StorageLifecycleDenied: OWNER_UNKNOWN; StorageLifecycleDenied: SUBJECT_TYPE_UNKNOWN; StorageLifecycleDenied: TENANT_MISMATCH; StorageLifecycleDenied: OWNER_TENANT_UNPROVEN; StorageLifecycleDenied: TENANT_UNKNOWN; StorageLifecycleDenied: SUBJECT_UNKNOWN; StorageLifecycleDenied: TENANT_AMBIGUOUS; StorageLifecycleDenied: FILE_GRAPH_UNKNOWN; StorageLifecycleDenied: CROSS_TENANT_OR_OWNER_FILE; StorageLifecycleDenied: CURRENT_VERSION_UNKNOWN; StorageLifecycleDenied: CONSENT_OWNERSHIP_UNKNOWN; StorageLifecycleDenied: EXTERNAL_REFERENCE_UNKNOWN; StorageLifecycleDenied: PHYSICAL_METADATA_CONFLICT; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT; StorageLifecycleDenied: GLOBAL_REFERENCE_VISIBILITY_UNPROVEN; StorageLifecycleDenied: REFERENCE_STATE_UNKNOWN; StorageLifecycleDenied: REFERENCE_CATALOG_UNKNOWN |
+
+El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / identity assurance — etapa `ctrl:IdentityWorkerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 28. POST /internal/identity/evidence/storage-purge-review
+
+- **Origen:** CONTRATO
+- **Nombre:** Recheck retired evidence objects; never grants physical delete
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `IdentityWorkerController.storagePurgeReview` — `src/modules/identity_assurance/controllers/identity-worker.controller.ts:63`
+
+### Qué es y para qué sirve (negocio)
+
+Recheck retired evidence objects; never grants physical delete. Dentro del módulo (descripción del modelo, en inglés): «Verifies patients, practitioners, representatives and organization operators against authoritative ministries, civil registries, professional boards and government data platforms.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_27_identity_assurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /internal/identity/evidence/storage-purge-review` la atiende `IdentityWorkerController.storagePurgeReview` (src/modules/identity_assurance/controllers/identity-worker.controller.ts:63). Exige sesión con alguno de los roles SYSTEM. Delega en `IdentityEvidenceStoragePurgeService.review`. Crea filas en system_ops.record_revisions. Actualiza messaging.queued_jobs. Lee audio_assets.audio_assets, common.file_versions, cross_store_consistency.deletion_targets, identity_assurance.identity_evidence_records, identity_assurance.identity_verification_attempts, identity_assurance.identity_verification_cases, messaging.queued_jobs, object_storage.multipart_uploads y 11 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SYSTEM | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:63` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audio_assets.audio_assets` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → StorageReferenceResolver.resolve → StorageReferenceRepository.snapshot | `src/common/storage/storage-reference.repository.ts:76` |
+| `common.file_versions` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → StorageReferenceResolver.resolve → StorageReferenceRepository.snapshot | `src/common/storage/storage-reference.repository.ts:70` |
+| `cross_store_consistency.deletion_targets` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → StorageReferenceResolver.resolve → StorageReferenceRepository.snapshot | `src/common/storage/storage-reference.repository.ts:93` |
+| `identity_assurance.identity_evidence_records` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → StorageReferenceResolver.resolve → StorageReferenceRepository.snapshot | `src/common/storage/storage-reference.repository.ts:97` |
+| `identity_assurance.identity_verification_attempts` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → StorageReferenceResolver.resolve → StorageReferenceRepository.snapshot | `src/common/storage/storage-reference.repository.ts:97` |
+| `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review | `src/modules/identity_assurance/services/identity-evidence-storage-purge.service.ts:129` |
+| `messaging.queued_jobs` | ESCRIBE | ACTUALIZA | POR_TIPO | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → StorageLifecycleCoordinator.dispatchPurge | `src/common/storage/storage-lifecycle-coordinator.service.ts:469` |
+| `messaging.queued_jobs` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → StorageLifecycleCoordinator.pendingPurges → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
+| `object_storage.multipart_uploads` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → StorageReferenceResolver.resolve → StorageReferenceRepository.snapshot | `src/common/storage/storage-reference.repository.ts:97` |
+| `object_storage.object_legal_holds` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityEvidenceHoldResolver.resolveWithObjects | `src/modules/system_ops/services/identity-evidence-hold-resolver.service.ts:65` |
+| `object_storage.object_locations` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityEvidenceHoldResolver.resolveWithObjects | `src/modules/system_ops/services/identity-evidence-hold-resolver.service.ts:65` |
+| `object_storage.object_retention_locks` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityEvidenceHoldResolver.resolveWithObjects | `src/modules/system_ops/services/identity-evidence-hold-resolver.service.ts:65` |
+| `object_storage.object_versions` | LEE | LEE | POR_SQL | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityEvidenceHoldResolver.resolveWithObjects | `src/modules/system_ops/services/identity-evidence-hold-resolver.service.ts:65` |
+| `system_ops.anonymization_rules` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findAnonymizationRuleById | `src/modules/system_ops/repositories/governance.repository.ts:31` |
+| `system_ops.entity_registry` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve | `src/modules/identity_assurance/identity-evidence-lifecycle.config.ts:160` |
+| `system_ops.field_registry` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findFieldById | `src/modules/system_ops/repositories/governance.repository.ts:259` |
+| `system_ops.legal_holds` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityEvidenceHoldResolver.resolveWithObjects → IdentityEvidenceHoldResolver.resolve → LegalHoldRepository.findForLifecycleGraph | `src/modules/system_ops/repositories/legal-hold.repository.ts:17` |
+| `system_ops.record_revisions` | ESCRIBE | CREA | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → RetentionExecutionRepository.createRevision | `src/modules/system_ops/repositories/retention-execution.repository.ts:88` |
+| `system_ops.record_revisions` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review | `src/modules/identity_assurance/services/identity-evidence-storage-purge.service.ts:143` |
+| `system_ops.retention_policies` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve → GovernanceRepository.findRetentionPolicyByCode | `src/modules/system_ops/repositories/governance.repository.ts:419` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IdentityWorkerController.storagePurgeReview → IdentityEvidenceStoragePurgeService.review → IdentityLifecycleConfigResolver.resolve | `src/modules/identity_assurance/identity-evidence-lifecycle.config.ts:184` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PURGE_INTENT_UNKNOWN; StorageLifecycleDenied: TRANSACTION_REQUIRED; StorageLifecycleDenied: GLOBAL_RESERVATION_VISIBILITY_UNPROVEN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN; StorageLifecycleDenied: DELETE_ATTEMPT_CHANGED; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT; StorageLifecycleDenied: PURGE_CONTEXT_UNKNOWN; StorageLifecycleDenied: PURGE_HOLD_COVERAGE_UNKNOWN; StorageLifecycleDenied: CUTOFF_UNKNOWN; StorageLifecycleDenied: MISSING_CONFIGURATION; StorageLifecycleDenied: MISSING_OR_DUPLICATE_BINDING; StorageLifecycleDenied: CONFIGURATION_INVALID; StorageLifecycleDenied: REGISTRY_BINDING_INVALID; StorageLifecycleDenied: RETENTION_POLICY_INVALID; StorageLifecycleDenied: POLICY_DISPOSITION_MISMATCH; StorageLifecycleDenied: OPERATION_NOT_AUTHORIZED; StorageLifecycleDenied: DUPLICATE_FIELD_RULE; StorageLifecycleDenied: FIELD_RULE_BINDING_INVALID; StorageLifecycleDenied: FIELD_OPERATION_UNSUPPORTED; StorageLifecycleDenied: ANONYMIZATION_RULES_MISSING; StorageLifecycleDenied: PURGE_METADATA_RULE_MISSING; StorageLifecycleDenied: PURGE_POLICY_CHANGED; StorageLifecycleDenied: CASE_OR_OWNER_CHANGED; StorageLifecycleDenied: RETIREMENT_UNPROVEN; StorageLifecycleDenied: LEGAL_HOLD_ACTIVE_OR_UNKNOWN; StorageLifecycleDenied: GLOBAL_REFERENCE_VISIBILITY_UNPROVEN; StorageLifecycleDenied: REFERENCE_STATE_UNKNOWN; StorageLifecycleDenied: REFERENCE_CATALOG_UNKNOWN; StorageLifecycleDenied: REFERENCES_BLOCKED_OR_UNKNOWN |
 
 El árbol de decisión completo está en [flujos](../flujos/identity_assurance.md).
 

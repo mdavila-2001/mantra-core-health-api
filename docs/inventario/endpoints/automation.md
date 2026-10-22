@@ -45,7 +45,7 @@
 
 Solicitar aprobación y pausar la ejecución. Caso de uso UC-48-10: Pausar por guardrail. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -57,11 +57,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:158` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:158` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -168,7 +168,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ejecutar una automatización de registro con deduplicación. Caso de uso UC-48-13: Escribir con dedupe. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -180,11 +180,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:191` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, recordAutomationId | `src/modules/automation/controllers/automation-orchestration.controller.ts:191` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -285,7 +285,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar un paso de la traza del agente. Caso de uso UC-48-09: Ejecución con traza. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -297,11 +297,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:141` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:141` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -421,7 +421,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar un agente con su primera versión. Caso de uso UC-48-01: Registrar agente con su versión 1. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -433,10 +433,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -554,7 +554,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Adjuntar una política de guardrail a un agente. Caso de uso UC-48-05: Guardrail y adjunción. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -566,11 +566,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:126` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/agent-catalog.controller.ts:126` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -669,7 +669,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Persistir memoria del agente. Caso de uso UC-48-12: Persistir memoria. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -681,11 +681,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, AGENT_RUNTIME, AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/agent-catalog.controller.ts:139` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -795,7 +795,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Enlazar herramientas a una versión del agente. Caso de uso UC-48-04: Enlazar herramientas. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -807,11 +807,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, versionId | `src/modules/automation/controllers/agent-catalog.controller.ts:92` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -923,7 +923,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Publicar una versión del agente. Caso de uso UC-48-02: Publicar versión. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -935,11 +935,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:59` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/agent-catalog.controller.ts:59` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1046,7 +1046,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Decidir la aprobación y reanudar o abortar el run. Caso de uso UC-48-11: Decidir y reanudar. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1058,11 +1058,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICAL_APPROVER, OPERATIONAL_APPROVER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:175` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:175` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1166,7 +1166,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir una política de guardrail. Caso de uso UC-48-05: Guardrail y adjunción. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1178,10 +1178,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1276,7 +1276,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Arrancar la ejecución de un agente dentro del run. Caso de uso UC-48-09: Ejecución con traza. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1288,11 +1288,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:124` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: workflowRunId | `src/modules/automation/controllers/automation-orchestration.controller.ts:124` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1385,7 +1385,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Cerrar la ejecución con el resumen de coste. Caso de uso UC-48-14: Cerrar con resumen de coste. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1397,11 +1397,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:214` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: workflowRunId | `src/modules/automation/controllers/automation-orchestration.controller.ts:214` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1499,7 +1499,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar una herramienta de agente. Caso de uso UC-48-03: Registrar herramienta. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1511,10 +1511,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:76` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1621,7 +1621,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Configurar un disparador de automatización. Caso de uso UC-48-07: Disparador. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1633,10 +1633,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1759,10 +1759,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/automation/controllers/automation-orchestration.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1851,7 +1851,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir un workflow con sus pasos. Caso de uso UC-48-06: Workflow con pasos anidados. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1863,10 +1863,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:59` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1999,7 +1999,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Arrancar la ejecución de un workflow. Caso de uso UC-48-08: Arrancar ejecución. Dentro del módulo (descripción del modelo, en inglés): «A governed layer that lets multiple AI agents (and deterministic bots) automate the capture, enrichment, validation and routing of information records across the platform — the "dynamic multi-agent automation layer" the clients asked for.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automation/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_48_automation.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2011,11 +2011,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:107` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

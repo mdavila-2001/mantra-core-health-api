@@ -9,7 +9,7 @@
 ## Proceso: Módulo 45 — Contexto de Sistema y Enumeraciones Dinámicas
 
 - **Código:** `system_context` · **Agrupación:** MIXTO · **Operaciones:** 13
-- **Actores:** Cualquier sesión válida · GOVERNANCE · MODULE_OWNER · PLATFORM_ADMIN · SYSTEM · TERMINOLOGY_ENGINEER · WRITE_SERVICE
+- **Actores:** Cualquier sesión válida · GOVERNANCE · MODULE_OWNER · PLATFORM_ADMIN · Público (sin sesión) · SYSTEM · TERMINOLOGY_ENGINEER · WRITE_SERVICE
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/system_context/README.md`
 
@@ -41,7 +41,7 @@ contexto (active) + versión 1 (draft)
    └─ bindings ──> el consumidor recibe el contexto en su ventana de validez
 ```
 
-_Fuente: `src/modules/system_context/README.md:40`_
+_Fuente: `src/modules/system_context/README.md:73`_
 
 ### Etapas y operaciones
 
@@ -58,7 +58,7 @@ _Fuente: `src/modules/system_context/README.md:40`_
 | `UC-45-10` | Vincular contexto a un consumidor | POST /system-context/contexts/{id}/bindings | MODULE_OWNER · PLATFORM_ADMIN | MEDIO | 3 |
 | `UC-45-11` | Retiro gobernado de la definición | POST /system-context/dynamic-enums/definitions/{defId}/retire | PLATFORM_ADMIN | MEDIO | 4 |
 | `UC-45-12` | Volver a una versión anterior | POST /system-context/contexts/{id}/rollback | PLATFORM_ADMIN | MEDIO | 4 |
-| `ctrl:SystemContextController` | Operaciones de SystemContextController que el README no asigna a un caso de uso | GET /system-context/dynamic-enums | Cualquier sesión válida | BAJO | 4 |
+| `ctrl:SystemContextController` | Operaciones de SystemContextController que el README no asigna a un caso de uso | GET /system-context/dynamic-enums | Público (sin sesión) | BAJO | 5 |
 |  |  | GET /system-context/dynamic-enums/bindings | Cualquier sesión válida | BAJO | 2 |
 
 ### Diagrama — etapas `UC-45-01`, `UC-45-02`, `UC-45-03`…
@@ -71,7 +71,8 @@ flowchart LR
   a14(["PLATFORM_ADMIN · GOVERNANCE"]):::actor
   a18(["SYSTEM · PLATFORM_ADMIN"]):::actor
   a23(["PLATFORM_ADMIN"]):::actor
-  a29(["Cualquier sesión válida"]):::actor
+  a29(["Público (sin sesión)"]):::actor
+  a32(["Cualquier sesión válida"]):::actor
   t3[("system_context.dynamic_enum_definitions")]:::tabla
   t5[("system_context.dynamic_enum_options")]:::tabla
   t6[("system_context.dynamic_enum_versions")]:::tabla
@@ -81,6 +82,7 @@ flowchart LR
   t19[("system_context.system_context_inputs")]:::tabla
   t20[("system_context.system_context_refresh_runs")]:::tabla
   t25[("system_context.system_context_bindings")]:::tabla
+  t30[("terminology.concept_designations")]:::tabla
   subgraph s0["UC-45-01 · Definir enumeración ligada a un value set"]
     o1["POST /system-context/dynamic-enums/definitions"]:::op
   end
@@ -117,7 +119,7 @@ flowchart LR
   end
   subgraph s11["ctrl:SystemContextController · Operaciones de SystemContextController que el RE…"]
     o28["GET /system-context/dynamic-enums"]:::op
-    o30["GET /system-context/dynamic-enums/bindings"]:::op
+    o31["GET /system-context/dynamic-enums/bindings"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -178,9 +180,10 @@ flowchart LR
   o28 -->|"LEE"| t3
   o28 -->|"LEE"| t5
   o28 -->|"LEE"| t6
-  a29 --> o30
-  o30 -->|"LEE"| t10
-  o30 -->|"LEE"| t3
+  o28 -->|"LEE"| t30
+  a32 --> o31
+  o31 -->|"LEE"| t10
+  o31 -->|"LEE"| t3
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -538,7 +541,6 @@ Leer las opciones publicadas de una enumeración
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | BadRequestException: Indique el campo destino (`target`) o el código de la enumeración (`code`); BadRequestException: El campo destino se escribe como `esquema.tabla.columna` |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Enumeración no encontrada; ResourceNotFoundException: La enumeración está retirada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La enumeración no tiene versión publicada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -546,7 +548,7 @@ Leer las opciones publicadas de una enumeración
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a DynamicEnumsService.readEnum"]:::llamada
   n2 --> n3
@@ -592,8 +594,12 @@ flowchart TD
   n21 -->|"no"| n23
   n24[("LEE system_context.dynamic_enum_options")]:::efecto
   n23 --> n24
-  n25(("200 Responde con éxito")):::ok
+  n25["Llama a SystemContextRepository.findSpanishDisplays"]:::llamada
   n24 --> n25
+  n26[("LEE terminology.concept_designations")]:::efecto
+  n25 --> n26
+  n27(("200 Responde con éxito")):::ok
+  n26 --> n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

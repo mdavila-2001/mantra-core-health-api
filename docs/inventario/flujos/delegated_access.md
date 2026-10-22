@@ -3,12 +3,12 @@
 # Flujos del módulo `delegated_access`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 11 (11 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 12 (11 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [delegated_access](../endpoints/delegated_access.md)
 
 ## Proceso: Módulo 29 — Delegated Access and Scoped Infrastructure Users
 
-- **Código:** `delegated_access` · **Agrupación:** CASO_DE_USO_README · **Operaciones:** 11
+- **Código:** `delegated_access` · **Agrupación:** MIXTO · **Operaciones:** 12
 - **Actores:** SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/delegated_access/README.md`
@@ -34,6 +34,7 @@ _Fuente: `src/modules/delegated_access/README.md:3`_
 | `UC-29-08` | Expirar delegaciones y grants vencidos | POST /delegated-access/expiry-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 7 |
 | `UC-29-09` | Evaluar actor efectivo por propósito (step-up) | POST /authz/effective-actor/evaluate | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-29-10` | Reasignar supervisor / suspender (cascada) | PATCH /org/user-assignments/{id} | SECURITY_ADMIN | MEDIO | 3 |
+| `ctrl:DelegatedPermissionSetsController` | Operaciones de DelegatedPermissionSetsController que el README no asigna a un caso de uso | GET /delegated-permission-sets | SECURITY_ADMIN | BAJO | 1 |
 
 ### Diagrama — etapas `UC-29-01`, `UC-29-02`, `UC-29-03`…
 
@@ -79,6 +80,9 @@ flowchart LR
   end
   subgraph s9["UC-29-10 · Reasignar supervisor / suspender (cascada)"]
     o21["PATCH /org/user-assignments/{id}"]:::op
+  end
+  subgraph s10["ctrl:DelegatedPermissionSetsController · Operaciones de DelegatedPermissionSets…"]
+    o22["GET /delegated-permission-sets"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -134,6 +138,8 @@ flowchart LR
   o21 -->|"ACTUALIZA"| t3
   o21 -->|"LEE"| t3
   o21 -->|"ACTUALIZA"| t10
+  a2 --> o22
+  o22 -->|"LEE"| t6
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -800,3 +806,10 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+### Operaciones sin decisiones propias
+
+Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
+
+| Operación | Respuestas posibles | Tablas |
+|---|---|---|
+| GET /delegated-permission-sets | 200, 401, 403, 429 | 1 |

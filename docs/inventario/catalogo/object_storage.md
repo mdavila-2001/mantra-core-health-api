@@ -11,22 +11,22 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [archive_manifests](#archive_manifests) | Describe conjuntos archivados y sus objetos para mantener inventario de contenido trasladado a archivo. | 9 | 2 | 2 | DIVERGE |
-| [dicom_instance_manifests](#dicom_instance_manifests) | Registra instancias DICOM y sus ubicaciones para resolver objetos individuales de imagenología. | 9 | 3 | 3 | DIVERGE |
-| [dicom_series_manifests](#dicom_series_manifests) | Cataloga series DICOM dentro de estudios para organizar referencias a imágenes diagnósticas. | 8 | 2 | 4 | DIVERGE |
-| [dicom_study_manifests](#dicom_study_manifests) | Registra manifests de estudios DICOM para localizar y gobernar imágenes médicas en PACS u object storage. | 11 | 3 | 4 | DIVERGE |
-| [dicomweb_access_logs](#dicomweb_access_logs) | Traza accesos por DICOMweb a objetos de imagen médica para auditoría y control de uso. | 10 | 3 | 2 | COINCIDE |
+| [dicom_instance_manifests](#dicom_instance_manifests) | Registra instancias DICOM y sus ubicaciones para resolver objetos individuales de imagenología. | 9 | 3 | 5 | DIVERGE |
+| [dicom_series_manifests](#dicom_series_manifests) | Cataloga series DICOM dentro de estudios para organizar referencias a imágenes diagnósticas. | 8 | 2 | 6 | DIVERGE |
+| [dicom_study_manifests](#dicom_study_manifests) | Registra manifests de estudios DICOM para localizar y gobernar imágenes médicas en PACS u object storage. | 11 | 3 | 6 | DIVERGE |
+| [dicomweb_access_logs](#dicomweb_access_logs) | Traza accesos por DICOMweb a objetos de imagen médica para auditoría y control de uso. | 10 | 3 | 3 | COINCIDE |
 | [large_payload_manifests](#large_payload_manifests) | Cataloga payloads grandes almacenados fuera de PostgreSQL y permite resolver su contenido por referencias. | 9 | 2 | 2 | COINCIDE |
-| [multipart_uploads](#multipart_uploads) | Gestiona cargas fragmentadas de objetos grandes para completar transferencias de forma recuperable. | 10 | 3 | 4 | COINCIDE |
-| [object_checksums](#object_checksums) | Conserva hashes de objetos para verificar integridad durante carga, copia y lectura. | 7 | 2 | 4 | DIVERGE |
+| [multipart_uploads](#multipart_uploads) | Gestiona cargas fragmentadas de objetos grandes para completar transferencias de forma recuperable. | 10 | 3 | 7 | COINCIDE |
+| [object_checksums](#object_checksums) | Conserva hashes de objetos para verificar integridad durante carga, copia y lectura. | 7 | 2 | 6 | DIVERGE |
 | [object_deletion_markers](#object_deletion_markers) | Marca objetos eliminados de manera lógica para propagar borrados y conservar trazabilidad de la operación. | 7 | 2 | 2 | COINCIDE |
 | [object_encryption_envelopes](#object_encryption_envelopes) | Registra metadata de claves y envolturas de cifrado usadas para proteger objetos almacenados. | 8 | 2 | 3 | COINCIDE |
 | [object_integrity_checks](#object_integrity_checks) | Registra verificaciones de integridad de objetos para detectar alteraciones o daños en contenido almacenado. | 8 | 2 | 1 | COINCIDE |
-| [object_legal_holds](#object_legal_holds) | Mantiene retenciones legales sobre objetos para impedir su eliminación mientras exista una obligación vigente. | 7 | 2 | 6 | DIVERGE |
-| [object_locations](#object_locations) | Registra ubicaciones físicas o remotas donde se guarda cada objeto binario. | 8 | 2 | 6 | DIVERGE |
-| [object_manifests](#object_manifests) | Cataloga metadata de objetos binarios —incluidos medios médicos y documentos— mientras el contenido reside en object storage o PACS. | 11 | 3 | 22 | DIVERGE |
-| [object_namespaces](#object_namespaces) | Define espacios de nombres aislados para organizar objetos binarios por tenant y propósito. | 10 | 2 | 4 | COINCIDE |
-| [object_retention_locks](#object_retention_locks) | Aplica bloqueos de retención a objetos que deben preservarse durante un período definido. | 7 | 2 | 4 | DIVERGE |
-| [object_versions](#object_versions) | Preserva versiones de objetos para mantener referencias a documentos y medios inmutables o versionados. | 12 | 4 | 11 | COINCIDE |
+| [object_legal_holds](#object_legal_holds) | Mantiene retenciones legales sobre objetos para impedir su eliminación mientras exista una obligación vigente. | 7 | 2 | 9 | DIVERGE |
+| [object_locations](#object_locations) | Registra ubicaciones físicas o remotas donde se guarda cada objeto binario. | 8 | 2 | 10 | DIVERGE |
+| [object_manifests](#object_manifests) | Cataloga metadata de objetos binarios —incluidos medios médicos y documentos— mientras el contenido reside en object storage o PACS. | 11 | 3 | 23 | DIVERGE |
+| [object_namespaces](#object_namespaces) | Define espacios de nombres aislados para organizar objetos binarios por tenant y propósito. | 10 | 2 | 5 | COINCIDE |
+| [object_retention_locks](#object_retention_locks) | Aplica bloqueos de retención a objetos que deben preservarse durante un período definido. | 7 | 2 | 7 | DIVERGE |
+| [object_versions](#object_versions) | Preserva versiones de objetos para mantener referencias a documentos y medios inmutables o versionados. | 12 | 4 | 15 | COINCIDE |
 
 ### Tablas sin relaciones dentro del schema
 
@@ -96,7 +96,7 @@ Registra instancias DICOM y sus ubicaciones para resolver objetos individuales d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: dicom_instance_manifests`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `DicomInstanceManifests` — `src/modules/object_storage/entities/dicom_instance_manifests.entity.ts`
-- **Resumen:** 9 columnas · 3 índices · 0 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 9 columnas · 3 índices · 0 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -127,6 +127,8 @@ Registra instancias DICOM y sus ubicaciones para resolver objetos individuales d
 | GET /dicomweb/studies/{studyUid}/series/{seriesUid}/instances/{sopUid} | LEE | DIRECTA |
 | POST /object-storage/dicom/studies/catalog | CREA | DIRECTA |
 | POST /object-storage/dicom/studies/catalog | LEE | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
+| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -151,7 +153,7 @@ Cataloga series DICOM dentro de estudios para organizar referencias a imágenes 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: dicom_series_manifests`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `DicomSeriesManifests` — `src/modules/object_storage/entities/dicom_series_manifests.entity.ts`
-- **Resumen:** 8 columnas · 2 índices · 0 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 8 columnas · 2 índices · 0 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -181,6 +183,8 @@ Cataloga series DICOM dentro de estudios para organizar referencias a imágenes 
 | POST /object-storage/dicom/studies/catalog | ACTUALIZA | POR_TIPO |
 | POST /object-storage/dicom/studies/catalog | CREA | DIRECTA |
 | POST /object-storage/dicom/studies/catalog | LEE | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
+| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -205,7 +209,7 @@ Registra manifests de estudios DICOM para localizar y gobernar imágenes médica
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: dicom_study_manifests`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `DicomStudyManifests` — `src/modules/object_storage/entities/dicom_study_manifests.entity.ts`
-- **Resumen:** 11 columnas · 3 índices · 0 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 11 columnas · 3 índices · 0 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -239,6 +243,8 @@ Registra manifests de estudios DICOM para localizar y gobernar imágenes médica
 | POST /object-storage/dicom/studies/catalog | ACTUALIZA | POR_TIPO |
 | POST /object-storage/dicom/studies/catalog | CREA | DIRECTA |
 | POST /object-storage/dicom/studies/catalog | LEE | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
+| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -263,7 +269,7 @@ Traza accesos por DICOMweb a objetos de imagen médica para auditoría y control
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: dicomweb_access_logs`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `DicomwebAccessLogs` — `src/modules/object_storage/entities/dicomweb_access_logs.entity.ts`
-- **Resumen:** 10 columnas · 3 índices · 0 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 10 columnas · 3 índices · 0 FK salientes · 0 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -293,13 +299,14 @@ Traza accesos por DICOMweb a objetos de imagen médica para auditoría y control
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /dicomweb/studies/{studyUid}/series/{seriesUid}/instances/{sopUid} | CREA | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | CREA | DIRECTA |
 | POST /object-storage/versions/{versionId}/signed-url | CREA | DIRECTA |
 
 #### Gobierno
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/object_storage/README.md:44` |
+| Append-only | sí (declarado) | `src/modules/object_storage/README.md:78` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -371,7 +378,7 @@ Gestiona cargas fragmentadas de objetos grandes para completar transferencias de
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: multipart_uploads`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `MultipartUploads` — `src/modules/object_storage/entities/multipart_uploads.entity.ts`
-- **Resumen:** 10 columnas · 3 índices · 0 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 10 columnas · 3 índices · 0 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -400,10 +407,13 @@ Gestiona cargas fragmentadas de objetos grandes para completar transferencias de
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/identity/evidence/lifecycle-scan | LEE | POR_SQL |
+| POST /internal/identity/evidence/storage-purge-review | LEE | POR_SQL |
 | POST /object-storage/namespaces/{code}/uploads/initiate | CREA | DIRECTA |
 | POST /object-storage/namespaces/{code}/uploads/initiate | LEE | DIRECTA |
 | POST /object-storage/uploads/{id}/complete | ACTUALIZA | POR_TIPO |
 | POST /object-storage/uploads/{id}/complete | LEE | DIRECTA |
+| POST /internal/governance/retention-executions/run | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -428,7 +438,7 @@ Conserva hashes de objetos para verificar integridad durante carga, copia y lect
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: object_checksums`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `ObjectChecksums` — `src/modules/object_storage/entities/object_checksums.entity.ts`
-- **Resumen:** 7 columnas · 2 índices · 0 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 7 columnas · 2 índices · 0 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -446,7 +456,7 @@ Conserva hashes de objetos para verificar integridad durante carga, copia y lect
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_object_checksum_algorithm_source` | no | object_version_id, algorithm, source | 1 consulta(s) de repositorio filtran u ordenan por «object_version_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_object_checksum_algorithm_source` | no | object_version_id, algorithm, source | 2 consulta(s) de repositorio filtran u ordenan por «object_version_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_object_checksum_status` | no | verification_status, ("verified_at" ASC) | _sin uso detectado estáticamente_ |
 
 #### Operaciones que la tocan
@@ -455,8 +465,10 @@ Conserva hashes de objetos para verificar integridad durante carga, copia y lect
 |---|---|---|
 | POST /object-storage/objects/{manifestId}/versions | CREA | DIRECTA |
 | POST /object-storage/uploads/{id}/complete | CREA | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/integrity-checks | ACTUALIZA | POR_TIPO |
 | POST /object-storage/versions/{versionId}/integrity-checks | LEE | DIRECTA |
+| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -617,7 +629,7 @@ Registra verificaciones de integridad de objetos para detectar alteraciones o da
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/object_storage/README.md:45` |
+| Append-only | sí (declarado) | `src/modules/object_storage/README.md:79` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -636,7 +648,7 @@ Mantiene retenciones legales sobre objetos para impedir su eliminación mientras
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: object_legal_holds`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `ObjectLegalHolds` — `src/modules/object_storage/entities/object_legal_holds.entity.ts`
-- **Resumen:** 7 columnas · 2 índices · 0 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 7 columnas · 2 índices · 0 FK salientes · 0 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -661,12 +673,15 @@ Mantiene retenciones legales sobre objetos para impedir su eliminación mientras
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/identity/evidence/lifecycle-scan | LEE | POR_SQL |
+| POST /internal/identity/evidence/storage-purge-review | LEE | POR_SQL |
 | POST /object-storage/archive-jobs/build | LEE | DIRECTA |
 | POST /object-storage/objects/{manifestId}/request-deletion | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/legal-holds | CREA | DIRECTA |
 | POST /object-storage/versions/{versionId}/legal-holds | LEE | DIRECTA |
 | DELETE /object-storage/versions/{versionId}/legal-holds/{holdId} | ACTUALIZA | POR_TIPO |
 | DELETE /object-storage/versions/{versionId}/legal-holds/{holdId} | LEE | DIRECTA |
+| POST /internal/governance/retention-executions/run | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -691,7 +706,7 @@ Registra ubicaciones físicas o remotas donde se guarda cada objeto binario.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: object_locations`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `ObjectLocations` — `src/modules/object_storage/entities/object_locations.entity.ts`
-- **Resumen:** 8 columnas · 2 índices · 0 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 8 columnas · 2 índices · 0 FK salientes · 0 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -717,12 +732,16 @@ Registra ubicaciones físicas o remotas donde se guarda cada objeto binario.
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/identity/evidence/lifecycle-scan | LEE | POR_SQL |
+| POST /internal/identity/evidence/storage-purge-review | LEE | POR_SQL |
 | POST /object-storage/archive-jobs/build | CREA | DIRECTA |
 | POST /object-storage/objects/{manifestId}/versions | CREA | DIRECTA |
 | POST /object-storage/uploads/{id}/complete | CREA | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/integrity-checks | ACTUALIZA | POR_TIPO |
 | POST /object-storage/versions/{versionId}/integrity-checks | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| POST /internal/governance/retention-executions/run | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -747,7 +766,7 @@ Cataloga metadata de objetos binarios —incluidos medios médicos y documentos�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: object_manifests; BIZ note`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `ObjectManifests` — `src/modules/object_storage/entities/object_manifests.entity.ts`
-- **Resumen:** 11 columnas · 3 índices · 0 FK salientes · 0 entrantes · 22 operaciones
+- **Resumen:** 11 columnas · 3 índices · 0 FK salientes · 0 entrantes · 23 operaciones
 
 #### Columnas
 
@@ -790,6 +809,7 @@ Cataloga metadata de objetos binarios —incluidos medios médicos y documentos�
 | POST /object-storage/uploads/{id}/complete | ACTUALIZA | POR_TIPO |
 | POST /object-storage/uploads/{id}/complete | CREA | DIRECTA |
 | POST /object-storage/uploads/{id}/complete | LEE | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/integrity-checks | ACTUALIZA | POR_TIPO |
 | POST /object-storage/versions/{versionId}/integrity-checks | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/legal-holds | ACTUALIZA | POR_TIPO |
@@ -823,7 +843,7 @@ Define espacios de nombres aislados para organizar objetos binarios por tenant y
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: object_namespaces; BIZ note`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `ObjectNamespaces` — `src/modules/object_storage/entities/object_namespaces.entity.ts`
-- **Resumen:** 10 columnas · 2 índices · 0 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 10 columnas · 2 índices · 0 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -854,6 +874,7 @@ Define espacios de nombres aislados para organizar objetos binarios por tenant y
 | POST /object-storage/namespaces/{code}/uploads/initiate | LEE | DIRECTA |
 | POST /object-storage/objects/{manifestId}/versions | LEE | DIRECTA |
 | POST /object-storage/uploads/{id}/complete | LEE | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/retention-lock | LEE | DIRECTA |
 
 #### Gobierno
@@ -879,7 +900,7 @@ Aplica bloqueos de retención a objetos que deben preservarse durante un períod
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: object_retention_locks`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `ObjectRetentionLocks` — `src/modules/object_storage/entities/object_retention_locks.entity.ts`
-- **Resumen:** 7 columnas · 2 índices · 0 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 7 columnas · 2 índices · 0 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -904,10 +925,13 @@ Aplica bloqueos de retención a objetos que deben preservarse durante un períod
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/identity/evidence/lifecycle-scan | LEE | POR_SQL |
+| POST /internal/identity/evidence/storage-purge-review | LEE | POR_SQL |
 | POST /object-storage/objects/{manifestId}/request-deletion | LEE | DIRECTA |
 | DELETE /object-storage/versions/{versionId}/legal-holds/{holdId} | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/retention-lock | CREA | DIRECTA |
 | POST /object-storage/versions/{versionId}/retention-lock | LEE | DIRECTA |
+| POST /internal/governance/retention-executions/run | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -932,7 +956,7 @@ Preserva versiones de objetos para mantener referencias a documentos y medios in
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_60_object_storage.puml: object_versions`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_60_object_storage.puml` · **DDL:** `SQL/60_object_storage/02_tables.sql`
 - **Entidad del ORM:** `ObjectVersions` — `src/modules/object_storage/entities/object_versions.entity.ts`
-- **Resumen:** 12 columnas · 4 índices · 0 FK salientes · 0 entrantes · 11 operaciones
+- **Resumen:** 12 columnas · 4 índices · 0 FK salientes · 0 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -964,17 +988,21 @@ Preserva versiones de objetos para mantener referencias a documentos y medios in
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/identity/evidence/lifecycle-scan | LEE | POR_SQL |
+| POST /internal/identity/evidence/storage-purge-review | LEE | POR_SQL |
 | POST /object-storage/archive-jobs/build | LEE | DIRECTA |
 | POST /object-storage/objects/{manifestId}/request-deletion | LEE | DIRECTA |
 | POST /object-storage/objects/{manifestId}/versions | CREA | DIRECTA |
 | POST /object-storage/objects/{manifestId}/versions | LEE | DIRECTA |
 | POST /object-storage/uploads/{id}/complete | CREA | DIRECTA |
 | POST /object-storage/uploads/{id}/complete | LEE | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/integrity-checks | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/legal-holds | LEE | DIRECTA |
 | DELETE /object-storage/versions/{versionId}/legal-holds/{holdId} | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/retention-lock | LEE | DIRECTA |
 | POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
+| POST /internal/governance/retention-executions/run | LEE | POR_SQL |
 
 #### Gobierno
 

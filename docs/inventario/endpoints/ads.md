@@ -46,7 +46,7 @@
 
 Lanzar una campaña con sus conjuntos, creativos y anuncios. Caso de uso UC-43-04: Lanzar campaña completa. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -58,11 +58,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:127` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:127` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -245,7 +245,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Crear un experimento A/B y arrancar sus variantes. Caso de uso UC-43-10: Experimento A/B. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -257,11 +257,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:241` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:241` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -406,7 +406,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Emitir la factura de anuncios del periodo. Caso de uso UC-43-14: Emitir factura de anuncios. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -418,11 +418,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: FINANCE, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:321` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:321` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -527,7 +527,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Guardar una segmentación y, si se pide, su audiencia. Caso de uso UC-43-05: Segmentación e identidad. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -539,11 +539,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:143` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:143` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -656,7 +656,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Programar un tramo de presupuesto o puja. Caso de uso UC-43-16: Programar presupuesto y puja. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:26`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:64`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -668,11 +668,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:355` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:355` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -786,7 +786,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Asignar la identidad con la que se publica el conjunto. Caso de uso UC-43-05: Segmentación e identidad. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -798,11 +798,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:160` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:160` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -893,7 +893,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Registrar el resultado de la revisión del anuncio. Caso de uso UC-43-12: Moderación y apelación. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -905,11 +905,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: POLICY_REVIEWER, SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:274` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1021,7 +1021,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Aplicar la acción de una regla automatizada. Caso de uso UC-43-11: Aplicar regla automatizada. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1033,11 +1033,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:257` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:257` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1138,7 +1138,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Provisionar una cuenta publicitaria. Caso de uso UC-43-01: Provisionar cuenta publicitaria. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1150,11 +1150,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADS_ADMIN, BUSINESS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: bmId | `src/modules/ads/controllers/ads.controller.ts:78` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1268,7 +1268,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Vincular un socio y compartir el alcance de assets. Caso de uso UC-43-02: Vincular socio y compartir assets. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1280,11 +1280,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADS_ADMIN, BUSINESS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: bmId | `src/modules/ads/controllers/ads.controller.ts:94` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1392,7 +1392,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Sincronizar el catálogo de productos con el feed. Caso de uso UC-43-13: Sincronizar catálogo. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1404,11 +1404,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:303` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, feedId | `src/modules/ads/controllers/ads.controller.ts:303` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1539,7 +1539,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Enviar una conversión server-side. Caso de uso UC-43-08: Conversión server-side con dedup. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1551,11 +1551,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:209` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:209` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1698,7 +1698,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Publicar la política de datos de evento con sus reglas de campo. Caso de uso UC-43-06: Política de datos y reglas de campo. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1710,10 +1710,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PRIVACY_OFFICER, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:177` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1836,7 +1836,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Ingerir entrega e insights y consolidar el gasto. Caso de uso UC-43-07: Ingerir entrega y consolidar gasto. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1848,10 +1848,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/ads/controllers/ads.controller.ts:193` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1990,7 +1990,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Recibir un lead del formulario y encolar su entrega al CRM. Caso de uso UC-43-15: Recibir lead y entregar a CRM. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:25`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:63`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2002,11 +2002,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:338` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:338` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2129,7 +2129,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Subir conversiones offline con reporte de coincidencia. Caso de uso UC-43-09: Conversiones offline con match. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2141,10 +2141,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:226` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2261,7 +2261,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Conectar la plataforma externa e importar identidades. Caso de uso UC-43-03: Conectar plataforma e importar identidades. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2273,10 +2273,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ADS_ADMIN, BUSINESS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2405,7 +2405,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 
 Apelar una infracción de política. Caso de uso UC-43-12: Moderación y apelación. Dentro del módulo (descripción del modelo, en inglés): «Models business managers, partner sharing, ad accounts and the campaign hierarchy campaign -> ad set -> ad -> creative.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_43_ads.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2417,11 +2417,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: POLICY_REVIEWER, AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:290` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:290` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

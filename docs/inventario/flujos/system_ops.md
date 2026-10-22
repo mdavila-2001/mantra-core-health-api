@@ -30,7 +30,7 @@ _Fuente: `src/modules/system_ops/README.md:3`_
 |  |  | POST /admin/governance/retention-policies | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-11-04` | Definir regla de anonimización | POST /admin/governance/anonymization-rules | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | PATCH /admin/governance/field-registry/{id} | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-11-05` | Ejecutar barrido de retención (excluye objetivos bajo legal hold) | POST /internal/governance/retention-executions/run | SECURITY_ADMIN | MEDIO | 6 |
+| `UC-11-05` | Ejecutar barrido de retención (excluye objetivos bajo legal hold) | POST /internal/governance/retention-executions/run | SECURITY_ADMIN | ALTO | 38 |
 | `UC-11-06` | Definir política de residencia | POST /admin/governance/residency-policies | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /admin/governance/tenant-residency-bindings | SECURITY_ADMIN | MEDIO | 1 |
 | `UC-11-07` | Registrar transferencia transfronteriza (append-only) | POST /admin/governance/cross-border-transfers | SECURITY_ADMIN | MEDIO | 2 |
@@ -61,21 +61,23 @@ flowchart LR
   t10[("system_ops.write_policies")]:::tabla
   t13[("system_ops.retention_policies")]:::tabla
   t16[("system_ops.anonymization_rules")]:::tabla
-  t19[("system_ops.legal_holds")]:::tabla
-  t20[("system_ops.record_revisions")]:::tabla
-  t21[("system_ops.retention_executions")]:::tabla
-  t23[("system_ops.data_residency_policies")]:::tabla
-  t25[("system_ops.tenant_residency_bindings")]:::tabla
-  t27[("system_ops.cross_border_transfer_events")]:::tabla
-  t31[("system_ops.backup_policies")]:::tabla
-  t33[("system_ops.restore_test_runs")]:::tabla
-  t35[("system_ops.operational_framework_controls")]:::tabla
-  t36[("system_ops.operational_frameworks")]:::tabla
-  t38[("system_ops.workload_assessments")]:::tabla
-  t40[("system_ops.assessment_control_results")]:::tabla
-  t42[("system_ops.assessment_findings")]:::tabla
-  t44[("system_ops.remediation_actions")]:::tabla
-  t45[("system_ops.remediation_plans")]:::tabla
+  t19[("audio_assets.audio_assets")]:::tabla
+  t20[("common.file_derivatives")]:::tabla
+  t21[("common.file_versions")]:::tabla
+  t22[("common.files")]:::tabla
+  t25[("system_ops.data_residency_policies")]:::tabla
+  t27[("system_ops.tenant_residency_bindings")]:::tabla
+  t29[("system_ops.cross_border_transfer_events")]:::tabla
+  t31[("system_ops.legal_holds")]:::tabla
+  t34[("system_ops.backup_policies")]:::tabla
+  t36[("system_ops.restore_test_runs")]:::tabla
+  t38[("system_ops.operational_framework_controls")]:::tabla
+  t39[("system_ops.operational_frameworks")]:::tabla
+  t41[("system_ops.workload_assessments")]:::tabla
+  t43[("system_ops.assessment_control_results")]:::tabla
+  t45[("system_ops.assessment_findings")]:::tabla
+  t47[("system_ops.remediation_actions")]:::tabla
+  t48[("system_ops.remediation_plans")]:::tabla
   t7[("+1 tablas más")]
   subgraph s0["UC-11-01 · Registrar dominio, clasificación y catalogar entidad + campos"]
     o1["POST /admin/governance/entity-registry"]:::op
@@ -92,36 +94,37 @@ flowchart LR
     o15["POST /admin/governance/anonymization-rules"]:::op
     o17["PATCH /admin/governance/field-registry/{id}"]:::op
   end
+  t23[("+32 tablas más")]
   subgraph s4["UC-11-05 · Ejecutar barrido de retención (excluye objetivos bajo legal hold)"]
     o18["POST /internal/governance/retention-executions/run"]:::op
   end
   subgraph s5["UC-11-06 · Definir política de residencia"]
-    o22["POST /admin/governance/residency-policies"]:::op
-    o24["POST /admin/governance/tenant-residency-bindings"]:::op
+    o24["POST /admin/governance/residency-policies"]:::op
+    o26["POST /admin/governance/tenant-residency-bindings"]:::op
   end
   subgraph s6["UC-11-07 · Registrar transferencia transfronteriza (append-only)"]
-    o26["POST /admin/governance/cross-border-transfers"]:::op
+    o28["POST /admin/governance/cross-border-transfers"]:::op
   end
   subgraph s7["UC-11-08 · Colocar legal hold"]
-    o28["POST /admin/governance/legal-holds"]:::op
-    o29["POST /admin/governance/legal-holds/{id}/release"]:::op
+    o30["POST /admin/governance/legal-holds"]:::op
+    o32["POST /admin/governance/legal-holds/{id}/release"]:::op
   end
   subgraph s8["UC-11-09 · Definir política de backup (RPO/RTO/inmutabilidad)"]
-    o30["POST /admin/ops/backup-policies"]:::op
+    o33["POST /admin/ops/backup-policies"]:::op
   end
   subgraph s9["UC-11-10 · Registrar prueba de restauración con evidencia"]
-    o32["POST /internal/ops/restore-test-runs"]:::op
+    o35["POST /internal/ops/restore-test-runs"]:::op
   end
   subgraph s10["UC-11-11 · Publicar framework con controles (jerárquicos)"]
-    o34["POST /admin/governance/operational-frameworks"]:::op
+    o37["POST /admin/governance/operational-frameworks"]:::op
   end
   subgraph s11["UC-11-12 · Iniciar evaluación de workload"]
-    o37["POST /admin/governance/workload-assessments"]:::op
-    o39["PUT /admin/governance/workload-assessments/{id}/control-results"]:::op
+    o40["POST /admin/governance/workload-assessments"]:::op
+    o42["PUT /admin/governance/workload-assessments/{id}/control-results"]:::op
   end
   subgraph s12["UC-11-13 · Abrir hallazgo"]
-    o41["POST /admin/governance/assessments/{id}/findings"]:::op
-    o43["POST /admin/governance/assessments/{id}/remediation-plans"]:::op
+    o44["POST /admin/governance/assessments/{id}/findings"]:::op
+    o46["POST /admin/governance/assessments/{id}/remediation-plans"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -158,56 +161,57 @@ flowchart LR
   o17 -->|"LEE"| t6
   o17 -->|"CREA"| t9
   a2 --> o18
-  o18 -->|"LEE"| t5
   o18 -->|"LEE"| t19
-  o18 -->|"CREA"| t20
-  o18 -->|"ACTUALIZA"| t21
-  o18 -->|"CREA"| t21
-  o18 -->|"LEE"| t13
-  a2 --> o22
-  o22 -->|"CREA"| t23
-  o22 -->|"LEE"| t23
-  o22 -->|"CREA"| t9
+  o18 -->|"BORRA"| t20
+  o18 -->|"LEE"| t20
+  o18 -->|"BORRA"| t21
+  o18 -->|"LEE"| t21
+  o18 -->|"BORRA"| t22
+  o18 -.-> t23
   a2 --> o24
   o24 -->|"CREA"| t25
+  o24 -->|"LEE"| t25
+  o24 -->|"CREA"| t9
   a2 --> o26
   o26 -->|"CREA"| t27
-  o26 -->|"LEE"| t27
   a2 --> o28
-  o28 -->|"CREA"| t9
-  o28 -->|"CREA"| t19
-  o28 -->|"LEE"| t19
-  a2 --> o29
-  o29 -->|"CREA"| t9
-  o29 -->|"ACTUALIZA"| t19
-  o29 -->|"LEE"| t19
+  o28 -->|"CREA"| t29
+  o28 -->|"LEE"| t29
   a2 --> o30
+  o30 -->|"CREA"| t9
   o30 -->|"CREA"| t31
+  o30 -->|"LEE"| t31
   a2 --> o32
+  o32 -->|"CREA"| t9
+  o32 -->|"ACTUALIZA"| t31
   o32 -->|"LEE"| t31
-  o32 -->|"CREA"| t33
-  a2 --> o34
-  o34 -->|"CREA"| t35
-  o34 -->|"CREA"| t36
-  o34 -->|"LEE"| t36
+  a2 --> o33
+  o33 -->|"CREA"| t34
+  a2 --> o35
+  o35 -->|"LEE"| t34
+  o35 -->|"CREA"| t36
   a2 --> o37
-  o37 -->|"LEE"| t36
   o37 -->|"CREA"| t38
-  a2 --> o39
-  o39 -->|"ACTUALIZA"| t40
-  o39 -->|"CREA"| t40
-  o39 -->|"LEE"| t40
-  o39 -->|"LEE"| t38
-  a2 --> o41
-  o41 -->|"CREA"| t42
-  o41 -->|"LEE"| t42
-  o41 -->|"LEE"| t38
-  a2 --> o43
-  o43 -->|"LEE"| t42
-  o43 -->|"CREA"| t44
-  o43 -->|"CREA"| t45
-  o43 -->|"LEE"| t45
-  o43 -->|"LEE"| t38
+  o37 -->|"CREA"| t39
+  o37 -->|"LEE"| t39
+  a2 --> o40
+  o40 -->|"LEE"| t39
+  o40 -->|"CREA"| t41
+  a2 --> o42
+  o42 -->|"ACTUALIZA"| t43
+  o42 -->|"CREA"| t43
+  o42 -->|"LEE"| t43
+  o42 -->|"LEE"| t41
+  a2 --> o44
+  o44 -->|"CREA"| t45
+  o44 -->|"LEE"| t45
+  o44 -->|"LEE"| t41
+  a2 --> o46
+  o46 -->|"LEE"| t45
+  o46 -->|"CREA"| t47
+  o46 -->|"CREA"| t48
+  o46 -->|"LEE"| t48
+  o46 -->|"LEE"| t41
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1332,7 +1336,7 @@ Definir una política de backup (RPO/RTO/inmutabilidad)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El RPO no puede superar al RTO |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {rangeOutside.map((v) => v.mensaje).join('; ')} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1342,9 +1346,9 @@ flowchart TD
   n1 --> n2
   n3["Llama a BackupService.createPolicy"]:::llamada
   n2 --> n3
-  n4{"dto.rpoSeconds › dto.rtoSeconds"}:::decision
+  n4{"rangeOutside.length › 0"}:::decision
   n3 --> n4
-  n5(["422 PRECONDITION_FAILED El RPO no puede superar al RTO"]):::error
+  n5(["422 PRECONDITION_FAILED {rangeOutside.map((v) =› v.mensaje).join('; ')}"]):::error
   n4 -->|"sí"| n5
   n6["Transacción: transactional(…)"]:::transaccion
   n4 -->|"no"| n6
@@ -1375,6 +1379,7 @@ Ejecutar un barrido de retención (excluye objetivos bajo legal hold)
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Política de retención no encontrada; ResourceNotFoundException: Entidad objetivo no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de retención no está ACTIVE |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: EXTERNAL_REFERENCE_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PHYSICAL_METADATA_CONFLICT |
 
 ```mermaid
 flowchart TD
@@ -1409,23 +1414,69 @@ flowchart TD
   n13 -->|"no"| n15
   n16[("CREA system_ops.retention_executions")]:::efecto
   n15 --> n16
-  n17["Llama a RetentionExecutionRepository.countActiveHoldsForTarget"]:::llamada
+  n17{"entity.schemaName === 'identity_assurance' && entity.tableName === 'identity_evidence_records'"}:::decision
   n16 --> n17
-  n18[("LEE system_ops.legal_holds")]:::efecto
-  n17 --> n18
-  n19{"activeHolds › 0"}:::decision
-  n18 --> n19
-  n20[("ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.…")]:::efecto
-  n19 -->|"sí"| n20
-  n21["Llama a RetentionExecutionRepository.createRevision"]:::llamada
+  n18{"!this.identityLifecycle"}:::decision
+  n17 -->|"sí"| n18
+  n19(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a IdentityEvidenceLifecycleService.scan"]:::llamada
+  n18 -->|"no"| n20
+  n21[("LEE terminology.catalog_concepts · LEE identity_assurance.identity_evidence_records")]:::efecto
   n20 --> n21
-  n19 -->|"no"| n21
-  n22[("CREA system_ops.record_revisions")]:::efecto
+  n22["Repite: por cada const evidence de records"]:::bucle
   n21 --> n22
-  n23[("ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.…")]:::efecto
-  n22 --> n23
-  n24(("200 Responde con éxito")):::ok
-  n23 --> n24
+  n23["Repite: por cada const rule de rules.filter( (rule) =› rule.evidenceTypeConceptC…"]:::bucle
+  n22 -->|"cada elemento"| n23
+  n24["Llama a IdentityEvidenceLifecycleService.executeRule"]:::llamada
+  n23 -->|"cada elemento"| n24
+  n25["Llama a IdentityEvidenceLifecycleService.execute"]:::llamada
+  n24 --> n25
+  n26["Intenta"]:::intento
+  n25 --> n26
+  n27["Transacción: transactional(…)"]:::transaccion
+  n26 --> n27
+  n28{"graph.opaqueReference"}:::decision
+  n27 --> n28
+  n29(["500 INTERNAL EXTERNAL_REFERENCE_UNKNOWN"]):::error
+  n28 -->|"sí"| n29
+  n30["Repite: por cada const version de graph.versions"]:::bucle
+  n28 -->|"no"| n30
+  n31{"!isKnownPhysicalIdentity(identity)"}:::decision
+  n30 -->|"cada elemento"| n31
+  n32(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
+  n31 -->|"sí"| n32
+  n33{"(version.objectKey && version.objectKey !== identity.exactObjectKey) || (version.bucketOrContainer && version…"}:::decision
+  n31 -->|"no"| n33
+  n34(["500 INTERNAL PHYSICAL_METADATA_CONFLICT"]):::error
+  n33 -->|"sí"| n34
+  n35{"contentByIdentity.has(key) && contentByIdentity.get(key) !== content"}:::decision
+  n33 -->|"no"| n35
+  n36(["500 INTERNAL PHYSICAL_METADATA_CONFLICT"]):::error
+  n35 -->|"sí"| n36
+  n37[("ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.…")]:::efecto
+  n35 -->|"no"| n37
+  n30 -->|"al terminar"| n37
+  n23 -->|"al terminar"| n37
+  n22 -->|"al terminar"| n37
+  n38["Llama a RetentionExecutionRepository.countActiveHoldsForTarget"]:::llamada
+  n37 --> n38
+  n17 -->|"no"| n38
+  n39[("LEE system_ops.legal_holds")]:::efecto
+  n38 --> n39
+  n40{"activeHolds › 0"}:::decision
+  n39 --> n40
+  n41[("ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.…")]:::efecto
+  n40 -->|"sí"| n41
+  n42["Llama a RetentionExecutionRepository.createRevision"]:::llamada
+  n41 --> n42
+  n40 -->|"no"| n42
+  n43[("CREA system_ops.record_revisions")]:::efecto
+  n42 --> n43
+  n44[("ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.…")]:::efecto
+  n43 --> n44
+  n45(("200 Responde con éxito")):::ok
+  n44 --> n45
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

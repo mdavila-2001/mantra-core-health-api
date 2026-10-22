@@ -3,10 +3,10 @@
 # Flujos del módulo `pharma_lab`
 
 - **Procesos:** 1 · **Máquinas de estado:** 3
-- **Operaciones:** 76 (69 con decisiones propias, 7 sin ellas)
+- **Operaciones:** 76 (70 con decisiones propias, 6 sin ellas)
 - Inventario de endpoints del módulo: [pharma_lab](../endpoints/pharma_lab.md)
 
-## Proceso: src / modules / pharma_lab
+## Proceso: Módulo `pharma_lab`
 
 - **Código:** `pharma_lab` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 76
 - **Actores:** ACCOUNTANT · BUSINESS_ADMIN · CLINICIAN · Cualquier sesión válida · FINANCE · LEGAL_COUNSEL · MEDICAL_VISITOR · PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · PLATFORM_ADMIN · PRACTITIONER · REGULATORY_AFFAIRS
@@ -15,7 +15,7 @@
 
 ### Para qué sirve
 
-Agrupa los componentes relacionados con **pharma_lab** y mantiene cohesionada esta responsabilidad del sistema.
+Gestiona laboratorios farmacéuticos, personal y visitadores, agenda y registros de visita, catálogo de productos, farmacovigilancia, documentación regulatoria y analítica.
 
 _Fuente: `src/modules/pharma_lab/README.md:3`_
 
@@ -24,147 +24,152 @@ _Fuente: `src/modules/pharma_lab/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:MedicalVisitorsController` | Operaciones de MedicalVisitorsController que el README no asigna a un caso de uso | GET /pharma-labs/{pharmaLabId}/medical-visitors | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
-|  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 12 |
-|  |  | PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/products | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 7 |
-|  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 8 |
-|  |  | PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/specialties | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 6 |
-|  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 19 |
-|  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/verifications | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 5 |
+|  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 16 |
+|  |  | PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/products | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 8 |
+|  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 12 |
+|  |  | PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/specialties | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 7 |
+|  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | ALTO | 22 |
+|  |  | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/verifications | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 6 |
 | `ctrl:PharmaCatalogController` | Operaciones de PharmaCatalogController que el README no asigna a un caso de uso | GET /pharma-labs/{pharmaLabId}/materials | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · MEDICAL_VISITOR · PLATFORM_ADMIN | BAJO | 2 |
-|  |  | POST /pharma-labs/{pharmaLabId}/materials | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 5 |
+|  |  | POST /pharma-labs/{pharmaLabId}/materials | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 6 |
 |  |  | GET /pharma-labs/{pharmaLabId}/materials/{materialId}/approvals | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | BAJO | 3 |
 |  |  | GET /pharma-labs/{pharmaLabId}/materials/{materialId}/assets | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · MEDICAL_VISITOR · PLATFORM_ADMIN | BAJO | 3 |
 |  |  | POST /pharma-labs/{pharmaLabId}/materials/{materialId}/assets | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 3 |
-|  |  | POST /pharma-labs/{pharmaLabId}/materials/{materialId}/decision | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 6 |
-|  |  | POST /pharma-labs/{pharmaLabId}/materials/{materialId}/submit | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 6 |
+|  |  | POST /pharma-labs/{pharmaLabId}/materials/{materialId}/decision | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 7 |
+|  |  | POST /pharma-labs/{pharmaLabId}/materials/{materialId}/submit | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 7 |
 |  |  | GET /pharma-labs/{pharmaLabId}/products | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · MEDICAL_VISITOR · PLATFORM_ADMIN | BAJO | 2 |
-|  |  | POST /pharma-labs/{pharmaLabId}/products | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 4 |
-|  |  | PATCH /pharma-labs/{pharmaLabId}/products/{productId} | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 5 |
-|  |  | POST /pharma-labs/{pharmaLabId}/products/{productId}/status | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 5 |
+|  |  | POST /pharma-labs/{pharmaLabId}/products | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 5 |
+|  |  | PATCH /pharma-labs/{pharmaLabId}/products/{productId} | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 6 |
+|  |  | POST /pharma-labs/{pharmaLabId}/products/{productId}/status | PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN | MEDIO | 6 |
 | `ctrl:PharmacovigilanceController` | Operaciones de PharmacovigilanceController que el README no asigna a un caso de uso | GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
-|  |  | POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | PRACTITIONER · CLINICIAN · PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · BUSINESS_ADMIN | MEDIO | 9 |
+|  |  | POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | PRACTITIONER · CLINICIAN · PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · BUSINESS_ADMIN | MEDIO | 10 |
 |  |  | GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId} | PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · PLATFORM_ADMIN | BAJO | 3 |
-|  |  | POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions | PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · PLATFORM_ADMIN | MEDIO | 6 |
+|  |  | POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions | PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · PLATFORM_ADMIN | MEDIO | 7 |
 | `ctrl:PharmaLabNoticesController` | Operaciones de PharmaLabNoticesController que el README no asigna a un caso de uso | POST /pharma-labs/notices/{noticeId}/read | Cualquier sesión válida | ALTO | 2 |
 |  |  | GET /pharma-labs/notices/mine | Cualquier sesión válida | BAJO | 1 |
 | `ctrl:PharmaLabReferenceController` | Operaciones de PharmaLabReferenceController que el README no asigna a un caso de uso | GET /pharma-labs/reference/concepts | Cualquier sesión válida | BAJO | 0 |
-| `ctrl:PharmaLabsController` | Operaciones de PharmaLabsController que el README no asigna a un caso de uso | GET /pharma-labs | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 1 |
-|  |  | POST /pharma-labs | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 5 |
-|  |  | GET /pharma-labs/{pharmaLabId} | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 1 |
-|  |  | PATCH /pharma-labs/{pharmaLabId} | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 4 |
-|  |  | GET /pharma-labs/{pharmaLabId}/link-events | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
+| `ctrl:PharmaLabsController` | Operaciones de PharmaLabsController que el README no asigna a un caso de uso | GET /pharma-labs | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
+|  |  | POST /pharma-labs | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 6 |
+|  |  | GET /pharma-labs/{pharmaLabId} | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
+|  |  | PATCH /pharma-labs/{pharmaLabId} | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 6 |
+|  |  | GET /pharma-labs/{pharmaLabId}/link-events | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 3 |
 |  |  | GET /pharma-labs/{pharmaLabId}/staff | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
-|  |  | POST /pharma-labs/{pharmaLabId}/staff | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 6 |
-|  |  | PATCH /pharma-labs/{pharmaLabId}/staff/{staffId}/permissions | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 6 |
-|  |  | POST /pharma-labs/{pharmaLabId}/staff/{staffId}/unlink | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 6 |
-| `ctrl:PharmaLabSocialController` | Operaciones de PharmaLabSocialController que el README no asigna a un caso de uso | POST /pharma-labs/{pharmaLabId}/cost-allocations | PHARMA_LAB_ADMIN · ACCOUNTANT · FINANCE · PLATFORM_ADMIN | MEDIO | 6 |
+|  |  | POST /pharma-labs/{pharmaLabId}/staff | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 7 |
+|  |  | PATCH /pharma-labs/{pharmaLabId}/staff/{staffId}/permissions | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 7 |
+|  |  | POST /pharma-labs/{pharmaLabId}/staff/{staffId}/unlink | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 7 |
+| `ctrl:PharmaLabSocialController` | Operaciones de PharmaLabSocialController que el README no asigna a un caso de uso | POST /pharma-labs/{pharmaLabId}/cost-allocations | PHARMA_LAB_ADMIN · ACCOUNTANT · FINANCE · PLATFORM_ADMIN | MEDIO | 7 |
 |  |  | GET /pharma-labs/{pharmaLabId}/cost-allocations/report | PHARMA_LAB_ADMIN · ACCOUNTANT · FINANCE · PLATFORM_ADMIN | BAJO | 3 |
 |  |  | GET /pharma-labs/{pharmaLabId}/visitor-posts | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
-|  |  | POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 10 |
-|  |  | POST /pharma-labs/visitor-posts | MEDICAL_VISITOR | MEDIO | 6 |
+|  |  | POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | MEDIO | 11 |
+|  |  | POST /pharma-labs/visitor-posts | MEDICAL_VISITOR | MEDIO | 7 |
 | `ctrl:RegulatoryDocumentsController` | Operaciones de RegulatoryDocumentsController que el README no asigna a un caso de uso | GET /pharma-labs/{pharmaLabId}/regulatory-documents | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | BAJO | 2 |
-|  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 5 |
+|  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 6 |
 |  |  | GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId} | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 4 |
 |  |  | GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/access-log | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | BAJO | 3 |
-|  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/invalidate | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 7 |
-|  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 8 |
-|  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions/{versionId}/download | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 6 |
+|  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/invalidate | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 8 |
+|  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 9 |
+|  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions/{versionId}/download | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 7 |
 |  |  | POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review | REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLATFORM_ADMIN | MEDIO | 5 |
 | `ctrl:VisitAgendaController` | Operaciones de VisitAgendaController que el README no asigna a un caso de uso | GET /visit-agenda/blocks | PRACTITIONER · CLINICIAN | BAJO | 1 |
-|  |  | POST /visit-agenda/blocks | PRACTITIONER · CLINICIAN | MEDIO | 3 |
-|  |  | POST /visit-agenda/blocks/{blockId}/lift | PRACTITIONER · CLINICIAN | MEDIO | 4 |
+|  |  | POST /visit-agenda/blocks | PRACTITIONER · CLINICIAN | MEDIO | 4 |
+|  |  | POST /visit-agenda/blocks/{blockId}/lift | PRACTITIONER · CLINICIAN | MEDIO | 5 |
 |  |  | GET /visit-agenda/doctors/{doctorUserId} | MEDICAL_VISITOR · PHARMA_LAB_ADMIN · PRACTITIONER · CLINICIAN | BAJO | 2 |
 |  |  | GET /visit-agenda/me | PRACTITIONER · CLINICIAN | BAJO | 2 |
-|  |  | PUT /visit-agenda/me | PRACTITIONER · CLINICIAN | ALTO | 7 |
-| `ctrl:VisitRecordsController` | Operaciones de VisitRecordsController que el README no asigna a un caso de uso | POST /visit-records | MEDICAL_VISITOR | MEDIO | 14 |
-|  |  | POST /visit-records/{visitRecordId}/confirm | PRACTITIONER · CLINICIAN | MEDIO | 4 |
-|  |  | POST /visit-records/{visitRecordId}/rating | PRACTITIONER · CLINICIAN | MEDIO | 8 |
+|  |  | PUT /visit-agenda/me | PRACTITIONER · CLINICIAN | ALTO | 8 |
+| `ctrl:VisitRecordsController` | Operaciones de VisitRecordsController que el README no asigna a un caso de uso | POST /visit-records | MEDICAL_VISITOR | MEDIO | 15 |
+|  |  | POST /visit-records/{visitRecordId}/confirm | PRACTITIONER · CLINICIAN | MEDIO | 5 |
+|  |  | POST /visit-records/{visitRecordId}/rating | PRACTITIONER · CLINICIAN | MEDIO | 9 |
 |  |  | GET /visit-records/inbox | PRACTITIONER · CLINICIAN | BAJO | 1 |
 |  |  | GET /visit-records/labs/{pharmaLabId} | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
 |  |  | GET /visit-records/labs/{pharmaLabId}/rating-summary | PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN | BAJO | 3 |
-| `ctrl:VisitRequestsController` | Operaciones de VisitRequestsController que el README no asigna a un caso de uso | POST /visit-requests | MEDICAL_VISITOR | MEDIO | 22 |
+| `ctrl:VisitRequestsController` | Operaciones de VisitRequestsController que el README no asigna a un caso de uso | POST /visit-requests | MEDICAL_VISITOR | MEDIO | 23 |
 |  |  | GET /visit-requests/{visitRequestId} | MEDICAL_VISITOR · PRACTITIONER · CLINICIAN | BAJO | 4 |
-|  |  | POST /visit-requests/{visitRequestId}/accept | PRACTITIONER · CLINICIAN | MEDIO | 7 |
-|  |  | POST /visit-requests/{visitRequestId}/cancel | MEDICAL_VISITOR · PRACTITIONER · CLINICIAN | MEDIO | 9 |
-|  |  | POST /visit-requests/{visitRequestId}/propose-time | PRACTITIONER · CLINICIAN | MEDIO | 16 |
-|  |  | POST /visit-requests/{visitRequestId}/reject | PRACTITIONER · CLINICIAN | MEDIO | 7 |
-|  |  | POST /visit-requests/{visitRequestId}/request-info | PRACTITIONER · CLINICIAN | MEDIO | 6 |
-|  |  | POST /visit-requests/{visitRequestId}/reschedule | MEDICAL_VISITOR | MEDIO | 17 |
+|  |  | POST /visit-requests/{visitRequestId}/accept | PRACTITIONER · CLINICIAN | MEDIO | 8 |
+|  |  | POST /visit-requests/{visitRequestId}/cancel | MEDICAL_VISITOR · PRACTITIONER · CLINICIAN | MEDIO | 10 |
+|  |  | POST /visit-requests/{visitRequestId}/propose-time | PRACTITIONER · CLINICIAN | MEDIO | 17 |
+|  |  | POST /visit-requests/{visitRequestId}/reject | PRACTITIONER · CLINICIAN | MEDIO | 8 |
+|  |  | POST /visit-requests/{visitRequestId}/request-info | PRACTITIONER · CLINICIAN | MEDIO | 7 |
+|  |  | POST /visit-requests/{visitRequestId}/reschedule | MEDICAL_VISITOR | MEDIO | 18 |
 |  |  | GET /visit-requests/inbox | PRACTITIONER · CLINICIAN | BAJO | 1 |
 |  |  | GET /visit-requests/mine | MEDICAL_VISITOR | BAJO | 2 |
 | `ctrl:VisitSurveysController` | Operaciones de VisitSurveysController que el README no asigna a un caso de uso | GET /visit-surveys/labs/{pharmaLabId} | PHARMA_LAB_ADMIN · PLATFORM_ADMIN | BAJO | 2 |
-|  |  | POST /visit-surveys/labs/{pharmaLabId} | PHARMA_LAB_ADMIN · PLATFORM_ADMIN | MEDIO | 5 |
-|  |  | POST /visit-surveys/labs/{pharmaLabId}/{surveyId}/close | PHARMA_LAB_ADMIN · PLATFORM_ADMIN | MEDIO | 5 |
+|  |  | POST /visit-surveys/labs/{pharmaLabId} | PHARMA_LAB_ADMIN · PLATFORM_ADMIN | MEDIO | 6 |
+|  |  | POST /visit-surveys/labs/{pharmaLabId}/{surveyId}/close | PHARMA_LAB_ADMIN · PLATFORM_ADMIN | MEDIO | 6 |
 |  |  | GET /visit-surveys/labs/{pharmaLabId}/{surveyId}/results | PHARMA_LAB_ADMIN · PLATFORM_ADMIN | BAJO | 5 |
 |  |  | GET /visit-surveys/pending | PRACTITIONER · CLINICIAN | BAJO | 1 |
 |  |  | GET /visit-surveys/responses/{responseId} | PRACTITIONER · CLINICIAN | BAJO | 3 |
-|  |  | POST /visit-surveys/responses/{responseId} | PRACTITIONER · CLINICIAN | MEDIO | 6 |
+|  |  | POST /visit-surveys/responses/{responseId} | PRACTITIONER · CLINICIAN | MEDIO | 7 |
 
 ### Diagrama 1 de 4 — etapas `ctrl:MedicalVisitorsController`, `ctrl:PharmaCatalogController`, `ctrl:PharmacovigilanceController`…
 
 ```mermaid
 flowchart LR
   a2(["PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN"]):::actor
-  a22(["PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · MEDICAL_VISITOR · P…"]):::actor
-  a25(["PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN"]):::actor
-  a39(["PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · PLATFORM_ADM…"]):::actor
-  a42(["PRACTITIONER · CLINICIAN · PHARMACOVIGILANCE_OFFICER · PHAR…"]):::actor
-  a50(["Cualquier sesión válida"]):::actor
+  a24(["PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · MEDICAL_VISITOR · P…"]):::actor
+  a27(["PHARMA_LAB_ADMIN · REGULATORY_AFFAIRS · PLATFORM_ADMIN"]):::actor
+  a43(["PHARMACOVIGILANCE_OFFICER · PHARMA_LAB_ADMIN · PLATFORM_ADM…"]):::actor
+  a46(["PRACTITIONER · CLINICIAN · PHARMACOVIGILANCE_OFFICER · PHAR…"]):::actor
+  a55(["Cualquier sesión válida"]):::actor
   t3[("pharma_lab.medical_visitors")]:::tabla
   t4[("pharma_lab.pharma_labs")]:::tabla
   t6[("audit.audit_log")]:::tabla
-  t7[("iam.users")]:::tabla
-  t8[("pharma_lab.medical_visitor_products")]:::tabla
-  t9[("pharma_lab.medical_visitor_specialties")]:::tabla
-  t17[("iam.refresh_tokens")]:::tabla
-  t18[("iam.sessions")]:::tabla
-  t23[("pharma_lab.informational_materials")]:::tabla
-  t26[("pharma_lab.pharma_products")]:::tabla
-  t28[("pharma_lab.material_approvals")]:::tabla
-  t30[("pharma_lab.material_assets")]:::tabla
-  t40[("pharma_lab.pharmacovigilance_reports")]:::tabla
-  t43[("pharma_lab.pharma_lab_notices")]:::tabla
-  t44[("pharma_lab.pharma_lab_staff")]:::tabla
-  t47[("pharma_lab.pharmacovigilance_actions")]:::tabla
-  t10[("+6 tablas más")]
-  t12[("+1 tablas más")]
-  t14[("+2 tablas más")]
-  t19[("+13 tablas más")]
+  t7[("authz.roles")]:::tabla
+  t8[("authz.user_role_assignments")]:::tabla
+  t9[("iam.sessions")]:::tabla
+  t12[("pharma_lab.medical_visitor_products")]:::tabla
+  t17[("pharma_lab.medical_visitor_specialties")]:::tabla
+  t20[("iam.refresh_tokens")]:::tabla
+  t25[("pharma_lab.informational_materials")]:::tabla
+  t28[("pharma_lab.pharma_products")]:::tabla
+  t30[("pharma_lab.material_approvals")]:::tabla
+  t32[("pharma_lab.material_assets")]:::tabla
+  t44[("pharma_lab.pharmacovigilance_reports")]:::tabla
+  t47[("pharma_lab.pharma_lab_notices")]:::tabla
+  t48[("pharma_lab.pharma_lab_staff")]:::tabla
+  t51[("pharma_lab.pharmacovigilance_actions")]:::tabla
+  t10[("+10 tablas más")]
+  t13[("+2 tablas más")]
+  t15[("+6 tablas más")]
+  t18[("+1 tablas más")]
+  t21[("+16 tablas más")]
   subgraph s0["ctrl:MedicalVisitorsController · Operaciones de MedicalVisitorsController que e…"]
     o1["GET /pharma-labs/{pharmaLabId}/medical-visitors"]:::op
     o5["POST /pharma-labs/{pharmaLabId}/medical-visitors"]:::op
     o11["PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/pr…"]:::op
-    o13["POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/r…"]:::op
-    o15["PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/sp…"]:::op
-    o16["POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/u…"]:::op
-    o20["POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/v…"]:::op
+    o14["POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/r…"]:::op
+    o16["PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/sp…"]:::op
+    o19["POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/u…"]:::op
+    o22["POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/v…"]:::op
   end
+  t35[("+1 tablas más")]
+  t37[("+1 tablas más")]
   subgraph s1["ctrl:PharmaCatalogController · Operaciones de PharmaCatalogController que el RE…"]
-    o21["GET /pharma-labs/{pharmaLabId}/materials"]:::op
-    o24["POST /pharma-labs/{pharmaLabId}/materials"]:::op
-    o27["GET /pharma-labs/{pharmaLabId}/materials/{materialId}/approvals"]:::op
-    o29["GET /pharma-labs/{pharmaLabId}/materials/{materialId}/assets"]:::op
-    o31["POST /pharma-labs/{pharmaLabId}/materials/{materialId}/assets"]:::op
-    o32["POST /pharma-labs/{pharmaLabId}/materials/{materialId}/decision"]:::op
-    o33["POST /pharma-labs/{pharmaLabId}/materials/{materialId}/submit"]:::op
-    o34["GET /pharma-labs/{pharmaLabId}/products"]:::op
-    o35["POST /pharma-labs/{pharmaLabId}/products"]:::op
-    o36["PATCH /pharma-labs/{pharmaLabId}/products/{productId}"]:::op
-    o37["POST /pharma-labs/{pharmaLabId}/products/{productId}/status"]:::op
+    o23["GET /pharma-labs/{pharmaLabId}/materials"]:::op
+    o26["POST /pharma-labs/{pharmaLabId}/materials"]:::op
+    o29["GET /pharma-labs/{pharmaLabId}/materials/{materialId}/approvals"]:::op
+    o31["GET /pharma-labs/{pharmaLabId}/materials/{materialId}/assets"]:::op
+    o33["POST /pharma-labs/{pharmaLabId}/materials/{materialId}/assets"]:::op
+    o34["POST /pharma-labs/{pharmaLabId}/materials/{materialId}/decision"]:::op
+    o36["POST /pharma-labs/{pharmaLabId}/materials/{materialId}/submit"]:::op
+    o38["GET /pharma-labs/{pharmaLabId}/products"]:::op
+    o39["POST /pharma-labs/{pharmaLabId}/products"]:::op
+    o40["PATCH /pharma-labs/{pharmaLabId}/products/{productId}"]:::op
+    o41["POST /pharma-labs/{pharmaLabId}/products/{productId}/status"]:::op
   end
-  t45[("+3 tablas más")]
+  t49[("+4 tablas más")]
+  t53[("+1 tablas más")]
   subgraph s2["ctrl:PharmacovigilanceController · Operaciones de PharmacovigilanceController q…"]
-    o38["GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports"]:::op
-    o41["POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports"]:::op
-    o46["GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}"]:::op
-    o48["POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/…"]:::op
+    o42["GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports"]:::op
+    o45["POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports"]:::op
+    o50["GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}"]:::op
+    o52["POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/…"]:::op
   end
   subgraph s3["ctrl:PharmaLabNoticesController · Operaciones de PharmaLabNoticesController que…"]
-    o49["POST /pharma-labs/notices/{noticeId}/read"]:::op
-    o51["GET /pharma-labs/notices/mine"]:::op
+    o54["POST /pharma-labs/notices/{noticeId}/read"]:::op
+    o56["GET /pharma-labs/notices/mine"]:::op
   end
   subgraph s4["ctrl:PharmaLabReferenceController · Operaciones de PharmaLabReferenceController…"]
-    o52["GET /pharma-labs/reference/concepts"]:::op
+    o57["GET /pharma-labs/reference/concepts"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -173,130 +178,139 @@ flowchart LR
   o5 -->|"CREA"| t6
   o5 -->|"LEE"| t6
   o5 -->|"LEE"| t7
-  o5 -->|"BORRA"| t8
   o5 -->|"CREA"| t8
-  o5 -->|"BORRA"| t9
+  o5 -->|"LEE"| t8
+  o5 -->|"LEE"| t9
   o5 -.-> t10
   a2 --> o11
   o11 -->|"CREA"| t6
   o11 -->|"LEE"| t6
-  o11 -->|"BORRA"| t8
-  o11 -->|"CREA"| t8
+  o11 -->|"LEE"| t9
+  o11 -->|"BORRA"| t12
+  o11 -->|"CREA"| t12
   o11 -->|"LEE"| t3
-  o11 -->|"LEE"| t4
-  o11 -.-> t12
-  a2 --> o13
-  o13 -->|"CREA"| t6
-  o13 -->|"LEE"| t6
-  o13 -->|"ACTUALIZA"| t7
-  o13 -->|"LEE"| t7
-  o13 -->|"ACTUALIZA"| t3
-  o13 -->|"LEE"| t3
-  o13 -.-> t14
-  a2 --> o15
-  o15 -->|"CREA"| t6
-  o15 -->|"LEE"| t6
-  o15 -->|"BORRA"| t9
-  o15 -->|"CREA"| t9
-  o15 -->|"LEE"| t3
-  o15 -->|"LEE"| t4
+  o11 -.-> t13
+  a2 --> o14
+  o14 -->|"CREA"| t6
+  o14 -->|"LEE"| t6
+  o14 -->|"LEE"| t7
+  o14 -->|"CREA"| t8
+  o14 -->|"LEE"| t8
+  o14 -->|"LEE"| t9
+  o14 -.-> t15
   a2 --> o16
   o16 -->|"CREA"| t6
   o16 -->|"LEE"| t6
-  o16 -->|"ACTUALIZA"| t17
-  o16 -->|"ACTUALIZA"| t18
-  o16 -->|"LEE"| t18
-  o16 -->|"ACTUALIZA"| t7
-  o16 -.-> t19
-  a2 --> o20
-  o20 -->|"CREA"| t6
-  o20 -->|"LEE"| t6
-  o20 -->|"ACTUALIZA"| t3
-  o20 -->|"LEE"| t3
-  o20 -->|"LEE"| t4
-  a22 --> o21
-  o21 -->|"LEE"| t23
-  o21 -->|"LEE"| t4
-  a25 --> o24
-  o24 -->|"CREA"| t6
-  o24 -->|"LEE"| t6
-  o24 -->|"CREA"| t23
-  o24 -->|"LEE"| t4
-  o24 -->|"LEE"| t26
-  a25 --> o27
-  o27 -->|"LEE"| t23
-  o27 -->|"LEE"| t28
-  o27 -->|"LEE"| t4
-  a22 --> o29
-  o29 -->|"LEE"| t23
+  o16 -->|"LEE"| t9
+  o16 -->|"BORRA"| t17
+  o16 -->|"CREA"| t17
+  o16 -->|"LEE"| t3
+  o16 -.-> t18
+  a2 --> o19
+  o19 -->|"CREA"| t6
+  o19 -->|"LEE"| t6
+  o19 -->|"LEE"| t7
+  o19 -->|"ACTUALIZA"| t8
+  o19 -->|"LEE"| t8
+  o19 -->|"ACTUALIZA"| t20
+  o19 -.-> t21
+  a2 --> o22
+  o22 -->|"CREA"| t6
+  o22 -->|"LEE"| t6
+  o22 -->|"LEE"| t9
+  o22 -->|"ACTUALIZA"| t3
+  o22 -->|"LEE"| t3
+  o22 -->|"LEE"| t4
+  a24 --> o23
+  o23 -->|"LEE"| t25
+  o23 -->|"LEE"| t4
+  a27 --> o26
+  o26 -->|"CREA"| t6
+  o26 -->|"LEE"| t6
+  o26 -->|"LEE"| t9
+  o26 -->|"CREA"| t25
+  o26 -->|"LEE"| t4
+  o26 -->|"LEE"| t28
+  a27 --> o29
+  o29 -->|"LEE"| t25
   o29 -->|"LEE"| t30
   o29 -->|"LEE"| t4
-  a25 --> o31
-  o31 -->|"LEE"| t23
-  o31 -->|"CREA"| t30
+  a24 --> o31
+  o31 -->|"LEE"| t25
+  o31 -->|"LEE"| t32
   o31 -->|"LEE"| t4
-  a25 --> o32
-  o32 -->|"CREA"| t6
-  o32 -->|"LEE"| t6
-  o32 -->|"ACTUALIZA"| t23
-  o32 -->|"LEE"| t23
-  o32 -->|"CREA"| t28
-  o32 -->|"LEE"| t4
-  a25 --> o33
-  o33 -->|"CREA"| t6
-  o33 -->|"LEE"| t6
-  o33 -->|"ACTUALIZA"| t23
-  o33 -->|"LEE"| t23
-  o33 -->|"LEE"| t30
+  a27 --> o33
+  o33 -->|"LEE"| t25
+  o33 -->|"CREA"| t32
   o33 -->|"LEE"| t4
-  a22 --> o34
-  o34 -->|"LEE"| t4
-  o34 -->|"LEE"| t26
-  a25 --> o35
-  o35 -->|"CREA"| t6
-  o35 -->|"LEE"| t6
-  o35 -->|"LEE"| t4
-  o35 -->|"CREA"| t26
-  a25 --> o36
+  a27 --> o34
+  o34 -->|"CREA"| t6
+  o34 -->|"LEE"| t6
+  o34 -->|"LEE"| t9
+  o34 -->|"ACTUALIZA"| t25
+  o34 -->|"LEE"| t25
+  o34 -->|"CREA"| t30
+  o34 -.-> t35
+  a27 --> o36
   o36 -->|"CREA"| t6
   o36 -->|"LEE"| t6
-  o36 -->|"LEE"| t4
-  o36 -->|"ACTUALIZA"| t26
-  o36 -->|"LEE"| t26
-  a25 --> o37
-  o37 -->|"CREA"| t6
-  o37 -->|"LEE"| t6
-  o37 -->|"LEE"| t4
-  o37 -->|"ACTUALIZA"| t26
-  o37 -->|"LEE"| t26
-  a39 --> o38
+  o36 -->|"LEE"| t9
+  o36 -->|"ACTUALIZA"| t25
+  o36 -->|"LEE"| t25
+  o36 -->|"LEE"| t32
+  o36 -.-> t37
+  a24 --> o38
   o38 -->|"LEE"| t4
-  o38 -->|"LEE"| t40
-  a42 --> o41
+  o38 -->|"LEE"| t28
+  a27 --> o39
+  o39 -->|"CREA"| t6
+  o39 -->|"LEE"| t6
+  o39 -->|"LEE"| t9
+  o39 -->|"LEE"| t4
+  o39 -->|"CREA"| t28
+  a27 --> o40
+  o40 -->|"CREA"| t6
+  o40 -->|"LEE"| t6
+  o40 -->|"LEE"| t9
+  o40 -->|"LEE"| t4
+  o40 -->|"ACTUALIZA"| t28
+  o40 -->|"LEE"| t28
+  a27 --> o41
   o41 -->|"CREA"| t6
   o41 -->|"LEE"| t6
-  o41 -->|"CREA"| t43
-  o41 -->|"LEE"| t44
+  o41 -->|"LEE"| t9
   o41 -->|"LEE"| t4
-  o41 -->|"LEE"| t26
-  o41 -.-> t45
-  a39 --> o46
-  o46 -->|"LEE"| t4
-  o46 -->|"LEE"| t47
-  o46 -->|"LEE"| t40
-  a39 --> o48
-  o48 -->|"CREA"| t6
-  o48 -->|"LEE"| t6
-  o48 -->|"LEE"| t4
-  o48 -->|"CREA"| t47
-  o48 -->|"ACTUALIZA"| t40
-  o48 -->|"LEE"| t40
-  a50 --> o49
-  o49 -->|"ACTUALIZA"| t43
-  o49 -->|"LEE"| t43
-  a50 --> o51
-  o51 -->|"LEE"| t43
-  a50 --> o52
+  o41 -->|"ACTUALIZA"| t28
+  o41 -->|"LEE"| t28
+  a43 --> o42
+  o42 -->|"LEE"| t4
+  o42 -->|"LEE"| t44
+  a46 --> o45
+  o45 -->|"CREA"| t6
+  o45 -->|"LEE"| t6
+  o45 -->|"LEE"| t9
+  o45 -->|"CREA"| t47
+  o45 -->|"LEE"| t48
+  o45 -->|"LEE"| t4
+  o45 -.-> t49
+  a43 --> o50
+  o50 -->|"LEE"| t4
+  o50 -->|"LEE"| t51
+  o50 -->|"LEE"| t44
+  a43 --> o52
+  o52 -->|"CREA"| t6
+  o52 -->|"LEE"| t6
+  o52 -->|"LEE"| t9
+  o52 -->|"LEE"| t4
+  o52 -->|"CREA"| t51
+  o52 -->|"ACTUALIZA"| t44
+  o52 -.-> t53
+  a55 --> o54
+  o54 -->|"ACTUALIZA"| t47
+  o54 -->|"LEE"| t47
+  a55 --> o56
+  o56 -->|"LEE"| t47
+  a55 --> o57
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -308,175 +322,195 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN"]):::actor
-  a17(["PHARMA_LAB_ADMIN · ACCOUNTANT · FINANCE · PLATFORM_ADMIN"]):::actor
-  a30(["MEDICAL_VISITOR"]):::actor
-  a33(["REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLA…"]):::actor
-  t3[("pharma_lab.pharma_labs")]:::tabla
-  t5[("audit.audit_log")]:::tabla
-  t6[("directory.tenants")]:::tabla
-  t10[("pharma_lab.pharma_lab_link_events")]:::tabla
-  t12[("pharma_lab.pharma_lab_staff")]:::tabla
-  t18[("accounting.journal_transactions")]:::tabla
-  t19[("pharma_lab.pharma_cost_allocations")]:::tabla
-  t20[("pharma_lab.pharma_products")]:::tabla
-  t23[("pharma_lab.visitor_post_submissions")]:::tabla
-  t25[("community.public_profiles")]:::tabla
-  t26[("community.social_posts")]:::tabla
-  t27[("pharma_lab.medical_visitors")]:::tabla
-  t31[("pharma_lab.informational_materials")]:::tabla
-  t34[("pharma_lab.regulatory_documents")]:::tabla
-  t36[("pharma_lab.regulatory_document_versions")]:::tabla
-  t38[("pharma_lab.regulatory_document_access_log")]:::tabla
-  t46[("pharma_lab.pharma_lab_notices")]:::tabla
+  a21(["PHARMA_LAB_ADMIN · ACCOUNTANT · FINANCE · PLATFORM_ADMIN"]):::actor
+  a34(["MEDICAL_VISITOR"]):::actor
+  a39(["REGULATORY_AFFAIRS · PHARMA_LAB_ADMIN · LEGAL_COUNSEL · PLA…"]):::actor
+  t3[("pharma_lab.pharma_lab_staff")]:::tabla
+  t4[("pharma_lab.pharma_labs")]:::tabla
+  t6[("audit.audit_log")]:::tabla
+  t7[("directory.tenants")]:::tabla
+  t8[("iam.sessions")]:::tabla
+  t12[("pharma_lab.pharma_lab_link_events")]:::tabla
+  t22[("accounting.journal_transactions")]:::tabla
+  t23[("pharma_lab.pharma_cost_allocations")]:::tabla
+  t26[("pharma_lab.pharma_products")]:::tabla
+  t28[("pharma_lab.visitor_post_submissions")]:::tabla
+  t30[("community.public_profiles")]:::tabla
+  t31[("community.social_posts")]:::tabla
+  t35[("pharma_lab.informational_materials")]:::tabla
+  t36[("pharma_lab.medical_visitors")]:::tabla
+  t40[("pharma_lab.regulatory_documents")]:::tabla
+  t42[("pharma_lab.regulatory_document_versions")]:::tabla
+  t44[("pharma_lab.regulatory_document_access_log")]:::tabla
+  t53[("pharma_lab.pharma_lab_notices")]:::tabla
+  t15[("+1 tablas más")]
+  t17[("+1 tablas más")]
+  t19[("+1 tablas más")]
   subgraph s0["ctrl:PharmaLabsController · Operaciones de PharmaLabsController que el README n…"]
     o1["GET /pharma-labs"]:::op
-    o4["POST /pharma-labs"]:::op
-    o7["GET /pharma-labs/{pharmaLabId}"]:::op
-    o8["PATCH /pharma-labs/{pharmaLabId}"]:::op
-    o9["GET /pharma-labs/{pharmaLabId}/link-events"]:::op
-    o11["GET /pharma-labs/{pharmaLabId}/staff"]:::op
-    o13["POST /pharma-labs/{pharmaLabId}/staff"]:::op
-    o14["PATCH /pharma-labs/{pharmaLabId}/staff/{staffId}/permissions"]:::op
-    o15["POST /pharma-labs/{pharmaLabId}/staff/{staffId}/unlink"]:::op
+    o5["POST /pharma-labs"]:::op
+    o9["GET /pharma-labs/{pharmaLabId}"]:::op
+    o10["PATCH /pharma-labs/{pharmaLabId}"]:::op
+    o11["GET /pharma-labs/{pharmaLabId}/link-events"]:::op
+    o13["GET /pharma-labs/{pharmaLabId}/staff"]:::op
+    o14["POST /pharma-labs/{pharmaLabId}/staff"]:::op
+    o16["PATCH /pharma-labs/{pharmaLabId}/staff/{staffId}/permissions"]:::op
+    o18["POST /pharma-labs/{pharmaLabId}/staff/{staffId}/unlink"]:::op
   end
-  t28[("+4 tablas más")]
+  t24[("+1 tablas más")]
+  t32[("+5 tablas más")]
+  t37[("+1 tablas más")]
   subgraph s1["ctrl:PharmaLabSocialController · Operaciones de PharmaLabSocialController que e…"]
-    o16["POST /pharma-labs/{pharmaLabId}/cost-allocations"]:::op
-    o21["GET /pharma-labs/{pharmaLabId}/cost-allocations/report"]:::op
-    o22["GET /pharma-labs/{pharmaLabId}/visitor-posts"]:::op
-    o24["POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision"]:::op
-    o29["POST /pharma-labs/visitor-posts"]:::op
+    o20["POST /pharma-labs/{pharmaLabId}/cost-allocations"]:::op
+    o25["GET /pharma-labs/{pharmaLabId}/cost-allocations/report"]:::op
+    o27["GET /pharma-labs/{pharmaLabId}/visitor-posts"]:::op
+    o29["POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision"]:::op
+    o33["POST /pharma-labs/visitor-posts"]:::op
   end
-  t41[("+1 tablas más")]
-  t43[("+2 tablas más")]
+  t47[("+2 tablas más")]
+  t49[("+3 tablas más")]
+  t51[("+1 tablas más")]
   subgraph s2["ctrl:RegulatoryDocumentsController · Operaciones de RegulatoryDocumentsControll…"]
-    o32["GET /pharma-labs/{pharmaLabId}/regulatory-documents"]:::op
-    o35["POST /pharma-labs/{pharmaLabId}/regulatory-documents"]:::op
-    o37["GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}"]:::op
-    o39["GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/acce…"]:::op
-    o40["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/inv…"]:::op
-    o42["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/ver…"]:::op
-    o44["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/ver…"]:::op
-    o45["POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/revi…"]:::op
+    o38["GET /pharma-labs/{pharmaLabId}/regulatory-documents"]:::op
+    o41["POST /pharma-labs/{pharmaLabId}/regulatory-documents"]:::op
+    o43["GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}"]:::op
+    o45["GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/acce…"]:::op
+    o46["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/inv…"]:::op
+    o48["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/ver…"]:::op
+    o50["POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/ver…"]:::op
+    o52["POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/revi…"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
-  a2 --> o4
-  o4 -->|"CREA"| t5
-  o4 -->|"LEE"| t5
-  o4 -->|"LEE"| t6
-  o4 -->|"CREA"| t3
-  o4 -->|"LEE"| t3
-  a2 --> o7
-  o7 -->|"LEE"| t3
-  a2 --> o8
-  o8 -->|"CREA"| t5
-  o8 -->|"LEE"| t5
-  o8 -->|"ACTUALIZA"| t3
-  o8 -->|"LEE"| t3
+  o1 -->|"LEE"| t4
+  a2 --> o5
+  o5 -->|"CREA"| t6
+  o5 -->|"LEE"| t6
+  o5 -->|"LEE"| t7
+  o5 -->|"LEE"| t8
+  o5 -->|"CREA"| t4
+  o5 -->|"LEE"| t4
   a2 --> o9
-  o9 -->|"LEE"| t10
   o9 -->|"LEE"| t3
+  o9 -->|"LEE"| t4
+  a2 --> o10
+  o10 -->|"CREA"| t6
+  o10 -->|"LEE"| t6
+  o10 -->|"LEE"| t8
+  o10 -->|"LEE"| t3
+  o10 -->|"ACTUALIZA"| t4
+  o10 -->|"LEE"| t4
   a2 --> o11
   o11 -->|"LEE"| t12
   o11 -->|"LEE"| t3
+  o11 -->|"LEE"| t4
   a2 --> o13
-  o13 -->|"CREA"| t5
-  o13 -->|"LEE"| t5
-  o13 -->|"CREA"| t10
-  o13 -->|"CREA"| t12
-  o13 -->|"LEE"| t12
   o13 -->|"LEE"| t3
+  o13 -->|"LEE"| t4
   a2 --> o14
-  o14 -->|"CREA"| t5
-  o14 -->|"LEE"| t5
-  o14 -->|"CREA"| t10
-  o14 -->|"ACTUALIZA"| t12
-  o14 -->|"LEE"| t12
+  o14 -->|"CREA"| t6
+  o14 -->|"LEE"| t6
+  o14 -->|"LEE"| t8
+  o14 -->|"CREA"| t12
+  o14 -->|"CREA"| t3
   o14 -->|"LEE"| t3
-  a2 --> o15
-  o15 -->|"CREA"| t5
-  o15 -->|"LEE"| t5
-  o15 -->|"CREA"| t10
-  o15 -->|"ACTUALIZA"| t12
-  o15 -->|"LEE"| t12
-  o15 -->|"LEE"| t3
-  a17 --> o16
-  o16 -->|"LEE"| t18
-  o16 -->|"CREA"| t5
-  o16 -->|"LEE"| t5
-  o16 -->|"CREA"| t19
+  o14 -.-> t15
+  a2 --> o16
+  o16 -->|"CREA"| t6
+  o16 -->|"LEE"| t6
+  o16 -->|"LEE"| t8
+  o16 -->|"CREA"| t12
+  o16 -->|"ACTUALIZA"| t3
   o16 -->|"LEE"| t3
-  o16 -->|"LEE"| t20
-  a17 --> o21
-  o21 -->|"LEE"| t19
-  o21 -->|"LEE"| t3
-  o21 -->|"LEE"| t20
-  a2 --> o22
-  o22 -->|"LEE"| t3
-  o22 -->|"LEE"| t23
-  a2 --> o24
-  o24 -->|"CREA"| t5
-  o24 -->|"LEE"| t5
-  o24 -->|"CREA"| t25
-  o24 -->|"LEE"| t25
-  o24 -->|"CREA"| t26
-  o24 -->|"LEE"| t27
-  o24 -.-> t28
-  a30 --> o29
-  o29 -->|"CREA"| t5
-  o29 -->|"LEE"| t5
-  o29 -->|"LEE"| t31
-  o29 -->|"LEE"| t27
-  o29 -->|"LEE"| t3
-  o29 -->|"CREA"| t23
-  a33 --> o32
-  o32 -->|"LEE"| t3
-  o32 -->|"LEE"| t34
-  a33 --> o35
-  o35 -->|"CREA"| t5
-  o35 -->|"LEE"| t5
-  o35 -->|"LEE"| t3
-  o35 -->|"CREA"| t36
-  o35 -->|"CREA"| t34
-  a33 --> o37
-  o37 -->|"LEE"| t3
-  o37 -->|"CREA"| t38
-  o37 -->|"LEE"| t36
-  o37 -->|"LEE"| t34
-  a33 --> o39
-  o39 -->|"LEE"| t3
-  o39 -->|"LEE"| t38
-  o39 -->|"LEE"| t34
-  a33 --> o40
-  o40 -->|"CREA"| t5
-  o40 -->|"LEE"| t5
-  o40 -->|"LEE"| t3
-  o40 -->|"ACTUALIZA"| t36
-  o40 -->|"LEE"| t36
-  o40 -->|"ACTUALIZA"| t34
-  o40 -.-> t41
-  a33 --> o42
-  o42 -->|"CREA"| t5
-  o42 -->|"LEE"| t5
-  o42 -->|"LEE"| t3
-  o42 -->|"ACTUALIZA"| t36
-  o42 -->|"CREA"| t36
-  o42 -->|"LEE"| t36
-  o42 -.-> t43
-  a33 --> o44
-  o44 -->|"CREA"| t5
-  o44 -->|"LEE"| t5
-  o44 -->|"LEE"| t3
-  o44 -->|"CREA"| t38
-  o44 -->|"LEE"| t36
-  o44 -->|"LEE"| t34
-  a33 --> o45
-  o45 -->|"CREA"| t46
-  o45 -->|"LEE"| t12
-  o45 -->|"LEE"| t3
-  o45 -->|"ACTUALIZA"| t34
-  o45 -->|"LEE"| t34
+  o16 -.-> t17
+  a2 --> o18
+  o18 -->|"CREA"| t6
+  o18 -->|"LEE"| t6
+  o18 -->|"LEE"| t8
+  o18 -->|"CREA"| t12
+  o18 -->|"ACTUALIZA"| t3
+  o18 -->|"LEE"| t3
+  o18 -.-> t19
+  a21 --> o20
+  o20 -->|"LEE"| t22
+  o20 -->|"CREA"| t6
+  o20 -->|"LEE"| t6
+  o20 -->|"LEE"| t8
+  o20 -->|"CREA"| t23
+  o20 -->|"LEE"| t4
+  o20 -.-> t24
+  a21 --> o25
+  o25 -->|"LEE"| t23
+  o25 -->|"LEE"| t4
+  o25 -->|"LEE"| t26
+  a2 --> o27
+  o27 -->|"LEE"| t4
+  o27 -->|"LEE"| t28
+  a2 --> o29
+  o29 -->|"CREA"| t6
+  o29 -->|"LEE"| t6
+  o29 -->|"CREA"| t30
+  o29 -->|"LEE"| t30
+  o29 -->|"CREA"| t31
+  o29 -->|"LEE"| t8
+  o29 -.-> t32
+  a34 --> o33
+  o33 -->|"CREA"| t6
+  o33 -->|"LEE"| t6
+  o33 -->|"LEE"| t8
+  o33 -->|"LEE"| t35
+  o33 -->|"LEE"| t36
+  o33 -->|"LEE"| t4
+  o33 -.-> t37
+  a39 --> o38
+  o38 -->|"LEE"| t4
+  o38 -->|"LEE"| t40
+  a39 --> o41
+  o41 -->|"CREA"| t6
+  o41 -->|"LEE"| t6
+  o41 -->|"LEE"| t8
+  o41 -->|"LEE"| t4
+  o41 -->|"CREA"| t42
+  o41 -->|"CREA"| t40
+  a39 --> o43
+  o43 -->|"LEE"| t4
+  o43 -->|"CREA"| t44
+  o43 -->|"LEE"| t42
+  o43 -->|"LEE"| t40
+  a39 --> o45
+  o45 -->|"LEE"| t4
+  o45 -->|"LEE"| t44
+  o45 -->|"LEE"| t40
+  a39 --> o46
+  o46 -->|"CREA"| t6
+  o46 -->|"LEE"| t6
+  o46 -->|"LEE"| t8
+  o46 -->|"LEE"| t4
+  o46 -->|"ACTUALIZA"| t42
+  o46 -->|"LEE"| t42
+  o46 -.-> t47
+  a39 --> o48
+  o48 -->|"CREA"| t6
+  o48 -->|"LEE"| t6
+  o48 -->|"LEE"| t8
+  o48 -->|"LEE"| t4
+  o48 -->|"ACTUALIZA"| t42
+  o48 -->|"CREA"| t42
+  o48 -.-> t49
+  a39 --> o50
+  o50 -->|"CREA"| t6
+  o50 -->|"LEE"| t6
+  o50 -->|"LEE"| t8
+  o50 -->|"LEE"| t4
+  o50 -->|"CREA"| t44
+  o50 -->|"LEE"| t42
+  o50 -.-> t51
+  a39 --> o52
+  o52 -->|"CREA"| t53
+  o52 -->|"LEE"| t3
+  o52 -->|"LEE"| t4
+  o52 -->|"ACTUALIZA"| t40
+  o52 -->|"LEE"| t40
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -488,181 +522,186 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["PRACTITIONER · CLINICIAN"]):::actor
-  a8(["MEDICAL_VISITOR · PHARMA_LAB_ADMIN · PRACTITIONER · CLINICI…"]):::actor
-  a15(["MEDICAL_VISITOR"]):::actor
+  a9(["MEDICAL_VISITOR · PHARMA_LAB_ADMIN · PRACTITIONER · CLINICI…"]):::actor
+  a16(["MEDICAL_VISITOR"]):::actor
   a28(["PHARMA_LAB_ADMIN · BUSINESS_ADMIN · PLATFORM_ADMIN"]):::actor
   a34(["MEDICAL_VISITOR · PRACTITIONER · CLINICIAN"]):::actor
   t3[("pharma_lab.doctor_visit_blocks")]:::tabla
   t5[("audit.audit_log")]:::tabla
-  t9[("pharma_lab.doctor_visit_policies")]:::tabla
-  t10[("pharma_lab.doctor_visit_windows")]:::tabla
-  t16[("pharma_lab.informational_materials")]:::tabla
-  t17[("pharma_lab.medical_visitors")]:::tabla
-  t18[("pharma_lab.pharma_lab_notices")]:::tabla
-  t19[("pharma_lab.pharma_labs")]:::tabla
+  t6[("iam.sessions")]:::tabla
+  t10[("pharma_lab.doctor_visit_policies")]:::tabla
+  t11[("pharma_lab.doctor_visit_windows")]:::tabla
+  t17[("pharma_lab.informational_materials")]:::tabla
+  t18[("pharma_lab.medical_visitors")]:::tabla
+  t19[("pharma_lab.pharma_lab_notices")]:::tabla
   t22[("pharma_lab.visit_records")]:::tabla
   t24[("pharma_lab.visit_ratings")]:::tabla
-  t31[("pharma_lab.medical_visitor_products")]:::tabla
+  t29[("pharma_lab.pharma_labs")]:::tabla
   t35[("pharma_lab.visit_request_events")]:::tabla
   t36[("pharma_lab.visit_request_topics")]:::tabla
   t37[("pharma_lab.visit_requests")]:::tabla
-  t13[("+1 tablas más")]
+  t14[("+2 tablas más")]
   subgraph s0["ctrl:VisitAgendaController · Operaciones de VisitAgendaController que el README…"]
     o1["GET /visit-agenda/blocks"]:::op
     o4["POST /visit-agenda/blocks"]:::op
-    o6["POST /visit-agenda/blocks/{blockId}/lift"]:::op
-    o7["GET /visit-agenda/doctors/{doctorUserId}"]:::op
-    o11["GET /visit-agenda/me"]:::op
-    o12["PUT /visit-agenda/me"]:::op
+    o7["POST /visit-agenda/blocks/{blockId}/lift"]:::op
+    o8["GET /visit-agenda/doctors/{doctorUserId}"]:::op
+    o12["GET /visit-agenda/me"]:::op
+    o13["PUT /visit-agenda/me"]:::op
   end
-  t20[("+8 tablas más")]
-  t25[("+2 tablas más")]
+  t20[("+9 tablas más")]
+  t25[("+3 tablas más")]
   subgraph s1["ctrl:VisitRecordsController · Operaciones de VisitRecordsController que el READ…"]
-    o14["POST /visit-records"]:::op
+    o15["POST /visit-records"]:::op
     o21["POST /visit-records/{visitRecordId}/confirm"]:::op
     o23["POST /visit-records/{visitRecordId}/rating"]:::op
     o26["GET /visit-records/inbox"]:::op
     o27["GET /visit-records/labs/{pharmaLabId}"]:::op
-    o29["GET /visit-records/labs/{pharmaLabId}/rating-summary"]:::op
+    o30["GET /visit-records/labs/{pharmaLabId}/rating-summary"]:::op
   end
-  t32[("+16 tablas más")]
-  t39[("+1 tablas más")]
-  t41[("+3 tablas más")]
-  t43[("+10 tablas más")]
-  t45[("+1 tablas más")]
-  t48[("+11 tablas más")]
+  t32[("+17 tablas más")]
+  t39[("+2 tablas más")]
+  t41[("+4 tablas más")]
+  t43[("+11 tablas más")]
+  t45[("+2 tablas más")]
+  t47[("+1 tablas más")]
+  t49[("+12 tablas más")]
   subgraph s2["ctrl:VisitRequestsController · Operaciones de VisitRequestsController que el RE…"]
-    o30["POST /visit-requests"]:::op
+    o31["POST /visit-requests"]:::op
     o33["GET /visit-requests/{visitRequestId}"]:::op
     o38["POST /visit-requests/{visitRequestId}/accept"]:::op
     o40["POST /visit-requests/{visitRequestId}/cancel"]:::op
     o42["POST /visit-requests/{visitRequestId}/propose-time"]:::op
     o44["POST /visit-requests/{visitRequestId}/reject"]:::op
     o46["POST /visit-requests/{visitRequestId}/request-info"]:::op
-    o47["POST /visit-requests/{visitRequestId}/reschedule"]:::op
-    o49["GET /visit-requests/inbox"]:::op
-    o50["GET /visit-requests/mine"]:::op
+    o48["POST /visit-requests/{visitRequestId}/reschedule"]:::op
+    o50["GET /visit-requests/inbox"]:::op
+    o51["GET /visit-requests/mine"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   a2 --> o4
   o4 -->|"CREA"| t5
   o4 -->|"LEE"| t5
+  o4 -->|"LEE"| t6
   o4 -->|"CREA"| t3
-  a2 --> o6
-  o6 -->|"CREA"| t5
-  o6 -->|"LEE"| t5
-  o6 -->|"ACTUALIZA"| t3
-  o6 -->|"LEE"| t3
-  a8 --> o7
-  o7 -->|"LEE"| t9
-  o7 -->|"LEE"| t10
-  a2 --> o11
-  o11 -->|"LEE"| t9
-  o11 -->|"LEE"| t10
+  a2 --> o7
+  o7 -->|"CREA"| t5
+  o7 -->|"LEE"| t5
+  o7 -->|"LEE"| t6
+  o7 -->|"ACTUALIZA"| t3
+  o7 -->|"LEE"| t3
+  a9 --> o8
+  o8 -->|"LEE"| t10
+  o8 -->|"LEE"| t11
   a2 --> o12
-  o12 -->|"CREA"| t5
-  o12 -->|"LEE"| t5
-  o12 -->|"ACTUALIZA"| t9
-  o12 -->|"CREA"| t9
-  o12 -->|"LEE"| t9
-  o12 -->|"BORRA"| t10
-  o12 -.-> t13
-  a15 --> o14
-  o14 -->|"CREA"| t5
-  o14 -->|"LEE"| t5
-  o14 -->|"LEE"| t16
-  o14 -->|"LEE"| t17
-  o14 -->|"CREA"| t18
-  o14 -->|"LEE"| t19
-  o14 -.-> t20
+  o12 -->|"LEE"| t10
+  o12 -->|"LEE"| t11
+  a2 --> o13
+  o13 -->|"CREA"| t5
+  o13 -->|"LEE"| t5
+  o13 -->|"LEE"| t6
+  o13 -->|"ACTUALIZA"| t10
+  o13 -->|"CREA"| t10
+  o13 -->|"LEE"| t10
+  o13 -.-> t14
+  a16 --> o15
+  o15 -->|"CREA"| t5
+  o15 -->|"LEE"| t5
+  o15 -->|"LEE"| t6
+  o15 -->|"LEE"| t17
+  o15 -->|"LEE"| t18
+  o15 -->|"CREA"| t19
+  o15 -.-> t20
   a2 --> o21
   o21 -->|"CREA"| t5
   o21 -->|"LEE"| t5
+  o21 -->|"LEE"| t6
   o21 -->|"ACTUALIZA"| t22
   o21 -->|"LEE"| t22
   a2 --> o23
   o23 -->|"CREA"| t5
   o23 -->|"LEE"| t5
-  o23 -->|"LEE"| t17
-  o23 -->|"CREA"| t18
+  o23 -->|"LEE"| t6
+  o23 -->|"LEE"| t18
+  o23 -->|"CREA"| t19
   o23 -->|"CREA"| t24
-  o23 -->|"LEE"| t24
   o23 -.-> t25
   a2 --> o26
   o26 -->|"LEE"| t22
   a28 --> o27
-  o27 -->|"LEE"| t19
+  o27 -->|"LEE"| t29
   o27 -->|"LEE"| t22
-  a28 --> o29
-  o29 -->|"LEE"| t19
-  o29 -->|"LEE"| t24
-  o29 -->|"LEE"| t22
-  a15 --> o30
-  o30 -->|"CREA"| t5
-  o30 -->|"LEE"| t5
-  o30 -->|"LEE"| t3
-  o30 -->|"LEE"| t9
-  o30 -->|"LEE"| t10
-  o30 -->|"LEE"| t31
-  o30 -.-> t32
+  a28 --> o30
+  o30 -->|"LEE"| t29
+  o30 -->|"LEE"| t24
+  o30 -->|"LEE"| t22
+  a16 --> o31
+  o31 -->|"CREA"| t5
+  o31 -->|"LEE"| t5
+  o31 -->|"LEE"| t6
+  o31 -->|"LEE"| t3
+  o31 -->|"LEE"| t10
+  o31 -->|"LEE"| t11
+  o31 -.-> t32
   a34 --> o33
-  o33 -->|"LEE"| t17
+  o33 -->|"LEE"| t18
   o33 -->|"LEE"| t35
   o33 -->|"LEE"| t36
   o33 -->|"LEE"| t37
   a2 --> o38
   o38 -->|"CREA"| t5
   o38 -->|"LEE"| t5
-  o38 -->|"LEE"| t17
-  o38 -->|"CREA"| t18
+  o38 -->|"LEE"| t6
+  o38 -->|"LEE"| t18
+  o38 -->|"CREA"| t19
   o38 -->|"CREA"| t35
-  o38 -->|"ACTUALIZA"| t37
   o38 -.-> t39
   a34 --> o40
   o40 -->|"CREA"| t5
   o40 -->|"LEE"| t5
-  o40 -->|"LEE"| t9
+  o40 -->|"LEE"| t6
   o40 -->|"LEE"| t10
-  o40 -->|"LEE"| t17
-  o40 -->|"CREA"| t18
+  o40 -->|"LEE"| t11
+  o40 -->|"LEE"| t18
   o40 -.-> t41
   a2 --> o42
   o42 -->|"CREA"| t5
   o42 -->|"LEE"| t5
-  o42 -->|"LEE"| t9
+  o42 -->|"LEE"| t6
   o42 -->|"LEE"| t10
-  o42 -->|"LEE"| t17
-  o42 -->|"CREA"| t18
+  o42 -->|"LEE"| t11
+  o42 -->|"LEE"| t18
   o42 -.-> t43
   a2 --> o44
   o44 -->|"CREA"| t5
   o44 -->|"LEE"| t5
-  o44 -->|"LEE"| t17
-  o44 -->|"CREA"| t18
+  o44 -->|"LEE"| t6
+  o44 -->|"LEE"| t18
+  o44 -->|"CREA"| t19
   o44 -->|"CREA"| t35
-  o44 -->|"ACTUALIZA"| t37
   o44 -.-> t45
   a2 --> o46
   o46 -->|"CREA"| t5
   o46 -->|"LEE"| t5
-  o46 -->|"LEE"| t17
-  o46 -->|"CREA"| t18
+  o46 -->|"LEE"| t6
+  o46 -->|"LEE"| t18
+  o46 -->|"CREA"| t19
   o46 -->|"CREA"| t35
-  o46 -->|"LEE"| t37
-  a15 --> o47
-  o47 -->|"CREA"| t5
-  o47 -->|"LEE"| t5
-  o47 -->|"LEE"| t9
-  o47 -->|"LEE"| t10
-  o47 -->|"LEE"| t17
-  o47 -->|"CREA"| t18
-  o47 -.-> t48
-  a2 --> o49
-  o49 -->|"LEE"| t37
-  a15 --> o50
-  o50 -->|"LEE"| t17
+  o46 -.-> t47
+  a16 --> o48
+  o48 -->|"CREA"| t5
+  o48 -->|"LEE"| t5
+  o48 -->|"LEE"| t6
+  o48 -->|"LEE"| t10
+  o48 -->|"LEE"| t11
+  o48 -->|"LEE"| t18
+  o48 -.-> t49
+  a2 --> o50
   o50 -->|"LEE"| t37
+  a16 --> o51
+  o51 -->|"LEE"| t18
+  o51 -->|"LEE"| t37
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -674,21 +713,23 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["PHARMA_LAB_ADMIN · PLATFORM_ADMIN"]):::actor
-  a13(["PRACTITIONER · CLINICIAN"]):::actor
+  a14(["PRACTITIONER · CLINICIAN"]):::actor
   t3[("pharma_lab.pharma_labs")]:::tabla
   t4[("pharma_lab.visit_surveys")]:::tabla
   t6[("audit.audit_log")]:::tabla
-  t7[("pharma_lab.visit_survey_questions")]:::tabla
-  t10[("pharma_lab.visit_survey_answers")]:::tabla
-  t11[("pharma_lab.visit_survey_responses")]:::tabla
+  t7[("iam.sessions")]:::tabla
+  t8[("pharma_lab.visit_survey_questions")]:::tabla
+  t11[("pharma_lab.visit_survey_answers")]:::tabla
+  t12[("pharma_lab.visit_survey_responses")]:::tabla
+  t17[("+1 tablas más")]
   subgraph s0["ctrl:VisitSurveysController · Operaciones de VisitSurveysController que el READ…"]
     o1["GET /visit-surveys/labs/{pharmaLabId}"]:::op
     o5["POST /visit-surveys/labs/{pharmaLabId}"]:::op
-    o8["POST /visit-surveys/labs/{pharmaLabId}/{surveyId}/close"]:::op
-    o9["GET /visit-surveys/labs/{pharmaLabId}/{surveyId}/results"]:::op
-    o12["GET /visit-surveys/pending"]:::op
-    o14["GET /visit-surveys/responses/{responseId}"]:::op
-    o15["POST /visit-surveys/responses/{responseId}"]:::op
+    o9["POST /visit-surveys/labs/{pharmaLabId}/{surveyId}/close"]:::op
+    o10["GET /visit-surveys/labs/{pharmaLabId}/{surveyId}/results"]:::op
+    o13["GET /visit-surveys/pending"]:::op
+    o15["GET /visit-surveys/responses/{responseId}"]:::op
+    o16["POST /visit-surveys/responses/{responseId}"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -696,34 +737,37 @@ flowchart LR
   a2 --> o5
   o5 -->|"CREA"| t6
   o5 -->|"LEE"| t6
+  o5 -->|"LEE"| t7
   o5 -->|"LEE"| t3
-  o5 -->|"CREA"| t7
+  o5 -->|"CREA"| t8
   o5 -->|"CREA"| t4
-  a2 --> o8
-  o8 -->|"CREA"| t6
-  o8 -->|"LEE"| t6
-  o8 -->|"LEE"| t3
-  o8 -->|"ACTUALIZA"| t4
-  o8 -->|"LEE"| t4
   a2 --> o9
-  o9 -->|"LEE"| t3
-  o9 -->|"LEE"| t10
+  o9 -->|"CREA"| t6
+  o9 -->|"LEE"| t6
   o9 -->|"LEE"| t7
-  o9 -->|"LEE"| t11
+  o9 -->|"LEE"| t3
+  o9 -->|"ACTUALIZA"| t4
   o9 -->|"LEE"| t4
-  a13 --> o12
-  o12 -->|"LEE"| t11
-  a13 --> o14
-  o14 -->|"LEE"| t7
-  o14 -->|"LEE"| t11
-  o14 -->|"LEE"| t4
-  a13 --> o15
-  o15 -->|"CREA"| t6
-  o15 -->|"LEE"| t6
-  o15 -->|"CREA"| t10
-  o15 -->|"LEE"| t7
-  o15 -->|"ACTUALIZA"| t11
-  o15 -->|"LEE"| t11
+  a2 --> o10
+  o10 -->|"LEE"| t3
+  o10 -->|"LEE"| t11
+  o10 -->|"LEE"| t8
+  o10 -->|"LEE"| t12
+  o10 -->|"LEE"| t4
+  a14 --> o13
+  o13 -->|"LEE"| t12
+  a14 --> o15
+  o15 -->|"LEE"| t8
+  o15 -->|"LEE"| t12
+  o15 -->|"LEE"| t4
+  a14 --> o16
+  o16 -->|"CREA"| t6
+  o16 -->|"LEE"| t6
+  o16 -->|"LEE"| t7
+  o16 -->|"CREA"| t11
+  o16 -->|"LEE"| t8
+  o16 -->|"ACTUALIZA"| t12
+  o16 -.-> t17
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -776,7 +820,7 @@ stateDiagram-v2
 | Operación | Estados de destino que nombra | A través de |
 |---|---|---|
 | POST /accounting/journal-transactions/{id}/approve | sin destino nombrado | LedgerService.transition → LedgerService.assertTransition |
-| POST /accounting/journal-transactions/{id}/classify | sin destino nombrado | LedgerService.transition → LedgerService.assertTransition |
+| POST /accounting/journal-transactions/{id}/classify | sin destino nombrado | LedgerService.classify → LedgerService.assertTransition |
 | POST /accounting/journal-transactions/{id}/post | sin destino nombrado | LedgerService.post → LedgerService.assertTransition |
 | POST /accounting/journal-transactions/{id}/reverse | sin destino nombrado | LedgerService.reverseJournal → LedgerService.assertTransition |
 | POST /accounting/journal-transactions/{id}/submit-review | sin destino nombrado | LedgerService.transition → LedgerService.assertTransition |
@@ -848,7 +892,50 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. POST /pharma-labs
+#### 1. GET /pharma-labs
+
+Listar laboratorios farmacéuticos
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PharmaLabOrganizationService.listLabs"]:::llamada
+  n2 --> n3
+  n4{"this.access.administersAllLabs(actor)"}:::decision
+  n3 --> n4
+  n5["Llama a OrganizationRepository.listLabs"]:::llamada
+  n4 -->|"sí"| n5
+  n6[("LEE pharma_lab.pharma_labs")]:::efecto
+  n5 --> n6
+  n7["Llama a OrganizationRepository.findLabIdsWhereStaff"]:::llamada
+  n6 --> n7
+  n4 -->|"no"| n7
+  n8[("LEE pharma_lab.pharma_lab_staff")]:::efecto
+  n7 --> n8
+  n9["Llama a OrganizationRepository.listLabs"]:::llamada
+  n8 --> n9
+  n10[("LEE pharma_lab.pharma_labs")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. POST /pharma-labs
 
 Registrar una organización laboratorio farmacéutico
 
@@ -858,7 +945,7 @@ Registrar una organización laboratorio farmacéutico
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Organización no encontrada |
 | 409 | `CONFLICT` | ConflictException: La organización ya está registrada como laboratorio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -871,36 +958,39 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5[("LEE directory.tenants")]:::efecto
+  n5["Llama a PharmaLabAccessService.assertAdministers"]:::llamada
   n4 --> n5
-  n6{"!tenant"}:::decision
+  n6(["404 NOT_FOUND Laboratorio no encontrado"]):::error
   n5 --> n6
-  n7(["404 NOT_FOUND Organización no encontrada"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a OrganizationRepository.findLabByTenant"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE pharma_lab.pharma_labs")]:::efecto
-  n8 --> n9
-  n10{"clash"}:::decision
-  n9 --> n10
-  n11(["409 CONFLICT La organización ya está registrada como laboratorio"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a OrganizationRepository.createLab"]:::llamada
-  n10 -->|"no"| n12
-  n13[("CREA pharma_lab.pharma_labs")]:::efecto
-  n12 --> n13
-  n14["Llama a AuditTrailService.record"]:::llamada
-  n13 --> n14
-  n15["Llama a AuditLogRepository.append"]:::llamada
+  n7[("LEE directory.tenants")]:::efecto
+  n8{"!tenant"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Organización no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a OrganizationRepository.findLabByTenant"]:::llamada
+  n8 -->|"no"| n10
+  n11[("LEE pharma_lab.pharma_labs")]:::efecto
+  n10 --> n11
+  n12{"clash"}:::decision
+  n11 --> n12
+  n13(["409 CONFLICT La organización ya está registrada como laboratorio"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a OrganizationRepository.createLab"]:::llamada
+  n12 -->|"no"| n14
+  n15[("CREA pharma_lab.pharma_labs")]:::efecto
   n14 --> n15
-  n16["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n16["Llama a AuditTrailService.record"]:::llamada
   n15 --> n16
-  n17[("LEE audit.audit_log")]:::efecto
+  n17["Llama a AuditLogRepository.append"]:::llamada
   n16 --> n17
-  n18[("CREA audit.audit_log")]:::efecto
+  n18["Llama a AuditLogRepository.findChainTip"]:::llamada
   n17 --> n18
-  n19(("201 Responde con éxito")):::ok
+  n19[("LEE audit.audit_log")]:::efecto
   n18 --> n19
+  n20[("CREA audit.audit_log")]:::efecto
+  n19 --> n20
+  n21(("201 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -909,7 +999,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. GET /pharma-labs/{pharmaLabId}
+#### 3. GET /pharma-labs/{pharmaLabId}
 
 Consultar el perfil de un laboratorio
 
@@ -920,6 +1010,7 @@ Consultar el perfil de un laboratorio
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -929,47 +1020,7 @@ flowchart TD
   n1 --> n2
   n3["Llama a PharmaLabOrganizationService.getLab"]:::llamada
   n2 --> n3
-  n4["Llama a PharmaLabAccessService.requireLab"]:::llamada
-  n3 --> n4
-  n5["Llama a OrganizationRepository.findLab"]:::llamada
-  n4 --> n5
-  n6[("LEE pharma_lab.pharma_labs")]:::efecto
-  n5 --> n6
-  n7{"!lab"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Laboratorio no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9(("200 Responde con éxito")):::ok
-  n7 -->|"no"| n9
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 3. PATCH /pharma-labs/{pharmaLabId}
-
-Actualizar el perfil institucional
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
-  n1 --> n2
-  n3["Llama a PharmaLabOrganizationService.updateLab"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a PharmaLabAccessService.requireAdministeredLab"]:::llamada
   n3 --> n4
   n5["Llama a PharmaLabAccessService.requireLab"]:::llamada
   n4 --> n5
@@ -981,56 +1032,49 @@ flowchart TD
   n7 --> n8
   n9(["404 NOT_FOUND Laboratorio no encontrado"]):::error
   n8 -->|"sí"| n9
-  n10[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n10["Llama a OrganizationRepository.findStaffByUser"]:::llamada
   n8 -->|"no"| n10
-  n11{"dto.tradeName !== undefined"}:::decision
+  n11[("LEE pharma_lab.pharma_lab_staff")]:::efecto
   n10 --> n11
-  n12[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
-  n11 -->|"sí"| n12
-  n13[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
-  n12 --> n13
-  n11 -->|"no"| n13
-  n14{"dto.taxId !== undefined"}:::decision
+  n12{"staff?.statusConceptId !== PHL.LINK_ACTIVE"}:::decision
+  n11 --> n12
+  n13["Llama a PharmaLabAccessService.assertAdministers"]:::llamada
+  n12 -->|"sí"| n13
+  n14(["404 NOT_FOUND Laboratorio no encontrado"]):::error
   n13 --> n14
-  n15[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
-  n14 -->|"sí"| n15
-  n16[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n15["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n12 -->|"no"| n15
+  n16["Llama a OrganizationRepository.findLab"]:::llamada
   n15 --> n16
-  n14 -->|"no"| n16
-  n17{"dto.description !== undefined"}:::decision
+  n17[("LEE pharma_lab.pharma_labs")]:::efecto
   n16 --> n17
-  n18[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
-  n17 -->|"sí"| n18
-  n19{"dto.researchAreas !== undefined"}:::decision
-  n18 --> n19
-  n17 -->|"no"| n19
-  n20[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
-  n19 -->|"sí"| n20
-  n21[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
-  n20 --> n21
-  n19 -->|"no"| n21
-  n22{"dto.logoUrl !== undefined"}:::decision
-  n21 --> n22
-  n23[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n18{"!lab"}:::decision
+  n17 --> n18
+  n19(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n18 -->|"sí"| n19
+  n20{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n18 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n20 -->|"sí"| n21
+  n22{"options.active"}:::decision
+  n20 -->|"no"| n22
+  n23["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
   n22 -->|"sí"| n23
-  n24{"dto.statusConceptId !== undefined"}:::decision
+  n24["Llama a OrganizationRepository.findLab"]:::llamada
   n23 --> n24
-  n22 -->|"no"| n24
-  n25[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
-  n24 -->|"sí"| n25
-  n26["Llama a AuditTrailService.record"]:::llamada
+  n25[("LEE pharma_lab.pharma_labs")]:::efecto
+  n24 --> n25
+  n26{"!lab"}:::decision
   n25 --> n26
-  n24 -->|"no"| n26
-  n27["Llama a AuditLogRepository.append"]:::llamada
-  n26 --> n27
-  n28["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n27 --> n28
-  n29[("LEE audit.audit_log")]:::efecto
-  n28 --> n29
-  n30[("CREA audit.audit_log")]:::efecto
-  n29 --> n30
-  n31(("200 Responde con éxito")):::ok
-  n30 --> n31
+  n27(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n26 -->|"sí"| n27
+  n28{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n28 -->|"sí"| n29
+  n30(("200 Responde con éxito")):::ok
+  n28 -->|"no"| n30
+  n22 -->|"no"| n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1039,7 +1083,141 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /pharma-labs/{pharmaLabId}/cost-allocations
+#### 4. PATCH /pharma-labs/{pharmaLabId}
+
+Actualizar el perfil institucional
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PharmaLabOrganizationService.updateLab"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PharmaLabAccessService.requireAdministeredLab"]:::llamada
+  n4 --> n5
+  n6["Llama a PharmaLabAccessService.requireLab"]:::llamada
+  n5 --> n6
+  n7["Llama a OrganizationRepository.findLab"]:::llamada
+  n6 --> n7
+  n8[("LEE pharma_lab.pharma_labs")]:::efecto
+  n7 --> n8
+  n9{"!lab"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a OrganizationRepository.findStaffByUser"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE pharma_lab.pharma_lab_staff")]:::efecto
+  n11 --> n12
+  n13{"staff?.statusConceptId !== PHL.LINK_ACTIVE"}:::decision
+  n12 --> n13
+  n14["Llama a PharmaLabAccessService.assertAdministers"]:::llamada
+  n13 -->|"sí"| n14
+  n15(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n14 --> n15
+  n16["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n13 -->|"no"| n16
+  n17["Llama a OrganizationRepository.findLab"]:::llamada
+  n16 --> n17
+  n18[("LEE pharma_lab.pharma_labs")]:::efecto
+  n17 --> n18
+  n19{"!lab"}:::decision
+  n18 --> n19
+  n20(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n21 -->|"sí"| n22
+  n23{"options.active"}:::decision
+  n21 -->|"no"| n23
+  n24["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n23 -->|"sí"| n24
+  n25["Llama a OrganizationRepository.findLab"]:::llamada
+  n24 --> n25
+  n26[("LEE pharma_lab.pharma_labs")]:::efecto
+  n25 --> n26
+  n27{"!lab"}:::decision
+  n26 --> n27
+  n28(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n27 -->|"sí"| n28
+  n29{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n29 -->|"sí"| n30
+  n31[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n29 -->|"no"| n31
+  n23 -->|"no"| n31
+  n32{"dto.tradeName !== undefined"}:::decision
+  n31 --> n32
+  n33[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n32 -->|"sí"| n33
+  n34[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n33 --> n34
+  n32 -->|"no"| n34
+  n35{"dto.taxId !== undefined"}:::decision
+  n34 --> n35
+  n36[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n35 -->|"sí"| n36
+  n37[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n36 --> n37
+  n35 -->|"no"| n37
+  n38{"dto.description !== undefined"}:::decision
+  n37 --> n38
+  n39[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n38 -->|"sí"| n39
+  n40{"dto.researchAreas !== undefined"}:::decision
+  n39 --> n40
+  n38 -->|"no"| n40
+  n41[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n40 -->|"sí"| n41
+  n42[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n41 --> n42
+  n40 -->|"no"| n42
+  n43{"dto.logoUrl !== undefined"}:::decision
+  n42 --> n43
+  n44[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n43 -->|"sí"| n44
+  n45{"dto.statusConceptId !== undefined"}:::decision
+  n44 --> n45
+  n43 -->|"no"| n45
+  n46[("ACTUALIZA pharma_lab.pharma_labs")]:::efecto
+  n45 -->|"sí"| n46
+  n47["Llama a AuditTrailService.record"]:::llamada
+  n46 --> n47
+  n45 -->|"no"| n47
+  n48["Llama a AuditLogRepository.append"]:::llamada
+  n47 --> n48
+  n49["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n48 --> n49
+  n50[("LEE audit.audit_log")]:::efecto
+  n49 --> n50
+  n51[("CREA audit.audit_log")]:::efecto
+  n50 --> n51
+  n52(("200 Responde con éxito")):::ok
+  n51 --> n52
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. POST /pharma-labs/{pharmaLabId}/cost-allocations
 
 Imputar un asiento contable a las dimensiones del laboratorio
 
@@ -1117,7 +1295,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. GET /pharma-labs/{pharmaLabId}/cost-allocations/report
+#### 6. GET /pharma-labs/{pharmaLabId}/cost-allocations/report
 
 Rentabilidad por producto y costos por proyecto del periodo
 
@@ -1165,7 +1343,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. GET /pharma-labs/{pharmaLabId}/link-events
+#### 7. GET /pharma-labs/{pharmaLabId}/link-events
 
 Historial de vinculaciones y permisos
 
@@ -1176,6 +1354,7 @@ Historial de vinculaciones y permisos
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1185,22 +1364,65 @@ flowchart TD
   n1 --> n2
   n3["Llama a PharmaLabOrganizationService.listLinkEvents"]:::llamada
   n2 --> n3
-  n4["Llama a PharmaLabAccessService.requireLab"]:::llamada
+  n4["Llama a PharmaLabAccessService.requireAdministeredLab"]:::llamada
   n3 --> n4
-  n5["Llama a OrganizationRepository.findLab"]:::llamada
+  n5["Llama a PharmaLabAccessService.requireLab"]:::llamada
   n4 --> n5
-  n6[("LEE pharma_lab.pharma_labs")]:::efecto
+  n6["Llama a OrganizationRepository.findLab"]:::llamada
   n5 --> n6
-  n7{"!lab"}:::decision
+  n7[("LEE pharma_lab.pharma_labs")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Laboratorio no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a OrganizationRepository.listLinkEvents"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE pharma_lab.pharma_lab_link_events")]:::efecto
-  n9 --> n10
-  n11(("200 Responde con éxito")):::ok
+  n8{"!lab"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a OrganizationRepository.findStaffByUser"]:::llamada
+  n8 -->|"no"| n10
+  n11[("LEE pharma_lab.pharma_lab_staff")]:::efecto
   n10 --> n11
+  n12{"staff?.statusConceptId !== PHL.LINK_ACTIVE"}:::decision
+  n11 --> n12
+  n13["Llama a PharmaLabAccessService.assertAdministers"]:::llamada
+  n12 -->|"sí"| n13
+  n14(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n13 --> n14
+  n15["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n12 -->|"no"| n15
+  n16["Llama a OrganizationRepository.findLab"]:::llamada
+  n15 --> n16
+  n17[("LEE pharma_lab.pharma_labs")]:::efecto
+  n16 --> n17
+  n18{"!lab"}:::decision
+  n17 --> n18
+  n19(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n18 -->|"sí"| n19
+  n20{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n18 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n20 -->|"sí"| n21
+  n22{"options.active"}:::decision
+  n20 -->|"no"| n22
+  n23["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n22 -->|"sí"| n23
+  n24["Llama a OrganizationRepository.findLab"]:::llamada
+  n23 --> n24
+  n25[("LEE pharma_lab.pharma_labs")]:::efecto
+  n24 --> n25
+  n26{"!lab"}:::decision
+  n25 --> n26
+  n27(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n26 -->|"sí"| n27
+  n28{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a OrganizationRepository.listLinkEvents"]:::llamada
+  n28 -->|"no"| n30
+  n22 -->|"no"| n30
+  n31[("LEE pharma_lab.pharma_lab_link_events")]:::efecto
+  n30 --> n31
+  n32(("200 Responde con éxito")):::ok
+  n31 --> n32
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1209,7 +1431,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. GET /pharma-labs/{pharmaLabId}/materials
+#### 8. GET /pharma-labs/{pharmaLabId}/materials
 
 Listar el material informativo
 
@@ -1253,7 +1475,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /pharma-labs/{pharmaLabId}/materials
+#### 9. POST /pharma-labs/{pharmaLabId}/materials
 
 Crear material informativo (nace en borrador)
 
@@ -1327,7 +1549,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. GET /pharma-labs/{pharmaLabId}/materials/{materialId}/approvals
+#### 10. GET /pharma-labs/{pharmaLabId}/materials/{materialId}/approvals
 
 Historial de revisiones del material
 
@@ -1381,7 +1603,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. GET /pharma-labs/{pharmaLabId}/materials/{materialId}/assets
+#### 11. GET /pharma-labs/{pharmaLabId}/materials/{materialId}/assets
 
 Listar los adjuntos del material
 
@@ -1435,7 +1657,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /pharma-labs/{pharmaLabId}/materials/{materialId}/assets
+#### 12. POST /pharma-labs/{pharmaLabId}/materials/{materialId}/assets
 
 Adjuntar un archivo al material
 
@@ -1446,7 +1668,7 @@ Adjuntar un archivo al material
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Material informativo no encontrado en el laboratorio |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede modificar el contenido de un material ya aprobado; creá una versión nueva |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede modificar el contenido de un material ya aprobado; cree una versión nueva |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1480,7 +1702,7 @@ flowchart TD
   n13 -->|"sí"| n14
   n15{"material.statusConceptId === PHL.MATERIAL_APPROVED"}:::decision
   n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED No se puede modificar el contenido de un material ya aprobado; creá una versión nueva"]):::error
+  n16(["422 PRECONDITION_FAILED No se puede modificar el contenido de un material ya aprobado; cree una versión nueva"]):::error
   n15 -->|"sí"| n16
   n17["Llama a CatalogRepository.createAsset"]:::llamada
   n15 -->|"no"| n17
@@ -1496,7 +1718,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /pharma-labs/{pharmaLabId}/materials/{materialId}/decision
+#### 13. POST /pharma-labs/{pharmaLabId}/materials/{materialId}/decision
 
 Aprobar o rechazar el material
 
@@ -1574,7 +1796,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /pharma-labs/{pharmaLabId}/materials/{materialId}/submit
+#### 14. POST /pharma-labs/{pharmaLabId}/materials/{materialId}/submit
 
 Enviar el material a revisión interna
 
@@ -1652,7 +1874,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. GET /pharma-labs/{pharmaLabId}/medical-visitors
+#### 15. GET /pharma-labs/{pharmaLabId}/medical-visitors
 
 Listar los visitadores del laboratorio
 
@@ -1696,7 +1918,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /pharma-labs/{pharmaLabId}/medical-visitors
+#### 16. POST /pharma-labs/{pharmaLabId}/medical-visitors
 
 Registrar un visitador médico
 
@@ -1706,9 +1928,9 @@ Registrar un visitador médico
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Cuenta no encontrada |
-| 409 | `CONFLICT` | ConflictException: La cuenta ya está registrada como visitador; ConflictException: El código interno ya está en uso en el laboratorio |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Algún producto no pertenece al catálogo del laboratorio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Cuenta no encontrada; ResourceNotFoundException: Rol no encontrado |
+| 409 | `CONFLICT` | ConflictException: La cuenta ya está registrada como visitador; ConflictException: El código interno ya está en uso en el laboratorio; ConflictException: El usuario ya tiene ese rol asignado y activo en ese ámbito |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Algún producto no pertenece al catálogo del laboratorio; PreconditionFailedException: Indique el rol a asignar por `roleId` o por `roleCode`; PreconditionFailedException: El rol no es asignable; PreconditionFailedException: validFrom debe ser anterior a validTo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1798,18 +2020,64 @@ flowchart TD
   n30 -->|"no"| n40
   n41[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
   n40 --> n41
-  n42["Llama a AuditTrailService.record"]:::llamada
+  n42["Llama a MedicalVisitorsService.assignVisitorRole"]:::llamada
   n41 --> n42
-  n43["Llama a AuditLogRepository.append"]:::llamada
+  n43["Intenta"]:::intento
   n42 --> n43
-  n44["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n44["Llama a AuthzGrantsService.assignRole"]:::llamada
   n43 --> n44
-  n45[("LEE audit.audit_log")]:::efecto
+  n45{"!dto.roleId && !dto.roleCode"}:::decision
   n44 --> n45
-  n46[("CREA audit.audit_log")]:::efecto
-  n45 --> n46
-  n47(("201 Responde con éxito")):::ok
-  n46 --> n47
+  n46(["422 PRECONDITION_FAILED Indique el rol a asignar por `roleId` o por `roleCode`"]):::error
+  n45 -->|"sí"| n46
+  n47["Transacción: transactional(…)"]:::transaccion
+  n45 -->|"no"| n47
+  n48["Llama a RolesRepository.findById"]:::llamada
+  n47 --> n48
+  n49[("LEE authz.roles")]:::efecto
+  n48 --> n49
+  n50["Llama a RolesRepository.findByCode"]:::llamada
+  n49 --> n50
+  n51[("LEE authz.roles")]:::efecto
+  n50 --> n51
+  n52{"!role"}:::decision
+  n51 --> n52
+  n53(["404 NOT_FOUND Rol no encontrado"]):::error
+  n52 -->|"sí"| n53
+  n54{"!role.isAssignable"}:::decision
+  n52 -->|"no"| n54
+  n55(["422 PRECONDITION_FAILED El rol no es asignable"]):::error
+  n54 -->|"sí"| n55
+  n56{"dto.validFrom && dto.validTo && dto.validFrom ›= dto.validTo"}:::decision
+  n54 -->|"no"| n56
+  n57(["422 PRECONDITION_FAILED validFrom debe ser anterior a validTo"]):::error
+  n56 -->|"sí"| n57
+  n58["Llama a UserRoleAssignmentsRepository.findActive"]:::llamada
+  n56 -->|"no"| n58
+  n59[("LEE authz.user_role_assignments")]:::efecto
+  n58 --> n59
+  n60{"existing"}:::decision
+  n59 --> n60
+  n61(["409 CONFLICT El usuario ya tiene ese rol asignado y activo en ese ámbito"]):::error
+  n60 -->|"sí"| n61
+  n62["Llama a UserRoleAssignmentsRepository.create"]:::llamada
+  n60 -->|"no"| n62
+  n63[("CREA authz.user_role_assignments")]:::efecto
+  n62 --> n63
+  n64(["↩ (relanza el error capturado)"]):::error
+  n43 -->|"si falla"| n64
+  n65["Llama a AuditTrailService.record"]:::llamada
+  n63 --> n65
+  n66["Llama a AuditLogRepository.append"]:::llamada
+  n65 --> n66
+  n67["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n66 --> n67
+  n68[("LEE audit.audit_log")]:::efecto
+  n67 --> n68
+  n69[("CREA audit.audit_log")]:::efecto
+  n68 --> n69
+  n70(("201 Responde con éxito")):::ok
+  n69 --> n70
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1818,7 +2086,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/products
+#### 17. PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/products
 
 Fijar los productos que el visitador representa
 
@@ -1900,7 +2168,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink
+#### 18. POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink
 
 Revincular a un visitador con nueva autorización
 
@@ -1910,9 +2178,9 @@ Revincular a un visitador con nueva autorización
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio |
-| 409 | `CONFLICT` | ConflictException: El visitador ya está vinculado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio; ResourceNotFoundException: Rol no encontrado |
+| 409 | `CONFLICT` | ConflictException: El visitador ya está vinculado; ConflictException: El usuario ya tiene ese rol asignado y activo en ese ámbito |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Indique el rol a asignar por `roleId` o por `roleCode`; PreconditionFailedException: El rol no es asignable; PreconditionFailedException: validFrom debe ser anterior a validTo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1963,18 +2231,64 @@ flowchart TD
   n20 -->|"no"| n22
   n23[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
   n22 --> n23
-  n24["Llama a AuditTrailService.record"]:::llamada
+  n24["Llama a MedicalVisitorsService.assignVisitorRole"]:::llamada
   n23 --> n24
-  n25["Llama a AuditLogRepository.append"]:::llamada
+  n25["Intenta"]:::intento
   n24 --> n25
-  n26["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n26["Llama a AuthzGrantsService.assignRole"]:::llamada
   n25 --> n26
-  n27[("LEE audit.audit_log")]:::efecto
+  n27{"!dto.roleId && !dto.roleCode"}:::decision
   n26 --> n27
-  n28[("CREA audit.audit_log")]:::efecto
-  n27 --> n28
-  n29(("201 Responde con éxito")):::ok
-  n28 --> n29
+  n28(["422 PRECONDITION_FAILED Indique el rol a asignar por `roleId` o por `roleCode`"]):::error
+  n27 -->|"sí"| n28
+  n29["Transacción: transactional(…)"]:::transaccion
+  n27 -->|"no"| n29
+  n30["Llama a RolesRepository.findById"]:::llamada
+  n29 --> n30
+  n31[("LEE authz.roles")]:::efecto
+  n30 --> n31
+  n32["Llama a RolesRepository.findByCode"]:::llamada
+  n31 --> n32
+  n33[("LEE authz.roles")]:::efecto
+  n32 --> n33
+  n34{"!role"}:::decision
+  n33 --> n34
+  n35(["404 NOT_FOUND Rol no encontrado"]):::error
+  n34 -->|"sí"| n35
+  n36{"!role.isAssignable"}:::decision
+  n34 -->|"no"| n36
+  n37(["422 PRECONDITION_FAILED El rol no es asignable"]):::error
+  n36 -->|"sí"| n37
+  n38{"dto.validFrom && dto.validTo && dto.validFrom ›= dto.validTo"}:::decision
+  n36 -->|"no"| n38
+  n39(["422 PRECONDITION_FAILED validFrom debe ser anterior a validTo"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a UserRoleAssignmentsRepository.findActive"]:::llamada
+  n38 -->|"no"| n40
+  n41[("LEE authz.user_role_assignments")]:::efecto
+  n40 --> n41
+  n42{"existing"}:::decision
+  n41 --> n42
+  n43(["409 CONFLICT El usuario ya tiene ese rol asignado y activo en ese ámbito"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a UserRoleAssignmentsRepository.create"]:::llamada
+  n42 -->|"no"| n44
+  n45[("CREA authz.user_role_assignments")]:::efecto
+  n44 --> n45
+  n46(["↩ (relanza el error capturado)"]):::error
+  n25 -->|"si falla"| n46
+  n47["Llama a AuditTrailService.record"]:::llamada
+  n45 --> n47
+  n48["Llama a AuditLogRepository.append"]:::llamada
+  n47 --> n48
+  n49["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n48 --> n49
+  n50[("LEE audit.audit_log")]:::efecto
+  n49 --> n50
+  n51[("CREA audit.audit_log")]:::efecto
+  n50 --> n51
+  n52(("201 Responde con éxito")):::ok
+  n51 --> n52
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1983,7 +2297,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/specialties
+#### 19. PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/specialties
 
 Fijar las especialidades que el visitador visita
 
@@ -2054,7 +2368,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink
+#### 20. POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink
 
 Desvincular al visitador y revocar sus accesos
 
@@ -2157,18 +2471,32 @@ flowchart TD
   n35 -->|"al terminar"| n41
   n42[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
   n41 --> n42
-  n43["Llama a AuditTrailService.record"]:::llamada
+  n43["Llama a MedicalVisitorsService.revokeVisitorRole"]:::llamada
   n42 --> n43
-  n44["Llama a AuditLogRepository.append"]:::llamada
+  n44["Llama a RolesRepository.findByCode"]:::llamada
   n43 --> n44
-  n45["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n45[("LEE authz.roles")]:::efecto
   n44 --> n45
-  n46[("LEE audit.audit_log")]:::efecto
+  n46["Llama a UserRoleAssignmentsRepository.findActive"]:::llamada
   n45 --> n46
-  n47[("CREA audit.audit_log")]:::efecto
+  n47[("LEE authz.user_role_assignments")]:::efecto
   n46 --> n47
-  n48(("201 Responde con éxito")):::ok
+  n48["Llama a UserRoleAssignmentsRepository.revoke"]:::llamada
   n47 --> n48
+  n49[("ACTUALIZA authz.user_role_assignments")]:::efecto
+  n48 --> n49
+  n50["Llama a AuditTrailService.record"]:::llamada
+  n49 --> n50
+  n51["Llama a AuditLogRepository.append"]:::llamada
+  n50 --> n51
+  n52["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n51 --> n52
+  n53[("LEE audit.audit_log")]:::efecto
+  n52 --> n53
+  n54[("CREA audit.audit_log")]:::efecto
+  n53 --> n54
+  n55(("201 Responde con éxito")):::ok
+  n54 --> n55
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2177,7 +2505,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/verifications
+#### 21. POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/verifications
 
 Registrar las verificaciones del visitador
 
@@ -2254,7 +2582,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports
+#### 22. GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports
 
 Listar los reportes del laboratorio
 
@@ -2298,7 +2626,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports
+#### 23. POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports
 
 Enviar un reporte de farmacovigilancia
 
@@ -2396,7 +2724,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}
+#### 24. GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}
 
 Consultar un reporte con su trazabilidad
 
@@ -2450,7 +2778,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions
+#### 25. POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions
 
 Registrar una acción de seguimiento
 
@@ -2528,7 +2856,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. GET /pharma-labs/{pharmaLabId}/products
+#### 26. GET /pharma-labs/{pharmaLabId}/products
 
 Listar el catálogo de medicamentos
 
@@ -2572,7 +2900,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /pharma-labs/{pharmaLabId}/products
+#### 27. POST /pharma-labs/{pharmaLabId}/products
 
 Registrar un medicamento en el catálogo
 
@@ -2639,7 +2967,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. PATCH /pharma-labs/{pharmaLabId}/products/{productId}
+#### 28. PATCH /pharma-labs/{pharmaLabId}/products/{productId}
 
 Actualizar un medicamento
 
@@ -2745,7 +3073,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /pharma-labs/{pharmaLabId}/products/{productId}/status
+#### 29. POST /pharma-labs/{pharmaLabId}/products/{productId}/status
 
 Cambiar el estado regulatorio de un medicamento
 
@@ -2821,7 +3149,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. GET /pharma-labs/{pharmaLabId}/regulatory-documents
+#### 30. GET /pharma-labs/{pharmaLabId}/regulatory-documents
 
 Listar los documentos del laboratorio
 
@@ -2865,7 +3193,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /pharma-labs/{pharmaLabId}/regulatory-documents
+#### 31. POST /pharma-labs/{pharmaLabId}/regulatory-documents
 
 Registrar un documento con su primera versión
 
@@ -2930,7 +3258,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}
+#### 32. GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}
 
 Consultar un documento y sus versiones
 
@@ -2990,7 +3318,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/access-log
+#### 33. GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/access-log
 
 Registro de consultas y descargas
 
@@ -3044,7 +3372,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/invalidate
+#### 34. POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/invalidate
 
 Invalidar el documento sin borrarlo
 
@@ -3122,7 +3450,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions
+#### 35. POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions
 
 Sustituir el documento por una versión nueva
 
@@ -3204,7 +3532,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions/{versionId}/download
+#### 36. POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions/{versionId}/download
 
 Registrar la descarga de una versión
 
@@ -3278,7 +3606,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review
+#### 37. POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review
 
 Revisar vencimientos y notificar al personal
 
@@ -3364,7 +3692,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. GET /pharma-labs/{pharmaLabId}/staff
+#### 38. GET /pharma-labs/{pharmaLabId}/staff
 
 Listar el personal del laboratorio
 
@@ -3375,6 +3703,7 @@ Listar el personal del laboratorio
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3384,22 +3713,65 @@ flowchart TD
   n1 --> n2
   n3["Llama a PharmaLabOrganizationService.listStaff"]:::llamada
   n2 --> n3
-  n4["Llama a PharmaLabAccessService.requireLab"]:::llamada
+  n4["Llama a PharmaLabAccessService.requireAdministeredLab"]:::llamada
   n3 --> n4
-  n5["Llama a OrganizationRepository.findLab"]:::llamada
+  n5["Llama a PharmaLabAccessService.requireLab"]:::llamada
   n4 --> n5
-  n6[("LEE pharma_lab.pharma_labs")]:::efecto
+  n6["Llama a OrganizationRepository.findLab"]:::llamada
   n5 --> n6
-  n7{"!lab"}:::decision
+  n7[("LEE pharma_lab.pharma_labs")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Laboratorio no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a OrganizationRepository.listStaff"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE pharma_lab.pharma_lab_staff")]:::efecto
-  n9 --> n10
-  n11(("200 Responde con éxito")):::ok
+  n8{"!lab"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a OrganizationRepository.findStaffByUser"]:::llamada
+  n8 -->|"no"| n10
+  n11[("LEE pharma_lab.pharma_lab_staff")]:::efecto
   n10 --> n11
+  n12{"staff?.statusConceptId !== PHL.LINK_ACTIVE"}:::decision
+  n11 --> n12
+  n13["Llama a PharmaLabAccessService.assertAdministers"]:::llamada
+  n12 -->|"sí"| n13
+  n14(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n13 --> n14
+  n15["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n12 -->|"no"| n15
+  n16["Llama a OrganizationRepository.findLab"]:::llamada
+  n15 --> n16
+  n17[("LEE pharma_lab.pharma_labs")]:::efecto
+  n16 --> n17
+  n18{"!lab"}:::decision
+  n17 --> n18
+  n19(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n18 -->|"sí"| n19
+  n20{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n18 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n20 -->|"sí"| n21
+  n22{"options.active"}:::decision
+  n20 -->|"no"| n22
+  n23["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n22 -->|"sí"| n23
+  n24["Llama a OrganizationRepository.findLab"]:::llamada
+  n23 --> n24
+  n25[("LEE pharma_lab.pharma_labs")]:::efecto
+  n24 --> n25
+  n26{"!lab"}:::decision
+  n25 --> n26
+  n27(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n26 -->|"sí"| n27
+  n28{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a OrganizationRepository.listStaff"]:::llamada
+  n28 -->|"no"| n30
+  n22 -->|"no"| n30
+  n31[("LEE pharma_lab.pharma_lab_staff")]:::efecto
+  n30 --> n31
+  n32(("200 Responde con éxito")):::ok
+  n31 --> n32
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3408,7 +3780,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. POST /pharma-labs/{pharmaLabId}/staff
+#### 39. POST /pharma-labs/{pharmaLabId}/staff
 
 Vincular personal al laboratorio
 
@@ -3432,48 +3804,87 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n5["Llama a PharmaLabAccessService.requireAdministeredLab"]:::llamada
   n4 --> n5
-  n6["Llama a OrganizationRepository.findLab"]:::llamada
+  n6["Llama a PharmaLabAccessService.requireLab"]:::llamada
   n5 --> n6
-  n7[("LEE pharma_lab.pharma_labs")]:::efecto
+  n7["Llama a OrganizationRepository.findLab"]:::llamada
   n6 --> n7
-  n8{"!lab"}:::decision
+  n8[("LEE pharma_lab.pharma_labs")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Laboratorio no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a OrganizationRepository.findStaffByUser"]:::llamada
-  n10 -->|"no"| n12
-  n13[("LEE pharma_lab.pharma_lab_staff")]:::efecto
+  n9{"!lab"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a OrganizationRepository.findStaffByUser"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE pharma_lab.pharma_lab_staff")]:::efecto
+  n11 --> n12
+  n13{"staff?.statusConceptId !== PHL.LINK_ACTIVE"}:::decision
   n12 --> n13
-  n14{"existing && existing.statusConceptId === PHL.LINK_ACTIVE"}:::decision
-  n13 --> n14
-  n15(["409 CONFLICT La cuenta ya está vinculada al laboratorio"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a OrganizationRepository.createStaff"]:::llamada
-  n14 -->|"no"| n16
-  n17[("CREA pharma_lab.pharma_lab_staff")]:::efecto
+  n14["Llama a PharmaLabAccessService.assertAdministers"]:::llamada
+  n13 -->|"sí"| n14
+  n15(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n14 --> n15
+  n16["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n13 -->|"no"| n16
+  n17["Llama a OrganizationRepository.findLab"]:::llamada
   n16 --> n17
-  n18["Llama a OrganizationRepository.appendLinkEvent"]:::llamada
+  n18[("LEE pharma_lab.pharma_labs")]:::efecto
   n17 --> n18
-  n19[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
+  n19{"!lab"}:::decision
   n18 --> n19
-  n20["Llama a AuditTrailService.record"]:::llamada
-  n19 --> n20
-  n21["Llama a AuditLogRepository.append"]:::llamada
-  n20 --> n21
-  n22["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n21 --> n22
-  n23[("LEE audit.audit_log")]:::efecto
-  n22 --> n23
-  n24[("CREA audit.audit_log")]:::efecto
-  n23 --> n24
-  n25(("201 Responde con éxito")):::ok
+  n20(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n21 -->|"sí"| n22
+  n23{"options.active"}:::decision
+  n21 -->|"no"| n23
+  n24["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n23 -->|"sí"| n24
+  n25["Llama a OrganizationRepository.findLab"]:::llamada
   n24 --> n25
+  n26[("LEE pharma_lab.pharma_labs")]:::efecto
+  n25 --> n26
+  n27{"!lab"}:::decision
+  n26 --> n27
+  n28(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n27 -->|"sí"| n28
+  n29{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a OrganizationRepository.findStaffByUser"]:::llamada
+  n29 -->|"no"| n31
+  n23 -->|"no"| n31
+  n32[("LEE pharma_lab.pharma_lab_staff")]:::efecto
+  n31 --> n32
+  n33{"existing && existing.statusConceptId === PHL.LINK_ACTIVE"}:::decision
+  n32 --> n33
+  n34(["409 CONFLICT La cuenta ya está vinculada al laboratorio"]):::error
+  n33 -->|"sí"| n34
+  n35["Llama a OrganizationRepository.createStaff"]:::llamada
+  n33 -->|"no"| n35
+  n36[("CREA pharma_lab.pharma_lab_staff")]:::efecto
+  n35 --> n36
+  n37["Llama a OrganizationRepository.appendLinkEvent"]:::llamada
+  n36 --> n37
+  n38[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
+  n37 --> n38
+  n39["Llama a AuditTrailService.record"]:::llamada
+  n38 --> n39
+  n40["Llama a AuditLogRepository.append"]:::llamada
+  n39 --> n40
+  n41["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n40 --> n41
+  n42[("LEE audit.audit_log")]:::efecto
+  n41 --> n42
+  n43[("CREA audit.audit_log")]:::efecto
+  n42 --> n43
+  n44(("201 Responde con éxito")):::ok
+  n43 --> n44
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3482,7 +3893,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. PATCH /pharma-labs/{pharmaLabId}/staff/{staffId}/permissions
+#### 40. PATCH /pharma-labs/{pharmaLabId}/staff/{staffId}/permissions
 
 Cambiar los permisos de un colaborador
 
@@ -3493,6 +3904,7 @@ Cambiar los permisos de un colaborador
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Ficha de personal no encontrada en el laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3504,44 +3916,87 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PharmaLabAccessService.requireLab"]:::llamada
+  n5["Llama a PharmaLabAccessService.requireAdministeredLab"]:::llamada
   n4 --> n5
-  n6["Llama a OrganizationRepository.findLab"]:::llamada
+  n6["Llama a PharmaLabAccessService.requireLab"]:::llamada
   n5 --> n6
-  n7[("LEE pharma_lab.pharma_labs")]:::efecto
+  n7["Llama a OrganizationRepository.findLab"]:::llamada
   n6 --> n7
-  n8{"!lab"}:::decision
+  n8[("LEE pharma_lab.pharma_labs")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Laboratorio no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a PharmaLabOrganizationService.requireStaff"]:::llamada
-  n8 -->|"no"| n10
-  n11["Llama a OrganizationRepository.findStaff"]:::llamada
-  n10 --> n11
+  n9{"!lab"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a OrganizationRepository.findStaffByUser"]:::llamada
+  n9 -->|"no"| n11
   n12[("LEE pharma_lab.pharma_lab_staff")]:::efecto
   n11 --> n12
-  n13{"!staff || staff.pharmaLabId !== pharmaLabId"}:::decision
+  n13{"staff?.statusConceptId !== PHL.LINK_ACTIVE"}:::decision
   n12 --> n13
-  n14(["404 NOT_FOUND Ficha de personal no encontrada en el laboratorio"]):::error
+  n14["Llama a PharmaLabAccessService.assertAdministers"]:::llamada
   n13 -->|"sí"| n14
-  n15[("ACTUALIZA pharma_lab.pharma_lab_staff")]:::efecto
-  n13 -->|"no"| n15
-  n16["Llama a OrganizationRepository.appendLinkEvent"]:::llamada
-  n15 --> n16
-  n17[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
+  n15(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n14 --> n15
+  n16["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n13 -->|"no"| n16
+  n17["Llama a OrganizationRepository.findLab"]:::llamada
   n16 --> n17
-  n18["Llama a AuditTrailService.record"]:::llamada
+  n18[("LEE pharma_lab.pharma_labs")]:::efecto
   n17 --> n18
-  n19["Llama a AuditLogRepository.append"]:::llamada
+  n19{"!lab"}:::decision
   n18 --> n19
-  n20["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n19 --> n20
-  n21[("LEE audit.audit_log")]:::efecto
-  n20 --> n21
-  n22[("CREA audit.audit_log")]:::efecto
-  n21 --> n22
-  n23(("200 Responde con éxito")):::ok
-  n22 --> n23
+  n20(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n21 -->|"sí"| n22
+  n23{"options.active"}:::decision
+  n21 -->|"no"| n23
+  n24["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n23 -->|"sí"| n24
+  n25["Llama a OrganizationRepository.findLab"]:::llamada
+  n24 --> n25
+  n26[("LEE pharma_lab.pharma_labs")]:::efecto
+  n25 --> n26
+  n27{"!lab"}:::decision
+  n26 --> n27
+  n28(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n27 -->|"sí"| n28
+  n29{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a PharmaLabOrganizationService.requireStaff"]:::llamada
+  n29 -->|"no"| n31
+  n23 -->|"no"| n31
+  n32["Llama a OrganizationRepository.findStaff"]:::llamada
+  n31 --> n32
+  n33[("LEE pharma_lab.pharma_lab_staff")]:::efecto
+  n32 --> n33
+  n34{"!staff || staff.pharmaLabId !== pharmaLabId"}:::decision
+  n33 --> n34
+  n35(["404 NOT_FOUND Ficha de personal no encontrada en el laboratorio"]):::error
+  n34 -->|"sí"| n35
+  n36[("ACTUALIZA pharma_lab.pharma_lab_staff")]:::efecto
+  n34 -->|"no"| n36
+  n37["Llama a OrganizationRepository.appendLinkEvent"]:::llamada
+  n36 --> n37
+  n38[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
+  n37 --> n38
+  n39["Llama a AuditTrailService.record"]:::llamada
+  n38 --> n39
+  n40["Llama a AuditLogRepository.append"]:::llamada
+  n39 --> n40
+  n41["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n40 --> n41
+  n42[("LEE audit.audit_log")]:::efecto
+  n41 --> n42
+  n43[("CREA audit.audit_log")]:::efecto
+  n42 --> n43
+  n44(("200 Responde con éxito")):::ok
+  n43 --> n44
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3550,7 +4005,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. POST /pharma-labs/{pharmaLabId}/staff/{staffId}/unlink
+#### 41. POST /pharma-labs/{pharmaLabId}/staff/{staffId}/unlink
 
 Desvincular a un colaborador
 
@@ -3561,6 +4016,7 @@ Desvincular a un colaborador
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Ficha de personal no encontrada en el laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3572,46 +4028,89 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PharmaLabAccessService.requireLab"]:::llamada
+  n5["Llama a PharmaLabAccessService.requireAdministeredLab"]:::llamada
   n4 --> n5
-  n6["Llama a OrganizationRepository.findLab"]:::llamada
+  n6["Llama a PharmaLabAccessService.requireLab"]:::llamada
   n5 --> n6
-  n7[("LEE pharma_lab.pharma_labs")]:::efecto
+  n7["Llama a OrganizationRepository.findLab"]:::llamada
   n6 --> n7
-  n8{"!lab"}:::decision
+  n8[("LEE pharma_lab.pharma_labs")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Laboratorio no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a PharmaLabOrganizationService.requireStaff"]:::llamada
-  n8 -->|"no"| n10
-  n11["Llama a OrganizationRepository.findStaff"]:::llamada
-  n10 --> n11
+  n9{"!lab"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a OrganizationRepository.findStaffByUser"]:::llamada
+  n9 -->|"no"| n11
   n12[("LEE pharma_lab.pharma_lab_staff")]:::efecto
   n11 --> n12
-  n13{"!staff || staff.pharmaLabId !== pharmaLabId"}:::decision
+  n13{"staff?.statusConceptId !== PHL.LINK_ACTIVE"}:::decision
   n12 --> n13
-  n14(["404 NOT_FOUND Ficha de personal no encontrada en el laboratorio"]):::error
+  n14["Llama a PharmaLabAccessService.assertAdministers"]:::llamada
   n13 -->|"sí"| n14
-  n15[("ACTUALIZA pharma_lab.pharma_lab_staff · ACTUALIZA pharma_lab.pharma_lab_staff")]:::efecto
-  n13 -->|"no"| n15
-  n16["Llama a OrganizationRepository.appendLinkEvent"]:::llamada
-  n15 --> n16
-  n17[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
+  n15(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n14 --> n15
+  n16["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n13 -->|"no"| n16
+  n17["Llama a OrganizationRepository.findLab"]:::llamada
   n16 --> n17
-  n18[("ACTUALIZA pharma_lab.pharma_lab_staff")]:::efecto
+  n18[("LEE pharma_lab.pharma_labs")]:::efecto
   n17 --> n18
-  n19["Llama a AuditTrailService.record"]:::llamada
+  n19{"!lab"}:::decision
   n18 --> n19
-  n20["Llama a AuditLogRepository.append"]:::llamada
-  n19 --> n20
-  n21["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n20 --> n21
-  n22[("LEE audit.audit_log")]:::efecto
-  n21 --> n22
-  n23[("CREA audit.audit_log")]:::efecto
-  n22 --> n23
-  n24(("201 Responde con éxito")):::ok
-  n23 --> n24
+  n20(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n21 -->|"sí"| n22
+  n23{"options.active"}:::decision
+  n21 -->|"no"| n23
+  n24["Llama a PharmaLabAccessService.requireActiveLab"]:::llamada
+  n23 -->|"sí"| n24
+  n25["Llama a OrganizationRepository.findLab"]:::llamada
+  n24 --> n25
+  n26[("LEE pharma_lab.pharma_labs")]:::efecto
+  n25 --> n26
+  n27{"!lab"}:::decision
+  n26 --> n27
+  n28(["404 NOT_FOUND Laboratorio no encontrado"]):::error
+  n27 -->|"sí"| n28
+  n29{"lab.statusConceptId !== PHL.LAB_ACTIVE"}:::decision
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED El laboratorio no está activo"]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a PharmaLabOrganizationService.requireStaff"]:::llamada
+  n29 -->|"no"| n31
+  n23 -->|"no"| n31
+  n32["Llama a OrganizationRepository.findStaff"]:::llamada
+  n31 --> n32
+  n33[("LEE pharma_lab.pharma_lab_staff")]:::efecto
+  n32 --> n33
+  n34{"!staff || staff.pharmaLabId !== pharmaLabId"}:::decision
+  n33 --> n34
+  n35(["404 NOT_FOUND Ficha de personal no encontrada en el laboratorio"]):::error
+  n34 -->|"sí"| n35
+  n36[("ACTUALIZA pharma_lab.pharma_lab_staff · ACTUALIZA pharma_lab.pharma_lab_staff")]:::efecto
+  n34 -->|"no"| n36
+  n37["Llama a OrganizationRepository.appendLinkEvent"]:::llamada
+  n36 --> n37
+  n38[("CREA pharma_lab.pharma_lab_link_events")]:::efecto
+  n37 --> n38
+  n39[("ACTUALIZA pharma_lab.pharma_lab_staff")]:::efecto
+  n38 --> n39
+  n40["Llama a AuditTrailService.record"]:::llamada
+  n39 --> n40
+  n41["Llama a AuditLogRepository.append"]:::llamada
+  n40 --> n41
+  n42["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n41 --> n42
+  n43[("LEE audit.audit_log")]:::efecto
+  n42 --> n43
+  n44[("CREA audit.audit_log")]:::efecto
+  n43 --> n44
+  n45(("201 Responde con éxito")):::ok
+  n44 --> n45
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3620,7 +4119,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 41. GET /pharma-labs/{pharmaLabId}/visitor-posts
+#### 42. GET /pharma-labs/{pharmaLabId}/visitor-posts
 
 Listar las publicaciones propuestas
 
@@ -3664,7 +4163,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision
+#### 43. POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision
 
 Aprobar o rechazar la publicación propuesta
 
@@ -3759,7 +4258,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 43. POST /pharma-labs/notices/{noticeId}/read
+#### 44. POST /pharma-labs/notices/{noticeId}/read
 
 Marcar un aviso como leído
 
@@ -3797,7 +4296,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 44. POST /pharma-labs/visitor-posts
+#### 45. POST /pharma-labs/visitor-posts
 
 Proponer una publicación como visitador
 
@@ -3883,7 +4382,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 45. POST /visit-agenda/blocks
+#### 46. POST /visit-agenda/blocks
 
 Bloquear un laboratorio o un visitador
 
@@ -3893,7 +4392,7 @@ Bloquear un laboratorio o un visitador
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indicá el laboratorio o el visitador a bloquear |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique el laboratorio o el visitador a bloquear |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3905,7 +4404,7 @@ flowchart TD
   n2 --> n3
   n4{"!dto.pharmaLabId && !dto.medicalVisitorId"}:::decision
   n3 --> n4
-  n5(["422 PRECONDITION_FAILED Indicá el laboratorio o el visitador a bloquear"]):::error
+  n5(["422 PRECONDITION_FAILED Indique el laboratorio o el visitador a bloquear"]):::error
   n4 -->|"sí"| n5
   n6["Transacción: transactional(…)"]:::transaccion
   n4 -->|"no"| n6
@@ -3933,7 +4432,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 46. POST /visit-agenda/blocks/{blockId}/lift
+#### 47. POST /visit-agenda/blocks/{blockId}/lift
 
 Levantar un bloqueo
 
@@ -3990,7 +4489,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 47. GET /visit-agenda/doctors/{doctorUserId}
+#### 48. GET /visit-agenda/doctors/{doctorUserId}
 
 Consultar la agenda de visitas de un doctor
 
@@ -4032,7 +4531,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 48. GET /visit-agenda/me
+#### 49. GET /visit-agenda/me
 
 Consultar la propia agenda de visitas
 
@@ -4073,7 +4572,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 49. PUT /visit-agenda/me
+#### 50. PUT /visit-agenda/me
 
 Configurar la agenda de visitas del doctor
 
@@ -4156,7 +4655,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 50. POST /visit-records
+#### 51. POST /visit-records
 
 Registrar la visita realizada
 
@@ -4303,7 +4802,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 51. POST /visit-records/{visitRecordId}/confirm
+#### 52. POST /visit-records/{visitRecordId}/confirm
 
 Confirmar que la visita ocurrió
 
@@ -4367,7 +4866,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 52. POST /visit-records/{visitRecordId}/rating
+#### 53. POST /visit-records/{visitRecordId}/rating
 
 Calificar la visita completada
 
@@ -4452,7 +4951,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 53. GET /visit-records/labs/{pharmaLabId}
+#### 54. GET /visit-records/labs/{pharmaLabId}
 
 Historial de visitas del laboratorio
 
@@ -4496,7 +4995,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 54. GET /visit-records/labs/{pharmaLabId}/rating-summary
+#### 55. GET /visit-records/labs/{pharmaLabId}/rating-summary
 
 Resultados agregados de las calificaciones del laboratorio
 
@@ -4544,7 +5043,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 55. POST /visit-requests
+#### 56. POST /visit-requests
 
 Solicitar una visita médica a un doctor
 
@@ -4712,7 +5211,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 56. GET /visit-requests/{visitRequestId}
+#### 57. GET /visit-requests/{visitRequestId}
 
 Consultar una solicitud con su bitácora
 
@@ -4766,7 +5265,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 57. POST /visit-requests/{visitRequestId}/accept
+#### 58. POST /visit-requests/{visitRequestId}/accept
 
 Aceptar la visita
 
@@ -4845,7 +5344,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 58. POST /visit-requests/{visitRequestId}/cancel
+#### 59. POST /visit-requests/{visitRequestId}/cancel
 
 Cancelar la visita
 
@@ -4963,7 +5462,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 59. POST /visit-requests/{visitRequestId}/propose-time
+#### 60. POST /visit-requests/{visitRequestId}/propose-time
 
 Proponer otro horario
 
@@ -5115,7 +5614,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 60. POST /visit-requests/{visitRequestId}/reject
+#### 61. POST /visit-requests/{visitRequestId}/reject
 
 Rechazar la visita
 
@@ -5194,7 +5693,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 61. POST /visit-requests/{visitRequestId}/request-info
+#### 62. POST /visit-requests/{visitRequestId}/request-info
 
 Solicitar información adicional al visitador
 
@@ -5267,7 +5766,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 62. POST /visit-requests/{visitRequestId}/reschedule
+#### 63. POST /visit-requests/{visitRequestId}/reschedule
 
 Reprogramar la visita dentro del plazo permitido
 
@@ -5435,7 +5934,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 63. GET /visit-requests/mine
+#### 64. GET /visit-requests/mine
 
 Listar las propias solicitudes de visita
 
@@ -5476,7 +5975,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 64. GET /visit-surveys/labs/{pharmaLabId}
+#### 65. GET /visit-surveys/labs/{pharmaLabId}
 
 Listar las encuestas del laboratorio
 
@@ -5520,7 +6019,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 65. POST /visit-surveys/labs/{pharmaLabId}
+#### 66. POST /visit-surveys/labs/{pharmaLabId}
 
 Configurar una encuesta posterior a la visita
 
@@ -5588,7 +6087,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 66. POST /visit-surveys/labs/{pharmaLabId}/{surveyId}/close
+#### 67. POST /visit-surveys/labs/{pharmaLabId}/{surveyId}/close
 
 Cerrar una encuesta
 
@@ -5657,7 +6156,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 67. GET /visit-surveys/labs/{pharmaLabId}/{surveyId}/results
+#### 68. GET /visit-surveys/labs/{pharmaLabId}/{surveyId}/results
 
 Resultados agregados de la encuesta
 
@@ -5723,7 +6222,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 68. GET /visit-surveys/responses/{responseId}
+#### 69. GET /visit-surveys/responses/{responseId}
 
 Consultar el cuestionario a responder
 
@@ -5773,7 +6272,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 69. POST /visit-surveys/responses/{responseId}
+#### 70. POST /visit-surveys/responses/{responseId}
 
 Responder la encuesta de la visita
 
@@ -5856,7 +6355,6 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
-| GET /pharma-labs | 200, 401, 403, 429 | 1 |
 | GET /pharma-labs/notices/mine | 200, 401, 403, 429 | 1 |
 | GET /pharma-labs/reference/concepts | 200, 401, 403, 429 | 0 |
 | GET /visit-agenda/blocks | 200, 401, 403, 429 | 1 |

@@ -1,1 +1,92 @@
-[]
+[
+  {
+    "id": "removed_operation:GET /admin/catalog/objects/{objectId}",
+    "reason": "Mismo URL con el parámetro de ruta renombrado ({objectId}/{scanId}/{annotationId} pasó a {id}): para un cliente no cambia nada.",
+    "migrationNote": "Ninguna: la ruta es idéntica; solo cambia el nombre del marcador en el contrato."
+  },
+  {
+    "id": "removed_operation:GET /admin/catalog/objects/{objectId}/columns",
+    "reason": "Mismo URL con el parámetro de ruta renombrado ({objectId}/{scanId}/{annotationId} pasó a {id}): para un cliente no cambia nada.",
+    "migrationNote": "Ninguna: la ruta es idéntica; solo cambia el nombre del marcador en el contrato."
+  },
+  {
+    "id": "removed_operation:GET /admin/catalog/objects/{objectId}/changes",
+    "reason": "Mismo URL con el parámetro de ruta renombrado ({objectId}/{scanId}/{annotationId} pasó a {id}): para un cliente no cambia nada.",
+    "migrationNote": "Ninguna: la ruta es idéntica; solo cambia el nombre del marcador en el contrato."
+  },
+  {
+    "id": "removed_operation:GET /admin/catalog/objects/{objectId}/impact",
+    "reason": "Mismo URL con el parámetro de ruta renombrado ({objectId}/{scanId}/{annotationId} pasó a {id}): para un cliente no cambia nada.",
+    "migrationNote": "Ninguna: la ruta es idéntica; solo cambia el nombre del marcador en el contrato."
+  },
+  {
+    "id": "removed_operation:GET /admin/catalog/objects/{objectId}/history",
+    "reason": "Mismo URL con el parámetro de ruta renombrado ({objectId}/{scanId}/{annotationId} pasó a {id}): para un cliente no cambia nada.",
+    "migrationNote": "Ninguna: la ruta es idéntica; solo cambia el nombre del marcador en el contrato."
+  },
+  {
+    "id": "removed_operation:GET /admin/catalog/columns/{columnId}/history",
+    "reason": "El módulo data_catalog del #660 reemplaza al anterior de dev (decisión del propietario) y no ofrece esta operación.",
+    "migrationNote": "Sin equivalente en /admin/catalog del diseño nuevo; los clientes que la usaban (importador de la bóveda por columna, cancelación de escaneos, worker run-next) deben migrar a /admin/catalog/objects/{id}/annotation o a los escaneos por POST /admin/catalog/scans."
+  },
+  {
+    "id": "removed_operation:PUT /admin/catalog/objects/{objectId}/annotation",
+    "reason": "Mismo URL con el parámetro de ruta renombrado ({objectId}/{scanId}/{annotationId} pasó a {id}): para un cliente no cambia nada.",
+    "migrationNote": "Ninguna: la ruta es idéntica; solo cambia el nombre del marcador en el contrato."
+  },
+  {
+    "id": "removed_operation:PUT /admin/catalog/columns/{columnId}/annotation",
+    "reason": "El módulo data_catalog del #660 reemplaza al anterior de dev (decisión del propietario) y no ofrece esta operación.",
+    "migrationNote": "Sin equivalente en /admin/catalog del diseño nuevo; los clientes que la usaban (importador de la bóveda por columna, cancelación de escaneos, worker run-next) deben migrar a /admin/catalog/objects/{id}/annotation o a los escaneos por POST /admin/catalog/scans."
+  },
+  {
+    "id": "removed_operation:POST /admin/catalog/annotations/{annotationId}/review",
+    "reason": "Mismo URL con el parámetro de ruta renombrado ({objectId}/{scanId}/{annotationId} pasó a {id}): para un cliente no cambia nada.",
+    "migrationNote": "Ninguna: la ruta es idéntica; solo cambia el nombre del marcador en el contrato."
+  },
+  {
+    "id": "removed_operation:GET /admin/catalog/objects/{objectId}/evidence",
+    "reason": "Mismo URL con el parámetro de ruta renombrado ({objectId}/{scanId}/{annotationId} pasó a {id}): para un cliente no cambia nada.",
+    "migrationNote": "Ninguna: la ruta es idéntica; solo cambia el nombre del marcador en el contrato."
+  },
+  {
+    "id": "removed_operation:POST /admin/catalog/objects/{objectId}/evidence",
+    "reason": "Mismo URL con el parámetro de ruta renombrado ({objectId}/{scanId}/{annotationId} pasó a {id}): para un cliente no cambia nada.",
+    "migrationNote": "Ninguna: la ruta es idéntica; solo cambia el nombre del marcador en el contrato."
+  },
+  {
+    "id": "removed_operation:GET /admin/catalog/columns/{columnId}/evidence",
+    "reason": "El módulo data_catalog del #660 reemplaza al anterior de dev (decisión del propietario) y no ofrece esta operación.",
+    "migrationNote": "Sin equivalente en /admin/catalog del diseño nuevo; los clientes que la usaban (importador de la bóveda por columna, cancelación de escaneos, worker run-next) deben migrar a /admin/catalog/objects/{id}/annotation o a los escaneos por POST /admin/catalog/scans."
+  },
+  {
+    "id": "removed_operation:POST /admin/catalog/columns/{columnId}/evidence",
+    "reason": "El módulo data_catalog del #660 reemplaza al anterior de dev (decisión del propietario) y no ofrece esta operación.",
+    "migrationNote": "Sin equivalente en /admin/catalog del diseño nuevo; los clientes que la usaban (importador de la bóveda por columna, cancelación de escaneos, worker run-next) deben migrar a /admin/catalog/objects/{id}/annotation o a los escaneos por POST /admin/catalog/scans."
+  },
+  {
+    "id": "new_required_request_field:POST /admin/catalog/scans:parámetro header:Idempotency-Key",
+    "reason": "POST /admin/catalog/scans del diseño nuevo exige Idempotency-Key (8–128 caracteres).",
+    "migrationNote": "Enviar la cabecera Idempotency-Key en cada POST /admin/catalog/scans."
+  },
+  {
+    "id": "removed_operation:GET /admin/catalog/scans/{scanId}",
+    "reason": "Mismo URL con el parámetro de ruta renombrado ({objectId}/{scanId}/{annotationId} pasó a {id}): para un cliente no cambia nada.",
+    "migrationNote": "Ninguna: la ruta es idéntica; solo cambia el nombre del marcador en el contrato."
+  },
+  {
+    "id": "removed_operation:GET /admin/catalog/scans/{scanId}/changes",
+    "reason": "El módulo data_catalog del #660 reemplaza al anterior de dev (decisión del propietario) y no ofrece esta operación.",
+    "migrationNote": "Sin equivalente en /admin/catalog del diseño nuevo; los clientes que la usaban (importador de la bóveda por columna, cancelación de escaneos, worker run-next) deben migrar a /admin/catalog/objects/{id}/annotation o a los escaneos por POST /admin/catalog/scans."
+  },
+  {
+    "id": "removed_operation:POST /admin/catalog/scans/{scanId}/cancel",
+    "reason": "El módulo data_catalog del #660 reemplaza al anterior de dev (decisión del propietario) y no ofrece esta operación.",
+    "migrationNote": "Sin equivalente en /admin/catalog del diseño nuevo; los clientes que la usaban (importador de la bóveda por columna, cancelación de escaneos, worker run-next) deben migrar a /admin/catalog/objects/{id}/annotation o a los escaneos por POST /admin/catalog/scans."
+  },
+  {
+    "id": "removed_operation:POST /internal/catalog/scans/run-next",
+    "reason": "El módulo data_catalog del #660 reemplaza al anterior de dev (decisión del propietario) y no ofrece esta operación.",
+    "migrationNote": "Sin equivalente en /admin/catalog del diseño nuevo; los clientes que la usaban (importador de la bóveda por columna, cancelación de escaneos, worker run-next) deben migrar a /admin/catalog/objects/{id}/annotation o a los escaneos por POST /admin/catalog/scans."
+  }
+]

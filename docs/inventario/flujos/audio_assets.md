@@ -3,7 +3,7 @@
 # Flujos del módulo `audio_assets`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 10 (8 con decisiones propias, 2 sin ellas)
+- **Operaciones:** 10 (9 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [audio_assets](../endpoints/audio_assets.md)
 
 ## Proceso: Audio Assets
@@ -231,7 +231,7 @@ Resuelve un asset TTS desde caché o agenda su generación
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla de audio no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: No se pudo materializar el asset de audio idempotente; Error: Asset reutilizado no encontrado |
+| 500 | `INTERNAL` | Error: No se pudo materializar el asset de audio idempotente; StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
 
 ```mermaid
 flowchart TD
@@ -281,14 +281,14 @@ flowchart TD
   n21 -->|"sí"| n22
   n23["Llama a AudioAssetsRepository.markReusedReady"]:::llamada
   n21 -->|"no"| n23
-  n24[("ACTUALIZA audio_assets.audio_assets")]:::efecto
+  n24{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
   n23 --> n24
-  n25{"!result"}:::decision
-  n24 --> n25
-  n26(["500 INTERNAL Asset reutilizado no encontrado"]):::error
-  n25 -->|"sí"| n26
+  n25(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n24 -->|"sí"| n25
+  n26[("LEE audio_assets.audio_assets · ACTUALIZA audio_assets.audio_assets")]:::efecto
+  n24 -->|"no"| n26
   n27{"existing && ['PENDING', 'GENERATING', 'FAILED_RETRYABLE'].includes( existing.generationStatus, )"}:::decision
-  n25 -->|"no"| n27
+  n26 --> n27
   n18 -->|"no"| n27
   n17 -->|"no"| n27
   n28["Llama a AudioJobQueueAdapter.enqueue"]:::llamada
@@ -367,7 +367,57 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /internal/audio-assets/{assetId}/generation-failed
+#### 4. POST /internal/audio-assets/{assetId}/generated
+
+Registra un asset de audio generado
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | StorageLifecycleDenied: PUBLICATION_PROOF_REQUIRED; StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a AudioGenerationUseCase.generated"]:::llamada
+  n2 --> n3
+  n4{"coordinated && (!this.publication || !input.publication)"}:::decision
+  n3 --> n4
+  n5(["500 INTERNAL PUBLICATION_PROOF_REQUIRED"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a AudioAssetsRepository.markReady"]:::llamada
+  n4 -->|"no"| n6
+  n7{"loadStorageEnv().lifecycleBinding && !publicationTx"}:::decision
+  n6 --> n7
+  n8(["500 INTERNAL PUBLICATION_TRANSACTION_REQUIRED"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a AudioAssetsRepository.markReady"]:::llamada
+  n7 -->|"no"| n9
+  n10{"loadStorageEnv().lifecycleBinding && !publicationTx"}:::decision
+  n9 --> n10
+  n11(["500 INTERNAL PUBLICATION_TRANSACTION_REQUIRED"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a AudioAssetsRepository.appendEvent"]:::llamada
+  n10 -->|"no"| n12
+  n13[("CREA audio_assets.audio_generation_events · GUARDA audio_assets.audio_generation_events")]:::efecto
+  n12 --> n13
+  n14(("201 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. POST /internal/audio-assets/{assetId}/generation-failed
 
 Registra un fallo de generación de audio
 
@@ -413,7 +463,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /internal/audio-assets/{assetId}/prepare-generation
+#### 6. POST /internal/audio-assets/{assetId}/prepare-generation
 
 Prepara un asset de audio para generación
 
@@ -492,7 +542,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /internal/audio-assets/garbage-collect
+#### 7. POST /internal/audio-assets/garbage-collect
 
 Elimina conservadoramente objetos de assets deprecados/permanentes
 
@@ -504,7 +554,7 @@ Elimina conservadoramente objetos de assets deprecados/permanentes
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3 |
+| 500 | `INTERNAL` | StorageLifecycleDenied: DELETE_PERMIT_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3 |
 
 ```mermaid
 flowchart TD
@@ -527,50 +577,129 @@ flowchart TD
   n8 --> n9
   n10["Llama a LocalDiskFileStorageAdapter.delete"]:::llamada
   n9 -->|"sí"| n10
-  n11["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
+  n11["Llama a LocalDiskFileStorageAdapter.resolvePhysicalIdentity"]:::llamada
   n10 --> n11
-  n12{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
+  n12["Intenta"]:::intento
   n11 --> n12
-  n13(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
-  n12 -->|"sí"| n13
-  n14{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
-  n12 -->|"no"| n14
-  n15(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
+  n13["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
+  n12 --> n13
+  n14{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
+  n13 --> n14
+  n15(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
   n14 -->|"sí"| n15
-  n16["Intenta"]:::intento
+  n16{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
   n14 -->|"no"| n16
-  n17(["↩ (relanza el error capturado)"]):::error
-  n16 -->|"si falla"| n17
-  n18["Llama a S3FileStorageAdapter.delete"]:::llamada
-  n16 --> n18
-  n19["Llama a S3FileStorageAdapter.assertConfigured"]:::llamada
-  n18 --> n19
-  n20{"!this.env.s3.bucket"}:::decision
-  n19 --> n20
-  n21(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
-  n20 -->|"sí"| n21
-  n22["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
-  n20 -->|"no"| n22
-  n23{"!storageUri.startsWith(expected)"}:::decision
+  n17(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
+  n16 -->|"sí"| n17
+  n18{"!permit || identity.kind !== 'KNOWN'"}:::decision
+  n16 -->|"no"| n18
+  n19(["500 INTERNAL DELETE_PERMIT_REQUIRED"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a LocalDiskFileStorageAdapter.inspect"]:::llamada
+  n18 -->|"no"| n20
+  n21["Intenta"]:::intento
+  n20 --> n21
+  n22["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
+  n21 --> n22
+  n23{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
   n22 --> n23
-  n24(["404 NOT_FOUND La URI no pertenece al bucket configurado"]):::error
+  n24(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
   n23 -->|"sí"| n24
-  n25{"!CONTENT_HASH_PATTERN.test(hash) || key !== this.objectKey(hash)"}:::decision
+  n25{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
   n23 -->|"no"| n25
-  n26(["404 NOT_FOUND La URI S3 está mal formada o fuera del prefijo permitido"]):::error
+  n26(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
   n25 -->|"sí"| n26
-  n27["Llama a AudioMaintenanceRepository.clearStorageReference"]:::llamada
+  n27["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
   n25 -->|"no"| n27
-  n9 -->|"no"| n27
-  n28[("ACTUALIZA audio_assets.audio_assets")]:::efecto
+  n28{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
   n27 --> n28
-  n29["Llama a AudioAssetsRepository.appendEvent"]:::llamada
-  n28 --> n29
-  n30[("CREA audio_assets.audio_generation_events · GUARDA audio_assets.audio_generation_events")]:::efecto
-  n29 --> n30
-  n31(("201 Responde con éxito")):::ok
-  n30 --> n31
-  n6 -->|"al terminar"| n31
+  n29(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
+  n28 -->|"sí"| n29
+  n30{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
+  n28 -->|"no"| n30
+  n31(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
+  n30 -->|"sí"| n31
+  n32{"before.state === 'UNKNOWN'"}:::decision
+  n30 -->|"no"| n32
+  n33(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
+  n32 -->|"no"| n34
+  n35{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
+  n34 --> n35
+  n36(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
+  n35 -->|"sí"| n36
+  n37{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
+  n35 -->|"no"| n37
+  n38(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
+  n37 -->|"sí"| n38
+  n39["Llama a LocalDiskFileStorageAdapter.inspect"]:::llamada
+  n37 -->|"no"| n39
+  n40["Intenta"]:::intento
+  n39 --> n40
+  n41["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
+  n40 --> n41
+  n42{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
+  n41 --> n42
+  n43(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
+  n42 -->|"sí"| n43
+  n44{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
+  n42 -->|"no"| n44
+  n45(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
+  n44 -->|"sí"| n45
+  n46["Llama a LocalDiskFileStorageAdapter.hashFromUri"]:::llamada
+  n44 -->|"no"| n46
+  n47{"!storageUri.startsWith(LOCAL_URI_PREFIX)"}:::decision
+  n46 --> n47
+  n48(["404 NOT_FOUND La URI no pertenece al almacenamiento local"]):::error
+  n47 -->|"sí"| n48
+  n49{"!CONTENT_HASH_PATTERN.test(hash)"}:::decision
+  n47 -->|"no"| n49
+  n50(["404 NOT_FOUND La URI de almacenamiento local está mal formada"]):::error
+  n49 -->|"sí"| n50
+  n51["Llama a S3FileStorageAdapter.delete"]:::llamada
+  n49 -->|"no"| n51
+  n52["Llama a S3FileStorageAdapter.assertConfigured"]:::llamada
+  n51 --> n52
+  n53{"!this.env.s3.bucket"}:::decision
+  n52 --> n53
+  n54(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n53 -->|"sí"| n54
+  n55["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
+  n53 -->|"no"| n55
+  n56{"!storageUri.startsWith(expected)"}:::decision
+  n55 --> n56
+  n57(["404 NOT_FOUND La URI no pertenece al bucket configurado"]):::error
+  n56 -->|"sí"| n57
+  n58{"!CONTENT_HASH_PATTERN.test(hash) || key !== this.objectKey(hash)"}:::decision
+  n56 -->|"no"| n58
+  n59(["404 NOT_FOUND La URI S3 está mal formada o fuera del prefijo permitido"]):::error
+  n58 -->|"sí"| n59
+  n60["Llama a S3FileStorageAdapter.resolvePhysicalIdentity"]:::llamada
+  n58 -->|"no"| n60
+  n61["Intenta"]:::intento
+  n60 --> n61
+  n62["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
+  n61 --> n62
+  n63{"!storageUri.startsWith(expected)"}:::decision
+  n62 --> n63
+  n64(["404 NOT_FOUND La URI no pertenece al bucket configurado"]):::error
+  n63 -->|"sí"| n64
+  n65{"!CONTENT_HASH_PATTERN.test(hash) || key !== this.objectKey(hash)"}:::decision
+  n63 -->|"no"| n65
+  n66(["404 NOT_FOUND La URI S3 está mal formada o fuera del prefijo permitido"]):::error
+  n65 -->|"sí"| n66
+  n67{"!permit || identity.kind !== 'KNOWN'"}:::decision
+  n65 -->|"no"| n67
+  n68(["500 INTERNAL DELETE_PERMIT_REQUIRED"]):::error
+  n67 -->|"sí"| n68
+  n69["Llama a AudioMaintenanceRepository.clearStorageReference"]:::llamada
+  n67 -->|"no"| n69
+  n9 -->|"no"| n69
+  n70[("ACTUALIZA audio_assets.audio_assets")]:::efecto
+  n69 --> n70
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -579,7 +708,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /internal/audio-assets/pregenerate
+#### 8. POST /internal/audio-assets/pregenerate
 
 Pre-genera STATIC, ENUMERATED y fallbacks de forma idempotente
 
@@ -591,7 +720,7 @@ Pre-genera STATIC, ENUMERATED y fallbacks de forma idempotente
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla de audio no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: La plantilla enumerada excede {MAX_ENUMERATED_COMBINATIONS} combinaciones; Error: No se pudo materializar el asset de audio idempotente; Error: Asset reutilizado no encontrado |
+| 500 | `INTERNAL` | Error: La plantilla enumerada excede {MAX_ENUMERATED_COMBINATIONS} combinaciones; Error: No se pudo materializar el asset de audio idempotente; StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
 
 ```mermaid
 flowchart TD
@@ -654,14 +783,14 @@ flowchart TD
   n27 -->|"sí"| n28
   n29["Llama a AudioAssetsRepository.markReusedReady"]:::llamada
   n27 -->|"no"| n29
-  n30[("ACTUALIZA audio_assets.audio_assets")]:::efecto
+  n30{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
   n29 --> n30
-  n31{"!result"}:::decision
-  n30 --> n31
-  n32(["500 INTERNAL Asset reutilizado no encontrado"]):::error
-  n31 -->|"sí"| n32
+  n31(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n30 -->|"sí"| n31
+  n32[("LEE audio_assets.audio_assets · ACTUALIZA audio_assets.audio_assets")]:::efecto
+  n30 -->|"no"| n32
   n33{"existing && ['PENDING', 'GENERATING', 'FAILED_RETRYABLE'].includes( existing.generationStatus, )"}:::decision
-  n31 -->|"no"| n33
+  n32 --> n33
   n24 -->|"no"| n33
   n23 -->|"no"| n33
   n34["Llama a AudioJobQueueAdapter.enqueue"]:::llamada
@@ -726,14 +855,14 @@ flowchart TD
   n60 -->|"sí"| n61
   n62["Llama a AudioAssetsRepository.markReusedReady"]:::llamada
   n60 -->|"no"| n62
-  n63[("ACTUALIZA audio_assets.audio_assets")]:::efecto
+  n63{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
   n62 --> n63
-  n64{"!result"}:::decision
-  n63 --> n64
-  n65(["500 INTERNAL Asset reutilizado no encontrado"]):::error
-  n64 -->|"sí"| n65
+  n64(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n63 -->|"sí"| n64
+  n65[("LEE audio_assets.audio_assets · ACTUALIZA audio_assets.audio_assets")]:::efecto
+  n63 -->|"no"| n65
   n66{"existing && ['PENDING', 'GENERATING', 'FAILED_RETRYABLE'].includes( existing.generationStatus, )"}:::decision
-  n64 -->|"no"| n66
+  n65 --> n66
   n57 -->|"no"| n66
   n56 -->|"no"| n66
   n67["Llama a AudioJobQueueAdapter.enqueue"]:::llamada
@@ -755,7 +884,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /internal/audio-assets/verify
+#### 9. POST /internal/audio-assets/verify
 
 Verifica existencia y checksum de assets READY
 
@@ -896,5 +1025,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
-| POST /internal/audio-assets/{assetId}/generated | 201, 400, 401, 403, 429 | 2 |
 | GET /internal/audio-assets/status | 200, 401, 403, 429 | 1 |

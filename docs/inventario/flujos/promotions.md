@@ -3,13 +3,13 @@
 # Flujos del módulo `promotions`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 15 (14 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 20 (19 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [promotions](../endpoints/promotions.md)
 
 ## Proceso: Módulo 51 — Lealtad, Descuentos, Cupones y Referidos
 
-- **Código:** `promotions` · **Agrupación:** MIXTO · **Operaciones:** 15
-- **Actores:** CASHIER · MARKETING_MANAGER · MEMBER · PROMOTIONS_ADMIN · SYSTEM
+- **Código:** `promotions` · **Agrupación:** MIXTO · **Operaciones:** 20
+- **Actores:** CASHIER · Cualquier sesión válida · MARKETING_MANAGER · MEMBER · PATIENT · PROMOTIONS_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/promotions/README.md`
 
@@ -42,7 +42,7 @@ promoción (draft) ── activar ──> active ── coupons/batch ──> cu
 referido (pending) ── qualify ──> qualified + puntos al referidor y al referido
 ```
 
-_Fuente: `src/modules/promotions/README.md:30`_
+_Fuente: `src/modules/promotions/README.md:69`_
 
 ### Etapas y operaciones
 
@@ -62,7 +62,12 @@ _Fuente: `src/modules/promotions/README.md:30`_
 | `UC-51-11` | Revertir redención | POST /redemptions/{id}/reverse | CASHIER · PROMOTIONS_ADMIN | MEDIO | 8 |
 | `UC-51-12` | Generar código de referido | POST /referral-programs/{id}/referrals | MEMBER · PROMOTIONS_ADMIN | MEDIO | 3 |
 | `UC-51-13` | Calificar y recompensar | POST /referrals/{id}/qualify | SYSTEM · PROMOTIONS_ADMIN | MEDIO | 13 |
-| `ctrl:LoyaltyController` | Operaciones de LoyaltyController que el README no asigna a un caso de uso | GET /loyalty/programs | SYSTEM · PROMOTIONS_ADMIN · MARKETING_MANAGER | BAJO | 1 |
+| `ctrl:LoyaltyController` | Operaciones de LoyaltyController que el README no asigna a un caso de uso | DESCONOCIDO / | Cualquier sesión válida | BAJO | 0 |
+|  |  | GET /loyalty/me | PATIENT | BAJO | 3 |
+|  |  | GET /loyalty/me/points | PATIENT | BAJO | 3 |
+|  |  | POST /loyalty/me/points/redeem | PATIENT | MEDIO | 5 |
+|  |  | GET /loyalty/programs | SYSTEM · PROMOTIONS_ADMIN · MARKETING_MANAGER | BAJO | 1 |
+| `ctrl:PromotionsController` | Operaciones de PromotionsController que el README no asigna a un caso de uso | GET /promotions/me | PATIENT | BAJO | 4 |
 
 ### Diagrama — etapas `UC-51-01`, `UC-51-02`, `UC-51-03`…
 
@@ -74,7 +79,9 @@ flowchart LR
   a14(["MEMBER · PROMOTIONS_ADMIN"]):::actor
   a17(["SYSTEM"]):::actor
   a24(["CASHIER · PROMOTIONS_ADMIN"]):::actor
-  a38(["SYSTEM · PROMOTIONS_ADMIN · MARKETING_MANAGER"]):::actor
+  a38(["Cualquier sesión válida"]):::actor
+  a40(["PATIENT"]):::actor
+  a44(["SYSTEM · PROMOTIONS_ADMIN · MARKETING_MANAGER"]):::actor
   t3[("promotions.earning_rules")]:::tabla
   t4[("promotions.loyalty_programs")]:::tabla
   t5[("promotions.loyalty_tiers")]:::tabla
@@ -88,6 +95,7 @@ flowchart LR
   t32[("promotions.referral_programs")]:::tabla
   t34[("payments.wallet_ledger_entries")]:::tabla
   t35[("payments.wallets")]:::tabla
+  t46[("terminology.catalog_concepts")]:::tabla
   subgraph s0["UC-51-01 · Programa de lealtad con niveles y reglas"]
     o1["POST /loyalty/programs"]:::op
   end
@@ -132,7 +140,14 @@ flowchart LR
     o33["POST /referrals/{id}/qualify"]:::op
   end
   subgraph s13["ctrl:LoyaltyController · Operaciones de LoyaltyController que el README no asig…"]
-    o37["GET /loyalty/programs"]:::op
+    o37["DESCONOCIDO /"]:::op
+    o39["GET /loyalty/me"]:::op
+    o41["GET /loyalty/me/points"]:::op
+    o42["POST /loyalty/me/points/redeem"]:::op
+    o43["GET /loyalty/programs"]:::op
+  end
+  subgraph s14["ctrl:PromotionsController · Operaciones de PromotionsController que el README n…"]
+    o45["GET /promotions/me"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -216,7 +231,27 @@ flowchart LR
   o33 -->|"ACTUALIZA"| t8
   o33 -.-> t36
   a38 --> o37
-  o37 -->|"LEE"| t4
+  a40 --> o39
+  o39 -->|"LEE"| t8
+  o39 -->|"LEE"| t4
+  o39 -->|"LEE"| t5
+  a40 --> o41
+  o41 -->|"LEE"| t8
+  o41 -->|"LEE"| t4
+  o41 -->|"LEE"| t9
+  a40 --> o42
+  o42 -->|"ACTUALIZA"| t8
+  o42 -->|"LEE"| t8
+  o42 -->|"LEE"| t4
+  o42 -->|"CREA"| t9
+  o42 -->|"LEE"| t9
+  a44 --> o43
+  o43 -->|"LEE"| t4
+  a40 --> o45
+  o45 -->|"LEE"| t22
+  o45 -->|"LEE"| t19
+  o45 -->|"LEE"| t20
+  o45 -->|"LEE"| t46
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -229,7 +264,38 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. POST /checkout/{orderId}/apply-discount
+#### 1. DESCONOCIDO /
+
+El tenant del contexto, que acota el programa del portal. Mismo criterio que el listado de programas: sin `X-Tenant-Id` no se sabe de qué programa se está hablando, y elegir uno por nosotros sería inventar.
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Se requiere X-Tenant-Id para operar sobre la membresía de lealtad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3{"!tenantId"}:::decision
+  n2 --> n3
+  n4(["422 PRECONDITION_FAILED Se requiere X-Tenant-Id para operar sobre la membresía de lealtad"]):::error
+  n3 -->|"sí"| n4
+  n5(("200 Responde con éxito")):::ok
+  n3 -->|"no"| n5
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. POST /checkout/{orderId}/apply-discount
 
 Aplicar un descuento al intento de pago del checkout
 
@@ -391,7 +457,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. POST /loyalty/jobs/expire-points
+#### 3. POST /loyalty/jobs/expire-points
 
 Barrer los puntos vencidos de un programa
 
@@ -456,7 +522,234 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /loyalty/memberships/{id}/points/earn
+#### 4. GET /loyalty/me
+
+Mi membresía de lealtad y mi saldo de puntos
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente; PreconditionFailedException: Se requiere X-Tenant-Id para operar sobre la membresía de lealtad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PromotionsLoyaltyService.myLoyalty"]:::llamada
+  n2 --> n3
+  n4["Llama a PromotionsLoyaltyService.requireOwnPatientProfileId"]:::llamada
+  n3 --> n4
+  n5{"!patientProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene perfil de paciente"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PromotionsLoyaltyService.findOwnMembership"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a PromotionsLoyaltyRepository.findActivePrograms"]:::llamada
+  n7 --> n8
+  n9[("LEE promotions.loyalty_programs")]:::efecto
+  n8 --> n9
+  n10["Llama a PromotionsLoyaltyRepository.findMembershipsByMemberRef"]:::llamada
+  n9 --> n10
+  n11[("LEE promotions.loyalty_memberships")]:::efecto
+  n10 --> n11
+  n12["Llama a PromotionsLoyaltyRepository.findTiersByProgram"]:::llamada
+  n11 --> n12
+  n13[("LEE promotions.loyalty_tiers")]:::efecto
+  n12 --> n13
+  n14["Llama a LoyaltyController.requireTenant"]:::llamada
+  n13 --> n14
+  n15{"!tenantId"}:::decision
+  n14 --> n15
+  n16(["422 PRECONDITION_FAILED Se requiere X-Tenant-Id para operar sobre la membresía de lealtad"]):::error
+  n15 -->|"sí"| n16
+  n17(("200 Responde con éxito")):::ok
+  n15 -->|"no"| n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. GET /loyalty/me/points
+
+Mis movimientos de puntos, más nuevos primero
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente; PreconditionFailedException: Cursor de movimientos inválido; PreconditionFailedException: Se requiere X-Tenant-Id para operar sobre la membresía de lealtad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PromotionsLoyaltyService.myPointsLedger"]:::llamada
+  n2 --> n3
+  n4["Llama a PromotionsLoyaltyService.requireOwnPatientProfileId"]:::llamada
+  n3 --> n4
+  n5{"!patientProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene perfil de paciente"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PromotionsLoyaltyService.findOwnMembership"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a PromotionsLoyaltyRepository.findActivePrograms"]:::llamada
+  n7 --> n8
+  n9[("LEE promotions.loyalty_programs")]:::efecto
+  n8 --> n9
+  n10["Llama a PromotionsLoyaltyRepository.findMembershipsByMemberRef"]:::llamada
+  n9 --> n10
+  n11[("LEE promotions.loyalty_memberships")]:::efecto
+  n10 --> n11
+  n12["Llama a PromotionsLoyaltyService.decodeLedgerCursor"]:::llamada
+  n11 --> n12
+  n13{"typeof recordedAt !== 'string' || typeof id !== 'string'"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED Cursor de movimientos inválido"]):::error
+  n13 -->|"sí"| n14
+  n15{"Number.isNaN(date.getTime())"}:::decision
+  n13 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED Cursor de movimientos inválido"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PromotionsLoyaltyRepository.findLedgerPageByMembership"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE promotions.points_ledger_entries")]:::efecto
+  n17 --> n18
+  n19["Llama a LoyaltyController.requireTenant"]:::llamada
+  n18 --> n19
+  n20{"!tenantId"}:::decision
+  n19 --> n20
+  n21(["422 PRECONDITION_FAILED Se requiere X-Tenant-Id para operar sobre la membresía de lealtad"]):::error
+  n20 -->|"sí"| n21
+  n22(("200 Responde con éxito")):::ok
+  n20 -->|"no"| n22
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. POST /loyalty/me/points/redeem
+
+Canjear puntos de mi propia membresía
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Membresía no encontrada |
+| 409 | `CONFLICT` | ConflictException: La clave de idempotencia pertenece a otro canje |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente; PreconditionFailedException: No tiene una membresía de lealtad en este programa; PreconditionFailedException: El canje debe ser de puntos positivos; PreconditionFailedException: La membresía no está activa; PreconditionFailedException: Saldo de puntos insuficiente; PreconditionFailedException: Se requiere X-Tenant-Id para operar sobre la membresía de lealtad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PromotionsLoyaltyService.redeemOwnPoints"]:::llamada
+  n2 --> n3
+  n4["Llama a PromotionsLoyaltyService.requireOwnPatientProfileId"]:::llamada
+  n3 --> n4
+  n5{"!patientProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene perfil de paciente"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PromotionsLoyaltyService.findOwnMembership"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a PromotionsLoyaltyRepository.findActivePrograms"]:::llamada
+  n7 --> n8
+  n9[("LEE promotions.loyalty_programs")]:::efecto
+  n8 --> n9
+  n10["Llama a PromotionsLoyaltyRepository.findMembershipsByMemberRef"]:::llamada
+  n9 --> n10
+  n11[("LEE promotions.loyalty_memberships")]:::efecto
+  n10 --> n11
+  n12{"!own"}:::decision
+  n11 --> n12
+  n13(["422 PRECONDITION_FAILED No tiene una membresía de lealtad en este programa"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PromotionsLoyaltyRepository.findLedgerEntryByKey"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE promotions.points_ledger_entries")]:::efecto
+  n14 --> n15
+  n16{"previous && previous.loyaltyMembershipId !== own.membership.id"}:::decision
+  n15 --> n16
+  n17(["409 CONFLICT La clave de idempotencia pertenece a otro canje"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a PromotionsLoyaltyService.redeemPoints"]:::llamada
+  n16 -->|"no"| n18
+  n19{"Number(dto.points) ‹= 0"}:::decision
+  n18 --> n19
+  n20(["422 PRECONDITION_FAILED El canje debe ser de puntos positivos"]):::error
+  n19 -->|"sí"| n20
+  n21["Transacción: transactional(…)"]:::transaccion
+  n19 -->|"no"| n21
+  n22["Llama a PromotionsLoyaltyRepository.findLedgerEntryByKey"]:::llamada
+  n21 --> n22
+  n23[("LEE promotions.points_ledger_entries")]:::efecto
+  n22 --> n23
+  n24{"previous"}:::decision
+  n23 --> n24
+  n25["Llama a PromotionsLoyaltyRepository.findMembershipForUpdate"]:::llamada
+  n24 -->|"sí"| n25
+  n26[("LEE promotions.loyalty_memberships")]:::efecto
+  n25 --> n26
+  n27["Llama a PromotionsLoyaltyRepository.findMembershipForUpdate"]:::llamada
+  n26 --> n27
+  n24 -->|"no"| n27
+  n28[("LEE promotions.loyalty_memberships")]:::efecto
+  n27 --> n28
+  n29{"!membership"}:::decision
+  n28 --> n29
+  n30(["404 NOT_FOUND Membresía no encontrada"]):::error
+  n29 -->|"sí"| n30
+  n31{"membership.statusConceptId !== CONCEPTS.MEMBERSHIP_ACTIVE"}:::decision
+  n29 -->|"no"| n31
+  n32(["422 PRECONDITION_FAILED La membresía no está activa"]):::error
+  n31 -->|"sí"| n32
+  n33{"balance ‹ Number(dto.points)"}:::decision
+  n31 -->|"no"| n33
+  n34(["422 PRECONDITION_FAILED Saldo de puntos insuficiente"]):::error
+  n33 -->|"sí"| n34
+  n35["Llama a PromotionsLoyaltyRepository.createLedgerEntry"]:::llamada
+  n33 -->|"no"| n35
+  n36[("CREA promotions.points_ledger_entries")]:::efecto
+  n35 --> n36
+  n37[("ACTUALIZA promotions.loyalty_memberships")]:::efecto
+  n36 --> n37
+  n38["Llama a LoyaltyController.requireTenant"]:::llamada
+  n37 --> n38
+  n39{"!tenantId"}:::decision
+  n38 --> n39
+  n40(["422 PRECONDITION_FAILED Se requiere X-Tenant-Id para operar sobre la membresía de lealtad"]):::error
+  n39 -->|"sí"| n40
+  n41(("201 Responde con éxito")):::ok
+  n39 -->|"no"| n41
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. POST /loyalty/memberships/{id}/points/earn
 
 Acumular puntos por un evento de la aplicación
 
@@ -560,7 +853,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /loyalty/memberships/{id}/points/redeem
+#### 8. POST /loyalty/memberships/{id}/points/redeem
 
 Canjear puntos
 
@@ -630,7 +923,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /loyalty/memberships/{id}/recompute
+#### 9. POST /loyalty/memberships/{id}/recompute
 
 Reproyectar saldo y nivel desde el ledger
 
@@ -680,7 +973,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. GET /loyalty/programs
+#### 10. GET /loyalty/programs
 
 Listar programas de lealtad activos
 
@@ -726,7 +1019,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /loyalty/programs
+#### 11. POST /loyalty/programs
 
 Crear un programa de lealtad con niveles y reglas
 
@@ -796,7 +1089,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /loyalty/programs/{id}/memberships
+#### 12. POST /loyalty/programs/{id}/memberships
 
 Inscribir a un miembro en el programa
 
@@ -866,7 +1159,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /promotions
+#### 13. POST /promotions
 
 Crear una promoción con sus reglas de descuento
 
@@ -940,7 +1233,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /promotions/{id}/coupons/batch
+#### 14. POST /promotions/{id}/coupons/batch
 
 Emitir un lote de cupones
 
@@ -1011,7 +1304,56 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /redemptions
+#### 15. GET /promotions/me
+
+Mis promociones vigentes
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PromotionsReadService.listMine"]:::llamada
+  n2 --> n3
+  n4{"!patientProfileId"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La cuenta no tiene perfil de paciente"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a PromotionsDiscountsRepository.findCurrentPromotions"]:::llamada
+  n4 -->|"no"| n6
+  n7[("LEE promotions.promotions")]:::efecto
+  n6 --> n7
+  n8["Llama a PromotionsDiscountsRepository.findRulesByPromotions"]:::llamada
+  n7 --> n8
+  n9[("LEE promotions.discount_rules")]:::efecto
+  n8 --> n9
+  n10["Llama a PromotionsDiscountsRepository.findPersonalCoupons"]:::llamada
+  n9 --> n10
+  n11[("LEE promotions.coupons")]:::efecto
+  n10 --> n11
+  n12["Llama a PromotionsDiscountsRepository.findConcepts"]:::llamada
+  n11 --> n12
+  n13[("LEE terminology.catalog_concepts")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 16. POST /redemptions
 
 Redimir un cupón y registrar la redención
 
@@ -1102,7 +1444,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /redemptions/{id}/reverse
+#### 17. POST /redemptions/{id}/reverse
 
 Revertir una redención por devolución o cancelación
 
@@ -1190,7 +1532,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /referral-programs/{id}/referrals
+#### 18. POST /referral-programs/{id}/referrals
 
 Generar el código de referido del miembro
 
@@ -1272,7 +1614,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /referrals/{id}/qualify
+#### 19. POST /referrals/{id}/qualify
 
 Calificar el referido y premiar a ambas partes
 

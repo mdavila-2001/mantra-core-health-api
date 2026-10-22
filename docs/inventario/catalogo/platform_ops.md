@@ -14,19 +14,19 @@
 | [capacity_measurements](#capacity_measurements) | Conserva mediciones de capacidad y consumo para sustentar decisiones de escalamiento. | 9 | 3 | 1 | COINCIDE |
 | [capacity_plans](#capacity_plans) | Planifica capacidad requerida por componentes y servicios para sostener crecimiento y disponibilidad. | 14 | 5 | 2 | COINCIDE |
 | [change_approvals](#change_approvals) | Conserva aprobaciones requeridas para autorizar cambios de software e infraestructura. | 8 | 5 | 2 | COINCIDE |
-| [change_requests](#change_requests) | Gestiona solicitudes de cambios técnicos para revisar impacto antes de modificar componentes desplegados. | 23 | 12 | 6 | COINCIDE |
+| [change_requests](#change_requests) | Gestiona solicitudes de cambios técnicos para revisar impacto antes de modificar componentes desplegados. | 23 | 12 | 7 | COINCIDE |
 | [component_tools](#component_tools) | Asocia herramientas con componentes para especificar dependencias técnicas de operación. | 12 | 5 | 0 | COINCIDE |
-| [deployments](#deployments) | Registra despliegues de componentes por entorno para reconstruir qué versión opera en cada ambiente. | 19 | 12 | 6 | COINCIDE |
+| [deployments](#deployments) | Registra despliegues de componentes por entorno para reconstruir qué versión opera en cada ambiente. | 19 | 12 | 8 | COINCIDE |
 | [error_budget_burn_events](#error_budget_burn_events) | Traza consumo de presupuestos de error para detectar degradación de confiabilidad. | 10 | 4 | 2 | COINCIDE |
 | [error_budget_policies](#error_budget_policies) | Define presupuestos de error y reglas de consumo para equilibrar cambios y confiabilidad. | 14 | 6 | 2 | COINCIDE |
 | [escalation_policies](#escalation_policies) | Define rutas de escalamiento cuando incidentes requieren atención de distintos equipos o niveles. | 11 | 6 | 0 | COINCIDE |
 | [escalation_policy_steps](#escalation_policy_steps) | Detalla pasos, tiempos y destinatarios de políticas de escalamiento. | 14 | 8 | 0 | COINCIDE |
 | [health_check_runs](#health_check_runs) | Conserva ejecuciones de verificaciones para mantener historial de resultados de salud. | 14 | 7 | 2 | COINCIDE |
 | [health_checks](#health_checks) | Define verificaciones de salud usadas para observar disponibilidad y condiciones de componentes. | 21 | 10 | 1 | COINCIDE |
-| [health_incidents](#health_incidents) | Representa incidentes operativos derivados de fallas o degradación de componentes. | 19 | 10 | 6 | COINCIDE |
+| [health_incidents](#health_incidents) | Representa incidentes operativos derivados de fallas o degradación de componentes. | 19 | 10 | 9 | COINCIDE |
 | [incident_communications](#incident_communications) | Registra comunicaciones emitidas durante incidentes para mantener alineados equipos y usuarios afectados. | 9 | 5 | 1 | COINCIDE |
 | [incident_responders](#incident_responders) | Relaciona responsables con incidentes para identificar quién participó en la respuesta. | 8 | 4 | 3 | COINCIDE |
-| [incident_timeline_events](#incident_timeline_events) | Preserva eventos cronológicos de incidentes para reconstruir detección, respuesta y recuperación. | 9 | 5 | 3 | COINCIDE |
+| [incident_timeline_events](#incident_timeline_events) | Preserva eventos cronológicos de incidentes para reconstruir detección, respuesta y recuperación. | 9 | 5 | 4 | COINCIDE |
 | [maintenance_windows](#maintenance_windows) | Programa ventanas de mantenimiento para coordinar interrupciones y reducir impacto en usuarios. | 14 | 6 | 1 | COINCIDE |
 | [on_call_schedules](#on_call_schedules) | Define calendarios de guardia para asegurar cobertura de respuesta operativa. | 12 | 5 | 0 | COINCIDE |
 | [on_call_shifts](#on_call_shifts) | Detalla turnos de guardia asignados a responsables por período. | 12 | 6 | 0 | COINCIDE |
@@ -41,12 +41,12 @@
 | [runbook_executions](#runbook_executions) | Registra ejecuciones de runbooks para documentar acciones y resultados de operación. | 12 | 7 | 1 | COINCIDE |
 | [runbook_versions](#runbook_versions) | Preserva versiones de procedimientos operativos para conocer instrucciones vigentes en cada ejecución. | 9 | 4 | 3 | COINCIDE |
 | [runbooks](#runbooks) | Cataloga procedimientos de respuesta a incidentes y tareas operativas repetibles. | 14 | 10 | 2 | COINCIDE |
-| [service_components](#service_components) | Cataloga componentes lógicos de la plataforma médica para relacionar servicios, dependencias, criticidad y operación. | 15 | 8 | 2 | COINCIDE |
+| [service_components](#service_components) | Cataloga componentes lógicos de la plataforma médica para relacionar servicios, dependencias, criticidad y operación. | 15 | 8 | 6 | COINCIDE |
 | [service_dependencies](#service_dependencies) | Modela dependencias entre servicios para evaluar impacto de incidentes y cambios. | 14 | 8 | 0 | COINCIDE |
-| [service_level_indicators](#service_level_indicators) | Define indicadores observables que miden desempeño y disponibilidad de servicios. | 15 | 7 | 0 | COINCIDE |
-| [service_level_objectives](#service_level_objectives) | Establece objetivos cuantitativos de servicio para evaluar confiabilidad y calidad operativa. | 14 | 5 | 1 | COINCIDE |
+| [service_level_indicators](#service_level_indicators) | Define indicadores observables que miden desempeño y disponibilidad de servicios. | 15 | 7 | 2 | COINCIDE |
+| [service_level_objectives](#service_level_objectives) | Establece objetivos cuantitativos de servicio para evaluar confiabilidad y calidad operativa. | 14 | 5 | 3 | COINCIDE |
 | [service_ownerships](#service_ownerships) | Asigna ownership de servicios a equipos para definir responsabilidad operativa. | 13 | 8 | 0 | COINCIDE |
-| [slo_measurements](#slo_measurements) | Registra mediciones de objetivos de servicio para comparar resultados con metas acordadas. | 11 | 4 | 3 | COINCIDE |
+| [slo_measurements](#slo_measurements) | Registra mediciones de objetivos de servicio para comparar resultados con metas acordadas. | 11 | 4 | 5 | COINCIDE |
 | [tool_registry](#tool_registry) | Registra herramientas y tecnologías operativas disponibles para construir, desplegar y mantener servicios. | 17 | 8 | 1 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -743,7 +743,7 @@ Gestiona solicitudes de cambios técnicos para revisar impacto antes de modifica
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: change_requests`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `ChangeRequests` — `src/modules/platform_ops/entities/change_requests.entity.ts`
-- **Resumen:** 23 columnas · 12 índices · 10 FK salientes · 2 entrantes · 6 operaciones
+- **Resumen:** 23 columnas · 12 índices · 10 FK salientes · 2 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -817,6 +817,7 @@ Gestiona solicitudes de cambios técnicos para revisar impacto antes de modifica
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/change-requests | LEE | POR_SQL |
 | POST /ops/change-requests | CREA | DIRECTA |
 | POST /ops/change-requests | LEE | DIRECTA |
 | POST /ops/change-requests/{id}/approvals | ACTUALIZA | POR_TIPO |
@@ -913,7 +914,7 @@ Registra despliegues de componentes por entorno para reconstruir qué versión o
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: deployments`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `Deployments` — `src/modules/platform_ops/entities/deployments.entity.ts`
-- **Resumen:** 19 columnas · 12 índices · 10 FK salientes · 4 entrantes · 6 operaciones
+- **Resumen:** 19 columnas · 12 índices · 10 FK salientes · 4 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -985,6 +986,8 @@ Registra despliegues de componentes por entorno para reconstruir qué versión o
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/deployments | LEE | POR_SQL |
+| GET /admin/ops/readiness | LEE | POR_SQL |
 | POST /ops/deployments | ACTUALIZA | POR_TIPO |
 | POST /ops/deployments | CREA | DIRECTA |
 | POST /ops/deployments | LEE | DIRECTA |
@@ -1479,7 +1482,7 @@ Representa incidentes operativos derivados de fallas o degradación de component
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: health_incidents`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `HealthIncidents` — `src/modules/platform_ops/entities/health_incidents.entity.ts`
-- **Resumen:** 19 columnas · 10 índices · 8 FK salientes · 6 entrantes · 6 operaciones
+- **Resumen:** 19 columnas · 10 índices · 8 FK salientes · 6 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -1549,6 +1552,9 @@ Representa incidentes operativos derivados de fallas o degradación de component
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/incidents | LEE | POR_SQL |
+| GET /admin/ops/incidents/{id} | LEE | POR_SQL |
+| GET /admin/ops/readiness | LEE | POR_SQL |
 | POST /ops/health-checks/{id}/runs | CREA | DIRECTA |
 | POST /ops/health-checks/{id}/runs | LEE | DIRECTA |
 | PATCH /ops/incidents/{id} | ACTUALIZA | POR_TIPO |
@@ -1712,7 +1718,7 @@ Preserva eventos cronológicos de incidentes para reconstruir detección, respue
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: incident_timeline_events`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `IncidentTimelineEvents` — `src/modules/platform_ops/entities/incident_timeline_events.entity.ts`
-- **Resumen:** 9 columnas · 5 índices · 3 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 9 columnas · 5 índices · 3 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -1750,6 +1756,7 @@ Preserva eventos cronológicos de incidentes para reconstruir detección, respue
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/incidents/{id} | LEE | POR_SQL |
 | POST /ops/health-checks/{id}/runs | CREA | DIRECTA |
 | PATCH /ops/incidents/{id} | CREA | DIRECTA |
 | POST /ops/runbook-executions | CREA | DIRECTA |
@@ -2866,7 +2873,7 @@ Cataloga componentes lógicos de la plataforma médica para relacionar servicios
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: service_components; BIZ note`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `ServiceComponents` — `src/modules/platform_ops/entities/service_components.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 6 FK salientes · 19 entrantes · 2 operaciones
+- **Resumen:** 15 columnas · 8 índices · 6 FK salientes · 19 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -2941,6 +2948,10 @@ Cataloga componentes lógicos de la plataforma médica para relacionar servicios
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/deployments | LEE | POR_SQL |
+| GET /admin/ops/incidents | LEE | POR_SQL |
+| GET /admin/ops/incidents/{id} | LEE | POR_SQL |
+| GET /admin/ops/readiness | LEE | POR_SQL |
 | POST /ops/artifacts | LEE | DIRECTA |
 | POST /ops/change-requests | LEE | DIRECTA |
 
@@ -3046,7 +3057,7 @@ Define indicadores observables que miden desempeño y disponibilidad de servicio
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: service_level_indicators`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `ServiceLevelIndicators` — `src/modules/platform_ops/entities/service_level_indicators.entity.ts`
-- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 1 entrantes · 0 operaciones
+- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 1 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -3100,7 +3111,10 @@ Define indicadores observables que miden desempeño y disponibilidad de servicio
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /admin/ops/readiness | LEE | POR_SQL |
+| GET /admin/ops/slos | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -3125,7 +3139,7 @@ Establece objetivos cuantitativos de servicio para evaluar confiabilidad y calid
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: service_level_objectives`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `ServiceLevelObjectives` — `src/modules/platform_ops/entities/service_level_objectives.entity.ts`
-- **Resumen:** 14 columnas · 5 índices · 4 FK salientes · 2 entrantes · 1 operaciones
+- **Resumen:** 14 columnas · 5 índices · 4 FK salientes · 2 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -3177,6 +3191,8 @@ Establece objetivos cuantitativos de servicio para evaluar confiabilidad y calid
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/readiness | LEE | POR_SQL |
+| GET /admin/ops/slos | LEE | POR_SQL |
 | POST /ops/slo/{id}/measurements | LEE | DIRECTA |
 
 #### Gobierno
@@ -3274,7 +3290,7 @@ Registra mediciones de objetivos de servicio para comparar resultados con metas 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: slo_measurements`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `SloMeasurements` — `src/modules/platform_ops/entities/slo_measurements.entity.ts`
-- **Resumen:** 11 columnas · 4 índices · 2 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 11 columnas · 4 índices · 2 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -3312,6 +3328,8 @@ Registra mediciones de objetivos de servicio para comparar resultados con metas 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/readiness | LEE | POR_SQL |
+| GET /admin/ops/slos | LEE | POR_SQL |
 | POST /ops/error-budget/{policyId}/burn-events | LEE | DIRECTA |
 | POST /ops/slo/{id}/measurements | CREA | DIRECTA |
 | POST /ops/slo/{id}/measurements | LEE | DIRECTA |

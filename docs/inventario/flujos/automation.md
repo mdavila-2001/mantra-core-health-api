@@ -50,7 +50,7 @@ EJECUCIÓN
   runs/:id/finalize ───> cierra agent_runs abiertos, suma coste, run COMPLETED|FAILED
 ```
 
-_Fuente: `src/modules/automation/README.md:29`_
+_Fuente: `src/modules/automation/README.md:66`_
 
 ### Etapas y operaciones
 

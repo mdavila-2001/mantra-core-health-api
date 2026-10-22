@@ -15,7 +15,7 @@
 
 ### Para qué sirve
 
-Contratos de read model versionados, materialized views, contratos de vista de frontend (route + view + fields/filters/sort/actions/kpis/states), preferencias de usuario y proyecciones públicas. Los endpoints son contratos de lectura y de materialización: no exponen SQL crudo al cliente (allow-lists de campos, filtros, orden y acciones), aplican masking heredado y derivan las acciones en servidor.
+Contratos versionados de read model, materialized views, contratos de vista de frontend (portal, ruta, vista y sus hijos), preferencias de usuario y una proyección pública de directorio. La administración de contratos y las consultas públicas usan identificadores/columnas constantes o validadas; la proyección de datos autenticada todavía no ejecuta la materialized view ni pagina filas.
 
 _Fuente: `src/modules/read_models/README.md:3`_
 
@@ -27,7 +27,7 @@ _Fuente: `src/modules/read_models/README.md:3`_
 | `UC-30-02` | Publicar contrato de vista (upsert portal/route + view + hijos) | POST /portals/{portalCode}/routes/{routeCode}/views | SECURITY_ADMIN | MEDIO | 12 |
 | `UC-30-03` | Refresh manual de la MV (REFRESH CONCURRENTLY) | POST /read-models/{definitionId}/refresh | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-30-04` | Backfill inicial (FULL) de la MV | POST /read-models/{definitionId}/backfill | SECURITY_ADMIN | MEDIO | 2 |
-| `UC-30-05` | Servir el read model (masking + cursor + staleness) | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | Cualquier sesión válida | BAJO | 6 |
+| `UC-30-05` | Devuelve contrato, masking y staleness; actualmente data queda vacío | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | Cualquier sesión válida | BAJO | 6 |
 | `UC-30-06` | Invalidar y recomputar tras cambio upstream | POST /read-models/{definitionId}/invalidate | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-30-07` | Reconciliar la MV divergente (result REPAIRED) | POST /read-models/{definitionId}/reconcile | SYSTEM · SECURITY_ADMIN | MEDIO | 2 |
 | `UC-30-08` | Nueva versión N+1 en DRAFT (anterior sigue ACTIVE) | POST /read-models/definitions/{schema}/{object}/versions | SECURITY_ADMIN | MEDIO | 3 |
@@ -70,7 +70,7 @@ flowchart LR
   subgraph s3["UC-30-04 · Backfill inicial (FULL) de la MV"]
     o13["POST /read-models/{definitionId}/backfill"]:::op
   end
-  subgraph s4["UC-30-05 · Servir el read model (masking + cursor + staleness)"]
+  subgraph s4["UC-30-05 · Devuelve contrato, masking y staleness; actualmente data queda vacío"]
     o14["GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data"]:::op
   end
   subgraph s5["UC-30-06 · Invalidar y recomputar tras cambio upstream"]
@@ -433,8 +433,10 @@ flowchart TD
   n3 --> n4
   n5[("LEE read_models.public_provider_directory")]:::efecto
   n4 --> n5
-  n6(("200 Responde con éxito")):::ok
-  n5 --> n6
+  n6(["↩ (relanza el error capturado)"]):::error
+  n4 -->|"si falla"| n6
+  n7(("200 Responde con éxito")):::ok
+  n5 --> n7
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -464,8 +466,10 @@ flowchart TD
   n3 --> n4
   n5[("LEE read_models.public_provider_directory")]:::efecto
   n4 --> n5
-  n6(("200 Responde con éxito")):::ok
-  n5 --> n6
+  n6(["↩ (relanza el error capturado)"]):::error
+  n4 -->|"si falla"| n6
+  n7(("200 Responde con éxito")):::ok
+  n5 --> n7
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

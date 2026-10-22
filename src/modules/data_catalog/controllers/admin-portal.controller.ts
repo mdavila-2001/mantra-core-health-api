@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -75,6 +76,7 @@ export class AdminPortalController {
 
   /** Ficha de una operación (negocio, contrato, datos, acceso, pruebas). */
   @Get('operaciones/:id')
+  @ApiOkResponse({ type: OperacionDetalleDto })
   @ApiOperation({ summary: 'Ver la ficha de una operación' })
   @ApiResponse({
     status: 404,
@@ -88,6 +90,7 @@ export class AdminPortalController {
 
   /** Árbol de decisión de una operación. */
   @Get('operaciones/:id/arbol')
+  @ApiOkResponse({ type: ArbolDto })
   @ApiOperation({ summary: 'Ver el árbol de decisión de una operación' })
   @ApiResponse({
     status: 404,
@@ -113,6 +116,7 @@ export class AdminPortalController {
 
   /** Casos de un hallazgo, paginados. */
   @Get('flujos/hallazgos/:id')
+  @ApiOkResponse({ type: HallazgoDetalleDto })
   @ApiOperation({ summary: 'Ver los casos de un hallazgo' })
   @ApiResponse({ status: 404, description: 'No existe ese hallazgo' })
   detalleDeHallazgo(
@@ -131,6 +135,7 @@ export class AdminPortalController {
 
   /** Detalle de un proceso con sus etapas y máquinas de estado. */
   @Get('flujos/:codigo')
+  @ApiOkResponse({ type: ProcesoDetalleDto })
   @ApiOperation({
     summary: 'Ver un proceso con sus etapas y máquinas de estado',
   })
@@ -143,6 +148,7 @@ export class AdminPortalController {
 
   /** Grafo de un proceso. */
   @Get('flujos/:codigo/grafo')
+  @ApiOkResponse({ type: GrafoDto })
   @ApiOperation({ summary: 'Ver el grafo de un proceso' })
   @ApiResponse({ status: 404, description: 'No existe ese proceso' })
   grafo(@Param() { codigo }: ProcesoCodigoParamDto): GrafoDto {
@@ -158,6 +164,7 @@ export class AdminPortalController {
 
   /** Ficha de una tabla. */
   @Get('catalogo/tablas/:schema/:tabla')
+  @ApiOkResponse({ type: TablaFichaDto })
   @ApiOperation({ summary: 'Ver la ficha de una tabla' })
   @ApiResponse({ status: 404, description: 'La tabla no está en el catálogo' })
   fichaDeTabla(@Param() { schema, tabla }: TablaParamDto): TablaFichaDto {
@@ -182,6 +189,7 @@ export class AdminPortalController {
 
   /** Qué operaciones tocan una tabla y con qué tablas se relaciona. */
   @Get('linaje/tablas/:schema/:tabla')
+  @ApiOkResponse({ type: LinajeTablaDto })
   @ApiOperation({ summary: 'Linaje de una tabla' })
   @ApiResponse({ status: 404, description: 'La tabla no está en el linaje' })
   linajeDeTabla(@Param() { schema, tabla }: TablaParamDto): LinajeTablaDto {

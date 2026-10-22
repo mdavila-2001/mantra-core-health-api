@@ -140,7 +140,7 @@ Registra entradas y salidas de geocercas para activar seguimiento logístico o d
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/geo/README.md:27` |
+| Append-only | sí (declarado) | `src/modules/geo/README.md:57` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -286,7 +286,7 @@ Conserva puntos de ubicación recibidos de sujetos rastreables para reconstruir 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/geo/README.md:25` |
+| Append-only | sí (declarado) | `src/modules/geo/README.md:55` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |

@@ -10,7 +10,7 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [audio_assets](#audio_assets) | Cataloga audios sintetizados y cacheados a partir de plantillas aprobadas para reutilizar recursos de voz. | 33 | 6 | 18 | COINCIDE |
+| [audio_assets](#audio_assets) | Cataloga audios sintetizados y cacheados a partir de plantillas aprobadas para reutilizar recursos de voz. | 33 | 6 | 24 | COINCIDE |
 | [audio_generation_events](#audio_generation_events) | Traza generación de audio, su costo y resultado para gobernar consumo de proveedores de voz. | 13 | 2 | 12 | COINCIDE |
 | [audio_generation_usage](#audio_generation_usage) | Acumula uso de síntesis de audio por período para controlar presupuesto y facturación de proveedores. | 10 | 1 | 3 | COINCIDE |
 | [audio_templates](#audio_templates) | Define textos registrados que pueden convertirse a voz en experiencias acotadas como onboarding. | 13 | 1 | 2 | COINCIDE |
@@ -30,7 +30,7 @@ Cataloga audios sintetizados y cacheados a partir de plantillas aprobadas para r
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_64_audio_assets.puml: audio_assets; BIZ note`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_64_audio_assets.puml` · **DDL:** `SQL/64_audio_assets/02_tables.sql`
 - **Entidad del ORM:** `AudioAssets` — `src/modules/audio_assets/entities/audio_assets.entity.ts`
-- **Resumen:** 33 columnas · 6 índices · 1 FK salientes · 0 entrantes · 18 operaciones
+- **Resumen:** 33 columnas · 6 índices · 1 FK salientes · 0 entrantes · 24 operaciones
 
 #### Columnas
 
@@ -115,6 +115,12 @@ Cataloga audios sintetizados y cacheados a partir de plantillas aprobadas para r
 | POST /internal/audio-assets/pregenerate | LEE | DIRECTA |
 | GET /internal/audio-assets/status | LEE | POR_SQL |
 | POST /internal/audio-assets/verify | LEE | DIRECTA |
+| POST /internal/storage-lifecycle/audio/{assetId}/abort | LEE | DIRECTA |
+| POST /internal/storage-lifecycle/audio/{assetId}/begin | LEE | DIRECTA |
+| POST /internal/storage-lifecycle/audio/{assetId}/dispatch | LEE | DIRECTA |
+| POST /internal/identity/evidence/lifecycle-scan | LEE | POR_SQL |
+| POST /internal/identity/evidence/storage-purge-review | LEE | POR_SQL |
+| POST /internal/governance/retention-executions/run | LEE | POR_SQL |
 
 #### Gobierno
 

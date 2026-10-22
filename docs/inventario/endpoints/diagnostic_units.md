@@ -5,7 +5,7 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 21 (21 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 15 · BAJO 6
-- **Tablas distintas que tocan:** 15
+- **Tablas distintas que tocan:** 16
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/diagnostic-units.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -19,7 +19,7 @@
 | 5 | POST | `/diagnostic-unit-sites/{siteId}/equipment` | Registrar equipamiento y calibración del sitio | MEDIO | 4 | SECURITY_ADMIN |
 | 6 | GET | `/diagnostic-units` | Listar unidades diagnósticas publicadas | BAJO | 5 | sesión (sin roles) |
 | 7 | POST | `/diagnostic-units` | Alta de unidad diagnóstica con sitios y acreditaciones | MEDIO | 4 | SECURITY_ADMIN |
-| 8 | GET | `/diagnostic-units/{id}` | Consultar el perfil de una unidad diagnóstica | BAJO | 9 | sesión (sin roles) |
+| 8 | GET | `/diagnostic-units/{id}` | Consultar el perfil de una unidad diagnóstica | BAJO | 10 | sesión (sin roles) |
 | 9 | POST | `/diagnostic-units/{id}/accreditations` | Registrar una acreditación con evidencia | MEDIO | 2 | SECURITY_ADMIN |
 | 10 | GET | `/diagnostic-units/{id}/administration` | Consola de administración de una unidad diagnóstica | BAJO | 11 | SECURITY_ADMIN |
 | 11 | POST | `/diagnostic-units/{id}/practitioner-assignments` | Asignar un especialista a la unidad/sitio | MEDIO | 5 | SECURITY_ADMIN |
@@ -28,9 +28,9 @@
 | 14 | POST | `/diagnostic-units/{id}/sites` | Registrar un sitio operativo de la unidad | MEDIO | 2 | SECURITY_ADMIN |
 | 15 | PUT | `/diagnostic-units/{id}/specialties` | Declarar las especialidades de la unidad | MEDIO | 4 | SECURITY_ADMIN |
 | 16 | POST | `/diagnostic-units/{id}/study-offerings` | Publicar oferta de estudio con componentes (panel) | MEDIO | 4 | SECURITY_ADMIN |
-| 17 | POST | `/diagnostic-units/{id}/verify-and-publish` | Verificar la unidad y publicar su perfil público | MEDIO | 7 | SECURITY_ADMIN |
+| 17 | POST | `/diagnostic-units/{id}/verify-and-publish` | Verificar la unidad y publicar su perfil público | MEDIO | 8 | SECURITY_ADMIN |
 | 18 | GET | `/diagnostic-units/administration` | Listar las unidades del tenant, publicadas o no | BAJO | 5 | SECURITY_ADMIN |
-| 19 | GET | `/diagnostic-units/search` | Buscar centros de diagnóstico, laboratorio e imagen | BAJO | 8 | sesión (sin roles) |
+| 19 | GET | `/diagnostic-units/search` | Buscar centros de diagnóstico, laboratorio e imagen | BAJO | 10 | sesión (sin roles) |
 | 20 | POST | `/price-schedules/{scheduleId}/study-prices` | Fijar/versionar el precio de un estudio (append-only) | MEDIO | 5 | SECURITY_ADMIN |
 | 21 | POST | `/study-prices/{priceId}/close` | Cerrar una versión de precio vigente | MEDIO | 2 | SECURITY_ADMIN |
 
@@ -49,7 +49,7 @@
 
 Actualizar estado/calibración de un equipo. Caso de uso UC-23-09: Actualizar estado/calibración de equipo. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:25`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:66`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -61,11 +61,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:28` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:28` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -154,7 +154,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Retirar (soft-delete) una oferta de estudio. Caso de uso UC-23-08: Retirar (soft-delete) oferta. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:64`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -166,9 +166,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:72` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:72` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -230,7 +230,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Renovar/registrar acreditación con evidencia. Caso de uso UC-23-11: Renovar acreditación. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:28`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -242,11 +242,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-unit-accreditations.controller.ts:31` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-unit-accreditations.controller.ts:31` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -335,7 +335,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Actualizar un sitio operativo de la unidad. Caso de uso UC-23-02: Actualizar sitio. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -347,11 +347,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:44` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:44` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -441,7 +441,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar equipamiento y calibración del sitio. Caso de uso UC-23-09: Registrar equipamiento. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:65`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -453,11 +453,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:57` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -558,7 +558,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Listar unidades diagnósticas publicadas. Caso de uso Directorio P3: Listar unidades activas y verificadas del tenant activo. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -570,18 +570,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:85` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:69` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findActiveOfferings | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:81` |
-| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:54` |
-| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findVisibleByTenant | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:24` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:157` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:83` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findActiveOfferings | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:95` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:55` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findVisibleByTenant | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:25` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.list → DiagnosticUnitsReadService.list → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:171` |
 
 ### Cuerpo
 
@@ -642,7 +642,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Alta de unidad diagnóstica con sitios y acreditaciones. Caso de uso UC-23-01: Alta de unidad con sitios (1..N) y acreditaciones (0..N). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -654,10 +654,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:172` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -787,11 +787,11 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Consultar el perfil de una unidad diagnóstica. Caso de uso Directorio P3: Perfil con sedes, equipos, oferta, precios públicos y acreditaciones vigentes. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`GET /diagnostic-units/{id}` la atiende `DiagnosticUnitsController.getById` (src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:142). Exige sesión; el controlador no declara roles. Delega en `DiagnosticUnitsReadService.getById`. Lee diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_accreditations, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, practice.practice_sites y 1 más.
+`GET /diagnostic-units/{id}` la atiende `DiagnosticUnitsController.getById` (src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:142). Exige sesión; el controlador no declara roles. Delega en `DiagnosticUnitsReadService.getById`. Lee common.addresses, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_accreditations, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units y 2 más.
 
 ### Requerimientos
 
@@ -799,23 +799,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:142` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:142` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:69` |
-| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:96` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findActiveOfferings | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:81` |
-| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:116` |
-| `diagnostic_units.diagnostic_unit_accreditations` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentAccreditations | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:130` |
-| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:54` |
-| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findVisibleById | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:41` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findPracticeSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:149` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:157` |
+| `common.addresses` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findAddresses | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:75` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:83` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentPublicSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:110` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findActiveOfferings | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:95` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentPrices | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:130` |
+| `diagnostic_units.diagnostic_unit_accreditations` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findCurrentAccreditations | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:144` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:55` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findVisibleById | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:42` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findPracticeSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:163` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.getById → DiagnosticUnitsReadService.getById → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:171` |
 
 ### Parámetros
 
@@ -843,7 +844,7 @@ La operación no recibe cuerpo.
 | `acceptsExternalOrders` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:36` |
 | `walkInAvailable` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:39` |
 | `homeCollectionAvailable` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:42` |
-| `sites` | `array<DiagnosticUnitSiteDetailDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:180` |
+| `sites` | `array<DiagnosticUnitSiteDetailDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:188` |
 | `sites[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:57` |
 | `sites[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:60` |
 | `sites[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:63` |
@@ -852,51 +853,53 @@ La operación no recibe cuerpo.
 | `sites[].role.display` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:9` |
 | `sites[].sampleCollectionAvailable` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:69` |
 | `sites[].imagingAvailable` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:72` |
-| `equipment` | `array<DiagnosticEquipmentDetailDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:183` |
-| `equipment[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:78` |
-| `equipment[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:81` |
-| `equipment[].type` | `DiagnosticConceptDto` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:84` |
+| `sites[].latitude` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:76` |
+| `sites[].longitude` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:80` |
+| `equipment` | `array<DiagnosticEquipmentDetailDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:191` |
+| `equipment[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:86` |
+| `equipment[].siteId` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:89` |
+| `equipment[].type` | `DiagnosticConceptDto` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:92` |
 | `equipment[].type.code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:6` |
 | `equipment[].type.display` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:9` |
-| `equipment[].manufacturer` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:87` |
-| `equipment[].model` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:90` |
-| `equipment[].modality` | `DiagnosticConceptDto` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:93` |
+| `equipment[].manufacturer` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:95` |
+| `equipment[].model` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:98` |
+| `equipment[].modality` | `DiagnosticConceptDto` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:101` |
 | `equipment[].modality.code` | `string` | No | — | — | — | sin fuente |
 | `equipment[].modality.display` | `string` | No | — | — | — | sin fuente |
-| `equipment[].operationalStatus` | `DiagnosticConceptDto` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:96` |
+| `equipment[].operationalStatus` | `DiagnosticConceptDto` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:104` |
 | `equipment[].operationalStatus.code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:6` |
 | `equipment[].operationalStatus.display` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:9` |
-| `equipment[].lastCalibrationAt` | `object` | No | formato date-time; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:99` |
-| `equipment[].nextCalibrationDueAt` | `object` | No | formato date-time; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:102` |
-| `studies` | `array<DiagnosticStudyDetailDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:186` |
-| `studies[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:123` |
-| `studies[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:126` |
-| `studies[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:129` |
-| `studies[].description` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:132` |
-| `studies[].siteId` | `object` | No | formato uuid; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:135` |
-| `studies[].modality` | `DiagnosticConceptDto` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:138` |
+| `equipment[].lastCalibrationAt` | `object` | No | formato date-time; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:107` |
+| `equipment[].nextCalibrationDueAt` | `object` | No | formato date-time; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:110` |
+| `studies` | `array<DiagnosticStudyDetailDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:194` |
+| `studies[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:131` |
+| `studies[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:134` |
+| `studies[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:137` |
+| `studies[].description` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:140` |
+| `studies[].siteId` | `object` | No | formato uuid; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:143` |
+| `studies[].modality` | `DiagnosticConceptDto` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:146` |
 | `studies[].modality.code` | `string` | No | — | — | — | sin fuente |
 | `studies[].modality.display` | `string` | No | — | — | — | sin fuente |
-| `studies[].preparationInstructions` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:141` |
-| `studies[].expectedDurationMinutes` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:144` |
-| `studies[].expectedTurnaroundMinutes` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:147` |
-| `studies[].requiresMedicalOrder` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:150` |
-| `studies[].prices` | `array<DiagnosticPublicPriceDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:153` |
-| `studies[].prices[].amount` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:108` |
-| `studies[].prices[].currency` | `DiagnosticConceptDto` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:111` |
+| `studies[].preparationInstructions` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:149` |
+| `studies[].expectedDurationMinutes` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:152` |
+| `studies[].expectedTurnaroundMinutes` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:155` |
+| `studies[].requiresMedicalOrder` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:158` |
+| `studies[].prices` | `array<DiagnosticPublicPriceDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:161` |
+| `studies[].prices[].amount` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:116` |
+| `studies[].prices[].currency` | `DiagnosticConceptDto` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:119` |
 | `studies[].prices[].currency.code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:6` |
 | `studies[].prices[].currency.display` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:9` |
-| `studies[].prices[].scheduleCode` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:114` |
-| `studies[].prices[].siteId` | `object` | No | formato uuid; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:117` |
-| `accreditations` | `array<DiagnosticAccreditationDetailDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:189` |
-| `accreditations[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:159` |
-| `accreditations[].type` | `DiagnosticConceptDto` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:162` |
+| `studies[].prices[].scheduleCode` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:122` |
+| `studies[].prices[].siteId` | `object` | No | formato uuid; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:125` |
+| `accreditations` | `array<DiagnosticAccreditationDetailDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:197` |
+| `accreditations[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:167` |
+| `accreditations[].type` | `DiagnosticConceptDto` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:170` |
 | `accreditations[].type.code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:6` |
 | `accreditations[].type.display` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:9` |
-| `accreditations[].number` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:165` |
-| `accreditations[].siteId` | `object` | No | formato uuid; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:168` |
-| `accreditations[].validFrom` | `object` | No | formato date; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:171` |
-| `accreditations[].validTo` | `object` | No | formato date; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:174` |
+| `accreditations[].number` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:173` |
+| `accreditations[].siteId` | `object` | No | formato uuid; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:176` |
+| `accreditations[].validFrom` | `object` | No | formato date; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:179` |
+| `accreditations[].validTo` | `object` | No | formato date; admite null | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:182` |
 
 ### Respuestas posibles
 
@@ -936,7 +939,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Registrar una acreditación con evidencia. Caso de uso UC-23-11: Registrar acreditación con evidencia. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:27`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:68`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -948,11 +951,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:265` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:265` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1063,9 +1066,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1258,7 +1261,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Asignar un especialista a la unidad/sitio. Caso de uso UC-23-10: Asignar especialista. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:26`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:67`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1270,11 +1273,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:252` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:252` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1377,7 +1380,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Crear un cronograma de precios. Caso de uso UC-23-06: Crear cronograma de precios. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1389,11 +1392,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:239` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:239` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1497,7 +1500,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Reconstruir la proyección del perfil público. Caso de uso UC-23-12: Reconstruir proyección del perfil público. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:29`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:70`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1509,9 +1512,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:278` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:278` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1574,7 +1577,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Registrar un sitio operativo de la unidad. Caso de uso UC-23-02: Registrar sitio operativo. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1586,11 +1589,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:186` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:186` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1687,7 +1690,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Declarar las especialidades de la unidad. Caso de uso UC-23-04: Declarar especialidades (upsert + soft-close). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1699,11 +1702,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:211` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:211` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1801,7 +1804,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Publicar oferta de estudio con componentes (panel). Caso de uso UC-23-05: Publicar oferta con componentes (panel). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1813,11 +1816,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:224` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:224` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1948,11 +1951,11 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Verificar la unidad y publicar su perfil público. Caso de uso UC-23-03: Verificar y publicar perfil público. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /diagnostic-units/{id}/verify-and-publish` la atiende `DiagnosticUnitsController.verifyAndPublish` (src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:199). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `DiagnosticUnitsService.verifyAndPublish`. Crea filas en community.public_profiles. Actualiza diagnostic_units.diagnostic_unit_accreditations, diagnostic_units.diagnostic_unit_specialties, diagnostic_units.diagnostic_units. Lee community.public_profiles, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units.
+`POST /diagnostic-units/{id}/verify-and-publish` la atiende `DiagnosticUnitsController.verifyAndPublish` (src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:199). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `DiagnosticUnitsService.verifyAndPublish`. Crea filas en community.public_profiles. Actualiza community.public_profiles, diagnostic_units.diagnostic_unit_accreditations, diagnostic_units.diagnostic_unit_specialties, diagnostic_units.diagnostic_units. Lee community.public_profiles, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units.
 
 ### Requerimientos
 
@@ -1960,16 +1963,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:199` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:199` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:231` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:189` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → PublicProfileProjectionService.projectOrganization | `src/modules/community/services/public-profile-projection.service.ts:133` |
+| `community.public_profiles` | ESCRIBE | CREA | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.create | `src/modules/community/repositories/public-profiles.repository.ts:344` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → PublicProfileProjectionService.projectOrganization → PublicProfilesRepository.findByTarget | `src/modules/community/repositories/public-profiles.repository.ts:302` |
 | `diagnostic_units.diagnostic_unit_accreditations` | ESCRIBE | ACTUALIZA | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitAccreditationsRepository.verifyOpenForUnit | `src/modules/diagnostic_units/repositories/diagnostic-unit-accreditations.repository.ts:98` |
 | `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitSitesRepository.countActiveForUnit | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:58` |
 | `diagnostic_units.diagnostic_unit_specialties` | ESCRIBE | ACTUALIZA | DIRECTA | DiagnosticUnitsController.verifyAndPublish → DiagnosticUnitsService.verifyAndPublish → DiagnosticUnitSpecialtiesRepository.verifyOpenForUnit | `src/modules/diagnostic_units/repositories/diagnostic-unit-specialties.repository.ts:93` |
@@ -2050,8 +2054,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:104` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2133,7 +2137,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /diagnostic-units/search` la atiende `DiagnosticUnitsController.search` (src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:124). Exige sesión; el controlador no declara roles. Delega en `DiagnosticUnitsSearchService.search`. Lee community.service_reviews, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, terminology.catalog_concepts.
+`GET /diagnostic-units/search` la atiende `DiagnosticUnitsController.search` (src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:124). Exige sesión; el controlador no declara roles. Delega en `DiagnosticUnitsSearchService.search`. Lee common.addresses, community.service_reviews, diagnostic_units.diagnostic_equipment, diagnostic_units.diagnostic_price_schedules, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_study_prices, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units y 2 más.
 
 ### Requerimientos
 
@@ -2142,20 +2146,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:124` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:124` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.service_reviews` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.proyectar → CommunityRatingsService.ratingsByProfiles → ReviewsRepository.averageByTargets | `src/modules/community/repositories/reviews.repository.ts:259` |
-| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.proyectar → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:69` |
-| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsReadRepository.findUnitIdsWithInsurerAgreement | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:238` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsReadRepository.findUnitIdsOfferingStudy | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:215` |
-| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.proyectar → DiagnosticUnitsReadRepository.findCurrentPricesForSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:289` |
-| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.proyectar → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:54` |
-| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsReadRepository.searchVisible | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:180` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.proyectar → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:157` |
+| `common.addresses` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findAddresses | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:75` |
+| `community.service_reviews` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.project → CommunityRatingsService.ratingsByProfiles → ReviewsRepository.averageByTargets | `src/modules/community/repositories/reviews.repository.ts:304` |
+| `diagnostic_units.diagnostic_equipment` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findEquipment | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:83` |
+| `diagnostic_units.diagnostic_price_schedules` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsReadRepository.findUnitIdsWithInsurerAgreement | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:252` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsReadRepository.findUnitIdsOfferingStudy | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:229` |
+| `diagnostic_units.diagnostic_study_prices` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findCurrentPricesForSchedules | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:303` |
+| `diagnostic_units.diagnostic_unit_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findActiveSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:55` |
+| `diagnostic_units.diagnostic_units` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsReadRepository.searchVisible | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:194` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findPracticeSites | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:163` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | DiagnosticUnitsController.search → DiagnosticUnitsSearchService.search → DiagnosticUnitsSearchService.project → DiagnosticUnitsReadRepository.findConcepts | `src/modules/diagnostic_units/repositories/diagnostic-units-read.repository.ts:171` |
 
 ### Parámetros
 
@@ -2182,7 +2188,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<DiagnosticUnitSearchItemDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:158` |
+| `items` | `array<DiagnosticUnitSearchItemDto>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:178` |
 | `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:15` |
 | `items[].code` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:18` |
 | `items[].name` | `string` | Sí | — | — | — | `src/modules/diagnostic_units/dto/directory-read.dto.ts:21` |
@@ -2199,9 +2205,11 @@ La operación no recibe cuerpo.
 | `items[].rating` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:143` |
 | `items[].ratingCount` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:147` |
 | `items[].minAmount` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:151` |
-| `total` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:162` |
-| `limit` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:166` |
-| `offset` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:170` |
+| `items[].minAmountCurrency` | `object` | No | admite null | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:159` |
+| `items[].cities` | `array<string>` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:171` |
+| `total` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:182` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:186` |
+| `offset` | `number` | Sí | — | — | — | `src/modules/diagnostic_units/dto/catalog.dto.ts:190` |
 
 ### Respuestas posibles
 
@@ -2237,7 +2245,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Fijar/versionar el precio de un estudio (append-only). Caso de uso UC-23-07: Fijar/versionar precio (append-only). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2249,11 +2257,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: scheduleId | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:45` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2356,7 +2364,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Cerrar una versión de precio vigente. Caso de uso UC-23-08: Cerrar versión de precio vigente. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:63`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2368,9 +2376,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: priceId | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:60` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

@@ -15,7 +15,7 @@
 | [data_movement_jobs](#data_movement_jobs) | Registra movimientos controlados de datasets entre stores compatibles con sus políticas. | 10 | 2 | 2 | COINCIDE |
 | [deletion_executions](#deletion_executions) | Registra acciones ejecutadas para eliminar datos de destinos secundarios. | 9 | 3 | 3 | COINCIDE |
 | [deletion_requests](#deletion_requests) | Coordina solicitudes de eliminación que deben propagarse a proyecciones y almacenes secundarios. | 10 | 2 | 6 | COINCIDE |
-| [deletion_targets](#deletion_targets) | Enumera stores y proyecciones afectados por una solicitud de eliminación para evitar copias residuales. | 8 | 2 | 9 | COINCIDE |
+| [deletion_targets](#deletion_targets) | Enumera stores y proyecciones afectados por una solicitud de eliminación para evitar copias residuales. | 8 | 2 | 12 | COINCIDE |
 | [deletion_verifications](#deletion_verifications) | Conserva verificaciones posteriores a una eliminación para demostrar propagación y cierre. | 7 | 2 | 1 | COINCIDE |
 | [projection_checkpoints](#projection_checkpoints) | Conserva posiciones procesadas por consumidores para reanudar actualización idempotente de proyecciones. | 8 | 3 | 3 | COINCIDE |
 | [projection_consumers](#projection_consumers) | Cataloga consumidores encargados de aplicar eventos a proyecciones y stores secundarios. | 7 | 2 | 3 | COINCIDE |
@@ -323,7 +323,7 @@ Enumera stores y proyecciones afectados por una solicitud de eliminación para e
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml: deletion_targets`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml` · **DDL:** `SQL/62_cross_store_consistency/02_tables.sql`
 - **Entidad del ORM:** `DeletionTargets` — `src/modules/cross_store_consistency/entities/deletion_targets.entity.ts`
-- **Resumen:** 8 columnas · 2 índices · 0 FK salientes · 0 entrantes · 9 operaciones
+- **Resumen:** 8 columnas · 2 índices · 0 FK salientes · 0 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -358,6 +358,9 @@ Enumera stores y proyecciones afectados por una solicitud de eliminación para e
 | POST /workers/deletion-targets/{id}/verifications | LEE | DIRECTA |
 | GET /workers/deletion-targets/executed | LEE | DIRECTA |
 | GET /workers/deletion-targets/pending | LEE | DIRECTA |
+| POST /internal/identity/evidence/lifecycle-scan | LEE | POR_SQL |
+| POST /internal/identity/evidence/storage-purge-review | LEE | POR_SQL |
+| POST /internal/governance/retention-executions/run | LEE | POR_SQL |
 
 #### Gobierno
 

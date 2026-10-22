@@ -43,7 +43,7 @@
 
 Publicar el contrato de una vista de página. Caso de uso UC-30-02: Publicar contrato de vista (upsert portal/route + view + hijos). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -55,10 +55,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/frontend-views.controller.ts:42` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -290,7 +290,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Derivar available_actions_json (estado + permiso + purpose). Caso de uso UC-30-11: Derivar available_actions_json (estado + permiso). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -302,8 +302,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -370,9 +370,9 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Servir el read model al frontend (consent-aware, masking heredado). Caso de uso UC-30-05: Servir el read model (masking + cursor + staleness). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
+Servir el read model al frontend (consent-aware, masking heredado). Caso de uso UC-30-05: Devuelve contrato, masking y staleness; actualmente data queda vacío. Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -384,8 +384,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -469,7 +469,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Servir una proyección pública por slug. Caso de uso UC-30-10: Proyecciones públicas (sin PHI, sin sesión). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -480,13 +480,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/read_models/controllers/public-projections.controller.ts:35` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `read_models.public_provider_directory (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | PublicProjectionsController.getBySlug → PublicProjectionsService.getBySlug | `src/modules/read_models/services/public-projections.service.ts:62` |
+| `read_models.public_provider_directory (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | PublicProjectionsController.getBySlug → PublicProjectionsService.getBySlug | `src/modules/read_models/services/public-projections.service.ts:69` |
 
 ### Parámetros
 
@@ -542,7 +542,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Servir el directorio público (solo campos aprobados). Caso de uso UC-30-10: Proyecciones públicas (sin PHI, sin sesión). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -553,13 +553,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/read_models/controllers/public-projections.controller.ts:22` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `read_models.public_provider_directory (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | PublicProjectionsController.searchDirectory → PublicProjectionsService.searchDirectory | `src/modules/read_models/services/public-projections.service.ts:122` |
+| `read_models.public_provider_directory (vista u objeto no catalogado)` | LEE | LEE | POR_SQL | PublicProjectionsController.searchDirectory → PublicProjectionsService.searchDirectory | `src/modules/read_models/services/public-projections.service.ts:130` |
 
 ### Cuerpo
 
@@ -609,7 +609,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Backfill inicial de una nueva materialized view. Caso de uso UC-30-04: Backfill inicial (FULL) de la MV. Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -621,9 +621,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:99` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -694,7 +694,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Invalidar y recomputar el read model tras cambio upstream. Caso de uso UC-30-06: Invalidar y recomputar tras cambio upstream. Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -706,9 +706,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:111` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -779,7 +779,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Reconciliar read model divergente contra la fuente canónica. Caso de uso UC-30-07: Reconciliar la MV divergente (result REPAIRED). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -791,9 +791,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:129` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:129` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -864,7 +864,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Refrescar la materialized view (REFRESH CONCURRENTLY, manual). Caso de uso UC-30-03: Refresh manual de la MV (REFRESH CONCURRENTLY). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -876,9 +876,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:85` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: definitionId | `src/modules/read_models/controllers/read-model-definitions.controller.ts:85` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -949,7 +949,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Registrar y publicar un contrato de read model versionado. Caso de uso UC-30-01: Registrar y publicar un contrato versionado + dependencias upstream. Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -961,10 +961,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1105,7 +1105,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Retirar una versión de read model (guarda de FK). Caso de uso UC-30-13: Deprecar (ACTIVE→DEPRECATED) y retirar (guarda de FK). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:25`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1117,9 +1117,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:155` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/read_models/controllers/read-model-definitions.controller.ts:155` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1185,7 +1185,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Deprecar una versión de read model. Caso de uso UC-30-13: Deprecar (ACTIVE→DEPRECATED) y retirar (guarda de FK). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:25`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1197,9 +1197,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:143` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/read_models/controllers/read-model-definitions.controller.ts:143` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1264,7 +1264,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Versionar el esquema de un read model. Caso de uso UC-30-08: Nueva versión N+1 en DRAFT (anterior sigue ACTIVE). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1276,10 +1276,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:55` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1406,7 +1406,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Detectar y reportar staleness/degradación de las MV. Caso de uso UC-30-12: Detectar staleness/degradación de las MV. Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1418,8 +1418,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/read_models/controllers/read-model-definitions.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1481,7 +1481,7 @@ El árbol de decisión completo está en [flujos](../flujos/read_models.md).
 
 Guardar preferencias de vista del usuario. Caso de uso UC-30-09: Preferencias de vista (validadas contra el allow-list). Dentro del módulo (descripción del modelo, en inglés): «Provides frontend-ready, permission-aware read contracts.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_models/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_30_read_models.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
@@ -1493,11 +1493,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/read_mo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/read_models/controllers/frontend-views.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: frontendPageViewId | `src/modules/read_models/controllers/frontend-views.controller.ts:92` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

@@ -3,74 +3,141 @@
 # Endpoints del módulo `promotions`
 
 - **Bloque:** Marketing y Crecimiento (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
-- **Operaciones:** 15 (15 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 13 · BAJO 2
-- **Tablas distintas que tocan:** 13
+- **Operaciones:** 20 (19 en el contrato, 1 sólo en el código)
+- **Riesgo:** ALTO 0 · MEDIO 14 · BAJO 6
+- **Tablas distintas que tocan:** 14
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/promotions.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/checkout/{orderId}/apply-discount` | Aplicar un descuento al intento de pago del checkout | MEDIO | 6 | CASHIER, PROMOTIONS_ADMIN |
-| 2 | POST | `/coupons/validate` | Validar un cupón contra una orden | BAJO | 4 | CASHIER, PROMOTIONS_ADMIN |
-| 3 | POST | `/loyalty/jobs/expire-points` | Barrer los puntos vencidos de un programa | MEDIO | 4 | SYSTEM |
-| 4 | POST | `/loyalty/memberships/{id}/points/earn` | Acumular puntos por un evento de la aplicación | MEDIO | 7 | SYSTEM, PROMOTIONS_ADMIN |
-| 5 | POST | `/loyalty/memberships/{id}/points/redeem` | Canjear puntos | MEDIO | 4 | MEMBER, PROMOTIONS_ADMIN |
-| 6 | POST | `/loyalty/memberships/{id}/recompute` | Reproyectar saldo y nivel desde el ledger | MEDIO | 4 | SYSTEM, PROMOTIONS_ADMIN |
-| 7 | GET | `/loyalty/programs` | Listar programas de lealtad activos | BAJO | 1 | SYSTEM, PROMOTIONS_ADMIN, MARKETING_MANAGER |
-| 8 | POST | `/loyalty/programs` | Crear un programa de lealtad con niveles y reglas | MEDIO | 4 | PROMOTIONS_ADMIN, MARKETING_MANAGER |
-| 9 | POST | `/loyalty/programs/{id}/memberships` | Inscribir a un miembro en el programa | MEDIO | 6 | PROMOTIONS_ADMIN, MEMBER |
-| 10 | POST | `/promotions` | Crear una promoción con sus reglas de descuento | MEDIO | 3 | PROMOTIONS_ADMIN, MARKETING_MANAGER |
-| 11 | POST | `/promotions/{id}/coupons/batch` | Emitir un lote de cupones | MEDIO | 3 | PROMOTIONS_ADMIN, MARKETING_MANAGER |
-| 12 | POST | `/redemptions` | Redimir un cupón y registrar la redención | MEDIO | 5 | CASHIER, PROMOTIONS_ADMIN |
-| 13 | POST | `/redemptions/{id}/reverse` | Revertir una redención por devolución o cancelación | MEDIO | 8 | CASHIER, PROMOTIONS_ADMIN |
-| 14 | POST | `/referral-programs/{id}/referrals` | Generar el código de referido del miembro | MEDIO | 3 | MEMBER, PROMOTIONS_ADMIN |
-| 15 | POST | `/referrals/{id}/qualify` | Calificar el referido y premiar a ambas partes | MEDIO | 13 | SYSTEM, PROMOTIONS_ADMIN |
+| 1 | DESCONOCIDO | `/` | El tenant del contexto, que acota el programa del portal. Mismo criterio que el listado de programas: sin `X-Tenant-Id` no se sabe de qué programa se está hablando, y elegir uno por nosotros sería inventar. | BAJO | 0 | sesión (sin roles) |
+| 2 | POST | `/checkout/{orderId}/apply-discount` | Aplicar un descuento al intento de pago del checkout | MEDIO | 6 | CASHIER, PROMOTIONS_ADMIN |
+| 3 | POST | `/coupons/validate` | Validar un cupón contra una orden | BAJO | 4 | CASHIER, PROMOTIONS_ADMIN |
+| 4 | POST | `/loyalty/jobs/expire-points` | Barrer los puntos vencidos de un programa | MEDIO | 4 | SYSTEM |
+| 5 | GET | `/loyalty/me` | Mi membresía de lealtad y mi saldo de puntos | BAJO | 3 | PATIENT |
+| 6 | GET | `/loyalty/me/points` | Mis movimientos de puntos, más nuevos primero | BAJO | 3 | PATIENT |
+| 7 | POST | `/loyalty/me/points/redeem` | Canjear puntos de mi propia membresía | MEDIO | 5 | PATIENT |
+| 8 | POST | `/loyalty/memberships/{id}/points/earn` | Acumular puntos por un evento de la aplicación | MEDIO | 7 | SYSTEM, PROMOTIONS_ADMIN |
+| 9 | POST | `/loyalty/memberships/{id}/points/redeem` | Canjear puntos | MEDIO | 4 | MEMBER, PROMOTIONS_ADMIN |
+| 10 | POST | `/loyalty/memberships/{id}/recompute` | Reproyectar saldo y nivel desde el ledger | MEDIO | 4 | SYSTEM, PROMOTIONS_ADMIN |
+| 11 | GET | `/loyalty/programs` | Listar programas de lealtad activos | BAJO | 1 | SYSTEM, PROMOTIONS_ADMIN, MARKETING_MANAGER |
+| 12 | POST | `/loyalty/programs` | Crear un programa de lealtad con niveles y reglas | MEDIO | 4 | PROMOTIONS_ADMIN, MARKETING_MANAGER |
+| 13 | POST | `/loyalty/programs/{id}/memberships` | Inscribir a un miembro en el programa | MEDIO | 6 | PROMOTIONS_ADMIN, MEMBER |
+| 14 | POST | `/promotions` | Crear una promoción con sus reglas de descuento | MEDIO | 3 | PROMOTIONS_ADMIN, MARKETING_MANAGER |
+| 15 | POST | `/promotions/{id}/coupons/batch` | Emitir un lote de cupones | MEDIO | 3 | PROMOTIONS_ADMIN, MARKETING_MANAGER |
+| 16 | GET | `/promotions/me` | Mis promociones vigentes | BAJO | 4 | PATIENT |
+| 17 | POST | `/redemptions` | Redimir un cupón y registrar la redención | MEDIO | 5 | CASHIER, PROMOTIONS_ADMIN |
+| 18 | POST | `/redemptions/{id}/reverse` | Revertir una redención por devolución o cancelación | MEDIO | 8 | CASHIER, PROMOTIONS_ADMIN |
+| 19 | POST | `/referral-programs/{id}/referrals` | Generar el código de referido del miembro | MEDIO | 3 | MEMBER, PROMOTIONS_ADMIN |
+| 20 | POST | `/referrals/{id}/qualify` | Calificar el referido y premiar a ambas partes | MEDIO | 13 | SYSTEM, PROMOTIONS_ADMIN |
 
 ---
 
-## 1. POST /checkout/{orderId}/apply-discount
+## 1. DESCONOCIDO /
 
-- **Origen:** CONTRATO
-- **Nombre:** Aplicar un descuento al intento de pago del checkout
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** El tenant del contexto, que acota el programa del portal. Mismo criterio que el listado de programas: sin `X-Tenant-Id` no se sabe de qué programa se está hablando, y elegir uno por nosotros sería inventar.
 - **Bloque:** Marketing y Crecimiento
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PromotionsController.applyDiscount` — `src/modules/promotions/controllers/promotions.controller.ts:96`
+- **Implementación:** `LoyaltyController.requireTenant` — `src/modules/promotions/controllers/loyalty.controller.ts:175`
 
 ### Qué es y para qué sirve (negocio)
 
-Aplicar un descuento al intento de pago del checkout. Caso de uso UC-51-10: Descuento en checkout. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
+El tenant del contexto, que acota el programa del portal. Mismo criterio que el listado de programas: sin `X-Tenant-Id` no se sabe de qué programa se está hablando, y elegir uno por nosotros sería inventar. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /checkout/{orderId}/apply-discount` la atiende `PromotionsController.applyDiscount` (src/modules/promotions/controllers/promotions.controller.ts:96). Exige sesión con alguno de los roles CASHIER, PROMOTIONS_ADMIN. Valida el cuerpo como `ApplyDiscountDto` (7 campos, 4 obligatorios). Delega en `PromotionsDiscountsService.applyDiscount`. Crea filas en promotions.redemptions. Actualiza promotions.coupons. Lee promotions.coupons, promotions.discount_rules, promotions.promotions, promotions.redemptions.
+`DESCONOCIDO /` la atiende `LoyaltyController.requireTenant` (src/modules/promotions/controllers/loyalty.controller.ts:175). Exige sesión; el controlador no declara roles. No toca tablas relacionales: el handler no invoca ningún servicio.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CASHIER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/promotions.controller.ts:96` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: orderId | `src/modules/promotions/controllers/promotions.controller.ts:96` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/promotions/controllers/loyalty.controller.ts:175` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+No toca tablas relacionales: el handler no invoca ningún servicio. _(automática; fuente: `src/modules/promotions/controllers/loyalty.controller.ts:175`)_
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `string`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Se requiere X-Tenant-Id para operar sobre la membresía de lealtad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `ctrl:LoyaltyController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 2. POST /checkout/{orderId}/apply-discount
+
+- **Origen:** CONTRATO
+- **Nombre:** Aplicar un descuento al intento de pago del checkout
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PromotionsController.applyDiscount` — `src/modules/promotions/controllers/promotions.controller.ts:127`
+
+### Qué es y para qué sirve (negocio)
+
+Aplicar un descuento al intento de pago del checkout. Caso de uso UC-51-10: Descuento en checkout. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`POST /checkout/{orderId}/apply-discount` la atiende `PromotionsController.applyDiscount` (src/modules/promotions/controllers/promotions.controller.ts:127). Exige sesión con alguno de los roles CASHIER, PROMOTIONS_ADMIN. Valida el cuerpo como `ApplyDiscountDto` (7 campos, 4 obligatorios). Delega en `PromotionsDiscountsService.applyDiscount`. Crea filas en promotions.redemptions. Actualiza promotions.coupons. Lee promotions.coupons, promotions.discount_rules, promotions.promotions, promotions.redemptions.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CASHIER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/promotions.controller.ts:127` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: orderId | `src/modules/promotions/controllers/promotions.controller.ts:127` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `promotions.coupons` | ESCRIBE | ACTUALIZA | POR_TIPO | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount | `src/modules/promotions/services/promotions-discounts.service.ts:465` |
-| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount → PromotionsDiscountsService.evaluateCouponForUpdate → PromotionsDiscountsRepository.findCouponByCodeForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:406` |
-| `promotions.discount_rules` | LEE | LEE | DIRECTA | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount → PromotionsDiscountsRepository.findRulesByPromotion | `src/modules/promotions/repositories/promotions-discounts.repository.ts:358` |
-| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount → PromotionsDiscountsRepository.findPromotionForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:293` |
-| `promotions.redemptions` | ESCRIBE | CREA | DIRECTA | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount → PromotionsDiscountsRepository.createRedemption | `src/modules/promotions/repositories/promotions-discounts.repository.ts:443` |
-| `promotions.redemptions` | LEE | LEE | DIRECTA | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount → PromotionsDiscountsRepository.findRedemptionByIntent | `src/modules/promotions/repositories/promotions-discounts.repository.ts:514` |
+| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount → PromotionsDiscountsService.evaluateCouponForUpdate → PromotionsDiscountsRepository.findCouponByCodeForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:503` |
+| `promotions.discount_rules` | LEE | LEE | DIRECTA | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount → PromotionsDiscountsRepository.findRulesByPromotion | `src/modules/promotions/repositories/promotions-discounts.repository.ts:359` |
+| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount → PromotionsDiscountsRepository.findPromotionForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:294` |
+| `promotions.redemptions` | ESCRIBE | CREA | DIRECTA | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount → PromotionsDiscountsRepository.createRedemption | `src/modules/promotions/repositories/promotions-discounts.repository.ts:540` |
+| `promotions.redemptions` | LEE | LEE | DIRECTA | PromotionsController.applyDiscount → PromotionsDiscountsService.applyDiscount → PromotionsDiscountsRepository.findRedemptionByIntent | `src/modules/promotions/repositories/promotions-discounts.repository.ts:611` |
 
 ### Parámetros
 
@@ -145,7 +212,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:221` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:311` |
 
 ### Flujos
 
@@ -153,44 +220,44 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 2. POST /coupons/validate
+## 3. POST /coupons/validate
 
 - **Origen:** CONTRATO
 - **Nombre:** Validar un cupón contra una orden
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PromotionsController.validateCoupon` — `src/modules/promotions/controllers/promotions.controller.ts:70`
+- **Implementación:** `PromotionsController.validateCoupon` — `src/modules/promotions/controllers/promotions.controller.ts:101`
 
 ### Qué es y para qué sirve (negocio)
 
 Validar un cupón contra una orden. Caso de uso UC-51-09: Validar y redimir cupón. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /coupons/validate` la atiende `PromotionsController.validateCoupon` (src/modules/promotions/controllers/promotions.controller.ts:70). Exige sesión con alguno de los roles CASHIER, PROMOTIONS_ADMIN. Valida el cuerpo como `ValidateCouponDto` (4 campos, 4 obligatorios). Delega en `PromotionsDiscountsService.validateCoupon`. Lee promotions.coupons, promotions.discount_rules, promotions.promotions, promotions.redemptions.
+`POST /coupons/validate` la atiende `PromotionsController.validateCoupon` (src/modules/promotions/controllers/promotions.controller.ts:101). Exige sesión con alguno de los roles CASHIER, PROMOTIONS_ADMIN. Valida el cuerpo como `ValidateCouponDto` (4 campos, 4 obligatorios). Delega en `PromotionsDiscountsService.validateCoupon`. Lee promotions.coupons, promotions.discount_rules, promotions.promotions, promotions.redemptions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CASHIER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/promotions.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CASHIER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/promotions.controller.ts:101` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.validateCoupon → PromotionsDiscountsService.validateCoupon → PromotionsDiscountsRepository.findCouponByCode | `src/modules/promotions/repositories/promotions-discounts.repository.ts:398` |
-| `promotions.discount_rules` | LEE | LEE | DIRECTA | PromotionsController.validateCoupon → PromotionsDiscountsService.validateCoupon → PromotionsDiscountsRepository.findRulesByPromotion | `src/modules/promotions/repositories/promotions-discounts.repository.ts:358` |
-| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.validateCoupon → PromotionsDiscountsService.validateCoupon → PromotionsDiscountsRepository.findPromotionById | `src/modules/promotions/repositories/promotions-discounts.repository.ts:279` |
-| `promotions.redemptions` | LEE | LEE | DIRECTA | PromotionsController.validateCoupon → PromotionsDiscountsService.validateCoupon → PromotionsDiscountsService.perUserRejection → PromotionsDiscountsRepository.findRedemptionsByRedeemer | `src/modules/promotions/repositories/promotions-discounts.repository.ts:489` |
+| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.validateCoupon → PromotionsDiscountsService.validateCoupon → PromotionsDiscountsRepository.findCouponByCode | `src/modules/promotions/repositories/promotions-discounts.repository.ts:495` |
+| `promotions.discount_rules` | LEE | LEE | DIRECTA | PromotionsController.validateCoupon → PromotionsDiscountsService.validateCoupon → PromotionsDiscountsRepository.findRulesByPromotion | `src/modules/promotions/repositories/promotions-discounts.repository.ts:359` |
+| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.validateCoupon → PromotionsDiscountsService.validateCoupon → PromotionsDiscountsRepository.findPromotionById | `src/modules/promotions/repositories/promotions-discounts.repository.ts:280` |
+| `promotions.redemptions` | LEE | LEE | DIRECTA | PromotionsController.validateCoupon → PromotionsDiscountsService.validateCoupon → PromotionsDiscountsService.perUserRejection → PromotionsDiscountsRepository.findRedemptionsByRedeemer | `src/modules/promotions/repositories/promotions-discounts.repository.ts:586` |
 
 ### Cuerpo — DTO `ValidateCouponDto` · `application/json`
 
@@ -251,7 +318,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:201` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:291` |
 
 ### Flujos
 
@@ -259,44 +326,44 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 3. POST /loyalty/jobs/expire-points
+## 4. POST /loyalty/jobs/expire-points
 
 - **Origen:** CONTRATO
 - **Nombre:** Barrer los puntos vencidos de un programa
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LoyaltyController.expirePoints` — `src/modules/promotions/controllers/loyalty.controller.ts:164`
+- **Implementación:** `LoyaltyController.expirePoints` — `src/modules/promotions/controllers/loyalty.controller.ts:267`
 
 ### Qué es y para qué sirve (negocio)
 
 Barrer los puntos vencidos de un programa. Caso de uso UC-51-06: Barrido de puntos vencidos. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /loyalty/jobs/expire-points` la atiende `LoyaltyController.expirePoints` (src/modules/promotions/controllers/loyalty.controller.ts:164). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `ExpirePointsDto` (2 campos, 1 obligatorio). Delega en `PromotionsLoyaltyService.expirePoints`. Crea filas en promotions.points_ledger_entries. Actualiza promotions.loyalty_memberships. Lee promotions.loyalty_memberships, promotions.points_ledger_entries.
+`POST /loyalty/jobs/expire-points` la atiende `LoyaltyController.expirePoints` (src/modules/promotions/controllers/loyalty.controller.ts:267). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `ExpirePointsDto` (2 campos, 1 obligatorio). Delega en `PromotionsLoyaltyService.expirePoints`. Crea filas en promotions.points_ledger_entries. Actualiza promotions.loyalty_memberships. Lee promotions.loyalty_memberships, promotions.points_ledger_entries.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/promotions/controllers/loyalty.controller.ts:164` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM | `src/modules/promotions/controllers/loyalty.controller.ts:267` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints | `src/modules/promotions/services/promotions-loyalty.service.ts:706` |
+| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints | `src/modules/promotions/services/promotions-loyalty.service.ts:748` |
 | `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints → PromotionsLoyaltyRepository.findMembershipsForSweep | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:536` |
 | `promotions.points_ledger_entries` | ESCRIBE | CREA | DIRECTA | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints → PromotionsLoyaltyRepository.createLedgerEntry | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:560` |
-| `promotions.points_ledger_entries` | LEE | LEE | DIRECTA | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints → PromotionsLoyaltyRepository.findExpirableEntries | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:622` |
+| `promotions.points_ledger_entries` | LEE | LEE | DIRECTA | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints → PromotionsLoyaltyRepository.findExpirableEntries | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:682` |
 
 ### Cuerpo — DTO `ExpirePointsDto` · `application/json`
 
@@ -348,7 +415,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:107` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:118` |
 
 ### Flujos
 
@@ -356,43 +423,319 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 4. POST /loyalty/memberships/{id}/points/earn
+## 5. GET /loyalty/me
 
 - **Origen:** CONTRATO
-- **Nombre:** Acumular puntos por un evento de la aplicación
+- **Nombre:** Mi membresía de lealtad y mi saldo de puntos
 - **Bloque:** Marketing y Crecimiento
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LoyaltyController.earnPoints` — `src/modules/promotions/controllers/loyalty.controller.ts:114`
+- **Implementación:** `LoyaltyController.myLoyalty` — `src/modules/promotions/controllers/loyalty.controller.ts:106`
 
 ### Qué es y para qué sirve (negocio)
 
-Acumular puntos por un evento de la aplicación. Caso de uso UC-51-03: Acumular puntos (idempotente). Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
+Mi membresía de lealtad y mi saldo de puntos. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /loyalty/memberships/{id}/points/earn` la atiende `LoyaltyController.earnPoints` (src/modules/promotions/controllers/loyalty.controller.ts:114). Exige sesión con alguno de los roles SYSTEM, PROMOTIONS_ADMIN. Valida el cuerpo como `EarnPointsDto` (5 campos, 2 obligatorios). Delega en `PromotionsLoyaltyService.earnPoints`. Crea filas en promotions.points_ledger_entries. Actualiza promotions.loyalty_memberships. Lee promotions.earning_rules, promotions.loyalty_memberships, promotions.loyalty_programs, promotions.loyalty_tiers, promotions.points_ledger_entries.
+`GET /loyalty/me` la atiende `LoyaltyController.myLoyalty` (src/modules/promotions/controllers/loyalty.controller.ts:106). Exige sesión con alguno de los roles PATIENT. Delega en `PromotionsLoyaltyService.myLoyalty`. Lee promotions.loyalty_memberships, promotions.loyalty_programs, promotions.loyalty_tiers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/loyalty.controller.ts:114` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:114` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PATIENT | `src/modules/promotions/controllers/loyalty.controller.ts:106` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.myLoyalty → PromotionsLoyaltyService.myLoyalty → PromotionsLoyaltyService.findOwnMembership → PromotionsLoyaltyRepository.findMembershipsByMemberRef | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:605` |
+| `promotions.loyalty_programs` | LEE | LEE | DIRECTA | LoyaltyController.myLoyalty → PromotionsLoyaltyService.myLoyalty → PromotionsLoyaltyService.findOwnMembership → PromotionsLoyaltyRepository.findActivePrograms | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:369` |
+| `promotions.loyalty_tiers` | LEE | LEE | DIRECTA | LoyaltyController.myLoyalty → PromotionsLoyaltyService.myLoyalty → PromotionsLoyaltyRepository.findTiersByProgram | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:408` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MyLoyaltyResponseDto>` · DTO `MyLoyaltyResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `enrolled` | `boolean` | Sí | — | — | Si el titular tiene membresía en el programa | `src/modules/promotions/dto/promotions.dto.ts:1593` |
+| `membership` | `MyLoyaltyMembershipDto` | No | — | — | — | `src/modules/promotions/dto/promotions.dto.ts:1596` |
+| `membership.membershipId` | `string` | No | formato uuid | — | — | `src/modules/promotions/dto/promotions.dto.ts:1555` |
+| `membership.programName` | `string` | No | — | — | Nombre del programa | `src/modules/promotions/dto/promotions.dto.ts:1558` |
+| `membership.pointsCurrencyName` | `string` | No | — | — | Cómo se llaman las unidades del programa («puntos») | `src/modules/promotions/dto/promotions.dto.ts:1563` |
+| `membership.pointsBalance` | `string` | No | — | — | Saldo disponible, como texto exacto | `src/modules/promotions/dto/promotions.dto.ts:1566` |
+| `membership.lifetimePoints` | `string` | No | — | — | Acumulado de por vida, como texto exacto | `src/modules/promotions/dto/promotions.dto.ts:1569` |
+| `membership.tier` | `MyLoyaltyTierDto` | No | — | — | — | `src/modules/promotions/dto/promotions.dto.ts:1572` |
+| `membership.tier.code` | `string` | No | — | — | Código del nivel | `src/modules/promotions/dto/promotions.dto.ts:1540` |
+| `membership.tier.name` | `string` | No | — | — | Nombre del nivel | `src/modules/promotions/dto/promotions.dto.ts:1543` |
+| `membership.tier.multiplier` | `string` | No | — | — | Cuánto multiplica la acumulación | `src/modules/promotions/dto/promotions.dto.ts:1546` |
+| `membership.tier.minPoints` | `string` | No | — | — | Puntos de por vida desde los que se alcanza | `src/modules/promotions/dto/promotions.dto.ts:1549` |
+| `membership.enrolledAt` | `string` | No | formato date-time | — | Cuándo se inscribió | `src/modules/promotions/dto/promotions.dto.ts:1575` |
+| `membership.active` | `boolean` | No | — | — | Si la membresía está activa. Se publica el hecho y no el concepto: el uuid de terminología es interno. | `src/modules/promotions/dto/promotions.dto.ts:1581` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente; PreconditionFailedException: Se requiere X-Tenant-Id para operar sobre la membresía de lealtad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:194` |
+
+### Flujos
+
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `ctrl:LoyaltyController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. GET /loyalty/me/points
+
+- **Origen:** CONTRATO
+- **Nombre:** Mis movimientos de puntos, más nuevos primero
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LoyaltyController.myPoints` — `src/modules/promotions/controllers/loyalty.controller.ts:122`
+
+### Qué es y para qué sirve (negocio)
+
+Mis movimientos de puntos, más nuevos primero. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`GET /loyalty/me/points` la atiende `LoyaltyController.myPoints` (src/modules/promotions/controllers/loyalty.controller.ts:122). Exige sesión con alguno de los roles PATIENT. Delega en `PromotionsLoyaltyService.myPointsLedger`. Lee promotions.loyalty_memberships, promotions.loyalty_programs, promotions.points_ledger_entries.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PATIENT | `src/modules/promotions/controllers/loyalty.controller.ts:122` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.myPoints → PromotionsLoyaltyService.myPointsLedger → PromotionsLoyaltyService.findOwnMembership → PromotionsLoyaltyRepository.findMembershipsByMemberRef | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:605` |
+| `promotions.loyalty_programs` | LEE | LEE | DIRECTA | LoyaltyController.myPoints → PromotionsLoyaltyService.myPointsLedger → PromotionsLoyaltyService.findOwnMembership → PromotionsLoyaltyRepository.findActivePrograms | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:369` |
+| `promotions.points_ledger_entries` | LEE | LEE | DIRECTA | LoyaltyController.myPoints → PromotionsLoyaltyService.myPointsLedger → PromotionsLoyaltyRepository.findLedgerPageByMembership | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:632` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `cursor` | query | No | `string` | Cursor opaco devuelto por la página anterior |
+| `limit` | query | No | `number` | Movimientos por página (1..100, por defecto 20) |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MyPointsLedgerPageResponseDto>` · DTO `MyPointsLedgerPageResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `entries` | `array<MyPointsLedgerEntryDto>` | Sí | — | — | — | `src/modules/promotions/dto/promotions.dto.ts:1663` |
+| `entries[].entryId` | `string` | Sí | formato uuid | — | — | `src/modules/promotions/dto/promotions.dto.ts:1602` |
+| `entries[].direction` | `string` | No | — | — | Hacia dónde mueve los puntos, como código del catálogo (POINTS_EARN, POINTS_REDEEM, POINTS_EXPIRE, POINTS_ADJUST). Se omite si el concepto no pertenece a ese catálogo: antes que publicar un uuid interno, no se dice. | `src/modules/promotions/dto/promotions.dto.ts:1608` |
+| `entries[].points` | `string` | Sí | — | — | Siempre positivo; el signo lo dice la dirección | `src/modules/promotions/dto/promotions.dto.ts:1613` |
+| `entries[].reason` | `string` | No | — | — | Por qué se movieron, como código del catálogo (REASON_*). Se omite con el mismo criterio que `direction`. | `src/modules/promotions/dto/promotions.dto.ts:1619` |
+| `entries[].balanceAfter` | `string` | No | — | — | Saldo que quedó después | `src/modules/promotions/dto/promotions.dto.ts:1622` |
+| `entries[].expiresAt` | `string` | No | formato date-time | — | Cuándo vencen estos puntos | `src/modules/promotions/dto/promotions.dto.ts:1625` |
+| `entries[].occurredAt` | `string` | Sí | formato date-time | — | Cuándo ocurrió el movimiento | `src/modules/promotions/dto/promotions.dto.ts:1628` |
+| `nextCursor` | `string` | No | — | — | Cursor de la página siguiente; ausente si no hay más | `src/modules/promotions/dto/promotions.dto.ts:1668` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente; PreconditionFailedException: Cursor de movimientos inválido; PreconditionFailedException: Se requiere X-Tenant-Id para operar sobre la membresía de lealtad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:218` |
+
+### Flujos
+
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `ctrl:LoyaltyController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. POST /loyalty/me/points/redeem
+
+- **Origen:** CONTRATO
+- **Nombre:** Canjear puntos de mi propia membresía
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LoyaltyController.redeemOwnPoints` — `src/modules/promotions/controllers/loyalty.controller.ts:149`
+
+### Qué es y para qué sirve (negocio)
+
+Canjear puntos de mi propia membresía. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`POST /loyalty/me/points/redeem` la atiende `LoyaltyController.redeemOwnPoints` (src/modules/promotions/controllers/loyalty.controller.ts:149). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `RedeemPointsDto` (3 campos, 2 obligatorios). Delega en `PromotionsLoyaltyService.redeemOwnPoints`. Crea filas en promotions.points_ledger_entries. Actualiza promotions.loyalty_memberships. Lee promotions.loyalty_memberships, promotions.loyalty_programs, promotions.points_ledger_entries.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PATIENT | `src/modules/promotions/controllers/loyalty.controller.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.redeemOwnPoints → PromotionsLoyaltyService.redeemOwnPoints → PromotionsLoyaltyService.redeemPoints | `src/modules/promotions/services/promotions-loyalty.service.ts:604` |
+| `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.redeemOwnPoints → PromotionsLoyaltyService.redeemOwnPoints → PromotionsLoyaltyService.findOwnMembership → PromotionsLoyaltyRepository.findMembershipsByMemberRef | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:605` |
+| `promotions.loyalty_programs` | LEE | LEE | DIRECTA | LoyaltyController.redeemOwnPoints → PromotionsLoyaltyService.redeemOwnPoints → PromotionsLoyaltyService.findOwnMembership → PromotionsLoyaltyRepository.findActivePrograms | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:369` |
+| `promotions.points_ledger_entries` | ESCRIBE | CREA | DIRECTA | LoyaltyController.redeemOwnPoints → PromotionsLoyaltyService.redeemOwnPoints → PromotionsLoyaltyService.redeemPoints → PromotionsLoyaltyRepository.createLedgerEntry | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:560` |
+| `promotions.points_ledger_entries` | LEE | LEE | DIRECTA | LoyaltyController.redeemOwnPoints → PromotionsLoyaltyService.redeemOwnPoints → PromotionsLoyaltyRepository.findLedgerEntryByKey | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:586` |
+
+### Cuerpo — DTO `RedeemPointsDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `points` | `string` | Sí | — | `@IsNumberString()` | Puntos a canjear | `src/modules/promotions/dto/promotions.dto.ts:496` |
+| `idempotencyKey` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Clave de idempotencia del canje | `src/modules/promotions/dto/promotions.dto.ts:507` |
+| `awardType` | `string` | No | valores: POINTS, WALLET_CREDIT | `@IsOptional()` `@IsIn(AWARD_TYPES)` | — | `src/modules/promotions/dto/promotions.dto.ts:515` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "points": "valor-ejemplo",
+  "idempotencyKey": "valor-ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "points": "valor-ejemplo",
+  "idempotencyKey": "valor-ejemplo",
+  "awardType": "POINTS"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<PointsLedgerResponseDto>` · DTO `PointsLedgerResponseDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `ledgerEntryId` | `string` | Sí | formato uuid | — | Entrada del ledger | `src/modules/promotions/dto/promotions.dto.ts:526` |
+| `membershipId` | `string` | Sí | formato uuid | — | — | `src/modules/promotions/dto/promotions.dto.ts:532` |
+| `points` | `string` | Sí | — | — | Puntos del movimiento | `src/modules/promotions/dto/promotions.dto.ts:538` |
+| `balanceAfter` | `string` | Sí | — | — | Saldo tras el movimiento | `src/modules/promotions/dto/promotions.dto.ts:544` |
+| `lifetimePoints` | `string` | Sí | — | — | Puntos de por vida tras el movimiento | `src/modules/promotions/dto/promotions.dto.ts:550` |
+| `currentTierId` | `string` | No | formato uuid | — | Nivel actual tras recalcular | `src/modules/promotions/dto/promotions.dto.ts:559` |
+| `duplicate` | `boolean` | Sí | — | — | true si la clave de idempotencia ya se había usado | `src/modules/promotions/dto/promotions.dto.ts:567` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Membresía no encontrada |
+| 409 | `CONFLICT` | ConflictException: La clave de idempotencia pertenece a otro canje |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente; PreconditionFailedException: No tiene una membresía de lealtad en este programa; PreconditionFailedException: El canje debe ser de puntos positivos; PreconditionFailedException: La membresía no está activa; PreconditionFailedException: Saldo de puntos insuficiente; PreconditionFailedException: Se requiere X-Tenant-Id para operar sobre la membresía de lealtad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:235` |
+
+### Flujos
+
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `ctrl:LoyaltyController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 8. POST /loyalty/memberships/{id}/points/earn
+
+- **Origen:** CONTRATO
+- **Nombre:** Acumular puntos por un evento de la aplicación
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `LoyaltyController.earnPoints` — `src/modules/promotions/controllers/loyalty.controller.ts:217`
+
+### Qué es y para qué sirve (negocio)
+
+Acumular puntos por un evento de la aplicación. Caso de uso UC-51-03: Acumular puntos (idempotente). Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`POST /loyalty/memberships/{id}/points/earn` la atiende `LoyaltyController.earnPoints` (src/modules/promotions/controllers/loyalty.controller.ts:217). Exige sesión con alguno de los roles SYSTEM, PROMOTIONS_ADMIN. Valida el cuerpo como `EarnPointsDto` (5 campos, 2 obligatorios). Delega en `PromotionsLoyaltyService.earnPoints`. Crea filas en promotions.points_ledger_entries. Actualiza promotions.loyalty_memberships. Lee promotions.earning_rules, promotions.loyalty_memberships, promotions.loyalty_programs, promotions.loyalty_tiers, promotions.points_ledger_entries.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SYSTEM, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/loyalty.controller.ts:217` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:217` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `promotions.earning_rules` | LEE | LEE | DIRECTA | LoyaltyController.earnPoints → PromotionsLoyaltyService.earnPoints → PromotionsLoyaltyRepository.findEarningRuleById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:460` |
-| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.earnPoints → PromotionsLoyaltyService.earnPoints | `src/modules/promotions/services/promotions-loyalty.service.ts:482` |
+| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.earnPoints → PromotionsLoyaltyService.earnPoints | `src/modules/promotions/services/promotions-loyalty.service.ts:524` |
 | `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.earnPoints → PromotionsLoyaltyService.earnPoints → PromotionsLoyaltyRepository.findMembershipForUpdate | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:512` |
 | `promotions.loyalty_programs` | LEE | LEE | DIRECTA | LoyaltyController.earnPoints → PromotionsLoyaltyService.earnPoints → PromotionsLoyaltyRepository.findProgramById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:335` |
 | `promotions.loyalty_tiers` | LEE | LEE | DIRECTA | LoyaltyController.earnPoints → PromotionsLoyaltyService.earnPoints → PromotionsLoyaltyRepository.findTiersByProgram | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:408` |
@@ -443,7 +786,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `ledgerEntryId` | `string` | Sí | formato uuid | — | Entrada del ledger | `src/modules/promotions/dto/promotions.dto.ts:526` |
-| `membershipId` | `string` | Sí | formato uuid | — | Identificador asociado a membership. | `src/modules/promotions/dto/promotions.dto.ts:532` |
+| `membershipId` | `string` | Sí | formato uuid | — | — | `src/modules/promotions/dto/promotions.dto.ts:532` |
 | `points` | `string` | Sí | — | — | Puntos del movimiento | `src/modules/promotions/dto/promotions.dto.ts:538` |
 | `balanceAfter` | `string` | Sí | — | — | Saldo tras el movimiento | `src/modules/promotions/dto/promotions.dto.ts:544` |
 | `lifetimePoints` | `string` | Sí | — | — | Puntos de por vida tras el movimiento | `src/modules/promotions/dto/promotions.dto.ts:550` |
@@ -468,7 +811,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:78` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:89` |
 
 ### Flujos
 
@@ -476,42 +819,42 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 5. POST /loyalty/memberships/{id}/points/redeem
+## 9. POST /loyalty/memberships/{id}/points/redeem
 
 - **Origen:** CONTRATO
 - **Nombre:** Canjear puntos
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LoyaltyController.redeemPoints` — `src/modules/promotions/controllers/loyalty.controller.ts:131`
+- **Implementación:** `LoyaltyController.redeemPoints` — `src/modules/promotions/controllers/loyalty.controller.ts:234`
 
 ### Qué es y para qué sirve (negocio)
 
 Canjear puntos. Caso de uso UC-51-04: Canjear puntos (idempotente). Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /loyalty/memberships/{id}/points/redeem` la atiende `LoyaltyController.redeemPoints` (src/modules/promotions/controllers/loyalty.controller.ts:131). Exige sesión con alguno de los roles MEMBER, PROMOTIONS_ADMIN. Valida el cuerpo como `RedeemPointsDto` (3 campos, 2 obligatorios). Delega en `PromotionsLoyaltyService.redeemPoints`. Crea filas en promotions.points_ledger_entries. Actualiza promotions.loyalty_memberships. Lee promotions.loyalty_memberships, promotions.points_ledger_entries.
+`POST /loyalty/memberships/{id}/points/redeem` la atiende `LoyaltyController.redeemPoints` (src/modules/promotions/controllers/loyalty.controller.ts:234). Exige sesión con alguno de los roles MEMBER, PROMOTIONS_ADMIN. Valida el cuerpo como `RedeemPointsDto` (3 campos, 2 obligatorios). Delega en `PromotionsLoyaltyService.redeemPoints`. Crea filas en promotions.points_ledger_entries. Actualiza promotions.loyalty_memberships. Lee promotions.loyalty_memberships, promotions.points_ledger_entries.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: MEMBER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/loyalty.controller.ts:131` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:131` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: MEMBER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/loyalty.controller.ts:234` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:234` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.redeemPoints → PromotionsLoyaltyService.redeemPoints | `src/modules/promotions/services/promotions-loyalty.service.ts:562` |
+| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.redeemPoints → PromotionsLoyaltyService.redeemPoints | `src/modules/promotions/services/promotions-loyalty.service.ts:604` |
 | `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.redeemPoints → PromotionsLoyaltyService.redeemPoints → PromotionsLoyaltyRepository.findMembershipForUpdate | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:512` |
 | `promotions.points_ledger_entries` | ESCRIBE | CREA | DIRECTA | LoyaltyController.redeemPoints → PromotionsLoyaltyService.redeemPoints → PromotionsLoyaltyRepository.createLedgerEntry | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:560` |
 | `promotions.points_ledger_entries` | LEE | LEE | DIRECTA | LoyaltyController.redeemPoints → PromotionsLoyaltyService.redeemPoints → PromotionsLoyaltyRepository.findLedgerEntryByKey | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:586` |
@@ -556,7 +899,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `ledgerEntryId` | `string` | Sí | formato uuid | — | Entrada del ledger | `src/modules/promotions/dto/promotions.dto.ts:526` |
-| `membershipId` | `string` | Sí | formato uuid | — | Identificador asociado a membership. | `src/modules/promotions/dto/promotions.dto.ts:532` |
+| `membershipId` | `string` | Sí | formato uuid | — | — | `src/modules/promotions/dto/promotions.dto.ts:532` |
 | `points` | `string` | Sí | — | — | Puntos del movimiento | `src/modules/promotions/dto/promotions.dto.ts:538` |
 | `balanceAfter` | `string` | Sí | — | — | Saldo tras el movimiento | `src/modules/promotions/dto/promotions.dto.ts:544` |
 | `lifetimePoints` | `string` | Sí | — | — | Puntos de por vida tras el movimiento | `src/modules/promotions/dto/promotions.dto.ts:550` |
@@ -581,7 +924,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:79` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:90` |
 
 ### Flujos
 
@@ -589,43 +932,43 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 6. POST /loyalty/memberships/{id}/recompute
+## 10. POST /loyalty/memberships/{id}/recompute
 
 - **Origen:** CONTRATO
 - **Nombre:** Reproyectar saldo y nivel desde el ledger
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LoyaltyController.recomputeBalance` — `src/modules/promotions/controllers/loyalty.controller.ts:148`
+- **Implementación:** `LoyaltyController.recomputeBalance` — `src/modules/promotions/controllers/loyalty.controller.ts:251`
 
 ### Qué es y para qué sirve (negocio)
 
 Reproyectar saldo y nivel desde el ledger. Caso de uso UC-51-05: Reproyectar saldo y nivel. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /loyalty/memberships/{id}/recompute` la atiende `LoyaltyController.recomputeBalance` (src/modules/promotions/controllers/loyalty.controller.ts:148). Exige sesión con alguno de los roles SYSTEM, PROMOTIONS_ADMIN. Delega en `PromotionsLoyaltyService.recomputeBalance`. Actualiza promotions.loyalty_memberships. Lee promotions.loyalty_memberships, promotions.loyalty_tiers, promotions.points_ledger_entries.
+`POST /loyalty/memberships/{id}/recompute` la atiende `LoyaltyController.recomputeBalance` (src/modules/promotions/controllers/loyalty.controller.ts:251). Exige sesión con alguno de los roles SYSTEM, PROMOTIONS_ADMIN. Delega en `PromotionsLoyaltyService.recomputeBalance`. Actualiza promotions.loyalty_memberships. Lee promotions.loyalty_memberships, promotions.loyalty_tiers, promotions.points_ledger_entries.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/loyalty.controller.ts:148` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:148` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/loyalty.controller.ts:251` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:251` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.recomputeBalance → PromotionsLoyaltyService.recomputeBalance | `src/modules/promotions/services/promotions-loyalty.service.ts:602` |
+| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.recomputeBalance → PromotionsLoyaltyService.recomputeBalance | `src/modules/promotions/services/promotions-loyalty.service.ts:644` |
 | `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.recomputeBalance → PromotionsLoyaltyService.recomputeBalance → PromotionsLoyaltyRepository.findMembershipForUpdate | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:512` |
 | `promotions.loyalty_tiers` | LEE | LEE | DIRECTA | LoyaltyController.recomputeBalance → PromotionsLoyaltyService.recomputeBalance → PromotionsLoyaltyRepository.findTiersByProgram | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:408` |
-| `promotions.points_ledger_entries` | LEE | LEE | DIRECTA | LoyaltyController.recomputeBalance → PromotionsLoyaltyService.recomputeBalance → PromotionsLoyaltyRepository.findLedgerByMembership | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:594` |
+| `promotions.points_ledger_entries` | LEE | LEE | DIRECTA | LoyaltyController.recomputeBalance → PromotionsLoyaltyService.recomputeBalance → PromotionsLoyaltyRepository.findLedgerByMembership | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:654` |
 
 ### Parámetros
 
@@ -664,7 +1007,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:97` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:108` |
 
 ### Flujos
 
@@ -672,14 +1015,14 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 7. GET /loyalty/programs
+## 11. GET /loyalty/programs
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar programas de lealtad activos
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LoyaltyController.listActivePrograms` — `src/modules/promotions/controllers/loyalty.controller.ts:57`
+- **Implementación:** `LoyaltyController.listActivePrograms` — `src/modules/promotions/controllers/loyalty.controller.ts:66`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -689,16 +1032,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /loyalty/programs` la atiende `LoyaltyController.listActivePrograms` (src/modules/promotions/controllers/loyalty.controller.ts:57). Exige sesión con alguno de los roles SYSTEM, PROMOTIONS_ADMIN, MARKETING_MANAGER. Delega en `PromotionsLoyaltyService.listActivePrograms`. Lee promotions.loyalty_programs.
+`GET /loyalty/programs` la atiende `LoyaltyController.listActivePrograms` (src/modules/promotions/controllers/loyalty.controller.ts:66). Exige sesión con alguno de los roles SYSTEM, PROMOTIONS_ADMIN, MARKETING_MANAGER. Delega en `PromotionsLoyaltyService.listActivePrograms`. Lee promotions.loyalty_programs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PROMOTIONS_ADMIN, MARKETING_MANAGER | `src/modules/promotions/controllers/loyalty.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, PROMOTIONS_ADMIN, MARKETING_MANAGER | `src/modules/promotions/controllers/loyalty.controller.ts:66` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -741,7 +1084,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:119` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:130` |
 
 ### Flujos
 
@@ -749,35 +1092,35 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 8. POST /loyalty/programs
+## 12. POST /loyalty/programs
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un programa de lealtad con niveles y reglas
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LoyaltyController.createProgram` — `src/modules/promotions/controllers/loyalty.controller.ts:83`
+- **Implementación:** `LoyaltyController.createProgram` — `src/modules/promotions/controllers/loyalty.controller.ts:186`
 
 ### Qué es y para qué sirve (negocio)
 
 Crear un programa de lealtad con niveles y reglas. Caso de uso UC-51-01: Programa de lealtad con niveles y reglas. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:10`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /loyalty/programs` la atiende `LoyaltyController.createProgram` (src/modules/promotions/controllers/loyalty.controller.ts:83). Exige sesión con alguno de los roles PROMOTIONS_ADMIN, MARKETING_MANAGER. Valida el cuerpo como `CreateLoyaltyProgramDto` (28 campos, 8 obligatorios). Delega en `PromotionsLoyaltyService.createProgram`. Crea filas en promotions.earning_rules, promotions.loyalty_programs, promotions.loyalty_tiers. Lee promotions.loyalty_programs.
+`POST /loyalty/programs` la atiende `LoyaltyController.createProgram` (src/modules/promotions/controllers/loyalty.controller.ts:186). Exige sesión con alguno de los roles PROMOTIONS_ADMIN, MARKETING_MANAGER. Valida el cuerpo como `CreateLoyaltyProgramDto` (28 campos, 8 obligatorios). Delega en `PromotionsLoyaltyService.createProgram`. Crea filas en promotions.earning_rules, promotions.loyalty_programs, promotions.loyalty_tiers. Lee promotions.loyalty_programs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PROMOTIONS_ADMIN, MARKETING_MANAGER | `src/modules/promotions/controllers/loyalty.controller.ts:83` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PROMOTIONS_ADMIN, MARKETING_MANAGER | `src/modules/promotions/controllers/loyalty.controller.ts:186` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -910,7 +1253,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:56` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:67` |
 
 ### Flujos
 
@@ -918,42 +1261,42 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 9. POST /loyalty/programs/{id}/memberships
+## 13. POST /loyalty/programs/{id}/memberships
 
 - **Origen:** CONTRATO
 - **Nombre:** Inscribir a un miembro en el programa
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LoyaltyController.enrollMember` — `src/modules/promotions/controllers/loyalty.controller.ts:97`
+- **Implementación:** `LoyaltyController.enrollMember` — `src/modules/promotions/controllers/loyalty.controller.ts:200`
 
 ### Qué es y para qué sirve (negocio)
 
 Inscribir a un miembro en el programa. Caso de uso UC-51-02: Inscribir miembro. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /loyalty/programs/{id}/memberships` la atiende `LoyaltyController.enrollMember` (src/modules/promotions/controllers/loyalty.controller.ts:97). Exige sesión con alguno de los roles PROMOTIONS_ADMIN, MEMBER. Valida el cuerpo como `EnrollMemberDto` (3 campos, 2 obligatorios). Delega en `PromotionsLoyaltyService.enrollMember`. Crea filas en promotions.loyalty_memberships, promotions.points_ledger_entries. Actualiza promotions.loyalty_memberships. Lee promotions.loyalty_memberships, promotions.loyalty_programs, promotions.loyalty_tiers.
+`POST /loyalty/programs/{id}/memberships` la atiende `LoyaltyController.enrollMember` (src/modules/promotions/controllers/loyalty.controller.ts:200). Exige sesión con alguno de los roles PROMOTIONS_ADMIN, MEMBER. Valida el cuerpo como `EnrollMemberDto` (3 campos, 2 obligatorios). Delega en `PromotionsLoyaltyService.enrollMember`. Crea filas en promotions.loyalty_memberships, promotions.points_ledger_entries. Actualiza promotions.loyalty_memberships. Lee promotions.loyalty_memberships, promotions.loyalty_programs, promotions.loyalty_tiers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PROMOTIONS_ADMIN, MEMBER | `src/modules/promotions/controllers/loyalty.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:97` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PROMOTIONS_ADMIN, MEMBER | `src/modules/promotions/controllers/loyalty.controller.ts:200` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:200` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.enrollMember → PromotionsLoyaltyService.enrollMember | `src/modules/promotions/services/promotions-loyalty.service.ts:325` |
+| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.enrollMember → PromotionsLoyaltyService.enrollMember | `src/modules/promotions/services/promotions-loyalty.service.ts:367` |
 | `promotions.loyalty_memberships` | ESCRIBE | CREA | DIRECTA | LoyaltyController.enrollMember → PromotionsLoyaltyService.enrollMember → PromotionsLoyaltyRepository.createMembership | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:476` |
 | `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.enrollMember → PromotionsLoyaltyService.enrollMember → PromotionsLoyaltyRepository.findMembershipByMember | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:500` |
 | `promotions.loyalty_programs` | LEE | LEE | DIRECTA | LoyaltyController.enrollMember → PromotionsLoyaltyService.enrollMember → PromotionsLoyaltyRepository.findProgramById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:335` |
@@ -1023,7 +1366,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:66` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:77` |
 
 ### Flujos
 
@@ -1031,43 +1374,43 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 10. POST /promotions
+## 14. POST /promotions
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una promoción con sus reglas de descuento
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PromotionsController.createPromotion` — `src/modules/promotions/controllers/promotions.controller.ts:41`
+- **Implementación:** `PromotionsController.createPromotion` — `src/modules/promotions/controllers/promotions.controller.ts:72`
 
 ### Qué es y para qué sirve (negocio)
 
 Crear una promoción con sus reglas de descuento. Caso de uso UC-51-07: Promoción con reglas de descuento. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /promotions` la atiende `PromotionsController.createPromotion` (src/modules/promotions/controllers/promotions.controller.ts:41). Exige sesión con alguno de los roles PROMOTIONS_ADMIN, MARKETING_MANAGER. Valida el cuerpo como `CreatePromotionDto` (25 campos, 8 obligatorios). Delega en `PromotionsDiscountsService.createPromotion`. Crea filas en promotions.discount_rules, promotions.promotions. Lee promotions.promotions.
+`POST /promotions` la atiende `PromotionsController.createPromotion` (src/modules/promotions/controllers/promotions.controller.ts:72). Exige sesión con alguno de los roles PROMOTIONS_ADMIN, MARKETING_MANAGER. Valida el cuerpo como `CreatePromotionDto` (25 campos, 8 obligatorios). Delega en `PromotionsDiscountsService.createPromotion`. Crea filas en promotions.discount_rules, promotions.promotions. Lee promotions.promotions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PROMOTIONS_ADMIN, MARKETING_MANAGER | `src/modules/promotions/controllers/promotions.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PROMOTIONS_ADMIN, MARKETING_MANAGER | `src/modules/promotions/controllers/promotions.controller.ts:72` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.discount_rules` | ESCRIBE | CREA | DIRECTA | PromotionsController.createPromotion → PromotionsDiscountsService.createPromotion → PromotionsDiscountsRepository.createDiscountRule | `src/modules/promotions/repositories/promotions-discounts.repository.ts:327` |
-| `promotions.promotions` | ESCRIBE | CREA | DIRECTA | PromotionsController.createPromotion → PromotionsDiscountsService.createPromotion → PromotionsDiscountsRepository.createPromotion | `src/modules/promotions/repositories/promotions-discounts.repository.ts:247` |
-| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.createPromotion → PromotionsDiscountsService.createPromotion → PromotionsDiscountsRepository.findPromotionByCode | `src/modules/promotions/repositories/promotions-discounts.repository.ts:313` |
+| `promotions.discount_rules` | ESCRIBE | CREA | DIRECTA | PromotionsController.createPromotion → PromotionsDiscountsService.createPromotion → PromotionsDiscountsRepository.createDiscountRule | `src/modules/promotions/repositories/promotions-discounts.repository.ts:328` |
+| `promotions.promotions` | ESCRIBE | CREA | DIRECTA | PromotionsController.createPromotion → PromotionsDiscountsService.createPromotion → PromotionsDiscountsRepository.createPromotion | `src/modules/promotions/repositories/promotions-discounts.repository.ts:248` |
+| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.createPromotion → PromotionsDiscountsService.createPromotion → PromotionsDiscountsRepository.findPromotionByCode | `src/modules/promotions/repositories/promotions-discounts.repository.ts:314` |
 
 ### Cuerpo — DTO `CreatePromotionDto` · `application/json`
 
@@ -1181,7 +1524,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:177` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:267` |
 
 ### Flujos
 
@@ -1189,44 +1532,44 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 11. POST /promotions/{id}/coupons/batch
+## 15. POST /promotions/{id}/coupons/batch
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir un lote de cupones
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PromotionsController.issueCoupons` — `src/modules/promotions/controllers/promotions.controller.ts:53`
+- **Implementación:** `PromotionsController.issueCoupons` — `src/modules/promotions/controllers/promotions.controller.ts:84`
 
 ### Qué es y para qué sirve (negocio)
 
 Emitir un lote de cupones. Caso de uso UC-51-08: Emitir lote de cupones. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /promotions/{id}/coupons/batch` la atiende `PromotionsController.issueCoupons` (src/modules/promotions/controllers/promotions.controller.ts:53). Exige sesión con alguno de los roles PROMOTIONS_ADMIN, MARKETING_MANAGER. Valida el cuerpo como `IssueCouponsDto` (8 campos, 2 obligatorios). Delega en `PromotionsDiscountsService.issueCoupons`. Crea filas en promotions.coupons. Lee promotions.coupons, promotions.promotions.
+`POST /promotions/{id}/coupons/batch` la atiende `PromotionsController.issueCoupons` (src/modules/promotions/controllers/promotions.controller.ts:84). Exige sesión con alguno de los roles PROMOTIONS_ADMIN, MARKETING_MANAGER. Valida el cuerpo como `IssueCouponsDto` (8 campos, 2 obligatorios). Delega en `PromotionsDiscountsService.issueCoupons`. Crea filas en promotions.coupons. Lee promotions.coupons, promotions.promotions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PROMOTIONS_ADMIN, MARKETING_MANAGER | `src/modules/promotions/controllers/promotions.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/promotions.controller.ts:53` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PROMOTIONS_ADMIN, MARKETING_MANAGER | `src/modules/promotions/controllers/promotions.controller.ts:84` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/promotions.controller.ts:84` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.coupons` | ESCRIBE | CREA | DIRECTA | PromotionsController.issueCoupons → PromotionsDiscountsService.issueCoupons → PromotionsDiscountsRepository.createCoupon | `src/modules/promotions/repositories/promotions-discounts.repository.ts:371` |
-| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.issueCoupons → PromotionsDiscountsService.issueCoupons → PromotionsDiscountsService.generateCouponCodes → PromotionsDiscountsRepository.findCouponsByCodes | `src/modules/promotions/repositories/promotions-discounts.repository.ts:430` |
-| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.issueCoupons → PromotionsDiscountsService.issueCoupons → PromotionsDiscountsRepository.findPromotionById | `src/modules/promotions/repositories/promotions-discounts.repository.ts:279` |
+| `promotions.coupons` | ESCRIBE | CREA | DIRECTA | PromotionsController.issueCoupons → PromotionsDiscountsService.issueCoupons → PromotionsDiscountsRepository.createCoupon | `src/modules/promotions/repositories/promotions-discounts.repository.ts:468` |
+| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.issueCoupons → PromotionsDiscountsService.issueCoupons → PromotionsDiscountsService.generateCouponCodes → PromotionsDiscountsRepository.findCouponsByCodes | `src/modules/promotions/repositories/promotions-discounts.repository.ts:527` |
+| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.issueCoupons → PromotionsDiscountsService.issueCoupons → PromotionsDiscountsRepository.findPromotionById | `src/modules/promotions/repositories/promotions-discounts.repository.ts:280` |
 
 ### Parámetros
 
@@ -1300,7 +1643,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:187` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:277` |
 
 ### Flujos
 
@@ -1308,45 +1651,143 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 12. POST /redemptions
+## 16. GET /promotions/me
 
 - **Origen:** CONTRATO
-- **Nombre:** Redimir un cupón y registrar la redención
+- **Nombre:** Mis promociones vigentes
 - **Bloque:** Marketing y Crecimiento
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PromotionsController.redeemCoupon` — `src/modules/promotions/controllers/promotions.controller.ts:84`
+- **Implementación:** `PromotionsController.listMine` — `src/modules/promotions/controllers/promotions.controller.ts:57`
 
 ### Qué es y para qué sirve (negocio)
 
-Redimir un cupón y registrar la redención. Caso de uso UC-51-09: Validar y redimir cupón. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
+Mis promociones vigentes. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /redemptions` la atiende `PromotionsController.redeemCoupon` (src/modules/promotions/controllers/promotions.controller.ts:84). Exige sesión con alguno de los roles CASHIER, PROMOTIONS_ADMIN. Valida el cuerpo como `CreateRedemptionDto` (8 campos, 4 obligatorios). Delega en `PromotionsDiscountsService.redeemCoupon`. Crea filas en promotions.redemptions. Lee promotions.coupons, promotions.discount_rules, promotions.promotions, promotions.redemptions.
+`GET /promotions/me` la atiende `PromotionsController.listMine` (src/modules/promotions/controllers/promotions.controller.ts:57). Exige sesión con alguno de los roles PATIENT. Delega en `PromotionsReadService.listMine`. Lee promotions.coupons, promotions.discount_rules, promotions.promotions, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CASHIER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/promotions.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PATIENT | `src/modules/promotions/controllers/promotions.controller.ts:57` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.redeemCoupon → PromotionsDiscountsService.redeemCoupon → PromotionsDiscountsService.evaluateCouponForUpdate → PromotionsDiscountsRepository.findCouponByCodeForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:406` |
-| `promotions.discount_rules` | LEE | LEE | DIRECTA | PromotionsController.redeemCoupon → PromotionsDiscountsService.redeemCoupon → PromotionsDiscountsService.evaluateCouponForUpdate → PromotionsDiscountsRepository.findRulesByPromotion | `src/modules/promotions/repositories/promotions-discounts.repository.ts:358` |
-| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.redeemCoupon → PromotionsDiscountsService.redeemCoupon → PromotionsDiscountsService.evaluateCouponForUpdate → PromotionsDiscountsRepository.findPromotionForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:293` |
-| `promotions.redemptions` | ESCRIBE | CREA | DIRECTA | PromotionsController.redeemCoupon → PromotionsDiscountsService.redeemCoupon → PromotionsDiscountsRepository.createRedemption | `src/modules/promotions/repositories/promotions-discounts.repository.ts:443` |
-| `promotions.redemptions` | LEE | LEE | DIRECTA | PromotionsController.redeemCoupon → PromotionsDiscountsService.redeemCoupon → PromotionsDiscountsService.evaluateCouponForUpdate → PromotionsDiscountsService.assertLimits → PromotionsDiscountsRepository.findAppliedRedemptions | `src/modules/promotions/repositories/promotions-discounts.repository.ts:502` |
+| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.listMine → PromotionsReadService.listMine → PromotionsDiscountsRepository.findPersonalCoupons | `src/modules/promotions/repositories/promotions-discounts.repository.ts:428` |
+| `promotions.discount_rules` | LEE | LEE | DIRECTA | PromotionsController.listMine → PromotionsReadService.listMine → PromotionsDiscountsRepository.findRulesByPromotions | `src/modules/promotions/repositories/promotions-discounts.repository.ts:403` |
+| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.listMine → PromotionsReadService.listMine → PromotionsDiscountsRepository.findCurrentPromotions | `src/modules/promotions/repositories/promotions-discounts.repository.ts:378` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PromotionsController.listMine → PromotionsReadService.listMine → PromotionsDiscountsRepository.findConcepts | `src/modules/promotions/repositories/promotions-discounts.repository.ts:455` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MyPromotionsResponseDto>` · DTO `MyPromotionsResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<MyPromotionDto>` | Sí | — | — | — | `src/modules/promotions/dto/promotions.dto.ts:1769` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/promotions/dto/promotions.dto.ts:1730` |
+| `items[].code` | `string` | Sí | — | — | — | `src/modules/promotions/dto/promotions.dto.ts:1734` |
+| `items[].name` | `string` | Sí | — | — | — | `src/modules/promotions/dto/promotions.dto.ts:1738` |
+| `items[].description` | `string` | No | admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1742` |
+| `items[].type` | `PromotionConceptDto` | No | admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1746` |
+| `items[].type.code` | `string` | No | — | — | — | sin fuente |
+| `items[].type.display` | `string` | No | — | — | — | sin fuente |
+| `items[].validFrom` | `string` | No | formato date-time; admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1750` |
+| `items[].validTo` | `string` | No | formato date-time; admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1754` |
+| `items[].discounts` | `array<MyPromotionDiscountDto>` | Sí | — | — | — | `src/modules/promotions/dto/promotions.dto.ts:1758` |
+| `items[].discounts[].type` | `PromotionConceptDto` | No | admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1688` |
+| `items[].discounts[].type.code` | `string` | No | — | — | — | sin fuente |
+| `items[].discounts[].type.display` | `string` | No | — | — | — | sin fuente |
+| `items[].discounts[].percentage` | `string` | No | admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1692` |
+| `items[].discounts[].fixedAmount` | `string` | No | admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1696` |
+| `items[].discounts[].currency` | `PromotionConceptDto` | No | admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1700` |
+| `items[].discounts[].currency.code` | `string` | No | — | — | — | sin fuente |
+| `items[].discounts[].currency.display` | `string` | No | — | — | — | sin fuente |
+| `items[].discounts[].minPurchaseAmount` | `string` | No | admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1704` |
+| `items[].discounts[].maxDiscountAmount` | `string` | No | admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1708` |
+| `items[].discounts[].appliesTo` | `PromotionConceptDto` | No | admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1712` |
+| `items[].discounts[].appliesTo.code` | `string` | No | — | — | — | sin fuente |
+| `items[].discounts[].appliesTo.display` | `string` | No | — | — | — | sin fuente |
+| `items[].coupons` | `array<MyPromotionCouponDto>` | Sí | — | — | — | `src/modules/promotions/dto/promotions.dto.ts:1762` |
+| `items[].coupons[].code` | `string` | Sí | — | — | — | `src/modules/promotions/dto/promotions.dto.ts:1719` |
+| `items[].coupons[].validTo` | `string` | No | formato date-time; admite null | — | — | `src/modules/promotions/dto/promotions.dto.ts:1723` |
+| `count` | `number` | Sí | — | — | — | `src/modules/promotions/dto/promotions.dto.ts:1773` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/promotions.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:355` |
+
+### Flujos
+
+- Módulo 51 — Lealtad, Descuentos, Cupones y Referidos — etapa `ctrl:PromotionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 17. POST /redemptions
+
+- **Origen:** CONTRATO
+- **Nombre:** Redimir un cupón y registrar la redención
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PromotionsController.redeemCoupon` — `src/modules/promotions/controllers/promotions.controller.ts:115`
+
+### Qué es y para qué sirve (negocio)
+
+Redimir un cupón y registrar la redención. Caso de uso UC-51-09: Validar y redimir cupón. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`POST /redemptions` la atiende `PromotionsController.redeemCoupon` (src/modules/promotions/controllers/promotions.controller.ts:115). Exige sesión con alguno de los roles CASHIER, PROMOTIONS_ADMIN. Valida el cuerpo como `CreateRedemptionDto` (8 campos, 4 obligatorios). Delega en `PromotionsDiscountsService.redeemCoupon`. Crea filas en promotions.redemptions. Lee promotions.coupons, promotions.discount_rules, promotions.promotions, promotions.redemptions.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CASHIER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/promotions.controller.ts:115` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.redeemCoupon → PromotionsDiscountsService.redeemCoupon → PromotionsDiscountsService.evaluateCouponForUpdate → PromotionsDiscountsRepository.findCouponByCodeForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:503` |
+| `promotions.discount_rules` | LEE | LEE | DIRECTA | PromotionsController.redeemCoupon → PromotionsDiscountsService.redeemCoupon → PromotionsDiscountsService.evaluateCouponForUpdate → PromotionsDiscountsRepository.findRulesByPromotion | `src/modules/promotions/repositories/promotions-discounts.repository.ts:359` |
+| `promotions.promotions` | LEE | LEE | DIRECTA | PromotionsController.redeemCoupon → PromotionsDiscountsService.redeemCoupon → PromotionsDiscountsService.evaluateCouponForUpdate → PromotionsDiscountsRepository.findPromotionForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:294` |
+| `promotions.redemptions` | ESCRIBE | CREA | DIRECTA | PromotionsController.redeemCoupon → PromotionsDiscountsService.redeemCoupon → PromotionsDiscountsRepository.createRedemption | `src/modules/promotions/repositories/promotions-discounts.repository.ts:540` |
+| `promotions.redemptions` | LEE | LEE | DIRECTA | PromotionsController.redeemCoupon → PromotionsDiscountsService.redeemCoupon → PromotionsDiscountsService.evaluateCouponForUpdate → PromotionsDiscountsService.assertLimits → PromotionsDiscountsRepository.findAppliedRedemptions | `src/modules/promotions/repositories/promotions-discounts.repository.ts:599` |
 
 ### Cuerpo — DTO `CreateRedemptionDto` · `application/json`
 
@@ -1416,7 +1857,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:211` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:301` |
 
 ### Flujos
 
@@ -1424,49 +1865,49 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 13. POST /redemptions/{id}/reverse
+## 18. POST /redemptions/{id}/reverse
 
 - **Origen:** CONTRATO
 - **Nombre:** Revertir una redención por devolución o cancelación
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PromotionsController.reverseRedemption` — `src/modules/promotions/controllers/promotions.controller.ts:112`
+- **Implementación:** `PromotionsController.reverseRedemption` — `src/modules/promotions/controllers/promotions.controller.ts:143`
 
 ### Qué es y para qué sirve (negocio)
 
 Revertir una redención por devolución o cancelación. Caso de uso UC-51-11: Revertir redención. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /redemptions/{id}/reverse` la atiende `PromotionsController.reverseRedemption` (src/modules/promotions/controllers/promotions.controller.ts:112). Exige sesión con alguno de los roles CASHIER, PROMOTIONS_ADMIN. Valida el cuerpo como `ReverseRedemptionDto` (3 campos, 1 obligatorio). Delega en `PromotionsDiscountsService.reverseRedemption`. Crea filas en promotions.points_ledger_entries. Actualiza promotions.coupons, promotions.loyalty_memberships, promotions.redemptions. Lee promotions.coupons, promotions.loyalty_memberships, promotions.points_ledger_entries, promotions.redemptions.
+`POST /redemptions/{id}/reverse` la atiende `PromotionsController.reverseRedemption` (src/modules/promotions/controllers/promotions.controller.ts:143). Exige sesión con alguno de los roles CASHIER, PROMOTIONS_ADMIN. Valida el cuerpo como `ReverseRedemptionDto` (3 campos, 1 obligatorio). Delega en `PromotionsDiscountsService.reverseRedemption`. Crea filas en promotions.points_ledger_entries. Actualiza promotions.coupons, promotions.loyalty_memberships, promotions.redemptions. Lee promotions.coupons, promotions.loyalty_memberships, promotions.points_ledger_entries, promotions.redemptions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CASHIER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/promotions.controller.ts:112` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/promotions.controller.ts:112` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CASHIER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/promotions.controller.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/promotions.controller.ts:143` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `promotions.coupons` | ESCRIBE | ACTUALIZA | POR_TIPO | PromotionsController.reverseRedemption → PromotionsDiscountsService.reverseRedemption | `src/modules/promotions/services/promotions-discounts.service.ts:545` |
-| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.reverseRedemption → PromotionsDiscountsService.reverseRedemption → PromotionsDiscountsRepository.findCouponForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:421` |
+| `promotions.coupons` | LEE | LEE | DIRECTA | PromotionsController.reverseRedemption → PromotionsDiscountsService.reverseRedemption → PromotionsDiscountsRepository.findCouponForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:518` |
 | `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | PromotionsController.reverseRedemption → PromotionsDiscountsService.reverseRedemption | `src/modules/promotions/services/promotions-discounts.service.ts:591` |
 | `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | PromotionsController.reverseRedemption → PromotionsDiscountsService.reverseRedemption → PromotionsLoyaltyRepository.findMembershipForUpdate | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:512` |
 | `promotions.points_ledger_entries` | ESCRIBE | CREA | DIRECTA | PromotionsController.reverseRedemption → PromotionsDiscountsService.reverseRedemption → PromotionsLoyaltyRepository.createLedgerEntry | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:560` |
 | `promotions.points_ledger_entries` | LEE | LEE | DIRECTA | PromotionsController.reverseRedemption → PromotionsDiscountsService.reverseRedemption → PromotionsLoyaltyRepository.findLedgerEntryByKey | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:586` |
 | `promotions.redemptions` | ESCRIBE | ACTUALIZA | POR_TIPO | PromotionsController.reverseRedemption → PromotionsDiscountsService.reverseRedemption | `src/modules/promotions/services/promotions-discounts.service.ts:597` |
-| `promotions.redemptions` | LEE | LEE | DIRECTA | PromotionsController.reverseRedemption → PromotionsDiscountsService.reverseRedemption → PromotionsDiscountsRepository.findRedemptionForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:475` |
+| `promotions.redemptions` | LEE | LEE | DIRECTA | PromotionsController.reverseRedemption → PromotionsDiscountsService.reverseRedemption → PromotionsDiscountsRepository.findRedemptionForUpdate | `src/modules/promotions/repositories/promotions-discounts.repository.ts:572` |
 
 ### Parámetros
 
@@ -1528,7 +1969,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:237` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:327` |
 
 ### Flujos
 
@@ -1536,44 +1977,44 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 14. POST /referral-programs/{id}/referrals
+## 19. POST /referral-programs/{id}/referrals
 
 - **Origen:** CONTRATO
 - **Nombre:** Generar el código de referido del miembro
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LoyaltyController.createReferral` — `src/modules/promotions/controllers/loyalty.controller.ts:180`
+- **Implementación:** `LoyaltyController.createReferral` — `src/modules/promotions/controllers/loyalty.controller.ts:283`
 
 ### Qué es y para qué sirve (negocio)
 
 Generar el código de referido del miembro. Caso de uso UC-51-12: Generar código de referido. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /referral-programs/{id}/referrals` la atiende `LoyaltyController.createReferral` (src/modules/promotions/controllers/loyalty.controller.ts:180). Exige sesión con alguno de los roles MEMBER, PROMOTIONS_ADMIN. Valida el cuerpo como `PromotionsCreateReferralDto` (1 campo, 0 obligatorios). Delega en `PromotionsLoyaltyService.createReferral`. Crea filas en promotions.member_referrals. Lee promotions.member_referrals, promotions.referral_programs.
+`POST /referral-programs/{id}/referrals` la atiende `LoyaltyController.createReferral` (src/modules/promotions/controllers/loyalty.controller.ts:283). Exige sesión con alguno de los roles MEMBER, PROMOTIONS_ADMIN. Valida el cuerpo como `PromotionsCreateReferralDto` (1 campo, 0 obligatorios). Delega en `PromotionsLoyaltyService.createReferral`. Crea filas en promotions.member_referrals. Lee promotions.member_referrals, promotions.referral_programs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: MEMBER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/loyalty.controller.ts:180` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:180` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: MEMBER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/loyalty.controller.ts:283` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:283` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.member_referrals` | ESCRIBE | CREA | DIRECTA | LoyaltyController.createReferral → PromotionsLoyaltyService.createReferral → PromotionsLoyaltyRepository.createReferral | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:657` |
-| `promotions.member_referrals` | LEE | LEE | DIRECTA | LoyaltyController.createReferral → PromotionsLoyaltyService.createReferral → PromotionsLoyaltyRepository.findReferralsByReferrer | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:709` |
-| `promotions.referral_programs` | LEE | LEE | DIRECTA | LoyaltyController.createReferral → PromotionsLoyaltyService.createReferral → PromotionsLoyaltyRepository.findReferralProgramById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:646` |
+| `promotions.member_referrals` | ESCRIBE | CREA | DIRECTA | LoyaltyController.createReferral → PromotionsLoyaltyService.createReferral → PromotionsLoyaltyRepository.createReferral | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:717` |
+| `promotions.member_referrals` | LEE | LEE | DIRECTA | LoyaltyController.createReferral → PromotionsLoyaltyService.createReferral → PromotionsLoyaltyRepository.findReferralsByReferrer | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:769` |
+| `promotions.referral_programs` | LEE | LEE | DIRECTA | LoyaltyController.createReferral → PromotionsLoyaltyService.createReferral → PromotionsLoyaltyRepository.findReferralProgramById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:706` |
 
 ### Parámetros
 
@@ -1630,7 +2071,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:155` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:166` |
 
 ### Flujos
 
@@ -1638,36 +2079,36 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 ---
 
-## 15. POST /referrals/{id}/qualify
+## 20. POST /referrals/{id}/qualify
 
 - **Origen:** CONTRATO
 - **Nombre:** Calificar el referido y premiar a ambas partes
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LoyaltyController.qualifyReferral` — `src/modules/promotions/controllers/loyalty.controller.ts:196`
+- **Implementación:** `LoyaltyController.qualifyReferral` — `src/modules/promotions/controllers/loyalty.controller.ts:299`
 
 ### Qué es y para qué sirve (negocio)
 
 Calificar el referido y premiar a ambas partes. Caso de uso UC-51-13: Calificar y recompensar. Dentro del módulo (descripción del modelo, en inglés): «The rewards and discount engine end users asked for: loyalty programs with tiers and a points ledger, promotions with flexible discount rules, single/multi-use coupons and promo codes with redemption tracking…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promotions/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_51_promotions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /referrals/{id}/qualify` la atiende `LoyaltyController.qualifyReferral` (src/modules/promotions/controllers/loyalty.controller.ts:196). Exige sesión con alguno de los roles SYSTEM, PROMOTIONS_ADMIN. Valida el cuerpo como `QualifyReferralDto` (4 campos, 4 obligatorios). Delega en `PromotionsLoyaltyService.qualifyReferral`. Crea filas en payments.wallet_ledger_entries, payments.wallets, promotions.points_ledger_entries. Actualiza payments.wallets, promotions.loyalty_memberships, promotions.member_referrals. Lee payments.wallet_ledger_entries, payments.wallets, promotions.loyalty_memberships, promotions.loyalty_tiers, promotions.member_referrals, promotions.points_ledger_entries, promotions.referral_programs.
+`POST /referrals/{id}/qualify` la atiende `LoyaltyController.qualifyReferral` (src/modules/promotions/controllers/loyalty.controller.ts:299). Exige sesión con alguno de los roles SYSTEM, PROMOTIONS_ADMIN. Valida el cuerpo como `QualifyReferralDto` (4 campos, 4 obligatorios). Delega en `PromotionsLoyaltyService.qualifyReferral`. Crea filas en payments.wallet_ledger_entries, payments.wallets, promotions.points_ledger_entries. Actualiza payments.wallets, promotions.loyalty_memberships, promotions.member_referrals. Lee payments.wallet_ledger_entries, payments.wallets, promotions.loyalty_memberships, promotions.loyalty_tiers, promotions.member_referrals, promotions.points_ledger_entries, promotions.referral_programs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/loyalty.controller.ts:196` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:196` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/loyalty.controller.ts:299` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:299` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1678,14 +2119,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `payments.wallets` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralWalletCredit → WalletsService.creditWallet | `src/modules/payments/services/wallets.service.ts:109` |
 | `payments.wallets` | ESCRIBE | CREA | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralWalletCredit → WalletsService.creditWallet → PaymentsWalletsRepository.createWallet | `src/modules/payments/repositories/payments-wallets.repository.ts:68` |
 | `payments.wallets` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralWalletCredit → WalletsService.creditWallet → PaymentsWalletsRepository.findWalletForUpdate | `src/modules/payments/repositories/payments-wallets.repository.ts:54` |
-| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints | `src/modules/promotions/services/promotions-loyalty.service.ts:1007` |
+| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints | `src/modules/promotions/services/promotions-loyalty.service.ts:1049` |
 | `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints → PromotionsLoyaltyRepository.findMembershipForUpdate | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:512` |
 | `promotions.loyalty_tiers` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints → PromotionsLoyaltyRepository.findTiersByProgram | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:408` |
-| `promotions.member_referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral | `src/modules/promotions/services/promotions-loyalty.service.ts:896` |
-| `promotions.member_referrals` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyRepository.findReferralForUpdate | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:696` |
+| `promotions.member_referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral | `src/modules/promotions/services/promotions-loyalty.service.ts:938` |
+| `promotions.member_referrals` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyRepository.findReferralForUpdate | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:756` |
 | `promotions.points_ledger_entries` | ESCRIBE | CREA | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints → PromotionsLoyaltyRepository.createLedgerEntry | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:560` |
 | `promotions.points_ledger_entries` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints → PromotionsLoyaltyRepository.findLedgerEntryByKey | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:586` |
-| `promotions.referral_programs` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyRepository.findReferralProgramById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:646` |
+| `promotions.referral_programs` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyRepository.findReferralProgramById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:706` |
 
 ### Parámetros
 
@@ -1754,7 +2195,7 @@ El árbol de decisión completo está en [flujos](../flujos/promotions.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:156` |
+| CONTROLADOR | `src/modules/promotions/controllers/promotions.controller.spec.ts:167` |
 
 ### Flujos
 

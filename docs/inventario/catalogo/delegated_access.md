@@ -13,7 +13,7 @@
 | [delegated_access_approval_requests](#delegated_access_approval_requests) | Gestiona solicitudes de aprobación antes de habilitar permisos delegados sensibles. | 12 | 8 | 5 | COINCIDE |
 | [delegated_access_grants](#delegated_access_grants) | Conserva concesiones de acceso delegado con su sujeto, alcance, permisos y vigencia. | 16 | 11 | 6 | COINCIDE |
 | [delegated_permission_set_items](#delegated_permission_set_items) | Detalla permisos incluidos en conjuntos delegables para limitar acciones otorgadas a representantes. | 6 | 2 | 4 | COINCIDE |
-| [delegated_permission_sets](#delegated_permission_sets) | Define paquetes reutilizables de permisos que pueden concederse a delegados bajo un alcance específico. | 13 | 6 | 5 | COINCIDE |
+| [delegated_permission_sets](#delegated_permission_sets) | Define paquetes reutilizables de permisos que pueden concederse a delegados bajo un alcance específico. | 13 | 6 | 6 | COINCIDE |
 | [delegation_events](#delegation_events) | Mantiene eventos de creación, modificación, uso o revocación de delegaciones para auditoría. | 10 | 6 | 7 | COINCIDE |
 | [organization_user_assignments](#organization_user_assignments) | Asocia usuarios con organizaciones para determinar en qué ámbitos pueden actuar o administrar acceso delegado. | 19 | 14 | 7 | COINCIDE |
 | [practitioner_delegate_assignments](#practitioner_delegate_assignments) | Relaciona profesionales con delegados autorizados para realizar tareas en su nombre. | 18 | 10 | 9 | COINCIDE |
@@ -330,7 +330,7 @@ Define paquetes reutilizables de permisos que pueden concederse a delegados bajo
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_29_delegated_access.puml: delegated_permission_sets`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` · **DDL:** `SQL/29_delegated_access/02_tables.sql`
 - **Entidad del ORM:** `DelegatedPermissionSets` — `src/modules/delegated_access/entities/delegated_permission_sets.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 2 entrantes · 5 operaciones
+- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 2 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -377,6 +377,7 @@ Define paquetes reutilizables de permisos que pueden concederse a delegados bajo
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /delegated-permission-sets | LEE | DIRECTA |
 | POST /delegated-permission-sets | CREA | DIRECTA |
 | POST /delegated-permission-sets | LEE | DIRECTA |
 | POST /delegated-permission-sets/{id}/versions | ACTUALIZA | POR_TIPO |

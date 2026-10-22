@@ -6,7 +6,7 @@
 - **Operaciones:** 15 (13 con decisiones propias, 2 sin ellas)
 - Inventario de endpoints del módulo: [integrations](../endpoints/integrations.md)
 
-## Proceso: src / modules / integrations
+## Proceso: Integraciones externas
 
 - **Código:** `integrations` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 15
 - **Actores:** Cualquier sesión válida · Público (sin sesión) · SECURITY_ADMIN · SYSTEM
@@ -15,7 +15,7 @@
 
 ### Para qué sirve
 
-Agrupa los componentes relacionados con **integrations** y mantiene cohesionada esta responsabilidad del sistema.
+Gestiona proveedores, conexiones tenantizadas, referencias a credenciales, endpoints versionados, mensajería saliente, reintentos, callbacks entrantes y suscripciones de webhook. Persiste en el esquema PostgreSQL `integrations`; los workers consumen los endpoints internos de descubrimiento, despacho, reintento y correlación.
 
 _Fuente: `src/modules/integrations/README.md:3`_
 
@@ -23,7 +23,7 @@ _Fuente: `src/modules/integrations/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `ctrl:IntegrationsConnectionsController` | Operaciones de IntegrationsConnectionsController que el README no asigna a un caso de uso | POST /integrations/connections/{id}:pause | SECURITY_ADMIN | MEDIO | 3 |
+| `ctrl:IntegrationsConnectionsController` | Operaciones de IntegrationsConnectionsController que el README no asigna a un caso de uso | POST /integrations/connections/{id}:pause | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /integrations/connections/{id}/credentials:rotate | SECURITY_ADMIN | MEDIO | 5 |
 | `ctrl:IntegrationsMessagesController` | Operaciones de IntegrationsMessagesController que el README no asigna a un caso de uso | POST /integrations/messages:outbound | Cualquier sesión válida | ALTO | 3 |
 |  |  | POST /integrations/messages/{id}:correlate | SYSTEM · SECURITY_ADMIN | MEDIO | 5 |
@@ -82,6 +82,7 @@ flowchart LR
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
+  o1 -->|"LEE"| t3
   o1 -->|"ACTUALIZA"| t4
   o1 -->|"LEE"| t4
   a2 --> o5
@@ -196,10 +197,15 @@ flowchart TD
   n9 -->|"no"| n11
   n12["Llama a OutboundMessagesRepository.holdQueuedForConnection"]:::llamada
   n11 --> n12
-  n13[("ACTUALIZA integrations.outbound_messages")]:::efecto
+  n13[("LEE integrations.outbound_messages")]:::efecto
   n12 --> n13
-  n14(("200 Responde con éxito")):::ok
+  n14["Repite: por cada const message de queued"]:::bucle
   n13 --> n14
+  n15[("ACTUALIZA integrations.outbound_messages")]:::efecto
+  n14 -->|"cada elemento"| n15
+  n16(("200 Responde con éxito")):::ok
+  n15 --> n16
+  n14 -->|"al terminar"| n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -452,7 +458,7 @@ Despachar un mensaje y registrar su respuesta
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Mensaje no encontrado; ResourceNotFoundException: Conexión no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mensaje no está en cola; PreconditionFailedException: El proveedor no tiene base_url configurada para el despacho |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mensaje no está en cola; PreconditionFailedException: El proveedor no tiene base_url configurada para el despacho; PreconditionFailedException: El cuerpo del despacho excede el tamaño permitido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -498,15 +504,28 @@ flowchart TD
   n19 -->|"sí"| n20
   n21[("LEE integrations.integration_endpoints")]:::efecto
   n20 --> n21
-  n22[("ACTUALIZA integrations.outbound_messages · ACTUALIZA integrations.outbound_messages")]:::efecto
+  n22["Llama a HttpDispatcherService.post"]:::llamada
   n21 --> n22
   n19 -->|"no"| n22
-  n23["Llama a MessageResponsesRepository.create"]:::llamada
+  n23{"requestBytes › MAX_DISPATCH_REQUEST_BYTES"}:::decision
   n22 --> n23
-  n24[("CREA integrations.message_responses")]:::efecto
-  n23 --> n24
-  n25(("200 Responde con éxito")):::ok
-  n24 --> n25
+  n24(["422 PRECONDITION_FAILED El cuerpo del despacho excede el tamaño permitido"]):::error
+  n23 -->|"sí"| n24
+  n25["Intenta"]:::intento
+  n23 -->|"no"| n25
+  n26{"error instanceof PreconditionFailedException"}:::decision
+  n25 -->|"si falla"| n26
+  n27(["↩ (relanza el error capturado)"]):::error
+  n26 -->|"sí"| n27
+  n28[("ACTUALIZA integrations.outbound_messages · ACTUALIZA integrations.outbound_messages")]:::efecto
+  n25 --> n28
+  n26 -->|"no"| n28
+  n29["Llama a MessageResponsesRepository.create"]:::llamada
+  n28 --> n29
+  n30[("CREA integrations.message_responses")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

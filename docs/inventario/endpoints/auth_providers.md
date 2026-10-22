@@ -40,7 +40,7 @@
 
 Solicitar la vinculación de un sujeto externo. Caso de uso UC-40-09: Solicitar vinculación de cuenta. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -52,10 +52,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:211` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -144,7 +144,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Completar la vinculación presentando el token. Caso de uso UC-40-10: Completar vinculación. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -156,18 +156,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:227` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `auth_providers.account_link_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AuthProvidersController.completeAccountLink → FederatedLoginService.completeAccountLink | `src/modules/auth_providers/services/federated-login.service.ts:505` |
+| `auth_providers.account_link_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AuthProvidersController.completeAccountLink → FederatedLoginService.completeAccountLink | `src/modules/auth_providers/services/federated-login.service.ts:508` |
 | `auth_providers.account_link_requests` | LEE | LEE | DIRECTA | AuthProvidersController.completeAccountLink → FederatedLoginService.completeAccountLink → AuthProvidersRepository.findLinkRequestByTokenHashForUpdate | `src/modules/auth_providers/repositories/auth-providers.repository.ts:977` |
-| `auth_providers.federated_identities` | ESCRIBE | ACTUALIZA | POR_TIPO | AuthProvidersController.completeAccountLink → FederatedLoginService.completeAccountLink | `src/modules/auth_providers/services/federated-login.service.ts:537` |
+| `auth_providers.federated_identities` | ESCRIBE | ACTUALIZA | POR_TIPO | AuthProvidersController.completeAccountLink → FederatedLoginService.completeAccountLink | `src/modules/auth_providers/services/federated-login.service.ts:536` |
 | `auth_providers.federated_identities` | ESCRIBE | CREA | DIRECTA | AuthProvidersController.completeAccountLink → FederatedLoginService.completeAccountLink → AuthProvidersRepository.createFederatedIdentity | `src/modules/auth_providers/repositories/auth-providers.repository.ts:797` |
 | `auth_providers.federated_identities` | LEE | LEE | DIRECTA | AuthProvidersController.completeAccountLink → FederatedLoginService.completeAccountLink → AuthProvidersRepository.findIdentityBySubjectForUpdate | `src/modules/auth_providers/repositories/auth-providers.repository.ts:856` |
 | `auth_providers.federated_login_attempts` | ESCRIBE | CREA | DIRECTA | AuthProvidersController.completeAccountLink → FederatedLoginService.completeAccountLink → AuthProvidersRepository.createLoginAttempt | `src/modules/auth_providers/repositories/auth-providers.repository.ts:886` |
@@ -251,7 +251,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Desvincular una identidad federada. Caso de uso UC-40-12: Desvincular identidad. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -263,17 +263,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:239` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:239` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `auth_providers.federated_identities` | ESCRIBE | ACTUALIZA | POR_TIPO | AuthProvidersController.unlinkIdentity → FederatedLoginService.unlinkIdentity | `src/modules/auth_providers/services/federated-login.service.ts:610` |
+| `auth_providers.federated_identities` | ESCRIBE | ACTUALIZA | POR_TIPO | AuthProvidersController.unlinkIdentity → FederatedLoginService.unlinkIdentity | `src/modules/auth_providers/services/federated-login.service.ts:617` |
 | `auth_providers.federated_identities` | LEE | LEE | DIRECTA | AuthProvidersController.unlinkIdentity → FederatedLoginService.unlinkIdentity → AuthProvidersRepository.findIdentityForUpdate | `src/modules/auth_providers/repositories/auth-providers.repository.ts:840` |
 | `auth_providers.federated_login_attempts` | ESCRIBE | CREA | DIRECTA | AuthProvidersController.unlinkIdentity → FederatedLoginService.unlinkIdentity → AuthProvidersRepository.createLoginAttempt | `src/modules/auth_providers/repositories/auth-providers.repository.ts:886` |
 
@@ -354,7 +354,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Registrar un proveedor de identidad. Caso de uso UC-40-01: Registrar proveedor OIDC/SAML. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:43`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -366,10 +366,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -466,7 +466,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Fijar el mapeo de atributos del proveedor. Caso de uso UC-40-04: Mapeo de claims a atributos. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -478,11 +478,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:128` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:128` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -589,7 +589,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Configurar el protocolo de un entorno e importar el JWKS. Caso de uso UC-40-02: Configurar protocolo e importar JWKS. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:44`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -601,11 +601,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:81` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -739,7 +739,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Definir una regla de aprovisionamiento. Caso de uso UC-40-06: Regla de aprovisionamiento. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -751,11 +751,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:161` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:161` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -855,7 +855,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Publicar una clave de firma del proveedor. Caso de uso UC-40-03: Publicar clave de firma. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -867,11 +867,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:98` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -971,7 +971,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Rotar la clave de firma. Caso de uso UC-40-11: Rotar clave de firma. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -983,11 +983,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/auth_providers/controllers/auth-providers.controller.ts:111` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1089,7 +1089,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Iniciar el login federado. Caso de uso UC-40-07: Iniciar login federado. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -1101,10 +1101,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:177` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1198,7 +1198,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Procesar el callback del proveedor. Caso de uso UC-40-08: Procesar callback. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -1210,10 +1210,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN, AUTH_SERVICE | `src/modules/auth_providers/controllers/auth-providers.controller.ts:194` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1325,7 +1325,7 @@ El árbol de decisión completo está en [flujos](../flujos/auth_providers.md).
 
 Vincular el proveedor a un tenant. Caso de uso UC-40-05: Vincular proveedor a tenant. Dentro del módulo (descripción del modelo, en inglés): «Generic, provider-adaptable federated login and user provisioning.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_providers/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_40_auth_providers.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -1337,10 +1337,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/auth_pr
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: IDENTITY_ADMIN | `src/modules/auth_providers/controllers/auth-providers.controller.ts:145` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

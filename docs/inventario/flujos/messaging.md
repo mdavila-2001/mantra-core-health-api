@@ -49,7 +49,7 @@ transacción de negocio
             └─ /webhooks/providers/:code/receipts ──> delivered | bounced
 ```
 
-_Fuente: `src/modules/messaging/README.md:73`_
+_Fuente: `src/modules/messaging/README.md:110`_
 
 ### Etapas y operaciones
 
@@ -350,7 +350,7 @@ Cerrar el trabajo con éxito
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Trabajo no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El trabajo no está en ejecución; PreconditionFailedException: El trabajo está reservado por otro worker |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Storage intent requires its lifecycle coordinator; PreconditionFailedException: El trabajo no está en ejecución; PreconditionFailedException: El trabajo está reservado por otro worker |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -370,18 +370,24 @@ flowchart TD
   n6 --> n7
   n8(["404 NOT_FOUND Trabajo no encontrado"]):::error
   n7 -->|"sí"| n8
-  n9{"job.statusConceptId !== CONCEPTS.JOB_RUNNING"}:::decision
+  n9["Llama a QueuesService.assertGenericJob"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El trabajo no está en ejecución"]):::error
-  n9 -->|"sí"| n10
-  n11{"job.lockedBy !== dto.workerId"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED El trabajo está reservado por otro worker"]):::error
-  n11 -->|"sí"| n12
-  n13[("ACTUALIZA messaging.queued_jobs · ACTUALIZA messaging.queued_jobs · ACTUALIZA messaging.queued_jobs · ACTUALI…")]:::efecto
-  n11 -->|"no"| n13
-  n14(("200 Responde con éxito")):::ok
-  n13 --> n14
+  n10{"isStorageJobType(jobType) || dedupeKey?.startsWith('storage-lifecycle:')"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED Storage intent requires its lifecycle coordinator"]):::error
+  n10 -->|"sí"| n11
+  n12{"job.statusConceptId !== CONCEPTS.JOB_RUNNING"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED El trabajo no está en ejecución"]):::error
+  n12 -->|"sí"| n13
+  n14{"job.lockedBy !== dto.workerId"}:::decision
+  n12 -->|"no"| n14
+  n15(["422 PRECONDITION_FAILED El trabajo está reservado por otro worker"]):::error
+  n14 -->|"sí"| n15
+  n16[("ACTUALIZA messaging.queued_jobs · ACTUALIZA messaging.queued_jobs · ACTUALIZA messaging.queued_jobs · ACTUALI…")]:::efecto
+  n14 -->|"no"| n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -401,7 +407,7 @@ Registrar el fallo del trabajo
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Trabajo no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El trabajo no está en ejecución; PreconditionFailedException: El trabajo está reservado por otro worker |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Storage intent requires its lifecycle coordinator; PreconditionFailedException: El trabajo no está en ejecución; PreconditionFailedException: El trabajo está reservado por otro worker |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -421,35 +427,41 @@ flowchart TD
   n6 --> n7
   n8(["404 NOT_FOUND Trabajo no encontrado"]):::error
   n7 -->|"sí"| n8
-  n9{"job.statusConceptId !== CONCEPTS.JOB_RUNNING"}:::decision
+  n9["Llama a QueuesService.assertGenericJob"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El trabajo no está en ejecución"]):::error
-  n9 -->|"sí"| n10
-  n11{"job.lockedBy !== dto.workerId"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED El trabajo está reservado por otro worker"]):::error
-  n11 -->|"sí"| n12
-  n13[("ACTUALIZA messaging.queued_jobs · ACTUALIZA messaging.queued_jobs · ACTUALIZA messaging.queued_jobs")]:::efecto
-  n11 -->|"no"| n13
-  n14{"attempts ‹ maxAttempts"}:::decision
-  n13 --> n14
-  n15[("ACTUALIZA messaging.queued_jobs · ACTUALIZA messaging.queued_jobs")]:::efecto
+  n10{"isStorageJobType(jobType) || dedupeKey?.startsWith('storage-lifecycle:')"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED Storage intent requires its lifecycle coordinator"]):::error
+  n10 -->|"sí"| n11
+  n12{"job.statusConceptId !== CONCEPTS.JOB_RUNNING"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED El trabajo no está en ejecución"]):::error
+  n12 -->|"sí"| n13
+  n14{"job.lockedBy !== dto.workerId"}:::decision
+  n12 -->|"no"| n14
+  n15(["422 PRECONDITION_FAILED El trabajo está reservado por otro worker"]):::error
   n14 -->|"sí"| n15
-  n16[("ACTUALIZA messaging.queued_jobs")]:::efecto
-  n15 --> n16
+  n16[("ACTUALIZA messaging.queued_jobs · ACTUALIZA messaging.queued_jobs · ACTUALIZA messaging.queued_jobs")]:::efecto
   n14 -->|"no"| n16
-  n17["Llama a QueuesRepository.createDeadLetterJob"]:::llamada
+  n17{"attempts ‹ maxAttempts"}:::decision
   n16 --> n17
-  n18[("CREA messaging.dead_letter_jobs")]:::efecto
-  n17 --> n18
-  n19["Llama a QueuesService.deadLetterQueueId"]:::llamada
+  n18[("ACTUALIZA messaging.queued_jobs · ACTUALIZA messaging.queued_jobs")]:::efecto
+  n17 -->|"sí"| n18
+  n19[("ACTUALIZA messaging.queued_jobs")]:::efecto
   n18 --> n19
-  n20["Llama a QueuesRepository.findQueueById"]:::llamada
+  n17 -->|"no"| n19
+  n20["Llama a QueuesRepository.createDeadLetterJob"]:::llamada
   n19 --> n20
-  n21[("LEE messaging.message_queues")]:::efecto
+  n21[("CREA messaging.dead_letter_jobs")]:::efecto
   n20 --> n21
-  n22(("200 Responde con éxito")):::ok
+  n22["Llama a QueuesService.deadLetterQueueId"]:::llamada
   n21 --> n22
+  n23["Llama a QueuesRepository.findQueueById"]:::llamada
+  n22 --> n23
+  n24[("LEE messaging.message_queues")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -657,7 +669,7 @@ Reclamar un lote de trabajos de la cola
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cola no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cola no está activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cola no está activa; PreconditionFailedException: Storage intent requires its lifecycle coordinator |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -685,8 +697,17 @@ flowchart TD
   n9 -->|"no"| n11
   n12[("LEE messaging.queued_jobs")]:::efecto
   n11 --> n12
-  n13(("200 Responde con éxito")):::ok
+  n13["Repite: map(…)"]:::bucle
   n12 --> n13
+  n14["Llama a QueuesService.assertGenericJob"]:::llamada
+  n13 -->|"cada elemento"| n14
+  n15{"isStorageJobType(jobType) || dedupeKey?.startsWith('storage-lifecycle:')"}:::decision
+  n14 --> n15
+  n16(["422 PRECONDITION_FAILED Storage intent requires its lifecycle coordinator"]):::error
+  n15 -->|"sí"| n16
+  n17(("200 Responde con éxito")):::ok
+  n15 -->|"no"| n17
+  n13 -->|"al terminar"| n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -766,7 +787,7 @@ flowchart TD
   n4 --> n5
   n6[("LEE messaging.in_app_notifications")]:::efecto
   n5 --> n6
-  n7["Repite: por cada const notification de pendientes"]:::bucle
+  n7["Repite: por cada const notification de pending"]:::bucle
   n6 --> n7
   n8[("ACTUALIZA messaging.in_app_notifications · ACTUALIZA messaging.in_app_notifications · ACTUALIZA messaging.in_…")]:::efecto
   n7 -->|"cada elemento"| n8
@@ -860,9 +881,9 @@ flowchart TD
   n7 -->|"no"| n9
   n10[("LEE messaging.recipient_preferences")]:::efecto
   n9 --> n10
-  n11["Repite: por cada const cambio de dto.categories ?? []"]:::bucle
+  n11["Repite: por cada const change de dto.categories ?? []"]:::bucle
   n10 --> n11
-  n12{"fila"}:::decision
+  n12{"row"}:::decision
   n11 -->|"cada elemento"| n12
   n13["Llama a NotificationsRepository.createPreference"]:::llamada
   n12 -->|"no"| n13
@@ -872,7 +893,7 @@ flowchart TD
   n12 -->|"sí"| n15
   n14 --> n15
   n11 -->|"al terminar"| n15
-  n16{"fila"}:::decision
+  n16{"row"}:::decision
   n15 -->|"sí"| n16
   n17["Llama a NotificationsRepository.createPreference"]:::llamada
   n16 -->|"no"| n17
@@ -1000,7 +1021,7 @@ Encolar un trabajo
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cola no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cola no está activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Storage intent requires its lifecycle coordinator; PreconditionFailedException: La cola no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1010,32 +1031,47 @@ flowchart TD
   n1 --> n2
   n3["Llama a QueuesService.enqueueJob"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a QueuesService.assertGenericJob"]:::llamada
   n3 --> n4
-  n5["Llama a QueuesRepository.findQueueByCode"]:::llamada
+  n5{"isStorageJobType(jobType) || dedupeKey?.startsWith('storage-lifecycle:')"}:::decision
   n4 --> n5
-  n6[("LEE messaging.message_queues")]:::efecto
-  n5 --> n6
-  n7{"!queue"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Cola no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"queue.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La cola no está activa"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a QueuesRepository.findJobByDedupeKey"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE messaging.queued_jobs")]:::efecto
-  n11 --> n12
-  n13["Llama a QueuesRepository.createJob"]:::llamada
-  n12 --> n13
-  n14[("CREA messaging.queued_jobs")]:::efecto
-  n13 --> n14
-  n15>"Encola ~code"]:::evento
+  n6(["422 PRECONDITION_FAILED Storage intent requires its lifecycle coordinator"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a QueuesRepository.findQueueByCode"]:::llamada
+  n7 --> n8
+  n9[("LEE messaging.message_queues")]:::efecto
+  n8 --> n9
+  n10{"!queue"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Cola no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12{"queue.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED La cola no está activa"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a QueuesRepository.findJobByDedupeKey"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE messaging.queued_jobs")]:::efecto
   n14 --> n15
-  n16(("201 Responde con éxito")):::ok
+  n16{"existing"}:::decision
   n15 --> n16
+  n17["Llama a QueuesService.assertGenericJob"]:::llamada
+  n16 -->|"sí"| n17
+  n18{"isStorageJobType(jobType) || dedupeKey?.startsWith('storage-lifecycle:')"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED Storage intent requires its lifecycle coordinator"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a QueuesRepository.createJob"]:::llamada
+  n18 -->|"no"| n20
+  n16 -->|"no"| n20
+  n21[("CREA messaging.queued_jobs")]:::efecto
+  n20 --> n21
+  n22>"Encola ~code"]:::evento
+  n21 --> n22
+  n23(("201 Responde con éxito")):::ok
+  n22 --> n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1055,7 +1091,7 @@ Reencolar un trabajo desde la cola muerta
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Entrada de cola muerta no encontrada; ResourceNotFoundException: Cola de destino no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cola de destino no está activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Storage intent requires its lifecycle coordinator; PreconditionFailedException: La cola de destino no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1079,28 +1115,62 @@ flowchart TD
   n7 -->|"no"| n9
   n10[("LEE messaging.queued_jobs")]:::efecto
   n9 --> n10
-  n11["Llama a QueuesRepository.findQueueById"]:::llamada
+  n11["Llama a QueuesService.assertGenericJob"]:::llamada
   n10 --> n11
-  n12[("LEE messaging.message_queues")]:::efecto
+  n12{"isStorageJobType(jobType) || dedupeKey?.startsWith('storage-lifecycle:')"}:::decision
   n11 --> n12
-  n13{"!queue"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Cola de destino no encontrada"]):::error
-  n13 -->|"sí"| n14
-  n15{"queue.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED La cola de destino no está activa"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a QueuesRepository.findJobByDedupeKey"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE messaging.queued_jobs")]:::efecto
-  n17 --> n18
-  n19["Llama a QueuesRepository.createJob"]:::llamada
+  n13(["422 PRECONDITION_FAILED Storage intent requires its lifecycle coordinator"]):::error
+  n12 -->|"sí"| n13
+  n14{"original"}:::decision
+  n12 -->|"no"| n14
+  n15["Llama a QueuesService.assertGenericJob"]:::llamada
+  n14 -->|"sí"| n15
+  n16{"isStorageJobType(jobType) || dedupeKey?.startsWith('storage-lifecycle:')"}:::decision
+  n15 --> n16
+  n17(["422 PRECONDITION_FAILED Storage intent requires its lifecycle coordinator"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a QueuesService.assertGenericJob"]:::llamada
+  n16 -->|"no"| n18
+  n14 -->|"no"| n18
+  n19{"isStorageJobType(jobType) || dedupeKey?.startsWith('storage-lifecycle:')"}:::decision
   n18 --> n19
-  n20[("CREA messaging.queued_jobs")]:::efecto
-  n19 --> n20
-  n21(("201 Responde con éxito")):::ok
-  n20 --> n21
+  n20(["422 PRECONDITION_FAILED Storage intent requires its lifecycle coordinator"]):::error
+  n19 -->|"sí"| n20
+  n21{"!original && dead.payloadJson && typeof dead.payloadJson === 'object' && 'ownerToken' in dead.payloadJson &&…"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED Storage intent requires its lifecycle coordinator"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a QueuesRepository.findQueueById"]:::llamada
+  n21 -->|"no"| n23
+  n24[("LEE messaging.message_queues")]:::efecto
+  n23 --> n24
+  n25{"!queue"}:::decision
+  n24 --> n25
+  n26(["404 NOT_FOUND Cola de destino no encontrada"]):::error
+  n25 -->|"sí"| n26
+  n27{"queue.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n25 -->|"no"| n27
+  n28(["422 PRECONDITION_FAILED La cola de destino no está activa"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a QueuesRepository.findJobByDedupeKey"]:::llamada
+  n27 -->|"no"| n29
+  n30[("LEE messaging.queued_jobs")]:::efecto
+  n29 --> n30
+  n31{"already"}:::decision
+  n30 --> n31
+  n32["Llama a QueuesService.assertGenericJob"]:::llamada
+  n31 -->|"sí"| n32
+  n33{"isStorageJobType(jobType) || dedupeKey?.startsWith('storage-lifecycle:')"}:::decision
+  n32 --> n33
+  n34(["422 PRECONDITION_FAILED Storage intent requires its lifecycle coordinator"]):::error
+  n33 -->|"sí"| n34
+  n35["Llama a QueuesRepository.createJob"]:::llamada
+  n33 -->|"no"| n35
+  n31 -->|"no"| n35
+  n36[("CREA messaging.queued_jobs")]:::efecto
+  n35 --> n36
+  n37(("201 Responde con éxito")):::ok
+  n36 --> n37
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

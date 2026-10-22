@@ -16,7 +16,7 @@
 | [integration_field_mappings](#integration_field_mappings) | Mapea campos entre contratos externos y estructuras internas para intercambiar datos con significado consistente. | 12 | 5 | 1 | COINCIDE |
 | [message_responses](#message_responses) | Conserva respuestas asociadas a mensajes intercambiados para conocer el resultado informado por sistemas externos. | 12 | 3 | 2 | COINCIDE |
 | [message_retries](#message_retries) | Traza reintentos de mensajes fallidos para sostener entrega confiable sin perder historial operativo. | 14 | 5 | 5 | COINCIDE |
-| [outbound_messages](#outbound_messages) | Mantiene mensajes salientes hacia proveedores o sistemas conectados para rastrear entregas e interoperabilidad. | 18 | 6 | 13 | COINCIDE |
+| [outbound_messages](#outbound_messages) | Mantiene mensajes salientes hacia proveedores o sistemas conectados para rastrear entregas e interoperabilidad. | 18 | 6 | 14 | COINCIDE |
 | [provider_connections](#provider_connections) | Configura vínculos operativos con proveedores externos para mantener su contexto y estado de integración. | 14 | 8 | 8 | COINCIDE |
 | [provider_credentials](#provider_credentials) | Gestiona referencias protegidas a credenciales usadas para autenticar conexiones con proveedores. | 13 | 5 | 4 | COINCIDE |
 | [webhook_subscriptions](#webhook_subscriptions) | Define suscripciones a webhooks para comunicar eventos del sistema a consumidores externos autorizados. | 12 | 6 | 3 | COINCIDE |
@@ -600,7 +600,7 @@ Mantiene mensajes salientes hacia proveedores o sistemas conectados para rastrea
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_12_integrations.puml: outbound_messages`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_12_integrations.puml` · **DDL:** `SQL/12_integrations/02_tables.sql`
 - **Entidad del ORM:** `OutboundMessages` — `src/modules/integrations/entities/outbound_messages.entity.ts`
-- **Resumen:** 18 columnas · 6 índices · 5 FK salientes · 4 entrantes · 13 operaciones
+- **Resumen:** 18 columnas · 6 índices · 5 FK salientes · 4 entrantes · 14 operaciones
 
 #### Columnas
 
@@ -660,7 +660,8 @@ Mantiene mensajes salientes hacia proveedores o sistemas conectados para rastrea
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /integrations/connections/{id}:pause | ACTUALIZA | DIRECTA |
+| POST /integrations/connections/{id}:pause | ACTUALIZA | POR_TIPO |
+| POST /integrations/connections/{id}:pause | LEE | DIRECTA |
 | POST /integrations/messages:outbound | CREA | DIRECTA |
 | POST /integrations/messages:outbound | LEE | DIRECTA |
 | POST /integrations/messages/{id}:correlate | ACTUALIZA | POR_TIPO |

@@ -38,7 +38,7 @@ sujeto (open, created) + envío (preparing)
 sla/scan ──> hito siguiente vencido ⇒ evento de incumplimiento + escalada de prioridad
 ```
 
-_Fuente: `src/modules/tracking/README.md:28`_
+_Fuente: `src/modules/tracking/README.md:59`_
 
 ### Etapas y operaciones
 

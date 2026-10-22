@@ -39,7 +39,7 @@
 
 Historial de transiciones del agregado. Caso de uso UC-32-11: Estado e historial. Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -51,9 +51,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AUDITOR, COMPLIANCE_OFFICER, CLINICIAN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:47` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -133,7 +133,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Disparar una transición validada. Caso de uso UC-32-05: Disparar transición validada. Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -145,13 +145,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CABECERA | idempotency-key (obligatoria) | `contrato (parameters)` |
 | CABECERA | Idempotency-Key (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:68` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -270,7 +270,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Compensar una transición. Caso de uso UC-32-08: Compensar (saga). Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -282,11 +282,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SAGA_ORCHESTRATOR, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId, eventId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:98` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -388,7 +388,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reintentar una transición cuyo efecto falló. Caso de uso UC-32-09: Reintentar transición fallida. Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -400,11 +400,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:121` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId, eventId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:121` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -500,7 +500,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Crear una instancia de workflow y sus tareas iniciales. Caso de uso UC-32-12: Crear instancia y tareas. Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -512,10 +512,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-instances.controller.ts:54` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -640,7 +640,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Escalar las instancias con el plazo vencido. Caso de uso UC-32-10: Escalar por vencimiento. Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -652,10 +652,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-instances.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -740,7 +740,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar una definición de máquina de estado. Caso de uso UC-32-01: Registrar definición de máquina. Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:42`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -752,10 +752,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:42` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -854,7 +854,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Publicar la versión de la definición. Caso de uso UC-32-04: Publicar/activar la versión. Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -866,11 +866,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-definitions.controller.ts:91` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -964,7 +964,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Declarar los estados de la máquina. Caso de uso UC-32-02: Declarar estados (inicial/terminal). Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:43`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -976,11 +976,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-definitions.controller.ts:58` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1087,7 +1087,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Declarar una transición con sus guardas y efectos. Caso de uso UC-32-03: Transición con guardas y efectos. Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:44`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1099,11 +1099,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-definitions.controller.ts:75` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1252,7 +1252,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Completar una tarea de workflow. Caso de uso UC-32-13: Completar tarea. Dentro del módulo (descripción del modelo, en inglés): «Makes lifecycle rules executable and auditable.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflow/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_32_workflow.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1264,11 +1264,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, BILLING_AGENT, SCHEDULER, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-instances.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-instances.controller.ts:70` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

@@ -79,7 +79,6 @@ export class AdminCatalogController {
   @Get('schemas')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogListSchemas',
     summary:
       'Schemas observados, con cuántos objetos tienen ficha y cuántos están aprobados',
   })
@@ -91,7 +90,6 @@ export class AdminCatalogController {
   @Get('objects')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogListObjects',
     summary: 'Objetos del catálogo, paginados por cursor',
   })
   @ApiResponse({ status: 200, type: CatalogObjectsPageDto })
@@ -102,7 +100,6 @@ export class AdminCatalogController {
   @Get('objects/:id')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogGetObject',
     summary:
       'Ficha técnica, observación, ficha curada, cobertura y gobierno de un objeto',
   })
@@ -115,7 +112,6 @@ export class AdminCatalogController {
   @Get('objects/:id/columns')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogListColumns',
     summary: 'Columnas observadas de un objeto, con su ficha si la tienen',
   })
   @ApiResponse({ status: 200, type: CatalogColumnsDto })
@@ -126,7 +122,6 @@ export class AdminCatalogController {
   @Get('objects/:id/evidence')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogListEvidence',
     summary: 'Evidencia enlazada a un objeto',
   })
   @ApiResponse({ status: 200, type: [EvidenceDto] })
@@ -138,7 +133,6 @@ export class AdminCatalogController {
   @Roles(...CATALOG_WRITE_ROLES)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    operationId: 'adminCatalogAddEvidence',
     summary: 'Enlaza evidencia a un objeto',
   })
   @ApiResponse({ status: 201, type: EvidenceDto })
@@ -153,7 +147,6 @@ export class AdminCatalogController {
   @Get('objects/:id/history')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogGetHistory',
     summary: 'Revisiones y decisiones de la ficha de un objeto',
   })
   @ApiResponse({ status: 200, type: AnnotationHistoryDto })
@@ -164,7 +157,6 @@ export class AdminCatalogController {
   @Get('objects/:id/changes')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogListChanges',
     summary: 'Cambios que los escaneos detectaron en un objeto',
   })
   @ApiResponse({ status: 200, type: ChangesPageDto })
@@ -175,7 +167,6 @@ export class AdminCatalogController {
   @Get('objects/:id/impact')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogGetImpact',
     summary:
       'Quién referencia a un objeto y a quién referencia, por claves foráneas observadas',
   })
@@ -187,7 +178,6 @@ export class AdminCatalogController {
   @Put('objects/:id/annotation')
   @Roles(...CATALOG_WRITE_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogSaveAnnotation',
     summary: 'Crea o edita la ficha de un objeto (con versión esperada)',
   })
   @ApiResponse({ status: 200, type: AnnotationDto })
@@ -212,7 +202,6 @@ export class AdminCatalogController {
   @Roles(...CATALOG_WRITE_ROLES)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    operationId: 'adminCatalogReviewAnnotation',
     summary: 'Aprueba o rechaza la revisión vigente de una ficha',
   })
   @ApiResponse({ status: 200, type: AnnotationDto })
@@ -239,7 +228,6 @@ export class AdminCatalogController {
   @Get('coverage')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogGetCoverage',
     summary: 'Cobertura del catálogo por dimensión, calculada por el servidor',
   })
   @ApiResponse({ status: 200, type: CatalogCoverageDto })
@@ -250,7 +238,6 @@ export class AdminCatalogController {
   @Get('scans')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
-    operationId: 'adminCatalogListScans',
     summary: 'Escaneos, del más reciente al más antiguo',
   })
   @ApiResponse({ status: 200, type: ScansPageDto })
@@ -260,7 +247,7 @@ export class AdminCatalogController {
 
   @Get('scans/:id')
   @Roles(...PORTAL_READ_ROLES)
-  @ApiOperation({ operationId: 'adminCatalogGetScan', summary: 'Un escaneo' })
+  @ApiOperation({ summary: 'Un escaneo' })
   @ApiResponse({ status: 200, type: ScanDto })
   scan(@Param() p: ObjectIdParamDto) {
     return this.read.scan(p.id);
@@ -276,7 +263,6 @@ export class AdminCatalogController {
       '8–128 caracteres; la misma clave del mismo usuario devuelve el escaneo ya aceptado',
   })
   @ApiOperation({
-    operationId: 'adminCatalogRequestScan',
     summary:
       'Pide un escaneo de la base primaria (se ejecuta fuera de la petición)',
   })

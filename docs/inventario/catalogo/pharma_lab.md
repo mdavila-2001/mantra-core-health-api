@@ -22,7 +22,7 @@
 | [pharma_cost_allocations](#pharma_cost_allocations) | Asigna importes contables a laboratorio, producto y representante, para rastrear costos de actividades de promoción farmacéutica. | 18 | 9 | 2 | COINCIDE |
 | [pharma_lab_link_events](#pharma_lab_link_events) | Registra eventos de vinculación entre laboratorio, personal, representante y usuario, dejando trazabilidad de la gestión de acceso a la red farmacéutica. | 13 | 6 | 7 | COINCIDE |
 | [pharma_lab_notices](#pharma_lab_notices) | Guarda avisos dirigidos a usuarios de un laboratorio con plantilla y asunto, para comunicar información operativa de actividades farmacéuticas. | 15 | 4 | 16 | COINCIDE |
-| [pharma_lab_staff](#pharma_lab_staff) | Relaciona usuarios con laboratorios y roles de personal, definiendo quién puede gestionar productos, documentos y visitas farmacéuticas. | 19 | 8 | 11 | COINCIDE |
+| [pharma_lab_staff](#pharma_lab_staff) | Relaciona usuarios con laboratorios y roles de personal, definiendo quién puede gestionar productos, documentos y visitas farmacéuticas. | 19 | 8 | 15 | COINCIDE |
 | [pharma_labs](#pharma_labs) | Representa laboratorios farmacéuticos y su tipo institucional para organizar productos, personal, documentos regulatorios y vínculos con profesionales. | 16 | 5 | 55 | COINCIDE |
 | [pharma_products](#pharma_products) | Registra productos de cada laboratorio con nombre comercial y principio activo, conectándolos con información médica, visitas y farmacovigilancia. | 23 | 5 | 13 | COINCIDE |
 | [pharmacovigilance_actions](#pharmacovigilance_actions) | Registra acciones y transiciones de estado sobre reportes de farmacovigilancia para dar seguimiento a casos de seguridad de productos. | 12 | 6 | 3 | COINCIDE |
@@ -1347,7 +1347,7 @@ Relaciona usuarios con laboratorios y roles de personal, definiendo quién puede
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_69_pharma_lab.puml:219: entity pharma_lab_staff {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_69_pharma_lab.puml` · **DDL:** `SQL/69_pharma_lab/02_tables.sql`
 - **Entidad del ORM:** `PharmaLabStaff` — `src/modules/pharma_lab/entities/pharma_lab_staff.entity.ts`
-- **Resumen:** 19 columnas · 8 índices · 8 FK salientes · 7 entrantes · 11 operaciones
+- **Resumen:** 19 columnas · 8 índices · 8 FK salientes · 7 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -1398,11 +1398,11 @@ Relaciona usuarios con laboratorios y roles de personal, definiendo quién puede
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_pharma_lab_staff_pharma_lab_id` | no | pharma_lab_id | Soporta la clave foránea fk_pharma_lab_staff_pharma_lab_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «pharma_lab_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_pharma_lab_staff_user_id` | no | user_id | Soporta la clave foránea fk_pharma_lab_staff_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_pharma_lab_staff_user_id` | no | user_id | Soporta la clave foránea fk_pharma_lab_staff_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharma_lab_staff_staff_type_concept_id` | no | staff_type_concept_id | Soporta la clave foránea fk_pharma_lab_staff_staff_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharma_lab_staff_branch_id` | no | branch_id | Soporta la clave foránea fk_pharma_lab_staff_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharma_lab_staff_credential_verification_concept_id` | no | credential_verification_concept_id | Soporta la clave foránea fk_pharma_lab_staff_credential_verification_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_pharma_lab_staff_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_pharma_lab_staff_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_pharma_lab_staff_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_pharma_lab_staff_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharma_lab_staff_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_pharma_lab_staff_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharma_lab_staff_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_pharma_lab_staff_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -1410,6 +1410,10 @@ Relaciona usuarios con laboratorios y roles de personal, definiendo quién puede
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /pharma-labs | LEE | DIRECTA |
+| GET /pharma-labs/{pharmaLabId} | LEE | DIRECTA |
+| PATCH /pharma-labs/{pharmaLabId} | LEE | DIRECTA |
+| GET /pharma-labs/{pharmaLabId}/link-events | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | ACTUALIZA | POR_TIPO |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | LEE | DIRECTA |

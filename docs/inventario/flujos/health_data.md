@@ -50,7 +50,7 @@ deidentification-runs ──> procedencia DEIDENTIFY + linaje versión → manif
 /fhir/r5/Patient/:id/$everything ──> versiones vigentes, expandidas por el clúster del MPI
 ```
 
-_Fuente: `src/modules/health_data/README.md:55`_
+_Fuente: `src/modules/health_data/README.md:91`_
 
 ### Etapas y operaciones
 

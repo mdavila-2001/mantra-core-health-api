@@ -52,7 +52,7 @@ MANTENIMIENTO
   .../retire · /lifecycle ────> modelo retirado, colección sellada, bindings congelados
 ```
 
-_Fuente: `src/modules/vector_rag/README.md:43`_
+_Fuente: `src/modules/vector_rag/README.md:79`_
 
 ### Etapas y operaciones
 

@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
@@ -194,27 +194,32 @@ export class BusquedaQueryDto extends PaginacionQueryDto {
 
 /** Parámetro de ruta con el identificador de una operación (`Clase_método`). */
 export class OperacionIdParamDto {
+  @ApiProperty()
   @Matches(/^[A-Za-z0-9_]{1,200}$/, { message: 'id de operación inválido' })
   id!: string;
 }
 
 /** Parámetro de ruta con el código de un proceso (`scheduling`, `critico:scheduling`). */
 export class ProcesoCodigoParamDto {
+  @ApiProperty()
   @Matches(/^[a-z0-9_:]{1,80}$/, { message: 'código de proceso inválido' })
   codigo!: string;
 }
 
 /** Parámetros de ruta de una tabla. */
 export class TablaParamDto {
+  @ApiProperty()
   @Matches(IDENTIFICADOR, { message: 'schema inválido' })
   schema!: string;
 
+  @ApiProperty()
   @Matches(IDENTIFICADOR, { message: 'tabla inválida' })
   tabla!: string;
 }
 
 /** Parámetro de ruta con el identificador de un hallazgo (`FLU-01`). */
 export class HallazgoIdParamDto {
+  @ApiProperty()
   @Matches(/^[A-Z]{3}-\d{2}$/, { message: 'id de hallazgo inválido' })
   id!: string;
 }

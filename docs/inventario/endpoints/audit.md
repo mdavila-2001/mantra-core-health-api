@@ -5,24 +5,24 @@
 - **Bloque:** Auditoría y Reporting (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 - **Operaciones:** 11 (11 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 10 · BAJO 0
-- **Tablas distintas que tocan:** 11
+- **Tablas distintas que tocan:** 12
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/audit.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/audit/anomaly/scan` | Detectar acceso anómalo | MEDIO | 3 | SECURITY_ADMIN |
-| 2 | POST | `/audit/data-access` | Registrar acceso/lectura clínica (accounting WORM) | MEDIO | 4 | SECURITY_ADMIN |
-| 3 | POST | `/audit/events` | Registrar provenance de un cambio y sellar la cadena hash | MEDIO | 2 | SECURITY_ADMIN |
-| 4 | GET | `/audit/history/{entity}/{id}` | Consultar historial / línea de tiempo de un registro | MEDIO | 3 | SECURITY_ADMIN |
-| 5 | POST | `/audit/integrity/verify` | Verificar integridad tamper-evidence de la cadena | MEDIO | 2 | SECURITY_ADMIN |
-| 6 | POST | `/audit/retention/apply` | Aplicar retención / archivado / litigation-hold | ALTO | 3 | SECURITY_ADMIN |
-| 7 | POST | `/audit/third-party-access` | Registrar acceso delegado / de tercero gobernado | MEDIO | 6 | SECURITY_ADMIN |
-| 8 | POST | `/compliance/audit-export` | Exportar evidencia de auditoría para cumplimiento | MEDIO | 4 | SECURITY_ADMIN |
-| 9 | POST | `/moderation/decisions` | Registrar decisión de moderación / gobernanza analítica | MEDIO | 5 | SECURITY_ADMIN |
-| 10 | POST | `/privacy/dsar` | Tramitar DSAR (solicitud del titular) | MEDIO | 4 | SECURITY_ADMIN |
-| 11 | PATCH | `/privacy/dsar/{id}` | Avanzar la máquina de estados de una solicitud DSAR | MEDIO | 4 | SECURITY_ADMIN |
+| 1 | POST | `/audit/anomaly/scan` | Detectar acceso anómalo | MEDIO | 4 | SECURITY_ADMIN |
+| 2 | POST | `/audit/data-access` | Registrar acceso/lectura clínica (accounting WORM) | MEDIO | 5 | SECURITY_ADMIN |
+| 3 | POST | `/audit/events` | Registrar provenance de un cambio y sellar la cadena hash | MEDIO | 3 | SECURITY_ADMIN |
+| 4 | GET | `/audit/history/{entity}/{id}` | Consultar historial / línea de tiempo de un registro | MEDIO | 4 | SECURITY_ADMIN |
+| 5 | POST | `/audit/integrity/verify` | Verificar integridad tamper-evidence de la cadena | MEDIO | 3 | SECURITY_ADMIN |
+| 6 | POST | `/audit/retention/apply` | Aplicar retención / archivado / litigation-hold | ALTO | 4 | SECURITY_ADMIN |
+| 7 | POST | `/audit/third-party-access` | Registrar acceso delegado / de tercero gobernado | MEDIO | 7 | SECURITY_ADMIN |
+| 8 | POST | `/compliance/audit-export` | Exportar evidencia de auditoría para cumplimiento | MEDIO | 5 | SECURITY_ADMIN |
+| 9 | POST | `/moderation/decisions` | Registrar decisión de moderación / gobernanza analítica | MEDIO | 6 | SECURITY_ADMIN |
+| 10 | POST | `/privacy/dsar` | Tramitar DSAR (solicitud del titular) | MEDIO | 5 | SECURITY_ADMIN |
+| 11 | PATCH | `/privacy/dsar/{id}` | Avanzar la máquina de estados de una solicitud DSAR | MEDIO | 5 | SECURITY_ADMIN |
 
 ---
 
@@ -39,11 +39,11 @@
 
 Detectar acceso anómalo. Caso de uso UC-10-10: Detectar acceso anómalo. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /audit/anomaly/scan` la atiende `AuditController.scanAnomaly` (src/modules/audit/controllers/audit.controller.ts:129). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AnomalyScanDto` (3 campos, 0 obligatorios). Delega en `AuditEventsService.scanAnomaly`. Crea filas en audit.audit_log. Lee audit.audit_log, audit.data_access_log.
+`POST /audit/anomaly/scan` la atiende `AuditController.scanAnomaly` (src/modules/audit/controllers/audit.controller.ts:129). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AnomalyScanDto` (3 campos, 0 obligatorios). Delega en `AuditEventsService.scanAnomaly`. Crea filas en audit.audit_log. Lee audit.audit_log, audit.data_access_log, iam.sessions.
 
 ### Requerimientos
 
@@ -51,18 +51,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:129` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `audit.data_access_log` | LEE | LEE | DIRECTA | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → DataAccessLogRepository.countByUserSince | `src/modules/audit/repositories/data-access-log.repository.ts:146` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Cuerpo — DTO `AnomalyScanDto` · `application/json`
 
@@ -135,11 +136,11 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Registrar acceso/lectura clínica (accounting WORM). Caso de uso UC-10-01: Registrar acceso/lectura clínica (accounting WORM) + provenance. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:43`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /audit/data-access` la atiende `AuditController.recordDataAccess` (src/modules/audit/controllers/audit.controller.ts:59). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordDataAccessDto` (10 campos, 0 obligatorios). Delega en `AuditEventsService.recordDataAccess`. Crea filas en audit.audit_log, audit.data_access_log, audit.patient_content_access_log. Lee audit.audit_log.
+`POST /audit/data-access` la atiende `AuditController.recordDataAccess` (src/modules/audit/controllers/audit.controller.ts:59). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordDataAccessDto` (10 campos, 0 obligatorios). Delega en `AuditEventsService.recordDataAccess`. Crea filas en audit.audit_log, audit.data_access_log, audit.patient_content_access_log. Lee audit.audit_log, iam.sessions.
 
 ### Requerimientos
 
@@ -147,19 +148,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:59` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `audit.data_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → DataAccessLogRepository.record | `src/modules/audit/repositories/data-access-log.repository.ts:98` |
 | `audit.patient_content_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → DataAccessLogRepository.recordPatientContent | `src/modules/audit/repositories/data-access-log.repository.ts:121` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Cuerpo — DTO `RecordDataAccessDto` · `application/json`
 
@@ -247,11 +249,11 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Registrar provenance de un cambio y sellar la cadena hash. Caso de uso UC-10-04: Registrar provenance de un cambio y sellar la cadena hash (incluye UC-10-03). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:44`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /audit/events` la atiende `AuditController.recordEvent` (src/modules/audit/controllers/audit.controller.ts:73). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordAuditEventDto` (8 campos, 3 obligatorios). Delega en `AuditEventsService.recordEvent`. Crea filas en audit.audit_log. Lee audit.audit_log.
+`POST /audit/events` la atiende `AuditController.recordEvent` (src/modules/audit/controllers/audit.controller.ts:73). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordAuditEventDto` (8 campos, 3 obligatorios). Delega en `AuditEventsService.recordEvent`. Crea filas en audit.audit_log. Lee audit.audit_log, iam.sessions.
 
 ### Requerimientos
 
@@ -259,17 +261,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Cuerpo — DTO `RecordAuditEventDto` · `application/json`
 
@@ -357,11 +360,11 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Consultar historial / línea de tiempo de un registro. Caso de uso UC-10-05: Consultar historial / línea de tiempo (audita la propia lectura). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`GET /audit/history/{entity}/{id}` la atiende `AuditController.getHistory` (src/modules/audit/controllers/audit.controller.ts:87). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AuditHistoryService.getTimeline`. Crea filas en audit.audit_log, audit.data_access_log. Lee audit.audit_log. Hay 1 llamada cuyo destino depende de un dato en tiempo de ejecución y no se siguió.
+`GET /audit/history/{entity}/{id}` la atiende `AuditController.getHistory` (src/modules/audit/controllers/audit.controller.ts:87). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AuditHistoryService.getTimeline`. Crea filas en audit.audit_log, audit.data_access_log. Lee audit.audit_log, iam.sessions. Hay 1 llamada cuyo destino depende de un dato en tiempo de ejecución y no se siguió.
 
 ### Requerimientos
 
@@ -369,17 +372,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/audit/controllers/audit.controller.ts:87` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `audit.data_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.getHistory → AuditHistoryService.getTimeline → DataAccessLogRepository.record | `src/modules/audit/repositories/data-access-log.repository.ts:98` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 **No se pudo seguir** (el destino depende de un dato en tiempo de ejecución):
 
@@ -451,11 +455,11 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Verificar integridad tamper-evidence de la cadena. Caso de uso UC-10-06: Verificar integridad tamper-evidence y atestar. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /audit/integrity/verify` la atiende `AuditController.verifyIntegrity` (src/modules/audit/controllers/audit.controller.ts:103). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AuditVerifyIntegrityDto` (2 campos, 0 obligatorios). Delega en `AuditEventsService.verifyIntegrity`. Crea filas en audit.audit_log. Lee audit.audit_log.
+`POST /audit/integrity/verify` la atiende `AuditController.verifyIntegrity` (src/modules/audit/controllers/audit.controller.ts:103). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AuditVerifyIntegrityDto` (2 campos, 0 obligatorios). Delega en `AuditEventsService.verifyIntegrity`. Crea filas en audit.audit_log. Lee audit.audit_log, iam.sessions.
 
 ### Requerimientos
 
@@ -463,17 +467,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.findChain | `src/modules/audit/repositories/audit-log.repository.ts:203` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.findChain | `src/modules/audit/repositories/audit-log.repository.ts:250` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Cuerpo — DTO `AuditVerifyIntegrityDto` · `application/json`
 
@@ -545,11 +550,11 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Aplicar retención / archivado / litigation-hold. Caso de uso UC-10-09: Aplicar retención / archivado / litigation-hold. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /audit/retention/apply` la atiende `AuditController.applyRetention` (src/modules/audit/controllers/audit.controller.ts:117). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RetentionApplyDto` (3 campos, 0 obligatorios). Delega en `AuditEventsService.applyRetention`. Crea filas en audit.audit_log. Borra de audit.data_access_log. Lee audit.audit_log.
+`POST /audit/retention/apply` la atiende `AuditController.applyRetention` (src/modules/audit/controllers/audit.controller.ts:117). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RetentionApplyDto` (3 campos, 0 obligatorios). Delega en `AuditEventsService.applyRetention`. Crea filas en audit.audit_log. Borra de audit.data_access_log. Lee audit.audit_log, iam.sessions.
 
 ### Requerimientos
 
@@ -557,18 +562,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:117` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `audit.data_access_log` | BORRA | BORRA | DIRECTA | AuditController.applyRetention → AuditEventsService.applyRetention → DataAccessLogRepository.purgeOlderThan | `src/modules/audit/repositories/data-access-log.repository.ts:163` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Cuerpo — DTO `RetentionApplyDto` · `application/json`
 
@@ -642,11 +648,11 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Registrar acceso delegado / de tercero gobernado. Caso de uso UC-10-12: Registrar acceso delegado / de tercero gobernado. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /audit/third-party-access` la atiende `AuditController.recordThirdPartyAccess` (src/modules/audit/controllers/audit.controller.ts:141). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordThirdPartyAccessDto` (13 campos, 2 obligatorios). Delega en `ThirdPartyAccessService.record`. Crea filas en audit.audit_log, audit.delegated_access_audit_log, audit.identity_verification_access_log, audit.insurance_decision_access_log, audit.pharmacy_inventory_access_log. Lee audit.audit_log.
+`POST /audit/third-party-access` la atiende `AuditController.recordThirdPartyAccess` (src/modules/audit/controllers/audit.controller.ts:141). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordThirdPartyAccessDto` (13 campos, 2 obligatorios). Delega en `ThirdPartyAccessService.record`. Crea filas en audit.audit_log, audit.delegated_access_audit_log, audit.identity_verification_access_log, audit.insurance_decision_access_log, audit.pharmacy_inventory_access_log. Lee audit.audit_log, iam.sessions.
 
 ### Requerimientos
 
@@ -654,21 +660,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/audit.controller.ts:141` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `audit.delegated_access_audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → ThirdPartyAccessRepository.recordDelegated | `src/modules/audit/repositories/third-party-access.repository.ts:168` |
 | `audit.identity_verification_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → ThirdPartyAccessRepository.recordIdentity | `src/modules/audit/repositories/third-party-access.repository.ts:224` |
 | `audit.insurance_decision_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → ThirdPartyAccessRepository.recordInsurance | `src/modules/audit/repositories/third-party-access.repository.ts:196` |
 | `audit.pharmacy_inventory_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → ThirdPartyAccessRepository.recordPharmacy | `src/modules/audit/repositories/third-party-access.repository.ts:251` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Cuerpo — DTO `RecordThirdPartyAccessDto` · `application/json`
 
@@ -765,11 +772,11 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Exportar evidencia de auditoría para cumplimiento. Caso de uso UC-10-07: Exportar evidencia de auditoría (idempotente por query_hash). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /compliance/audit-export` la atiende `ComplianceController.exportEvidence` (src/modules/audit/controllers/compliance.controller.ts:20). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAuditExportDto` (6 campos, 0 obligatorios). Delega en `ComplianceService.exportEvidence`. Crea filas en audit.analytics_governance_log, audit.audit_log. Lee audit.analytics_governance_log, audit.audit_log.
+`POST /compliance/audit-export` la atiende `ComplianceController.exportEvidence` (src/modules/audit/controllers/compliance.controller.ts:20). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAuditExportDto` (6 campos, 0 obligatorios). Delega en `ComplianceService.exportEvidence`. Crea filas en audit.analytics_governance_log, audit.audit_log. Lee audit.analytics_governance_log, audit.audit_log, iam.sessions.
 
 ### Requerimientos
 
@@ -777,10 +784,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/compliance.controller.ts:20` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -788,8 +795,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|---|---|---|
 | `audit.analytics_governance_log` | ESCRIBE | CREA | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AnalyticsGovernanceLogRepository.record | `src/modules/audit/repositories/analytics-governance-log.repository.ts:54` |
 | `audit.analytics_governance_log` | LEE | LEE | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AnalyticsGovernanceLogRepository.existsByQueryHash | `src/modules/audit/repositories/analytics-governance-log.repository.ts:46` |
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Cuerpo — DTO `CreateAuditExportDto` · `application/json`
 
@@ -870,11 +878,11 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Registrar decisión de moderación / gobernanza analítica. Caso de uso UC-10-11: Registrar decisión de moderación / gobernanza. Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /moderation/decisions` la atiende `ModerationController.recordDecision` (src/modules/audit/controllers/moderation.controller.ts:23). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateModerationDecisionDto` (8 campos, 3 obligatorios). Delega en `ModerationService.recordDecision`. Crea filas en audit.analytics_governance_log, audit.audit_log, audit.moderation_decisions_history, audit.moderation_events. Lee audit.audit_log.
+`POST /moderation/decisions` la atiende `ModerationController.recordDecision` (src/modules/audit/controllers/moderation.controller.ts:23). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateModerationDecisionDto` (8 campos, 3 obligatorios). Delega en `ModerationService.recordDecision`. Crea filas en audit.analytics_governance_log, audit.audit_log, audit.moderation_decisions_history, audit.moderation_events. Lee audit.audit_log, iam.sessions.
 
 ### Requerimientos
 
@@ -882,20 +890,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/moderation.controller.ts:23` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.analytics_governance_log` | ESCRIBE | CREA | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → AnalyticsGovernanceLogRepository.record | `src/modules/audit/repositories/analytics-governance-log.repository.ts:54` |
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `audit.moderation_decisions_history` | ESCRIBE | CREA | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → ModerationRepository.recordHistory | `src/modules/audit/repositories/moderation.repository.ts:102` |
 | `audit.moderation_events` | ESCRIBE | CREA | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → ModerationRepository.record | `src/modules/audit/repositories/moderation.repository.ts:77` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Cuerpo — DTO `CreateModerationDecisionDto` · `application/json`
 
@@ -983,11 +992,11 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Tramitar DSAR (solicitud del titular). Caso de uso UC-10-08: Tramitar DSAR (máquina de estados). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`POST /privacy/dsar` la atiende `PrivacyController.createDsar` (src/modules/audit/controllers/privacy.controller.ts:29). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDsarDto` (3 campos, 1 obligatorio). Delega en `ComplianceService.createDsar`. Crea filas en audit.analytics_governance_log, audit.audit_log, audit.dsar_requests. Lee audit.audit_log.
+`POST /privacy/dsar` la atiende `PrivacyController.createDsar` (src/modules/audit/controllers/privacy.controller.ts:29). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDsarDto` (3 campos, 1 obligatorio). Delega en `ComplianceService.createDsar`. Crea filas en audit.analytics_governance_log, audit.audit_log, audit.dsar_requests. Lee audit.audit_log, iam.sessions.
 
 ### Requerimientos
 
@@ -995,19 +1004,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/privacy.controller.ts:29` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.analytics_governance_log` | ESCRIBE | CREA | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → AnalyticsGovernanceLogRepository.record | `src/modules/audit/repositories/analytics-governance-log.repository.ts:54` |
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `audit.dsar_requests` | ESCRIBE | CREA | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → DsarRequestsRepository.create | `src/modules/audit/repositories/dsar-requests.repository.ts:44` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Cuerpo — DTO `CreateDsarDto` · `application/json`
 
@@ -1086,11 +1096,11 @@ El árbol de decisión completo está en [flujos](../flujos/audit.md).
 
 Avanzar la máquina de estados de una solicitud DSAR. Caso de uso UC-10-08: Tramitar DSAR (máquina de estados). Dentro del módulo (descripción del modelo, en inglés): «Complements diagram_10_audit with history and append-only evidence for patient identity, workforce assignments, facilities, diagnostic assets, public profiles and moderation.» Dominio: Auditoría y Reporting.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_10_audit.puml:180`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:36`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /privacy/dsar/{id}` la atiende `PrivacyController.updateDsar` (src/modules/audit/controllers/privacy.controller.ts:41). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateDsarDto` (2 campos, 1 obligatorio). Delega en `ComplianceService.updateDsar`. Crea filas en audit.audit_log. Actualiza audit.dsar_requests. Lee audit.audit_log, audit.dsar_requests.
+`PATCH /privacy/dsar/{id}` la atiende `PrivacyController.updateDsar` (src/modules/audit/controllers/privacy.controller.ts:41). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateDsarDto` (2 campos, 1 obligatorio). Delega en `ComplianceService.updateDsar`. Crea filas en audit.audit_log. Actualiza audit.dsar_requests. Lee audit.audit_log, audit.dsar_requests, iam.sessions.
 
 ### Requerimientos
 
@@ -1098,20 +1108,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/audit/controllers/privacy.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/audit/controllers/privacy.controller.ts:41` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `audit.dsar_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PrivacyController.updateDsar → ComplianceService.updateDsar | `src/modules/audit/services/compliance.service.ts:198` |
 | `audit.dsar_requests` | LEE | LEE | DIRECTA | PrivacyController.updateDsar → ComplianceService.updateDsar → DsarRequestsRepository.findById | `src/modules/audit/repositories/dsar-requests.repository.ts:39` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Parámetros
 

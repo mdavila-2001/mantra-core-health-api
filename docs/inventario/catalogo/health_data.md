@@ -25,13 +25,13 @@
 | [health_data_quality_runs](#health_data_quality_runs) | Registra ejecuciones de controles de calidad para seguir qué reglas se aplicaron y cuándo. | 12 | 7 | 2 | COINCIDE |
 | [health_deidentification_profiles](#health_deidentification_profiles) | Configura perfiles de desidentificación para preparar datos de salud para usos autorizados que no requieren identificación directa. | 17 | 8 | 3 | COINCIDE |
 | [health_deidentification_runs](#health_deidentification_runs) | Traza ejecuciones de desidentificación para vincular los datos procesados con el perfil y resultado de la operación. | 14 | 9 | 4 | COINCIDE |
-| [health_export_jobs](#health_export_jobs) | Representa trabajos de exportación de datos de salud para controlar sus solicitudes, ejecución y destino previsto. | 15 | 11 | 1 | COINCIDE |
-| [health_export_manifests](#health_export_manifests) | Enumera los recursos incluidos en exportaciones para hacer verificable el contenido entregado. | 10 | 7 | 1 | COINCIDE |
+| [health_export_jobs](#health_export_jobs) | Representa trabajos de exportación de datos de salud para controlar sus solicitudes, ejecución y destino previsto. | 15 | 11 | 5 | COINCIDE |
+| [health_export_manifests](#health_export_manifests) | Enumera los recursos incluidos en exportaciones para hacer verificable el contenido entregado. | 10 | 7 | 5 | COINCIDE |
 | [health_ingestion_batches](#health_ingestion_batches) | Agrupa cargas de información sanitaria para seguir su recepción y resultado como unidades operativas. | 16 | 8 | 5 | COINCIDE |
 | [health_ingestion_records](#health_ingestion_records) | Conserva registros individuales recibidos durante ingestiones para reconciliar datos originales con su procesamiento canónico. | 13 | 8 | 5 | COINCIDE |
 | [health_lineage_edges](#health_lineage_edges) | Representa vínculos de linaje entre datos de salud y transformaciones para reconstruir dependencias y recorrido de la información. | 12 | 11 | 3 | COINCIDE |
-| [health_provenance_records](#health_provenance_records) | Registra procedencia de recursos de salud para establecer fuente, proceso y contexto de generación o transformación. | 14 | 8 | 4 | COINCIDE |
-| [health_provenance_targets](#health_provenance_targets) | Vincula evidencia de procedencia con los recursos afectados para mostrar a qué datos aplica cada registro de origen. | 6 | 6 | 4 | COINCIDE |
+| [health_provenance_records](#health_provenance_records) | Registra procedencia de recursos de salud para establecer fuente, proceso y contexto de generación o transformación. | 14 | 8 | 5 | COINCIDE |
+| [health_provenance_targets](#health_provenance_targets) | Vincula evidencia de procedencia con los recursos afectados para mostrar a qué datos aplica cada registro de origen. | 6 | 6 | 5 | COINCIDE |
 | [health_source_connections](#health_source_connections) | Define conexiones técnicas a sistemas de origen para permitir intercambios de datos de salud autorizados y trazables. | 16 | 10 | 3 | COINCIDE |
 | [health_source_systems](#health_source_systems) | Registra sistemas de origen de datos de salud y su nivel de confianza para gobernar la incorporación de información clínica externa. | 17 | 9 | 2 | COINCIDE |
 | [health_terminology_mapping_rules](#health_terminology_mapping_rules) | Define correspondencias entre conceptos de origen y destino para normalizar terminología en procesos de interoperabilidad. | 14 | 7 | 0 | COINCIDE |
@@ -1554,7 +1554,7 @@ Representa trabajos de exportación de datos de salud para controlar sus solicit
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_export_jobs`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthExportJobs` — `src/modules/health_data/entities/health_export_jobs.entity.ts`
-- **Resumen:** 15 columnas · 11 índices · 8 FK salientes · 1 entrantes · 1 operaciones
+- **Resumen:** 15 columnas · 11 índices · 8 FK salientes · 1 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -1611,6 +1611,10 @@ Representa trabajos de exportación de datos de salud para controlar sus solicit
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /fhir/r5/$export | CREA | DIRECTA |
+| GET /insurance/portability/certificates/{certificateId}/json | LEE | DIRECTA |
+| GET /insurance/portability/certificates/{certificateId}/pdf | LEE | DIRECTA |
+| POST /insurance/portability/export | CREA | DIRECTA |
+| GET /public/portability/verify/{manifestHash} | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1635,7 +1639,7 @@ Enumera los recursos incluidos en exportaciones para hacer verificable el conten
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_export_manifests`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthExportManifests` — `src/modules/health_data/entities/health_export_manifests.entity.ts`
-- **Resumen:** 10 columnas · 7 índices · 4 FK salientes · 0 entrantes · 1 operaciones
+- **Resumen:** 10 columnas · 7 índices · 4 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -1669,9 +1673,9 @@ Enumera los recursos incluidos en exportaciones para hacer verificable el conten
 | `ix_health_export_manifests_file_id` | no | file_id | Soporta la clave foránea fk_health_export_manifests_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_health_export_manifests_encryption_profile_id` | no | encryption_profile_id | Soporta la clave foránea fk_health_export_manifests_encryption_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_health_export_manifests_retention_policy_id` | no | retention_policy_id | Soporta la clave foránea fk_health_export_manifests_retention_policy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_health_export_manifests_content_hash` | no | content_hash | _sin uso detectado estáticamente_ |
+| `ix_health_export_manifests_content_hash` | no | content_hash | 1 consulta(s) de repositorio filtran u ordenan por «content_hash», la primera columna del índice _(CONSULTA)_ |
 | `uk_health_export_manifests_job_version` | sí | health_export_job_id, manifest_version | Garantiza que no se repita la combinación (health_export_job_id, manifest_version) _(DOCUMENTO)_; Soporta la clave foránea fk_health_export_manifests_health_export_job_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «health_export_job_id», la primera columna del índice _(CONSULTA)_ |
-| `brin_health_export_manifests_created_at` | no | created_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+| `brin_health_export_manifests_created_at` | no | created_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «created_at», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -1684,6 +1688,10 @@ Enumera los recursos incluidos en exportaciones para hacer verificable el conten
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /fhir/r5/$export | CREA | DIRECTA |
+| GET /insurance/portability/certificates/{certificateId}/json | LEE | DIRECTA |
+| GET /insurance/portability/certificates/{certificateId}/pdf | LEE | DIRECTA |
+| POST /insurance/portability/export | CREA | DIRECTA |
+| GET /public/portability/verify/{manifestHash} | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1955,7 +1963,7 @@ Registra procedencia de recursos de salud para establecer fuente, proceso y cont
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_provenance_records`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthProvenanceRecords` — `src/modules/health_data/entities/health_provenance_records.entity.ts`
-- **Resumen:** 14 columnas · 8 índices · 5 FK salientes · 3 entrantes · 4 operaciones
+- **Resumen:** 14 columnas · 8 índices · 5 FK salientes · 3 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -2010,6 +2018,7 @@ Registra procedencia de recursos de salud para establecer fuente, proceso y cont
 | POST /health-data/canonical-resources/{id}/retire | CREA | DIRECTA |
 | POST /health-data/canonical-resources/project | CREA | DIRECTA |
 | POST /health-data/deidentification-runs | CREA | DIRECTA |
+| POST /insurance/portability/export | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -2034,7 +2043,7 @@ Vincula evidencia de procedencia con los recursos afectados para mostrar a qué 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml: health_provenance_targets`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_52_health_data_platform.puml` · **DDL:** `SQL/52_health_data/02_tables.sql`
 - **Entidad del ORM:** `HealthProvenanceTargets` — `src/modules/health_data/entities/health_provenance_targets.entity.ts`
-- **Resumen:** 6 columnas · 6 índices · 3 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 6 columnas · 6 índices · 3 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -2080,6 +2089,7 @@ Vincula evidencia de procedencia con los recursos afectados para mostrar a qué 
 | POST /health-data/canonical-resources/{id}/retire | CREA | DIRECTA |
 | POST /health-data/canonical-resources/project | CREA | DIRECTA |
 | POST /health-data/deidentification-runs | CREA | DIRECTA |
+| POST /insurance/portability/export | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -3032,7 +3042,7 @@ Proyecta recursos relevantes en una línea de tiempo longitudinal para facilitar
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/health_data/README.md:45` |
+| Append-only | sí (declarado) | `src/modules/health_data/README.md:81` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |

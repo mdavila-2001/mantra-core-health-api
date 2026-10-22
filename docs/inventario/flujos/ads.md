@@ -49,7 +49,7 @@ review event ── approved ──> efectivo activo + infracciones cerradas
 lead form ── submission (idempotente por lead externo) ── respuestas cifradas ──> entrega a CRM
 ```
 
-_Fuente: `src/modules/ads/README.md:48`_
+_Fuente: `src/modules/ads/README.md:86`_
 
 ### Etapas y operaciones
 

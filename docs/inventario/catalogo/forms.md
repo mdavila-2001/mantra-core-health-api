@@ -10,10 +10,10 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [dynamic_field_definitions](#dynamic_field_definitions) | Define campos configurables con tipo y semántica para extender formularios sin alterar cada tabla de negocio. | 31 | 9 | 14 | COINCIDE |
+| [dynamic_field_definitions](#dynamic_field_definitions) | Define campos configurables con tipo y semántica para extender formularios sin alterar cada tabla de negocio. | 31 | 9 | 17 | COINCIDE |
 | [dynamic_field_sections](#dynamic_field_sections) | Agrupa campos dinámicos en secciones para configurar formularios usados por módulos del sistema médico. | 11 | 5 | 5 | COINCIDE |
 | [extension_target_policies](#extension_target_policies) | Restringe qué entidades pueden extenderse con campos dinámicos para mantener control sobre el modelo de datos. | 15 | 8 | 4 | COINCIDE |
-| [field_assignments](#field_assignments) | Asigna definiciones de campo a formularios, entidades o contextos donde deben capturarse. | 21 | 13 | 10 | COINCIDE |
+| [field_assignments](#field_assignments) | Asigna definiciones de campo a formularios, entidades o contextos donde deben capturarse. | 21 | 13 | 16 | COINCIDE |
 | [field_definition_localizations](#field_definition_localizations) | Conserva etiquetas y textos localizados de campos para presentar formularios en idiomas y regiones distintos. | 12 | 4 | 4 | COINCIDE |
 | [field_definition_set_versions](#field_definition_set_versions) | Versiona conjuntos de campos para reproducir qué estructura estaba vigente al completar un formulario. | 11 | 5 | 5 | COINCIDE |
 | [field_definition_sets](#field_definition_sets) | Agrupa definiciones de campo reutilizables para compartir estructuras entre formularios y módulos. | 13 | 6 | 9 | COINCIDE |
@@ -24,8 +24,8 @@
 | [field_value_access_rules](#field_value_access_rules) | Define reglas de acceso a valores de campos para proteger información según usuario, rol o finalidad. | 15 | 10 | 3 | COINCIDE |
 | [field_value_audit](#field_value_audit) | Preserva cambios de valores dinámicos para atribuir quién los modificó y reconstruir respuestas previas. | 9 | 6 | 3 | COINCIDE |
 | [field_value_provenance](#field_value_provenance) | Registra procedencia de valores dinámicos para conocer origen, actor o proceso de captura. | 14 | 7 | 1 | COINCIDE |
-| [field_values](#field_values) | Conserva valores capturados en campos dinámicos para mantener respuestas estructuradas fuera de los esquemas fijos. | 34 | 12 | 9 | COINCIDE |
-| [form_instances](#form_instances) | Representa instancias concretas de formularios completadas o en curso por pacientes y usuarios. | 12 | 5 | 10 | COINCIDE |
+| [field_values](#field_values) | Conserva valores capturados en campos dinámicos para mantener respuestas estructuradas fuera de los esquemas fijos. | 34 | 12 | 10 | COINCIDE |
+| [form_instances](#form_instances) | Representa instancias concretas de formularios completadas o en curso por pacientes y usuarios. | 12 | 5 | 16 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -207,7 +207,7 @@ Define campos configurables con tipo y semántica para extender formularios sin 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: dynamic_field_definitions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `DynamicFieldDefinitions` — `src/modules/forms/entities/dynamic_field_definitions.entity.ts`
-- **Resumen:** 31 columnas · 9 índices · 8 FK salientes · 8 entrantes · 14 operaciones
+- **Resumen:** 31 columnas · 9 índices · 8 FK salientes · 8 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -293,12 +293,15 @@ Define campos configurables con tipo y semántica para extender formularios sin 
 | GET /charts/templates | LEE | DIRECTA |
 | POST /charts/templates | CREA | DIRECTA |
 | GET /charts/templates/{id} | LEE | DIRECTA |
+| POST /admin/content-packs/{code}/apply | ACTUALIZA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | POST /forms/assignments | LEE | DIRECTA |
 | GET /forms/definition-sets/{id} | LEE | DIRECTA |
 | POST /forms/field-definitions | CREA | DIRECTA |
 | POST /forms/field-definitions | LEE | DIRECTA |
+| PATCH /forms/field-definitions/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /forms/field-definitions/{id} | LEE | DIRECTA |
 | POST /forms/fields/{id}/access-rules | LEE | DIRECTA |
 | POST /forms/fields/{id}/dependencies | LEE | DIRECTA |
 | PUT /forms/fields/{id}/localizations/{lang} | LEE | DIRECTA |
@@ -487,7 +490,7 @@ Asigna definiciones de campo a formularios, entidades o contextos donde deben ca
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: field_assignments`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `FieldAssignments` — `src/modules/forms/entities/field_assignments.entity.ts`
-- **Resumen:** 21 columnas · 13 índices · 11 FK salientes · 2 entrantes · 10 operaciones
+- **Resumen:** 21 columnas · 13 índices · 11 FK salientes · 2 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -537,15 +540,15 @@ Asigna definiciones de campo a formularios, entidades o contextos donde deben ca
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_field_assignments_field_id` | no | field_id | Soporta la clave foránea fk_field_assignments_field_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_field_assignments_target_resource_concept_id` | no | target_resource_concept_id | Soporta la clave foránea fk_field_assignments_target_resource_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «target_resource_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_field_assignments_field_id` | no | field_id | Soporta la clave foránea fk_field_assignments_field_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «field_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_field_assignments_target_resource_concept_id` | no | target_resource_concept_id | Soporta la clave foránea fk_field_assignments_target_resource_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «target_resource_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_assignments_profile_type_concept_id` | no | profile_type_concept_id | Soporta la clave foránea fk_field_assignments_profile_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_field_assignments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_field_assignments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_field_assignments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_field_assignments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_assignments_branch_id` | no | branch_id | Soporta la clave foránea fk_field_assignments_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_field_assignments_section_id` | no | section_id | Soporta la clave foránea fk_field_assignments_section_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «section_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_field_assignments_section_id` | no | section_id | Soporta la clave foránea fk_field_assignments_section_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «section_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_assignments_read_role_value_set_id` | no | read_role_value_set_id | Soporta la clave foránea fk_field_assignments_read_role_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_assignments_write_role_value_set_id` | no | write_role_value_set_id | Soporta la clave foránea fk_field_assignments_write_role_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_field_assignments_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_field_assignments_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_field_assignments_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_field_assignments_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_assignments_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_field_assignments_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_assignments_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_field_assignments_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_assignments_tenant_id_state_concept_id` | no | tenant_id, state_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -564,7 +567,13 @@ Asigna definiciones de campo a formularios, entidades o contextos donde deben ca
 | GET /forms/assignments | LEE | DIRECTA |
 | POST /forms/assignments | CREA | DIRECTA |
 | POST /forms/assignments | LEE | DIRECTA |
+| DELETE /forms/assignments/{id} | ACTUALIZA | POR_TIPO |
+| DELETE /forms/assignments/{id} | LEE | DIRECTA |
+| PATCH /forms/assignments/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /forms/assignments/{id} | LEE | DIRECTA |
 | GET /forms/assignments/budget | LEE | DIRECTA |
+| PUT /forms/assignments/order | LEE | DIRECTA |
+| PATCH /forms/field-definitions/{id} | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1325,7 +1334,7 @@ Conserva valores capturados en campos dinámicos para mantener respuestas estruc
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: field_values`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `FieldValues` — `src/modules/forms/entities/field_values.entity.ts`
-- **Resumen:** 34 columnas · 12 índices · 12 FK salientes · 3 entrantes · 9 operaciones
+- **Resumen:** 34 columnas · 12 índices · 12 FK salientes · 3 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -1392,7 +1401,7 @@ Conserva valores capturados en campos dinámicos para mantener respuestas estruc
 |---|---|---|---|
 | `ix_field_values_form_instance_id` | no | form_instance_id | Soporta la clave foránea fk_field_values_form_instance_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «form_instance_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_values_resource_type_concept_id` | no | resource_type_concept_id | Soporta la clave foránea fk_field_values_resource_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_field_values_field_id` | no | field_id | Soporta la clave foránea fk_field_values_field_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_field_values_field_id` | no | field_id | Soporta la clave foránea fk_field_values_field_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «field_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_values_assignment_id` | no | assignment_id | Soporta la clave foránea fk_field_values_assignment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_values_value_concept_id` | no | value_concept_id | Soporta la clave foránea fk_field_values_value_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_values_file_id` | no | file_id | Soporta la clave foránea fk_field_values_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1407,6 +1416,7 @@ Conserva valores capturados en campos dinámicos para mantener respuestas estruc
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| PATCH /forms/field-definitions/{id} | LEE | DIRECTA |
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | POST /forms/instances/{id}/close | ACTUALIZA | POR_TIPO |
 | POST /forms/instances/{id}/close | LEE | DIRECTA |
@@ -1440,7 +1450,7 @@ Representa instancias concretas de formularios completadas o en curso por pacien
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: form_instances`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `FormInstances` — `src/modules/forms/entities/form_instances.entity.ts`
-- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 1 entrantes · 10 operaciones
+- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 1 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -1484,6 +1494,9 @@ Representa instancias concretas de formularios completadas o en curso por pacien
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /charts/care-plans | LEE | DIRECTA |
+| POST /clinical/medication-requests | LEE | DIRECTA |
+| POST /clinical/service-requests | LEE | DIRECTA |
 | GET /forms/instances | LEE | DIRECTA |
 | POST /forms/instances | CREA | DIRECTA |
 | POST /forms/instances | LEE | DIRECTA |
@@ -1494,6 +1507,9 @@ Representa instancias concretas de formularios completadas o en curso por pacien
 | GET /forms/me/instances | LEE | DIRECTA |
 | GET /forms/me/instances/{id} | LEE | DIRECTA |
 | POST /forms/values/import | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| POST /scheduling/appointments/direct | LEE | DIRECTA |
+| POST /scheduling/appointments/walk-in | LEE | DIRECTA |
 
 #### Gobierno
 

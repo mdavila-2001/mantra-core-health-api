@@ -14,14 +14,14 @@
 | [care_team_members](#care_team_members) | Relaciona profesionales y otros participantes con equipos de cuidado para documentar composición y vigencia del equipo. | 14 | 7 | 3 | COINCIDE |
 | [care_teams](#care_teams) | Representa equipos de atención responsables de coordinar el cuidado de pacientes a través de encuentros y servicios. | 14 | 9 | 3 | COINCIDE |
 | [cds_rules](#cds_rules) | Define reglas de soporte a decisiones clínicas que pueden evaluar datos del paciente y presentar recomendaciones o alertas. | 16 | 8 | 7 | COINCIDE |
-| [clinical_alerts](#clinical_alerts) | Mantiene alertas clínicas asociadas a pacientes o atención para hacer visibles condiciones que requieren consideración del equipo. | 20 | 11 | 4 | COINCIDE |
+| [clinical_alerts](#clinical_alerts) | Mantiene alertas clínicas asociadas a pacientes o atención para hacer visibles condiciones que requieren consideración del equipo. | 20 | 11 | 3 | COINCIDE |
 | [drug_interactions](#drug_interactions) | Cataloga interacciones entre medicamentos para apoyar controles de seguridad farmacológica durante la prescripción. | 14 | 6 | 4 | COINCIDE |
 | [immunization_schedules](#immunization_schedules) | Define calendarios de inmunización que organizan recomendaciones de dosis por población, edad o pauta. | 14 | 7 | 2 | COINCIDE |
 | [order_set_items](#order_set_items) | Asocia órdenes individuales a conjuntos para especificar qué solicitudes componen cada protocolo reutilizable. | 14 | 6 | 2 | COINCIDE |
 | [order_sets](#order_sets) | Define conjuntos reutilizables de órdenes clínicas para apoyar flujos frecuentes de atención con componentes coordinados. | 14 | 7 | 3 | COINCIDE |
 | [prescription_favorites](#prescription_favorites) | Guarda selecciones frecuentes de prescripción para facilitar la captura de órdenes recurrentes por profesionales autorizados. | 16 | 8 | 5 | COINCIDE |
 | [reference_ranges](#reference_ranges) | Conserva rangos de referencia clínicos para contextualizar la interpretación de mediciones y resultados. | 18 | 6 | 0 | COINCIDE |
-| [referrals](#referrals) | Registra derivaciones de pacientes entre profesionales o servicios para apoyar continuidad de atención. | 19 | 13 | 5 | COINCIDE |
+| [referrals](#referrals) | Registra derivaciones de pacientes entre profesionales o servicios para apoyar continuidad de atención. | 19 | 13 | 6 | COINCIDE |
 | [virtual_encounters](#virtual_encounters) | Representa encuentros clínicos realizados por canales virtuales y conserva su contexto dentro de la atención del paciente. | 14 | 6 | 6 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -445,7 +445,7 @@ Mantiene alertas clínicas asociadas a pacientes o atención para hacer visibles
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml: clinical_alerts`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` · **DDL:** `SQL/18_clinical_ext/02_tables.sql`
 - **Entidad del ORM:** `ClinicalAlerts` — `src/modules/clinical_ext/entities/clinical_alerts.entity.ts`
-- **Resumen:** 20 columnas · 11 índices · 10 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 20 columnas · 11 índices · 10 FK salientes · 1 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -508,7 +508,6 @@ Mantiene alertas clínicas asociadas a pacientes o atención para hacer visibles
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /cds/check-interactions | CREA | DIRECTA |
 | POST /cds/evaluate | CREA | DIRECTA |
 | PATCH /clinical-alerts/{id}/acknowledge | LEE | DIRECTA |
 | PATCH /clinical-alerts/{id}/override | LEE | DIRECTA |
@@ -996,7 +995,7 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml: referrals`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` · **DDL:** `SQL/18_clinical_ext/02_tables.sql`
 - **Entidad del ORM:** `Referrals` — `src/modules/clinical_ext/entities/referrals.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 12 FK salientes · 1 entrantes · 5 operaciones
+- **Resumen:** 19 columnas · 13 índices · 12 FK salientes · 1 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -1067,6 +1066,7 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 | POST /referrals | LEE | DIRECTA |
 | PATCH /referrals/{id}/respond | ACTUALIZA | POR_TIPO |
 | PATCH /referrals/{id}/respond | LEE | DIRECTA |
+| GET /referrals/me | LEE | DIRECTA |
 
 #### Gobierno
 

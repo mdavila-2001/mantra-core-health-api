@@ -33,43 +33,43 @@
 | Concept ID | Identificador estable de un concepto. **Lo que se manda**; `display` es solo para mostrar | — | `mantra-core-health:docs/business/glossary.md:25` |
 | Expansión | La lista de opciones vigentes de un conjunto de valores | — | `mantra-core-health:docs/business/glossary.md:26` |
 | Proyección materializada | Vista precalculada del servidor. **Puede estar atrasada** → S7 | — | `mantra-core-health:docs/business/glossary.md:27` |
-| S1 | `route-auth-pending` | — | `mantra-core-health:docs/business/glossary.md:58` |
-| S2 | `loading` | — | `mantra-core-health:docs/business/glossary.md:59` |
-| S3 | `empty` | — | `mantra-core-health:docs/business/glossary.md:60` |
-| S4 | `validation` | — | `mantra-core-health:docs/business/glossary.md:62` |
-| S5 | `forbidden` | — | `mantra-core-health:docs/business/glossary.md:63` |
-| S6 | `not-found` | — | `mantra-core-health:docs/business/glossary.md:64` |
-| S7 | `stale` | — | `mantra-core-health:docs/business/glossary.md:65` |
-| S8 | `offline` | — | `mantra-core-health:docs/business/glossary.md:66` |
-| S9 | `error` | — | `mantra-core-health:docs/business/glossary.md:67` |
-| core/ | Infraestructura sin interfaz: sesión, HTTP, estados, tokens | — | `mantra-core-health:docs/business/glossary.md:97` |
-| shared/ | Interfaz reutilizable: 48 componentes en tres niveles | — | `mantra-core-health:docs/business/glossary.md:98` |
-| features/ | Pantallas | — | `mantra-core-health:docs/business/glossary.md:99` |
-| Átomo / molécula / organismo | Los tres niveles de atomic design. **El nivel es la carpeta**, no un decorador | — | `mantra-core-health:docs/business/glossary.md:100` |
-| Barril | `shared/index.ts`, la API pública de `shared/`. Hoy **no lo importa nadie** | — | `mantra-core-health:docs/business/glossary.md:101` |
-| ViewStateHost | El organismo que pinta los nueve estados, una vez para todo el proyecto | — | `mantra-core-health:docs/business/glossary.md:102` |
-| FORM_CONTROL_CONTEXT | El contrato de accesibilidad entre un campo y su control | — | `mantra-core-health:docs/business/glossary.md:103` |
-| Fan-in | Cuántos archivos importan a uno. **Lo que cuesta cambiarlo** | — | `mantra-core-health:docs/business/glossary.md:104` |
-| Radio de firma | `28px 4px 28px 4px`. Un elemento por pantalla, nunca en botones ni entradas | — | `mantra-core-health:docs/business/glossary.md:105` |
-| Excepciones E1–E4 | Las excepciones WCAG declaradas por el sistema de diseño, con su medición | — | `mantra-core-health:docs/business/glossary.md:106` |
-| Access token | JWT de acceso. **Memoria**, minutos | — | `mantra-core-health:docs/business/glossary.md:112` |
-| Refresh token | Canjea por un par nuevo. **`localStorage`**, se rota entero | — | `mantra-core-health:docs/business/glossary.md:113` |
-| sub | Identificador del usuario. **El único claim obligatorio** | — | `mantra-core-health:docs/business/glossary.md:114` |
-| sid | Identificador de sesión, para cerrarla del lado del servidor | — | `mantra-core-health:docs/business/glossary.md:115` |
-| tenants[] | Organizaciones del usuario | — | `mantra-core-health:docs/business/glossary.md:116` |
-| tenantNames{} | Su nombre legible, «para no mostrar uuid crudos» | — | `mantra-core-health:docs/business/glossary.md:117` |
-| X-Tenant-Id | Cabecera con la organización activa. **Se omite si no está resuelta** | — | `mantra-core-health:docs/business/glossary.md:118` |
-| requestId | Identificador de correlación. En la interfaz: **«código de soporte»** | — | `mantra-core-health:docs/business/glossary.md:119` |
-| Prerenderizado | HTML generado en el build. **4 rutas** | — | `mantra-core-health:docs/business/glossary.md:126` |
-| Hidratación | Angular toma el HTML del servidor y lo hace interactivo | — | `mantra-core-health:docs/business/glossary.md:127` |
-| outputHashing | Hash en el nombre de cada archivo. Permite cachear un año | — | `mantra-core-health:docs/business/glossary.md:128` |
-| Presupuesto | Límite de tamaño de `angular.json`. Hoy avisa a 500 kB | — | `mantra-core-health:docs/business/glossary.md:129` |
-| env.generated.ts | Puente entre `.env` y el paquete. **Generado, no versionado** | — | `mantra-core-health:docs/business/glossary.md:130` |
-| --st-error-* | **No es severidad clínica.** Es semántica de producto (`identidad-visual.md` 11.3) | — | `mantra-core-health:docs/business/glossary.md:137` |
-| --st-primary-* | **No es un estado.** Es un chip de marca con la misma receta tonal | — | `mantra-core-health:docs/business/glossary.md:138` |
-| --border-default | **No delimita controles.** Es un divisor decorativo. El de controles es `--border-strong` | — | `mantra-core-health:docs/business/glossary.md:139` |
-| isDevMode() | **No es una bandera de funcionalidad.** Es el modo de compilación | — | `mantra-core-health:docs/business/glossary.md:140` |
-| Bandera de funcionalidad | **No es autorización.** La autoridad es la API | — | `mantra-core-health:docs/business/glossary.md:141` |
-| generatedAt | **No es cuándo se calculó el dato.** Es cuándo se armó la respuesta. El dato es `refreshedAt` | — | `mantra-core-health:docs/business/glossary.md:142` |
-| Cobertura global (≈56 %) | **No es la métrica del proyecto.** Los umbrales son por área | — | `mantra-core-health:docs/business/glossary.md:143` |
+| S1 | `route-auth-pending` | — | `mantra-core-health:docs/business/glossary.md:80` |
+| S2 | `loading` | — | `mantra-core-health:docs/business/glossary.md:81` |
+| S3 | `empty` | — | `mantra-core-health:docs/business/glossary.md:82` |
+| S4 | `validation` | — | `mantra-core-health:docs/business/glossary.md:84` |
+| S5 | `forbidden` | — | `mantra-core-health:docs/business/glossary.md:85` |
+| S6 | `not-found` | — | `mantra-core-health:docs/business/glossary.md:86` |
+| S7 | `stale` | — | `mantra-core-health:docs/business/glossary.md:87` |
+| S8 | `offline` | — | `mantra-core-health:docs/business/glossary.md:88` |
+| S9 | `error` | — | `mantra-core-health:docs/business/glossary.md:89` |
+| core/ | Infraestructura sin interfaz: sesión, HTTP, estados, tokens | — | `mantra-core-health:docs/business/glossary.md:119` |
+| shared/ | Interfaz reutilizable: 48 componentes en tres niveles | — | `mantra-core-health:docs/business/glossary.md:120` |
+| features/ | Pantallas | — | `mantra-core-health:docs/business/glossary.md:121` |
+| Átomo / molécula / organismo | Los tres niveles de atomic design. **El nivel es la carpeta**, no un decorador | — | `mantra-core-health:docs/business/glossary.md:122` |
+| Barril | `shared/index.ts`, la API pública de `shared/`. Hoy **no lo importa nadie** | — | `mantra-core-health:docs/business/glossary.md:123` |
+| ViewStateHost | El organismo que pinta los nueve estados, una vez para todo el proyecto | — | `mantra-core-health:docs/business/glossary.md:124` |
+| FORM_CONTROL_CONTEXT | El contrato de accesibilidad entre un campo y su control | — | `mantra-core-health:docs/business/glossary.md:125` |
+| Fan-in | Cuántos archivos importan a uno. **Lo que cuesta cambiarlo** | — | `mantra-core-health:docs/business/glossary.md:126` |
+| Radio de firma | `28px 4px 28px 4px`. Un elemento por pantalla, nunca en botones ni entradas | — | `mantra-core-health:docs/business/glossary.md:127` |
+| Excepciones E1–E4 | Las excepciones WCAG declaradas por el sistema de diseño, con su medición | — | `mantra-core-health:docs/business/glossary.md:128` |
+| Access token | JWT de acceso. **Memoria**, minutos | — | `mantra-core-health:docs/business/glossary.md:134` |
+| Refresh token | Canjea por un par nuevo. **`localStorage`**, se rota entero | — | `mantra-core-health:docs/business/glossary.md:135` |
+| sub | Identificador del usuario. **El único claim obligatorio** | — | `mantra-core-health:docs/business/glossary.md:136` |
+| sid | Identificador de sesión, para cerrarla del lado del servidor | — | `mantra-core-health:docs/business/glossary.md:137` |
+| tenants[] | Organizaciones del usuario | — | `mantra-core-health:docs/business/glossary.md:138` |
+| tenantNames{} | Su nombre legible, «para no mostrar uuid crudos» | — | `mantra-core-health:docs/business/glossary.md:139` |
+| X-Tenant-Id | Cabecera con la organización activa. **Se omite si no está resuelta** | — | `mantra-core-health:docs/business/glossary.md:140` |
+| requestId | Identificador de correlación. En la interfaz: **«código de soporte»** | — | `mantra-core-health:docs/business/glossary.md:141` |
+| Prerenderizado | HTML generado en el build. **4 rutas** | — | `mantra-core-health:docs/business/glossary.md:148` |
+| Hidratación | Angular toma el HTML del servidor y lo hace interactivo | — | `mantra-core-health:docs/business/glossary.md:149` |
+| outputHashing | Hash en el nombre de cada archivo. Permite cachear un año | — | `mantra-core-health:docs/business/glossary.md:150` |
+| Presupuesto | Límite de tamaño de `angular.json`. Hoy avisa a 500 kB | — | `mantra-core-health:docs/business/glossary.md:151` |
+| env.generated.ts | Puente entre `.env` y el paquete. **Generado, no versionado** | — | `mantra-core-health:docs/business/glossary.md:152` |
+| --st-error-* | **No es severidad clínica.** Es semántica de producto (`identidad-visual.md` 11.3) | — | `mantra-core-health:docs/business/glossary.md:159` |
+| --st-primary-* | **No es un estado.** Es un chip de marca con la misma receta tonal | — | `mantra-core-health:docs/business/glossary.md:160` |
+| --border-default | **No delimita controles.** Es un divisor decorativo. El de controles es `--border-strong` | — | `mantra-core-health:docs/business/glossary.md:161` |
+| isDevMode() | **No es una bandera de funcionalidad.** Es el modo de compilación | — | `mantra-core-health:docs/business/glossary.md:162` |
+| Bandera de funcionalidad | **No es autorización.** La autoridad es la API | — | `mantra-core-health:docs/business/glossary.md:163` |
+| generatedAt | **No es cuándo se calculó el dato.** Es cuándo se armó la respuesta. El dato es `refreshedAt` | — | `mantra-core-health:docs/business/glossary.md:164` |
+| Cobertura global (≈56 %) | **No es la métrica del proyecto.** Los umbrales son por área | — | `mantra-core-health:docs/business/glossary.md:165` |
 

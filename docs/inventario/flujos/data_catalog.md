@@ -296,11 +296,12 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 #### 1. POST /admin/catalog/annotations/{id}/review
 
-
+Aprueba o rechaza la revisión vigente de una ficha
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Ficha no encontrada |
@@ -312,7 +313,7 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a CatalogGovernanceService.review"]:::llamada
   n2 --> n3
@@ -370,7 +371,7 @@ flowchart TD
 
 #### 2. GET /admin/catalog/objects
 
-
+Objetos del catálogo, paginados por cursor
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -411,7 +412,7 @@ flowchart TD
 
 #### 3. GET /admin/catalog/objects/{id}
 
-
+Ficha técnica, observación, ficha curada, cobertura y gobierno de un objeto
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -464,11 +465,12 @@ flowchart TD
 
 #### 4. PUT /admin/catalog/objects/{id}/annotation
 
-
+Crea o edita la ficha de un objeto (con versión esperada)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Objeto del catálogo no encontrado |
@@ -479,7 +481,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a CatalogGovernanceService.saveAnnotation"]:::llamada
   n2 --> n3
@@ -557,7 +559,7 @@ flowchart TD
 
 #### 5. GET /admin/catalog/objects/{id}/changes
 
-
+Cambios que los escaneos detectaron en un objeto
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -600,7 +602,7 @@ flowchart TD
 
 #### 6. GET /admin/catalog/objects/{id}/columns
 
-
+Columnas observadas de un objeto, con su ficha si la tienen
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -647,7 +649,7 @@ flowchart TD
 
 #### 7. GET /admin/catalog/objects/{id}/evidence
 
-
+Evidencia enlazada a un objeto
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -690,11 +692,12 @@ flowchart TD
 
 #### 8. POST /admin/catalog/objects/{id}/evidence
 
-
+Enlaza evidencia a un objeto
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Objeto del catálogo no encontrado |
@@ -703,7 +706,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a CatalogGovernanceService.addEvidence"]:::llamada
   n2 --> n3
@@ -733,7 +736,7 @@ flowchart TD
 
 #### 9. GET /admin/catalog/objects/{id}/history
 
-
+Revisiones y decisiones de la ficha de un objeto
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -786,7 +789,7 @@ flowchart TD
 
 #### 10. GET /admin/catalog/objects/{id}/impact
 
-
+Quién referencia a un objeto y a quién referencia, por claves foráneas observadas
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -837,7 +840,7 @@ flowchart TD
 
 #### 11. POST /admin/catalog/scans
 
-
+Pide un escaneo de la base primaria (se ejecuta fuera de la petición)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1011,7 +1014,7 @@ flowchart TD
 
 #### 12. GET /admin/catalog/scans/{id}
 
-
+Un escaneo
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1048,7 +1051,7 @@ flowchart TD
 
 #### 13. GET /admin/portal/catalogo/deriva
 
-Deriva entre el modelo, el ORM y la base.
+Deriva entre el DDL del modelo y las entidades del ORM
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1095,7 +1098,7 @@ flowchart TD
 
 #### 14. GET /admin/portal/catalogo/tablas
 
-Tablas del catálogo de datos del modelo.
+Listar las tablas del catálogo de datos
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1142,7 +1145,7 @@ flowchart TD
 
 #### 15. GET /admin/portal/catalogo/tablas/{schema}/{tabla}
 
-Ficha de una tabla.
+Ver la ficha de una tabla
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1216,7 +1219,7 @@ flowchart TD
 
 #### 16. GET /admin/portal/flujos
 
-Procesos de negocio (por módulo y críticos).
+Listar los procesos de negocio
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1263,7 +1266,7 @@ flowchart TD
 
 #### 17. GET /admin/portal/flujos/{codigo}
 
-Detalle de un proceso con sus etapas y máquinas de estado.
+Ver un proceso con sus etapas y máquinas de estado
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1329,7 +1332,7 @@ flowchart TD
 
 #### 18. GET /admin/portal/flujos/{codigo}/grafo
 
-Grafo de un proceso.
+Ver el grafo de un proceso
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1395,7 +1398,7 @@ flowchart TD
 
 #### 19. GET /admin/portal/flujos/hallazgos
 
-Hallazgos que salen de cruzar flujos, riesgo, pruebas y consumidores.
+Resumen de hallazgos del mapa
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1442,7 +1445,7 @@ flowchart TD
 
 #### 20. GET /admin/portal/flujos/hallazgos/{id}
 
-Casos de un hallazgo, paginados.
+Ver los casos de un hallazgo
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1494,7 +1497,7 @@ flowchart TD
 
 #### 21. GET /admin/portal/flujos/mapa
 
-Mapa de operaciones (ruta, proceso, riesgo, autorización, quién la llama, señales).
+Mapa de operaciones con sus señales
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1541,7 +1544,7 @@ flowchart TD
 
 #### 22. GET /admin/portal/glosario
 
-Glosario de los términos de la API y del frontend.
+Buscar en el glosario
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1588,7 +1591,7 @@ flowchart TD
 
 #### 23. GET /admin/portal/linaje
 
-Métricas del linaje y dominios.
+Métricas del linaje de datos
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1635,7 +1638,7 @@ flowchart TD
 
 #### 24. GET /admin/portal/linaje/tablas/{schema}/{tabla}
 
-Qué operaciones tocan una tabla y con qué tablas se relaciona.
+Linaje de una tabla
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1687,7 +1690,7 @@ flowchart TD
 
 #### 25. GET /admin/portal/operaciones
 
-Catálogo de operaciones HTTP, con filtros y cursor.
+Listar las operaciones HTTP del sistema
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1748,7 +1751,7 @@ flowchart TD
 
 #### 26. GET /admin/portal/operaciones/{id}
 
-Ficha de una operación (negocio, contrato, datos, acceso, pruebas).
+Ver la ficha de una operación
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1806,7 +1809,7 @@ flowchart TD
 
 #### 27. GET /admin/portal/operaciones/{id}/arbol
 
-Árbol de decisión de una operación.
+Ver el árbol de decisión de una operación
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1875,7 +1878,7 @@ flowchart TD
 
 #### 28. GET /admin/portal/version
 
-Versión del inventario que se está mostrando.
+Versión y tamaño del inventario publicado
 
 | HTTP | Código | Cuándo |
 |---|---|---|

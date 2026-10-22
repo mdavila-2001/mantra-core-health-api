@@ -43,7 +43,7 @@
 
 Consolidar la instantánea de costes del periodo. Caso de uso UC-54-12: Consolidar costes por tenant/dataset. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -55,10 +55,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, FINOPS_ANALYST, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-finops.controller.ts:24` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -168,7 +168,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Definir una colección física y su esquema versionado. Caso de uso UC-54-04: Definir colección y su esquema versionado. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -180,10 +180,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:105` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -300,7 +300,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Definir una política de consistencia. Caso de uso UC-54-06: Política de consistencia del store. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -312,10 +312,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:135` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -407,7 +407,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Definir un dataset gobernado con su versión inicial. Caso de uso UC-54-02: Definir dataset + versión inicial. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -419,10 +419,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:76` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -525,7 +525,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Definir la política de acceso al dato del dataset. Caso de uso UC-54-07: Política de acceso al dato. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -537,11 +537,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:150` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:150` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -638,7 +638,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Publicar una versión nueva del dataset. Caso de uso UC-54-03: Publicar versión con huella de esquema. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -650,11 +650,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:89` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -754,7 +754,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Definir un perfil de cifrado con su política de rotación. Caso de uso UC-54-09: Perfil de cifrado con rotación. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -766,10 +766,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:180` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -879,7 +879,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Forzar el failover de una colocación. Caso de uso UC-54-11: Salud y failover. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -891,11 +891,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:209` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:209` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -983,7 +983,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Aprobar una colocación respetando residencia y clasificación. Caso de uso UC-54-05: Aprobar colocación respetando residencia. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -995,10 +995,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:120` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1104,7 +1104,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Definir políticas de residencia, replicación y retención. Caso de uso UC-54-10: Residencia, replicación y retención. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1116,10 +1116,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:194` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1251,7 +1251,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Registrar un backend con sus regiones y capacidades. Caso de uso UC-54-01: Registrar backend con regiones y capacidades. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1263,10 +1263,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1407,7 +1407,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Vincular el tenant a su colocación. Caso de uso UC-54-08: Vincular tenant a colocación. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1419,11 +1419,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:164` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:164` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1522,7 +1522,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Definir la política de integridad del dataset. Caso de uso UC-54-13: Integridad y cuarentena. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1534,10 +1534,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1633,7 +1633,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Verificar que la proyección cuadra con la fuente canónica. Caso de uso UC-54-13: Integridad y cuarentena. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1645,11 +1645,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: datasetId | `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:67` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1742,7 +1742,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 
 Registrar una comprobación de salud de la región. Caso de uso UC-54-11: Salud y failover. Dentro del módulo (descripción del modelo, en inglés): «Defines where each dataset may live, which store is canonical, how tenants are isolated, and which encryption, residency, retention, replication and consistency rules apply.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglot_storage/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1754,10 +1754,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

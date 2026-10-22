@@ -117,7 +117,7 @@ Sonda de readiness de dependencias obligatorias
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: MongoDB no confirmó el ping; Error: Redis no respondió PONG; Error: OpenSearch está en estado red |
+| 500 | `INTERNAL` | Error: MongoDB no confirmó el ping; Error: Redis no respondió PONG; Error: OpenSearch está en estado red; Error: RLS_ENFORCE=true pero el rol de runtime "{role.rolsuper ? 'es superusua…}": las políticas no aíslan nada / RLS_ENFORCE=true pero no se pudo resolver el rol de… |
 | 503 | `DEPENDENCY_UNAVAILABLE` | ServiceUnavailableException: {{ code: ErrorCode.DEPENDENCY_UNAVAILABLE, message: 'Una o m…} |
 
 ```mermaid
@@ -149,12 +149,18 @@ flowchart TD
   n12 --> n13
   n14(["500 INTERNAL OpenSearch está en estado red"]):::error
   n13 -->|"sí"| n14
-  n15{"Object.values(checks).some((check) =› check.status === 'down')"}:::decision
+  n15["Llama a AppReadinessService.checkRls"]:::llamada
   n13 -->|"no"| n15
-  n16(["503 DEPENDENCY_UNAVAILABLE {{ code: ErrorCode.DEPENDENCY_UNAVAILABLE, message: 'Una o m…}"]):::error
-  n15 -->|"sí"| n16
-  n17(("200 Responde con éxito")):::ok
-  n15 -->|"no"| n17
+  n16{"!role || role.rolbypassrls || role.rolsuper"}:::decision
+  n15 --> n16
+  n17(["500 INTERNAL RLS_ENFORCE=true pero el rol de runtime '{role.rolsuper ? 'es superusua…}': las políticas no aís…"]):::error
+  n16 -->|"sí"| n17
+  n18{"Object.values(checks).some((check) =› check.status === 'down')"}:::decision
+  n16 -->|"no"| n18
+  n19(["503 DEPENDENCY_UNAVAILABLE {{ code: ErrorCode.DEPENDENCY_UNAVAILABLE, message: 'Una o m…}"]):::error
+  n18 -->|"sí"| n19
+  n20(("200 Responde con éxito")):::ok
+  n18 -->|"no"| n20
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

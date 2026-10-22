@@ -43,7 +43,7 @@
 
 Publicar un artefacto inmutable. Caso de uso UC-46-03: Publicar artefacto inmutable. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -55,10 +55,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DEPLOY_PIPELINE, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -174,7 +174,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Registrar una medición de capacidad. Caso de uso UC-46-11: Medición de capacidad. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -186,11 +186,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CAPACITY_PLANNER, SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:240` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:240` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -292,7 +292,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Registrar una solicitud de cambio. Caso de uso UC-46-01: Registrar solicitud de cambio. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -304,10 +304,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -413,7 +413,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Registrar la decisión del CAB. Caso de uso UC-46-02: Decisión del CAB, multi-paso. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -425,11 +425,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CHANGE_APPROVER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:89` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -526,7 +526,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Ejecutar un despliegue. Caso de uso UC-46-04: Ejecutar despliegue con puertas. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -538,10 +538,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RELEASE_MANAGER, DEPLOY_PIPELINE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:122` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -644,7 +644,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Revertir un despliegue. Caso de uso UC-46-05: Revertir despliegue. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -656,11 +656,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SRE, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:138` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:138` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -751,7 +751,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Registrar la quema del presupuesto de error. Caso de uso UC-46-10: Quema y congelamiento. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -763,11 +763,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:223` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: policyId | `src/modules/platform_ops/controllers/platform-ops.controller.ts:223` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -864,7 +864,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Registrar una corrida de health check. Caso de uso UC-46-06: Corrida y derivación de incidente. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -876,11 +876,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:155` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:155` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -989,7 +989,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Mover el incidente, sumar respondientes y publicar comunicaciones. Caso de uso UC-46-07: Ciclo de vida del incidente. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1001,11 +1001,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INCIDENT_COMMANDER, SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:172` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:172` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1128,7 +1128,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Abrir el postmortem del incidente resuelto. Caso de uso UC-46-08: Postmortem y acciones. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1140,11 +1140,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SRE, INCIDENT_COMMANDER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:189` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:189` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1275,7 +1275,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Cerrar la revisión de preparación con su decisión. Caso de uso UC-46-12: Cerrar revisión de preparación. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1287,11 +1287,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:257` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:257` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1396,7 +1396,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Cerrar un ejercicio de resiliencia. Caso de uso UC-46-14: Cerrar ejercicio de resiliencia. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:25`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1408,11 +1408,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:304` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:304` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1518,7 +1518,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Registrar la ejecución de un runbook. Caso de uso UC-46-13: Versión y ejecución de runbook. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1530,10 +1530,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:289` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1634,7 +1634,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Publicar una versión del runbook. Caso de uso UC-46-13: Versión y ejecución de runbook. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1646,11 +1646,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:273` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:273` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1741,7 +1741,7 @@ El árbol de decisión completo está en [flujos](../flujos/platform_ops.md).
 
 Registrar la medición de una ventana del SLO. Caso de uso UC-46-09: Medición de ventana SLO. Dentro del módulo (descripción del modelo, en inglés): «The operational backbone a data-center-grade deployment requires.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platform_ops/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_46_platform_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1753,11 +1753,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/platfor
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SRE, PLATFORM_ADMIN | `src/modules/platform_ops/controllers/platform-ops.controller.ts:206` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/platform_ops/controllers/platform-ops.controller.ts:206` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
