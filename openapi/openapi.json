@@ -90619,7 +90619,7 @@
             "name": "sortBy",
             "required": false,
             "in": "query",
-            "description": "Campo de ordenamiento",
+            "description": "Campo de ordenamiento. Debe ser un identificador de columna (letras, números, guión bajo); el servicio aplica además su propia allowlist de columnas ordenables",
             "schema": {
               "default": "createdAt",
               "type": "string"
@@ -92830,7 +92830,8 @@
           },
           "profilePhotoBase64": {
             "type": "string",
-            "description": "Foto de perfil en formato Base64 (Data URI o base64 plano)"
+            "description": "Foto de perfil en formato Base64 (Data URI o base64 plano)",
+            "maxLength": 2800000
           },
           "signatureFileId": {
             "type": "string",
@@ -94040,7 +94041,8 @@
           },
           "profilePhotoBase64": {
             "type": "string",
-            "description": "Foto de perfil en formato Base64 (Data URI o base64 plano)"
+            "description": "Foto de perfil en formato Base64 (Data URI o base64 plano)",
+            "maxLength": 2800000
           },
           "signatureFileId": {
             "type": "string",
@@ -100328,7 +100330,8 @@
           },
           "reasonText": {
             "type": "string",
-            "description": "Motivo de consulta"
+            "description": "Motivo de consulta",
+            "maxLength": 1000
           },
           "participants": {
             "type": "array",
@@ -100421,7 +100424,8 @@
           },
           "valueText": {
             "type": "string",
-            "description": "Valor de texto"
+            "description": "Valor de texto",
+            "maxLength": 1000
           },
           "valueConceptId": {
             "type": "string",
@@ -100496,7 +100500,8 @@
           },
           "text": {
             "type": "string",
-            "description": "Texto libre del rango"
+            "description": "Texto libre del rango",
+            "maxLength": 300
           }
         },
         "additionalProperties": false
@@ -100519,7 +100524,8 @@
           },
           "valueText": {
             "type": "string",
-            "description": "Valor de texto"
+            "description": "Valor de texto",
+            "maxLength": 1000
           },
           "valueConceptId": {
             "type": "string",
@@ -100646,7 +100652,8 @@
           },
           "valueText": {
             "type": "string",
-            "description": "Valor de texto"
+            "description": "Valor de texto",
+            "maxLength": 1000
           },
           "valueConceptId": {
             "type": "string",
@@ -100664,7 +100671,8 @@
           },
           "note": {
             "type": "string",
-            "description": "Nota que justifica la enmienda"
+            "description": "Nota que justifica la enmienda",
+            "maxLength": 1000
           },
           "expectedRowVersion": {
             "type": "number",
@@ -101075,7 +101083,8 @@
           },
           "description": {
             "type": "string",
-            "description": "Descripción libre"
+            "description": "Descripción libre",
+            "maxLength": 1000
           }
         },
         "required": [
@@ -101188,7 +101197,8 @@
           },
           "doseText": {
             "type": "string",
-            "description": "Dosis en texto libre"
+            "description": "Dosis en texto libre",
+            "maxLength": 500
           },
           "routeConceptId": {
             "type": "string",
@@ -101197,7 +101207,8 @@
           },
           "frequencyText": {
             "type": "string",
-            "description": "Frecuencia en texto libre"
+            "description": "Frecuencia en texto libre",
+            "maxLength": 500
           },
           "quantityDecimal": {
             "type": "number",
@@ -101220,7 +101231,8 @@
           },
           "patientInstructionsText": {
             "type": "string",
-            "description": "Indicaciones al paciente impresas en la receta, separadas de la posología (Patch v4.1.3)"
+            "description": "Indicaciones al paciente impresas en la receta, separadas de la posología (Patch v4.1.3)",
+            "maxLength": 2000
           },
           "indicationConditionId": {
             "type": "string",
@@ -101327,7 +101339,8 @@
           },
           "doseText": {
             "type": "string",
-            "description": "Dosis en texto libre"
+            "description": "Dosis en texto libre",
+            "maxLength": 500
           },
           "routeConceptId": {
             "type": "string",
@@ -101336,7 +101349,8 @@
           },
           "frequencyText": {
             "type": "string",
-            "description": "Frecuencia en texto libre"
+            "description": "Frecuencia en texto libre",
+            "maxLength": 500
           },
           "quantityDecimal": {
             "type": "number",
@@ -101369,7 +101383,8 @@
           },
           "patientInstructionsText": {
             "type": "string",
-            "description": "Indicaciones al paciente impresas en la receta (Patch v4.1.3)"
+            "description": "Indicaciones al paciente impresas en la receta (Patch v4.1.3)",
+            "maxLength": 2000
           }
         },
         "additionalProperties": false
@@ -101379,7 +101394,8 @@
         "properties": {
           "reasonText": {
             "type": "string",
-            "description": "Motivo de la invalidación (obligatorio)"
+            "description": "Motivo de la invalidación (obligatorio)",
+            "maxLength": 1000
           }
         },
         "required": [
@@ -101392,7 +101408,8 @@
         "properties": {
           "reasonText": {
             "type": "string",
-            "description": "Motivo de la corrección/reemplazo (obligatorio)"
+            "description": "Motivo de la corrección/reemplazo (obligatorio)",
+            "maxLength": 1000
           },
           "medicationConceptId": {
             "type": "string",
@@ -101406,7 +101423,8 @@
           },
           "doseText": {
             "type": "string",
-            "description": "Dosis en texto libre"
+            "description": "Dosis en texto libre",
+            "maxLength": 500
           },
           "routeConceptId": {
             "type": "string",
@@ -101415,7 +101433,8 @@
           },
           "frequencyText": {
             "type": "string",
-            "description": "Frecuencia en texto libre"
+            "description": "Frecuencia en texto libre",
+            "maxLength": 500
           },
           "quantityDecimal": {
             "type": "number",
@@ -101447,11 +101466,13 @@
         "properties": {
           "doseText": {
             "type": "string",
-            "description": "Dosis en texto libre"
+            "description": "Dosis en texto libre",
+            "maxLength": 500
           },
           "frequencyText": {
             "type": "string",
-            "description": "Frecuencia en texto libre"
+            "description": "Frecuencia en texto libre",
+            "maxLength": 500
           },
           "quantityDecimal": {
             "type": "number",
@@ -101545,7 +101566,8 @@
           },
           "followUpText": {
             "type": "string",
-            "description": "Seguimiento en texto libre"
+            "description": "Seguimiento en texto libre",
+            "maxLength": 2000
           }
         },
         "required": [
@@ -108477,7 +108499,8 @@
           },
           "provisionTypeConceptId": {
             "type": "string",
-            "description": "Tipo de provisión (concept id); por defecto la base"
+            "description": "Tipo de provisión (concept id); por defecto la base",
+            "format": "uuid"
           }
         },
         "required": [
@@ -114843,6 +114866,34 @@
             "format": "uuid",
             "description": "Value set de valores permitidos (campos de selección)"
           },
+          "options": {
+            "description": "Opciones propias de un campo de elección (dataType \"code\" sin valueSetId)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "multiple": {
+            "type": "boolean",
+            "description": "Admite varias respuestas en vez de una sola"
+          },
+          "allowOther": {
+            "type": "boolean",
+            "description": "Ofrece «Otro», con texto libre"
+          },
+          "description": {
+            "type": "string",
+            "description": "Ayuda que se lee bajo la pregunta (se sirve como \"hint\")",
+            "maxLength": 1000
+          },
+          "cardinalityMin": {
+            "type": "number",
+            "description": "Cardinalidad mínima (sólo con multiple)"
+          },
+          "cardinalityMax": {
+            "type": "number",
+            "description": "Cardinalidad máxima (sólo con multiple)"
+          },
           "required": {
             "type": "boolean",
             "default": false
@@ -115004,7 +115055,8 @@
           },
           "messageTemplate": {
             "type": "string",
-            "description": "Plantilla del mensaje de alerta"
+            "description": "Plantilla del mensaje de alerta",
+            "maxLength": 2000
           }
         },
         "required": [
@@ -115142,10 +115194,12 @@
             "description": "Severidad (concept id)"
           },
           "mechanismText": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2000
           },
           "managementText": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2000
           }
         },
         "required": [
@@ -115513,7 +115567,8 @@
           },
           "doseText": {
             "type": "string",
-            "description": "Posología por defecto"
+            "description": "Posología por defecto",
+            "maxLength": 500
           },
           "routeConceptId": {
             "type": "string",
@@ -115522,7 +115577,8 @@
           },
           "frequencyText": {
             "type": "string",
-            "description": "Frecuencia por defecto"
+            "description": "Frecuencia por defecto",
+            "maxLength": 500
           },
           "quantityDecimal": {
             "type": "number",
@@ -115535,7 +115591,8 @@
           },
           "patientInstructionsText": {
             "type": "string",
-            "description": "Indicaciones al paciente por defecto, separadas de la posología"
+            "description": "Indicaciones al paciente por defecto, separadas de la posología",
+            "maxLength": 2000
           }
         },
         "required": [
@@ -119487,6 +119544,28 @@
             "items": {
               "$ref": "#/components/schemas/ValidationRuleInputDto"
             }
+          },
+          "options": {
+            "description": "Opciones propias de un campo de elección (dataType \"code\" sin valueSetId)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "multiple": {
+            "type": "boolean",
+            "description": "Admite varias respuestas en vez de una sola",
+            "default": false
+          },
+          "allowOther": {
+            "type": "boolean",
+            "description": "Ofrece «Otro», con texto libre",
+            "default": false
+          },
+          "description": {
+            "type": "string",
+            "description": "Ayuda que se lee bajo la pregunta (se sirve como \"hint\")",
+            "maxLength": 1000
           }
         },
         "required": [
@@ -119522,6 +119601,27 @@
               "code"
             ],
             "description": "Tipo de dato técnico; con valores capturados no se cambia (409)"
+          },
+          "options": {
+            "description": "Opciones, reemplazadas enteras",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "multiple": {
+            "type": "boolean",
+            "description": "Admite varias respuestas"
+          },
+          "allowOther": {
+            "type": "boolean",
+            "description": "Ofrece «Otro», con texto libre"
+          },
+          "description": {
+            "type": "object",
+            "description": "Ayuda bajo la pregunta; null la quita",
+            "maxLength": 1000,
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -121751,7 +121851,8 @@
             "maxLength": 500
           },
           "diagnosticsText": {
-            "type": "string"
+            "type": "string",
+            "maxLength": 2000
           },
           "locationJson": {
             "type": "object"
@@ -121885,7 +121986,8 @@
           },
           "reasonText": {
             "type": "string",
-            "description": "Por qué se decide así"
+            "description": "Por qué se decide así",
+            "maxLength": 1000
           },
           "evidenceJson": {
             "type": "object",
@@ -121947,7 +122049,8 @@
           },
           "summaryRedacted": {
             "type": "string",
-            "description": "Resumen ya redactado según el consentimiento; nunca el dato clínico en claro"
+            "description": "Resumen ya redactado según el consentimiento; nunca el dato clínico en claro",
+            "maxLength": 2000
           },
           "clinicalPriorityConceptId": {
             "type": "string",
@@ -122044,7 +122147,8 @@
         "properties": {
           "reason": {
             "type": "string",
-            "description": "Por qué se retira"
+            "description": "Por qué se retira",
+            "maxLength": 1000
           }
         },
         "required": [
@@ -129310,7 +129414,8 @@
           },
           "expiresAt": {
             "type": "string",
-            "description": "Fecha de expiración del lote (ISO)"
+            "description": "Fecha de expiración del lote (ISO)",
+            "format": "date"
           }
         },
         "required": [

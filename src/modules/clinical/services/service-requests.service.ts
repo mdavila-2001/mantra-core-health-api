@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -202,9 +203,11 @@ export class ServiceRequestsService {
       encounter.patientProfileId !== dto.patientProfileId ||
       encounter.tenantId !== dto.custodianTenantId
     ) {
-      throw new ResourceNotFoundException('Encuentro no encontrado', {
-        encounterId: dto.encounterId,
-      });
+      throw new ResourceNotFoundException(
+        'Encuentro no encontrado',
+        { encounterId: dto.encounterId },
+        ClinicalErrorReason.ENCOUNTER_NOT_FOUND,
+      );
     }
   }
 

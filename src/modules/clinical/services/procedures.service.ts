@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import {
   ResourceNotFoundException,
   touch,
@@ -71,6 +72,7 @@ export class ProceduresService {
             {
               serviceRequestId: dto.serviceRequestId,
             },
+            ClinicalErrorReason.SERVICE_REQUEST_NOT_FOUND,
           );
         }
         sr.statusConceptId = CLIN.SERVICE_REQUEST_COMPLETED;
@@ -87,6 +89,7 @@ export class ProceduresService {
             {
               parentProcedureId: dto.parentProcedureId,
             },
+            ClinicalErrorReason.PARENT_PROCEDURE_NOT_FOUND,
           );
         }
       }

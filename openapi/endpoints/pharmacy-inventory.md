@@ -50,7 +50,7 @@ Referencia exhaustiva de 29 operación(es) del módulo `pharmacy_inventory`, der
 - **Nombre:** Ingerir un lote de sincronización ERP
 - **Operation ID:** `PharmacyInventoryInternalController_createSyncBatch`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryInternalController.createSyncBatch](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory-internal.controller.ts)
+- **Implementación:** [PharmacyInventoryInternalController.createSyncBatch](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -197,7 +197,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Conciliar lote de sincronización externa (UC-25-12)
 - **Operation ID:** `PharmacyInventoryInternalController_reconcile`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryInternalController.reconcile](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory-internal.controller.ts)
+- **Implementación:** [PharmacyInventoryInternalController.reconcile](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -286,8 +286,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Lote de sincronización no encontrado | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-sync.service.ts |
-| 422 | `PRECONDITION_FAILED` | El lote no está en estado reconciliable | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-sync.service.ts |
+| 404 | `NOT_FOUND` | Lote de sincronización no encontrado | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-sync/reconcile-inventory-sync-batch.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | El lote no está en estado reconciliable | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-sync/reconcile-inventory-sync-batch.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -312,7 +312,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Liberar reservas y pedidos vencidos (UC-25-05)
 - **Operation ID:** `PharmacyInventoryInternalController_expireReservations`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryInternalController.expireReservations](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory-internal.controller.ts)
+- **Implementación:** [PharmacyInventoryInternalController.expireReservations](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts)
 
 ### Descripción de negocio
 
@@ -394,9 +394,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -421,7 +418,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Consultar qué sedes pueden surtir un conjunto de productos
 - **Operation ID:** `PharmacyInventoryReadController_availability`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryReadController.availability](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory-read.controller.ts)
+- **Implementación:** [PharmacyInventoryReadController.availability](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -616,7 +613,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Consultar el stock disponible de una sede
 - **Operation ID:** `PharmacyInventoryReadController_getSiteStock`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryReadController.getSiteStock](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory-read.controller.ts)
+- **Implementación:** [PharmacyInventoryReadController.getSiteStock](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts)
 
 ### Descripción de negocio
 
@@ -739,7 +736,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sede de farmacia no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-inventory-read.service.ts |
+| 404 | `NOT_FOUND` | Sede de farmacia no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-inventory-read/read-pharmacy-inventory.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -764,7 +761,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Dispensar una prescripción a un paciente (UC-25-03)
 - **Operation ID:** `PharmacyDispensingController_dispense`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyDispensingController.dispense](../../src/modules/pharmacy_inventory/controllers/pharmacy-dispensing.controller.ts)
+- **Implementación:** [PharmacyDispensingController.dispense](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-dispensing.controller.ts)
 
 ### Descripción de negocio
 
@@ -902,10 +899,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Reserva no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/medication-dispensations.service.ts |
+| 404 | `NOT_FOUND` | Reserva no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La reserva es un pedido de paciente: se dispensa con su código de retiro por POST /pharmacy/orders/:id/dispense | Excepción explícita en src/modules/pharmacy_inventory/services/medication-dispensations.service.ts |
-| 422 | `PRECONDITION_FAILED` | Stock insuficiente para dispensar | Excepción explícita en src/modules/pharmacy_inventory/services/medication-dispensations.service.ts |
+| 422 | `PRECONDITION_FAILED` | La reserva es un pedido de paciente: se dispensa con su código de retiro por POST /pharmacy/orders/:id/dispense | Excepción explícita en src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Stock insuficiente para dispensar | Excepción explícita en src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -930,7 +927,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Recepcionar mercancía por lote (UC-25-02)
 - **Operation ID:** `PharmacyProcurementController_receiveGoods`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyProcurementController.receiveGoods](../../src/modules/pharmacy_inventory/controllers/pharmacy-procurement.controller.ts)
+- **Implementación:** [PharmacyProcurementController.receiveGoods](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts)
 
 ### Descripción de negocio
 
@@ -989,7 +986,7 @@ Content-Type: application/json
 | `inventoryLocationId` | Sí | `string` | formato `uuid` | Ubicación destino del stock | `00000000-0000-4000-8000-000000000001` |
 | `supplierDeliveryReference` | No | `string` | Sin restricción adicional declarada | Referencia de entrega del proveedor | `valor-ejemplo` |
 | `idempotencyKey` | No | `string` | Sin restricción adicional declarada | Clave de idempotencia | `valor-ejemplo` |
-| `lines` | Sí | `array<GoodsReceiptLineDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"pharmacyPurchaseOrderLineId":"00000000-0000-4000-8000-000000000001","pharmacyProductId":"00000000-0000-4000-8000-000000000001","lotNumber":"valor-ejemplo","receivedQuantity":1,"acceptedQuantity":1,"rejectedQuantity":1,"unitCostAmount":1,"expiresAt":"valor-ejemplo"}]` |
+| `lines` | Sí | `array<GoodsReceiptLineDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"pharmacyPurchaseOrderLineId":"00000000-0000-4000-8000-000000000001","pharmacyProductId":"00000000-0000-4000-8000-000000000001","lotNumber":"valor-ejemplo","receivedQuantity":1,"acceptedQuantity":1,"rejectedQuantity":1,"unitCostAmount":1,"expiresAt":"2026-07-31"}]` |
 | `lines[].pharmacyPurchaseOrderLineId` | Sí | `string` | formato `uuid` | Línea de la orden de compra | `00000000-0000-4000-8000-000000000001` |
 | `lines[].pharmacyProductId` | Sí | `string` | formato `uuid` | Producto de farmacia | `00000000-0000-4000-8000-000000000001` |
 | `lines[].lotNumber` | Sí | `string` | longitud máxima 128 | Número de lote recibido | `valor-ejemplo` |
@@ -997,7 +994,7 @@ Content-Type: application/json
 | `lines[].acceptedQuantity` | No | `number` | mínimo 0 | Cantidad aceptada (default = recibida) | `1` |
 | `lines[].rejectedQuantity` | No | `number` | mínimo 0 | Cantidad rechazada | `1` |
 | `lines[].unitCostAmount` | No | `number` | mínimo 0 | Costo unitario | `1` |
-| `lines[].expiresAt` | No | `string` | Sin restricción adicional declarada | Fecha de expiración del lote (ISO) | `valor-ejemplo` |
+| `lines[].expiresAt` | No | `string` | formato `date` | Fecha de expiración del lote (ISO) | `2026-07-31` |
 
 ### Payload completo de ejemplo
 
@@ -1024,7 +1021,7 @@ Content-Type: application/json
       "acceptedQuantity": 1,
       "rejectedQuantity": 1,
       "unitCostAmount": 1,
-      "expiresAt": "valor-ejemplo"
+      "expiresAt": "2026-07-31"
     }
   ]
 }
@@ -1078,11 +1075,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Orden de compra no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-procurement.service.ts |
-| 404 | `NOT_FOUND` | Ubicación destino no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-procurement.service.ts |
-| 404 | `NOT_FOUND` | Línea de orden no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-procurement.service.ts |
+| 404 | `NOT_FOUND` | Orden de compra no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts |
+| 404 | `NOT_FOUND` | Ubicación destino no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts |
+| 404 | `NOT_FOUND` | Línea de orden no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La orden no admite recepción | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-procurement.service.ts |
+| 422 | `PRECONDITION_FAILED` | La orden no admite recepción | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1107,7 +1104,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Emitir una orden de compra a proveedor (UC-25-01)
 - **Operation ID:** `PharmacyProcurementController_createPurchaseOrder`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyProcurementController.createPurchaseOrder](../../src/modules/pharmacy_inventory/controllers/pharmacy-procurement.controller.ts)
+- **Implementación:** [PharmacyProcurementController.createPurchaseOrder](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts)
 
 ### Descripción de negocio
 
@@ -1236,9 +1233,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Proveedor no encontrado | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-procurement.service.ts |
+| 404 | `NOT_FOUND` | Proveedor no encontrado | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El proveedor no está activo | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-procurement.service.ts |
+| 422 | `PRECONDITION_FAILED` | El proveedor no está activo | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1263,7 +1260,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Reservar stock para una prescripción (UC-25-04)
 - **Operation ID:** `PharmacyInventoryController_reserve`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryController.reserve](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory.controller.ts)
+- **Implementación:** [PharmacyInventoryController.reserve](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts)
 
 ### Descripción de negocio
 
@@ -1397,7 +1394,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Stock disponible insuficiente para reservar | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-reservations.service.ts |
+| 422 | `PRECONDITION_FAILED` | Stock disponible insuficiente para reservar | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-reservations/reserve-inventory.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1422,7 +1419,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Registrar un proveedor de farmacia
 - **Operation ID:** `PharmacyProcurementController_createSupplier`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyProcurementController.createSupplier](../../src/modules/pharmacy_inventory/controllers/pharmacy-procurement.controller.ts)
+- **Implementación:** [PharmacyProcurementController.createSupplier](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts)
 
 ### Descripción de negocio
 
@@ -1550,7 +1547,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Transferir stock entre ubicaciones (UC-25-10)
 - **Operation ID:** `PharmacyInventoryController_transfer`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryController.transfer](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory.controller.ts)
+- **Implementación:** [PharmacyInventoryController.transfer](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts)
 
 ### Descripción de negocio
 
@@ -1667,10 +1664,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Ubicación origen no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-transfers.service.ts |
-| 404 | `NOT_FOUND` | Ubicación destino no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-transfers.service.ts |
+| 404 | `NOT_FOUND` | Ubicación origen no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-transfers/transfer-inventory.use-case.ts |
+| 404 | `NOT_FOUND` | Ubicación destino no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-transfers/transfer-inventory.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Stock disponible insuficiente en origen | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-transfers.service.ts |
+| 422 | `PRECONDITION_FAILED` | Stock disponible insuficiente en origen | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-transfers/transfer-inventory.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1695,7 +1692,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Iniciar y congelar una sesión de conteo (UC-25-06)
 - **Operation ID:** `PharmacyInventoryController_openCountSession`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryController.openCountSession](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory.controller.ts)
+- **Implementación:** [PharmacyInventoryController.openCountSession](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts)
 
 ### Descripción de negocio
 
@@ -1816,8 +1813,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Ubicación no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-count.service.ts |
-| 409 | `CONFLICT` | Ya existe una sesión de conteo abierta en la ubicación | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-count.service.ts |
+| 404 | `NOT_FOUND` | Ubicación no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-count/open-inventory-count.use-case.ts |
+| 409 | `CONFLICT` | Ya existe una sesión de conteo abierta en la ubicación | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-count/open-inventory-count.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1843,7 +1840,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Crear una ubicación de inventario
 - **Operation ID:** `PharmacyInventoryController_createLocation`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryController.createLocation](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory.controller.ts)
+- **Implementación:** [PharmacyInventoryController.createLocation](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts)
 
 ### Descripción de negocio
 
@@ -1974,7 +1971,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Aprobar conteo y ajustar ledger por varianza (UC-25-07)
 - **Operation ID:** `PharmacyInventoryController_approveCountSession`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryController.approveCountSession](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory.controller.ts)
+- **Implementación:** [PharmacyInventoryController.approveCountSession](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts)
 
 ### Descripción de negocio
 
@@ -2091,10 +2088,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sesión de conteo no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-count.service.ts |
-| 404 | `NOT_FOUND` | Línea de conteo no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-count.service.ts |
+| 404 | `NOT_FOUND` | Sesión de conteo no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-count/approve-inventory-count.use-case.ts |
+| 404 | `NOT_FOUND` | Línea de conteo no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-count/approve-inventory-count.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La sesión no está en estado aprobable | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-count.service.ts |
+| 422 | `PRECONDITION_FAILED` | La sesión no está en estado aprobable | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-count/approve-inventory-count.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2119,7 +2116,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Reversar una dispensación (UC-25-11)
 - **Operation ID:** `PharmacyDispensingController_reverse`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyDispensingController.reverse](../../src/modules/pharmacy_inventory/controllers/pharmacy-dispensing.controller.ts)
+- **Implementación:** [PharmacyDispensingController.reverse](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-dispensing.controller.ts)
 
 ### Descripción de negocio
 
@@ -2218,9 +2215,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Dispensación no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/medication-dispensations.service.ts |
+| 404 | `NOT_FOUND` | Dispensación no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/medication-dispensations/reverse-medication-dispensation.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La dispensación no está en estado reversible | Excepción explícita en src/modules/pharmacy_inventory/services/medication-dispensations.service.ts |
+| 422 | `PRECONDITION_FAILED` | La dispensación no está en estado reversible | Excepción explícita en src/modules/pharmacy_inventory/application/medication-dispensations/reverse-medication-dispensation.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2245,7 +2242,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Bandeja de pedidos de las farmacias del tenant (FAR-E2)
 - **Operation ID:** `PharmacyOrdersController_listForTenant`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.listForTenant](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.listForTenant](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -2537,10 +2534,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | Estado de pedido desconocido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | Estado de pedido desconocido | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2565,7 +2559,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Crear un pedido de farmacia (FAR-E1)
 - **Operation ID:** `PharmacyOrdersController_create`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.create](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.create](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -2881,13 +2875,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sede de farmacia no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 404 | `NOT_FOUND` | Producto no disponible en la sede | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 404 | `NOT_FOUND` | Sede de farmacia no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 404 | `NOT_FOUND` | Receta no encontrada | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 404 | `NOT_FOUND` | Producto no disponible en la sede | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido repite productos; use una línea por producto | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El envío a domicilio o al trabajo llega con el carril de envío (FAR-E4); hoy solo RETIRO | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido repite productos; use una línea por producto | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El envío a domicilio o al trabajo llega con el carril de envío (FAR-E4); hoy solo RETIRO | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2912,7 +2906,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Consultar un pedido de farmacia (FAR-E1)
 - **Operation ID:** `PharmacyOrdersController_getOrder`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.getOrder](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.getOrder](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -3194,9 +3188,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3221,7 +3212,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Aceptar los genéricos propuestos (paciente)
 - **Operation ID:** `PharmacyOrdersController_acceptSubstitutions`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.acceptSubstitutions](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.acceptSubstitutions](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -3506,9 +3497,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido no tiene una decisión de sustituciones pendiente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido no tiene propuestas de sustitución en pie | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no tiene una decisión de sustituciones pendiente | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no tiene propuestas de sustitución en pie | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3533,7 +3524,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Cancelar un pedido de farmacia (FAR-E1)
 - **Operation ID:** `PharmacyOrdersController_cancel`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.cancel](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.cancel](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -3818,8 +3809,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
-| 409 | `CONFLICT` | El pedido ya está en un estado terminal y no puede cancelarse | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 409 | `CONFLICT` | El pedido ya está en un estado terminal y no puede cancelarse | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3844,7 +3835,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Confirmar el pedido (FAR-E2)
 - **Operation ID:** `PharmacyOrdersController_confirm`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.confirm](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.confirm](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -4150,16 +4141,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El ajuste refiere un producto que no está en el pedido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | Hay más de un ajuste para el mismo renglón | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | La transición no es legal para el estado actual del pedido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | PROPONER_GENERICO exige el producto propuesto (proposedProductId) | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El producto propuesto no está disponible en esta farmacia | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El producto propuesto no es del mismo medicamento que el original | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El ajuste refiere un producto que no está en el pedido | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | Hay más de un ajuste para el mismo renglón | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | La transición no es legal para el estado actual del pedido | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | PROPONER_GENERICO exige el producto propuesto (proposedProductId) | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El producto propuesto no está disponible en esta farmacia | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El producto propuesto no es del mismo medicamento que el original | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4184,7 +4172,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Dispensar el pedido en el mostrador (FAR-E3)
 - **Operation ID:** `PharmacyOrdersController_dispense`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.dispense](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.dispense](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -4489,16 +4477,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 409 | `CONFLICT` | La clave de idempotencia ya se usó para otra entrega | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 409 | `CONFLICT` | El pedido tiene reclamos activos contradictorios | Excepción explícita en src/modules/insurance/repositories/patient-settlement.repository.ts |
+| 409 | `CONFLICT` | La clave de idempotencia ya se usó para otra entrega | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | Solo un pedido listo para retiro puede dispensarse | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El código de retiro no coincide. El pedido no se modificó. | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | La entrega refiere productos sin saldo en pie en este pedido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido no tiene saldo en pie que entregar | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | Solo un pedido listo para retiro puede dispensarse | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El código de retiro no coincide. El pedido no se modificó. | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | La entrega refiere productos sin saldo en pie en este pedido | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no tiene saldo en pie que entregar | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4523,7 +4507,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Preferir los productos originales (paciente)
 - **Operation ID:** `PharmacyOrdersController_preferOriginal`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.preferOriginal](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.preferOriginal](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -4808,9 +4792,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido no tiene una decisión de sustituciones pendiente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido no tiene propuestas de sustitución en pie | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no tiene una decisión de sustituciones pendiente | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no tiene propuestas de sustitución en pie | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4835,7 +4819,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Marcar el pedido listo para retiro (FAR-E2/E3)
 - **Operation ID:** `PharmacyOrdersController_ready`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.ready](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.ready](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -5120,14 +5104,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 409 | `CONFLICT` | No se pudo sellar un código de retiro único; reintente la operación | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | La transición no es legal para el estado actual del pedido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido no declara modalidad de entrega: no puede demostrarse que sea un retiro | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | El pedido es de envío: se cierra por el carril de envío, no por el mostrador | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | La sede no ofrece retiro en mostrador | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 409 | `CONFLICT` | No se pudo sellar un código de retiro único; reintente la operación | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | La transición no es legal para el estado actual del pedido | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido no declara modalidad de entrega: no puede demostrarse que sea un retiro | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | El pedido es de envío: se cierra por el carril de envío, no por el mostrador | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | La sede no ofrece retiro en mostrador | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5152,7 +5133,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Rechazar el pedido (FAR-E2)
 - **Operation ID:** `PharmacyOrdersController_reject`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.reject](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.reject](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -5451,12 +5432,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El rechazo exige un motivo en palabras | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | La transición no es legal para el estado actual del pedido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El rechazo exige un motivo en palabras | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
+| 422 | `PRECONDITION_FAILED` | La transición no es legal para el estado actual del pedido | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5481,7 +5459,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Abrir revisión del pedido (FAR-E2)
 - **Operation ID:** `PharmacyOrdersController_openReview`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.openReview](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.openReview](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -5766,10 +5744,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PHARMACY_STAFF. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La transición no es legal para el estado actual del pedido | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La transición no es legal para el estado actual del pedido | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -5794,7 +5769,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Mis pedidos de farmacia, más nuevos primero (FAR-E1)
 - **Operation ID:** `PharmacyOrdersController_listMine`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyOrdersController.listMine](../../src/modules/pharmacy_inventory/controllers/pharmacy-orders.controller.ts)
+- **Implementación:** [PharmacyOrdersController.listMine](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts)
 
 ### Descripción de negocio
 
@@ -6079,10 +6054,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/services/pharmacy-orders.service.ts |
-| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta autenticada no tiene perfil de paciente | Excepción explícita en src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6107,7 +6079,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Aplicar retiro/recall de lote (UC-25-08)
 - **Operation ID:** `PharmacyInventoryController_createRecallHold`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryController.createRecallHold](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory.controller.ts)
+- **Implementación:** [PharmacyInventoryController.createRecallHold](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts)
 
 ### Descripción de negocio
 
@@ -6219,7 +6191,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Lote no encontrado | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-recall.service.ts |
+| 404 | `NOT_FOUND` | Lote no encontrado | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-recall/create-recall-hold.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6245,7 +6217,7 @@ Ejemplo de error normalizado:
 - **Nombre:** Liberar recall y reactivar lote (UC-25-09)
 - **Operation ID:** `PharmacyInventoryController_releaseRecallHold`
 - **Autenticación:** JWT Bearer obligatoria
-- **Implementación:** [PharmacyInventoryController.releaseRecallHold](../../src/modules/pharmacy_inventory/controllers/pharmacy-inventory.controller.ts)
+- **Implementación:** [PharmacyInventoryController.releaseRecallHold](../../src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts)
 
 ### Descripción de negocio
 
@@ -6342,9 +6314,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Hold de recall no encontrado | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-recall.service.ts |
+| 404 | `NOT_FOUND` | Hold de recall no encontrado | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-recall/release-recall-hold.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | El hold no está activo | Excepción explícita en src/modules/pharmacy_inventory/services/inventory-recall.service.ts |
+| 422 | `PRECONDITION_FAILED` | El hold no está activo | Excepción explícita en src/modules/pharmacy_inventory/application/inventory-recall/release-recall-hold.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

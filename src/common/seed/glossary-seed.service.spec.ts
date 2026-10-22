@@ -490,8 +490,9 @@ describe('GlossarySeedService', () => {
       expect(
         g
           .rowsIn('ConceptProperties')
-          .find((row) => row.id === glossaryPropertyId(slug, 'glossary-article'))
-          .valueJson,
+          .find(
+            (row) => row.id === glossaryPropertyId(slug, 'glossary-article'),
+          ).valueJson,
       ).toEqual(glossaryArticleFor(slug));
     });
 

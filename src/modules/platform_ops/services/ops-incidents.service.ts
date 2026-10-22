@@ -13,6 +13,7 @@ import {
   OpsIncidentsRepository,
   OpsImprovementsRepository,
 } from '../repositories';
+import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
 import type { HealthIncidents } from '../entities';
 import {
   RecordHealthRunDto,
@@ -171,14 +172,19 @@ export class OpsIncidentsService {
         healthCheckId,
       );
       if (!check) {
-        throw new ResourceNotFoundException('Health check no encontrado', {
-          healthCheckId,
-        });
+        throw new ResourceNotFoundException(
+          'Health check no encontrado',
+          {
+            healthCheckId,
+          },
+          PlatformOpsErrorReason.HEALTH_CHECK_NOT_FOUND,
+        );
       }
       if (check.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'El health check no está activo',
           { healthCheckId },
+          PlatformOpsErrorReason.HEALTH_CHECK_NOT_ACTIVE,
         );
       }
       if (check.isEnabled === false) {
@@ -187,6 +193,7 @@ export class OpsIncidentsService {
           {
             healthCheckId,
           },
+          PlatformOpsErrorReason.HEALTH_CHECK_DISABLED,
         );
       }
 
@@ -317,14 +324,22 @@ export class OpsIncidentsService {
         incidentId,
       );
       if (!incident) {
-        throw new ResourceNotFoundException('Incidente no encontrado', {
-          incidentId,
-        });
+        throw new ResourceNotFoundException(
+          'Incidente no encontrado',
+          {
+            incidentId,
+          },
+          PlatformOpsErrorReason.INCIDENT_NOT_FOUND,
+        );
       }
       if (incident.statusConceptId === CONCEPTS.INCIDENT_RESOLVED) {
-        throw new PreconditionFailedException('El incidente ya está resuelto', {
-          incidentId,
-        });
+        throw new PreconditionFailedException(
+          'El incidente ya está resuelto',
+          {
+            incidentId,
+          },
+          PlatformOpsErrorReason.INCIDENT_ALREADY_RESOLVED,
+        );
       }
 
       const timelineEventIds: string[] = [];
@@ -437,9 +452,13 @@ export class OpsIncidentsService {
         incidentId,
       );
       if (!incident) {
-        throw new ResourceNotFoundException('Incidente no encontrado', {
-          incidentId,
-        });
+        throw new ResourceNotFoundException(
+          'Incidente no encontrado',
+          {
+            incidentId,
+          },
+          PlatformOpsErrorReason.INCIDENT_NOT_FOUND,
+        );
       }
       // Un postmortem sobre un incidente vivo describiría algo que aún cambia.
       if (incident.statusConceptId !== CONCEPTS.INCIDENT_RESOLVED) {
@@ -448,6 +467,7 @@ export class OpsIncidentsService {
           {
             incidentId,
           },
+          PlatformOpsErrorReason.INCIDENT_NOT_RESOLVED,
         );
       }
 
@@ -456,10 +476,14 @@ export class OpsIncidentsService {
         incidentId,
       );
       if (previous) {
-        throw new ConflictException('El incidente ya tiene postmortem', {
-          incidentId,
-          postmortemId: previous.id,
-        });
+        throw new ConflictException(
+          'El incidente ya tiene postmortem',
+          {
+            incidentId,
+            postmortemId: previous.id,
+          },
+          PlatformOpsErrorReason.INCIDENT_POSTMORTEM_ALREADY_EXISTS,
+        );
       }
 
       const postmortem = this.incidentsRepo.createPostmortem(tx, {
@@ -556,6 +580,7 @@ export class OpsIncidentsService {
           incidentId: incident.id,
           transition: dto.transition,
         },
+        PlatformOpsErrorReason.INCIDENT_TRANSITION_INVALID,
       );
     }
 
@@ -568,6 +593,7 @@ export class OpsIncidentsService {
         throw new PreconditionFailedException(
           'Resolver exige causa raíz y descripción de la resolución',
           { incidentId: incident.id },
+          PlatformOpsErrorReason.INCIDENT_RESOLVE_MISSING_ROOT_CAUSE,
         );
       }
       incident.rootCauseText = rootCause;
@@ -610,6 +636,7 @@ export class OpsIncidentsService {
             incidentId,
             actionCode: action.actionCode,
           },
+          PlatformOpsErrorReason.POSTMORTEM_ACTION_CODE_DUPLICATE,
         );
       }
       seen.add(action.actionCode);

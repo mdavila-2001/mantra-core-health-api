@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { PreconditionFailedException } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { JournalRepository } from '../repositories';
 import { sumCents, fromCents } from './money';
 
@@ -137,6 +138,7 @@ export class PostingHelper {
           debit: fromCents(debit),
           credit: fromCents(credit),
         },
+        AccountingErrorReason.JOURNAL_ENTRY_UNBALANCED,
       );
     }
 

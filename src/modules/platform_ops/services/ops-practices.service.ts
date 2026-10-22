@@ -14,6 +14,7 @@ import {
   OpsIncidentsRepository,
   OpsImprovementsRepository,
 } from '../repositories';
+import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
 import {
   CompleteReadinessReviewDto,
   ReadinessReviewResponseDto,
@@ -93,12 +94,17 @@ export class OpsPracticesService {
         throw new ResourceNotFoundException(
           'Revisión de preparación no encontrada',
           { reviewId },
+          PlatformOpsErrorReason.READINESS_REVIEW_NOT_FOUND,
         );
       }
       if (review.statusConceptId !== CONCEPTS.ORR_IN_PROGRESS) {
-        throw new PreconditionFailedException('La revisión no está en curso', {
-          reviewId,
-        });
+        throw new PreconditionFailedException(
+          'La revisión no está en curso',
+          {
+            reviewId,
+          },
+          PlatformOpsErrorReason.READINESS_REVIEW_NOT_IN_PROGRESS,
+        );
       }
 
       const findings = await this.practicesRepo.findFindingsForUpdate(
@@ -117,13 +123,18 @@ export class OpsPracticesService {
               reviewId,
               findingId: resolved.findingId,
             },
+            PlatformOpsErrorReason.READINESS_FINDING_NOT_IN_REVIEW,
           );
         }
         if (finding.statusConceptId !== CONCEPTS.FINDING_OPEN) {
-          throw new ConflictException('El hallazgo ya no está abierto', {
-            reviewId,
-            findingId: resolved.findingId,
-          });
+          throw new ConflictException(
+            'El hallazgo ya no está abierto',
+            {
+              reviewId,
+              findingId: resolved.findingId,
+            },
+            PlatformOpsErrorReason.READINESS_FINDING_NOT_OPEN,
+          );
         }
         finding.statusConceptId = CONCEPTS.FINDING_RESOLVED;
         finding.resolvedAt = new Date();
@@ -143,6 +154,7 @@ export class OpsPracticesService {
           throw new PreconditionFailedException(
             'Quedan hallazgos críticos o altos sin resolver',
             { reviewId, findingId: blocking.id },
+            PlatformOpsErrorReason.READINESS_BLOCKING_FINDINGS_OPEN,
           );
         }
       }
@@ -220,14 +232,22 @@ export class OpsPracticesService {
         runbookId,
       );
       if (!runbook) {
-        throw new ResourceNotFoundException('Runbook no encontrado', {
-          runbookId,
-        });
+        throw new ResourceNotFoundException(
+          'Runbook no encontrado',
+          {
+            runbookId,
+          },
+          PlatformOpsErrorReason.RUNBOOK_NOT_FOUND,
+        );
       }
       if (runbook.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El runbook no está activo', {
-          runbookId,
-        });
+        throw new PreconditionFailedException(
+          'El runbook no está activo',
+          {
+            runbookId,
+          },
+          PlatformOpsErrorReason.RUNBOOK_NOT_ACTIVE,
+        );
       }
 
       const latest = await this.practicesRepo.findLatestRunbookVersion(
@@ -241,10 +261,14 @@ export class OpsPracticesService {
         versionNumber,
       );
       if (taken) {
-        throw new ConflictException('Esa versión del runbook ya existe', {
-          runbookId,
-          versionNumber,
-        });
+        throw new ConflictException(
+          'Esa versión del runbook ya existe',
+          {
+            runbookId,
+            versionNumber,
+          },
+          PlatformOpsErrorReason.RUNBOOK_VERSION_DUPLICATE,
+        );
       }
 
       const version = this.practicesRepo.createRunbookVersion(tx, {
@@ -287,6 +311,7 @@ export class OpsPracticesService {
         {
           runbookVersionId: dto.runbookVersionId,
         },
+        PlatformOpsErrorReason.RUNBOOK_EXECUTION_WINDOW_INVERTED,
       );
     }
 
@@ -301,6 +326,7 @@ export class OpsPracticesService {
           {
             runbookVersionId: dto.runbookVersionId,
           },
+          PlatformOpsErrorReason.RUNBOOK_VERSION_NOT_FOUND,
         );
       }
 
@@ -310,9 +336,13 @@ export class OpsPracticesService {
           dto.healthIncidentId,
         );
         if (!incident) {
-          throw new ResourceNotFoundException('Incidente no encontrado', {
-            healthIncidentId: dto.healthIncidentId,
-          });
+          throw new ResourceNotFoundException(
+            'Incidente no encontrado',
+            {
+              healthIncidentId: dto.healthIncidentId,
+            },
+            PlatformOpsErrorReason.INCIDENT_NOT_FOUND,
+          );
         }
       }
 
@@ -379,6 +409,7 @@ export class OpsPracticesService {
         {
           exerciseId,
         },
+        PlatformOpsErrorReason.RESILIENCE_EXERCISE_WINDOW_INVERTED,
       );
     }
 
@@ -393,12 +424,17 @@ export class OpsPracticesService {
           {
             exerciseId,
           },
+          PlatformOpsErrorReason.RESILIENCE_EXERCISE_NOT_FOUND,
         );
       }
       if (exercise.resultConceptId) {
-        throw new ConflictException('El ejercicio ya está cerrado', {
-          exerciseId,
-        });
+        throw new ConflictException(
+          'El ejercicio ya está cerrado',
+          {
+            exerciseId,
+          },
+          PlatformOpsErrorReason.RESILIENCE_EXERCISE_ALREADY_CLOSED,
+        );
       }
 
       const objective = await this.practicesRepo.findRecoveryObjectiveForUpdate(
@@ -412,6 +448,7 @@ export class OpsPracticesService {
         throw new PreconditionFailedException(
           'El componente no tiene objetivo de recuperación vigente',
           { exerciseId, serviceComponentId: exercise.serviceComponentId },
+          PlatformOpsErrorReason.RECOVERY_OBJECTIVE_NOT_FOUND,
         );
       }
 

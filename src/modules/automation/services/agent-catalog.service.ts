@@ -10,6 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
+import { AutomationErrorReason } from '../automation.error-reasons';
 import {
   AgentsRepository,
   AutomationGovernanceRepository,
@@ -82,9 +83,13 @@ export class AgentCatalogService {
     return this.em.transactional(async (tx) => {
       const existing = await this.agentsRepo.findAgentByCode(tx, dto.code);
       if (existing) {
-        throw new ConflictException('Ya existe un agente con ese código.', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'Ya existe un agente con ese código.',
+          {
+            code: dto.code,
+          },
+          AutomationErrorReason.AGENT_CODE_ALREADY_EXISTS,
+        );
       }
 
       if (
@@ -94,6 +99,7 @@ export class AgentCatalogService {
         throw new PreconditionFailedException(
           'Un agente que actúa necesita una identidad de servicio (`actsAsUserId`).',
           { code: dto.code },
+          AutomationErrorReason.ACTING_AGENT_MISSING_SERVICE_IDENTITY,
         );
       }
 
@@ -167,9 +173,13 @@ export class AgentCatalogService {
     return this.em.transactional(async (tx) => {
       const agent = await this.agentsRepo.findAgentForUpdate(tx, agentId);
       if (!agent) {
-        throw new ResourceNotFoundException('Agente no encontrado.', {
-          agentId,
-        });
+        throw new ResourceNotFoundException(
+          'Agente no encontrado.',
+          {
+            agentId,
+          },
+          AutomationErrorReason.AGENT_NOT_FOUND,
+        );
       }
 
       const now = new Date();
@@ -183,6 +193,7 @@ export class AgentCatalogService {
             {
               agentVersionId: dto.agentVersionId,
             },
+            AutomationErrorReason.AGENT_VERSION_NOT_FOUND_FOR_AGENT,
           );
         }
         if (version.statusConceptId !== CONCEPTS.AUTO_VERSION_DRAFT) {
@@ -191,6 +202,7 @@ export class AgentCatalogService {
             {
               agentVersionId: version.id,
             },
+            AutomationErrorReason.AGENT_VERSION_NOT_DRAFT,
           );
         }
         version.statusConceptId = CONCEPTS.AUTO_VERSION_PUBLISHED;
@@ -202,6 +214,7 @@ export class AgentCatalogService {
           throw new PreconditionFailedException(
             'Para crear una versión nueva hace falta su plantilla de prompt.',
             { agentId },
+            AutomationErrorReason.NEW_VERSION_MISSING_PROMPT_TEMPLATE,
           );
         }
         const maxVersion = await this.agentsRepo.findMaxVersion(tx, agentId);
@@ -275,6 +288,7 @@ export class AgentCatalogService {
           {
             code: dto.code,
           },
+          AutomationErrorReason.TOOL_CODE_ALREADY_EXISTS,
         );
       }
 
@@ -285,6 +299,7 @@ export class AgentCatalogService {
         throw new PreconditionFailedException(
           'Una herramienta de llamada HTTP necesita un endpoint de integración.',
           { code: dto.code },
+          AutomationErrorReason.HTTP_TOOL_MISSING_INTEGRATION_ENDPOINT,
         );
       }
 
@@ -354,6 +369,7 @@ export class AgentCatalogService {
             agentId,
             agentVersionId,
           },
+          AutomationErrorReason.AGENT_VERSION_NOT_FOUND_FOR_AGENT,
         );
       }
 
@@ -367,6 +383,7 @@ export class AgentCatalogService {
             {
               agentToolId: binding.agentToolId,
             },
+            AutomationErrorReason.DUPLICATE_TOOL_IN_BINDING_BATCH,
           );
         }
         seen.add(binding.agentToolId);
@@ -376,9 +393,13 @@ export class AgentCatalogService {
           binding.agentToolId,
         );
         if (!tool) {
-          throw new ResourceNotFoundException('Herramienta no encontrada.', {
-            agentToolId: binding.agentToolId,
-          });
+          throw new ResourceNotFoundException(
+            'Herramienta no encontrada.',
+            {
+              agentToolId: binding.agentToolId,
+            },
+            AutomationErrorReason.TOOL_NOT_FOUND,
+          );
         }
         if (tool.stateConceptId !== CONCEPTS.AUTO_TOOL_ACTIVE) {
           throw new PreconditionFailedException(
@@ -386,6 +407,7 @@ export class AgentCatalogService {
             {
               agentToolId: tool.id,
             },
+            AutomationErrorReason.TOOL_NOT_ACTIVE,
           );
         }
 
@@ -400,6 +422,7 @@ export class AgentCatalogService {
             {
               agentToolId: binding.agentToolId,
             },
+            AutomationErrorReason.TOOL_ALREADY_BOUND_TO_VERSION,
           );
         }
 
@@ -456,6 +479,7 @@ export class AgentCatalogService {
           {
             code: dto.code,
           },
+          AutomationErrorReason.GUARDRAIL_CODE_ALREADY_EXISTS,
         );
       }
 
@@ -466,6 +490,7 @@ export class AgentCatalogService {
         throw new PreconditionFailedException(
           'Una política de coste tiene que declarar su tope.',
           { code: dto.code },
+          AutomationErrorReason.COST_GUARDRAIL_MISSING_CAP,
         );
       }
       if (
@@ -475,6 +500,7 @@ export class AgentCatalogService {
         throw new PreconditionFailedException(
           'Una política de datos de paciente tiene que declarar cómo se tratan.',
           { code: dto.code },
+          AutomationErrorReason.PHI_GUARDRAIL_MISSING_HANDLING,
         );
       }
 
@@ -512,9 +538,13 @@ export class AgentCatalogService {
     return this.em.transactional(async (tx) => {
       const agent = await this.agentsRepo.findAgentForUpdate(tx, agentId);
       if (!agent) {
-        throw new ResourceNotFoundException('Agente no encontrado.', {
-          agentId,
-        });
+        throw new ResourceNotFoundException(
+          'Agente no encontrado.',
+          {
+            agentId,
+          },
+          AutomationErrorReason.AGENT_NOT_FOUND,
+        );
       }
 
       const policy = await this.governanceRepo.findGuardrailPolicyById(
@@ -527,6 +557,7 @@ export class AgentCatalogService {
           {
             guardrailPolicyId: dto.guardrailPolicyId,
           },
+          AutomationErrorReason.GUARDRAIL_POLICY_NOT_FOUND,
         );
       }
       if (!policy.isActive) {
@@ -535,6 +566,7 @@ export class AgentCatalogService {
           {
             guardrailPolicyId: policy.id,
           },
+          AutomationErrorReason.GUARDRAIL_POLICY_NOT_ACTIVE,
         );
       }
 
@@ -550,6 +582,7 @@ export class AgentCatalogService {
             agentId,
             guardrailPolicyId: policy.id,
           },
+          AutomationErrorReason.GUARDRAIL_ALREADY_ATTACHED,
         );
       }
 
@@ -610,9 +643,13 @@ export class AgentCatalogService {
     return this.em.transactional(async (tx) => {
       const agent = await this.agentsRepo.findAgentById(tx, agentId);
       if (!agent) {
-        throw new ResourceNotFoundException('Agente no encontrado.', {
-          agentId,
-        });
+        throw new ResourceNotFoundException(
+          'Agente no encontrado.',
+          {
+            agentId,
+          },
+          AutomationErrorReason.AGENT_NOT_FOUND,
+        );
       }
 
       if (
@@ -622,6 +659,7 @@ export class AgentCatalogService {
         throw new PreconditionFailedException(
           'Fuera del ámbito global la memoria tiene que declarar a qué se refiere.',
           { agentId },
+          AutomationErrorReason.MEMORY_SCOPE_MISSING_REFERENCE,
         );
       }
 

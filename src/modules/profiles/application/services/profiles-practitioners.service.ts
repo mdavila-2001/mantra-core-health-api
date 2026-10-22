@@ -77,6 +77,7 @@ import { composeAccountDisplayName } from '../../domain/person-name';
 import { applyOccupation, applyCompany } from '../../domain/person-work-fields';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import { ProfilesAffiliationsService } from './profiles-affiliations.service';
+import { ProfilesErrorReason } from '../../profiles.error-reasons';
 import { BO_PROFESSION_CONCEPT_IDS } from '../../../../common/seed/bo-professions.catalog';
 import {
   PRACTITIONER_CONTEXT_PORT,
@@ -297,6 +298,8 @@ export class ProfilesPractitionersService {
     if (!link) {
       throw new PreconditionFailedException(
         'La cuenta no tiene una persona vinculada',
+        {},
+        ProfilesErrorReason.ACCOUNT_WITHOUT_LINKED_PERSON,
       );
     }
 
@@ -331,6 +334,8 @@ export class ProfilesPractitionersService {
     if (!link) {
       throw new PreconditionFailedException(
         'La cuenta no tiene una persona vinculada',
+        {},
+        ProfilesErrorReason.ACCOUNT_WITHOUT_LINKED_PERSON,
       );
     }
     const profile = await this.practitionersRepo.findById(em, link.personId);
@@ -338,6 +343,7 @@ export class ProfilesPractitionersService {
       throw new PreconditionFailedException(
         'La cuenta no tiene perfil profesional',
         { personId: link.personId },
+        ProfilesErrorReason.ACCOUNT_WITHOUT_PRACTITIONER_PROFILE,
       );
     }
     const practitionerProfileId = profile.profileId;
@@ -913,9 +919,13 @@ export class ProfilesPractitionersService {
       // 404 y no 403: la cuenta existe y la sesión es válida, lo que no hay es
       // un perfil profesional a su nombre. Decirlo como «prohibido» mandaría a
       // pedir permisos a quien lo que necesita es que lo den de alta.
-      throw new ResourceNotFoundException('Perfil profesional no encontrado', {
-        personId,
-      });
+      throw new ResourceNotFoundException(
+        'Perfil profesional no encontrado',
+        {
+          personId,
+        },
+        ProfilesErrorReason.PRACTITIONER_PROFILE_NOT_FOUND,
+      );
     }
 
     const profileId = practitioner.profileId;
@@ -1210,6 +1220,8 @@ export class ProfilesPractitionersService {
       if (!link) {
         throw new PreconditionFailedException(
           'La cuenta no tiene una persona vinculada',
+          {},
+          ProfilesErrorReason.ACCOUNT_WITHOUT_LINKED_PERSON,
         );
       }
       const practitioner = await this.practitionersRepo.findById(
@@ -1222,6 +1234,7 @@ export class ProfilesPractitionersService {
           {
             personId: link.personId,
           },
+          ProfilesErrorReason.PRACTITIONER_PROFILE_NOT_FOUND,
         );
       }
 
@@ -1584,9 +1597,13 @@ export class ProfilesPractitionersService {
       await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
       const practitioner = await this.practitionersRepo.findById(tx, profileId);
       if (!practitioner) {
-        throw new ResourceNotFoundException('Profesional no encontrado', {
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Profesional no encontrado',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.PRACTITIONER_PROFILE_NOT_FOUND,
+        );
       }
       // Dentro de la misma transacción que la escritura: comprobar contra un
       // estado y escribir sobre otro no comprueba nada.
@@ -1643,9 +1660,13 @@ export class ProfilesPractitionersService {
       await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
       const practitioner = await this.practitionersRepo.findById(tx, profileId);
       if (!practitioner) {
-        throw new ResourceNotFoundException('Profesional no encontrado', {
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Profesional no encontrado',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.PRACTITIONER_PROFILE_NOT_FOUND,
+        );
       }
       practitioner.photoFileId = undefined;
       touch(practitioner, actor.id);
@@ -1722,9 +1743,13 @@ export class ProfilesPractitionersService {
         dto.practitionerCode,
       );
       if (clash) {
-        throw new ConflictException('El practitioner_code ya está en uso', {
-          practitionerCode: dto.practitionerCode,
-        });
+        throw new ConflictException(
+          'El practitioner_code ya está en uso',
+          {
+            practitionerCode: dto.practitionerCode,
+          },
+          ProfilesErrorReason.PRACTITIONER_CODE_ALREADY_IN_USE,
+        );
       }
 
       // Persona: reutilizar la indicada o crear una nueva.
@@ -1732,9 +1757,13 @@ export class ProfilesPractitionersService {
       if (personId) {
         const existing = await this.personsRepo.findById(tx, personId);
         if (!existing)
-          throw new ResourceNotFoundException('Persona no encontrada', {
-            personId,
-          });
+          throw new ResourceNotFoundException(
+            'Persona no encontrada',
+            {
+              personId,
+            },
+            ProfilesErrorReason.PERSON_NOT_FOUND,
+          );
       } else {
         const person = this.personsRepo.create(tx, {
           personStatusConceptId: PROF.PERSON_ACTIVE,
@@ -1861,9 +1890,13 @@ export class ProfilesPractitionersService {
       await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
       const practitioner = await this.practitionersRepo.findById(tx, profileId);
       if (!practitioner) {
-        throw new ResourceNotFoundException('Profesional no encontrado', {
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Profesional no encontrado',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.PRACTITIONER_PROFILE_NOT_FOUND,
+        );
       }
 
       // Dentro de la MISMA transacción que la escritura: comprobar el archivo
@@ -1993,6 +2026,7 @@ export class ProfilesPractitionersService {
       throw new PreconditionFailedException(
         'Una credencial verificada debe declarar la fuente consultada',
         { credentialId },
+        ProfilesErrorReason.CREDENTIAL_VERIFICATION_REQUIRES_SOURCE,
       );
     }
 
@@ -2006,9 +2040,13 @@ export class ProfilesPractitionersService {
         credentialId,
       );
       if (!credential) {
-        throw new ResourceNotFoundException('Credencial no encontrada', {
-          credentialId,
-        });
+        throw new ResourceNotFoundException(
+          'Credencial no encontrada',
+          {
+            credentialId,
+          },
+          ProfilesErrorReason.CREDENTIAL_NOT_FOUND,
+        );
       }
       if (credential.stateConceptId !== PROF.CRED_PENDING) {
         throw new PreconditionFailedException(
@@ -2016,6 +2054,7 @@ export class ProfilesPractitionersService {
           {
             credentialId,
           },
+          ProfilesErrorReason.CREDENTIAL_NOT_PENDING,
         );
       }
 
@@ -2135,6 +2174,7 @@ export class ProfilesPractitionersService {
       throw new PreconditionFailedException(
         `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,
         { declaradas: unique.length },
+        ProfilesErrorReason.SPECIALTY_LIMIT_EXCEEDED,
       );
     }
 
@@ -2171,9 +2211,13 @@ export class ProfilesPractitionersService {
       await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
       const practitioner = await this.practitionersRepo.findById(tx, profileId);
       if (!practitioner) {
-        throw new ResourceNotFoundException('Profesional no encontrado', {
-          profileId,
-        });
+        throw new ResourceNotFoundException(
+          'Profesional no encontrado',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.PRACTITIONER_PROFILE_NOT_FOUND,
+        );
       }
 
       if (dto.supportingCredentialId) {
@@ -2185,6 +2229,7 @@ export class ProfilesPractitionersService {
           throw new PreconditionFailedException(
             'La credencial de soporte no pertenece al profesional',
             { supportingCredentialId: dto.supportingCredentialId },
+            ProfilesErrorReason.SUPPORTING_CREDENTIAL_MISMATCH,
           );
         }
         if (credential.stateConceptId !== PROF.CRED_VERIFIED) {
@@ -2193,6 +2238,7 @@ export class ProfilesPractitionersService {
             {
               supportingCredentialId: dto.supportingCredentialId,
             },
+            ProfilesErrorReason.SUPPORTING_CREDENTIAL_NOT_VERIFIED,
           );
         }
       }
@@ -2203,9 +2249,13 @@ export class ProfilesPractitionersService {
       // modelo. Si no se dice cuál, no hay especialidad que registrar.
       const specialtyConceptId = dto.specialtyConceptId;
       if (specialtyConceptId === undefined) {
-        throw new PreconditionFailedException('Falta indicar la especialidad', {
-          profileId,
-        });
+        throw new PreconditionFailedException(
+          'Falta indicar la especialidad',
+          {
+            profileId,
+          },
+          ProfilesErrorReason.SPECIALTY_REQUIRED,
+        );
       }
       await this.specialtyCatalog.assertIsMedicalSpecialty(
         tx,
@@ -2224,7 +2274,8 @@ export class ProfilesPractitionersService {
       if (active.length >= MAX_SPECIALTIES_PER_PRACTITIONER) {
         throw new PreconditionFailedException(
           `Un profesional puede declarar hasta ${MAX_SPECIALTIES_PER_PRACTITIONER} especialidades`,
-          { profileId, activas: active.length },
+          { profileId, active: active.length },
+          ProfilesErrorReason.SPECIALTY_LIMIT_EXCEEDED,
         );
       }
 
@@ -2240,6 +2291,7 @@ export class ProfilesPractitionersService {
             profileId,
             specialtyConceptId,
           },
+          ProfilesErrorReason.SPECIALTY_ALREADY_ACTIVE,
         );
       }
 
@@ -2720,6 +2772,7 @@ export class ProfilesPractitionersService {
       throw new PreconditionFailedException(
         'El fin del vínculo no puede ser anterior a su inicio',
         { startDate: dto.startDate, endDate: dto.endDate },
+        ProfilesErrorReason.AFFILIATION_END_BEFORE_START,
       );
     }
 
@@ -2734,9 +2787,13 @@ export class ProfilesPractitionersService {
       if (explicitProfile !== null) {
         const exists = await this.practitionersRepo.findById(tx, profileId);
         if (!exists) {
-          throw new ResourceNotFoundException('Profesional no encontrado', {
-            profileId,
-          });
+          throw new ResourceNotFoundException(
+            'Profesional no encontrado',
+            {
+              profileId,
+            },
+            ProfilesErrorReason.PRACTITIONER_PROFILE_NOT_FOUND,
+          );
         }
       }
 
@@ -2765,6 +2822,7 @@ export class ProfilesPractitionersService {
         throw new ConflictException(
           'Ese vínculo ya está en el historial laboral',
           { organizationName, roleTitle, startDate: dto.startDate },
+          ProfilesErrorReason.AFFILIATION_ALREADY_IN_HISTORY,
         );
       }
 
@@ -2804,10 +2862,14 @@ export class ProfilesPractitionersService {
             dto.practiceSiteId,
           );
         if (alreadyRequested) {
-          throw new ConflictException('Ya pidió vincularse a esa sede', {
-            practiceSiteId: dto.practiceSiteId,
-            statusConceptId: alreadyRequested.statusConceptId,
-          });
+          throw new ConflictException(
+            'Ya pidió vincularse a esa sede',
+            {
+              practiceSiteId: dto.practiceSiteId,
+              statusConceptId: alreadyRequested.statusConceptId,
+            },
+            ProfilesErrorReason.AFFILIATION_SITE_ALREADY_REQUESTED,
+          );
         }
       }
 
@@ -3091,6 +3153,7 @@ export class ProfilesPractitionersService {
       throw new PreconditionFailedException(
         'Ese concepto no es un tipo de credencial profesional',
         { credentialTypeConceptId: dto.credentialTypeConceptId },
+        ProfilesErrorReason.CREDENTIAL_TYPE_INVALID,
       );
     }
     assertClassificationProfession(dto.professionConceptId);

@@ -70,7 +70,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_TARGET_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `SECURITY_ADMIN`.
 - Deben ser UUID válidos: `environmentId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -146,7 +146,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_TARGET_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Entorno no encontrado | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -205,7 +205,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_READ_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -242,7 +242,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -303,7 +303,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_PLAN_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -365,7 +365,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_PLAN_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
 | 404 | `NOT_FOUND` | Entorno no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
@@ -429,7 +429,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_READ_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
 - Deben ser UUID válidos: `planId`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -468,7 +468,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -531,7 +531,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_APPROVE_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `RELEASE_MANAGER`, `SECURITY_ADMIN`.
 - Deben ser UUID válidos: `planId`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -587,7 +587,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_APPROVE_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, RELEASE_MANAGER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 409 | `CONFLICT` | El plan no está esperando aprobación | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 409 | `CONFLICT` | El plan revisado no es el vigente | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
@@ -646,7 +646,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_PLAN_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`.
 - Deben ser UUID válidos: `planId`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -687,7 +687,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_PLAN_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 409 | `CONFLICT` | El plan ya terminó | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -748,7 +748,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_PLAN_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -809,7 +809,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_PLAN_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 404 | `NOT_FOUND` | Entorno no encontrado | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -865,7 +865,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...QA_READ_ROLES`.
+- Roles admitidos por `@Roles`: `QA_ADMIN`, `QA_ENGINEER`, `RELEASE_MANAGER`, `PLATFORM_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -901,7 +901,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...QA_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

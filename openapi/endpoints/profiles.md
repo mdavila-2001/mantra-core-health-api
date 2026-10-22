@@ -627,7 +627,7 @@ Contexto declarado en el controlador: UC-05-14: ficha de filiación del paciente
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /profiles/patients/{profileId}` en `ProfilesPatientsController_getPatient`. El controlador delega en `ModuleRef.get`, `ProfilesPatientsService.getPatientById`. No recibe body. El tipo de retorno estático es `Promise<PatientDetailResponseDto>`.
+NestJS resuelve `GET /profiles/patients/{profileId}` en `ProfilesPatientsController_getPatient`. El controlador delega en `ClinicalPatientHistoryAccessPort.assertCanReadHistory`, `ProfilesPatientsService.getPatientById`. No recibe body. El tipo de retorno estático es `Promise<PatientDetailResponseDto>`.
 
 ### Parámetros
 

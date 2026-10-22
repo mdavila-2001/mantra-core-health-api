@@ -13,6 +13,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import { PracticeTenantLookupService } from '../../practice/services';
 import { PractitionerRoleAssignments } from '../../practice/entities';
 import { PRAC } from '../../practice/practice.concepts';
@@ -159,6 +160,7 @@ export class BillingServiceCatalogService {
         throw new ConflictException(
           'Ya existe un servicio con ese código en el catálogo',
           { code: dto.code },
+          BillingErrorReason.SERVICE_CATALOG_CODE_ALREADY_EXISTS,
         );
       }
 
@@ -362,7 +364,11 @@ export class BillingServiceCatalogService {
     return this.em.transactional(async (tx) => {
       const item = await this.serviceCatalogRepo.findById(tx, id);
       if (item === null) {
-        throw new ResourceNotFoundException('Servicio no encontrado', { id });
+        throw new ResourceNotFoundException(
+          'Servicio no encontrado',
+          { id },
+          BillingErrorReason.SERVICE_CATALOG_ITEM_NOT_FOUND,
+        );
       }
       await this.assertCanEdit(actor, item.practiceId, id);
 
@@ -433,9 +439,13 @@ export class BillingServiceCatalogService {
       }
     }
 
-    throw new ResourceNotFoundException('Servicio no encontrado', {
-      id: serviceId,
-    });
+    throw new ResourceNotFoundException(
+      'Servicio no encontrado',
+      {
+        id: serviceId,
+      },
+      BillingErrorReason.SERVICE_CATALOG_ITEM_NOT_VISIBLE,
+    );
   }
 }
 

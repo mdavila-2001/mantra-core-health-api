@@ -9,6 +9,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { FiscalRepository } from '../repositories';
 import {
   CreateFiscalYearDto,
@@ -59,9 +60,13 @@ export class FiscalService {
         dto.code,
       );
       if (clash) {
-        throw new ConflictException('El ejercicio ya existe en la práctica', {
-          code: dto.code,
-        });
+        throw new ConflictException(
+          'El ejercicio ya existe en la práctica',
+          {
+            code: dto.code,
+          },
+          AccountingErrorReason.FISCAL_YEAR_ALREADY_EXISTS,
+        );
       }
 
       const year = this.fiscalRepo.createYear(tx, {
@@ -115,15 +120,23 @@ export class FiscalService {
     return this.em.transactional(async (tx) => {
       const period = await this.fiscalRepo.findPeriodById(tx, periodId);
       if (!period) {
-        throw new ResourceNotFoundException('Periodo fiscal no encontrado', {
-          periodId,
-        });
+        throw new ResourceNotFoundException(
+          'Periodo fiscal no encontrado',
+          {
+            periodId,
+          },
+          AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
+        );
       }
       if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
-        throw new PreconditionFailedException('El periodo no está ABIERTO', {
-          periodId,
-          status: period.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'El periodo no está ABIERTO',
+          {
+            periodId,
+            status: period.statusConceptId,
+          },
+          AccountingErrorReason.FISCAL_PERIOD_NOT_OPEN,
+        );
       }
       period.statusConceptId = ACCT.PERIOD_LOCKED;
       touch(period, actor.id);

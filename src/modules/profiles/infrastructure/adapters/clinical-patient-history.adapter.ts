@@ -6,9 +6,7 @@ import type { ClinicalPatientHistoryPort } from '../../application/ports/clinica
 
 /** Resolves clinical history access lazily to avoid the existing module cycle. */
 @Injectable()
-export class ClinicalPatientHistoryAdapter
-  implements ClinicalPatientHistoryPort
-{
+export class ClinicalPatientHistoryAdapter implements ClinicalPatientHistoryPort {
   constructor(private readonly moduleRef: ModuleRef) {}
 
   assertCanReadHistory(

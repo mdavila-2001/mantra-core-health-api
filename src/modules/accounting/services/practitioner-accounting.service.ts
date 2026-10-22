@@ -29,6 +29,7 @@ import { toCents, fromCents } from './money';
 import { Appointments, Encounters } from '../../clinical/entities';
 import { Invoices } from '../../billing/entities';
 import { BILL } from '../../billing/billing.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import {
   PaidConsultationDto,
   PaidConsultationsResponseDto,
@@ -94,6 +95,7 @@ export class PractitionerAccountingService {
       throw new PreconditionFailedException(
         'La cuenta no tiene un perfil profesional asociado',
         { actorId: actor.id },
+        AccountingErrorReason.PRACTITIONER_PROFILE_MISSING,
       );
     }
     const practiceIds =
@@ -104,6 +106,7 @@ export class PractitionerAccountingService {
       throw new PreconditionFailedException(
         'El profesional no tiene una vinculación activa con esa práctica',
         { practiceId },
+        AccountingErrorReason.PRACTITIONER_PRACTICE_NOT_LINKED,
       );
     }
     return actor.practitionerProfileId;
@@ -191,32 +194,40 @@ export class PractitionerAccountingService {
     const em = this.em.fork();
     const invoice = await em.findOne(Invoices, { id: dto.invoiceId });
     if (!invoice) {
-      throw new ResourceNotFoundException('Factura no encontrada', {
-        invoiceId: dto.invoiceId,
-      });
+      throw new ResourceNotFoundException(
+        'Factura no encontrada',
+        {
+          invoiceId: dto.invoiceId,
+        },
+        AccountingErrorReason.INVOICE_NOT_FOUND,
+      );
     }
     if (invoice.practiceId !== dto.practiceId) {
       throw new PreconditionFailedException(
         'La factura no pertenece a esa práctica',
         { invoiceId: dto.invoiceId, practiceId: dto.practiceId },
+        AccountingErrorReason.INVOICE_PRACTICE_MISMATCH,
       );
     }
     if (invoice.statusConceptId !== BILL.INVOICE_PAID) {
       throw new PreconditionFailedException(
         'La factura todavía no está pagada',
         { invoiceId: dto.invoiceId, status: invoice.statusConceptId },
+        AccountingErrorReason.INVOICE_NOT_PAID,
       );
     }
     if (invoice.transactionId) {
       throw new ConflictException(
         'La factura ya tiene un asiento contable asociado',
         { invoiceId: dto.invoiceId, transactionId: invoice.transactionId },
+        AccountingErrorReason.INVOICE_ALREADY_POSTED,
       );
     }
     if (!invoice.encounterId) {
       throw new PreconditionFailedException(
         'La factura no está ligada a un encuentro clínico: no se puede confirmar que sea de este profesional',
         { invoiceId: dto.invoiceId },
+        AccountingErrorReason.INVOICE_NOT_LINKED_TO_ENCOUNTER,
       );
     }
     const encounter = await em.findOne(Encounters, {
@@ -232,6 +243,7 @@ export class PractitionerAccountingService {
       throw new PreconditionFailedException(
         'La consulta de esa factura no es de este profesional',
         { invoiceId: dto.invoiceId },
+        AccountingErrorReason.INVOICE_CONSULTATION_NOT_OWNED,
       );
     }
 
@@ -240,6 +252,7 @@ export class PractitionerAccountingService {
       throw new PreconditionFailedException(
         'La factura no registra un importe pagado',
         { invoiceId: dto.invoiceId },
+        AccountingErrorReason.INVOICE_PAID_AMOUNT_MISSING,
       );
     }
 

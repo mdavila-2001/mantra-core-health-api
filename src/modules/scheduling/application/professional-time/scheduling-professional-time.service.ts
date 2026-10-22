@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS, PreconditionFailedException } from '../../../../common';
 import { SchedulingBookingsRepository } from '../../infrastructure/repositories';
 import { SCHED } from '../../domain/scheduling.concepts';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
 
 /**
  * Estados en los que una cita compromete el tiempo del profesional.
@@ -259,6 +260,7 @@ export class SchedulingProfessionalTimeService {
         endAt: first.endAt,
         resourceName: first.resourceName,
       },
+      SchedulingErrorReason.PRACTITIONER_NOT_AVAILABLE,
     );
   }
 }

@@ -8,6 +8,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { AssetRepository } from '../repositories';
 import { PostingHelper } from './posting.helper';
 import { toCents, fromCents } from './money';
@@ -64,6 +65,7 @@ export class AssetService {
           {
             code: dto.code,
           },
+          AccountingErrorReason.ASSET_CODE_ALREADY_EXISTS,
         );
       }
 
@@ -261,6 +263,7 @@ export class AssetService {
           {
             fiscalPeriodId: dto.fiscalPeriodId,
           },
+          AccountingErrorReason.DEPRECIATION_NO_ELIGIBLE_ASSETS,
         );
       }
 

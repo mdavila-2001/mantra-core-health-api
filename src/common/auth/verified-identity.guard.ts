@@ -9,6 +9,7 @@ import { PROF } from '../../modules/profiles/profiles.concepts';
 import { findCurrentIdentityAssertionForPerson } from '../../modules/identity_assurance/repositories/identity-assertions.repository';
 import { IdentityVerificationRequiredException } from '../errors/domain.exception';
 import { REQUIRES_VERIFIED_IDENTITY_KEY } from './requires-verified-identity.decorator';
+import { IS_PUBLIC_KEY } from './public.decorator';
 import type { AuthenticatedRequest } from './authenticated-user.interface';
 
 /**
@@ -49,6 +50,16 @@ export class VerifiedIdentityGuard implements CanActivate {
    * @throws ForbiddenException si el titular no tiene la identidad verificada.
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Mismo corte que en `RolesGuard`: una ruta `@Public()` no tiene
+    // `request.user`, así que si además declarara `@RequiresVerifiedIdentity()`
+    // por error, sin esto se vería "no-authenticated-user" en vez del problema
+    // real (ruta mal anotada).
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) return true;
+
     const required = this.reflector.getAllAndOverride<boolean>(
       REQUIRES_VERIFIED_IDENTITY_KEY,
       [context.getHandler(), context.getClass()],

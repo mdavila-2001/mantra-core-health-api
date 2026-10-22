@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { ConflictException, type AuthenticatedUser } from '../../../common';
+import { ClinicalErrorReason } from '../clinical.error-reasons';
 import { CareEpisodesRepository } from '../repositories';
 import { CreateCareEpisodeDto, CareEpisodeResponseDto } from '../dto';
 import { CLIN } from '../clinical.concepts';
@@ -51,9 +52,13 @@ export class CareEpisodesService {
           { operation: 'clinical.care-episode.open', reason: 'active-exists' },
           'Rejected: patient already has an active episode',
         );
-        throw new ConflictException('El paciente ya tiene un episodio activo', {
-          patientProfileId: dto.patientProfileId,
-        });
+        throw new ConflictException(
+          'El paciente ya tiene un episodio activo',
+          {
+            patientProfileId: dto.patientProfileId,
+          },
+          ClinicalErrorReason.CARE_EPISODE_ALREADY_ACTIVE,
+        );
       }
 
       const episode = this.episodesRepo.create(tx, {

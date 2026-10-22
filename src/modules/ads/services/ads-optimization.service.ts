@@ -10,6 +10,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { AdsErrorReason } from '../ads.error-reasons';
 import {
   AdsAccountsRepository,
   AdsCampaignsRepository,
@@ -134,6 +135,7 @@ export class AdsOptimizationService {
         {
           totalSplit,
         },
+        AdsErrorReason.EXPERIMENT_TRAFFIC_SPLIT_INVALID,
       );
     }
     const controls = dto.variants.filter((v) => v.isControl).length;
@@ -143,6 +145,7 @@ export class AdsOptimizationService {
         {
           controls,
         },
+        AdsErrorReason.EXPERIMENT_CONTROL_COUNT_INVALID,
       );
     }
 
@@ -155,6 +158,7 @@ export class AdsOptimizationService {
         throw new ResourceNotFoundException(
           'Cuenta publicitaria no encontrada',
           { adAccountId },
+          AdsErrorReason.AD_ACCOUNT_NOT_FOUND,
         );
       }
 
@@ -191,6 +195,7 @@ export class AdsOptimizationService {
               {
                 variantRefId: variant.variantRefId,
               },
+              AdsErrorReason.EXPERIMENT_VARIANT_CAMPAIGN_NOT_FOUND,
             );
           }
           if (campaign.statusConceptId === CONCEPTS.AD_STATUS_PAUSED) {
@@ -209,6 +214,7 @@ export class AdsOptimizationService {
               {
                 variantRefId: variant.variantRefId,
               },
+              AdsErrorReason.EXPERIMENT_VARIANT_AD_SET_NOT_FOUND,
             );
           }
           if (adSet.statusConceptId === CONCEPTS.AD_STATUS_PAUSED) {
@@ -266,12 +272,17 @@ export class AdsOptimizationService {
         throw new ResourceNotFoundException(
           'Regla automatizada no encontrada',
           { ruleId },
+          AdsErrorReason.AUTOMATED_RULE_NOT_FOUND,
         );
       }
       if (!rule.isEnabled || rule.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('La regla no está habilitada', {
-          ruleId,
-        });
+        throw new PreconditionFailedException(
+          'La regla no está habilitada',
+          {
+            ruleId,
+          },
+          AdsErrorReason.AUTOMATED_RULE_NOT_ENABLED,
+        );
       }
 
       const actions: Array<Record<string, unknown>> = [];
@@ -350,7 +361,11 @@ export class AdsOptimizationService {
 
       const ad = await this.campaignsRepo.findAdForUpdate(tx, adId);
       if (!ad) {
-        throw new ResourceNotFoundException('Anuncio no encontrado', { adId });
+        throw new ResourceNotFoundException(
+          'Anuncio no encontrado',
+          { adId },
+          AdsErrorReason.AD_NOT_FOUND,
+        );
       }
 
       const reviewEvent = this.optimizationRepo.createReviewEvent(tx, {
@@ -368,6 +383,7 @@ export class AdsOptimizationService {
           throw new PreconditionFailedException(
             'Un rechazo necesita código, categoría y severidad de la política',
             { adId },
+            AdsErrorReason.REVIEW_DISAPPROVAL_POLICY_DATA_MISSING,
           );
         }
         this.logger.warn(
@@ -449,9 +465,13 @@ export class AdsOptimizationService {
         violationId,
       );
       if (!violation) {
-        throw new ResourceNotFoundException('Infracción no encontrada', {
-          violationId,
-        });
+        throw new ResourceNotFoundException(
+          'Infracción no encontrada',
+          {
+            violationId,
+          },
+          AdsErrorReason.POLICY_VIOLATION_NOT_FOUND,
+        );
       }
       if (violation.statusConceptId !== CONCEPTS.VIOLATION_OPEN) {
         throw new PreconditionFailedException(
@@ -460,6 +480,7 @@ export class AdsOptimizationService {
             violationId,
             statusConceptId: violation.statusConceptId,
           },
+          AdsErrorReason.POLICY_VIOLATION_NOT_OPEN,
         );
       }
 
@@ -468,10 +489,14 @@ export class AdsOptimizationService {
         violationId,
       );
       if (existing) {
-        throw new ConflictException('La infracción ya tiene una apelación', {
-          violationId,
-          appealId: existing.id,
-        });
+        throw new ConflictException(
+          'La infracción ya tiene una apelación',
+          {
+            violationId,
+            appealId: existing.id,
+          },
+          AdsErrorReason.POLICY_APPEAL_ALREADY_EXISTS,
+        );
       }
 
       const appeal = this.optimizationRepo.createAppeal(tx, {
@@ -519,6 +544,7 @@ export class AdsOptimizationService {
           periodStart: dto.periodStart,
           periodEnd: dto.periodEnd,
         },
+        AdsErrorReason.INVOICE_PERIOD_INVERTED,
       );
     }
 
@@ -527,9 +553,13 @@ export class AdsOptimizationService {
       dto.invoiceNumber,
     );
     if (duplicateNumber) {
-      throw new ConflictException('Ya existe una factura con ese número', {
-        invoiceNumber: dto.invoiceNumber,
-      });
+      throw new ConflictException(
+        'Ya existe una factura con ese número',
+        {
+          invoiceNumber: dto.invoiceNumber,
+        },
+        AdsErrorReason.INVOICE_NUMBER_DUPLICATE,
+      );
     }
 
     return this.em.transactional(async (tx) => {
@@ -541,6 +571,7 @@ export class AdsOptimizationService {
         throw new ResourceNotFoundException(
           'Cuenta publicitaria no encontrada',
           { adAccountId },
+          AdsErrorReason.AD_ACCOUNT_NOT_FOUND,
         );
       }
 
@@ -551,10 +582,14 @@ export class AdsOptimizationService {
         periodEnd,
       );
       if (existing) {
-        throw new ConflictException('El periodo ya está facturado', {
-          adAccountId,
-          invoiceId: existing.id,
-        });
+        throw new ConflictException(
+          'El periodo ya está facturado',
+          {
+            adAccountId,
+            invoiceId: existing.id,
+          },
+          AdsErrorReason.INVOICE_PERIOD_ALREADY_ISSUED,
+        );
       }
 
       const rollups = await this.dataRepo.findInsightsInPeriod(
@@ -572,6 +607,7 @@ export class AdsOptimizationService {
             periodStart: dto.periodStart,
             periodEnd: dto.periodEnd,
           },
+          AdsErrorReason.INVOICE_PERIOD_NO_USAGE,
         );
       }
 
@@ -686,12 +722,17 @@ export class AdsOptimizationService {
         throw new ResourceNotFoundException(
           'Formulario de leads no encontrado',
           { leadFormId },
+          AdsErrorReason.LEAD_FORM_NOT_FOUND,
         );
       }
       if (form.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
-        throw new PreconditionFailedException('El formulario no está activo', {
-          leadFormId,
-        });
+        throw new PreconditionFailedException(
+          'El formulario no está activo',
+          {
+            leadFormId,
+          },
+          AdsErrorReason.LEAD_FORM_NOT_ACTIVE,
+        );
       }
 
       const previous = await this.optimizationRepo.findSubmissionByExternalId(
@@ -760,6 +801,7 @@ export class AdsOptimizationService {
             leadFormId,
             missing: missing.map((q) => q.questionKey),
           },
+          AdsErrorReason.LEAD_REQUIRED_ANSWERS_MISSING,
         );
       }
 

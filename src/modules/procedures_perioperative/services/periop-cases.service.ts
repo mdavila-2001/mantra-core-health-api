@@ -50,6 +50,7 @@ import {
   type ChargeType,
 } from '../dto';
 import { PERIOP } from '../procedures_perioperative.concepts';
+import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 
 const CASE_TYPE_CONCEPT: Readonly<Record<SurgicalCaseType, string>> = {
   ELECTIVE: CONCEPTS.CASE_TYPE_ELECTIVE,
@@ -222,6 +223,7 @@ export class PeriopCasesService {
           scheduledStartAt: dto.scheduledStartAt,
           scheduledEndAt: dto.scheduledEndAt,
         },
+        ProceduresPerioperativeErrorReason.SCHEDULE_END_BEFORE_START,
       );
     }
     // Saltarse la programación electiva exige justificarlo: es lo que después
@@ -230,6 +232,7 @@ export class PeriopCasesService {
       throw new PreconditionFailedException(
         'Un caso urgente o de emergencia necesita justificar su urgencia',
         { caseType: dto.caseType },
+        ProceduresPerioperativeErrorReason.URGENCY_REASON_REQUIRED,
       );
     }
 
@@ -248,6 +251,7 @@ export class PeriopCasesService {
             operatingRoomId: dto.operatingRoomId,
             conflictingCaseId: overlapping[0].id,
           },
+          ProceduresPerioperativeErrorReason.OPERATING_ROOM_SLOT_CONFLICT,
         );
       }
 
@@ -349,14 +353,22 @@ export class PeriopCasesService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       // Spec 223/228: qué cambios son "relevantes". De los campos que este
@@ -394,6 +406,7 @@ export class PeriopCasesService {
               caseId,
               statusConceptId: surgicalCase.statusConceptId,
             },
+            ProceduresPerioperativeErrorReason.PATIENT_CHANGE_NOT_ALLOWED_AFTER_CONFIRMATION,
           );
         }
         // C-13: aun en borrador, con consentimientos/asignaciones/evidencias ya
@@ -402,6 +415,7 @@ export class PeriopCasesService {
           throw new PreconditionFailedException(
             'CAN-INT-001: el paciente no puede cambiarse: el caso ya tiene asignaciones o evidencias asociadas',
             { code: 'CAN-INT-001', caseId },
+            ProceduresPerioperativeErrorReason.PATIENT_CHANGE_BLOCKED_BY_DEPENDENCIES,
           );
         }
         surgicalCase.patientProfileId = dto.patientProfileId;
@@ -429,6 +443,7 @@ export class PeriopCasesService {
         throw new PreconditionFailedException(
           'El caso debe terminar después de empezar',
           { caseId },
+          ProceduresPerioperativeErrorReason.SCHEDULE_END_BEFORE_START,
         );
       }
 
@@ -515,19 +530,28 @@ export class PeriopCasesService {
     const result = await this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
       if (!CONFIRMABLE_CASE_STATES.includes(surgicalCase.statusConceptId)) {
         throw new PreconditionFailedException(
           'El caso no admite confirmación en su estado actual',
           { caseId, statusConceptId: surgicalCase.statusConceptId },
+          ProceduresPerioperativeErrorReason.CASE_NOT_CONFIRMABLE_IN_CURRENT_STATE,
         );
       }
 
@@ -638,6 +662,7 @@ export class PeriopCasesService {
           caseId: result.caseId,
           membersWithoutCurrentCredential: result.memberIds,
         },
+        ProceduresPerioperativeErrorReason.TEAM_MEMBER_WITHOUT_CURRENT_CREDENTIAL,
       );
     }
     return {
@@ -703,14 +728,22 @@ export class PeriopCasesService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       const existing = await this.casesRepo.findDiagnosesByCase(tx, caseId);
@@ -726,6 +759,7 @@ export class PeriopCasesService {
         throw new ConflictException(
           'El caso sólo admite un diagnóstico principal',
           { caseId },
+          ProceduresPerioperativeErrorReason.MULTIPLE_PRIMARY_DIAGNOSES_NOT_ALLOWED,
         );
       }
 
@@ -790,6 +824,7 @@ export class PeriopCasesService {
       throw new PreconditionFailedException(
         'Indique la condición por `conditionId` o por `conditionCodeConceptId`',
         {},
+        ProceduresPerioperativeErrorReason.CONDITION_REFERENCE_REQUIRED,
       );
     }
     try {
@@ -833,14 +868,22 @@ export class PeriopCasesService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       const team = await this.casesRepo.findTeamByCase(tx, caseId);
@@ -856,6 +899,7 @@ export class PeriopCasesService {
             caseId,
             practitionerProfileId: dto.practitionerProfileId,
           },
+          ProceduresPerioperativeErrorReason.TEAM_MEMBER_ROLE_ALREADY_ASSIGNED,
         );
       }
 
@@ -935,9 +979,13 @@ export class PeriopCasesService {
   async getCaseDetail(caseId: string): Promise<CaseDetailDto> {
     const surgicalCase = await this.casesRepo.findCaseById(this.em, caseId);
     if (!surgicalCase) {
-      throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-        caseId,
-      });
+      throw new ResourceNotFoundException(
+        'Caso quirúrgico no encontrado',
+        {
+          caseId,
+        },
+        ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+      );
     }
 
     const [
@@ -1118,9 +1166,13 @@ export class PeriopCasesService {
   async listTeamMembers(caseId: string): Promise<TeamMemberSummaryDto[]> {
     const surgicalCase = await this.casesRepo.findCaseById(this.em, caseId);
     if (!surgicalCase) {
-      throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-        caseId,
-      });
+      throw new ResourceNotFoundException(
+        'Caso quirúrgico no encontrado',
+        {
+          caseId,
+        },
+        ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+      );
     }
     const team = await this.casesRepo.findTeamByCase(this.em, caseId);
     return team.map((member) => ({
@@ -1162,14 +1214,22 @@ export class PeriopCasesService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       const team = await this.casesRepo.findTeamByCase(tx, caseId);
@@ -1178,6 +1238,7 @@ export class PeriopCasesService {
         throw new ResourceNotFoundException(
           'El integrante no pertenece al caso',
           { caseId, memberId },
+          ProceduresPerioperativeErrorReason.TEAM_MEMBER_NOT_IN_CASE,
         );
       }
 
@@ -1191,6 +1252,7 @@ export class PeriopCasesService {
         throw new PreconditionFailedException(
           'Sólo el propio integrante puede aceptar su participación',
           { caseId, memberId },
+          ProceduresPerioperativeErrorReason.TEAM_MEMBER_SELF_ACTION_REQUIRED,
         );
       }
 
@@ -1214,6 +1276,7 @@ export class PeriopCasesService {
         throw new PreconditionFailedException(
           'CAN-INT-002: el integrante no tiene credencial profesional vigente',
           { caseId, memberId },
+          ProceduresPerioperativeErrorReason.TEAM_MEMBER_WITHOUT_CURRENT_CREDENTIAL,
         );
       }
 
@@ -1276,14 +1339,22 @@ export class PeriopCasesService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new PreconditionFailedException('El caso está cancelado', {
-          caseId,
-        });
+        throw new PreconditionFailedException(
+          'El caso está cancelado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_CANCELLED,
+        );
       }
 
       const team = await this.casesRepo.findTeamByCase(tx, caseId);
@@ -1292,6 +1363,7 @@ export class PeriopCasesService {
         throw new ResourceNotFoundException(
           'El integrante no pertenece al caso',
           { caseId, memberId },
+          ProceduresPerioperativeErrorReason.TEAM_MEMBER_NOT_IN_CASE,
         );
       }
 
@@ -1308,6 +1380,7 @@ export class PeriopCasesService {
         throw new PreconditionFailedException(
           'Sólo el propio integrante puede responder a su participación',
           { caseId, memberId },
+          ProceduresPerioperativeErrorReason.TEAM_MEMBER_SELF_ACTION_REQUIRED,
         );
       }
 
@@ -1369,12 +1442,20 @@ export class PeriopCasesService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
-        throw new ConflictException('El caso ya está cancelado', { caseId });
+        throw new ConflictException(
+          'El caso ya está cancelado',
+          { caseId },
+          ProceduresPerioperativeErrorReason.CASE_ALREADY_CANCELLED,
+        );
       }
       if (!CANCELLABLE_CASE_STATES.includes(surgicalCase.statusConceptId)) {
         throw new PreconditionFailedException(
@@ -1383,6 +1464,7 @@ export class PeriopCasesService {
             caseId,
             statusConceptId: surgicalCase.statusConceptId,
           },
+          ProceduresPerioperativeErrorReason.CASE_NOT_CANCELLABLE_IN_CURRENT_STATE,
         );
       }
 
@@ -1451,9 +1533,13 @@ export class PeriopCasesService {
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
       if (!surgicalCase) {
-        throw new ResourceNotFoundException('Caso quirúrgico no encontrado', {
-          caseId,
-        });
+        throw new ResourceNotFoundException(
+          'Caso quirúrgico no encontrado',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
+        );
       }
       if (surgicalCase.statusConceptId !== CONCEPTS.CASE_COMPLETED) {
         throw new PreconditionFailedException(
@@ -1462,6 +1548,7 @@ export class PeriopCasesService {
             caseId,
             statusConceptId: surgicalCase.statusConceptId,
           },
+          ProceduresPerioperativeErrorReason.CHARGES_REQUIRE_COMPLETED_CASE,
         );
       }
 
@@ -1473,9 +1560,13 @@ export class PeriopCasesService {
         (item) => item.statusConceptId === CONCEPTS.CHARGE_POSTED,
       );
       if (alreadyPosted) {
-        throw new ConflictException('El caso ya tiene cargos emitidos', {
-          caseId,
-        });
+        throw new ConflictException(
+          'El caso ya tiene cargos emitidos',
+          {
+            caseId,
+          },
+          ProceduresPerioperativeErrorReason.CHARGES_ALREADY_POSTED,
+        );
       }
 
       let totalAmount = 0;
@@ -1565,8 +1656,12 @@ export class PeriopCasesService {
       if (!(await this.casesRepo.findCaseByNumber(tx, candidate)))
         return candidate;
     }
-    throw new ConflictException('No se pudo asignar número de caso', {
-      custodianTenantId,
-    });
+    throw new ConflictException(
+      'No se pudo asignar número de caso',
+      {
+        custodianTenantId,
+      },
+      ProceduresPerioperativeErrorReason.CASE_NUMBER_ALLOCATION_FAILED,
+    );
   }
 }

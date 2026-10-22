@@ -7,6 +7,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import {
   ReimbursementsRepository,
   InvoicesRepository,
@@ -73,14 +74,19 @@ export class ReimbursementsService {
         throw new ConflictException(
           'El reclamo ya tiene un reembolso registrado',
           { claimId: dto.claimId },
+          BillingErrorReason.REIMBURSEMENT_CLAIM_ALREADY_LINKED,
         );
       }
 
       const invoice = await this.invoicesRepo.findById(tx, dto.invoiceId);
       if (!invoice)
-        throw new ResourceNotFoundException('Factura no encontrada', {
-          invoiceId: dto.invoiceId,
-        });
+        throw new ResourceNotFoundException(
+          'Factura no encontrada',
+          {
+            invoiceId: dto.invoiceId,
+          },
+          BillingErrorReason.REIMBURSEMENT_INVOICE_NOT_FOUND,
+        );
 
       const reimbursement = this.reimbursementsRepo.create(tx, {
         claimId: dto.claimId,

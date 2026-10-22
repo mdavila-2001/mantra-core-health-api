@@ -2755,6 +2755,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "name": "Nombre de ejemplo",
         "dataType": {},
         "valueSetId": "00000000-0000-4000-8000-000000000001",
+        "cardinalityMin": 1,
+        "cardinalityMax": 1,
         "required": true,
         "ordinal": 1,
         "own": true,
@@ -2878,11 +2880,17 @@ Content-Type: application/json
 | `tenantId` | No | `string` | formato `uuid` | Tenant dueño de la plantilla | `00000000-0000-4000-8000-000000000001` |
 | `code` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Código único de la plantilla | `CODIGO_EJEMPLO` |
 | `name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre legible de la plantilla | `Nombre de ejemplo` |
-| `fields` | Sí | `array<TemplateFieldInputDto>` | Sin restricción adicional declarada | Campos del esquema, en el orden en que se presentan | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":"string","valueSetId":"00000000-0000-4000-8000-000000000001","required":false,"ordinal":1}]` |
+| `fields` | Sí | `array<TemplateFieldInputDto>` | Sin restricción adicional declarada | Campos del esquema, en el orden en que se presentan | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":"string","valueSetId":"00000000-0000-4000-8000-000000000001","options":["valor-ejemplo","valor-ejemplo"],"multiple":true,"allowOther":true,"description":"Texto descriptivo de ejemplo","cardinalityMin":1,"cardinalityMax":1,"required":false,"ordinal":1}]` |
 | `fields[].code` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Código único del campo | `CODIGO_EJEMPLO` |
 | `fields[].name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre legible del campo | `Nombre de ejemplo` |
 | `fields[].dataType` | Sí | `string` | valores: `string`, `text`, `integer`, `decimal`, `boolean`, `date`, `datetime`, `time`, `uuid`, `json`, `binary`, `reference`, `code` | Tipo de dato técnico | `string` |
 | `fields[].valueSetId` | No | `string` | formato `uuid` | Value set de valores permitidos (campos de selección) | `00000000-0000-4000-8000-000000000001` |
+| `fields[].options` | No | `array<string>` | mínimo 2 elemento(s) | Opciones propias de un campo de elección (dataType "code" sin valueSetId) | `["valor-ejemplo","valor-ejemplo"]` |
+| `fields[].multiple` | No | `boolean` | Sin restricción adicional declarada | Admite varias respuestas en vez de una sola | `true` |
+| `fields[].allowOther` | No | `boolean` | Sin restricción adicional declarada | Ofrece «Otro», con texto libre | `true` |
+| `fields[].description` | No | `string` | longitud máxima 1000 | Ayuda que se lee bajo la pregunta (se sirve como "hint") | `Texto descriptivo de ejemplo` |
+| `fields[].cardinalityMin` | No | `number` | Sin restricción adicional declarada | Cardinalidad mínima (sólo con multiple) | `1` |
+| `fields[].cardinalityMax` | No | `number` | Sin restricción adicional declarada | Cardinalidad máxima (sólo con multiple) | `1` |
 | `fields[].required` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
 | `fields[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden de presentación | `1` |
 
@@ -2907,6 +2915,15 @@ Content-Type: application/json
       "name": "Nombre de ejemplo",
       "dataType": "string",
       "valueSetId": "00000000-0000-4000-8000-000000000001",
+      "options": [
+        "valor-ejemplo",
+        "valor-ejemplo"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Texto descriptivo de ejemplo",
+      "cardinalityMin": 1,
+      "cardinalityMax": 1,
       "required": false,
       "ordinal": 1
     }
@@ -2949,6 +2966,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "name": "Nombre de ejemplo",
       "dataType": {},
       "valueSetId": "00000000-0000-4000-8000-000000000001",
+      "cardinalityMin": 1,
+      "cardinalityMax": 1,
       "required": true,
       "ordinal": 1,
       "own": true,
@@ -2993,13 +3012,15 @@ Campos de la respuesta:
 | `statusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado de la plantilla. | `00000000-0000-4000-8000-000000000001` |
 | `sectionId` | No | `string` | formato `uuid` | Sección que aloja los campos de la plantilla. Se publica porque colgar un campo propio **dentro** de la plantilla exige nombrarla: una asignación en otra sección existe pero no la dibuja nadie. | `00000000-0000-4000-8000-000000000001` |
 | `fieldTargetConceptId` | Sí | `string` | formato `uuid` | Target de las asignaciones de campo de las plantillas de chart. Es un concepto del catálogo, y su UUID se deriva de un código: publicarlo evita que cada cliente lo copie a mano y quede clavado el día que cambie. | `00000000-0000-4000-8000-000000000001` |
-| `fields` | Sí | `array<ChartTemplateFieldDto>` | Sin restricción adicional declarada | Los campos del esquema, en su orden de presentación. | `[{"assignmentId":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":{},"valueSetId":"00000000-0000-4000-8000-000000000001","required":true,"ordinal":1,"own":true,"section":"valor-ejemplo","options":["valor-ejemplo"],"multiple":true,"allowOther":true,"description":"Texto descriptivo de ejemplo","showWhen":{"fieldId":"00000000-0000-4000-8000-000000000001","equals":[{}]}}]` |
+| `fields` | Sí | `array<ChartTemplateFieldDto>` | Sin restricción adicional declarada | Los campos del esquema, en su orden de presentación. | `[{"assignmentId":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":{},"valueSetId":"00000000-0000-4000-8000-000000000001","cardinalityMin":1,"cardinalityMax":1,"required":true,"ordinal":1,"own":true,"section":"valor-ejemplo","options":["valor-ejemplo"],"multiple":true,"allowOther":true,"description":"Texto descriptivo de ejemplo","showWhen":{"fieldId":"00000000-0000-4000-8000-000000000001","equals":[{}]}}]` |
 | `fields[].assignmentId` | Sí | `string` | formato `uuid` | Identificador de la asignación (`forms.field_assignments.id`). | `00000000-0000-4000-8000-000000000001` |
 | `fields[].fieldId` | Sí | `string` | formato `uuid` | Identificador del campo (`forms.dynamic_field_definitions.id`). | `00000000-0000-4000-8000-000000000001` |
 | `fields[].code` | Sí | `string` | Sin restricción adicional declarada | Código del campo. | `CODIGO_EJEMPLO` |
 | `fields[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible del campo. | `Nombre de ejemplo` |
 | `fields[].dataType` | Sí | `object` | Sin restricción adicional declarada | Tipo de dato técnico del campo. | `{}` |
 | `fields[].valueSetId` | No | `string` | formato `uuid` | Value set de valores permitidos, si el campo es de selección. | `00000000-0000-4000-8000-000000000001` |
+| `fields[].cardinalityMin` | No | `number` | Sin restricción adicional declarada | Casillas: marcar al menos N. Sólo con `multiple`. | `1` |
+| `fields[].cardinalityMax` | No | `number` | Sin restricción adicional declarada | Casillas: marcar como máximo N. Sólo con `multiple`. | `1` |
 | `fields[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo es obligatorio al completar la plantilla. | `true` |
 | `fields[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden de presentación del campo dentro de la plantilla. | `1` |
 | `fields[].own` | Sí | `boolean` | Sin restricción adicional declarada | ¿Es un campo propio del tenant, o del formulario estándar? | `true` |
@@ -3031,6 +3052,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | `options`/`allowOther` sólo aplican a dataType "code" | Excepción explícita en src/modules/chart/services/chart-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" declara valueSetId u options, no los dos | Excepción explícita en src/modules/chart/services/chart-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` no aplica sobre un valueSetId | Excepción explícita en src/modules/chart/services/chart-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" sin valueSetId necesita al menos dos opciones | Excepción explícita en src/modules/chart/services/chart-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una opción no puede estar vacía | Excepción explícita en src/modules/chart/services/chart-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las opciones no pueden repetirse | Excepción explícita en src/modules/chart/services/chart-templates.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3136,6 +3163,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "name": "Nombre de ejemplo",
       "dataType": {},
       "valueSetId": "00000000-0000-4000-8000-000000000001",
+      "cardinalityMin": 1,
+      "cardinalityMax": 1,
       "required": true,
       "ordinal": 1,
       "own": true,
@@ -3180,13 +3209,15 @@ Campos de la respuesta:
 | `statusConceptId` | Sí | `string` | formato `uuid` | Concept id del estado de la plantilla. | `00000000-0000-4000-8000-000000000001` |
 | `sectionId` | No | `string` | formato `uuid` | Sección que aloja los campos de la plantilla. Se publica porque colgar un campo propio **dentro** de la plantilla exige nombrarla: una asignación en otra sección existe pero no la dibuja nadie. | `00000000-0000-4000-8000-000000000001` |
 | `fieldTargetConceptId` | Sí | `string` | formato `uuid` | Target de las asignaciones de campo de las plantillas de chart. Es un concepto del catálogo, y su UUID se deriva de un código: publicarlo evita que cada cliente lo copie a mano y quede clavado el día que cambie. | `00000000-0000-4000-8000-000000000001` |
-| `fields` | Sí | `array<ChartTemplateFieldDto>` | Sin restricción adicional declarada | Los campos del esquema, en su orden de presentación. | `[{"assignmentId":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":{},"valueSetId":"00000000-0000-4000-8000-000000000001","required":true,"ordinal":1,"own":true,"section":"valor-ejemplo","options":["valor-ejemplo"],"multiple":true,"allowOther":true,"description":"Texto descriptivo de ejemplo","showWhen":{"fieldId":"00000000-0000-4000-8000-000000000001","equals":[{}]}}]` |
+| `fields` | Sí | `array<ChartTemplateFieldDto>` | Sin restricción adicional declarada | Los campos del esquema, en su orden de presentación. | `[{"assignmentId":"00000000-0000-4000-8000-000000000001","fieldId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","dataType":{},"valueSetId":"00000000-0000-4000-8000-000000000001","cardinalityMin":1,"cardinalityMax":1,"required":true,"ordinal":1,"own":true,"section":"valor-ejemplo","options":["valor-ejemplo"],"multiple":true,"allowOther":true,"description":"Texto descriptivo de ejemplo","showWhen":{"fieldId":"00000000-0000-4000-8000-000000000001","equals":[{}]}}]` |
 | `fields[].assignmentId` | Sí | `string` | formato `uuid` | Identificador de la asignación (`forms.field_assignments.id`). | `00000000-0000-4000-8000-000000000001` |
 | `fields[].fieldId` | Sí | `string` | formato `uuid` | Identificador del campo (`forms.dynamic_field_definitions.id`). | `00000000-0000-4000-8000-000000000001` |
 | `fields[].code` | Sí | `string` | Sin restricción adicional declarada | Código del campo. | `CODIGO_EJEMPLO` |
 | `fields[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible del campo. | `Nombre de ejemplo` |
 | `fields[].dataType` | Sí | `object` | Sin restricción adicional declarada | Tipo de dato técnico del campo. | `{}` |
 | `fields[].valueSetId` | No | `string` | formato `uuid` | Value set de valores permitidos, si el campo es de selección. | `00000000-0000-4000-8000-000000000001` |
+| `fields[].cardinalityMin` | No | `number` | Sin restricción adicional declarada | Casillas: marcar al menos N. Sólo con `multiple`. | `1` |
+| `fields[].cardinalityMax` | No | `number` | Sin restricción adicional declarada | Casillas: marcar como máximo N. Sólo con `multiple`. | `1` |
 | `fields[].required` | Sí | `boolean` | Sin restricción adicional declarada | Si el campo es obligatorio al completar la plantilla. | `true` |
 | `fields[].ordinal` | No | `number` | Sin restricción adicional declarada | Orden de presentación del campo dentro de la plantilla. | `1` |
 | `fields[].own` | Sí | `boolean` | Sin restricción adicional declarada | ¿Es un campo propio del tenant, o del formulario estándar? | `true` |

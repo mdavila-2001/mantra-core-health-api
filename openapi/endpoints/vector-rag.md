@@ -1962,7 +1962,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `citations` | Sí | `array<EvidenceInputDto>` | mínimo 1 elemento(s); máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"vectorChunkId":"00000000-0000-4000-8000-000000000001","quotedTextRedacted":"valor-ejemplo","sourceUri":"valor-ejemplo"}]` |
+| `citations` | Sí | `array<VectorRagEvidenceInputDto>` | mínimo 1 elemento(s); máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"vectorChunkId":"00000000-0000-4000-8000-000000000001","quotedTextRedacted":"valor-ejemplo","sourceUri":"valor-ejemplo"}]` |
 | `citations[].vectorChunkId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `citations[].quotedTextRedacted` | Sí | `string` | Sin restricción adicional declarada | Fragmento citado, ya redactado | `valor-ejemplo` |
 | `citations[].sourceUri` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |

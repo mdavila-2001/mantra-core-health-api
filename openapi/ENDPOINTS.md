@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1492 de 1492 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1510 de 1510 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -19,12 +19,12 @@ Se documentan **1492 de 1492 endpoints** en **72 módulos**. La referencia compl
 | `clinical` | 39 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 27 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 19 | [Abrir referencia](endpoints/common.md) |
-| `community` | 96 | [Abrir referencia](endpoints/community.md) |
+| `community` | 98 | [Abrir referencia](endpoints/community.md) |
 | `consent` | 22 | [Abrir referencia](endpoints/consent.md) |
 | `content_packs` | 2 | [Abrir referencia](endpoints/content-packs.md) |
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
 | `cross_store_consistency` | 16 | [Abrir referencia](endpoints/cross-store-consistency.md) |
-| `data_catalog` | 22 | [Abrir referencia](endpoints/data-catalog.md) |
+| `data_catalog` | 31 | [Abrir referencia](endpoints/data-catalog.md) |
 | `delegated_access` | 12 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 21 | [Abrir referencia](endpoints/diagnostic-units.md) |
 | `diagnostics` | 31 | [Abrir referencia](endpoints/diagnostics.md) |
@@ -38,7 +38,7 @@ Se documentan **1492 de 1492 endpoints** en **72 módulos**. La referencia compl
 | `health_context` | 13 | [Abrir referencia](endpoints/health-context.md) |
 | `health_data` | 16 | [Abrir referencia](endpoints/health-data.md) |
 | `iam` | 35 | [Abrir referencia](endpoints/iam.md) |
-| `identity_assurance` | 27 | [Abrir referencia](endpoints/identity-assurance.md) |
+| `identity_assurance` | 28 | [Abrir referencia](endpoints/identity-assurance.md) |
 | `insurance` | 53 | [Abrir referencia](endpoints/insurance.md) |
 | `insurance-campaigns` | 16 | [Abrir referencia](endpoints/insurance-campaigns.md) |
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
@@ -48,7 +48,7 @@ Se documentan **1492 de 1492 endpoints** en **72 módulos**. La referencia compl
 | `medical_groups` | 8 | [Abrir referencia](endpoints/medical-groups.md) |
 | `messaging` | 17 | [Abrir referencia](endpoints/messaging.md) |
 | `object_storage` | 14 | [Abrir referencia](endpoints/object-storage.md) |
-| `ops_console` | 7 | [Abrir referencia](endpoints/ops-console.md) |
+| `ops_console` | 9 | [Abrir referencia](endpoints/ops-console.md) |
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
 | `payments` | 14 | [Abrir referencia](endpoints/payments.md) |
 | `pharma_lab` | 76 | [Abrir referencia](endpoints/pharma-lab.md) |
@@ -56,13 +56,13 @@ Se documentan **1492 de 1492 endpoints** en **72 módulos**. La referencia compl
 | `pharmacy_inventory` | 29 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
-| `practice` | 29 | [Abrir referencia](endpoints/practice.md) |
+| `practice` | 30 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 32 | [Abrir referencia](endpoints/procedures-perioperative.md) |
 | `profiles` | 57 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 19 | [Abrir referencia](endpoints/promotions.md) |
 | `public` | 2 | [Abrir referencia](endpoints/public.md) |
 | `qa_execution` | 9 | [Abrir referencia](endpoints/qa-execution.md) |
-| `qa_lab` | 19 | [Abrir referencia](endpoints/qa-lab.md) |
+| `qa_lab` | 21 | [Abrir referencia](endpoints/qa-lab.md) |
 | `quotations` | 3 | [Abrir referencia](endpoints/quotations.md) |
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |
 | `redis_runtime` | 5 | [Abrir referencia](endpoints/redis-runtime.md) |
@@ -72,7 +72,7 @@ Se documentan **1492 de 1492 endpoints** en **72 módulos**. La referencia compl
 | `surveys` | 17 | [Abrir referencia](endpoints/surveys.md) |
 | `system_context` | 13 | [Abrir referencia](endpoints/system-context.md) |
 | `system_ops` | 24 | [Abrir referencia](endpoints/system-ops.md) |
-| `telemetry` | 21 | [Abrir referencia](endpoints/telemetry.md) |
+| `telemetry` | 22 | [Abrir referencia](endpoints/telemetry.md) |
 | `terminology` | 25 | [Abrir referencia](endpoints/terminology.md) |
 | `time_series` | 14 | [Abrir referencia](endpoints/time-series.md) |
 | `tracking` | 11 | [Abrir referencia](endpoints/tracking.md) |

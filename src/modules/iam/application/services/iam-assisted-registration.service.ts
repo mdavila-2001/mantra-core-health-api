@@ -9,6 +9,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
+import { IamErrorReason } from '../../iam.error-reasons';
 import { composeAccountDisplayName } from '../../../profiles/domain/person-name';
 import {
   UsersRepository,
@@ -109,6 +110,7 @@ export class IamAssistedRegistrationService {
         throw new ConflictException(
           'Ya existe una cuenta con ese identificador; prefiera invitar en lugar de crear un duplicado',
           { email: dto.email, suggestion: 'invitation' },
+          IamErrorReason.IDENTIFIER_ALREADY_REGISTERED_PREFER_INVITATION,
         );
       }
 

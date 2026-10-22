@@ -15,6 +15,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { MaxJsonSize } from '../../../common/validators/max-json-size.validator';
 
 /**
  * Desenlace de una corrida de validación FHIR. No es un campo de entrada: el
@@ -405,6 +406,7 @@ export class ProjectCanonicalResourceDto {
    * Valor de normalized payload json mantenido por la instancia.
    */
   @ApiProperty({ description: 'Payload normalizado del recurso' })
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   normalizedPayloadJson!: Record<string, unknown>;
 
@@ -475,6 +477,7 @@ export class ProjectCanonicalResourceDto {
    */
   @ApiPropertyOptional({ description: 'Etiquetas de seguridad del recurso' })
   @IsOptional()
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   securityLabelsJson?: Record<string, unknown>;
 }
@@ -826,9 +829,10 @@ export class ValidationIssueDto {
   /**
    * Valor de diagnostics text mantenido por la instancia.
    */
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: 2000 })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   diagnosticsText?: string;
 
   /**
@@ -836,6 +840,7 @@ export class ValidationIssueDto {
    */
   @ApiPropertyOptional()
   @IsOptional()
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   locationJson?: Record<string, unknown>;
 }
@@ -891,6 +896,7 @@ export class ValidateVersionDto {
    */
   @ApiPropertyOptional()
   @IsOptional()
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   summaryJson?: Record<string, unknown>;
 }
@@ -1049,6 +1055,7 @@ export class RecordQualityRunDto {
    */
   @ApiPropertyOptional()
   @IsOptional()
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   summaryJson?: Record<string, unknown>;
 }
@@ -1103,8 +1110,9 @@ export class ResolveMatchCandidateDto {
   /**
    * Valor de reason text mantenido por la instancia.
    */
-  @ApiProperty({ description: 'Por qué se decide así' })
+  @ApiProperty({ description: 'Por qué se decide así', maxLength: 1000 })
   @IsString()
+  @MaxLength(1000)
   reasonText!: string;
 
   /**
@@ -1114,6 +1122,7 @@ export class ResolveMatchCandidateDto {
     description: 'Evidencia en la que se apoya la decisión',
   })
   @IsOptional()
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   evidenceJson?: Record<string, unknown>;
 
@@ -1257,9 +1266,11 @@ export class ProjectTimelineEntryDto {
   @ApiPropertyOptional({
     description:
       'Resumen ya redactado según el consentimiento; nunca el dato clínico en claro',
+    maxLength: 2000,
   })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   summaryRedacted?: string;
 
   /**
@@ -1286,6 +1297,7 @@ export class ProjectTimelineEntryDto {
    */
   @ApiPropertyOptional()
   @IsOptional()
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   securityLabelsJson?: Record<string, unknown>;
 }
@@ -1398,6 +1410,7 @@ export class RecordDeidRunDto {
     description: 'Resultado de la verificación de re-identificación',
   })
   @IsOptional()
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   verificationSummaryJson?: Record<string, unknown>;
 
@@ -1581,6 +1594,7 @@ export class ExportBundleDto {
    */
   @ApiPropertyOptional({ description: 'A dónde se entrega' })
   @IsOptional()
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   deliveryDestinationJson?: Record<string, unknown>;
 }
@@ -1727,8 +1741,9 @@ export class RetireResourceDto {
   /**
    * Valor de reason mantenido por la instancia.
    */
-  @ApiProperty({ description: 'Por qué se retira' })
+  @ApiProperty({ description: 'Por qué se retira', maxLength: 1000 })
   @IsString()
+  @MaxLength(1000)
   reason!: string;
 }
 

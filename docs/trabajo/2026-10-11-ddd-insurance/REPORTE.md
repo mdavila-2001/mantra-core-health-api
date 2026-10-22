@@ -1,8 +1,8 @@
 # Reporte — DDD insurance
 
-- Fecha: 2026-10-11 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/ddd-insurance-dev`
-- Peldaño de evidencia alcanzado: `VERIFIED` para la ubicación, puertos, adaptadores y reglas de capas según ADR-0026. PR #645 resuelto sin conflictos contra `origin/dev`.
-- Avance: 12 / 12 microtareas completadas (100 %). S1 a S4 completadas. Merge de `origin/dev` completado y sincronizado.
+- Fecha: 2026-10-11 · Plan: [PLAN.md](./PLAN.md) · Rama: `justin/ddd-insurance-test` (base `test`)
+- Peldaño de evidencia alcanzado: `VERIFIED` para la ubicación, puertos, adaptadores y reglas de capas según ADR-0026.
+- Avance: 12 / 12 microtareas completadas (100 %). S1 a S4 completadas. Verde contra `origin/test`.
 
 ## Completado
 

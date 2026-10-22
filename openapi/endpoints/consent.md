@@ -242,7 +242,7 @@ Content-Type: application/json
 | `provisions[].securityLabelConceptId` | No | `string` | formato `uuid` | Etiqueta de seguridad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `provisions[].validFrom` | No | `string` | Sin restricción adicional declarada | Inicio de vigencia (ISO-8601) | `valor-ejemplo` |
 | `provisions[].validTo` | No | `string` | Sin restricción adicional declarada | Fin de vigencia (ISO-8601) | `valor-ejemplo` |
-| `provisions[].provisionTypeConceptId` | No | `string` | Sin restricción adicional declarada | Tipo de provisión (concept id); por defecto la base | `00000000-0000-4000-8000-000000000001` |
+| `provisions[].provisionTypeConceptId` | No | `string` | formato `uuid` | Tipo de provisión (concept id); por defecto la base | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -409,7 +409,7 @@ Content-Type: application/json
 | `provisions[].securityLabelConceptId` | No | `string` | formato `uuid` | Etiqueta de seguridad (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `provisions[].validFrom` | No | `string` | Sin restricción adicional declarada | Inicio de vigencia (ISO-8601) | `valor-ejemplo` |
 | `provisions[].validTo` | No | `string` | Sin restricción adicional declarada | Fin de vigencia (ISO-8601) | `valor-ejemplo` |
-| `provisions[].provisionTypeConceptId` | No | `string` | Sin restricción adicional declarada | Tipo de provisión (concept id); por defecto la base | `00000000-0000-4000-8000-000000000001` |
+| `provisions[].provisionTypeConceptId` | No | `string` | formato `uuid` | Tipo de provisión (concept id); por defecto la base | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 

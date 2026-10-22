@@ -732,7 +732,7 @@ Content-Type: application/json
 | `ruleTypeConceptId` | No | `string` | formato `uuid` | Tipo de regla (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `severityConceptId` | No | `string` | formato `uuid` | Severidad de la alerta que genera (concept id) | `00000000-0000-4000-8000-000000000001` |
 | `logicJson` | No | `object` | Sin restricción adicional declarada | Lógica de la regla (JSON) | `{}` |
-| `messageTemplate` | No | `string` | Sin restricción adicional declarada | Plantilla del mensaje de alerta | `valor-ejemplo` |
+| `messageTemplate` | No | `string` | longitud máxima 2000 | Plantilla del mensaje de alerta | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -1679,8 +1679,8 @@ Content-Type: application/json
 | `substanceAConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `substanceBConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `severityConceptId` | No | `string` | formato `uuid` | Severidad (concept id) | `00000000-0000-4000-8000-000000000001` |
-| `mechanismText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `managementText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `mechanismText` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `managementText` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -2495,12 +2495,12 @@ Content-Type: application/json
 | `name` | Sí | `string` | longitud mínima 1; longitud máxima 120 | Rótulo del favorito, único dentro de la lista del profesional (p. ej. «ATB post extracción») | `Nombre de ejemplo` |
 | `medicationConceptId` | Sí | `string` | formato `uuid` | Medicamento codificado (terminology.catalog_concepts) | `00000000-0000-4000-8000-000000000001` |
 | `substanceAtcConceptId` | No | `string` | formato `uuid` | Principio activo ATC | `00000000-0000-4000-8000-000000000001` |
-| `doseText` | No | `string` | Sin restricción adicional declarada | Posología por defecto | `valor-ejemplo` |
+| `doseText` | No | `string` | longitud máxima 500 | Posología por defecto | `valor-ejemplo` |
 | `routeConceptId` | No | `string` | formato `uuid` | Vía de administración por defecto | `00000000-0000-4000-8000-000000000001` |
-| `frequencyText` | No | `string` | Sin restricción adicional declarada | Frecuencia por defecto | `valor-ejemplo` |
+| `frequencyText` | No | `string` | longitud máxima 500 | Frecuencia por defecto | `valor-ejemplo` |
 | `quantityDecimal` | No | `number` | Sin restricción adicional declarada | Cantidad por defecto | `1` |
 | `unitConceptId` | No | `string` | formato `uuid` | Unidad de la cantidad | `00000000-0000-4000-8000-000000000001` |
-| `patientInstructionsText` | No | `string` | Sin restricción adicional declarada | Indicaciones al paciente por defecto, separadas de la posología | `valor-ejemplo` |
+| `patientInstructionsText` | No | `string` | longitud máxima 2000 | Indicaciones al paciente por defecto, separadas de la posología | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 

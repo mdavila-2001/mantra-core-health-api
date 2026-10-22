@@ -43,7 +43,7 @@ scheduling/
 │   ├── bookings/               fachada + support/ (colaboradores) + use-cases/ (18)
 │   ├── catalog/                fachada + support/ + use-cases/ (16)
 │   ├── agenda/ confirmation/ delay/ notices/ professional-time/ affiliation/ walk-in/
-│   ├── waitlist/ service-offerings/
+│   ├── waitlist/
 ├── infrastructure/
 │   ├── repositories/           acceso a datos propio (clases sin estado, reciben el EntityManager)
 │   ├── adapters/               puertos implementados: audit, profiles, clinical, insurance,

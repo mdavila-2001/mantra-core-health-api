@@ -11,6 +11,7 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { MaxJsonSize } from '../../../common/validators/max-json-size.validator';
 
 /** Cuerpo de `POST /cds-rules` (crea la regla en borrador; precondición de UC-18-13). */
 export class CreateCdsRuleDto {
@@ -68,15 +69,20 @@ export class CreateCdsRuleDto {
    */
   @ApiPropertyOptional({ description: 'Lógica de la regla (JSON)' })
   @IsOptional()
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   logicJson?: Record<string, unknown>;
 
   /**
    * Valor de message template mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Plantilla del mensaje de alerta' })
+  @ApiPropertyOptional({
+    description: 'Plantilla del mensaje de alerta',
+    maxLength: 2000,
+  })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   messageTemplate?: string;
 }
 
@@ -87,6 +93,7 @@ export class PublishRuleVersionDto {
    */
   @ApiPropertyOptional({ description: 'Nueva lógica de la regla (JSON)' })
   @IsOptional()
+  @MaxJsonSize(256 * 1024)
   @IsObject()
   logicJson?: Record<string, unknown>;
 
@@ -282,17 +289,19 @@ export class CreateDrugInteractionDto {
   /**
    * Valor de mechanism text mantenido por la instancia.
    */
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: 2000 })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   mechanismText?: string;
 
   /**
    * Valor de management text mantenido por la instancia.
    */
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: 2000 })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   managementText?: string;
 }
 

@@ -1,11 +1,11 @@
 # Reporte — DDD iam
 
-- Fecha: 2026-10-11 · Rama: `justin/ddd-iam-dev`
+- Fecha: 2026-10-11 · Rama: `justin/ddd-iam-test` (base `test`)
 - Peldaño de evidencia alcanzado: `VERIFIED` para la organización en capas DDD (`presentation/`, `application/`, `infrastructure/`, `domain/`).
-- Pruebas dirigidas: 22 suites / 362 tests de `iam` aprobados (100 %).
+- Pruebas dirigidas: 22 suites / 351 tests de `iam` aprobados (100 %).
 - Typecheck: 0 errores.
 - ESLint: 0 errores.
-- Guardarraíl de arquitectura: 7/7 suites aprobadas.
+- Guardarraíl de arquitectura: 7/7 tests aprobados.
 
 ## Cambios realizados
 1. `presentation/controllers`: Controllers HTTP de autenticación, usuarios y seguridad.

@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  IsISO8601,
   IsNumber,
   IsOptional,
   IsString,
@@ -77,9 +78,12 @@ export class GoodsReceiptLineDto {
   /**
    * Valor de expires at mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Fecha de expiración del lote (ISO)' })
+  @ApiPropertyOptional({
+    description: 'Fecha de expiración del lote (ISO)',
+    format: 'date',
+  })
   @IsOptional()
-  @IsString()
+  @IsISO8601()
   expiresAt?: string;
 }
 

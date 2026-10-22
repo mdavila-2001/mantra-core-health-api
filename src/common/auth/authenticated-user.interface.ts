@@ -1,3 +1,5 @@
+import type { Request } from 'express';
+
 /**
  * Identidad del sujeto autenticado tal como la reconstruye el backend a partir
  * del JWT validado. Es el contrato que reciben controladores y servicios vía
@@ -65,4 +67,3 @@ export type AuthenticatedRequest = Omit<Request, 'user'> & {
    */
   resolvedTenantId?: string;
 };
-import type { Request } from 'express';

@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -162,9 +163,10 @@ export class CheckInEncounterDto {
   /**
    * Valor de reason text mantenido por la instancia.
    */
-  @ApiPropertyOptional({ description: 'Motivo de consulta' })
+  @ApiPropertyOptional({ description: 'Motivo de consulta', maxLength: 1000 })
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   reasonText?: string;
 
   /**

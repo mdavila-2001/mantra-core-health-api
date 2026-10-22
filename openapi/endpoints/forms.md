@@ -1686,6 +1686,10 @@ Content-Type: application/json
 | `validationRules[].parameters` | No | `object` | Sin restricción adicional declarada | Parámetros de la regla | `{}` |
 | `validationRules[].severity` | No | `string` | valores: `ERROR`, `WARNING` | Sin descripción específica en el contrato OpenAPI. | `ERROR` |
 | `validationRules[].errorMessage` | No | `string` | longitud máxima 500 | Mensaje de error asociado | `valor-ejemplo` |
+| `options` | No | `array<string>` | mínimo 2 elemento(s) | Opciones propias de un campo de elección (dataType "code" sin valueSetId) | `["valor-ejemplo","valor-ejemplo"]` |
+| `multiple` | No | `boolean` | Sin restricción adicional declarada | Admite varias respuestas en vez de una sola | `false` |
+| `allowOther` | No | `boolean` | Sin restricción adicional declarada | Ofrece «Otro», con texto libre | `false` |
+| `description` | No | `string` | longitud máxima 1000 | Ayuda que se lee bajo la pregunta (se sirve como "hint") | `Texto descriptivo de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -1716,7 +1720,14 @@ Content-Type: application/json
       "severity": "ERROR",
       "errorMessage": "valor-ejemplo"
     }
-  ]
+  ],
+  "options": [
+    "valor-ejemplo",
+    "valor-ejemplo"
+  ],
+  "multiple": false,
+  "allowOther": false,
+  "description": "Texto descriptivo de ejemplo"
 }
 ```
 
@@ -1759,6 +1770,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | El código de campo ya existe | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | `options` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" declara valueSetId u options, no los dos | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" sin valueSetId necesita al menos dos opciones | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una opción no puede estar vacía | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las opciones no pueden repetirse | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1827,6 +1845,10 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `name` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre legible del campo | `Nombre de ejemplo` |
 | `dataType` | No | `string` | valores: `string`, `text`, `integer`, `decimal`, `boolean`, `date`, `datetime`, `time`, `uuid`, `json`, `binary`, `reference`, `code` | Tipo de dato técnico; con valores capturados no se cambia (409) | `string` |
+| `options` | No | `array<string>` | mínimo 2 elemento(s) | Opciones, reemplazadas enteras | `["valor-ejemplo","valor-ejemplo"]` |
+| `multiple` | No | `boolean` | Sin restricción adicional declarada | Admite varias respuestas | `true` |
+| `allowOther` | No | `boolean` | Sin restricción adicional declarada | Ofrece «Otro», con texto libre | `true` |
+| `description` | No | `object` | longitud máxima 1000; admite null | Ayuda bajo la pregunta; null la quita | `{}` |
 
 ### Payload completo de ejemplo
 
@@ -1840,7 +1862,14 @@ Content-Type: application/json
 
 {
   "name": "Nombre de ejemplo",
-  "dataType": "string"
+  "dataType": "string",
+  "options": [
+    "valor-ejemplo",
+    "valor-ejemplo"
+  ],
+  "multiple": true,
+  "allowOther": true,
+  "description": {}
 }
 ```
 
@@ -1886,6 +1915,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Campo no encontrado | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 409 | `CONFLICT` | El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No se puede quitar una opción que ya tiene respuestas capturadas | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `options` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` sólo aplica a dataType "code" | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" declara valueSetId u options, no los dos | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un campo "code" sin valueSetId necesita al menos dos opciones | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una opción no puede estar vacía | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las opciones no pueden repetirse | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2945,6 +2982,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Instancia no encontrada | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La instancia no está abierta | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El campo no tiene opciones declaradas | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El valor no está entre las opciones del campo | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3336,6 +3375,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Valor no encontrado | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El valor ya fue superado | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El campo no tiene opciones declaradas | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El valor no está entre las opciones del campo | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3487,6 +3528,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Instancia no encontrada | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El campo no tiene opciones declaradas | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
+| 422 | `PRECONDITION_FAILED` | El valor no está entre las opciones del campo | Excepción explícita en src/modules/forms/services/forms-values.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

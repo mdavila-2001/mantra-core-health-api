@@ -8,6 +8,7 @@ import {
   CONCEPTS,
   type AuthenticatedUser,
 } from '../../../common';
+import { BillingErrorReason } from '../billing.error-reasons';
 import {
   BillsRepository,
   BillingDocumentLinksRepository,
@@ -64,17 +65,25 @@ export class BillsService {
     return this.em.transactional(async (tx) => {
       const vendor = await this.billsRepo.findVendor(tx, dto.vendorId);
       if (!vendor)
-        throw new ResourceNotFoundException('Proveedor no encontrado', {
-          vendorId: dto.vendorId,
-        });
+        throw new ResourceNotFoundException(
+          'Proveedor no encontrado',
+          {
+            vendorId: dto.vendorId,
+          },
+          BillingErrorReason.BILL_VENDOR_NOT_FOUND,
+        );
       if (
         vendor.statusConceptId !== CONCEPTS.STATE_ACTIVE &&
         vendor.statusConceptId !== CONCEPTS.TENANT_ACTIVE
       ) {
         // El vendor debe estar activo para poder capturar su factura.
-        throw new PreconditionFailedException('El proveedor no está activo', {
-          vendorId: dto.vendorId,
-        });
+        throw new PreconditionFailedException(
+          'El proveedor no está activo',
+          {
+            vendorId: dto.vendorId,
+          },
+          BillingErrorReason.BILL_VENDOR_NOT_ACTIVE,
+        );
       }
 
       const clash = await this.billsRepo.findByNumber(
@@ -89,6 +98,7 @@ export class BillsService {
           {
             billNumber: dto.billNumber,
           },
+          BillingErrorReason.BILL_NUMBER_ALREADY_CAPTURED,
         );
       }
 
@@ -98,6 +108,7 @@ export class BillsService {
           throw new PreconditionFailedException(
             'Three-way match: la línea con orden de compra requiere recepción de bienes',
             { billNumber: dto.billNumber },
+            BillingErrorReason.BILL_LINE_MISSING_GOODS_RECEIPT,
           );
         }
       }

@@ -10,6 +10,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { PromotionsErrorReason } from '../promotions.error-reasons';
 import {
   PromotionsDiscountsRepository,
   PromotionsLoyaltyRepository,
@@ -125,10 +126,14 @@ export class PromotionsDiscountsService {
       dto.code,
     );
     if (duplicate) {
-      throw new ConflictException('Ya existe una promoción con ese código', {
-        tenantId: dto.tenantId,
-        code: dto.code,
-      });
+      throw new ConflictException(
+        'Ya existe una promoción con ese código',
+        {
+          tenantId: dto.tenantId,
+          code: dto.code,
+        },
+        PromotionsErrorReason.PROMOTION_CODE_ALREADY_EXISTS,
+      );
     }
 
     const validFrom = new Date(dto.validFrom);
@@ -140,6 +145,7 @@ export class PromotionsDiscountsService {
           validFrom: dto.validFrom,
           validTo: dto.validTo,
         },
+        PromotionsErrorReason.PROMOTION_INVALID_DATE_RANGE,
       );
     }
     dto.rules.forEach((rule) => this.assertRuleShape(rule));
@@ -216,6 +222,7 @@ export class PromotionsDiscountsService {
         {
           promotionId,
         },
+        PromotionsErrorReason.PERSONAL_COUPON_REQUIRES_MEMBER,
       );
     }
     // Un lote de cupones personales para un mismo miembro no tiene lectura de
@@ -224,6 +231,7 @@ export class PromotionsDiscountsService {
       throw new PreconditionFailedException(
         'Un cupón PERSONAL se emite de uno en uno',
         { promotionId, quantity: dto.quantity },
+        PromotionsErrorReason.PERSONAL_COUPON_SINGLE_QUANTITY,
       );
     }
 
@@ -233,15 +241,23 @@ export class PromotionsDiscountsService {
         promotionId,
       );
       if (!promotion) {
-        throw new ResourceNotFoundException('Promoción no encontrada', {
-          promotionId,
-        });
+        throw new ResourceNotFoundException(
+          'Promoción no encontrada',
+          {
+            promotionId,
+          },
+          PromotionsErrorReason.PROMOTION_NOT_FOUND,
+        );
       }
       if (promotion.statusConceptId !== CONCEPTS.PROMOTION_ACTIVE) {
-        throw new PreconditionFailedException('La promoción no está activa', {
-          promotionId,
-          statusConceptId: promotion.statusConceptId,
-        });
+        throw new PreconditionFailedException(
+          'La promoción no está activa',
+          {
+            promotionId,
+            statusConceptId: promotion.statusConceptId,
+          },
+          PromotionsErrorReason.PROMOTION_NOT_ACTIVE,
+        );
       }
 
       const codes = await this.generateCouponCodes(
@@ -391,6 +407,7 @@ export class PromotionsDiscountsService {
       throw new PreconditionFailedException(
         'Hay que indicar el cupón o la promoción automática a aplicar',
         { orderId },
+        PromotionsErrorReason.DISCOUNT_TARGET_REQUIRED,
       );
     }
 
@@ -422,9 +439,13 @@ export class PromotionsDiscountsService {
           dto.promotionId!,
         );
         if (!found) {
-          throw new ResourceNotFoundException('Promoción no encontrada', {
-            promotionId: dto.promotionId,
-          });
+          throw new ResourceNotFoundException(
+            'Promoción no encontrada',
+            {
+              promotionId: dto.promotionId,
+            },
+            PromotionsErrorReason.PROMOTION_NOT_FOUND,
+          );
         }
         this.assertPromotionUsable(found);
         const rules = await this.discountsRepo.findRulesByPromotion(
@@ -436,6 +457,7 @@ export class PromotionsDiscountsService {
           throw new PreconditionFailedException(
             'Ninguna regla de la promoción aplica al importe de la orden',
             { promotionId: found.id, orderAmount: dto.orderAmount },
+            PromotionsErrorReason.NO_RULE_APPLIES_TO_ORDER,
           );
         }
         await this.assertLimits(tx, found, dto.redeemerRefId);
@@ -525,15 +547,23 @@ export class PromotionsDiscountsService {
         redemptionId,
       );
       if (!redemption) {
-        throw new ResourceNotFoundException('Redención no encontrada', {
-          redemptionId,
-        });
+        throw new ResourceNotFoundException(
+          'Redención no encontrada',
+          {
+            redemptionId,
+          },
+          PromotionsErrorReason.REDEMPTION_NOT_FOUND,
+        );
       }
       if (redemption.statusConceptId !== CONCEPTS.REDEMPTION_APPLIED) {
-        throw new ConflictException('La redención ya no está aplicada', {
-          redemptionId,
-          statusConceptId: redemption.statusConceptId,
-        });
+        throw new ConflictException(
+          'La redención ya no está aplicada',
+          {
+            redemptionId,
+            statusConceptId: redemption.statusConceptId,
+          },
+          PromotionsErrorReason.REDEMPTION_NOT_APPLIED,
+        );
       }
 
       if (redemption.couponId) {
@@ -570,9 +600,13 @@ export class PromotionsDiscountsService {
             dto.membershipId,
           );
           if (!membership) {
-            throw new ResourceNotFoundException('Membresía no encontrada', {
-              membershipId: dto.membershipId,
-            });
+            throw new ResourceNotFoundException(
+              'Membresía no encontrada',
+              {
+                membershipId: dto.membershipId,
+              },
+              PromotionsErrorReason.MEMBERSHIP_NOT_FOUND,
+            );
           }
           const balanceAfter = this.round(
             Number(membership.pointsBalance ?? '0') + Number(dto.restorePoints),
@@ -628,7 +662,11 @@ export class PromotionsDiscountsService {
   ): Promise<CouponEvaluation> {
     const coupon = await this.discountsRepo.findCouponByCodeForUpdate(tx, code);
     if (!coupon) {
-      throw new ResourceNotFoundException('Cupón no encontrado', { code });
+      throw new ResourceNotFoundException(
+        'Cupón no encontrado',
+        { code },
+        PromotionsErrorReason.COUPON_NOT_FOUND,
+      );
     }
 
     const promotion = await this.discountsRepo.findPromotionForUpdate(
@@ -636,16 +674,24 @@ export class PromotionsDiscountsService {
       coupon.promotionId,
     );
     if (!promotion) {
-      throw new ResourceNotFoundException('Promoción del cupón no encontrada', {
-        promotionId: coupon.promotionId,
-      });
+      throw new ResourceNotFoundException(
+        'Promoción del cupón no encontrada',
+        {
+          promotionId: coupon.promotionId,
+        },
+        PromotionsErrorReason.PROMOTION_NOT_FOUND,
+      );
     }
 
     const rejection = this.rejectionReason(coupon, promotion, {
       redeemerRefId: context.redeemerRefId,
     });
     if (rejection) {
-      throw new PreconditionFailedException(rejection, { code });
+      throw new PreconditionFailedException(
+        rejection,
+        { code },
+        PromotionsErrorReason.COUPON_NOT_REDEEMABLE,
+      );
     }
 
     const rules = await this.discountsRepo.findRulesByPromotion(
@@ -657,6 +703,7 @@ export class PromotionsDiscountsService {
       throw new PreconditionFailedException(
         'Ninguna regla aplica al importe de la orden',
         { code, orderAmount: context.orderAmount },
+        PromotionsErrorReason.NO_RULE_APPLIES_TO_ORDER,
       );
     }
 
@@ -719,9 +766,13 @@ export class PromotionsDiscountsService {
   private assertPromotionUsable(promotion: Promotions): void {
     const now = new Date();
     if (promotion.statusConceptId !== CONCEPTS.PROMOTION_ACTIVE) {
-      throw new PreconditionFailedException('La promoción no está activa', {
-        promotionId: promotion.id,
-      });
+      throw new PreconditionFailedException(
+        'La promoción no está activa',
+        {
+          promotionId: promotion.id,
+        },
+        PromotionsErrorReason.PROMOTION_NOT_ACTIVE,
+      );
     }
     if (
       (promotion.validFrom && promotion.validFrom > now) ||
@@ -732,6 +783,7 @@ export class PromotionsDiscountsService {
         {
           promotionId: promotion.id,
         },
+        PromotionsErrorReason.PROMOTION_OUT_OF_VALIDITY,
       );
     }
   }
@@ -758,6 +810,7 @@ export class PromotionsDiscountsService {
           promotionId: promotion.id,
           totalRedemptionLimit: promotion.totalRedemptionLimit,
         },
+        PromotionsErrorReason.PROMOTION_REDEMPTION_LIMIT_REACHED,
       );
     }
 
@@ -767,6 +820,7 @@ export class PromotionsDiscountsService {
         throw new PreconditionFailedException(
           'El usuario alcanzó su límite de redenciones en la promoción',
           { promotionId: promotion.id, perUserLimit: promotion.perUserLimit },
+          PromotionsErrorReason.PROMOTION_PER_USER_LIMIT_REACHED,
         );
       }
     }
@@ -783,6 +837,7 @@ export class PromotionsDiscountsService {
             promotionId: promotion.id,
             budgetAmount: promotion.budgetAmount,
           },
+          PromotionsErrorReason.PROMOTION_BUDGET_EXHAUSTED,
         );
       }
     }
@@ -905,6 +960,7 @@ export class PromotionsDiscountsService {
         throw new PreconditionFailedException(
           'Una regla PERCENTAGE necesita porcentaje',
           {},
+          PromotionsErrorReason.PERCENTAGE_RULE_REQUIRES_PERCENTAGE,
         );
       }
       const pct = Number(rule.percentage);
@@ -914,6 +970,7 @@ export class PromotionsDiscountsService {
           {
             percentage: rule.percentage,
           },
+          PromotionsErrorReason.PERCENTAGE_OUT_OF_RANGE,
         );
       }
     }
@@ -921,6 +978,7 @@ export class PromotionsDiscountsService {
       throw new PreconditionFailedException(
         'Una regla FIXED necesita importe',
         {},
+        PromotionsErrorReason.FIXED_RULE_REQUIRES_AMOUNT,
       );
     }
     if (
@@ -930,6 +988,7 @@ export class PromotionsDiscountsService {
       throw new PreconditionFailedException(
         'Una regla BOGO necesita buyQuantity y getQuantity',
         {},
+        PromotionsErrorReason.BOGO_RULE_REQUIRES_QUANTITIES,
       );
     }
   }
@@ -959,6 +1018,7 @@ export class PromotionsDiscountsService {
     throw new ConflictException(
       'No se pudieron generar códigos de cupón libres',
       { quantity },
+      PromotionsErrorReason.COUPON_CODE_GENERATION_EXHAUSTED,
     );
   }
 

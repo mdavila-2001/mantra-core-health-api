@@ -22,6 +22,7 @@ import type {
 import { SurveysRepository } from '../repositories';
 import { PHL } from '../pharma_lab.concepts';
 import { PharmaLabAccessService } from './pharma-lab-access.service';
+import { PharmaLabErrorReason } from '../pharma_lab.error-reasons';
 
 /** Indicador agregado de una pregunta de encuesta. */
 export interface SurveyQuestionIndicator {
@@ -148,9 +149,11 @@ export class VisitSurveysService {
       await this.access.requireLab(tx, pharmaLabId);
       const survey = await this.requireSurvey(tx, pharmaLabId, surveyId);
       if (survey.statusConceptId === PHL.SURVEY_CLOSED) {
-        throw new ConflictException('La encuesta ya está cerrada', {
-          surveyId,
-        });
+        throw new ConflictException(
+          'La encuesta ya está cerrada',
+          { surveyId },
+          PharmaLabErrorReason.SURVEY_ALREADY_CLOSED,
+        );
       }
       survey.statusConceptId = PHL.SURVEY_CLOSED;
       touch(survey, actor.id);
@@ -209,15 +212,19 @@ export class VisitSurveysService {
   }> {
     const response = await this.repo.findResponse(this.em, responseId);
     if (!response || response.doctorUserId !== actor.id) {
-      throw new ResourceNotFoundException('Encuesta no encontrada', {
-        responseId,
-      });
+      throw new ResourceNotFoundException(
+        'Encuesta no encontrada',
+        { responseId },
+        PharmaLabErrorReason.SURVEY_RESPONSE_NOT_FOUND,
+      );
     }
     const survey = await this.repo.findSurvey(this.em, response.visitSurveyId);
     if (!survey) {
-      throw new ResourceNotFoundException('Encuesta no encontrada', {
-        responseId,
-      });
+      throw new ResourceNotFoundException(
+        'Encuesta no encontrada',
+        { responseId },
+        PharmaLabErrorReason.SURVEY_NOT_FOUND,
+      );
     }
     return {
       response,
@@ -245,14 +252,18 @@ export class VisitSurveysService {
     return this.em.transactional(async (tx) => {
       const response = await this.repo.findResponse(tx, responseId);
       if (!response || response.doctorUserId !== actor.id) {
-        throw new ResourceNotFoundException('Encuesta no encontrada', {
-          responseId,
-        });
+        throw new ResourceNotFoundException(
+          'Encuesta no encontrada',
+          { responseId },
+          PharmaLabErrorReason.SURVEY_RESPONSE_NOT_FOUND,
+        );
       }
       if (response.statusConceptId === PHL.RESPONSE_SUBMITTED) {
-        throw new ConflictException('La encuesta ya fue respondida', {
-          responseId,
-        });
+        throw new ConflictException(
+          'La encuesta ya fue respondida',
+          { responseId },
+          PharmaLabErrorReason.SURVEY_RESPONSE_ALREADY_SUBMITTED,
+        );
       }
 
       const questions = await this.repo.listQuestions(
@@ -272,6 +283,7 @@ export class VisitSurveysService {
         throw new PreconditionFailedException(
           'Faltan respuestas obligatorias',
           { questionIds: missing.map((question) => question.id) },
+          PharmaLabErrorReason.SURVEY_REQUIRED_ANSWERS_MISSING,
         );
       }
       const foreign = dto.answers.filter(
@@ -281,6 +293,7 @@ export class VisitSurveysService {
         throw new PreconditionFailedException(
           'Alguna respuesta no corresponde a una pregunta de esta encuesta',
           {},
+          PharmaLabErrorReason.SURVEY_ANSWER_QUESTION_MISMATCH,
         );
       }
 
@@ -380,6 +393,7 @@ export class VisitSurveysService {
       throw new ResourceNotFoundException(
         'Encuesta no encontrada en el laboratorio',
         { pharmaLabId, surveyId },
+        PharmaLabErrorReason.SURVEY_NOT_FOUND_IN_LAB,
       );
     }
     return survey;
