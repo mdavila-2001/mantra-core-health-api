@@ -1,0 +1,27 @@
+{"event": "seed.step", "name": "catálogo de conceptos", "inserted": 4444, "failed": false, "tookMs": 414, "detail": {"inserted": 4444}}
+{"event": "seed.step", "name": "enumeraciones dinámicas", "inserted": 852, "failed": false, "tookMs": 96, "detail": {"valueSets": 150, "definitions": 75, "options": 551, "bindings": 76}}
+{"event": "seed.step", "name": "apoderamiento de portal", "inserted": 3, "failed": false, "tookMs": 17, "detail": {"valueSets": 1, "versions": 1, "legalBases": 1}}
+{"event": "seed.step", "name": "glosario médico", "inserted": 763, "failed": false, "tookMs": 99, "detail": {"valueSets": 34, "terms": 69, "designations": 108, "properties": 231, "memberships": 217, "relationships": 104, "orphanRelationships": 1, "codeSystemBackfilled": 0, "updated": 0, "removed": 0}}
+{"event": "seed.step", "name": "departamentos de Bolivia", "inserted": 1740, "failed": false, "tookMs": 119, "detail": {"valueSets": 2, "versions": 2, "departments": 9, "municipalities": 340, "designations": 349, "properties": 689, "memberships": 349}}
+{"event": "seed.step", "name": "país y categoría canónica de formas societarias", "inserted": 42, "failed": false, "tookMs": 5, "detail": {"properties": 42}}
+{"event": "seed.step", "name": "catálogos de afiliación y representación legal", "inserted": 68, "failed": false, "tookMs": 44, "detail": {"codeSystemVersions": 4, "concepts": 28, "valueSets": 4, "versions": 4, "memberships": 28, "skippedForeignSets": 0}}
+{"event": "seed.step", "name": "ocupaciones de Bolivia", "inserted": 258, "failed": false, "tookMs": 28, "detail": {"valueSets": 1, "versions": 1, "occupations": 64, "designations": 64, "properties": 64, "memberships": 64}}
+{"event": "seed.step", "name": "empresas de Bolivia", "inserted": 622, "failed": false, "tookMs": 38, "detail": {"valueSets": 1, "versions": 1, "employers": 155, "designations": 155, "properties": 155, "memberships": 155}}
+{"event": "seed.step", "name": "establecimientos de salud", "inserted": 4526, "failed": false, "tookMs": 194, "detail": {"valueSets": 1, "versions": 1, "facilities": 642, "properties": 3240, "memberships": 642}}
+{"event": "seed.step", "name": "aseguradoras de Bolivia", "inserted": 123, "failed": false, "tookMs": 37, "detail": {"tenants": 25, "carriers": 25, "products": 25, "plans": 48}}
+{"event": "seed.step", "name": "nomenclador de procedimientos", "inserted": 24910, "failed": false, "tookMs": 2346, "detail": {"valueSets": 1, "versions": 1, "procedures": 4408, "properties": 16092, "memberships": 4408, "reconciled": 0}}
+{"event": "seed.step", "name": "vademécum de medicamentos", "inserted": 2541, "failed": false, "tookMs": 194, "detail": {"inserted": 2541, "reconciled": 0}}
+{"event": "seed.step", "name": "mensajería", "inserted": 6, "failed": false, "tookMs": 20, "detail": {"inserted": 6}}
+{"event": "seed.step", "name": "audio assets", "inserted": 5, "failed": false, "tookMs": 10, "detail": {"inserted": 5}}
+{"event": "seed.step", "name": "pack de stickers", "inserted": 24, "failed": false, "tookMs": 106, "detail": {"inserted": 24}}
+{"event": "seed.step", "name": "verificación de identidad", "inserted": 9, "failed": false, "tookMs": 18, "detail": {"inserted": 9}}
+{"event": "seed.step", "name": "roles asistenciales", "inserted": 19, "failed": false, "tookMs": 28, "detail": {"inserted": 19}}
+{"event": "seed.step", "name": "permisos de plataforma", "inserted": 1, "failed": false, "tookMs": 3, "detail": {"inserted": 1}}
+{"event": "seed.step", "name": "formularios clínicos estándar", "inserted": 174, "failed": false, "tookMs": 43767, "detail": {"templates": 137, "specialties": 37}}
+{"event": "seed.step", "name": "administrador de arranque", "inserted": null, "failed": false, "tookMs": 0, "detail": {"provisioned": false, "skipped": "not-configured"}}
+{"event": "seed.step", "name": "cuentas de proveedores", "inserted": 0, "failed": false, "tookMs": 0, "detail": {"created": 0, "skipped": "not-configured"}}
+{"event": "seed.step", "name": "padrón de personas", "inserted": 0, "failed": false, "tookMs": 0, "detail": {"practitionersCreated": 0, "practitionersExisting": 0, "patientsCreated": 0, "patientsExisting": 0, "skipped": [], "reason": "not-configured"}}
+{"event": "seed.step", "name": "directorio de redes de aseguradoras", "inserted": 0, "failed": false, "tookMs": 1, "detail": {"practitionersCreated": 0, "practitionersExisting": 0, "sitesCreated": 0, "membershipsCreated": 0, "workplacesCreated": 0, "networksCreated": 0, "unmappedSpecialties": [], "failed": [], "reason": "not-configured"}}
+{"event": "seed.step", "name": "servicio por defecto de cada práctica", "inserted": 0, "failed": false, "tookMs": 4, "detail": {"inserted": 0}}
+{"event": "seed.summary", "inserted": 41130, "failed": 0, "ok": 25, "tookMs": 47589}
+seed-cli #1 EXIT=0

@@ -1,0 +1,12 @@
+└─ eslint
+   ├─ ID: eslint (deprecation)
+   ├─ Issue: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+   ├─ Severity: moderate
+   ├─ Vulnerable Versions: 9.39.5
+   │ 
+   ├─ Tree Versions
+   │  └─ 9.39.5
+   │ 
+   └─ Dependents
+      └─ mantra-core-health-api@workspace:.
+exit=1

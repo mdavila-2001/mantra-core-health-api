@@ -29,7 +29,7 @@ el código:
 
 ## Procedimiento de verificación (pendiente de ejecutar contra cada entorno)
 
-Copiado de `ESTADO-Y-PENDIENTES.md` (ya identificado como prioridad P0 antes de esta auditoría):
+Copiado de `docs/progress/ESTADO-Y-PENDIENTES.md` (ya identificado como prioridad P0 antes de esta auditoría):
 
 1. Usar `DB_APP_USER`/`DB_APP_PASSWORD` (rol sin `BYPASSRLS`) para el runtime de la API y los
    workers — nunca el rol propietario del esquema.

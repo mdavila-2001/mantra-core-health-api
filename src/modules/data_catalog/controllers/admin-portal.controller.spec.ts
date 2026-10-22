@@ -12,6 +12,7 @@ import { AuthTokenModule } from '../../../common/auth/auth-token.module';
 import { JwtAuthGuard } from '../../../common/auth/jwt-auth.guard';
 import { JwtStrategy } from '../../../common/auth/jwt.strategy';
 import { RolesGuard } from '../../../common/auth/roles.guard';
+import { SessionValidator } from '../../../common/auth/session-validator';
 import { TokenService } from '../../../common/auth/token.service';
 import { AllExceptionsFilter } from '../../../common/filters/all-exceptions.filter';
 import { TracingService } from '../../../observability';
@@ -53,6 +54,11 @@ describe('AdminPortalController (HTTP)', () => {
         InventoryRepository,
         PortalInventoryService,
         JwtStrategy,
+        // La sesión no es lo que se prueba acá: se da por activa.
+        {
+          provide: SessionValidator,
+          useValue: { assertActive: jest.fn(async () => undefined) },
+        },
         { provide: APP_GUARD, useClass: JwtAuthGuard },
         { provide: APP_GUARD, useClass: RolesGuard },
         { provide: APP_FILTER, useClass: AllExceptionsFilter },

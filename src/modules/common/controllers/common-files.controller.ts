@@ -40,6 +40,7 @@ import {
   FileVersionResponseDto,
   LinkedFilePageDto,
   ListFileLinksQueryDto,
+  SignedDownloadQueryDto,
   UploadFileDto,
 } from '../dto';
 
@@ -107,8 +108,11 @@ export class CommonFilesController {
   @ApiOperation({
     summary: 'Listar los archivos adjuntos a un recurso (UC-02-08)',
   })
-  listLinks(@Query() query: ListFileLinksQueryDto): Promise<LinkedFilePageDto> {
-    return this.filesService.listLinkedFiles(query);
+  listLinks(
+    @Query() query: ListFileLinksQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
+    return this.filesService.listLinkedFiles(query, actor);
   }
 
   /** Devuelve el contenido de la versión vigente de un archivo. */
@@ -117,9 +121,13 @@ export class CommonFilesController {
   @ApiOperation({ summary: 'Descargar el contenido vigente de un archivo' })
   async downloadContent(
     @Param('id', ParseUUIDPipe) id: string,
+    @Query() signed: SignedDownloadQueryDto,
     @Res() res: Response,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
+    // La URL firmada que se emite se valida acá (TX-09); sin firma, sigue la
+    // lectura por autoría. En los dos casos hace falta sesión.
+    this.filesService.assertDownloadSignature(id, signed);
     const content = await this.uploadService.download(id, actor);
     res.setHeader('Content-Type', content.mimeType);
     if (content.originalName) {
@@ -193,13 +201,21 @@ export class CommonFilesController {
     return this.filesService.softDelete(id, user);
   }
 
-  /** UC-02-11: emite una URL de descarga firmada. */
+  /**
+   * UC-02-11: emite una URL de descarga firmada.
+   *
+   * Lleva `@CurrentUser` desde 5.1: sin él el servicio no tenía a quién
+   * autorizar, y esta ruta era el camino paralelo que rodeaba el control de
+   * `:id/content`. La regla que aplica es la misma que la del contenido.
+   */
   @Post(':id/download-url')
   @HttpCode(HttpStatus.CREATED)
+  @Header('Cache-Control', 'private, no-store')
   @ApiOperation({ summary: 'Emitir una URL de descarga firmada (UC-02-11)' })
   downloadUrl(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<DownloadUrlResponseDto> {
-    return this.filesService.generateDownloadUrl(id);
+    return this.filesService.generateDownloadUrl(id, actor);
   }
 }

@@ -9,7 +9,7 @@
 **Monolito modular**, no microservicios: una única aplicación NestJS (`AppModule`) registra 61
 módulos de dominio en el mismo proceso HTTP, cada uno mapeado 1:1 a un schema PostgreSQL propio
 (`src/modules/README.md`). El aislamiento entre dominios se logra por **convención de código
-verificada mecánicamente** (`tools/redesa/coverage-report.mjs`), no por límites de proceso o red.
+verificada mecánicamente** (`tools/alovida/coverage-report.mjs`), no por límites de proceso o red.
 
 La única fragmentación real en procesos separados es **temporal, no por dominio HTTP**: 17
 workers ejecutan trabajo periódico por dominio, cada uno su propio proceso/contenedor, hablando

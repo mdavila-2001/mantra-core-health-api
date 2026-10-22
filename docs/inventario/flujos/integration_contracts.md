@@ -816,7 +816,7 @@ Entregar y verificar un webhook firmado
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Suscripción de webhook no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suscripción no está ACTIVE; PreconditionFailedException: La suscripción aún no es válida; PreconditionFailedException: La suscripción ya expiró; PreconditionFailedException: No hay versión ACTIVE del contrato para entregar; PreconditionFailedException: La suscripción no tiene callbackUri para entregar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suscripción no está ACTIVE; PreconditionFailedException: La suscripción aún no es válida; PreconditionFailedException: La suscripción ya expiró; PreconditionFailedException: No hay versión ACTIVE del contrato para entregar; PreconditionFailedException: La suscripción no tiene callbackUri para entregar; PreconditionFailedException: El cuerpo del despacho excede el tamaño permitido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -860,16 +860,29 @@ flowchart TD
   n17 -->|"no"| n19
   n20(["422 PRECONDITION_FAILED La suscripción no tiene callbackUri para entregar"]):::error
   n19 -->|"sí"| n20
-  n21["Llama a ExchangeRecordsRepository.create"]:::llamada
+  n21["Llama a HttpDispatcherService.post"]:::llamada
   n19 -->|"no"| n21
-  n22[("CREA integration_contracts.integration_exchange_records")]:::efecto
+  n22{"requestBytes › MAX_DISPATCH_REQUEST_BYTES"}:::decision
   n21 --> n22
-  n23["Llama a DeliveryEvidenceRepository.create"]:::llamada
-  n22 --> n23
-  n24[("CREA integration_contracts.webhook_delivery_evidence")]:::efecto
-  n23 --> n24
-  n25(("201 Responde con éxito")):::ok
-  n24 --> n25
+  n23(["422 PRECONDITION_FAILED El cuerpo del despacho excede el tamaño permitido"]):::error
+  n22 -->|"sí"| n23
+  n24["Intenta"]:::intento
+  n22 -->|"no"| n24
+  n25{"error instanceof PreconditionFailedException"}:::decision
+  n24 -->|"si falla"| n25
+  n26(["↩ (relanza el error capturado)"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a ExchangeRecordsRepository.create"]:::llamada
+  n24 --> n27
+  n25 -->|"no"| n27
+  n28[("CREA integration_contracts.integration_exchange_records")]:::efecto
+  n27 --> n28
+  n29["Llama a DeliveryEvidenceRepository.create"]:::llamada
+  n28 --> n29
+  n30[("CREA integration_contracts.webhook_delivery_evidence")]:::efecto
+  n29 --> n30
+  n31(("201 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

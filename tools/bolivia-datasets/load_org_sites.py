@@ -40,9 +40,11 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -73,24 +75,45 @@ class Api:
         self.base = base.rstrip("/")
         self.token: str | None = None
 
+    # Mismo defecto que los otros cargadores de `bolivia-datasets/`: Neon corta
+    # la conexión del backend a mitad de una ráfaga y eso tumba el proceso de
+    # Nest. Son fallos de SOCKET, no de protocolo HTTP —`URLError` no los
+    # atrapa—, y este método ni siquiera capturaba `URLError`.
+    REINTENTOS_POR_CAIDA = 3
+    ESPERA_ENTRE_REINTENTOS = 15.0
+
     def _peticion(
         self, metodo: str, ruta: str, cuerpo: dict | None
     ) -> tuple[int, dict]:
         datos = json.dumps(cuerpo).encode("utf-8") if cuerpo is not None else None
-        pedido = urllib.request.Request(f"{self.base}{ruta}", data=datos, method=metodo)
-        pedido.add_header("Content-Type", "application/json")
-        if self.token:
-            pedido.add_header("Authorization", f"Bearer {self.token}")
-        try:
-            with urllib.request.urlopen(pedido, timeout=30) as resp:
-                crudo = resp.read().decode("utf-8")
-                return resp.status, (json.loads(crudo) if crudo else {})
-        except urllib.error.HTTPError as error:
-            crudo = error.read().decode("utf-8", errors="replace")
+        for intento in range(1, self.REINTENTOS_POR_CAIDA + 1):
+            pedido = urllib.request.Request(f"{self.base}{ruta}", data=datos, method=metodo)
+            pedido.add_header("Content-Type", "application/json")
+            if self.token:
+                pedido.add_header("Authorization", f"Bearer {self.token}")
             try:
-                return error.code, json.loads(crudo)
-            except json.JSONDecodeError:
-                return error.code, {"message": crudo[:300]}
+                with urllib.request.urlopen(pedido, timeout=30) as resp:
+                    crudo = resp.read().decode("utf-8")
+                    return resp.status, (json.loads(crudo) if crudo else {})
+            except urllib.error.HTTPError as error:
+                crudo = error.read().decode("utf-8", errors="replace")
+                try:
+                    return error.code, json.loads(crudo)
+                except json.JSONDecodeError:
+                    return error.code, {"message": crudo[:300]}
+            except urllib.error.URLError as error:
+                return 0, {"message": str(error.reason)}
+            except (http.client.HTTPException, TimeoutError, ConnectionError, OSError) as error:
+                if intento == self.REINTENTOS_POR_CAIDA:
+                    return 0, {"message": f"{type(error).__name__}: {error}"}
+                print(
+                    f"    aviso: {type(error).__name__} ({error}) — "
+                    f"reintento {intento}/{self.REINTENTOS_POR_CAIDA} en "
+                    f"{self.ESPERA_ENTRE_REINTENTOS:.0f}s",
+                    file=sys.stderr,
+                )
+                time.sleep(self.ESPERA_ENTRE_REINTENTOS)
+        return 0, {"message": "sin respuesta tras los reintentos"}
 
     def entrar(self, correo: str, clave: str) -> None:
         estado, cuerpo = self._peticion(

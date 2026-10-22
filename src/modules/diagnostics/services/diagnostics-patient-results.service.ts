@@ -1,3 +1,5 @@
+import { PatientSettlementService } from '../../insurance/application/services/patient-settlement.service';
+import { unavailableSettlement } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -12,15 +14,21 @@ import {
 import {
   PatientProfilesRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
-import { ResourceScopeGrantsRepository } from '../../authz/repositories';
+} from '../../profiles/infrastructure/repositories';
+import { findPractitionerNames } from '../../profiles/infrastructure/read-models/practitioner-names';
+import {
+  CareRelationshipsRepository,
+  ResourceScopeGrantsRepository,
+} from '../../authz/repositories';
 import { AUTHZ } from '../../authz/authz.concepts';
 import {
   DIAGNOSTIC_RESULT_READ_PERMISSION_CODE,
   platformPermissionId,
 } from '../../authz/authz.seed';
+import { FileUploadService } from '../../common/services';
+import type { FileContentDto } from '../../common/dto';
 import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
-import { CATEGORIAS_DIAGNOSTICAS, DIAG } from '../diagnostics.concepts';
+import { DIAGNOSTIC_CATEGORIES, DIAG } from '../diagnostics.concepts';
 import type {
   DiagnosticResultShareDto,
   DiagnosticResultSharesResponseDto,
@@ -84,7 +92,9 @@ export class DiagnosticsPatientResultsService {
    * @param accountLinksRepo - Vínculo cuenta↔persona, para resolver al titular.
    * @param patientProfilesRepo - Perfil de paciente de esa persona.
    * @param grantsRepo - Grants sujeto→recurso: los resultados compartidos.
+   * @param careRepo - Relaciones asistenciales, para exigir vínculo vigente al compartir (CL-48).
    * @param logger - Registro estructurado.
+   * @param fileUpload - Bytes de un archivo ya autorizado por contexto (CL-40).
    */
   constructor(
     private readonly em: EntityManager,
@@ -93,7 +103,10 @@ export class DiagnosticsPatientResultsService {
     private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly patientProfilesRepo: PatientProfilesRepository,
     private readonly grantsRepo: ResourceScopeGrantsRepository,
+    private readonly careRepo: CareRelationshipsRepository,
     private readonly logger: PinoLogger,
+    private readonly settlements: PatientSettlementService,
+    private readonly fileUpload?: FileUploadService,
   ) {
     this.logger.setContext(DiagnosticsPatientResultsService.name);
   }
@@ -162,34 +175,41 @@ export class DiagnosticsPatientResultsService {
     const rows = await this.ordersRepo.findOrdersForPatientPortal(
       em,
       patientProfileId,
-      CATEGORIAS_DIAGNOSTICAS,
+      DIAGNOSTIC_CATEGORIES,
       limit + 1,
     );
     const truncated = rows.length > limit;
     const page = rows.slice(0, limit);
 
-    const [preparacion, informePorOrden] = await Promise.all([
-      this.preparacionPorConcepto(
+    const [settlements, preparation, reportByOrder] = await Promise.all([
+      this.settlements.forOrders(
         em,
-        page.map((orden) => orden.codeConceptId),
+        actor.id,
+        'DIAGNOSTIC',
+        page.map((order) => order.id),
       ),
-      this.informeLiberadoPorOrden(
+      this.preparationByConcept(
         em,
-        page.map((orden) => orden.id),
+        page.map((order) => order.codeConceptId),
+      ),
+      this.releasedReportByOrder(
+        em,
+        page.map((order) => order.id),
       ),
     ]);
 
-    const items: PatientOrderSummaryDto[] = page.map((orden) => {
-      const reportId = informePorOrden.get(orden.id);
+    const items: PatientOrderSummaryDto[] = page.map((order) => {
+      const reportId = reportByOrder.get(order.id);
       return {
-        id: orden.id,
-        encounterId: orden.encounterId,
-        codeConceptId: orden.codeConceptId,
-        categoryConceptId: orden.categoryConceptId,
-        statusConceptId: orden.statusConceptId,
-        priorityConceptId: orden.priorityConceptId,
-        createdAt: orden.createdAt,
-        preparationInstructions: preparacion.get(orden.codeConceptId),
+        id: order.id,
+        ...(settlements.get(order.id) ?? unavailableSettlement()),
+        encounterId: order.encounterId,
+        codeConceptId: order.codeConceptId,
+        categoryConceptId: order.categoryConceptId,
+        statusConceptId: order.statusConceptId,
+        priorityConceptId: order.priorityConceptId,
+        createdAt: order.createdAt,
+        preparationInstructions: preparation.get(order.codeConceptId),
         hasReleasedResult: reportId !== undefined,
         reportId,
       };
@@ -220,22 +240,22 @@ export class DiagnosticsPatientResultsService {
    * @param conceptIds - Conceptos de los estudios pedidos.
    * @returns Concepto → preparación publicada.
    */
-  private async preparacionPorConcepto(
+  private async preparationByConcept(
     em: EntityManager,
     conceptIds: readonly string[],
   ): Promise<Map<string, string>> {
-    const ofertas = await this.ordersRepo.findPreparationByStudyConcepts(
+    const offers = await this.ordersRepo.findPreparationByStudyConcepts(
       em,
       conceptIds,
     );
-    const porConcepto = new Map<string, string>();
-    for (const oferta of ofertas) {
-      const texto = oferta.preparationInstructions;
-      if (texto !== undefined && !porConcepto.has(oferta.studyConceptId)) {
-        porConcepto.set(oferta.studyConceptId, texto);
+    const byConcept = new Map<string, string>();
+    for (const offer of offers) {
+      const text = offer.preparationInstructions;
+      if (text !== undefined && !byConcept.has(offer.studyConceptId)) {
+        byConcept.set(offer.studyConceptId, text);
       }
     }
-    return porConcepto;
+    return byConcept;
   }
 
   /**
@@ -251,40 +271,40 @@ export class DiagnosticsPatientResultsService {
    * @param orderIds - Órdenes de la página.
    * @returns Orden → informe visible, sólo para las que lo tienen.
    */
-  private async informeLiberadoPorOrden(
+  private async releasedReportByOrder(
     em: EntityManager,
     orderIds: readonly string[],
   ): Promise<Map<string, string>> {
-    const informes = await this.ordersRepo.findReportsByServiceRequests(
+    const reports = await this.ordersRepo.findReportsByServiceRequests(
       em,
       orderIds,
     );
-    const visibles = await this.projectReleasedResults(em, informes);
+    const visible = await this.projectReleasedResults(em, reports);
 
     // Una orden puede tener más de un informe visible: un estudio que se repite
     // por muestra insuficiente deja el primero liberado y agrega el segundo.
     // Gana **el liberado más recientemente**, que es el que la persona vino a
     // ver; quedarse con el último que apareció en la lista sería resolver un
     // empate clínico por orden de iteración.
-    const porOrden = new Map<string, { reportId: string; releasedAt: Date }>();
-    for (const resultado of visibles) {
-      const ordenId = resultado.serviceRequestId;
-      if (ordenId === undefined) {
+    const byOrder = new Map<string, { reportId: string; releasedAt: Date }>();
+    for (const result of visible) {
+      const orderId = result.serviceRequestId;
+      if (orderId === undefined) {
         continue;
       }
-      const actual = porOrden.get(ordenId);
+      const actual = byOrder.get(orderId);
       if (
         actual === undefined ||
-        resultado.releasedAt.getTime() > actual.releasedAt.getTime()
+        result.releasedAt.getTime() > actual.releasedAt.getTime()
       ) {
-        porOrden.set(ordenId, {
-          reportId: resultado.reportId,
-          releasedAt: resultado.releasedAt,
+        byOrder.set(orderId, {
+          reportId: result.reportId,
+          releasedAt: result.releasedAt,
         });
       }
     }
     return new Map(
-      [...porOrden].map(([ordenId, elegido]) => [ordenId, elegido.reportId]),
+      [...byOrder].map(([orderId, chosen]) => [orderId, chosen.reportId]),
     );
   }
 
@@ -318,6 +338,73 @@ export class DiagnosticsPatientResultsService {
   }
 
   /**
+   * Los bytes de un archivo de un resultado del titular (CL-40).
+   *
+   * La vía genérica `GET /common/files/:id/content` sigue siendo «lo tuyo o
+   * revisor» (`canActorReadOwnFile`) y no se afloja: el PDF lo subió el
+   * laboratorio, no el paciente. Acá autoriza el contexto —el informe es del
+   * titular, tiene una versión liberada y visible, y el archivo cuelga de esa
+   * versión— y recién entonces se piden los bytes con
+   * `downloadForAuthorizedContext`.
+   *
+   * Todo lo que no cumpla es **404**, no 403 ni 401: no se revela si el
+   * informe o el archivo existen, y un 401 haría que el cliente cierre la
+   * sesión.
+   *
+   * @param actor - Usuario autenticado (el paciente).
+   * @param reportId - Informe.
+   * @param fileId - Archivo del informe.
+   * @returns Bytes y tipo MIME.
+   * @throws ResourceNotFoundException si no es suyo, no está liberado o el
+   *   archivo no pertenece a la versión visible.
+   */
+  async getOwnResultFileContent(
+    actor: AuthenticatedUser,
+    reportId: string,
+    fileId: string,
+  ): Promise<FileContentDto> {
+    const em = this.em.fork();
+    const patientProfileId = await this.resolveOwnPatientProfileId(em, actor);
+    const report = await this.ordersRepo.findReportById(em, reportId);
+    if (!report || report.patientProfileId !== patientProfileId) {
+      if (report) {
+        this.logger.warn(
+          { operation: 'diagnostics.patient-results.file.denied', reportId },
+          'Intento de leer el archivo de un informe de otra persona',
+        );
+      }
+      throw new ResourceNotFoundException('Archivo no encontrado', {
+        reportId,
+        fileId,
+      });
+    }
+    const [item] = await this.projectReleasedResults(em, [report]);
+    if (!item?.files.some((file) => file.fileId === fileId)) {
+      throw new ResourceNotFoundException('Archivo no encontrado', {
+        reportId,
+        fileId,
+      });
+    }
+    if (!this.fileUpload) {
+      throw new PreconditionFailedException(
+        'La descarga de archivos no está disponible',
+      );
+    }
+    this.logger.info(
+      {
+        operation: 'diagnostics.patient-results.file.content',
+        reportId,
+        fileId,
+      },
+      'El titular descarga un archivo de su resultado',
+    );
+    return this.fileUpload.downloadForAuthorizedContext(
+      fileId,
+      'diagnostics.patient-result.file.content',
+    );
+  }
+
+  /**
    * Comparte un resultado con un profesional, hasta una fecha.
    *
    * Se materializa como un `authz.resource_scope_grants`: sujeto el profesional,
@@ -342,15 +429,48 @@ export class DiagnosticsPatientResultsService {
         { validUntil: dto.validUntil.toISOString() },
       );
     }
-    if (dto.practitionerUserId === actor.id) {
-      throw new PreconditionFailedException(
-        'No hace falta compartirse un resultado con uno mismo',
-        {},
-      );
-    }
 
     return this.em.transactional(async (tx) => {
       const report = await this.requireOwnReport(tx, actor, reportId);
+
+      // CL-48: la lista que ve el paciente sale de sus relaciones
+      // asistenciales reales, nunca de un buscador global de usuarios. El
+      // servidor repite la misma exigencia del lado del servidor: compartir
+      // sólo vale con un profesional que tiene una relación ACTIVE con este
+      // paciente en este momento, sea cual sea el perfil que mande el cliente.
+      const relation = await this.careRepo.findActive(
+        tx,
+        report.patientProfileId,
+        dto.practitionerProfileId,
+      );
+      if (!relation) {
+        throw new PreconditionFailedException(
+          'El profesional no tiene una relación asistencial vigente con este paciente',
+          { practitionerProfileId: dto.practitionerProfileId },
+        );
+      }
+      const account = await this.accountLinksRepo.findActiveByPerson(
+        tx,
+        dto.practitionerProfileId,
+      );
+      if (!account) {
+        throw new ResourceNotFoundException(
+          'El profesional no tiene una cuenta activa en el portal',
+          { practitionerProfileId: dto.practitionerProfileId },
+        );
+      }
+      const practitionerUserId = account.userId;
+      if (practitionerUserId === actor.id) {
+        throw new PreconditionFailedException(
+          'No hace falta compartirse un resultado con uno mismo',
+          {},
+        );
+      }
+      const names = await findPractitionerNames(tx, [
+        dto.practitionerProfileId,
+      ]);
+      const practitionerName = names.get(dto.practitionerProfileId);
+
       // Sólo se comparte lo que la persona misma puede ver. Compartir un
       // resultado que ni el titular puede abrir sería adelantarle a un tercero
       // algo que el profesional que lo firma todavía no liberó.
@@ -364,7 +484,7 @@ export class DiagnosticsPatientResultsService {
 
       const existing = await this.grantsRepo.findExisting(
         tx,
-        dto.practitionerUserId,
+        practitionerUserId,
         RESULT_READ_PERMISSION_ID,
         reportId,
       );
@@ -385,16 +505,17 @@ export class DiagnosticsPatientResultsService {
           },
           'Se extendió un resultado ya compartido',
         );
-        return this.toShareDto(existing.id, reportId, dto.practitionerUserId, {
+        return this.toShareDto(existing.id, reportId, practitionerUserId, {
           validFrom: existing.validFrom,
           validTo: existing.validTo,
           now,
+          practitionerName,
         });
       }
 
       const grant = this.grantsRepo.create(tx, {
         subjectTypeConceptId: AUTHZ.SUBJECT_TYPE_USER,
-        subjectId: dto.practitionerUserId,
+        subjectId: practitionerUserId,
         permissionId: RESULT_READ_PERMISSION_ID,
         resourceTypeConceptId: AUTHZ.RESOURCE_TYPE_DOCUMENT,
         resourceId: reportId,
@@ -414,10 +535,11 @@ export class DiagnosticsPatientResultsService {
         },
         'Resultado compartido con un profesional',
       );
-      return this.toShareDto(grant.id, reportId, dto.practitionerUserId, {
+      return this.toShareDto(grant.id, reportId, practitionerUserId, {
         validFrom: now,
         validTo: dto.validUntil,
         now,
+        practitionerName,
       });
     });
   }
@@ -443,6 +565,11 @@ export class DiagnosticsPatientResultsService {
       RESULT_READ_PERMISSION_ID,
     );
 
+    const namesByUser = await this.namesByUserId(
+      em,
+      grants.map((grant) => grant.subjectId),
+    );
+
     return {
       reportId,
       items: grants.map((grant) =>
@@ -450,6 +577,7 @@ export class DiagnosticsPatientResultsService {
           validFrom: grant.validFrom,
           validTo: grant.validTo,
           now,
+          practitionerName: namesByUser.get(grant.subjectId),
         }),
       ),
     };
@@ -512,10 +640,12 @@ export class DiagnosticsPatientResultsService {
         },
         'Se dejó de compartir un resultado',
       );
+      const names = await this.namesByUserId(tx, [grant.subjectId]);
       return this.toShareDto(grant.id, reportId, grant.subjectId, {
         validFrom: grant.validFrom,
         validTo: grant.validTo,
         now,
+        practitionerName: names.get(grant.subjectId),
       });
     });
   }
@@ -624,72 +754,72 @@ export class DiagnosticsPatientResultsService {
     // rectificarse, y lo que vale es la decisión más reciente. Los eventos
     // llegan del más nuevo al más viejo, así que el primero que se ve de cada
     // versión es ése.
-    const ultimoEvento = new Map<
+    const lastEvent = new Map<
       string,
       { visibilityConceptId: string; recordedAt: Date }
     >();
-    for (const evento of releases) {
-      const versionId = evento.diagnosticReportVersionId;
-      if (versionId === undefined || ultimoEvento.has(versionId)) {
+    for (const event of releases) {
+      const versionId = event.diagnosticReportVersionId;
+      if (versionId === undefined || lastEvent.has(versionId)) {
         continue;
       }
-      ultimoEvento.set(versionId, {
-        visibilityConceptId: evento.patientVisibilityConceptId,
-        recordedAt: evento.recordedAt,
+      lastEvent.set(versionId, {
+        visibilityConceptId: event.patientVisibilityConceptId,
+        recordedAt: event.recordedAt,
       });
     }
 
     // De cada informe, la versión visible de número más alto: una enmienda
     // reemplaza a la versión que corrige, y mostrar las dos sería mostrar dos
     // veces el mismo resultado con textos distintos.
-    const visiblePorInforme = new Map<string, DiagnosticReportVersions>();
+    const visibleByReport = new Map<string, DiagnosticReportVersions>();
     for (const version of versions) {
-      const release = ultimoEvento.get(version.id);
+      const release = lastEvent.get(version.id);
       if (
         release === undefined ||
         release.visibilityConceptId !== DIAG.VISIBILITY_PATIENT_VISIBLE
       ) {
         continue;
       }
-      const actual = visiblePorInforme.get(version.diagnosticReportId);
+      const actual = visibleByReport.get(version.diagnosticReportId);
       if (
         actual === undefined ||
         version.versionNumber > actual.versionNumber
       ) {
-        visiblePorInforme.set(version.diagnosticReportId, version);
+        visibleByReport.set(version.diagnosticReportId, version);
       }
     }
-    if (visiblePorInforme.size === 0) {
+    if (visibleByReport.size === 0) {
       return [];
     }
 
-    const visibleIds = [...visiblePorInforme.values()].map((v) => v.id);
+    const visibleIds = [...visibleByReport.values()].map((v) => v.id);
     const [files, results] = await Promise.all([
       this.reportsRepo.findFilesByVersions(em, visibleIds),
       this.reportsRepo.findResultsByVersions(em, visibleIds),
     ]);
 
-    const filesPorVersion = new Map<string, DiagnosticReportFiles[]>();
+    const filesByVersion = new Map<string, DiagnosticReportFiles[]>();
     for (const file of files) {
-      const lista = filesPorVersion.get(file.diagnosticReportVersionId) ?? [];
-      lista.push(file);
-      filesPorVersion.set(file.diagnosticReportVersionId, lista);
+      const list = filesByVersion.get(file.diagnosticReportVersionId) ?? [];
+      list.push(file);
+      filesByVersion.set(file.diagnosticReportVersionId, list);
     }
-    const observacionesPorVersion = new Map<string, string[]>();
+    const observationsByVersion = new Map<string, string[]>();
     for (const result of results) {
-      const lista =
-        observacionesPorVersion.get(result.diagnosticReportVersionId) ?? [];
-      lista.push(result.observationId);
-      observacionesPorVersion.set(result.diagnosticReportVersionId, lista);
+      const list =
+        observationsByVersion.get(result.diagnosticReportVersionId) ?? [];
+      list.push(result.observationId);
+      observationsByVersion.set(result.diagnosticReportVersionId, list);
     }
 
     const items: PatientDiagnosticResultDto[] = [];
     for (const report of reports) {
-      const version = visiblePorInforme.get(report.id);
+      const version = visibleByReport.get(report.id);
       if (version === undefined) {
         continue;
       }
-      const release = ultimoEvento.get(version.id);
+      const release = lastEvent.get(version.id);
       items.push({
         reportId: report.id,
         versionId: version.id,
@@ -702,8 +832,8 @@ export class DiagnosticsPatientResultsService {
         issuedAt: version.issuedAt,
         releasedAt: release?.recordedAt ?? version.recordedAt,
         clinicalStatusConceptId: version.clinicalStatusConceptId,
-        observationIds: observacionesPorVersion.get(version.id) ?? [],
-        files: (filesPorVersion.get(version.id) ?? []).map((file) => ({
+        observationIds: observationsByVersion.get(version.id) ?? [],
+        files: (filesByVersion.get(version.id) ?? []).map((file) => ({
           id: file.id,
           fileId: file.fileId,
           contentRoleConceptId: file.contentRoleConceptId,
@@ -720,27 +850,62 @@ export class DiagnosticsPatientResultsService {
     id: string,
     reportId: string,
     practitionerUserId: string,
-    vigencia: {
+    validity: {
       /** Desde cuándo vale. */
       validFrom?: Date;
       /** Hasta cuándo vale. */
       validTo?: Date;
       /** Instante contra el que se decide la vigencia. */
       now: Date;
+      /** Nombre resuelto del profesional, si se pudo resolver. */
+      practitionerName?: string;
     },
   ): DiagnosticResultShareDto {
-    const desde = vigencia.validFrom ?? vigencia.now;
-    const activo =
-      desde.getTime() <= vigencia.now.getTime() &&
-      (vigencia.validTo === undefined ||
-        vigencia.validTo.getTime() > vigencia.now.getTime());
+    const from = validity.validFrom ?? validity.now;
+    const active =
+      from.getTime() <= validity.now.getTime() &&
+      (validity.validTo === undefined ||
+        validity.validTo.getTime() > validity.now.getTime());
     return {
       id,
       reportId,
       practitionerUserId,
-      validFrom: desde,
-      validTo: vigencia.validTo,
-      active: activo,
+      practitionerName: validity.practitionerName,
+      validFrom: from,
+      validTo: validity.validTo,
+      active: active,
     };
+  }
+
+  /**
+   * Nombre de cada cuenta (`iam.users.id`), por su persona vinculada.
+   *
+   * Mismo camino de dos saltos que `AuthzMeService.namesByUserId` (BR-20):
+   * cuenta → persona activa → nombre. Se duplica acá porque ese método es
+   * privado de otro módulo y el compartido (CL-48) resuelve el sentido
+   * contrario del mismo vínculo que ya usa este servicio para el titular.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param userIds - Cuentas a resolver.
+   * @returns Mapa `userId -> nombre`, sin las que no se pudieron resolver.
+   */
+  private async namesByUserId(
+    em: EntityManager,
+    userIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    const unique = [...new Set(userIds)];
+    if (unique.length === 0) return new Map();
+    const personIdByUser = new Map<string, string>();
+    for (const userId of unique) {
+      const link = await this.accountLinksRepo.findActiveByUser(em, userId);
+      if (link) personIdByUser.set(userId, link.personId);
+    }
+    const names = await findPractitionerNames(em, [...personIdByUser.values()]);
+    const result = new Map<string, string>();
+    for (const [userId, personId] of personIdByUser) {
+      const name = names.get(personId);
+      if (name !== undefined) result.set(userId, name);
+    }
+    return result;
   }
 }

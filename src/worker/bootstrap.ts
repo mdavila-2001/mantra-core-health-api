@@ -1,7 +1,7 @@
 // Primera importación del proceso worker: los 20 entrypoints
 // (`src/worker-<dominio>.ts`) importan este archivo antes que ningún otro, así
 // que la telemetría queda inicializada antes que NestJS, axios y pg. El nombre
-// del servicio (`redesa-worker-<dominio>`) se deriva del entrypoint en ejecución
+// del servicio (`alovida-worker-<dominio>`) se deriva del entrypoint en ejecución
 // — ver `resolveServiceName` en `observability/telemetry.config.ts`.
 import '../observability/telemetry.bootstrap';
 

@@ -1,0 +1,11 @@
+node.exe : validating openapi\openapi.yaml using lint rules for api 'alovida-health@v1'...
+En C:\nvm4w\nodejs\yarn.ps1: 16 Carácter: 5
++     & "$basedir/node$exe"  "$basedir/node_modules/corepack/dist/yarn. ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (validating open...a-health@v1'...:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+openapi\openapi.yaml: validated in 596ms
+
+Woohoo! Your API description is valid. 🎉
+

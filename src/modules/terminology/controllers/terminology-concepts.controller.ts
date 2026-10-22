@@ -35,6 +35,11 @@ import {
   DeprecateConceptResponseDto,
   SearchConceptsResponseDto,
   GlossaryGraphDto,
+  GlossaryNeighborhoodDto,
+  GlossaryNeighborhoodQueryDto,
+  type GlossaryNeighborhoodRequest,
+  DEFAULT_NEIGHBORS_PER_GROUP,
+  DEFAULT_NEIGHBOR_PAGE_SIZE,
   ConceptDetailDto,
   type DesignationLanguage,
 } from '../dto';
@@ -65,6 +70,30 @@ function parseLanguage(value?: string): DesignationLanguage | undefined {
  * una bandera en una URL a mano. Cualquier otro texto que no sea `true` o `1` es
  * falso: una bandera nunca debería hacer fallar una lectura.
  */
+/**
+ * Tope del desplazamiento. Un millón de términos es varias veces el glosario
+ * más grande que se planifica; pasarse es un error de quien llama, no una
+ * página vacía que haya que recorrer.
+ */
+const MAX_OFFSET = 1_000_000;
+
+/**
+ * Lee `offset` como entero no negativo, o `undefined` si no vino.
+ *
+ * No reutiliza `ParseOptionalLimitPipe` porque ése rechaza el cero, y cero es
+ * justamente el desplazamiento de la primera página.
+ */
+function parseOffset(value?: string): number | undefined {
+  if (value === undefined || value === '') return undefined;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 0 || parsed > MAX_OFFSET) {
+    throw new BadRequestException(
+      `offset debe ser un entero entre 0 y ${MAX_OFFSET}`,
+    );
+  }
+  return parsed;
+}
+
 function parseFlag(value?: string): boolean {
   if (value === undefined) return false;
   return value === '' || value === 'true' || value === '1';
@@ -166,6 +195,18 @@ export class TerminologyConceptsController {
     description:
       'Acota a los conceptos de ese conjunto de valores. Es «navegar por categoría»: se combina con `q` y devuelve lo mismo que la búsqueda, no los miembros crudos de `$expand`',
   })
+  @ApiQuery({
+    name: 'tagValueSetId',
+    required: false,
+    description:
+      'Sólo glosario: además de `valueSetId`, el término tiene que llevar esta etiqueta (intersección)',
+  })
+  @ApiQuery({
+    name: 'offset',
+    required: false,
+    description:
+      'Sólo glosario: cuántos términos saltear. La respuesta trae `total` para armar la paginación',
+  })
   searchConcepts(
     @Query('q') query?: string,
     @Query('codeSystemVersionId') codeSystemVersionId?: string,
@@ -175,6 +216,9 @@ export class TerminologyConceptsController {
     @Query('includeValueSets') includeValueSets?: string,
     @Query('valueSetId', new ParseUUIDPipe({ optional: true }))
     valueSetId?: string,
+    @Query('tagValueSetId', new ParseUUIDPipe({ optional: true }))
+    tagValueSetId?: string,
+    @Query('offset') offset?: string,
   ): Promise<SearchConceptsResponseDto> {
     // Resolver por id no debe quedar recortado por el tope de la búsqueda por
     // texto: quien manda 120 ids espera los 120 de vuelta.
@@ -182,6 +226,7 @@ export class TerminologyConceptsController {
       ? Math.max(limit ?? 50, ids.length)
       : (limit ?? 50);
     const language = parseLanguage(lang);
+    const parsedOffset = parseOffset(offset);
     return this.conceptsService.searchConcepts(
       query,
       codeSystemVersionId,
@@ -193,6 +238,8 @@ export class TerminologyConceptsController {
       {
         ...(language === undefined ? {} : { language }),
         ...(valueSetId === undefined ? {} : { valueSetId }),
+        ...(tagValueSetId === undefined ? {} : { tagValueSetId }),
+        ...(parsedOffset === undefined ? {} : { offset: parsedOffset }),
         includeValueSets: parseFlag(includeValueSets),
       },
     );
@@ -222,6 +269,60 @@ export class TerminologyConceptsController {
       parseLanguage(lang),
       limit ?? 500,
     );
+  }
+
+  /**
+   * El vecindario de un término para el mapa: sus relaciones salientes y
+   * entrantes por tipo, con el total real de cada grupo.
+   *
+   * Va **antes** de `@Get(':conceptId')`, igual que `glossary-graph`: el orden
+   * de declaración es el orden de resolución, y una ruta con parámetro
+   * declarada antes se comería el segmento fijo.
+   *
+   * Mismo acceso que `glossary-graph`: lectura del glosario público, sin rol.
+   *
+   * @param conceptId - Término central.
+   * @param query - Idioma, muestra por grupo o página de un grupo.
+   * @returns El término central y sus grupos de vecinos.
+   */
+  @Get(':conceptId/glossary-neighborhood')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Lee el vecindario de un término del glosario: relaciones salientes y entrantes agrupadas por tipo',
+    description:
+      'Sin `type` ni `direction` devuelve una muestra de `perGroup` vecinos por grupo, con el `total` real. Con `type` y `direction` devuelve ese único grupo, paginado con `offset` y `limit`.',
+  })
+  readGlossaryNeighborhood(
+    @Param('conceptId', ParseUUIDPipe) conceptId: string,
+    @Query() query: GlossaryNeighborhoodQueryDto,
+  ): Promise<GlossaryNeighborhoodDto> {
+    const request: GlossaryNeighborhoodRequest =
+      query.type !== undefined && query.direction !== undefined
+        ? {
+            type: query.type,
+            direction: query.direction,
+            offset: query.offset ?? 0,
+            limit: query.limit ?? DEFAULT_NEIGHBOR_PAGE_SIZE,
+          }
+        : { perGroup: query.perGroup ?? DEFAULT_NEIGHBORS_PER_GROUP };
+    return this.conceptsService.readGlossaryNeighborhood(
+      conceptId,
+      parseLanguage(query.lang),
+      request,
+    );
+  }
+
+  /** Devuelve el documento enciclopédico guardado como propiedad del concepto. */
+  @Get(':conceptId/glossary-article')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Lee el artículo enciclopédico de un término del glosario',
+  })
+  readGlossaryArticle(
+    @Param('conceptId', ParseUUIDPipe) conceptId: string,
+  ): Promise<unknown> {
+    return this.conceptsService.readGlossaryArticle(conceptId);
   }
 
   /**

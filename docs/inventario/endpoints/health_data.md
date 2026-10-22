@@ -38,36 +38,36 @@
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FhirR5Controller.exportBundle` — `src/modules/health_data/controllers/fhir-r5.controller.ts:46`
+- **Implementación:** `FhirR5Controller.exportBundle` — `src/modules/health_data/controllers/fhir-r5.controller.ts:52`
 
 ### Qué es y para qué sirve (negocio)
 
 Exportar un Bundle FHIR interoperable con su manifiesto. Caso de uso UC-52-12: Exportar Bundle FHIR con manifiesto. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /fhir/r5/$export` la atiende `FhirR5Controller.exportBundle` (src/modules/health_data/controllers/fhir-r5.controller.ts:46). Exige sesión con alguno de los roles PRIVACY_OFFICER, HEALTH_DATA_ADMIN. Valida el cuerpo como `ExportBundleDto` (14 campos, 4 obligatorios). Delega en `DataReleaseService.exportBundle`. Crea filas en health_data.health_export_jobs, health_data.health_export_manifests, health_data.health_provenance_records, health_data.health_provenance_targets. Lee health_data.health_deidentification_runs.
+`POST /fhir/r5/$export` la atiende `FhirR5Controller.exportBundle` (src/modules/health_data/controllers/fhir-r5.controller.ts:52). Exige sesión con alguno de los roles PRIVACY_OFFICER, HEALTH_DATA_ADMIN. Valida el cuerpo como `ExportBundleDto` (14 campos, 4 obligatorios). Delega en `DataReleaseService.exportBundle`. Crea filas en health_data.health_export_jobs, health_data.health_export_manifests, health_data.health_provenance_records, health_data.health_provenance_targets. Lee health_data.health_deidentification_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRIVACY_OFFICER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/fhir-r5.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PRIVACY_OFFICER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/fhir-r5.controller.ts:52` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `health_data.health_deidentification_runs` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseRepository.findDeidRunById | `src/modules/health_data/repositories/data-release.repository.ts:183` |
-| `health_data.health_export_jobs` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseRepository.createExportJob | `src/modules/health_data/repositories/data-release.repository.ts:244` |
-| `health_data.health_export_manifests` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseRepository.createExportManifest | `src/modules/health_data/repositories/data-release.repository.ts:323` |
+| `health_data.health_export_jobs` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseRepository.createExportJob | `src/modules/health_data/repositories/data-release.repository.ts:260` |
+| `health_data.health_export_manifests` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseRepository.createExportManifest | `src/modules/health_data/repositories/data-release.repository.ts:340` |
 | `health_data.health_provenance_records` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → HealthProvenanceRepository.createProvenanceRecord | `src/modules/health_data/repositories/health-provenance.repository.ts:122` |
 | `health_data.health_provenance_targets` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → HealthProvenanceRepository.createProvenanceTarget | `src/modules/health_data/repositories/health-provenance.repository.ts:173` |
 
@@ -167,27 +167,27 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FhirR5Controller.serveEverything` — `src/modules/health_data/controllers/fhir-r5.controller.ts:62`
+- **Implementación:** `FhirR5Controller.serveEverything` — `src/modules/health_data/controllers/fhir-r5.controller.ts:73`
 
 ### Qué es y para qué sirve (negocio)
 
 Servir la historia longitudinal del paciente. Caso de uso UC-52-13: Servir historia longitudinal. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`GET /fhir/r5/Patient/{id}/$everything` la atiende `FhirR5Controller.serveEverything` (src/modules/health_data/controllers/fhir-r5.controller.ts:62). Exige sesión con alguno de los roles INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Delega en `DataReleaseService.serveEverything`. Lee health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.patient_identity_members.
+`GET /fhir/r5/Patient/{id}/$everything` la atiende `FhirR5Controller.serveEverything` (src/modules/health_data/controllers/fhir-r5.controller.ts:73). Exige sesión con alguno de los roles INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Delega en `DataReleaseService.serveEverything`. Lee health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.patient_identity_members.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/fhir-r5.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/fhir-r5.controller.ts:62` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/fhir-r5.controller.ts:73` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/fhir-r5.controller.ts:73` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -255,29 +255,29 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.createBinding` — `src/modules/health_data/controllers/health-data.controller.ts:195`
+- **Implementación:** `HealthDataController.createBinding` — `src/modules/health_data/controllers/health-data.controller.ts:235`
 
 ### Qué es y para qué sirve (negocio)
 
 Enlazar el recurso a una entidad de dominio. Caso de uso UC-52-06: Enlazar a entidad de dominio. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/canonical-resources/{id}/bindings` la atiende `HealthDataController.createBinding` (src/modules/health_data/controllers/health-data.controller.ts:195). Exige sesión con alguno de los roles CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Valida el cuerpo como `CreateResourceBindingDto` (4 campos, 2 obligatorios). Delega en `CanonicalResourcesService.createBinding`. Crea filas en health_data.canonical_resource_bindings, health_data.health_lineage_edges. Actualiza health_data.canonical_health_resources. Lee health_data.canonical_health_resources, health_data.canonical_resource_bindings.
+`POST /health-data/canonical-resources/{id}/bindings` la atiende `HealthDataController.createBinding` (src/modules/health_data/controllers/health-data.controller.ts:235). Exige sesión con alguno de los roles CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Valida el cuerpo como `CreateResourceBindingDto` (4 campos, 2 obligatorios). Delega en `CanonicalResourcesService.createBinding`. Crea filas en health_data.canonical_resource_bindings, health_data.health_lineage_edges. Actualiza health_data.canonical_health_resources. Lee health_data.canonical_health_resources, health_data.canonical_resource_bindings.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:195` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:195` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:235` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:235` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -369,29 +369,29 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.registerIdentifier` — `src/modules/health_data/controllers/health-data.controller.ts:165`
+- **Implementación:** `HealthDataController.registerIdentifier` — `src/modules/health_data/controllers/health-data.controller.ts:195`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar un identificador de negocio del recurso. Caso de uso UC-52-04: Identificadores de negocio. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/canonical-resources/{id}/identifiers` la atiende `HealthDataController.registerIdentifier` (src/modules/health_data/controllers/health-data.controller.ts:165). Exige sesión con alguno de los roles INGESTION_WORKER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Valida el cuerpo como `RegisterIdentifierDto` (6 campos, 2 obligatorios). Delega en `CanonicalResourcesService.registerIdentifier`. Crea filas en health_data.canonical_resource_identifiers. Actualiza health_data.canonical_health_resources, health_data.canonical_resource_identifiers. Lee health_data.canonical_health_resources, health_data.canonical_resource_identifiers.
+`POST /health-data/canonical-resources/{id}/identifiers` la atiende `HealthDataController.registerIdentifier` (src/modules/health_data/controllers/health-data.controller.ts:195). Exige sesión con alguno de los roles INGESTION_WORKER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Valida el cuerpo como `RegisterIdentifierDto` (6 campos, 2 obligatorios). Delega en `CanonicalResourcesService.registerIdentifier`. Crea filas en health_data.canonical_resource_identifiers. Actualiza health_data.canonical_health_resources, health_data.canonical_resource_identifiers. Lee health_data.canonical_health_resources, health_data.canonical_resource_identifiers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGESTION_WORKER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:165` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:165` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: INGESTION_WORKER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:195` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:195` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -487,29 +487,29 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.createRelationship` — `src/modules/health_data/controllers/health-data.controller.ts:180`
+- **Implementación:** `HealthDataController.createRelationship` — `src/modules/health_data/controllers/health-data.controller.ts:215`
 
 ### Qué es y para qué sirve (negocio)
 
 Relacionar dos recursos canónicos. Caso de uso UC-52-05: Relacionar recursos (grafo clínico). Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/canonical-resources/{id}/relationships` la atiende `HealthDataController.createRelationship` (src/modules/health_data/controllers/health-data.controller.ts:180). Exige sesión con alguno de los roles DATA_STEWARD, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Valida el cuerpo como `HealthDataCreateRelationshipDto` (5 campos, 2 obligatorios). Delega en `CanonicalResourcesService.createRelationship`. Crea filas en health_data.canonical_resource_relationships. Actualiza health_data.canonical_resource_relationships. Lee health_data.canonical_health_resources, health_data.canonical_resource_relationships.
+`POST /health-data/canonical-resources/{id}/relationships` la atiende `HealthDataController.createRelationship` (src/modules/health_data/controllers/health-data.controller.ts:215). Exige sesión con alguno de los roles DATA_STEWARD, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Valida el cuerpo como `HealthDataCreateRelationshipDto` (5 campos, 2 obligatorios). Delega en `CanonicalResourcesService.createRelationship`. Crea filas en health_data.canonical_resource_relationships. Actualiza health_data.canonical_resource_relationships. Lee health_data.canonical_health_resources, health_data.canonical_resource_relationships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_STEWARD, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:180` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:180` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: DATA_STEWARD, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:215` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:215` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -602,29 +602,29 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.retireResource` — `src/modules/health_data/controllers/health-data.controller.ts:292`
+- **Implementación:** `HealthDataController.retireResource` — `src/modules/health_data/controllers/health-data.controller.ts:362`
 
 ### Qué es y para qué sirve (negocio)
 
 Retirar el recurso canónico (borrado lógico). Caso de uso UC-52-14: Retiro gobernado del recurso. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:25`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/canonical-resources/{id}/retire` la atiende `HealthDataController.retireResource` (src/modules/health_data/controllers/health-data.controller.ts:292). Exige sesión con alguno de los roles CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Valida el cuerpo como `RetireResourceDto` (1 campo, 1 obligatorio). Delega en `CanonicalResourcesService.retireResource`. Crea filas en health_data.health_provenance_records, health_data.health_provenance_targets. Actualiza health_data.canonical_health_resources, health_data.canonical_resource_bindings, health_data.canonical_resource_relationships. Lee health_data.canonical_health_resources, health_data.canonical_resource_bindings, health_data.canonical_resource_relationships.
+`POST /health-data/canonical-resources/{id}/retire` la atiende `HealthDataController.retireResource` (src/modules/health_data/controllers/health-data.controller.ts:362). Exige sesión con alguno de los roles CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN. Valida el cuerpo como `RetireResourceDto` (1 campo, 1 obligatorio). Delega en `CanonicalResourcesService.retireResource`. Crea filas en health_data.health_provenance_records, health_data.health_provenance_targets. Actualiza health_data.canonical_health_resources, health_data.canonical_resource_bindings, health_data.canonical_resource_relationships. Lee health_data.canonical_health_resources, health_data.canonical_resource_bindings, health_data.canonical_resource_relationships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:292` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:292` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:362` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:362` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -712,28 +712,28 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.projectResource` — `src/modules/health_data/controllers/health-data.controller.ts:150`
+- **Implementación:** `HealthDataController.projectResource` — `src/modules/health_data/controllers/health-data.controller.ts:175`
 
 ### Qué es y para qué sirve (negocio)
 
 Proyectar el registro a recurso canónico y versionarlo. Caso de uso UC-52-03: Proyectar recurso canónico y versionarlo. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/canonical-resources/project` la atiende `HealthDataController.projectResource` (src/modules/health_data/controllers/health-data.controller.ts:150). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `ProjectCanonicalResourceDto` (11 campos, 3 obligatorios). Delega en `HealthIngestionService.projectResource`. Crea filas en health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.health_lineage_edges, health_data.health_provenance_records, health_data.health_provenance_targets. Actualiza health_data.canonical_health_resources, health_data.health_ingestion_records. Lee health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.health_ingestion_records.
+`POST /health-data/canonical-resources/project` la atiende `HealthDataController.projectResource` (src/modules/health_data/controllers/health-data.controller.ts:175). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `ProjectCanonicalResourceDto` (11 campos, 3 obligatorios). Delega en `HealthIngestionService.projectResource`. Crea filas en health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.health_lineage_edges, health_data.health_provenance_records, health_data.health_provenance_targets. Actualiza health_data.canonical_health_resources, health_data.health_ingestion_records. Lee health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.health_ingestion_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:150` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:175` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -841,28 +841,28 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.recordDeidRun` — `src/modules/health_data/controllers/health-data.controller.ts:276`
+- **Implementación:** `HealthDataController.recordDeidRun` — `src/modules/health_data/controllers/health-data.controller.ts:341`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar una corrida de de-identificación. Caso de uso UC-52-11: Corrida de de-identificación. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/deidentification-runs` la atiende `HealthDataController.recordDeidRun` (src/modules/health_data/controllers/health-data.controller.ts:276). Exige sesión con alguno de los roles PRIVACY_OFFICER, HEALTH_DATA_ADMIN. Valida el cuerpo como `RecordDeidRunDto` (11 campos, 5 obligatorios). Delega en `DataReleaseService.recordDeidRun`. Crea filas en health_data.health_deidentification_runs, health_data.health_lineage_edges, health_data.health_provenance_records, health_data.health_provenance_targets. Lee health_data.health_deidentification_profiles.
+`POST /health-data/deidentification-runs` la atiende `HealthDataController.recordDeidRun` (src/modules/health_data/controllers/health-data.controller.ts:341). Exige sesión con alguno de los roles PRIVACY_OFFICER, HEALTH_DATA_ADMIN. Valida el cuerpo como `RecordDeidRunDto` (11 campos, 5 obligatorios). Delega en `DataReleaseService.recordDeidRun`. Crea filas en health_data.health_deidentification_runs, health_data.health_lineage_edges, health_data.health_provenance_records, health_data.health_provenance_targets. Lee health_data.health_deidentification_profiles.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRIVACY_OFFICER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:276` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PRIVACY_OFFICER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:341` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -966,29 +966,29 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.resolveCandidate` — `src/modules/health_data/controllers/health-data.controller.ts:246`
+- **Implementación:** `HealthDataController.resolveCandidate` — `src/modules/health_data/controllers/health-data.controller.ts:301`
 
 ### Qué es y para qué sirve (negocio)
 
 Resolver un candidato de identidad longitudinal. Caso de uso UC-52-09: Resolver identidad longitudinal (MPI). Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/identity/candidates/{id}/decision` la atiende `HealthDataController.resolveCandidate` (src/modules/health_data/controllers/health-data.controller.ts:246). Exige sesión con alguno de los roles MPI_STEWARD, HEALTH_DATA_ADMIN. Valida el cuerpo como `ResolveMatchCandidateDto` (4 campos, 2 obligatorios). Delega en `PatientIdentityService.resolveCandidate`. Crea filas en health_data.patient_identity_clusters, health_data.patient_identity_members, health_data.patient_match_decisions. Actualiza health_data.patient_identity_clusters, health_data.patient_match_candidates. Lee health_data.patient_identity_clusters, health_data.patient_identity_members, health_data.patient_match_candidates, health_data.patient_match_decisions.
+`POST /health-data/identity/candidates/{id}/decision` la atiende `HealthDataController.resolveCandidate` (src/modules/health_data/controllers/health-data.controller.ts:301). Exige sesión con alguno de los roles MPI_STEWARD, HEALTH_DATA_ADMIN. Valida el cuerpo como `ResolveMatchCandidateDto` (4 campos, 2 obligatorios). Delega en `PatientIdentityService.resolveCandidate`. Crea filas en health_data.patient_identity_clusters, health_data.patient_identity_members, health_data.patient_match_decisions. Actualiza health_data.patient_identity_clusters, health_data.patient_match_candidates. Lee health_data.patient_identity_clusters, health_data.patient_identity_members, health_data.patient_match_candidates, health_data.patient_match_decisions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: MPI_STEWARD, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:246` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:246` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: MPI_STEWARD, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:301` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:301` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1085,28 +1085,28 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.openBatch` — `src/modules/health_data/controllers/health-data.controller.ts:103`
+- **Implementación:** `HealthDataController.openBatch` — `src/modules/health_data/controllers/health-data.controller.ts:113`
 
 ### Qué es y para qué sirve (negocio)
 
 Abrir un lote de ingesta desde una conexión de origen. Caso de uso UC-52-01: Abrir lote desde una conexión de origen. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/ingestion-batches` la atiende `HealthDataController.openBatch` (src/modules/health_data/controllers/health-data.controller.ts:103). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `OpenIngestionBatchDto` (7 campos, 3 obligatorios). Delega en `HealthIngestionService.openBatch`. Crea filas en health_data.health_ingestion_batches. Actualiza health_data.health_source_connections. Lee health_data.health_ingestion_batches, health_data.health_source_connections.
+`POST /health-data/ingestion-batches` la atiende `HealthDataController.openBatch` (src/modules/health_data/controllers/health-data.controller.ts:113). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `OpenIngestionBatchDto` (7 campos, 3 obligatorios). Delega en `HealthIngestionService.openBatch`. Crea filas en health_data.health_ingestion_batches. Actualiza health_data.health_source_connections. Lee health_data.health_ingestion_batches, health_data.health_source_connections.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:113` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1197,7 +1197,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.closeBatch` — `src/modules/health_data/controllers/health-data.controller.ts:135`
+- **Implementación:** `HealthDataController.closeBatch` — `src/modules/health_data/controllers/health-data.controller.ts:155`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1207,19 +1207,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/ingestion-batches/{id}/close` la atiende `HealthDataController.closeBatch` (src/modules/health_data/controllers/health-data.controller.ts:135). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `CloseIngestionBatchDto` (2 campos, 0 obligatorios). Delega en `HealthIngestionService.closeBatch`. Actualiza health_data.health_ingestion_batches. Lee health_data.health_ingestion_batches, health_data.health_ingestion_records.
+`POST /health-data/ingestion-batches/{id}/close` la atiende `HealthDataController.closeBatch` (src/modules/health_data/controllers/health-data.controller.ts:155). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `CloseIngestionBatchDto` (2 campos, 0 obligatorios). Delega en `HealthIngestionService.closeBatch`. Actualiza health_data.health_ingestion_batches. Lee health_data.health_ingestion_batches, health_data.health_ingestion_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:135` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:135` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:155` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:155` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1302,29 +1302,29 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.recordIngestionRecord` — `src/modules/health_data/controllers/health-data.controller.ts:119`
+- **Implementación:** `HealthDataController.recordIngestionRecord` — `src/modules/health_data/controllers/health-data.controller.ts:134`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar un registro crudo del lote. Caso de uso UC-52-02: Registro crudo y cierre con conteos. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/ingestion-batches/{id}/records` la atiende `HealthDataController.recordIngestionRecord` (src/modules/health_data/controllers/health-data.controller.ts:119). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `RecordIngestionRecordDto` (6 campos, 3 obligatorios). Delega en `HealthIngestionService.recordIngestionRecord`. Crea filas en health_data.health_ingestion_records. Lee health_data.health_ingestion_batches, health_data.health_ingestion_records.
+`POST /health-data/ingestion-batches/{id}/records` la atiende `HealthDataController.recordIngestionRecord` (src/modules/health_data/controllers/health-data.controller.ts:134). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN. Valida el cuerpo como `RecordIngestionRecordDto` (6 campos, 3 obligatorios). Delega en `HealthIngestionService.recordIngestionRecord`. Crea filas en health_data.health_ingestion_records. Lee health_data.health_ingestion_batches, health_data.health_ingestion_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:119` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:134` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:134` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1417,28 +1417,28 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.recordQualityRun` — `src/modules/health_data/controllers/health-data.controller.ts:231`
+- **Implementación:** `HealthDataController.recordQualityRun` — `src/modules/health_data/controllers/health-data.controller.ts:281`
 
 ### Qué es y para qué sirve (negocio)
 
 Ejecutar reglas de calidad y abrir incidencias. Caso de uso UC-52-08: Reglas de calidad e incidencias. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/quality-runs` la atiende `HealthDataController.recordQualityRun` (src/modules/health_data/controllers/health-data.controller.ts:231). Exige sesión con alguno de los roles DATA_STEWARD, HEALTH_DATA_ADMIN. Valida el cuerpo como `RecordQualityRunDto` (12 campos, 3 obligatorios). Delega en `HealthValidationService.recordQualityRun`. Crea filas en health_data.health_data_quality_issues, health_data.health_data_quality_runs. Actualiza health_data.health_data_quality_runs. Lee health_data.health_data_quality_issues, health_data.health_data_quality_rule_sets, health_data.health_data_quality_rules.
+`POST /health-data/quality-runs` la atiende `HealthDataController.recordQualityRun` (src/modules/health_data/controllers/health-data.controller.ts:281). Exige sesión con alguno de los roles DATA_STEWARD, HEALTH_DATA_ADMIN. Valida el cuerpo como `RecordQualityRunDto` (12 campos, 3 obligatorios). Delega en `HealthValidationService.recordQualityRun`. Crea filas en health_data.health_data_quality_issues, health_data.health_data_quality_runs. Actualiza health_data.health_data_quality_runs. Lee health_data.health_data_quality_issues, health_data.health_data_quality_rule_sets, health_data.health_data_quality_rules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_STEWARD, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:231` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: DATA_STEWARD, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:281` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1460,12 +1460,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `recordsEvaluated` | `string` | Sí | — | `@IsNumberString({ no_symbols: true })` | Registros evaluados; cadena por ser bigint | `src/modules/health_data/dto/health-data.dto.ts:1013` |
 | `healthIngestionBatchId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ámbito: lote de ingesta | `src/modules/health_data/dto/health-data.dto.ts:1024` |
 | `canonicalResourceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ámbito: recurso canónico | `src/modules/health_data/dto/health-data.dto.ts:1035` |
-| `findings` | `array<QualityFindingDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => QualityFindingDto)` | — | `src/modules/health_data/dto/health-data.dto.ts:1045` |
-| `findings[].healthDataQualityRuleId` | `string` | No | formato uuid | `@IsUUID()` | Regla que se incumple | `src/modules/health_data/dto/health-data.dto.ts:949` |
-| `findings[].canonicalHealthResourceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:957` |
-| `findings[].canonicalResourceVersionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/health_data/dto/health-data.dto.ts:965` |
-| `findings[].fieldPath` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Campo afectado | `src/modules/health_data/dto/health-data.dto.ts:974` |
-| `findings[].observedValueHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del valor observado; el valor en claro no se guarda | `src/modules/health_data/dto/health-data.dto.ts:986` |
+| `findings` | `array<HealthDataQualityFindingDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => QualityFindingDto)` | — | `src/modules/health_data/dto/health-data.dto.ts:1045` |
+| `findings[].healthDataQualityRuleId` | `string` | No | formato uuid | — | Regla que se incumple | sin fuente |
+| `findings[].canonicalHealthResourceId` | `string` | No | formato uuid | — | — | sin fuente |
+| `findings[].canonicalResourceVersionId` | `string` | No | formato uuid | — | — | sin fuente |
+| `findings[].fieldPath` | `string` | No | longitud máxima 500 | — | Campo afectado | sin fuente |
+| `findings[].observedValueHash` | `string` | No | longitud máxima 200 | — | Hash del valor observado; el valor en claro no se guarda | sin fuente |
 | `summaryJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | — | `src/modules/health_data/dto/health-data.dto.ts:1053` |
 
 **Payload mínimo** (sólo los obligatorios):
@@ -1546,7 +1546,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.createSourceConnection` — `src/modules/health_data/controllers/health-data.controller.ts:88`
+- **Implementación:** `HealthDataController.createSourceConnection` — `src/modules/health_data/controllers/health-data.controller.ts:93`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1556,18 +1556,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/source-connections` la atiende `HealthDataController.createSourceConnection` (src/modules/health_data/controllers/health-data.controller.ts:88). Exige sesión con alguno de los roles HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN. Valida el cuerpo como `CreateSourceConnectionDto` (7 campos, 7 obligatorios). Delega en `HealthIngestionService.createSourceConnection`. Crea filas en health_data.health_source_connections, health_data.health_source_systems. Lee health_data.health_source_systems.
+`POST /health-data/source-connections` la atiende `HealthDataController.createSourceConnection` (src/modules/health_data/controllers/health-data.controller.ts:93). Exige sesión con alguno de los roles HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN. Valida el cuerpo como `CreateSourceConnectionDto` (7 campos, 7 obligatorios). Delega en `HealthIngestionService.createSourceConnection`. Crea filas en health_data.health_source_connections, health_data.health_source_systems. Lee health_data.health_source_systems.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:88` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:93` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1656,28 +1656,28 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.projectTimelineEntry` — `src/modules/health_data/controllers/health-data.controller.ts:262`
+- **Implementación:** `HealthDataController.projectTimelineEntry` — `src/modules/health_data/controllers/health-data.controller.ts:322`
 
 ### Qué es y para qué sirve (negocio)
 
 Proyectar una entrada de la línea de tiempo del paciente. Caso de uso UC-52-10: Proyectar entrada de línea de tiempo. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/timeline-entries` la atiende `HealthDataController.projectTimelineEntry` (src/modules/health_data/controllers/health-data.controller.ts:262). Exige sesión con alguno de los roles SYSTEM, HEALTH_DATA_ADMIN. Valida el cuerpo como `ProjectTimelineEntryDto` (13 campos, 5 obligatorios). Delega en `PatientIdentityService.projectTimelineEntry`. Crea filas en health_data.patient_timeline_entries. Lee health_data.patient_timeline_entries.
+`POST /health-data/timeline-entries` la atiende `HealthDataController.projectTimelineEntry` (src/modules/health_data/controllers/health-data.controller.ts:322). Exige sesión con alguno de los roles SYSTEM, HEALTH_DATA_ADMIN. Valida el cuerpo como `ProjectTimelineEntryDto` (13 campos, 5 obligatorios). Delega en `PatientIdentityService.projectTimelineEntry`. Crea filas en health_data.patient_timeline_entries. Lee health_data.patient_timeline_entries.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:262` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:322` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1776,29 +1776,29 @@ El árbol de decisión completo está en [flujos](../flujos/health_data.md).
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `HealthDataController.validateVersion` — `src/modules/health_data/controllers/health-data.controller.ts:211`
+- **Implementación:** `HealthDataController.validateVersion` — `src/modules/health_data/controllers/health-data.controller.ts:256`
 
 ### Qué es y para qué sirve (negocio)
 
 Validar la versión contra un perfil FHIR R5. Caso de uso UC-52-07: Validar contra perfil FHIR R5. Dentro del módulo (descripción del modelo, en inglés): «Provides a governed international-grade health data center: source onboarding, ingestion, canonical versioned resources, patient identity resolution, FHIR validation, quality, provenance, lineage, terminology mapping, controlled exports…» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_data/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_52_health_data_platform.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /health-data/versions/{id}/validate` la atiende `HealthDataController.validateVersion` (src/modules/health_data/controllers/health-data.controller.ts:211). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN. Valida el cuerpo como `ValidateVersionDto` (10 campos, 3 obligatorios). Delega en `HealthValidationService.validateVersion`. Crea filas en health_data.fhir_validation_issues, health_data.fhir_validation_runs. Actualiza health_data.canonical_health_resources. Lee health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.fhir_profile_versions, health_data.fhir_validation_runs.
+`POST /health-data/versions/{id}/validate` la atiende `HealthDataController.validateVersion` (src/modules/health_data/controllers/health-data.controller.ts:256). Exige sesión con alguno de los roles INGESTION_WORKER, HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN. Valida el cuerpo como `ValidateVersionDto` (10 campos, 3 obligatorios). Delega en `HealthValidationService.validateVersion`. Crea filas en health_data.fhir_validation_issues, health_data.fhir_validation_runs. Actualiza health_data.canonical_health_resources. Lee health_data.canonical_health_resource_versions, health_data.canonical_health_resources, health_data.fhir_profile_versions, health_data.fhir_validation_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN | `src/modules/health_data/controllers/health-data.controller.ts:211` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:211` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN | `src/modules/health_data/controllers/health-data.controller.ts:256` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:256` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

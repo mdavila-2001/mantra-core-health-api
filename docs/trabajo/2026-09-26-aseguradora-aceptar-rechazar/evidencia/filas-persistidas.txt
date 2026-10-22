@@ -1,0 +1,7 @@
+ v | por_item |          decision           | approved_amount |       policy_clause_reference       |                denial_rationale                
+---+----------+-----------------------------+-----------------+-------------------------------------+------------------------------------------------
+ 1 | f        | insurance:DECISION_PARTIAL  |           40.00 |                                     | 
+ 1 | t        | insurance:DECISION_APPROVED |           40.00 |                                     | 
+ 1 | t        | insurance:DECISION_DENIED   |                 | Cláusula 12.3 — fuera del vademécum | Principio activo excluido del plan ambulatorio
+(3 rows)
+

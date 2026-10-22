@@ -39,11 +39,11 @@ describe('keyset-cursor', () => {
   });
 
   it('rechaza valores no escalares: no hay comparación SQL para un objeto', () => {
-    const anidado = Buffer.from(
+    const nested = Buffer.from(
       JSON.stringify({ ordinal: { $gt: 1 } }),
       'utf8',
     ).toString('base64url');
 
-    expect(() => decodeKeysetCursor(anidado)).toThrow(BadRequestException);
+    expect(() => decodeKeysetCursor(nested)).toThrow(BadRequestException);
   });
 });

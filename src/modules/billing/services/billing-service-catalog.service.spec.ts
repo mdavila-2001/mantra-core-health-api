@@ -8,32 +8,91 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { BillingServiceCatalogService } from './billing-service-catalog.service';
-import { ConflictException, encodeKeysetCursor } from '../../../common';
+import {
+  CONCEPTS,
+  ConflictException,
+  ResourceNotFoundException,
+  encodeKeysetCursor,
+  runWithTenant,
+} from '../../../common';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+/** Quien atiende: sin rol administrativo, con perfil profesional. */
+const doctor = {
+  id: 'user-med',
+  roles: ['PRACTITIONER'],
+  practitionerProfileId: 'hp-1',
+} as any;
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  // Sin vinculaciones activas por defecto: sin `runWithTenant` de por medio,
+  // `attachDefaultSatisfactionSurvey` corta antes de pedir el tenant.
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    find: mockFn().mockResolvedValue([]),
+  };
   const em = {
     fork: mockFn().mockReturnValue({}),
     transactional: mockFn((cb: any) => cb(tx)),
   };
   const serviceCatalogRepo = {
     findByCode: mockFn(),
+    findById: mockFn(),
     create: mockFn(),
     searchPage: mockFn(),
   };
+  const practiceTenantLookup = {
+    findActivePracticeIdsForPractitioner: mockFn().mockResolvedValue([]),
+    findTenantOfPractice: mockFn().mockResolvedValue(null),
+    // Por omisión la práctica NO es el consultorio propio de nadie: el alta de un
+    // profesional tiene que pedirlo a propósito.
+    isOwnOffice: mockFn().mockResolvedValue(false),
+  };
+  const templatesRepo = {
+    createTemplate: mockFn(),
+    createVersion: mockFn(),
+    createQuestion: mockFn(),
+  };
+  const assignmentsRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new BillingServiceCatalogService(
     em as any,
     serviceCatalogRepo as any,
+    practiceTenantLookup as any,
+    templatesRepo as any,
+    assignmentsRepo as any,
     logger as any,
   );
-  return { service, tx, em, serviceCatalogRepo };
+  return {
+    service,
+    tx,
+    em,
+    serviceCatalogRepo,
+    practiceTenantLookup,
+    templatesRepo,
+    assignmentsRepo,
+    logger,
+  };
+}
+
+/** Una fila editable del catálogo, con los campos que el servicio toca. */
+function catalogRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 's1',
+    practiceId: 'pr1',
+    code: 'CITA_MEDICA',
+    name: 'Cita médica',
+    defaultPrice: '0.00',
+    currencyConceptId: undefined as string | undefined,
+    isActive: true,
+    updatedAt: new Date(0),
+    updatedByUserId: undefined as string | undefined,
+    ...overrides,
+  };
 }
 
 const item = {
@@ -126,6 +185,174 @@ describe('BillingServiceCatalogService', () => {
       expect(d.tx.flush).toHaveBeenCalled();
     });
 
+    describe('quién puede dar de alta (v4.2.40)', () => {
+      const dto = {
+        practiceId: 'pr1',
+        code: 'NEBU-01',
+        name: 'Nebulización',
+        defaultPrice: '80.00',
+      };
+
+      it('un profesional da de alta un servicio en su consultorio propio', async () => {
+        const d = build();
+        d.practiceTenantLookup.isOwnOffice.mockResolvedValue(true);
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        d.serviceCatalogRepo.create.mockReturnValue(item);
+        // Todo servicio nuevo sale con su encuesta (FT-31): el doble de esa parte.
+        d.templatesRepo.createTemplate.mockReturnValue({
+          id: 'tpl-1',
+          statusConceptId: 'draft',
+        });
+        d.templatesRepo.createVersion.mockReturnValue({
+          id: 'ver-1',
+          publicationStatusConceptId: 'draft',
+        });
+
+        await runWithTenant('tenant-1', () => d.service.create(dto, doctor));
+
+        expect(d.practiceTenantLookup.isOwnOffice).toHaveBeenCalledWith(
+          'pr1',
+          'user-med',
+        );
+        expect(d.serviceCatalogRepo.create).toHaveBeenCalled();
+      });
+
+      it('en una organización ajena responde 404 y no crea nada', async () => {
+        const d = build();
+        d.practiceTenantLookup.isOwnOffice.mockResolvedValue(false);
+
+        await expect(d.service.create(dto, doctor)).rejects.toThrow(
+          /Práctica no encontrada/,
+        );
+        expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('la administración no pasa por esa comprobación', async () => {
+        const d = build();
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        d.serviceCatalogRepo.create.mockReturnValue(item);
+
+        await d.service.create(dto, actor);
+
+        expect(d.practiceTenantLookup.isOwnOffice).not.toHaveBeenCalled();
+      });
+    });
+
+    /**
+     * FT-31: ningún servicio médico nuevo debería quedar sin forma de medir
+     * la atención. Estos tres casos son la regla completa: quien da de alta
+     * es un profesional, quien da de alta es un admin puro con alguien a
+     * quien atribuirle la plantilla, y quien da de alta es un admin puro sin
+     * nadie —el único caso donde de verdad no hay encuesta.
+     */
+    describe('encuesta de satisfacción por defecto', () => {
+      it('un profesional que da de alta su propio servicio queda como dueño de la encuesta', async () => {
+        const d = build();
+        d.practiceTenantLookup.isOwnOffice.mockResolvedValue(true);
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        d.serviceCatalogRepo.create.mockReturnValue(item);
+        d.templatesRepo.createTemplate.mockReturnValue({
+          id: 'tpl-1',
+          statusConceptId: 'draft',
+        });
+        d.templatesRepo.createVersion.mockReturnValue({
+          id: 'ver-1',
+          publicationStatusConceptId: 'draft',
+        });
+
+        await runWithTenant('tenant-1', () =>
+          d.service.create(
+            {
+              practiceId: 'pr1',
+              code: 'CONS-01',
+              name: 'Consulta general',
+              defaultPrice: '100.00',
+            },
+            doctor,
+          ),
+        );
+
+        expect(d.templatesRepo.createTemplate).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            ownerPractitionerId: doctor.practitionerProfileId,
+            title: expect.stringContaining('Consulta general'),
+          }),
+        );
+        expect(d.templatesRepo.createQuestion).toHaveBeenCalled();
+        expect(d.assignmentsRepo.create).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({
+            surveyVersionId: 'ver-1',
+            targetTypeConceptId: expect.any(String),
+            targetId: item.id,
+            active: true,
+          }),
+        );
+        // Con perfil profesional propio, ni hace falta buscar a quién
+        // atribuírsela: no consulta las vinculaciones de la práctica.
+        expect(d.tx.find).not.toHaveBeenCalled();
+      });
+
+      it('un admin sin perfil se la atribuye al profesional activo más antiguo de la práctica', async () => {
+        const d = build();
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        d.serviceCatalogRepo.create.mockReturnValue(item);
+        d.tx.find.mockResolvedValue([
+          {
+            practitionerProfileId: 'hp-nueva',
+            isPrimary: false,
+            createdAt: new Date('2026-02-01'),
+          },
+          {
+            practitionerProfileId: 'hp-vieja',
+            isPrimary: false,
+            createdAt: new Date('2026-01-01'),
+          },
+        ]);
+        d.templatesRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+        d.templatesRepo.createVersion.mockReturnValue({ id: 'ver-1' });
+
+        await runWithTenant('tenant-1', () =>
+          d.service.create(
+            {
+              practiceId: 'pr1',
+              code: 'CONS-01',
+              name: 'Consulta general',
+              defaultPrice: '100.00',
+            },
+            actor,
+          ),
+        );
+
+        expect(d.templatesRepo.createTemplate).toHaveBeenCalledWith(
+          d.tx,
+          expect.objectContaining({ ownerPractitionerId: 'hp-vieja' }),
+        );
+      });
+
+      it('sin nadie a quien atribuirle la plantilla, el servicio se crea igual, sin encuesta', async () => {
+        const d = build();
+        d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+        d.serviceCatalogRepo.create.mockReturnValue(item);
+        d.tx.find.mockResolvedValue([]);
+
+        const res = await d.service.create(
+          {
+            practiceId: 'pr1',
+            code: 'CONS-01',
+            name: 'Consulta general',
+            defaultPrice: '100.00',
+          },
+          actor,
+        );
+
+        expect(res).toEqual(item);
+        expect(d.templatesRepo.createTemplate).not.toHaveBeenCalled();
+        expect(d.logger.warn).toHaveBeenCalled();
+      });
+    });
+
     it('rejects a duplicate code within the same practice', async () => {
       const d = build();
       d.serviceCatalogRepo.findByCode.mockResolvedValue(item);
@@ -142,6 +369,132 @@ describe('BillingServiceCatalogService', () => {
         ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * FT-22-R05. Lo que se comprueba acá no es «guarda el número», sino **quién
+   * puede guardarlo** y que un servicio ajeno responda lo mismo que uno que no
+   * existe: si el rechazo del ajeno fuera distinto, probar uuids revelaría qué
+   * servicios tiene la organización de al lado.
+   */
+  describe('update', () => {
+    it('quien atiende en esa práctica corrige el precio y su moneda', async () => {
+      const d = build();
+      const row = catalogRow();
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['otra', 'pr1'],
+      );
+
+      const res = await d.service.update(
+        's1',
+        { defaultPrice: '150.00' },
+        doctor,
+      );
+
+      expect(res.defaultPrice).toBe('150.00');
+      // Una fila sin moneda la gana en su primera edición: un importe sin
+      // unidad no es un precio.
+      expect(res.currencyConceptId).toBe(CONCEPTS.CURRENCY_BOB);
+      expect(res.currencyCode).toBe('BOB');
+      expect(row.updatedByUserId).toBe(doctor.id);
+      expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('conserva la moneda que la fila ya tenía', async () => {
+      const d = build();
+      const row = catalogRow({ currencyConceptId: CONCEPTS.CURRENCY_USD });
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['pr1'],
+      );
+
+      const res = await d.service.update(
+        's1',
+        { defaultPrice: '20.00' },
+        doctor,
+      );
+
+      expect(res.currencyConceptId).toBe(CONCEPTS.CURRENCY_USD);
+      expect(res.currencyCode).toBe('USD');
+    });
+
+    it('deja intacto lo que el cuerpo no menciona', async () => {
+      const d = build();
+      const row = catalogRow({ defaultPrice: '80.00' });
+      d.serviceCatalogRepo.findById.mockResolvedValue(row);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['pr1'],
+      );
+
+      const res = await d.service.update('s1', { isActive: false }, doctor);
+
+      expect(res.isActive).toBe(false);
+      expect(res.defaultPrice).toBe('80.00');
+      expect(res.name).toBe('Cita médica');
+    });
+
+    it('un servicio inexistente es 404', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.update('s1', { defaultPrice: '10.00' }, doctor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('un servicio de una práctica ajena es el MISMO 404, no un 403', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(catalogRow());
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        ['otra-practica'],
+      );
+
+      await expect(
+        d.service.update('s1', { defaultPrice: '10.00' }, doctor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('la cuenta administradora corrige lo que su organización dio de alta', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(catalogRow());
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+        'mi-tenant',
+      );
+
+      const res = await runWithTenant('mi-tenant', () =>
+        d.service.update('s1', { defaultPrice: '90.00' }, actor),
+      );
+
+      expect(res.defaultPrice).toBe('90.00');
+    });
+
+    it('la cuenta administradora de otra organización recibe 404', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(catalogRow());
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue(
+        'otro-tenant',
+      );
+
+      await expect(
+        runWithTenant('mi-tenant', () =>
+          d.service.update('s1', { defaultPrice: '90.00' }, actor),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('una cuenta sin perfil profesional ni rol administrativo recibe 404', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(catalogRow());
+
+      await expect(
+        d.service.update('s1', { defaultPrice: '10.00' }, {
+          id: 'u9',
+          roles: ['PATIENT'],
+        } as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });

@@ -10,14 +10,14 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [care_plan_activities](#care_plan_activities) | Detalla actividades que componen un plan de cuidado para facilitar su asignación y seguimiento. | 11 | 5 | 4 | COINCIDE |
-| [care_plans](#care_plans) | Agrupa objetivos y estrategias de cuidado que orientan el seguimiento clínico de un paciente. | 15 | 9 | 4 | COINCIDE |
+| [care_plan_activities](#care_plan_activities) | Detalla actividades que componen un plan de cuidado para facilitar su asignación y seguimiento. | 11 | 5 | 7 | COINCIDE |
+| [care_plans](#care_plans) | Agrupa objetivos y estrategias de cuidado que orientan el seguimiento clínico de un paciente. | 15 | 9 | 7 | DIVERGE |
 | [chart_template_assignments](#chart_template_assignments) | Asigna plantillas clínicas a los ámbitos o sujetos correspondientes para determinar qué estructura documental se usa. | 11 | 6 | 3 | COINCIDE |
-| [clinical_note_headers](#clinical_note_headers) | Representa la identidad y el estado actual de una nota clínica dentro del expediente del paciente. | 14 | 11 | 18 | COINCIDE |
+| [clinical_note_headers](#clinical_note_headers) | Representa la identidad y el estado actual de una nota clínica dentro del expediente del paciente. | 14 | 11 | 25 | COINCIDE |
 | [clinical_note_signatures](#clinical_note_signatures) | Registra firmas asociadas a notas clínicas para documentar su validación y autoría profesional. | 8 | 3 | 3 | COINCIDE |
-| [clinical_note_versions](#clinical_note_versions) | Preserva versiones sucesivas de notas clínicas para mantener trazabilidad de su contenido y cambios. | 19 | 10 | 12 | COINCIDE |
-| [document_record_files](#document_record_files) | Vincula archivos almacenados con registros documentales para resolver su ubicación y asociación clínica. | 7 | 4 | 1 | COINCIDE |
-| [document_records](#document_records) | Registra documentos clínicos y su clasificación dentro del expediente del paciente. | 18 | 12 | 7 | COINCIDE |
+| [clinical_note_versions](#clinical_note_versions) | Preserva versiones sucesivas de notas clínicas para mantener trazabilidad de su contenido y cambios. | 19 | 10 | 17 | COINCIDE |
+| [document_record_files](#document_record_files) | Vincula archivos almacenados con registros documentales para resolver su ubicación y asociación clínica. | 7 | 4 | 8 | COINCIDE |
+| [document_records](#document_records) | Registra documentos clínicos y su clasificación dentro del expediente del paciente. | 18 | 12 | 13 | COINCIDE |
 | [note_release_events](#note_release_events) | Conserva eventos de liberación de notas para representar cuándo pasan a estar disponibles en el flujo clínico previsto. | 9 | 8 | 2 | COINCIDE |
 | [physical_exam_findings](#physical_exam_findings) | Documenta hallazgos del examen físico asociados a la valoración clínica del paciente. | 8 | 4 | 1 | COINCIDE |
 | [specialty_chart_templates](#specialty_chart_templates) | Define plantillas de expediente o documentación adaptadas a especialidades clínicas. | 13 | 8 | 7 | COINCIDE |
@@ -165,7 +165,7 @@ Detalla actividades que componen un plan de cuidado para facilitar su asignació
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: care_plan_activities`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `CarePlanActivities` — `src/modules/chart/entities/care_plan_activities.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -210,7 +210,10 @@ Detalla actividades que componen un plan de cuidado para facilitar su asignació
 | POST /charts/care-plans | CREA | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | ACTUALIZA | POR_TIPO |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
+| GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -235,7 +238,7 @@ Agrupa objetivos y estrategias de cuidado que orientan el seguimiento clínico d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: care_plans`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `CarePlans` — `src/modules/chart/entities/care_plans.entity.ts`
-- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 2 entrantes · 4 operaciones
+- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 2 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -251,11 +254,11 @@ Agrupa objetivos y estrategias de cuidado que orientan el seguimiento clínico d
 | 8 | `start_date` | `date` | Opcional | _sin dato_ | coincide |
 | 9 | `end_date` | `date` | Opcional | _sin dato_ | coincide |
 | 10 | `author_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Opcional | _sin dato_ | coincide |
-| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/chart/entities/care_plans.entity.ts:72`)_ | coincide |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/chart/entities/care_plans.entity.ts:78`)_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/chart/entities/care_plans.entity.ts:79`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/chart/entities/care_plans.entity.ts:85`)_ | coincide |
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/chart/entities/care_plans.entity.ts:96`)_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/chart/entities/care_plans.entity.ts:103`)_ | coincide |
 
 #### Relaciones
 
@@ -278,7 +281,7 @@ Agrupa objetivos y estrategias de cuidado que orientan el seguimiento clínico d
 |---|---|---|---|
 | `ix_care_plans_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_care_plans_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_care_plans_condition_id` | no | condition_id | Soporta la clave foránea fk_care_plans_condition_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_care_plans_encounter_id` | no | encounter_id | Soporta la clave foránea fk_care_plans_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_plans_encounter_id` | no | encounter_id | Soporta la clave foránea fk_care_plans_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_care_plans_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_care_plans_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_care_plans_intent_concept_id` | no | intent_concept_id | Soporta la clave foránea fk_care_plans_intent_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_care_plans_author_profile_id` | no | author_profile_id | Soporta la clave foránea fk_care_plans_author_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -293,7 +296,10 @@ Agrupa objetivos y estrategias de cuidado que orientan el seguimiento clínico d
 | POST /charts/care-plans | CREA | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | ACTUALIZA | POR_TIPO |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
+| GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -389,7 +395,7 @@ Representa la identidad y el estado actual de una nota clínica dentro del exped
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: clinical_note_headers`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `ClinicalNoteHeaders` — `src/modules/chart/entities/clinical_note_headers.entity.ts`
-- **Resumen:** 14 columnas · 11 índices · 10 FK salientes · 2 entrantes · 18 operaciones
+- **Resumen:** 14 columnas · 11 índices · 10 FK salientes · 2 entrantes · 25 operaciones
 
 #### Columnas
 
@@ -431,8 +437,8 @@ Representa la identidad y el estado actual de una nota clínica dentro del exped
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_clinical_note_headers_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_clinical_note_headers_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_clinical_note_headers_encounter_id` | no | encounter_id | Soporta la clave foránea fk_clinical_note_headers_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_clinical_note_headers_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_clinical_note_headers_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_clinical_note_headers_encounter_id` | no | encounter_id | Soporta la clave foránea fk_clinical_note_headers_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_clinical_note_headers_note_type_concept_id` | no | note_type_concept_id | Soporta la clave foránea fk_clinical_note_headers_note_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_note_headers_lifecycle_status_concept_id` | no | lifecycle_status_concept_id | Soporta la clave foránea fk_clinical_note_headers_lifecycle_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_note_headers_current_version_id` | no | current_version_id | Soporta la clave foránea fk_clinical_note_headers_current_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -447,6 +453,10 @@ Representa la identidad y el estado actual de una nota clínica dentro del exped
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/notes | LEE | DIRECTA |
+| GET /charts/notes | LEE | DIRECTA |
 | POST /charts/notes | ACTUALIZA | POR_TIPO |
 | POST /charts/notes | CREA | DIRECTA |
 | POST /charts/notes/{noteId}/amendments | ACTUALIZA | POR_TIPO |
@@ -455,11 +465,14 @@ Representa la identidad y el estado actual de una nota clínica dentro del exped
 | PUT /charts/notes/{noteId}/versions | LEE | DIRECTA |
 | POST /charts/notes/{noteId}/versions/{versionId}/cosign | LEE | DIRECTA |
 | POST /charts/notes/{noteId}/versions/{versionId}/sign | LEE | DIRECTA |
+| POST /charts/notes/versions/{versionId}/exam-findings | LEE | DIRECTA |
 | POST /charts/notes/versions/{versionId}/release | ACTUALIZA | POR_TIPO |
 | POST /charts/notes/versions/{versionId}/release | LEE | DIRECTA |
 | POST /charts/notes/versions/{versionId}/withhold | ACTUALIZA | POR_TIPO |
 | POST /charts/notes/versions/{versionId}/withhold | LEE | DIRECTA |
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
+| POST /clinical/conditions/{id}/verification | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | GET /profiles/practitioners/{profileId}/summary | LEE | DIRECTA |
@@ -555,7 +568,7 @@ Preserva versiones sucesivas de notas clínicas para mantener trazabilidad de su
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: clinical_note_versions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `ClinicalNoteVersions` — `src/modules/chart/entities/clinical_note_versions.entity.ts`
-- **Resumen:** 19 columnas · 10 índices · 8 FK salientes · 6 entrantes · 12 operaciones
+- **Resumen:** 19 columnas · 10 índices · 8 FK salientes · 6 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -625,6 +638,10 @@ Preserva versiones sucesivas de notas clínicas para mantener trazabilidad de su
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/notes | LEE | DIRECTA |
+| GET /charts/notes | LEE | DIRECTA |
 | POST /charts/notes | CREA | DIRECTA |
 | POST /charts/notes/{noteId}/amendments | CREA | DIRECTA |
 | POST /charts/notes/{noteId}/amendments | LEE | DIRECTA |
@@ -637,6 +654,7 @@ Preserva versiones sucesivas de notas clínicas para mantener trazabilidad de su
 | POST /charts/notes/versions/{versionId}/release | LEE | DIRECTA |
 | POST /charts/notes/versions/{versionId}/withhold | LEE | DIRECTA |
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -661,7 +679,7 @@ Vincula archivos almacenados con registros documentales para resolver su ubicaci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: document_record_files`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `DocumentRecordFiles` — `src/modules/chart/entities/document_record_files.entity.ts`
-- **Resumen:** 7 columnas · 4 índices · 4 FK salientes · 0 entrantes · 1 operaciones
+- **Resumen:** 7 columnas · 4 índices · 4 FK salientes · 0 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -688,7 +706,7 @@ Vincula archivos almacenados con registros documentales para resolver su ubicaci
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_document_record_files_document_record_id` | no | document_record_id | Soporta la clave foránea fk_document_record_files_document_record_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_document_record_files_document_record_id` | no | document_record_id | Soporta la clave foránea fk_document_record_files_document_record_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «document_record_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_document_record_files_file_id` | no | file_id | Soporta la clave foránea fk_document_record_files_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_document_record_files_content_role_concept_id` | no | content_role_concept_id | Soporta la clave foránea fk_document_record_files_content_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_document_record_files_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_document_record_files_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -698,6 +716,13 @@ Vincula archivos almacenados con registros documentales para resolver su ubicaci
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /charts/documents | CREA | DIRECTA |
+| GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
+| GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/documents | LEE | DIRECTA |
+| GET /charts/me/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
+| GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -722,7 +747,7 @@ Registra documentos clínicos y su clasificación dentro del expediente del paci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_15_chart.puml: document_records`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_15_chart.puml` · **DDL:** `SQL/15_chart/02_tables.sql`
 - **Entidad del ORM:** `DocumentRecords` — `src/modules/chart/entities/document_records.entity.ts`
-- **Resumen:** 18 columnas · 12 índices · 10 FK salientes · 3 entrantes · 7 operaciones
+- **Resumen:** 18 columnas · 12 índices · 10 FK salientes · 3 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -771,7 +796,7 @@ Registra documentos clínicos y su clasificación dentro del expediente del paci
 |---|---|---|---|
 | `ix_document_records_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_document_records_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_document_records_tenant_id` | no | tenant_id | Soporta la clave foránea fk_document_records_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_document_records_encounter_id` | no | encounter_id | Soporta la clave foránea fk_document_records_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_document_records_encounter_id` | no | encounter_id | Soporta la clave foránea fk_document_records_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_document_records_category_concept_id` | no | category_concept_id | Soporta la clave foránea fk_document_records_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_document_records_source_concept_id` | no | source_concept_id | Soporta la clave foránea fk_document_records_source_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_document_records_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_document_records_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -787,7 +812,13 @@ Registra documentos clínicos y su clasificación dentro del expediente del paci
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /charts/documents | CREA | DIRECTA |
+| GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
+| GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/documents | LEE | DIRECTA |
+| GET /charts/me/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
+| GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
 | GET /charts/patients/{patientProfileId}/chart | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | GET /profiles/practitioners/{profileId}/summary | LEE | DIRECTA |

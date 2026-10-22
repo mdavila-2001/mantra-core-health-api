@@ -1,0 +1,19 @@
+=== lint de lo tocado
+exit=0
+
+=== typecheck
+exit=0
+
+=== pruebas del módulo de terminología
+2026-09-25T10:27:05-04:00
+(node:23068) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:37756) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 21 passed, 21 total
+Tests:       240 passed, 240 total
+Snapshots:   0 total
+Time:        14.576 s, estimated 15 s
+Ran all test suites matching src/modules/terminology.
+exit=0

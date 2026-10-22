@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
+import { IdentityEvidenceLifecycleModule } from './identity-evidence-lifecycle.module';
+import { StorageLifecycleModule } from '../../common/storage/storage-lifecycle.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { DirectoryModule } from '../directory/directory.module';
 import { CommunityModule } from '../community/community.module';
+import { CommonModule } from '../common/common.module';
 import {
   IdentityAuthoritiesController,
   IdentityPoliciesController,
@@ -46,6 +49,8 @@ import {
  */
 @Module({
   imports: [
+    IdentityEvidenceLifecycleModule,
+    StorageLifecycleModule,
     MikroOrmModule.forFeature(Object.values(entities)),
     // Verificar una matrícula o una institución cambia el estado de esos
     // dominios, no del propio caso: el efecto lo aplica
@@ -57,6 +62,7 @@ import {
     // este módulo sólo sabe que el caso quedó verificado. Sin ciclo: community
     // no importa `identity_assurance`.
     CommunityModule,
+    CommonModule,
   ],
   controllers: [
     IdentityAuthoritiesController,

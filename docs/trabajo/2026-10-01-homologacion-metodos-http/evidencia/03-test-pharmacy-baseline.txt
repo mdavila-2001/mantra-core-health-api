@@ -1,0 +1,12 @@
+$ yarn test src/modules/pharmacy
+(node:23416) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:11160) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 18 passed, 18 total
+Tests:       218 passed, 218 total
+Snapshots:   0 total
+Time:        93.276 s
+Ran all test suites matching src/modules/pharmacy.
+exit=0

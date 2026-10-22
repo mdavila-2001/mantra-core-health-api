@@ -68,7 +68,7 @@ export const { seeds: SURVEYS_CONCEPT_SEEDS, ids: SURVEYS } =
     },
 
     // --- Cosa evaluada por la asignación (survey_assignments.target_type) ----
-    // REDESA asocia la encuesta a «una consulta, servicio o tipo de atención».
+    // ALOVIDA asocia la encuesta a «una consulta, servicio o tipo de atención».
     TARGET_APPOINTMENT: {
       code: 'SURVEY_TARGET_APPOINTMENT',
       display: 'Assigned to a specific appointment',

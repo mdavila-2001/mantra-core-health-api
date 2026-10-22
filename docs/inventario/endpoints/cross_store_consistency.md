@@ -44,7 +44,7 @@
 
 Archivar por retención y purgar la copia caliente. Caso de uso UC-62-14: Archivado por retención. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:33`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:72`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -56,10 +56,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:185` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -162,7 +162,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Mover datos entre zonas de almacenamiento. Caso de uso UC-62-13: Movimiento entre zonas. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:32`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:71`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -174,10 +174,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:169` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -290,7 +290,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Solicitar el borrado de un sujeto. Caso de uso UC-62-08: Solicitud de borrado. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:27`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:66`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -302,10 +302,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:136` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -405,7 +405,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Cerrar la solicitud de borrado. Caso de uso UC-62-11: Verificación y cierre. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:30`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -417,11 +417,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:152` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:152` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -516,7 +516,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reprocesar una entrega de la cola muerta. Caso de uso UC-62-04: Cola muerta y reproceso. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -528,11 +528,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:81` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -617,7 +617,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar la definición de proyección con sus suscripciones y su SLO. Caso de uso UC-62-01: Definición, suscripciones y SLO. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -629,10 +629,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -765,7 +765,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Encolar la reparación de una deriva. Caso de uso UC-62-07: Reparación de deriva. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:26`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:65`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -777,11 +777,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:119` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -886,7 +886,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar la corrida de reconciliación y abrir las derivas. Caso de uso UC-62-05: Corrida de reconciliación. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:63`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -898,10 +898,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, RECONCILIATION_WORKER, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1030,7 +1030,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Encolar la invalidación de caché. Caso de uso UC-62-12: Invalidación de caché. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:31`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:70`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1042,10 +1042,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MAINTENANCE_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:183` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1142,7 +1142,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Expandir la solicitud a objetivos por store. Caso de uso UC-62-09: Expansión a objetivos. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:28`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:67`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1154,11 +1154,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:98` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1266,7 +1266,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ejecutar el borrado en el store destino. Caso de uso UC-62-10: Ejecución del borrado. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:29`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:68`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1278,11 +1278,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:134` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:134` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1373,7 +1373,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Verificar la ausencia en el store. Caso de uso UC-62-11: Verificación y cierre. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:30`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1385,11 +1385,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:166` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:166` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1493,9 +1493,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:154` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1572,9 +1572,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:122` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1639,7 +1639,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Mandar el intento fallido a la cola muerta. Caso de uso UC-62-04: Cola muerta y reproceso. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1651,10 +1651,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:82` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1749,7 +1749,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar la entrega y avanzar el checkpoint. Caso de uso UC-62-02: Entrega idempotente. Dentro del módulo (descripción del modelo, en inglés): «Guarantees that derived NoSQL/search/cache/vector/object projections can be rebuilt, reconciled, repaired and deleted without dual-write inconsistency.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_store_consistency/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_62_cross_store_consistency.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1761,10 +1761,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

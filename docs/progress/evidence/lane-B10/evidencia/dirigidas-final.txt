@@ -1,0 +1,21 @@
+$ corepack yarn test --testPathPatterns="scheduling-bookings.service|scheduling-bookings.repository|scheduling-catalog.service|scheduling-catalog.dto" -t "M4|retireTemplate"
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) cerrar acepta un cupo sembrado con id uuid5
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) cerrar sigue aceptando ids uuid4
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) correr acepta un cupo sembrado con id uuid5
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) un texto que no es UUID sigue dando 400
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) cerrar sin ningún cupo sigue dando 400
+PASS SchedulingBookingsService reschedule (UC-41-08) solapamiento en cupos distintos (M4 · H1.S1) rechaza mover la cita a un cupo cuyo rango se pisa con otra cita comprometida de la misma médica
+PASS SchedulingBookingsService reschedule (UC-41-08) solapamiento en cupos distintos (M4 · H1.S1) rechaza mover la cita encima de otro turno confirmado del mismo paciente
+PASS SchedulingBookingsService reschedule (UC-41-08) solapamiento en cupos distintos (M4 · H1.S1) con el rango libre, mueve la cita y la deja atribuida al recurso del cupo destino
+PASS SchedulingBookingsService reschedule (UC-41-08) solapamiento en cupos distintos (M4 · H1.S1) un recurso que no es de un profesional (una sala) no pasa por la regla madre
+PASS SchedulingBookingsService reschedule (UC-41-08) solapamiento en cupos distintos (M4 · H1.S1) el paciente titular reprograma su propio turno
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) con citas comprometidas retira igual: conserva sus cupos y dice cuáles citas siguen vivas
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) la respuesta trae el total y los ids de las vivas, no los nombres de los pacientes
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) sin citas comprometidas retira, y dice qué soltó
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) el historial tampoco frena el retiro
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) pide los estados vivos correctos para distinguir los dos casos
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) retirar una agenda ajena es 403, aunque esté vacía
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) una plantilla que no existe es 404, no un retiro silencioso
+Suites: 3 passed, 0 failed, 4 total
+Tests:  17 passed, 0 failed, 271 skipped, 288 total
+exit=0

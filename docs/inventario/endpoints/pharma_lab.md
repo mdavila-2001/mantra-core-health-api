@@ -5,89 +5,89 @@
 - **Bloque:** —
 - **Operaciones:** 76 (76 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 6 · MEDIO 40 · BAJO 30
-- **Tablas distintas que tocan:** 46
+- **Tablas distintas que tocan:** 48
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/pharma-lab.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/pharma-labs` | Listar laboratorios farmacéuticos | BAJO | 1 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 2 | POST | `/pharma-labs` | Registrar una organización laboratorio farmacéutico | MEDIO | 5 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 3 | GET | `/pharma-labs/{pharmaLabId}` | Consultar el perfil de un laboratorio | BAJO | 1 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 4 | PATCH | `/pharma-labs/{pharmaLabId}` | Actualizar el perfil institucional | MEDIO | 4 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 5 | POST | `/pharma-labs/{pharmaLabId}/cost-allocations` | Imputar un asiento contable a las dimensiones del laboratorio | MEDIO | 6 | PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN |
+| 1 | GET | `/pharma-labs` | Listar laboratorios farmacéuticos | BAJO | 2 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 2 | POST | `/pharma-labs` | Registrar una organización laboratorio farmacéutico | MEDIO | 6 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 3 | GET | `/pharma-labs/{pharmaLabId}` | Consultar el perfil de un laboratorio | BAJO | 2 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 4 | PATCH | `/pharma-labs/{pharmaLabId}` | Actualizar el perfil institucional | MEDIO | 6 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 5 | POST | `/pharma-labs/{pharmaLabId}/cost-allocations` | Imputar un asiento contable a las dimensiones del laboratorio | MEDIO | 7 | PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN |
 | 6 | GET | `/pharma-labs/{pharmaLabId}/cost-allocations/report` | Rentabilidad por producto y costos por proyecto del periodo | BAJO | 3 | PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN |
-| 7 | GET | `/pharma-labs/{pharmaLabId}/link-events` | Historial de vinculaciones y permisos | BAJO | 2 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 7 | GET | `/pharma-labs/{pharmaLabId}/link-events` | Historial de vinculaciones y permisos | BAJO | 3 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
 | 8 | GET | `/pharma-labs/{pharmaLabId}/materials` | Listar el material informativo | BAJO | 2 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN |
-| 9 | POST | `/pharma-labs/{pharmaLabId}/materials` | Crear material informativo (nace en borrador) | MEDIO | 5 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
+| 9 | POST | `/pharma-labs/{pharmaLabId}/materials` | Crear material informativo (nace en borrador) | MEDIO | 6 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
 | 10 | GET | `/pharma-labs/{pharmaLabId}/materials/{materialId}/approvals` | Historial de revisiones del material | BAJO | 3 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
 | 11 | GET | `/pharma-labs/{pharmaLabId}/materials/{materialId}/assets` | Listar los adjuntos del material | BAJO | 3 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN |
 | 12 | POST | `/pharma-labs/{pharmaLabId}/materials/{materialId}/assets` | Adjuntar un archivo al material | MEDIO | 3 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
-| 13 | POST | `/pharma-labs/{pharmaLabId}/materials/{materialId}/decision` | Aprobar o rechazar el material | MEDIO | 6 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
-| 14 | POST | `/pharma-labs/{pharmaLabId}/materials/{materialId}/submit` | Enviar el material a revisión interna | MEDIO | 6 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
+| 13 | POST | `/pharma-labs/{pharmaLabId}/materials/{materialId}/decision` | Aprobar o rechazar el material | MEDIO | 7 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
+| 14 | POST | `/pharma-labs/{pharmaLabId}/materials/{materialId}/submit` | Enviar el material a revisión interna | MEDIO | 7 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
 | 15 | GET | `/pharma-labs/{pharmaLabId}/medical-visitors` | Listar los visitadores del laboratorio | BAJO | 2 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 16 | POST | `/pharma-labs/{pharmaLabId}/medical-visitors` | Registrar un visitador médico | ALTO | 12 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 17 | PUT | `/pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/products` | Fijar los productos que el visitador representa | ALTO | 7 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 18 | POST | `/pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink` | Revincular a un visitador con nueva autorización | MEDIO | 8 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 19 | PUT | `/pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/specialties` | Fijar las especialidades que el visitador visita | ALTO | 6 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 20 | POST | `/pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink` | Desvincular al visitador y revocar sus accesos | ALTO | 19 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 21 | POST | `/pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/verifications` | Registrar las verificaciones del visitador | MEDIO | 5 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 16 | POST | `/pharma-labs/{pharmaLabId}/medical-visitors` | Registrar un visitador médico | ALTO | 16 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 17 | PUT | `/pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/products` | Fijar los productos que el visitador representa | ALTO | 8 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 18 | POST | `/pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink` | Revincular a un visitador con nueva autorización | MEDIO | 12 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 19 | PUT | `/pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/specialties` | Fijar las especialidades que el visitador visita | ALTO | 7 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 20 | POST | `/pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink` | Desvincular al visitador y revocar sus accesos | ALTO | 22 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 21 | POST | `/pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/verifications` | Registrar las verificaciones del visitador | MEDIO | 6 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
 | 22 | GET | `/pharma-labs/{pharmaLabId}/pharmacovigilance/reports` | Listar los reportes del laboratorio | BAJO | 2 | PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN |
-| 23 | POST | `/pharma-labs/{pharmaLabId}/pharmacovigilance/reports` | Enviar un reporte de farmacovigilancia | MEDIO | 9 | PRACTITIONER, CLINICIAN, PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, BUSINESS_ADMIN |
+| 23 | POST | `/pharma-labs/{pharmaLabId}/pharmacovigilance/reports` | Enviar un reporte de farmacovigilancia | MEDIO | 10 | PRACTITIONER, CLINICIAN, PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, BUSINESS_ADMIN |
 | 24 | GET | `/pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}` | Consultar un reporte con su trazabilidad | BAJO | 3 | PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN |
-| 25 | POST | `/pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions` | Registrar una acción de seguimiento | MEDIO | 6 | PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN |
+| 25 | POST | `/pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions` | Registrar una acción de seguimiento | MEDIO | 7 | PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN |
 | 26 | GET | `/pharma-labs/{pharmaLabId}/products` | Listar el catálogo de medicamentos | BAJO | 2 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN |
-| 27 | POST | `/pharma-labs/{pharmaLabId}/products` | Registrar un medicamento en el catálogo | MEDIO | 4 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
-| 28 | PATCH | `/pharma-labs/{pharmaLabId}/products/{productId}` | Actualizar un medicamento | MEDIO | 5 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
-| 29 | POST | `/pharma-labs/{pharmaLabId}/products/{productId}/status` | Cambiar el estado regulatorio de un medicamento | MEDIO | 5 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
+| 27 | POST | `/pharma-labs/{pharmaLabId}/products` | Registrar un medicamento en el catálogo | MEDIO | 5 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
+| 28 | PATCH | `/pharma-labs/{pharmaLabId}/products/{productId}` | Actualizar un medicamento | MEDIO | 6 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
+| 29 | POST | `/pharma-labs/{pharmaLabId}/products/{productId}/status` | Cambiar el estado regulatorio de un medicamento | MEDIO | 6 | PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN |
 | 30 | GET | `/pharma-labs/{pharmaLabId}/regulatory-documents` | Listar los documentos del laboratorio | BAJO | 2 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
-| 31 | POST | `/pharma-labs/{pharmaLabId}/regulatory-documents` | Registrar un documento con su primera versión | MEDIO | 5 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
+| 31 | POST | `/pharma-labs/{pharmaLabId}/regulatory-documents` | Registrar un documento con su primera versión | MEDIO | 6 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
 | 32 | GET | `/pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}` | Consultar un documento y sus versiones | MEDIO | 4 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
 | 33 | GET | `/pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/access-log` | Registro de consultas y descargas | BAJO | 3 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
-| 34 | POST | `/pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/invalidate` | Invalidar el documento sin borrarlo | MEDIO | 7 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
-| 35 | POST | `/pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions` | Sustituir el documento por una versión nueva | MEDIO | 8 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
-| 36 | POST | `/pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions/{versionId}/download` | Registrar la descarga de una versión | MEDIO | 6 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
+| 34 | POST | `/pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/invalidate` | Invalidar el documento sin borrarlo | MEDIO | 8 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
+| 35 | POST | `/pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions` | Sustituir el documento por una versión nueva | MEDIO | 9 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
+| 36 | POST | `/pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions/{versionId}/download` | Registrar la descarga de una versión | MEDIO | 7 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
 | 37 | POST | `/pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review` | Revisar vencimientos y notificar al personal | MEDIO | 5 | REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN |
 | 38 | GET | `/pharma-labs/{pharmaLabId}/staff` | Listar el personal del laboratorio | BAJO | 2 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 39 | POST | `/pharma-labs/{pharmaLabId}/staff` | Vincular personal al laboratorio | MEDIO | 6 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 40 | PATCH | `/pharma-labs/{pharmaLabId}/staff/{staffId}/permissions` | Cambiar los permisos de un colaborador | MEDIO | 6 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 41 | POST | `/pharma-labs/{pharmaLabId}/staff/{staffId}/unlink` | Desvincular a un colaborador | MEDIO | 6 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 39 | POST | `/pharma-labs/{pharmaLabId}/staff` | Vincular personal al laboratorio | MEDIO | 7 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 40 | PATCH | `/pharma-labs/{pharmaLabId}/staff/{staffId}/permissions` | Cambiar los permisos de un colaborador | MEDIO | 7 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 41 | POST | `/pharma-labs/{pharmaLabId}/staff/{staffId}/unlink` | Desvincular a un colaborador | MEDIO | 7 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
 | 42 | GET | `/pharma-labs/{pharmaLabId}/visitor-posts` | Listar las publicaciones propuestas | BAJO | 2 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 43 | POST | `/pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision` | Aprobar o rechazar la publicación propuesta | MEDIO | 10 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
+| 43 | POST | `/pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision` | Aprobar o rechazar la publicación propuesta | MEDIO | 11 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
 | 44 | POST | `/pharma-labs/notices/{noticeId}/read` | Marcar un aviso como leído | ALTO | 2 | sesión (sin roles) |
 | 45 | GET | `/pharma-labs/notices/mine` | Avisos del laboratorio dirigidos a mi cuenta | BAJO | 1 | sesión (sin roles) |
 | 46 | GET | `/pharma-labs/reference/concepts` | Diccionario de conceptos del laboratorio farmacéutico | BAJO | 0 | sesión (sin roles) |
-| 47 | POST | `/pharma-labs/visitor-posts` | Proponer una publicación como visitador | MEDIO | 6 | MEDICAL_VISITOR |
+| 47 | POST | `/pharma-labs/visitor-posts` | Proponer una publicación como visitador | MEDIO | 7 | MEDICAL_VISITOR |
 | 48 | GET | `/visit-agenda/blocks` | Listar los bloqueos vigentes | BAJO | 1 | PRACTITIONER, CLINICIAN |
-| 49 | POST | `/visit-agenda/blocks` | Bloquear un laboratorio o un visitador | MEDIO | 3 | PRACTITIONER, CLINICIAN |
-| 50 | POST | `/visit-agenda/blocks/{blockId}/lift` | Levantar un bloqueo | MEDIO | 4 | PRACTITIONER, CLINICIAN |
+| 49 | POST | `/visit-agenda/blocks` | Bloquear un laboratorio o un visitador | MEDIO | 4 | PRACTITIONER, CLINICIAN |
+| 50 | POST | `/visit-agenda/blocks/{blockId}/lift` | Levantar un bloqueo | MEDIO | 5 | PRACTITIONER, CLINICIAN |
 | 51 | GET | `/visit-agenda/doctors/{doctorUserId}` | Consultar la agenda de visitas de un doctor | BAJO | 2 | MEDICAL_VISITOR, PHARMA_LAB_ADMIN, PRACTITIONER, CLINICIAN |
 | 52 | GET | `/visit-agenda/me` | Consultar la propia agenda de visitas | BAJO | 2 | PRACTITIONER, CLINICIAN |
-| 53 | PUT | `/visit-agenda/me` | Configurar la agenda de visitas del doctor | ALTO | 7 | PRACTITIONER, CLINICIAN |
-| 54 | POST | `/visit-records` | Registrar la visita realizada | MEDIO | 14 | MEDICAL_VISITOR |
-| 55 | POST | `/visit-records/{visitRecordId}/confirm` | Confirmar que la visita ocurrió | MEDIO | 4 | PRACTITIONER, CLINICIAN |
-| 56 | POST | `/visit-records/{visitRecordId}/rating` | Calificar la visita completada | MEDIO | 8 | PRACTITIONER, CLINICIAN |
+| 53 | PUT | `/visit-agenda/me` | Configurar la agenda de visitas del doctor | ALTO | 8 | PRACTITIONER, CLINICIAN |
+| 54 | POST | `/visit-records` | Registrar la visita realizada | MEDIO | 15 | MEDICAL_VISITOR |
+| 55 | POST | `/visit-records/{visitRecordId}/confirm` | Confirmar que la visita ocurrió | MEDIO | 5 | PRACTITIONER, CLINICIAN |
+| 56 | POST | `/visit-records/{visitRecordId}/rating` | Calificar la visita completada | MEDIO | 9 | PRACTITIONER, CLINICIAN |
 | 57 | GET | `/visit-records/inbox` | Listar las visitas recibidas | BAJO | 1 | PRACTITIONER, CLINICIAN |
 | 58 | GET | `/visit-records/labs/{pharmaLabId}` | Historial de visitas del laboratorio | BAJO | 2 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
 | 59 | GET | `/visit-records/labs/{pharmaLabId}/rating-summary` | Resultados agregados de las calificaciones del laboratorio | BAJO | 3 | PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN |
-| 60 | POST | `/visit-requests` | Solicitar una visita médica a un doctor | MEDIO | 22 | MEDICAL_VISITOR |
+| 60 | POST | `/visit-requests` | Solicitar una visita médica a un doctor | MEDIO | 23 | MEDICAL_VISITOR |
 | 61 | GET | `/visit-requests/{visitRequestId}` | Consultar una solicitud con su bitácora | BAJO | 4 | MEDICAL_VISITOR, PRACTITIONER, CLINICIAN |
-| 62 | POST | `/visit-requests/{visitRequestId}/accept` | Aceptar la visita | MEDIO | 7 | PRACTITIONER, CLINICIAN |
-| 63 | POST | `/visit-requests/{visitRequestId}/cancel` | Cancelar la visita | MEDIO | 9 | MEDICAL_VISITOR, PRACTITIONER, CLINICIAN |
-| 64 | POST | `/visit-requests/{visitRequestId}/propose-time` | Proponer otro horario | MEDIO | 16 | PRACTITIONER, CLINICIAN |
-| 65 | POST | `/visit-requests/{visitRequestId}/reject` | Rechazar la visita | MEDIO | 7 | PRACTITIONER, CLINICIAN |
-| 66 | POST | `/visit-requests/{visitRequestId}/request-info` | Solicitar información adicional al visitador | MEDIO | 6 | PRACTITIONER, CLINICIAN |
-| 67 | POST | `/visit-requests/{visitRequestId}/reschedule` | Reprogramar la visita dentro del plazo permitido | MEDIO | 17 | MEDICAL_VISITOR |
+| 62 | POST | `/visit-requests/{visitRequestId}/accept` | Aceptar la visita | MEDIO | 8 | PRACTITIONER, CLINICIAN |
+| 63 | POST | `/visit-requests/{visitRequestId}/cancel` | Cancelar la visita | MEDIO | 10 | MEDICAL_VISITOR, PRACTITIONER, CLINICIAN |
+| 64 | POST | `/visit-requests/{visitRequestId}/propose-time` | Proponer otro horario | MEDIO | 17 | PRACTITIONER, CLINICIAN |
+| 65 | POST | `/visit-requests/{visitRequestId}/reject` | Rechazar la visita | MEDIO | 8 | PRACTITIONER, CLINICIAN |
+| 66 | POST | `/visit-requests/{visitRequestId}/request-info` | Solicitar información adicional al visitador | MEDIO | 7 | PRACTITIONER, CLINICIAN |
+| 67 | POST | `/visit-requests/{visitRequestId}/reschedule` | Reprogramar la visita dentro del plazo permitido | MEDIO | 18 | MEDICAL_VISITOR |
 | 68 | GET | `/visit-requests/inbox` | Listar las solicitudes de visita recibidas | BAJO | 1 | PRACTITIONER, CLINICIAN |
 | 69 | GET | `/visit-requests/mine` | Listar las propias solicitudes de visita | BAJO | 2 | MEDICAL_VISITOR |
 | 70 | GET | `/visit-surveys/labs/{pharmaLabId}` | Listar las encuestas del laboratorio | BAJO | 2 | PHARMA_LAB_ADMIN, PLATFORM_ADMIN |
-| 71 | POST | `/visit-surveys/labs/{pharmaLabId}` | Configurar una encuesta posterior a la visita | MEDIO | 5 | PHARMA_LAB_ADMIN, PLATFORM_ADMIN |
-| 72 | POST | `/visit-surveys/labs/{pharmaLabId}/{surveyId}/close` | Cerrar una encuesta | MEDIO | 5 | PHARMA_LAB_ADMIN, PLATFORM_ADMIN |
+| 71 | POST | `/visit-surveys/labs/{pharmaLabId}` | Configurar una encuesta posterior a la visita | MEDIO | 6 | PHARMA_LAB_ADMIN, PLATFORM_ADMIN |
+| 72 | POST | `/visit-surveys/labs/{pharmaLabId}/{surveyId}/close` | Cerrar una encuesta | MEDIO | 6 | PHARMA_LAB_ADMIN, PLATFORM_ADMIN |
 | 73 | GET | `/visit-surveys/labs/{pharmaLabId}/{surveyId}/results` | Resultados agregados de la encuesta | BAJO | 5 | PHARMA_LAB_ADMIN, PLATFORM_ADMIN |
 | 74 | GET | `/visit-surveys/pending` | Listar las encuestas pendientes de responder | BAJO | 1 | PRACTITIONER, CLINICIAN |
 | 75 | GET | `/visit-surveys/responses/{responseId}` | Consultar el cuestionario a responder | BAJO | 3 | PRACTITIONER, CLINICIAN |
-| 76 | POST | `/visit-surveys/responses/{responseId}` | Responder la encuesta de la visita | MEDIO | 6 | PRACTITIONER, CLINICIAN |
+| 76 | POST | `/visit-surveys/responses/{responseId}` | Responder la encuesta de la visita | MEDIO | 7 | PRACTITIONER, CLINICIAN |
 
 ---
 
@@ -108,7 +108,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs` la atiende `PharmaLabsController.list` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:60). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `PharmaLabOrganizationService.listLabs`. Lee pharma_lab.pharma_labs.
+`GET /pharma-labs` la atiende `PharmaLabsController.list` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:60). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `PharmaLabOrganizationService.listLabs`. Lee pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
@@ -116,14 +116,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.list → PharmaLabOrganizationService.listLabs → OrganizationRepository.listLabs | `src/modules/pharma_lab/repositories/organization.repository.ts:45` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.list → PharmaLabOrganizationService.listLabs → OrganizationRepository.findLabIdsWhereStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:117` |
+| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.list → PharmaLabOrganizationService.listLabs → OrganizationRepository.listLabs | `src/modules/pharma_lab/repositories/organization.repository.ts:59` |
 
 ### Cuerpo
 
@@ -167,7 +168,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -188,7 +189,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs` la atiende `PharmaLabsController.create` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:47). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreatePharmaLabDto` (8 campos, 3 obligatorios). Delega en `PharmaLabOrganizationService.createLab`. Crea filas en audit.audit_log, pharma_lab.pharma_labs. Lee audit.audit_log, directory.tenants, pharma_lab.pharma_labs.
+`POST /pharma-labs` la atiende `PharmaLabsController.create` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:47). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreatePharmaLabDto` (8 campos, 3 obligatorios). Delega en `PharmaLabOrganizationService.createLab`. Crea filas en audit.audit_log, pharma_lab.pharma_labs. Lee audit.audit_log, directory.tenants, iam.sessions, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
@@ -196,19 +197,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
-| `directory.tenants` | LEE | LEE | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:75` |
-| `pharma_lab.pharma_labs` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → OrganizationRepository.createLab | `src/modules/pharma_lab/repositories/organization.repository.ts:56` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `directory.tenants` | LEE | LEE | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:77` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `pharma_lab.pharma_labs` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → OrganizationRepository.createLab | `src/modules/pharma_lab/repositories/organization.repository.ts:70` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → OrganizationRepository.findLabByTenant | `src/modules/pharma_lab/repositories/organization.repository.ts:35` |
 
 ### Cuerpo — DTO `CreatePharmaLabDto` · `application/json`
@@ -267,7 +269,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Organización no encontrada |
 | 409 | `CONFLICT` | ConflictException: La organización ya está registrada como laboratorio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -279,7 +281,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -300,7 +302,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}` la atiende `PharmaLabsController.getOne` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:67). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `PharmaLabOrganizationService.getLab`. Lee pharma_lab.pharma_labs.
+`GET /pharma-labs/{pharmaLabId}` la atiende `PharmaLabsController.getOne` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:67). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `PharmaLabOrganizationService.getLab`. Lee pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
@@ -308,15 +310,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:67` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.getOne → PharmaLabOrganizationService.getLab → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.getOne → PharmaLabOrganizationService.getLab → PharmaLabAccessService.requireAdministeredLab → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
+| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.getOne → PharmaLabOrganizationService.getLab → PharmaLabAccessService.requireAdministeredLab → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 
 ### Parámetros
 
@@ -358,6 +361,7 @@ La operación no recibe cuerpo.
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
@@ -368,7 +372,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -379,7 +383,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabsController.update` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:76`
+- **Implementación:** `PharmaLabsController.update` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:77`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -389,28 +393,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /pharma-labs/{pharmaLabId}` la atiende `PharmaLabsController.update` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:76). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UpdatePharmaLabDto` (6 campos, 0 obligatorios). Delega en `PharmaLabOrganizationService.updateLab`. Crea filas en audit.audit_log. Actualiza pharma_lab.pharma_labs. Lee audit.audit_log, pharma_lab.pharma_labs.
+`PATCH /pharma-labs/{pharmaLabId}` la atiende `PharmaLabsController.update` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:77). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UpdatePharmaLabDto` (6 campos, 0 obligatorios). Delega en `PharmaLabOrganizationService.updateLab`. Crea filas en audit.audit_log. Actualiza pharma_lab.pharma_labs. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:76` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:76` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:77` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:77` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
-| `pharma_lab.pharma_labs` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaLabsController.update → PharmaLabOrganizationService.updateLab | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:133` |
-| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → PharmaLabAccessService.requireAdministeredLab → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
+| `pharma_lab.pharma_labs` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaLabsController.update → PharmaLabOrganizationService.updateLab | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:139` |
+| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → PharmaLabAccessService.requireAdministeredLab → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 
 ### Parámetros
 
@@ -468,6 +474,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
@@ -478,7 +485,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -489,7 +496,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabSocialController.allocate` — `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:92`
+- **Implementación:** `PharmaLabSocialController.allocate` — `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:95`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -499,27 +506,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/cost-allocations` la atiende `PharmaLabSocialController.allocate` (src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:92). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN. Valida el cuerpo como `CreateCostAllocationDto` (11 campos, 5 obligatorios). Delega en `PharmaAnalyticsService.createAllocation`. Crea filas en audit.audit_log, pharma_lab.pharma_cost_allocations. Lee accounting.journal_transactions, audit.audit_log, pharma_lab.pharma_labs, pharma_lab.pharma_products.
+`POST /pharma-labs/{pharmaLabId}/cost-allocations` la atiende `PharmaLabSocialController.allocate` (src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:95). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN. Valida el cuerpo como `CreateCostAllocationDto` (11 campos, 5 obligatorios). Delega en `PharmaAnalyticsService.createAllocation`. Crea filas en audit.audit_log, pharma_lab.pharma_cost_allocations. Lee accounting.journal_transactions, audit.audit_log, iam.sessions, pharma_lab.pharma_labs, pharma_lab.pharma_products.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:92` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:95` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:95` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation | `src/modules/pharma_lab/services/pharma-analytics.service.ts:91` |
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_cost_allocations` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AnalyticsRepository.createAllocation | `src/modules/pharma_lab/repositories/analytics.repository.ts:24` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | LEE | LEE | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → CatalogRepository.findProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:22` |
@@ -604,7 +612,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -615,7 +623,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabSocialController.report` — `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:107`
+- **Implementación:** `PharmaLabSocialController.report` — `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:110`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -625,19 +633,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/cost-allocations/report` la atiende `PharmaLabSocialController.report` (src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:107). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN. Delega en `PharmaAnalyticsService.getReport`. Lee pharma_lab.pharma_cost_allocations, pharma_lab.pharma_labs, pharma_lab.pharma_products.
+`GET /pharma-labs/{pharmaLabId}/cost-allocations/report` la atiende `PharmaLabSocialController.report` (src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:110). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN. Delega en `PharmaAnalyticsService.getReport`. Lee pharma_lab.pharma_cost_allocations, pharma_lab.pharma_labs, pharma_lab.pharma_products.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, ACCOUNTANT, FINANCE, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:110` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:107` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:110` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -682,7 +690,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -693,7 +701,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabsController.listLinkEvents` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:137`
+- **Implementación:** `PharmaLabsController.listLinkEvents` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:139`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -703,24 +711,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/link-events` la atiende `PharmaLabsController.listLinkEvents` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:137). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `PharmaLabOrganizationService.listLinkEvents`. Lee pharma_lab.pharma_lab_link_events, pharma_lab.pharma_labs.
+`GET /pharma-labs/{pharmaLabId}/link-events` la atiende `PharmaLabsController.listLinkEvents` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:139). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `PharmaLabOrganizationService.listLinkEvents`. Lee pharma_lab.pharma_lab_link_events, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:137` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:139` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:139` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharma_lab.pharma_lab_link_events` | LEE | LEE | DIRECTA | PharmaLabsController.listLinkEvents → PharmaLabOrganizationService.listLinkEvents → OrganizationRepository.listLinkEvents | `src/modules/pharma_lab/repositories/organization.repository.ts:158` |
-| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.listLinkEvents → PharmaLabOrganizationService.listLinkEvents → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
+| `pharma_lab.pharma_lab_link_events` | LEE | LEE | DIRECTA | PharmaLabsController.listLinkEvents → PharmaLabOrganizationService.listLinkEvents → OrganizationRepository.listLinkEvents | `src/modules/pharma_lab/repositories/organization.repository.ts:193` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.listLinkEvents → PharmaLabOrganizationService.listLinkEvents → PharmaLabAccessService.requireAdministeredLab → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
+| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.listLinkEvents → PharmaLabOrganizationService.listLinkEvents → PharmaLabAccessService.requireAdministeredLab → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 
 ### Parámetros
 
@@ -759,6 +768,7 @@ La operación no recibe cuerpo.
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
@@ -769,7 +779,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -780,7 +790,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.listMaterials` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:115`
+- **Implementación:** `PharmaCatalogController.listMaterials` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:118`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -790,17 +800,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/materials` la atiende `PharmaCatalogController.listMaterials` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:115). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN. Delega en `PharmaCatalogService.listMaterials`. Lee pharma_lab.informational_materials, pharma_lab.pharma_labs.
+`GET /pharma-labs/{pharmaLabId}/materials` la atiende `PharmaCatalogController.listMaterials` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:118). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN. Delega en `PharmaCatalogService.listMaterials`. Lee pharma_lab.informational_materials, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:115` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:118` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:118` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -864,7 +874,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -875,7 +885,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.createMaterial` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:102`
+- **Implementación:** `PharmaCatalogController.createMaterial` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:105`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -885,26 +895,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/materials` la atiende `PharmaCatalogController.createMaterial` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:102). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `CreateInformationalMaterialDto` (11 campos, 4 obligatorios). Delega en `PharmaCatalogService.createMaterial`. Crea filas en audit.audit_log, pharma_lab.informational_materials. Lee audit.audit_log, pharma_lab.pharma_labs, pharma_lab.pharma_products.
+`POST /pharma-labs/{pharmaLabId}/materials` la atiende `PharmaCatalogController.createMaterial` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:105). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `CreateInformationalMaterialDto` (11 campos, 4 obligatorios). Delega en `PharmaCatalogService.createMaterial`. Crea filas en audit.audit_log, pharma_lab.informational_materials. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs, pharma_lab.pharma_products.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:102` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:105` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:105` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.informational_materials` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → CatalogRepository.createMaterial | `src/modules/pharma_lab/repositories/catalog.repository.ts:134` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | LEE | LEE | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → PharmaCatalogService.requireProduct → CatalogRepository.findProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:22` |
@@ -988,7 +999,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -999,7 +1010,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.listApprovals` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:185`
+- **Implementación:** `PharmaCatalogController.listApprovals` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:188`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1009,17 +1020,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/materials/{materialId}/approvals` la atiende `PharmaCatalogController.listApprovals` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:185). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Delega en `PharmaCatalogService.listApprovals`. Lee pharma_lab.informational_materials, pharma_lab.material_approvals, pharma_lab.pharma_labs.
+`GET /pharma-labs/{pharmaLabId}/materials/{materialId}/approvals` la atiende `PharmaCatalogController.listApprovals` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:188). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Delega en `PharmaCatalogService.listApprovals`. Lee pharma_lab.informational_materials, pharma_lab.material_approvals, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:185` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, materialId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:185` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:188` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, materialId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:188` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1073,7 +1084,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1084,7 +1095,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.listAssets` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:144`
+- **Implementación:** `PharmaCatalogController.listAssets` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:147`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1094,17 +1105,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/materials/{materialId}/assets` la atiende `PharmaCatalogController.listAssets` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:144). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN. Delega en `PharmaCatalogService.listAssets`. Lee pharma_lab.informational_materials, pharma_lab.material_assets, pharma_lab.pharma_labs.
+`GET /pharma-labs/{pharmaLabId}/materials/{materialId}/assets` la atiende `PharmaCatalogController.listAssets` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:147). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN. Delega en `PharmaCatalogService.listAssets`. Lee pharma_lab.informational_materials, pharma_lab.material_assets, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:144` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, materialId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:144` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:147` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, materialId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:147` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1158,7 +1169,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1169,7 +1180,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.addAsset` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:130`
+- **Implementación:** `PharmaCatalogController.addAsset` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:133`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1179,19 +1190,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/materials/{materialId}/assets` la atiende `PharmaCatalogController.addAsset` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:130). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `AddMaterialAssetDto` (5 campos, 3 obligatorios). Delega en `PharmaCatalogService.addAsset`. Crea filas en pharma_lab.material_assets. Lee pharma_lab.informational_materials, pharma_lab.pharma_labs.
+`POST /pharma-labs/{pharmaLabId}/materials/{materialId}/assets` la atiende `PharmaCatalogController.addAsset` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:133). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `AddMaterialAssetDto` (5 campos, 3 obligatorios). Delega en `PharmaCatalogService.addAsset`. Crea filas en pharma_lab.material_assets. Lee pharma_lab.informational_materials, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:130` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, materialId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:130` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:133` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, materialId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:133` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1257,7 +1268,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Material informativo no encontrado en el laboratorio |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede modificar el contenido de un material ya aprobado; creá una versión nueva |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede modificar el contenido de un material ya aprobado; cree una versión nueva |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
@@ -1268,7 +1279,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1279,7 +1290,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.decideMaterial` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:172`
+- **Implementación:** `PharmaCatalogController.decideMaterial` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:175`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1289,26 +1300,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/materials/{materialId}/decision` la atiende `PharmaCatalogController.decideMaterial` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:172). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `DecideMaterialDto` (3 campos, 2 obligatorios). Delega en `PharmaCatalogService.decideMaterial`. Crea filas en audit.audit_log, pharma_lab.material_approvals. Actualiza pharma_lab.informational_materials. Lee audit.audit_log, pharma_lab.informational_materials, pharma_lab.pharma_labs.
+`POST /pharma-labs/{pharmaLabId}/materials/{materialId}/decision` la atiende `PharmaCatalogController.decideMaterial` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:175). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `DecideMaterialDto` (3 campos, 2 obligatorios). Delega en `PharmaCatalogService.decideMaterial`. Crea filas en audit.audit_log, pharma_lab.material_approvals. Actualiza pharma_lab.informational_materials. Lee audit.audit_log, iam.sessions, pharma_lab.informational_materials, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:172` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, materialId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:172` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:175` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, materialId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:175` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.informational_materials` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial | `src/modules/pharma_lab/services/pharma-catalog.service.ts:440` |
 | `pharma_lab.informational_materials` | LEE | LEE | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → PharmaCatalogService.requireMaterial → CatalogRepository.findMaterial | `src/modules/pharma_lab/repositories/catalog.repository.ts:87` |
 | `pharma_lab.material_approvals` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → CatalogRepository.createApproval | `src/modules/pharma_lab/repositories/catalog.repository.ts:189` |
@@ -1378,7 +1390,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1389,7 +1401,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.submitMaterial` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:160`
+- **Implementación:** `PharmaCatalogController.submitMaterial` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:163`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1399,24 +1411,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/materials/{materialId}/submit` la atiende `PharmaCatalogController.submitMaterial` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:160). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Delega en `PharmaCatalogService.submitMaterialForReview`. Crea filas en audit.audit_log. Actualiza pharma_lab.informational_materials. Lee audit.audit_log, pharma_lab.informational_materials, pharma_lab.material_assets, pharma_lab.pharma_labs.
+`POST /pharma-labs/{pharmaLabId}/materials/{materialId}/submit` la atiende `PharmaCatalogController.submitMaterial` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:163). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Delega en `PharmaCatalogService.submitMaterialForReview`. Crea filas en audit.audit_log. Actualiza pharma_lab.informational_materials. Lee audit.audit_log, iam.sessions, pharma_lab.informational_materials, pharma_lab.material_assets, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:160` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, materialId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:160` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:163` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, materialId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:163` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.informational_materials` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview | `src/modules/pharma_lab/services/pharma-catalog.service.ts:391` |
 | `pharma_lab.informational_materials` | LEE | LEE | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → PharmaCatalogService.requireMaterial → CatalogRepository.findMaterial | `src/modules/pharma_lab/repositories/catalog.repository.ts:87` |
 | `pharma_lab.material_assets` | LEE | LEE | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → CatalogRepository.listAssets | `src/modules/pharma_lab/repositories/catalog.repository.ts:174` |
@@ -1461,7 +1474,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1472,7 +1485,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MedicalVisitorsController.list` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:60`
+- **Implementación:** `MedicalVisitorsController.list` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:63`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1482,17 +1495,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/medical-visitors` la atiende `MedicalVisitorsController.list` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:60). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `MedicalVisitorsService.listVisitors`. Lee pharma_lab.medical_visitors, pharma_lab.pharma_labs.
+`GET /pharma-labs/{pharmaLabId}/medical-visitors` la atiende `MedicalVisitorsController.list` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:63). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `MedicalVisitorsService.listVisitors`. Lee pharma_lab.medical_visitors, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:60` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:63` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:63` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1562,7 +1575,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1573,7 +1586,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MedicalVisitorsController.create` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:48`
+- **Implementación:** `MedicalVisitorsController.create` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:51`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1583,34 +1596,38 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/medical-visitors` la atiende `MedicalVisitorsController.create` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:48). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateMedicalVisitorDto` (14 campos, 4 obligatorios). Delega en `MedicalVisitorsService.createVisitor`. Crea filas en audit.audit_log, pharma_lab.medical_visitor_products, pharma_lab.medical_visitor_specialties, pharma_lab.medical_visitors, pharma_lab.pharma_lab_link_events. Borra de pharma_lab.medical_visitor_products, pharma_lab.medical_visitor_specialties. Lee audit.audit_log, iam.users, pharma_lab.medical_visitors, pharma_lab.pharma_labs, pharma_lab.pharma_products.
+`POST /pharma-labs/{pharmaLabId}/medical-visitors` la atiende `MedicalVisitorsController.create` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:51). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateMedicalVisitorDto` (14 campos, 4 obligatorios). Delega en `MedicalVisitorsService.createVisitor`. Crea filas en audit.audit_log, authz.user_role_assignments, pharma_lab.medical_visitor_products, pharma_lab.medical_visitor_specialties, pharma_lab.medical_visitors, pharma_lab.pharma_lab_link_events. Borra de pharma_lab.medical_visitor_products, pharma_lab.medical_visitor_specialties. Lee audit.audit_log, authz.roles, authz.user_role_assignments, iam.sessions, iam.users, pharma_lab.medical_visitors, pharma_lab.pharma_labs, pharma_lab.pharma_products.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:48` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:51` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:51` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
-| `iam.users` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:96` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `authz.roles` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
+| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.users` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:161` |
 | `pharma_lab.medical_visitor_products` | BORRA | BORRA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → VisitorsRepository.replaceProducts | `src/modules/pharma_lab/repositories/visitors.repository.ts:158` |
 | `pharma_lab.medical_visitor_products` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → VisitorsRepository.replaceProducts | `src/modules/pharma_lab/repositories/visitors.repository.ts:160` |
 | `pharma_lab.medical_visitor_specialties` | BORRA | BORRA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → VisitorsRepository.replaceSpecialties | `src/modules/pharma_lab/repositories/visitors.repository.ts:113` |
 | `pharma_lab.medical_visitor_specialties` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → VisitorsRepository.replaceSpecialties | `src/modules/pharma_lab/repositories/visitors.repository.ts:115` |
 | `pharma_lab.medical_visitors` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → VisitorsRepository.createVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:92` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → VisitorsRepository.findVisitorByUser | `src/modules/pharma_lab/repositories/visitors.repository.ts:44` |
-| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:135` |
+| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:170` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → MedicalVisitorsService.assertProductsBelongToLab → CatalogRepository.findProductsByIds | `src/modules/pharma_lab/repositories/catalog.repository.ts:37` |
 
@@ -1691,9 +1708,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Cuenta no encontrada |
-| 409 | `CONFLICT` | ConflictException: La cuenta ya está registrada como visitador; ConflictException: El código interno ya está en uso en el laboratorio |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Algún producto no pertenece al catálogo del laboratorio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Cuenta no encontrada; ResourceNotFoundException: Rol no encontrado |
+| 409 | `CONFLICT` | ConflictException: La cuenta ya está registrada como visitador; ConflictException: El código interno ya está en uso en el laboratorio; ConflictException: El usuario ya tiene ese rol asignado y activo en ese ámbito |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Algún producto no pertenece al catálogo del laboratorio; PreconditionFailedException: Indique el rol a asignar por `roleId` o por `roleCode`; PreconditionFailedException: El rol no es asignable; PreconditionFailedException: validFrom debe ser anterior a validTo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
@@ -1704,7 +1721,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1715,7 +1732,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MedicalVisitorsController.setProducts` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:86`
+- **Implementación:** `MedicalVisitorsController.setProducts` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:89`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1725,26 +1742,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/products` la atiende `MedicalVisitorsController.setProducts` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:86). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `SetVisitorProductsDto` (1 campo, 1 obligatorio). Delega en `MedicalVisitorsService.setProducts`. Crea filas en audit.audit_log, pharma_lab.medical_visitor_products. Borra de pharma_lab.medical_visitor_products. Lee audit.audit_log, pharma_lab.medical_visitors, pharma_lab.pharma_labs, pharma_lab.pharma_products.
+`PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/products` la atiende `MedicalVisitorsController.setProducts` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:89). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `SetVisitorProductsDto` (1 campo, 1 obligatorio). Delega en `MedicalVisitorsService.setProducts`. Crea filas en audit.audit_log, pharma_lab.medical_visitor_products. Borra de pharma_lab.medical_visitor_products. Lee audit.audit_log, iam.sessions, pharma_lab.medical_visitors, pharma_lab.pharma_labs, pharma_lab.pharma_products.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, medicalVisitorId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:86` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:89` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, medicalVisitorId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:89` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.medical_visitor_products` | BORRA | BORRA | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → VisitorsRepository.replaceProducts | `src/modules/pharma_lab/repositories/visitors.repository.ts:158` |
 | `pharma_lab.medical_visitor_products` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → VisitorsRepository.replaceProducts | `src/modules/pharma_lab/repositories/visitors.repository.ts:160` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → PharmaLabAccessService.requireVisitorOfLab → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
@@ -1813,7 +1831,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1824,7 +1842,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MedicalVisitorsController.relink` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:136`
+- **Implementación:** `MedicalVisitorsController.relink` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:139`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1834,31 +1852,35 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink` la atiende `MedicalVisitorsController.relink` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:136). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RelinkMedicalVisitorDto` (2 campos, 2 obligatorios). Delega en `MedicalVisitorsService.relinkVisitor`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_link_events. Actualiza iam.users, pharma_lab.medical_visitors. Lee audit.audit_log, iam.users, pharma_lab.medical_visitors, pharma_lab.pharma_labs.
+`POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink` la atiende `MedicalVisitorsController.relink` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:139). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RelinkMedicalVisitorDto` (2 campos, 2 obligatorios). Delega en `MedicalVisitorsService.relinkVisitor`. Crea filas en audit.audit_log, authz.user_role_assignments, pharma_lab.pharma_lab_link_events. Actualiza iam.users, pharma_lab.medical_visitors. Lee audit.audit_log, authz.roles, authz.user_role_assignments, iam.sessions, iam.users, pharma_lab.medical_visitors, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:136` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, medicalVisitorId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:136` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:139` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, medicalVisitorId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:139` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
-| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:533` |
-| `iam.users` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:531` |
-| `pharma_lab.medical_visitors` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:520` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `authz.roles` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
+| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:609` |
+| `iam.users` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:607` |
+| `pharma_lab.medical_visitors` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:596` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → PharmaLabAccessService.requireVisitorOfLab → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
-| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:135` |
+| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:170` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 
 ### Parámetros
@@ -1910,9 +1932,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio |
-| 409 | `CONFLICT` | ConflictException: El visitador ya está vinculado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio; ResourceNotFoundException: Rol no encontrado |
+| 409 | `CONFLICT` | ConflictException: El visitador ya está vinculado; ConflictException: El usuario ya tiene ese rol asignado y activo en ese ámbito |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Indique el rol a asignar por `roleId` o por `roleCode`; PreconditionFailedException: El rol no es asignable; PreconditionFailedException: validFrom debe ser anterior a validTo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
@@ -1923,7 +1945,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1934,7 +1956,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MedicalVisitorsController.setSpecialties` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:98`
+- **Implementación:** `MedicalVisitorsController.setSpecialties` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:101`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1944,26 +1966,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/specialties` la atiende `MedicalVisitorsController.setSpecialties` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:98). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `SetVisitorSpecialtiesDto` (1 campo, 1 obligatorio). Delega en `MedicalVisitorsService.setSpecialties`. Crea filas en audit.audit_log, pharma_lab.medical_visitor_specialties. Borra de pharma_lab.medical_visitor_specialties. Lee audit.audit_log, pharma_lab.medical_visitors, pharma_lab.pharma_labs.
+`PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/specialties` la atiende `MedicalVisitorsController.setSpecialties` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:101). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `SetVisitorSpecialtiesDto` (1 campo, 1 obligatorio). Delega en `MedicalVisitorsService.setSpecialties`. Crea filas en audit.audit_log, pharma_lab.medical_visitor_specialties. Borra de pharma_lab.medical_visitor_specialties. Lee audit.audit_log, iam.sessions, pharma_lab.medical_visitors, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, medicalVisitorId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:98` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:101` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, medicalVisitorId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:101` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.medical_visitor_specialties` | BORRA | BORRA | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → VisitorsRepository.replaceSpecialties | `src/modules/pharma_lab/repositories/visitors.repository.ts:113` |
 | `pharma_lab.medical_visitor_specialties` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → VisitorsRepository.replaceSpecialties | `src/modules/pharma_lab/repositories/visitors.repository.ts:115` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → PharmaLabAccessService.requireVisitorOfLab → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
@@ -2030,7 +2053,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2041,7 +2064,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MedicalVisitorsController.unlink` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:115`
+- **Implementación:** `MedicalVisitorsController.unlink` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:118`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2051,42 +2074,45 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink` la atiende `MedicalVisitorsController.unlink` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:115). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UnlinkDto` (2 campos, 1 obligatorio). Delega en `MedicalVisitorsService.unlinkVisitor`. Crea filas en audit.audit_log, pharma_lab.medical_visitor_products, pharma_lab.pharma_lab_link_events, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza iam.refresh_tokens, iam.sessions, iam.users, pharma_lab.medical_visitors, pharma_lab.pharma_lab_staff, pharma_lab.visit_requests. Borra de pharma_lab.medical_visitor_products. Lee audit.audit_log, iam.sessions, iam.users, pharma_lab.medical_visitors, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs, pharma_lab.visit_requests.
+`POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink` la atiende `MedicalVisitorsController.unlink` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:118). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UnlinkDto` (2 campos, 1 obligatorio). Delega en `MedicalVisitorsService.unlinkVisitor`. Crea filas en audit.audit_log, pharma_lab.medical_visitor_products, pharma_lab.pharma_lab_link_events, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza authz.user_role_assignments, iam.refresh_tokens, iam.sessions, iam.users, pharma_lab.medical_visitors, pharma_lab.pharma_lab_staff, pharma_lab.visit_requests. Borra de pharma_lab.medical_visitor_products. Lee audit.audit_log, authz.roles, authz.user_role_assignments, iam.sessions, iam.users, pharma_lab.medical_visitors, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs y 1 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:115` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, medicalVisitorId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:115` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:118` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, medicalVisitorId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:118` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `authz.roles` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → MedicalVisitorsService.revokeVisitorRole → RolesRepository.findByCode | `src/modules/authz/repositories/roles.repository.ts:72` |
+| `authz.user_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → MedicalVisitorsService.revokeVisitorRole → UserRoleAssignmentsRepository.revoke | `src/modules/authz/repositories/user-role-assignments.repository.ts:166` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → MedicalVisitorsService.revokeVisitorRole → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
 | `iam.refresh_tokens` | ESCRIBE | ACTUALIZA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → VisitorsRepository.revokeRefreshTokens | `src/modules/pharma_lab/repositories/visitors.repository.ts:229` |
 | `iam.sessions` | ESCRIBE | ACTUALIZA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → VisitorsRepository.revokeSessions | `src/modules/pharma_lab/repositories/visitors.repository.ts:199` |
 | `iam.sessions` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → VisitorsRepository.revokeRefreshTokens | `src/modules/pharma_lab/repositories/visitors.repository.ts:223` |
-| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:396` |
-| `iam.users` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:394` |
+| `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:466` |
+| `iam.users` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:464` |
 | `pharma_lab.medical_visitor_products` | BORRA | BORRA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → VisitorsRepository.replaceProducts | `src/modules/pharma_lab/repositories/visitors.repository.ts:158` |
 | `pharma_lab.medical_visitor_products` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → VisitorsRepository.replaceProducts | `src/modules/pharma_lab/repositories/visitors.repository.ts:160` |
-| `pharma_lab.medical_visitors` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:362` |
+| `pharma_lab.medical_visitors` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:432` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → PharmaLabAccessService.requireVisitorOfLab → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
-| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:135` |
+| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:170` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
-| `pharma_lab.pharma_lab_staff` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:386` |
-| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:87` |
+| `pharma_lab.pharma_lab_staff` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:456` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.visit_request_events` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → VisitsRepository.appendRequestEvent | `src/modules/pharma_lab/repositories/visits.repository.ts:187` |
-| `pharma_lab.visit_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:419` |
+| `pharma_lab.visit_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:489` |
 | `pharma_lab.visit_requests` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → VisitsRepository.listOpenRequestsOfVisitor | `src/modules/pharma_lab/repositories/visits.repository.ts:133` |
 
 ### Parámetros
@@ -2150,7 +2176,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2161,7 +2187,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `MedicalVisitorsController.verify` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:69`
+- **Implementación:** `MedicalVisitorsController.verify` — `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:72`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2171,27 +2197,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/verifications` la atiende `MedicalVisitorsController.verify` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:69). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `VerifyMedicalVisitorDto` (3 campos, 0 obligatorios). Delega en `MedicalVisitorsService.verifyVisitor`. Crea filas en audit.audit_log. Actualiza pharma_lab.medical_visitors. Lee audit.audit_log, pharma_lab.medical_visitors, pharma_lab.pharma_labs.
+`POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/verifications` la atiende `MedicalVisitorsController.verify` (src/modules/pharma_lab/controllers/medical-visitors.controller.ts:72). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `VerifyMedicalVisitorDto` (3 campos, 0 obligatorios). Delega en `MedicalVisitorsService.verifyVisitor`. Crea filas en audit.audit_log. Actualiza pharma_lab.medical_visitors. Lee audit.audit_log, iam.sessions, pharma_lab.medical_visitors, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, medicalVisitorId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:69` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:72` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, medicalVisitorId | `src/modules/pharma_lab/controllers/medical-visitors.controller.ts:72` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
-| `pharma_lab.medical_visitors` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:216` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `pharma_lab.medical_visitors` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:286` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → PharmaLabAccessService.requireVisitorOfLab → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 
@@ -2254,7 +2281,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:MedicalVisitorsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2265,7 +2292,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacovigilanceController.listReports` — `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:64`
+- **Implementación:** `PharmacovigilanceController.listReports` — `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:70`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2275,17 +2302,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports` la atiende `PharmacovigilanceController.listReports` (src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:64). Exige sesión con alguno de los roles PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN. Delega en `PharmacovigilanceService.listReports`. Lee pharma_lab.pharma_labs, pharma_lab.pharmacovigilance_reports.
+`GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports` la atiende `PharmacovigilanceController.listReports` (src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:70). Exige sesión con alguno de los roles PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN. Delega en `PharmacovigilanceService.listReports`. Lee pharma_lab.pharma_labs, pharma_lab.pharmacovigilance_reports.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:64` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:70` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:70` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2351,7 +2378,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2362,7 +2389,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacovigilanceController.createReport` — `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:45`
+- **Implementación:** `PharmacovigilanceController.createReport` — `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:48`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2372,28 +2399,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports` la atiende `PharmacovigilanceController.createReport` (src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:45). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN, PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, BUSINESS_ADMIN. Valida el cuerpo como `CreatePharmacovigilanceReportDto` (11 campos, 6 obligatorios). Delega en `PharmacovigilanceService.createReport`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.pharmacovigilance_actions, pharma_lab.pharmacovigilance_reports. Lee audit.audit_log, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs, pharma_lab.pharma_products, pharma_lab.pharmacovigilance_reports.
+`POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports` la atiende `PharmacovigilanceController.createReport` (src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:48). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN, PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, BUSINESS_ADMIN. Valida el cuerpo como `CreatePharmacovigilanceReportDto` (11 campos, 6 obligatorios). Delega en `PharmacovigilanceService.createReport`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.pharmacovigilance_actions, pharma_lab.pharmacovigilance_reports. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs, pharma_lab.pharma_products, pharma_lab.pharmacovigilance_reports.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN, PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, BUSINESS_ADMIN | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:45` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN, PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, BUSINESS_ADMIN | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:48` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:48` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → PharmaLabNotificationsService.notifyAll → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
-| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → PharmaLabOrganizationService.listActiveStaffUserIds → OrganizationRepository.listStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:98` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → PharmaLabOrganizationService.listActiveStaffUserIds → OrganizationRepository.listStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:133` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | LEE | LEE | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → CatalogRepository.findProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:22` |
 | `pharma_lab.pharmacovigilance_actions` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → PharmacovigilanceRepository.appendAction | `src/modules/pharma_lab/repositories/pharmacovigilance.repository.ts:101` |
@@ -2481,7 +2509,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2492,7 +2520,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacovigilanceController.getReport` — `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:74`
+- **Implementación:** `PharmacovigilanceController.getReport` — `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:80`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2502,17 +2530,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}` la atiende `PharmacovigilanceController.getReport` (src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:74). Exige sesión con alguno de los roles PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN. Delega en `PharmacovigilanceService.getReportDetail`. Lee pharma_lab.pharma_labs, pharma_lab.pharmacovigilance_actions, pharma_lab.pharmacovigilance_reports.
+`GET /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}` la atiende `PharmacovigilanceController.getReport` (src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:80). Exige sesión con alguno de los roles PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN. Delega en `PharmacovigilanceService.getReportDetail`. Lee pharma_lab.pharma_labs, pharma_lab.pharmacovigilance_actions, pharma_lab.pharmacovigilance_reports.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, reportId | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:74` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:80` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, reportId | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:80` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2580,7 +2608,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2591,7 +2619,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmacovigilanceController.addAction` — `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:90`
+- **Implementación:** `PharmacovigilanceController.addAction` — `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:96`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2601,26 +2629,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions` la atiende `PharmacovigilanceController.addAction` (src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:90). Exige sesión con alguno de los roles PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `AddPharmacovigilanceActionDto` (5 campos, 3 obligatorios). Delega en `PharmacovigilanceService.addAction`. Crea filas en audit.audit_log, pharma_lab.pharmacovigilance_actions. Actualiza pharma_lab.pharmacovigilance_reports. Lee audit.audit_log, pharma_lab.pharma_labs, pharma_lab.pharmacovigilance_reports.
+`POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions` la atiende `PharmacovigilanceController.addAction` (src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:96). Exige sesión con alguno de los roles PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `AddPharmacovigilanceActionDto` (5 campos, 3 obligatorios). Delega en `PharmacovigilanceService.addAction`. Crea filas en audit.audit_log, pharma_lab.pharmacovigilance_actions. Actualiza pharma_lab.pharmacovigilance_reports. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs, pharma_lab.pharmacovigilance_reports.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, reportId | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:90` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMACOVIGILANCE_OFFICER, PHARMA_LAB_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:96` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, reportId | `src/modules/pharma_lab/controllers/pharmacovigilance.controller.ts:96` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharmacovigilance_actions` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → PharmacovigilanceRepository.appendAction | `src/modules/pharma_lab/repositories/pharmacovigilance.repository.ts:101` |
 | `pharma_lab.pharmacovigilance_reports` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction | `src/modules/pharma_lab/services/pharmacovigilance.service.ts:218` |
@@ -2694,7 +2723,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmacovigilanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2705,7 +2734,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.listProducts` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:61`
+- **Implementación:** `PharmaCatalogController.listProducts` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:64`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2715,17 +2744,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/products` la atiende `PharmaCatalogController.listProducts` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:61). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN. Delega en `PharmaCatalogService.listProducts`. Lee pharma_lab.pharma_labs, pharma_lab.pharma_products.
+`GET /pharma-labs/{pharmaLabId}/products` la atiende `PharmaCatalogController.listProducts` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:64). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN. Delega en `PharmaCatalogService.listProducts`. Lee pharma_lab.pharma_labs, pharma_lab.pharma_products.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:61` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, MEDICAL_VISITOR, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:64` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:64` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2791,7 +2820,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2802,7 +2831,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.createProduct` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:48`
+- **Implementación:** `PharmaCatalogController.createProduct` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:51`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2812,26 +2841,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/products` la atiende `PharmaCatalogController.createProduct` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:48). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `CreatePharmaProductDto` (14 campos, 4 obligatorios). Delega en `PharmaCatalogService.createProduct`. Crea filas en audit.audit_log, pharma_lab.pharma_products. Lee audit.audit_log, pharma_lab.pharma_labs.
+`POST /pharma-labs/{pharmaLabId}/products` la atiende `PharmaCatalogController.createProduct` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:51). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `CreatePharmaProductDto` (14 campos, 4 obligatorios). Delega en `PharmaCatalogService.createProduct`. Crea filas en audit.audit_log, pharma_lab.pharma_products. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:48` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:51` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:51` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → CatalogRepository.createProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:69` |
 
@@ -2923,7 +2953,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2934,7 +2964,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.updateProduct` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:76`
+- **Implementación:** `PharmaCatalogController.updateProduct` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:79`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2944,26 +2974,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /pharma-labs/{pharmaLabId}/products/{productId}` la atiende `PharmaCatalogController.updateProduct` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:76). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `UpdatePharmaProductDto` (7 campos, 0 obligatorios). Delega en `PharmaCatalogService.updateProduct`. Crea filas en audit.audit_log. Actualiza pharma_lab.pharma_products. Lee audit.audit_log, pharma_lab.pharma_labs, pharma_lab.pharma_products.
+`PATCH /pharma-labs/{pharmaLabId}/products/{productId}` la atiende `PharmaCatalogController.updateProduct` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:79). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `UpdatePharmaProductDto` (7 campos, 0 obligatorios). Delega en `PharmaCatalogService.updateProduct`. Crea filas en audit.audit_log. Actualiza pharma_lab.pharma_products. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs, pharma_lab.pharma_products.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:76` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, productId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:76` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:79` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, productId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:79` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct | `src/modules/pharma_lab/services/pharma-catalog.service.ts:164` |
 | `pharma_lab.pharma_products` | LEE | LEE | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → PharmaCatalogService.requireProduct → CatalogRepository.findProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:22` |
@@ -3038,7 +3069,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3049,7 +3080,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaCatalogController.changeProductStatus` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:89`
+- **Implementación:** `PharmaCatalogController.changeProductStatus` — `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:92`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3059,26 +3090,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/products/{productId}/status` la atiende `PharmaCatalogController.changeProductStatus` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:89). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `ChangeProductStatusDto` (2 campos, 2 obligatorios). Delega en `PharmaCatalogService.changeProductStatus`. Crea filas en audit.audit_log. Actualiza pharma_lab.pharma_products. Lee audit.audit_log, pharma_lab.pharma_labs, pharma_lab.pharma_products.
+`POST /pharma-labs/{pharmaLabId}/products/{productId}/status` la atiende `PharmaCatalogController.changeProductStatus` (src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:92). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN. Valida el cuerpo como `ChangeProductStatusDto` (2 campos, 2 obligatorios). Delega en `PharmaCatalogService.changeProductStatus`. Crea filas en audit.audit_log. Actualiza pharma_lab.pharma_products. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs, pharma_lab.pharma_products.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, productId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:89` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, REGULATORY_AFFAIRS, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:92` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, productId | `src/modules/pharma_lab/controllers/pharma-catalog.controller.ts:92` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus | `src/modules/pharma_lab/services/pharma-catalog.service.ts:228` |
 | `pharma_lab.pharma_products` | LEE | LEE | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → PharmaCatalogService.requireProduct → CatalogRepository.findProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:22` |
@@ -3144,7 +3176,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3155,7 +3187,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RegulatoryDocumentsController.list` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:64`
+- **Implementación:** `RegulatoryDocumentsController.list` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:67`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3165,17 +3197,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/regulatory-documents` la atiende `RegulatoryDocumentsController.list` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:64). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Delega en `RegulatoryDocumentsService.listDocuments`. Lee pharma_lab.pharma_labs, pharma_lab.regulatory_documents.
+`GET /pharma-labs/{pharmaLabId}/regulatory-documents` la atiende `RegulatoryDocumentsController.list` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:67). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Delega en `RegulatoryDocumentsService.listDocuments`. Lee pharma_lab.pharma_labs, pharma_lab.regulatory_documents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:64` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:67` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:67` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -3238,7 +3270,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3249,7 +3281,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RegulatoryDocumentsController.create` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:52`
+- **Implementación:** `RegulatoryDocumentsController.create` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:55`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3259,26 +3291,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/regulatory-documents` la atiende `RegulatoryDocumentsController.create` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:52). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Valida el cuerpo como `CreateRegulatoryDocumentDto` (15 campos, 6 obligatorios). Delega en `RegulatoryDocumentsService.createDocument`. Crea filas en audit.audit_log, pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents. Lee audit.audit_log, pharma_lab.pharma_labs.
+`POST /pharma-labs/{pharmaLabId}/regulatory-documents` la atiende `RegulatoryDocumentsController.create` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:55). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Valida el cuerpo como `CreateRegulatoryDocumentDto` (15 campos, 6 obligatorios). Delega en `RegulatoryDocumentsService.createDocument`. Crea filas en audit.audit_log, pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:52` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:55` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:55` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.regulatory_document_versions` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → RegulatoryRepository.createVersion | `src/modules/pharma_lab/repositories/regulatory.repository.ts:99` |
 | `pharma_lab.regulatory_documents` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → RegulatoryRepository.createDocument | `src/modules/pharma_lab/repositories/regulatory.repository.ts:81` |
@@ -3372,7 +3405,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3383,7 +3416,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RegulatoryDocumentsController.getOne` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:73`
+- **Implementación:** `RegulatoryDocumentsController.getOne` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:76`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3393,17 +3426,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}` la atiende `RegulatoryDocumentsController.getOne` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:73). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Delega en `RegulatoryDocumentsService.getDocument`. Crea filas en pharma_lab.regulatory_document_access_log. Lee pharma_lab.pharma_labs, pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents.
+`GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}` la atiende `RegulatoryDocumentsController.getOne` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:76). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Delega en `RegulatoryDocumentsService.getDocument`. Crea filas en pharma_lab.regulatory_document_access_log. Lee pharma_lab.pharma_labs, pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, documentId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:73` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:76` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, documentId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:76` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -3469,7 +3502,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3480,7 +3513,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RegulatoryDocumentsController.accessLog` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:131`
+- **Implementación:** `RegulatoryDocumentsController.accessLog` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:134`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3490,17 +3523,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/access-log` la atiende `RegulatoryDocumentsController.accessLog` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:131). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Delega en `RegulatoryDocumentsService.listAccessLog`. Lee pharma_lab.pharma_labs, pharma_lab.regulatory_document_access_log, pharma_lab.regulatory_documents.
+`GET /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/access-log` la atiende `RegulatoryDocumentsController.accessLog` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:134). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Delega en `RegulatoryDocumentsService.listAccessLog`. Lee pharma_lab.pharma_labs, pharma_lab.regulatory_document_access_log, pharma_lab.regulatory_documents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:131` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, documentId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:131` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:134` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, documentId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:134` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -3552,7 +3585,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3563,7 +3596,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RegulatoryDocumentsController.invalidate` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:119`
+- **Implementación:** `RegulatoryDocumentsController.invalidate` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:122`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3573,26 +3606,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/invalidate` la atiende `RegulatoryDocumentsController.invalidate` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:119). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Valida el cuerpo como `InvalidateDocumentDto` (1 campo, 1 obligatorio). Delega en `RegulatoryDocumentsService.invalidateDocument`. Crea filas en audit.audit_log. Actualiza pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents. Lee audit.audit_log, pharma_lab.pharma_labs, pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents.
+`POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/invalidate` la atiende `RegulatoryDocumentsController.invalidate` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:122). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Valida el cuerpo como `InvalidateDocumentDto` (1 campo, 1 obligatorio). Delega en `RegulatoryDocumentsService.invalidateDocument`. Crea filas en audit.audit_log. Actualiza pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs, pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, documentId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:119` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:122` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, documentId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:122` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.regulatory_document_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument | `src/modules/pharma_lab/services/regulatory-documents.service.ts:210` |
 | `pharma_lab.regulatory_document_versions` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → RegulatoryRepository.findCurrentVersion | `src/modules/pharma_lab/repositories/regulatory.repository.ts:117` |
@@ -3657,7 +3691,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3668,7 +3702,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RegulatoryDocumentsController.addVersion` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:89`
+- **Implementación:** `RegulatoryDocumentsController.addVersion` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:92`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3678,26 +3712,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions` la atiende `RegulatoryDocumentsController.addVersion` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:89). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Valida el cuerpo como `AddDocumentVersionDto` (7 campos, 4 obligatorios). Delega en `RegulatoryDocumentsService.addVersion`. Crea filas en audit.audit_log, pharma_lab.regulatory_document_versions. Actualiza pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents. Lee audit.audit_log, pharma_lab.pharma_labs, pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents.
+`POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions` la atiende `RegulatoryDocumentsController.addVersion` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:92). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Valida el cuerpo como `AddDocumentVersionDto` (7 campos, 4 obligatorios). Delega en `RegulatoryDocumentsService.addVersion`. Crea filas en audit.audit_log, pharma_lab.regulatory_document_versions. Actualiza pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs, pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, documentId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:89` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:92` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, documentId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:92` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.regulatory_document_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion | `src/modules/pharma_lab/services/regulatory-documents.service.ts:147` |
 | `pharma_lab.regulatory_document_versions` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → RegulatoryRepository.createVersion | `src/modules/pharma_lab/repositories/regulatory.repository.ts:99` |
@@ -3778,7 +3813,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3789,7 +3824,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RegulatoryDocumentsController.download` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:102`
+- **Implementación:** `RegulatoryDocumentsController.download` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:105`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3799,24 +3834,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions/{versionId}/download` la atiende `RegulatoryDocumentsController.download` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:102). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Delega en `RegulatoryDocumentsService.registerDownload`. Crea filas en audit.audit_log, pharma_lab.regulatory_document_access_log. Lee audit.audit_log, pharma_lab.pharma_labs, pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents.
+`POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions/{versionId}/download` la atiende `RegulatoryDocumentsController.download` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:105). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Delega en `RegulatoryDocumentsService.registerDownload`. Crea filas en audit.audit_log, pharma_lab.regulatory_document_access_log. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs, pharma_lab.regulatory_document_versions, pharma_lab.regulatory_documents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, documentId, versionId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:102` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:105` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, documentId, versionId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:105` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.regulatory_document_access_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → RegulatoryRepository.appendAccess | `src/modules/pharma_lab/repositories/regulatory.repository.ts:153` |
 | `pharma_lab.regulatory_document_versions` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → RegulatoryRepository.listVersions | `src/modules/pharma_lab/repositories/regulatory.repository.ts:134` |
@@ -3873,7 +3909,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3884,7 +3920,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RegulatoryDocumentsController.reviewExpirations` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:141`
+- **Implementación:** `RegulatoryDocumentsController.reviewExpirations` — `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:144`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3894,24 +3930,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review` la atiende `RegulatoryDocumentsController.reviewExpirations` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:141). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Delega en `RegulatoryDocumentsService.reviewExpirations`. Crea filas en pharma_lab.pharma_lab_notices. Actualiza pharma_lab.regulatory_documents. Lee pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs, pharma_lab.regulatory_documents.
+`POST /pharma-labs/{pharmaLabId}/regulatory-documents/expirations/review` la atiende `RegulatoryDocumentsController.reviewExpirations` (src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:144). Exige sesión con alguno de los roles REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN. Delega en `RegulatoryDocumentsService.reviewExpirations`. Crea filas en pharma_lab.pharma_lab_notices. Actualiza pharma_lab.regulatory_documents. Lee pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs, pharma_lab.regulatory_documents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:141` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:141` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: REGULATORY_AFFAIRS, PHARMA_LAB_ADMIN, LEGAL_COUNSEL, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:144` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/regulatory-documents.controller.ts:144` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.reviewExpirations → RegulatoryDocumentsService.reviewExpirations → PharmaLabNotificationsService.notifyAll → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
-| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.reviewExpirations → RegulatoryDocumentsService.reviewExpirations → PharmaLabOrganizationService.listActiveStaffUserIds → OrganizationRepository.listStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:98` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.reviewExpirations → RegulatoryDocumentsService.reviewExpirations → PharmaLabOrganizationService.listActiveStaffUserIds → OrganizationRepository.listStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:133` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.reviewExpirations → RegulatoryDocumentsService.reviewExpirations → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.regulatory_documents` | ESCRIBE | ACTUALIZA | POR_TIPO | RegulatoryDocumentsController.reviewExpirations → RegulatoryDocumentsService.reviewExpirations | `src/modules/pharma_lab/services/regulatory-documents.service.ts:378` |
 | `pharma_lab.regulatory_documents` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.reviewExpirations → RegulatoryDocumentsService.reviewExpirations → RegulatoryRepository.listExpiringDocuments | `src/modules/pharma_lab/repositories/regulatory.repository.ts:59` |
@@ -3949,7 +3985,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:RegulatoryDocumentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -3960,7 +3996,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabsController.listStaff` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:99`
+- **Implementación:** `PharmaLabsController.listStaff` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:100`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3970,24 +4006,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/staff` la atiende `PharmaLabsController.listStaff` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:99). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `PharmaLabOrganizationService.listStaff`. Lee pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
+`GET /pharma-labs/{pharmaLabId}/staff` la atiende `PharmaLabsController.listStaff` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:100). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `PharmaLabOrganizationService.listStaff`. Lee pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:99` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:100` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:100` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.listStaff → PharmaLabOrganizationService.listStaff → OrganizationRepository.listStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:98` |
-| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.listStaff → PharmaLabOrganizationService.listStaff → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.listStaff → PharmaLabOrganizationService.listStaff → OrganizationRepository.listStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:133` |
+| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.listStaff → PharmaLabOrganizationService.listStaff → PharmaLabAccessService.requireAdministeredLab → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 
 ### Parámetros
 
@@ -4032,6 +4068,7 @@ La operación no recibe cuerpo.
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
@@ -4042,7 +4079,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4053,7 +4090,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabsController.linkStaff` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:87`
+- **Implementación:** `PharmaLabsController.linkStaff` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:88`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4063,30 +4100,31 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/staff` la atiende `PharmaLabsController.linkStaff` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:87). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `LinkStaffDto` (9 campos, 3 obligatorios). Delega en `PharmaLabOrganizationService.linkStaff`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_link_events, pharma_lab.pharma_lab_staff. Lee audit.audit_log, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
+`POST /pharma-labs/{pharmaLabId}/staff` la atiende `PharmaLabsController.linkStaff` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:88). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `LinkStaffDto` (9 campos, 3 obligatorios). Delega en `PharmaLabOrganizationService.linkStaff`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_link_events, pharma_lab.pharma_lab_staff. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:87` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:88` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:88` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
-| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:135` |
-| `pharma_lab.pharma_lab_staff` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → OrganizationRepository.createStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:116` |
-| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:87` |
-| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:170` |
+| `pharma_lab.pharma_lab_staff` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → OrganizationRepository.createStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:151` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
+| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → PharmaLabAccessService.requireAdministeredLab → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 
 ### Parámetros
 
@@ -4165,7 +4203,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4176,7 +4214,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabsController.updatePermissions` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:108`
+- **Implementación:** `PharmaLabsController.updatePermissions` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:110`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4186,30 +4224,31 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /pharma-labs/{pharmaLabId}/staff/{staffId}/permissions` la atiende `PharmaLabsController.updatePermissions` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:108). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UpdateStaffPermissionsDto` (2 campos, 2 obligatorios). Delega en `PharmaLabOrganizationService.updateStaffPermissions`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_link_events. Actualiza pharma_lab.pharma_lab_staff. Lee audit.audit_log, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
+`PATCH /pharma-labs/{pharmaLabId}/staff/{staffId}/permissions` la atiende `PharmaLabsController.updatePermissions` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:110). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UpdateStaffPermissionsDto` (2 campos, 2 obligatorios). Delega en `PharmaLabOrganizationService.updateStaffPermissions`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_link_events. Actualiza pharma_lab.pharma_lab_staff. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:108` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, staffId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:108` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:110` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, staffId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:110` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
-| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:135` |
-| `pharma_lab.pharma_lab_staff` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:261` |
-| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → PharmaLabOrganizationService.requireStaff → OrganizationRepository.findStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:71` |
-| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:170` |
+| `pharma_lab.pharma_lab_staff` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:297` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → PharmaLabAccessService.requireAdministeredLab → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
+| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → PharmaLabAccessService.requireAdministeredLab → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 
 ### Parámetros
 
@@ -4265,6 +4304,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Ficha de personal no encontrada en el laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
@@ -4275,7 +4315,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4286,7 +4326,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabsController.unlinkStaff` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:125`
+- **Implementación:** `PharmaLabsController.unlinkStaff` — `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:127`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4296,30 +4336,31 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/staff/{staffId}/unlink` la atiende `PharmaLabsController.unlinkStaff` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:125). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UnlinkDto` (2 campos, 1 obligatorio). Delega en `PharmaLabOrganizationService.unlinkStaff`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_link_events. Actualiza pharma_lab.pharma_lab_staff. Lee audit.audit_log, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
+`POST /pharma-labs/{pharmaLabId}/staff/{staffId}/unlink` la atiende `PharmaLabsController.unlinkStaff` (src/modules/pharma_lab/controllers/pharma-labs.controller.ts:127). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `UnlinkDto` (2 campos, 1 obligatorio). Delega en `PharmaLabOrganizationService.unlinkStaff`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_link_events. Actualiza pharma_lab.pharma_lab_staff. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_lab_staff, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:125` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, staffId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:125` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:127` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, staffId | `src/modules/pharma_lab/controllers/pharma-labs.controller.ts:127` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
-| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:135` |
-| `pharma_lab.pharma_lab_staff` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:310` |
-| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → PharmaLabOrganizationService.requireStaff → OrganizationRepository.findStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:71` |
-| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:170` |
+| `pharma_lab.pharma_lab_staff` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:350` |
+| `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → PharmaLabAccessService.requireAdministeredLab → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
+| `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → PharmaLabAccessService.requireAdministeredLab → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 
 ### Parámetros
 
@@ -4370,6 +4411,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Ficha de personal no encontrada en el laboratorio |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
@@ -4380,7 +4422,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4391,7 +4433,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabSocialController.listPosts` — `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:69`
+- **Implementación:** `PharmaLabSocialController.listPosts` — `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:72`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4401,17 +4443,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /pharma-labs/{pharmaLabId}/visitor-posts` la atiende `PharmaLabSocialController.listPosts` (src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:69). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `PharmaSocialService.listSubmissions`. Lee pharma_lab.pharma_labs, pharma_lab.visitor_post_submissions.
+`GET /pharma-labs/{pharmaLabId}/visitor-posts` la atiende `PharmaLabSocialController.listPosts` (src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:72). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `PharmaSocialService.listSubmissions`. Lee pharma_lab.pharma_labs, pharma_lab.visitor_post_submissions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:69` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:72` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:72` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -4469,7 +4511,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4480,7 +4522,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabSocialController.decidePost` — `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:79`
+- **Implementación:** `PharmaLabSocialController.decidePost` — `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:82`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4490,29 +4532,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision` la atiende `PharmaLabSocialController.decidePost` (src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:79). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DecideVisitorPostDto` (2 campos, 2 obligatorios). Delega en `PharmaSocialService.decide`. Crea filas en audit.audit_log, community.public_profiles, community.social_posts, pharma_lab.pharma_lab_notices. Actualiza pharma_lab.visitor_post_submissions. Lee audit.audit_log, community.public_profiles, pharma_lab.medical_visitors, pharma_lab.pharma_labs, pharma_lab.visitor_post_submissions.
+`POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision` la atiende `PharmaLabSocialController.decidePost` (src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:82). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DecideVisitorPostDto` (2 campos, 2 obligatorios). Delega en `PharmaSocialService.decide`. Crea filas en audit.audit_log, community.public_profiles, community.social_posts, pharma_lab.pharma_lab_notices. Actualiza pharma_lab.visitor_post_submissions. Lee audit.audit_log, community.public_profiles, iam.sessions, pharma_lab.medical_visitors, pharma_lab.pharma_labs, pharma_lab.visitor_post_submissions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, submissionId | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:79` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:82` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, submissionId | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:82` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `community.public_profiles` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → PharmaSocialService.ensurePublicProfile | `src/modules/pharma_lab/services/pharma-social.service.ts:266` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → PharmaSocialService.ensurePublicProfile | `src/modules/pharma_lab/services/pharma-social.service.ts:259` |
 | `community.social_posts` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide | `src/modules/pharma_lab/services/pharma-social.service.ts:179` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → PharmaLabAccessService.requireVisitorOfLab → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
@@ -4581,7 +4624,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4610,9 +4653,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharma_lab/controllers/pharma-lab-notices.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: noticeId | `src/modules/pharma_lab/controllers/pharma-lab-notices.controller.ts:48` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -4654,7 +4697,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabNoticesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabNoticesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4683,8 +4726,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharma_lab/controllers/pharma-lab-notices.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -4733,7 +4776,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabNoticesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabNoticesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4762,8 +4805,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharma_lab/controllers/pharma-lab-reference.controller.ts:34` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -4794,7 +4837,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabReferenceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabReferenceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4805,7 +4848,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PharmaLabSocialController.submitPost` — `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:57`
+- **Implementación:** `PharmaLabSocialController.submitPost` — `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:60`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -4815,25 +4858,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /pharma-labs/visitor-posts` la atiende `PharmaLabSocialController.submitPost` (src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:57). Exige sesión con alguno de los roles MEDICAL_VISITOR. Valida el cuerpo como `SubmitVisitorPostDto` (2 campos, 1 obligatorio). Delega en `PharmaSocialService.submit`. Crea filas en audit.audit_log, pharma_lab.visitor_post_submissions. Lee audit.audit_log, pharma_lab.informational_materials, pharma_lab.medical_visitors, pharma_lab.pharma_labs.
+`POST /pharma-labs/visitor-posts` la atiende `PharmaLabSocialController.submitPost` (src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:60). Exige sesión con alguno de los roles MEDICAL_VISITOR. Valida el cuerpo como `SubmitVisitorPostDto` (2 campos, 1 obligatorio). Delega en `PharmaSocialService.submit`. Crea filas en audit.audit_log, pharma_lab.visitor_post_submissions. Lee audit.audit_log, iam.sessions, pharma_lab.informational_materials, pharma_lab.medical_visitors, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: MEDICAL_VISITOR | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: MEDICAL_VISITOR | `src/modules/pharma_lab/controllers/pharma-lab-social.controller.ts:60` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.informational_materials` | LEE | LEE | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → CatalogRepository.findMaterial | `src/modules/pharma_lab/repositories/catalog.repository.ts:87` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → PharmaLabAccessService.requireOperatingVisitor → VisitorsRepository.findVisitorByUser | `src/modules/pharma_lab/repositories/visitors.repository.ts:44` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → PharmaLabAccessService.requireOperatingVisitor → PharmaLabAccessService.requireVisitorOperable → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
@@ -4891,7 +4935,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:PharmaLabSocialController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4920,8 +4964,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-agenda.controller.ts:83` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -4967,7 +5011,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -4988,7 +5032,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-agenda/blocks` la atiende `VisitAgendaController.createBlock` (src/modules/pharma_lab/controllers/visit-agenda.controller.ts:71). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateVisitBlockDto` (3 campos, 1 obligatorio). Delega en `VisitAgendaService.createBlock`. Crea filas en audit.audit_log, pharma_lab.doctor_visit_blocks. Lee audit.audit_log.
+`POST /visit-agenda/blocks` la atiende `VisitAgendaController.createBlock` (src/modules/pharma_lab/controllers/visit-agenda.controller.ts:71). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `CreateVisitBlockDto` (3 campos, 1 obligatorio). Delega en `VisitAgendaService.createBlock`. Crea filas en audit.audit_log, pharma_lab.doctor_visit_blocks. Lee audit.audit_log, iam.sessions.
 
 ### Requerimientos
 
@@ -4996,17 +5040,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-agenda.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.doctor_visit_blocks` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AgendaRepository.createBlock | `src/modules/pharma_lab/repositories/agenda.repository.ts:103` |
 
 ### Cuerpo — DTO `CreateVisitBlockDto` · `application/json`
@@ -5051,7 +5096,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indicá el laboratorio o el visitador a bloquear |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique el laboratorio o el visitador a bloquear |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/pharma_lab.md).
@@ -5062,7 +5107,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5083,7 +5128,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-agenda/blocks/{blockId}/lift` la atiende `VisitAgendaController.liftBlock` (src/modules/pharma_lab/controllers/visit-agenda.controller.ts:93). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `VisitAgendaService.liftBlock`. Crea filas en audit.audit_log. Actualiza pharma_lab.doctor_visit_blocks. Lee audit.audit_log, pharma_lab.doctor_visit_blocks.
+`POST /visit-agenda/blocks/{blockId}/lift` la atiende `VisitAgendaController.liftBlock` (src/modules/pharma_lab/controllers/visit-agenda.controller.ts:93). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `VisitAgendaService.liftBlock`. Crea filas en audit.audit_log. Actualiza pharma_lab.doctor_visit_blocks. Lee audit.audit_log, iam.sessions, pharma_lab.doctor_visit_blocks.
 
 ### Requerimientos
 
@@ -5091,16 +5136,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-agenda.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: blockId | `src/modules/pharma_lab/controllers/visit-agenda.controller.ts:93` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.doctor_visit_blocks` | ESCRIBE | ACTUALIZA | POR_TIPO | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock | `src/modules/pharma_lab/services/visit-agenda.service.ts:261` |
 | `pharma_lab.doctor_visit_blocks` | LEE | LEE | DIRECTA | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AgendaRepository.findBlock | `src/modules/pharma_lab/repositories/agenda.repository.ts:118` |
 
@@ -5141,7 +5187,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5170,9 +5216,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MEDICAL_VISITOR, PHARMA_LAB_ADMIN, PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-agenda.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: doctorUserId | `src/modules/pharma_lab/controllers/visit-agenda.controller.ts:61` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -5214,7 +5260,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5243,8 +5289,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-agenda.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -5279,7 +5325,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5300,7 +5346,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /visit-agenda/me` la atiende `VisitAgendaController.putPolicy` (src/modules/pharma_lab/controllers/visit-agenda.controller.ts:39). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `PutVisitPolicyDto` (16 campos, 6 obligatorios). Delega en `VisitAgendaService.putPolicy`. Crea filas en audit.audit_log, pharma_lab.doctor_visit_policies, pharma_lab.doctor_visit_windows. Actualiza pharma_lab.doctor_visit_policies. Borra de pharma_lab.doctor_visit_windows. Lee audit.audit_log, pharma_lab.doctor_visit_policies.
+`PUT /visit-agenda/me` la atiende `VisitAgendaController.putPolicy` (src/modules/pharma_lab/controllers/visit-agenda.controller.ts:39). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `PutVisitPolicyDto` (16 campos, 6 obligatorios). Delega en `VisitAgendaService.putPolicy`. Crea filas en audit.audit_log, pharma_lab.doctor_visit_policies, pharma_lab.doctor_visit_windows. Actualiza pharma_lab.doctor_visit_policies. Borra de pharma_lab.doctor_visit_windows. Lee audit.audit_log, iam.sessions, pharma_lab.doctor_visit_policies.
 
 ### Requerimientos
 
@@ -5308,17 +5354,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-agenda.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.doctor_visit_policies` | ESCRIBE | ACTUALIZA | POR_TIPO | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy | `src/modules/pharma_lab/services/visit-agenda.service.ts:128` |
 | `pharma_lab.doctor_visit_policies` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AgendaRepository.createPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:39` |
 | `pharma_lab.doctor_visit_policies` | LEE | LEE | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AgendaRepository.findPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:25` |
@@ -5418,7 +5465,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitAgendaController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5429,7 +5476,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VisitRecordsController.create` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:39`
+- **Implementación:** `VisitRecordsController.create` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:42`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5439,25 +5486,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-records` la atiende `VisitRecordsController.create` (src/modules/pharma_lab/controllers/visit-records.controller.ts:39). Exige sesión con alguno de los roles MEDICAL_VISITOR. Valida el cuerpo como `CreateVisitRecordDto` (13 campos, 4 obligatorios). Delega en `VisitRecordsService.createRecord`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_record_materials, pharma_lab.visit_records, pharma_lab.visit_request_events, pharma_lab.visit_survey_responses. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, pharma_lab.informational_materials, pharma_lab.medical_visitors, pharma_lab.pharma_labs, pharma_lab.visit_records, pharma_lab.visit_requests, pharma_lab.visit_surveys.
+`POST /visit-records` la atiende `VisitRecordsController.create` (src/modules/pharma_lab/controllers/visit-records.controller.ts:42). Exige sesión con alguno de los roles MEDICAL_VISITOR. Valida el cuerpo como `CreateVisitRecordDto` (13 campos, 4 obligatorios). Delega en `VisitRecordsService.createRecord`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_record_materials, pharma_lab.visit_records, pharma_lab.visit_request_events, pharma_lab.visit_survey_responses. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, iam.sessions, pharma_lab.informational_materials, pharma_lab.medical_visitors, pharma_lab.pharma_labs, pharma_lab.visit_records, pharma_lab.visit_requests, pharma_lab.visit_surveys.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: MEDICAL_VISITOR | `src/modules/pharma_lab/controllers/visit-records.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: MEDICAL_VISITOR | `src/modules/pharma_lab/controllers/visit-records.controller.ts:42` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.informational_materials` | LEE | LEE | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → VisitRecordsService.resolveApprovedMaterials → CatalogRepository.findMaterialsByIds | `src/modules/pharma_lab/repositories/catalog.repository.ts:102` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → PharmaLabAccessService.requireOperatingVisitor → VisitorsRepository.findVisitorByUser | `src/modules/pharma_lab/repositories/visitors.repository.ts:44` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
@@ -5552,7 +5600,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5563,7 +5611,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VisitRecordsController.confirm` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:59`
+- **Implementación:** `VisitRecordsController.confirm` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5573,26 +5621,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-records/{visitRecordId}/confirm` la atiende `VisitRecordsController.confirm` (src/modules/pharma_lab/controllers/visit-records.controller.ts:59). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `ConfirmVisitRecordDto` (2 campos, 1 obligatorio). Delega en `VisitRecordsService.confirmRecord`. Crea filas en audit.audit_log. Actualiza pharma_lab.visit_records. Lee audit.audit_log, pharma_lab.visit_records.
+`POST /visit-records/{visitRecordId}/confirm` la atiende `VisitRecordsController.confirm` (src/modules/pharma_lab/controllers/visit-records.controller.ts:62). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `ConfirmVisitRecordDto` (2 campos, 1 obligatorio). Delega en `VisitRecordsService.confirmRecord`. Crea filas en audit.audit_log. Actualiza pharma_lab.visit_records. Lee audit.audit_log, iam.sessions, pharma_lab.visit_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-records.controller.ts:59` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: visitRecordId | `src/modules/pharma_lab/controllers/visit-records.controller.ts:59` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-records.controller.ts:62` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: visitRecordId | `src/modules/pharma_lab/controllers/visit-records.controller.ts:62` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.visit_records` | ESCRIBE | ACTUALIZA | POR_TIPO | VisitRecordsController.confirm → VisitRecordsService.confirmRecord | `src/modules/pharma_lab/services/visit-records.service.ts:247` |
 | `pharma_lab.visit_records` | LEE | LEE | DIRECTA | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → VisitRecordsService.requireDoctorRecord → VisitsRepository.findRecord | `src/modules/pharma_lab/repositories/visits.repository.ts:220` |
 
@@ -5655,7 +5704,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5666,7 +5715,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VisitRecordsController.rate` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:71`
+- **Implementación:** `VisitRecordsController.rate` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:74`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5676,26 +5725,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-records/{visitRecordId}/rating` la atiende `VisitRecordsController.rate` (src/modules/pharma_lab/controllers/visit-records.controller.ts:71). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `RateVisitDto` (9 campos, 1 obligatorio). Delega en `VisitRecordsService.rateVisit`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_ratings. Lee audit.audit_log, pharma_lab.medical_visitors, pharma_lab.visit_ratings, pharma_lab.visit_records, pharma_lab.visit_requests.
+`POST /visit-records/{visitRecordId}/rating` la atiende `VisitRecordsController.rate` (src/modules/pharma_lab/controllers/visit-records.controller.ts:74). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `RateVisitDto` (9 campos, 1 obligatorio). Delega en `VisitRecordsService.rateVisit`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_ratings. Lee audit.audit_log, iam.sessions, pharma_lab.medical_visitors, pharma_lab.visit_ratings, pharma_lab.visit_records, pharma_lab.visit_requests.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-records.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: visitRecordId | `src/modules/pharma_lab/controllers/visit-records.controller.ts:71` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-records.controller.ts:74` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: visitRecordId | `src/modules/pharma_lab/controllers/visit-records.controller.ts:74` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.visit_ratings` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → VisitsRepository.createRating | `src/modules/pharma_lab/repositories/visits.repository.ts:348` |
@@ -5776,7 +5826,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5787,7 +5837,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VisitRecordsController.listInbox` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:51`
+- **Implementación:** `VisitRecordsController.listInbox` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:54`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5797,16 +5847,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /visit-records/inbox` la atiende `VisitRecordsController.listInbox` (src/modules/pharma_lab/controllers/visit-records.controller.ts:51). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `VisitRecordsService.listDoctorRecords`. Lee pharma_lab.visit_records.
+`GET /visit-records/inbox` la atiende `VisitRecordsController.listInbox` (src/modules/pharma_lab/controllers/visit-records.controller.ts:54). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `VisitRecordsService.listDoctorRecords`. Lee pharma_lab.visit_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-records.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-records.controller.ts:54` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -5862,7 +5912,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5873,7 +5923,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VisitRecordsController.listLabRecords` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:84`
+- **Implementación:** `VisitRecordsController.listLabRecords` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:87`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5883,17 +5933,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /visit-records/labs/{pharmaLabId}` la atiende `VisitRecordsController.listLabRecords` (src/modules/pharma_lab/controllers/visit-records.controller.ts:84). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `VisitRecordsService.listLabRecords`. Lee pharma_lab.pharma_labs, pharma_lab.visit_records.
+`GET /visit-records/labs/{pharmaLabId}` la atiende `VisitRecordsController.listLabRecords` (src/modules/pharma_lab/controllers/visit-records.controller.ts:87). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `VisitRecordsService.listLabRecords`. Lee pharma_lab.pharma_labs, pharma_lab.visit_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/visit-records.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/visit-records.controller.ts:84` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/visit-records.controller.ts:87` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/visit-records.controller.ts:87` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -5958,7 +6008,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -5969,7 +6019,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VisitRecordsController.ratingSummary` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:94`
+- **Implementación:** `VisitRecordsController.ratingSummary` — `src/modules/pharma_lab/controllers/visit-records.controller.ts:97`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -5979,17 +6029,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /visit-records/labs/{pharmaLabId}/rating-summary` la atiende `VisitRecordsController.ratingSummary` (src/modules/pharma_lab/controllers/visit-records.controller.ts:94). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `VisitRecordsService.getRatingAggregate`. Lee pharma_lab.pharma_labs, pharma_lab.visit_ratings, pharma_lab.visit_records.
+`GET /visit-records/labs/{pharmaLabId}/rating-summary` la atiende `VisitRecordsController.ratingSummary` (src/modules/pharma_lab/controllers/visit-records.controller.ts:97). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN. Delega en `VisitRecordsService.getRatingAggregate`. Lee pharma_lab.pharma_labs, pharma_lab.visit_ratings, pharma_lab.visit_records.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/visit-records.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/visit-records.controller.ts:94` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PHARMA_LAB_ADMIN, BUSINESS_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/visit-records.controller.ts:97` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/visit-records.controller.ts:97` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -6032,7 +6082,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRecordsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6053,7 +6103,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-requests` la atiende `VisitRequestsController.create` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:45). Exige sesión con alguno de los roles MEDICAL_VISITOR. Valida el cuerpo como `CreateVisitRequestDto` (11 campos, 6 obligatorios). Delega en `VisitRequestsService.createRequest`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events, pharma_lab.visit_request_topics, pharma_lab.visit_requests. Lee audit.audit_log, pharma_lab.doctor_visit_blocks, pharma_lab.doctor_visit_policies, pharma_lab.doctor_visit_windows, pharma_lab.medical_visitor_products, pharma_lab.medical_visitor_specialties, pharma_lab.medical_visitors, pharma_lab.pharma_labs y 9 más.
+`POST /visit-requests` la atiende `VisitRequestsController.create` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:45). Exige sesión con alguno de los roles MEDICAL_VISITOR. Valida el cuerpo como `CreateVisitRequestDto` (11 campos, 6 obligatorios). Delega en `VisitRequestsService.createRequest`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events, pharma_lab.visit_request_topics, pharma_lab.visit_requests. Lee audit.audit_log, iam.sessions, pharma_lab.doctor_visit_blocks, pharma_lab.doctor_visit_policies, pharma_lab.doctor_visit_windows, pharma_lab.medical_visitor_products, pharma_lab.medical_visitor_specialties, pharma_lab.medical_visitors y 10 más.
 
 ### Requerimientos
 
@@ -6061,17 +6111,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MEDICAL_VISITOR | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.doctor_visit_blocks` | LEE | LEE | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → VisitAgendaService.assertVisitorAccepted → AgendaRepository.findApplicableBlock | `src/modules/pharma_lab/repositories/agenda.repository.ts:154` |
 | `pharma_lab.doctor_visit_policies` | LEE | LEE | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → VisitAgendaService.assertVisitorAccepted → AgendaRepository.findPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:25` |
 | `pharma_lab.doctor_visit_windows` | LEE | LEE | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → VisitAgendaService.assertSlotAvailable → AgendaRepository.listWindows | `src/modules/pharma_lab/repositories/agenda.repository.ts:57` |
@@ -6173,7 +6224,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6202,9 +6253,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MEDICAL_VISITOR, PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: visitRequestId | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:73` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -6272,7 +6323,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6293,7 +6344,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-requests/{visitRequestId}/accept` la atiende `VisitRequestsController.accept` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:91). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `VisitDecisionDto` (1 campo, 0 obligatorios). Delega en `VisitRequestsService.accept`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, pharma_lab.medical_visitors, pharma_lab.visit_requests.
+`POST /visit-requests/{visitRequestId}/accept` la atiende `VisitRequestsController.accept` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:91). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `VisitDecisionDto` (1 campo, 0 obligatorios). Delega en `VisitRequestsService.accept`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, iam.sessions, pharma_lab.medical_visitors, pharma_lab.visit_requests.
 
 ### Requerimientos
 
@@ -6301,18 +6352,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: visitRequestId | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:91` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → VisitRequestsService.notifyVisitor → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → VisitRequestsService.notifyVisitor → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.visit_request_events` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → VisitsRepository.appendRequestEvent | `src/modules/pharma_lab/repositories/visits.repository.ts:187` |
@@ -6374,7 +6426,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6395,7 +6447,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-requests/{visitRequestId}/cancel` la atiende `VisitRequestsController.cancel` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:151). Exige sesión con alguno de los roles MEDICAL_VISITOR, PRACTITIONER, CLINICIAN. Valida el cuerpo como `CancelVisitDto` (1 campo, 1 obligatorio). Delega en `VisitRequestsService.cancel`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, pharma_lab.doctor_visit_policies, pharma_lab.doctor_visit_windows, pharma_lab.medical_visitors, pharma_lab.visit_requests.
+`POST /visit-requests/{visitRequestId}/cancel` la atiende `VisitRequestsController.cancel` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:151). Exige sesión con alguno de los roles MEDICAL_VISITOR, PRACTITIONER, CLINICIAN. Valida el cuerpo como `CancelVisitDto` (1 campo, 1 obligatorio). Delega en `VisitRequestsService.cancel`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, iam.sessions, pharma_lab.doctor_visit_policies, pharma_lab.doctor_visit_windows, pharma_lab.medical_visitors, pharma_lab.visit_requests.
 
 ### Requerimientos
 
@@ -6403,18 +6455,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MEDICAL_VISITOR, PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:151` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: visitRequestId | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:151` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.doctor_visit_policies` | LEE | LEE | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → VisitAgendaService.getPublishedAgenda → AgendaRepository.findPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:25` |
 | `pharma_lab.doctor_visit_windows` | LEE | LEE | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → VisitAgendaService.getPublishedAgenda → AgendaRepository.listWindows | `src/modules/pharma_lab/repositories/agenda.repository.ts:57` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → VisitorsRepository.findVisitorByUser | `src/modules/pharma_lab/repositories/visitors.repository.ts:44` |
@@ -6481,7 +6534,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6502,7 +6555,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-requests/{visitRequestId}/propose-time` la atiende `VisitRequestsController.proposeTime` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:127). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `ProposeVisitTimeDto` (2 campos, 1 obligatorio). Delega en `VisitRequestsService.proposeTime`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, pharma_lab.doctor_visit_policies, pharma_lab.doctor_visit_windows, pharma_lab.medical_visitors, pharma_lab.visit_requests, procedures_perioperative.procedure_cases, profiles.health_practitioner_profiles, profiles.person_account_links y 4 más.
+`POST /visit-requests/{visitRequestId}/propose-time` la atiende `VisitRequestsController.proposeTime` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:127). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `ProposeVisitTimeDto` (2 campos, 1 obligatorio). Delega en `VisitRequestsService.proposeTime`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, iam.sessions, pharma_lab.doctor_visit_policies, pharma_lab.doctor_visit_windows, pharma_lab.medical_visitors, pharma_lab.visit_requests, procedures_perioperative.procedure_cases, profiles.health_practitioner_profiles y 5 más.
 
 ### Requerimientos
 
@@ -6510,18 +6563,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:127` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: visitRequestId | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:127` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.doctor_visit_policies` | LEE | LEE | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → VisitAgendaService.assertSlotAvailable → AgendaRepository.findPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:25` |
 | `pharma_lab.doctor_visit_windows` | LEE | LEE | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → VisitAgendaService.assertSlotAvailable → AgendaRepository.listWindows | `src/modules/pharma_lab/repositories/agenda.repository.ts:57` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → VisitRequestsService.notifyVisitor → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
@@ -6597,7 +6651,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6618,7 +6672,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-requests/{visitRequestId}/reject` la atiende `VisitRequestsController.reject` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:103). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `VisitDecisionDto` (1 campo, 0 obligatorios). Delega en `VisitRequestsService.reject`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, pharma_lab.medical_visitors, pharma_lab.visit_requests.
+`POST /visit-requests/{visitRequestId}/reject` la atiende `VisitRequestsController.reject` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:103). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `VisitDecisionDto` (1 campo, 0 obligatorios). Delega en `VisitRequestsService.reject`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, iam.sessions, pharma_lab.medical_visitors, pharma_lab.visit_requests.
 
 ### Requerimientos
 
@@ -6626,18 +6680,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: visitRequestId | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:103` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → VisitRequestsService.notifyVisitor → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → VisitRequestsService.notifyVisitor → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.visit_request_events` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → VisitsRepository.appendRequestEvent | `src/modules/pharma_lab/repositories/visits.repository.ts:187` |
@@ -6699,7 +6754,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6720,7 +6775,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-requests/{visitRequestId}/request-info` la atiende `VisitRequestsController.requestInfo` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:115). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `VisitDecisionDto` (1 campo, 0 obligatorios). Delega en `VisitRequestsService.requestInfo`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Lee audit.audit_log, pharma_lab.medical_visitors, pharma_lab.visit_requests.
+`POST /visit-requests/{visitRequestId}/request-info` la atiende `VisitRequestsController.requestInfo` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:115). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `VisitDecisionDto` (1 campo, 0 obligatorios). Delega en `VisitRequestsService.requestInfo`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Lee audit.audit_log, iam.sessions, pharma_lab.medical_visitors, pharma_lab.visit_requests.
 
 ### Requerimientos
 
@@ -6728,18 +6783,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:115` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: visitRequestId | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:115` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → VisitRequestsService.notifyVisitor → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → VisitRequestsService.notifyVisitor → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.visit_request_events` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → VisitsRepository.appendRequestEvent | `src/modules/pharma_lab/repositories/visits.repository.ts:187` |
@@ -6800,7 +6856,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6821,7 +6877,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-requests/{visitRequestId}/reschedule` la atiende `VisitRequestsController.reschedule` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:139). Exige sesión con alguno de los roles MEDICAL_VISITOR. Valida el cuerpo como `RescheduleVisitDto` (2 campos, 2 obligatorios). Delega en `VisitRequestsService.reschedule`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, pharma_lab.doctor_visit_policies, pharma_lab.doctor_visit_windows, pharma_lab.medical_visitors, pharma_lab.pharma_labs, pharma_lab.visit_requests, procedures_perioperative.procedure_cases, profiles.health_practitioner_profiles y 5 más.
+`POST /visit-requests/{visitRequestId}/reschedule` la atiende `VisitRequestsController.reschedule` (src/modules/pharma_lab/controllers/visit-requests.controller.ts:139). Exige sesión con alguno de los roles MEDICAL_VISITOR. Valida el cuerpo como `RescheduleVisitDto` (2 campos, 2 obligatorios). Delega en `VisitRequestsService.reschedule`. Crea filas en audit.audit_log, pharma_lab.pharma_lab_notices, pharma_lab.visit_request_events. Actualiza pharma_lab.visit_requests. Lee audit.audit_log, iam.sessions, pharma_lab.doctor_visit_policies, pharma_lab.doctor_visit_windows, pharma_lab.medical_visitors, pharma_lab.pharma_labs, pharma_lab.visit_requests, procedures_perioperative.procedure_cases y 6 más.
 
 ### Requerimientos
 
@@ -6829,18 +6885,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MEDICAL_VISITOR | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: visitRequestId | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:139` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.doctor_visit_policies` | LEE | LEE | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → VisitAgendaService.assertSlotAvailable → AgendaRepository.findPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:25` |
 | `pharma_lab.doctor_visit_windows` | LEE | LEE | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → VisitAgendaService.assertSlotAvailable → AgendaRepository.listWindows | `src/modules/pharma_lab/repositories/agenda.repository.ts:57` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → PharmaLabAccessService.requireOperatingVisitor → VisitorsRepository.findVisitorByUser | `src/modules/pharma_lab/repositories/visitors.repository.ts:44` |
@@ -6918,7 +6975,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -6947,8 +7004,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -7005,7 +7062,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -7034,8 +7091,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MEDICAL_VISITOR | `src/modules/pharma_lab/controllers/visit-requests.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -7094,7 +7151,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitRequestsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -7123,9 +7180,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PHARMA_LAB_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:55` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:55` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -7185,7 +7242,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -7206,7 +7263,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-surveys/labs/{pharmaLabId}` la atiende `VisitSurveysController.create` (src/modules/pharma_lab/controllers/visit-surveys.controller.ts:42). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateVisitSurveyDto` (14 campos, 5 obligatorios). Delega en `VisitSurveysService.createSurvey`. Crea filas en audit.audit_log, pharma_lab.visit_survey_questions, pharma_lab.visit_surveys. Lee audit.audit_log, pharma_lab.pharma_labs.
+`POST /visit-surveys/labs/{pharmaLabId}` la atiende `VisitSurveysController.create` (src/modules/pharma_lab/controllers/visit-surveys.controller.ts:42). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `CreateVisitSurveyDto` (14 campos, 5 obligatorios). Delega en `VisitSurveysService.createSurvey`. Crea filas en audit.audit_log, pharma_lab.visit_survey_questions, pharma_lab.visit_surveys. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs.
 
 ### Requerimientos
 
@@ -7214,18 +7271,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PHARMA_LAB_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:42` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:42` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.visit_survey_questions` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → SurveysRepository.createQuestion | `src/modules/pharma_lab/repositories/surveys.repository.ts:100` |
 | `pharma_lab.visit_surveys` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → SurveysRepository.createSurvey | `src/modules/pharma_lab/repositories/surveys.repository.ts:82` |
@@ -7324,7 +7382,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -7345,7 +7403,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-surveys/labs/{pharmaLabId}/{surveyId}/close` la atiende `VisitSurveysController.close` (src/modules/pharma_lab/controllers/visit-surveys.controller.ts:65). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, PLATFORM_ADMIN. Delega en `VisitSurveysService.closeSurvey`. Crea filas en audit.audit_log. Actualiza pharma_lab.visit_surveys. Lee audit.audit_log, pharma_lab.pharma_labs, pharma_lab.visit_surveys.
+`POST /visit-surveys/labs/{pharmaLabId}/{surveyId}/close` la atiende `VisitSurveysController.close` (src/modules/pharma_lab/controllers/visit-surveys.controller.ts:65). Exige sesión con alguno de los roles PHARMA_LAB_ADMIN, PLATFORM_ADMIN. Delega en `VisitSurveysService.closeSurvey`. Crea filas en audit.audit_log. Actualiza pharma_lab.visit_surveys. Lee audit.audit_log, iam.sessions, pharma_lab.pharma_labs, pharma_lab.visit_surveys.
 
 ### Requerimientos
 
@@ -7353,16 +7411,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PHARMA_LAB_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, surveyId | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:65` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.visit_surveys` | ESCRIBE | ACTUALIZA | POR_TIPO | VisitSurveysController.close → VisitSurveysService.closeSurvey | `src/modules/pharma_lab/services/visit-surveys.service.ts:155` |
 | `pharma_lab.visit_surveys` | LEE | LEE | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → VisitSurveysService.requireSurvey → SurveysRepository.findSurvey | `src/modules/pharma_lab/repositories/surveys.repository.ts:23` |
@@ -7405,7 +7464,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -7434,9 +7493,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PHARMA_LAB_ADMIN, PLATFORM_ADMIN | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmaLabId, surveyId | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:77` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -7482,7 +7541,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -7511,8 +7570,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -7558,7 +7617,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -7587,9 +7646,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: responseId | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:102` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -7645,7 +7704,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -7666,7 +7725,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /visit-surveys/responses/{responseId}` la atiende `VisitSurveysController.submit` (src/modules/pharma_lab/controllers/visit-surveys.controller.ts:120). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SubmitSurveyResponseDto` (5 campos, 2 obligatorios). Delega en `VisitSurveysService.submitResponse`. Crea filas en audit.audit_log, pharma_lab.visit_survey_answers. Actualiza pharma_lab.visit_survey_responses. Lee audit.audit_log, pharma_lab.visit_survey_questions, pharma_lab.visit_survey_responses.
+`POST /visit-surveys/responses/{responseId}` la atiende `VisitSurveysController.submit` (src/modules/pharma_lab/controllers/visit-surveys.controller.ts:120). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SubmitSurveyResponseDto` (5 campos, 2 obligatorios). Delega en `VisitSurveysService.submitResponse`. Crea filas en audit.audit_log, pharma_lab.visit_survey_answers. Actualiza pharma_lab.visit_survey_responses. Lee audit.audit_log, iam.sessions, pharma_lab.visit_survey_questions, pharma_lab.visit_survey_responses.
 
 ### Requerimientos
 
@@ -7674,18 +7733,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:120` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: responseId | `src/modules/pharma_lab/controllers/visit-surveys.controller.ts:120` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:176` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:151` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `pharma_lab.visit_survey_answers` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → SurveysRepository.createAnswer | `src/modules/pharma_lab/repositories/surveys.repository.ts:204` |
 | `pharma_lab.visit_survey_questions` | LEE | LEE | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → SurveysRepository.listQuestions | `src/modules/pharma_lab/repositories/surveys.repository.ts:122` |
 | `pharma_lab.visit_survey_responses` | ESCRIBE | ACTUALIZA | POR_TIPO | VisitSurveysController.submit → VisitSurveysService.submitResponse | `src/modules/pharma_lab/services/visit-surveys.service.ts:297` |
@@ -7764,7 +7824,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / pharma_lab — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Módulo `pharma_lab` — etapa `ctrl:VisitSurveysController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

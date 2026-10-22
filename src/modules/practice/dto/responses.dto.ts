@@ -185,6 +185,37 @@ export class RoleAssignmentResponseDto {
   @ApiProperty() createdAt!: Date;
 }
 
+/**
+ * Página de vinculaciones profesional-organización de una práctica (CV-14).
+ *
+ * Es lo que el administrador de la práctica necesita para dejar de aprobar a
+ * ciegas: antes de esto, `POST …/approve` existía pero nada permitía ver qué
+ * había pendiente sin que alguien pasara el uuid por otro canal.
+ */
+export class ListPracticeRoleAssignmentsResponseDto {
+  /**
+   * Vinculaciones de esta página, ordenadas por `id`.
+   */
+  @ApiProperty({ type: [RoleAssignmentResponseDto] })
+  items!: RoleAssignmentResponseDto[];
+
+  /**
+   * Cantidad devuelta en esta página.
+   */
+  @ApiProperty() count!: number;
+
+  /**
+   * Tope aplicado a la consulta.
+   */
+  @ApiProperty() limit!: number;
+
+  /**
+   * Cursor opaco de continuación, o `null` si ésta es la última página.
+   */
+  @ApiProperty({ nullable: true, type: String })
+  nextCursor!: string | null;
+}
+
 /** Respuesta de asignación de apoyo (UC-14-09). */
 export class SupportAssignmentResponseDto {
   /**
@@ -319,6 +350,38 @@ export class PractitionerSiteDto {
   /** Dirección en una línea, o `null` si la sede no tiene ninguna cargada. */
   @ApiPropertyOptional({ nullable: true, example: 'Av. Brasil 1234, La Paz' })
   addressText!: string | null;
+  /** Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). */
+  @ApiPropertyOptional({ nullable: true })
+  latitude!: number | null;
+  /** Longitud del punto de la sede. Va siempre junto a `latitude`. */
+  @ApiPropertyOptional({ nullable: true })
+  longitude!: number | null;
+  /** Teléfono de este profesional en esta sede, si lo declaró. */
+  @ApiPropertyOptional({ nullable: true, example: '+591 72123456' })
+  contactPhone!: string | null;
+  /**
+   * Si la sede es el consultorio **propio** del profesional —su práctica
+   * personal— y no la de otra organización donde atiende (P32-a).
+   *
+   * La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra.
+   * Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo
+   * propio no es el mismo acto que desvincularse de un hospital. Sale de
+   * comparar la práctica de la sede con la práctica personal del profesional
+   * (tipo consultorio y él como cuenta administradora), no de adivinar por el
+   * nombre.
+   */
+  @ApiProperty() isOwnSite!: boolean;
+  /**
+   * Archivo del QR bancario con el que el profesional cobra **en esta sede**,
+   * o `null` si no configuró ninguno (P33).
+   *
+   * Es por sede y no por persona porque no se cobra igual en todos lados: en
+   * el consultorio propio cobra el profesional y en la clínica puede cobrar
+   * la clínica. Un QR único de perfil obligaría a corregirlo cada vez que
+   * cambia de establecimiento.
+   */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  bankQrFileId!: string | null;
   /** Concepto de estado. */
   @ApiProperty({ format: 'uuid' }) status!: string;
 }

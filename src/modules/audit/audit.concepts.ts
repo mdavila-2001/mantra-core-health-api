@@ -69,6 +69,16 @@ export const { seeds: AUDIT_CONCEPT_SEEDS, ids: AUD } = defineModuleConcepts(
       code: 'AUDIT_PURPOSE_VERIFICATION',
       display: 'Identity verification',
     },
+    /**
+     * El titular ejerciendo su propio derecho (subtarea 3.3: portabilidad de
+     * póliza y siniestralidad). Distinto de `PURPOSE_COVERAGE` —que es cuando
+     * OTRO actor consulta la cobertura por razones de negocio—: acá quien pide
+     * el dato es la misma persona a la que pertenece.
+     */
+    PURPOSE_PATIENT_REQUEST: {
+      code: 'AUDIT_PURPOSE_PATIENT_REQUEST',
+      display: 'Patient requested',
+    },
 
     // --- Decisión de control de acceso ---
     DECISION_PERMIT: { code: 'AUDIT_DECISION_PERMIT', display: 'Permit' },

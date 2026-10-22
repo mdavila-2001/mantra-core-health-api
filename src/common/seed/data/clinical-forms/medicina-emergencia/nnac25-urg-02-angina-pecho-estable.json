@@ -1,0 +1,160 @@
+{
+  "code": "NNAC25_URG_02_ANGINA_PECHO_ESTABLE",
+  "name": "Angina de pecho estable (NNAC 2025)",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Urgencias y Emergencias (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/966-norma-nacional-de-atencion-clinica-de-urgencias-y-emergencias?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 2, pág. 32; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Aparición: El dolor se presenta con el ejercicio o en situaciones que aumentan el trabajo cardíaco, como el estrés, el frío intenso o tras una comida copiosa",
+        "Duración: Los episodios son de corta duración",
+        "Angina típica: Si el paciente presenta las tres características mencionadas",
+        "Angina atípica: Si el paciente presenta dos de las características",
+        "Tipo de malestar: Descrito como opresivo, sordo o pesado",
+        "Ubicación: Generalmente retroesternal o en el hemitórax izquierdo, pudiendo irradiarse al brazo izquierdo, cuello, mandíbula y espalda",
+        "Relación con el esfuerzo: El dolor se desencadena por el esfuerzo físico o estrés emocional y se alivia con el descanso",
+        "Electrocardiograma (ECG) de 12 derivaciones: Es esencial realizar un ECG, ya que hasta el 50% de los pacientes pueden presentar un resultado normal",
+        "Detección de bloqueos: Es importante identificar un bloqueo avanzado de la rama izquierda del haz de His",
+        "Prueba de esfuerzo convencional: Se realiza en una cinta continua y es útil para diagnosticar angina de esfuerzo en pacientes con un ECG basal normal"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 32. La angina es una manifestación de la cardiopatía isquémica, caracterizada por un dolor torácico opresivo que resulta de la isquemia del miocardio. Esta condición se produce cuando la demanda de oxígeno del músculo cardíaco supera la capacidad de suministro de las arterias coronarias, lo que provoca una insuficiente irrigación sanguínea al corazón."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Determinación de enzimas de necrosis",
+        "Electrocardiograma (ECG)",
+        "Pruebas de esfuerzo: Estas pruebas se utilizan para provocar isquemia y son requeridas según la especialidad médica",
+        "Visualización del árbol coronario: Se puede realizar mediante métodos no invasivos o angiografía",
+        "Hemograma",
+        "Glucemia",
+        "Creatinina",
+        "Hepatograma y dosaje de creatinfosfoquinasa (CPK): Se debe realizar antes y después de iniciar el tratamiento con estatinas",
+        "Se recomienda realizar una radiografía de tórax en casos de angina atípica, insuficiencia cardíaca o sospecha de enfermedad pulmonar",
+        "Estos exámenes complementarios son esenciales para un diagnóstico preciso y para guiar el trataiento adecuado en pacientes con sospecha de isquemia coronaria"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "I24: Otras enfermedades isquémicas agudas del corazón",
+        "I24.0: Trombosis coronaria que no resulta en infarto del miocardio",
+        "I24.1: Síndrome de Dressler",
+        "I24.8: Otras formas de enfermedad isquémica aguda del corazón",
+        "I24.9: Enfermedad isquémica aguda del corazón, no especificada"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 2, pág. 32); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

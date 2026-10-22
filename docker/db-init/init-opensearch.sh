@@ -1,6 +1,6 @@
 #!/bin/sh
 # =========================================================================
-# Mantra Core Technologies · REDESA Health Ecosystem
+# Mantra Core Technologies · ALOVIDA Health Ecosystem
 # opensearch-init: crea los índices del módulo 57 search_platform desde los
 # *.mapping.json (índice = nombre de archivo sin sufijo). Idempotente.
 # POSIX sh (corre en curlimages/curl, sin bash).

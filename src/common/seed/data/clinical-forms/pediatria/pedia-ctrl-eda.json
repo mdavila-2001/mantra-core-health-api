@@ -1,0 +1,144 @@
+{
+  "code": "PEDIA_CTRL_EDA",
+  "name": "Niño con diarrea (AIEPI)",
+  "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Atención Integrada a las Enfermedades Prevalentes de la Infancia (AIEPI)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/teams/maternal-newborn-child-adolescent-health-and-ageing/child-health/integrated-management-of-childhood-illness",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Estado de hidratación y planes A/B/C, disentería y diarrea persistente."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diarrea",
+      "code": "edad_en_meses",
+      "name": "Edad (meses)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: diarrea",
+      "code": "signos_de_peligro",
+      "name": "Signos generales de peligro",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "No puede beber ni tomar el pecho",
+        "Vomita todo",
+        "Convulsiones",
+        "Letárgico o inconsciente",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: diarrea",
+      "code": "eda_deposiciones_24h",
+      "name": "Deposiciones líquidas en las últimas 24 horas",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: diarrea",
+      "code": "eda_sangre_en_heces",
+      "name": "Sangre en las heces (disentería)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diarrea",
+      "code": "eda_vomitos",
+      "name": "Vómitos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diarrea",
+      "code": "eda_hidratacion",
+      "name": "Estado de hidratación (OMS)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sin deshidratación — Plan A",
+        "Algún grado de deshidratación — Plan B",
+        "Deshidratación grave — Plan C"
+      ]
+    },
+    {
+      "section": "Evaluación: diarrea",
+      "code": "eda_fiebre",
+      "name": "Fiebre",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diarrea",
+      "code": "dias_de_diarrea",
+      "name": "Días de diarrea",
+      "dataType": "integer",
+      "required": false,
+      "description": "14 o más: diarrea persistente."
+    },
+    {
+      "section": "Evaluación: diarrea",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sales de rehidratación oral",
+        "Zinc por 10 a 14 días",
+        "Seguir alimentando",
+        "Signos para volver"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

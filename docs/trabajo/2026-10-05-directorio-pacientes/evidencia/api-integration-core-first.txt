@@ -1,0 +1,28 @@
+Native core selection; raw preserved in ignored cache integration-core-raw.txt.
+{"level":40,"time":1791216512429,"pid":19500,"hostname":"Marcelo","reqId":"be96f3d8-6c96-4656-98eb-470c513cfb9f","context":"AllExceptionsFilter","correlationId":"be96f3d8-6c96-4656-98eb-470c513cfb9f","code":"PRECONDITION_FAILED","path":"/insurance-products/b700577a-5f25-4b02-921f-f4bb80c40152/plans","method":"POST","status":422,"msg":"La operación requiere un tenant: indique X-Tenant-Id."}
+FAIL test/integration/insurer-patients.int-spec.ts (46.523 s)
+  ● insurer-patients directory integration › pages in SQL with an exact total and no foreign patient or excess payload
+
+    expected 201 "Created", got 422 "Unprocessable Entity"
+
+      90 |           currencyConceptId: CONCEPTS.CURRENCY_BOB,
+      91 |         })
+    > 92 |         .expect(201);
+         |          ^
+      93 |       organizations.push({
+      94 |         tenantId: org.body.tenantId,
+      95 |         ownerId: org.body.ownerUserId,
+
+      at Object.expect (test/integration/insurer-patients.int-spec.ts:92:10)
+      ----
+      at Test._assertStatus (node_modules/supertest/lib/test.js:309:14)
+      at node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (node_modules/supertest/lib/test.js:195:23)
+      at localAssert (node_modules/supertest/lib/test.js:138:14)
+Test Suites: 1 failed, 1 total
+Tests:       9 failed, 9 total
+Snapshots:   0 total
+Time:        47.144 s, estimated 273 s
+Ran all test suites matching insurer-patients.
+EXIT_CODE=1

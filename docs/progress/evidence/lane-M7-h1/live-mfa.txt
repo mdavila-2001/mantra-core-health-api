@@ -1,0 +1,6 @@
+PASS TX-29 preparación: factor TOTP enrolado y verificado :: status=201
+PASS TX-29 bandera encendida, cuenta con factor verificado, sin código -> 401 details.reason MFA_REQUIRED :: {"code": "UNAUTHENTICATED", "message": "Se requiere el código de verificación en dos pasos", "correlationId": "5", "details": {"reason": "MFA_REQUIRED"}, "timestamp": "2026-09-26T07:02:09.971Z", "path": "/iam/auth/login"}
+PASS TX-29 código que no valida -> 401 MFA_INVALID :: {"code": "UNAUTHENTICATED", "message": "El código de verificación no es válido", "correlationId": "6", "details": {"reason": "MFA_INVALID"}, "timestamp": "2026-09-26T07:02:10.062Z", "path": "/iam/auth/login"}
+PASS TX-29 código vigente -> 200 con sesión
+PASS TX-29 bandera APAGADA (default): el mismo login sin código entra (200): el contrato no cambia
+5 pruebas, 0 FAIL

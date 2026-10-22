@@ -1,29 +1,15 @@
-# src
+# Código de la API y los workers
 
-Agrupa los componentes relacionados con **src** y mantiene cohesionada esta responsabilidad del sistema.
+`main.ts` arranca la API HTTP; `app.module.ts` compone módulos, guards, filtros e interceptores. Los 24 archivos `worker-*.ts` arrancan procesos independientes por dominio mediante `worker/bootstrap.ts`. `seed-cli.ts` ofrece el entrypoint de siembra; `mikro-orm.config.ts` configura MikroORM.
 
-## Contenido
+| Carpeta | Responsabilidad |
+|---|---|
+| [`common/`](./common/README.md) | Autenticación, tenant, errores, resiliencia, semillas y utilidades compartidas. |
+| [`modules/`](./modules/README.md) | 70 módulos de negocio y plataforma; controllers, DTOs, servicios, repositorios y entidades cuando corresponden. |
+| [`orm/`](./orm/README.md) | Configuración de MikroORM, catálogo y fidelidad del esquema. |
+| [`worker/`](./worker/README.md) | Bootstrap, cliente hacia la API, salud, ciclo de vida y 24 grupos de jobs. |
+| `observability/` | Telemetría y trazas; véase [la guía](../docs/observability/README.md). |
+| [`logging/`](./logging/README.md) | Logging estructurado. |
+| [`persistence/`](./persistence/README.md) | Soporte de persistencia de la aplicación. |
 
-### Subcarpetas
-
-- [`common/`](./common/README.md): componentes de common.
-- [`logging/`](./logging/README.md): componentes de logging.
-- [`modules/`](./modules/README.md): componentes de modules.
-- [`orm/`](./orm/README.md): componentes de orm.
-
-### Archivos
-
-| Archivo | Responsabilidad |
-| --- | --- |
-| `app.controller.spec.ts` | Pruebas unitarias del componente homónimo. |
-| `app.controller.ts` | Endpoints HTTP y adaptación del transporte. |
-| `app.module.ts` | Composición de dependencias del módulo NestJS. |
-| `app.service.ts` | Casos de uso y reglas de negocio. |
-| `main.ts` | Implementación o recurso de soporte de esta carpeta. |
-| `mikro-orm.config.ts` | Configuración tipada del componente. |
-
-## Criterios de mantenimiento
-
-- Mantener las reglas de negocio fuera de los adaptadores de transporte.
-- Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
-- Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+`app.controller.ts` expone el saludo raíz y sondas `/health`, `/liveness`, `/readiness`; `app-readiness.service.ts` comprueba dependencias. El saludo raíz no representa un flujo funcional. Las rutas de cada dominio se explican en su README, y el [informe de revisión](../docs/revision-backend-2026-10-04/README.md) distingue lo auditado de lo pendiente.

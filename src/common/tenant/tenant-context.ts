@@ -5,6 +5,8 @@ import { PreconditionFailedException } from '../errors/domain.exception';
 export interface TenantContext {
   /** Tenant seleccionado por el request (cabecera `X-Tenant-Id`, ya verificado). */
   readonly tenantId: string;
+  /** Paciente que navega el mercado de farmacias de todas las organizaciones. */
+  readonly marketplaceViewer?: boolean;
 }
 
 /**
@@ -16,8 +18,25 @@ export interface TenantContext {
 const storage = new AsyncLocalStorage<TenantContext>();
 
 /** Ejecuta `fn` con el tenant dado en el contexto asíncrono. */
-export function runWithTenant<T>(tenantId: string, fn: () => T): T {
-  return storage.run({ tenantId }, fn);
+export function runWithTenant<T>(
+  tenantId: string,
+  fn: () => T,
+  options: { marketplaceViewer?: boolean } = {},
+): T {
+  return storage.run(
+    { tenantId, marketplaceViewer: options.marketplaceViewer === true },
+    fn,
+  );
+}
+
+/**
+ * Tenant al que acotar las lecturas del mercado de farmacias: `undefined` para
+ * un paciente (ve las farmacias publicadas de todas las organizaciones), el
+ * tenant del request para el personal de la farmacia y la plataforma.
+ */
+export function marketplaceTenantScope(): string | undefined {
+  if (storage.getStore()?.marketplaceViewer) return undefined;
+  return requireTenantId();
 }
 
 /** Tenant del contexto actual, o `undefined` si el request no fijó ninguno. */
@@ -43,7 +62,7 @@ export function requireTenantId(): string {
   if (!tenantId) {
     throw new PreconditionFailedException(
       'La operación requiere un tenant: indique X-Tenant-Id.',
-      {},
+      { reason: 'TENANT_REQUIRED' },
     );
   }
   return tenantId;

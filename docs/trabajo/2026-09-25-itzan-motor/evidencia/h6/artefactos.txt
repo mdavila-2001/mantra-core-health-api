@@ -1,0 +1,11 @@
+=== documentacion de endpoints
+2026-09-25T11:34:51-04:00
+Documentación generada: 1365 endpoints, 70 módulos, 71 archivos Markdown.
+endpoints exit=0
+
+=== sincronizacion de docs
+Sin README.md: ops_console — omitido (todos los módulos deberían tener uno, ver docs/reports/system-inventory.md)
+Sincronizados 68 módulos → docs/modules/
+Bóveda SALUD no encontrada — se conserva docs/data/entity-catalog.md tal como está.
+Para regenerarlo, clone la bóveda como hermana del repositorio o apunte SALUD_VAULT a su ruta.
+sync exit=0

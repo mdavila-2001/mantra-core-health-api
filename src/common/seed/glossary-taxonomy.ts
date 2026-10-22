@@ -8,9 +8,10 @@ import {
 } from './dynamic-enum-catalog';
 
 /**
- * La taxonomía del glosario médico: 11 categorías (pertenencia exclusiva, una
- * por término), 15 etiquetas (N:N) y el value set paraguas que marca «esto es
- * un término del glosario» dentro de la tabla compartida de conceptos.
+ * La taxonomía del glosario médico: 12 categorías (pertenencia exclusiva, una
+ * por término — la duodécima, `other`, se sumó en FND-25-01), 16 etiquetas
+ * (N:N) y el value set paraguas que marca «esto es un término del glosario»
+ * dentro de la tabla compartida de conceptos.
  *
  * ## Por qué no es una enumeración dinámica más
  *
@@ -51,7 +52,20 @@ export interface GlossaryTaxonomyEntry {
   readonly name: string;
 }
 
-/** Las 11 categorías del grid del glosario. Pertenencia exclusiva: un término, una categoría. */
+/**
+ * Las 12 categorías del grid del glosario. Pertenencia exclusiva: un
+ * término, una categoría.
+ *
+ * `other` (FND-25-01) es la quinta categoría exigida por la fuente literal
+ * del requisito («OTROS TÉRMINOS»), que la reconstrucción de esta pantalla
+ * había resuelto sin ella: las otras 11 son deliberadamente **más**
+ * específicas que las cuatro clínicas restantes que sí nombra el pedido
+ * (procedimientos, tratamientos, enfermedades, medicamentos), pero ninguna
+ * es un catch-all. `other` agrupa terminología general de salud que no es
+ * clínica en sí misma —proceso administrativo/legal de la atención— y que
+ * por eso no encaja en ninguna de las 11 (ver los 5 términos de
+ * `glossary-terms.catalog.ts` bajo `categoryKey: 'other'`).
+ */
 export const GLOSSARY_CATEGORIES: readonly GlossaryTaxonomyEntry[] = [
   {
     key: 'anatomy',
@@ -104,9 +118,25 @@ export const GLOSSARY_CATEGORIES: readonly GlossaryTaxonomyEntry[] = [
     internalCode: 'glossary-category-care',
     name: 'Cuidados de enfermería',
   },
+  {
+    key: 'other',
+    internalCode: 'glossary-category-other',
+    name: 'Otros términos',
+  },
 ];
 
-/** Las 15 etiquetas del glosario. Un término puede llevar 0..N. */
+/**
+ * Las 21 etiquetas del glosario. Un término puede llevar 0..N.
+ *
+ * `urologic` se sumó el 2026-09-30 (auditoría del glosario): la próstata, el
+ * testículo y la función eréctil no son riñón, y colgarlos de `renal` mezclaba
+ * dos especialidades en un mismo filtro.
+ *
+ * `hematologic`, `ophthalmologic`, `ent`, `congenital` y `trauma` se sumaron el
+ * 2026-10-01: son los capítulos 3, 7, 8, 17 y 19 de CIE-10 (sangre e inmunidad,
+ * ojo, oído, malformaciones congénitas, traumatismos), que no tenían etiqueta y
+ * dejaban sin filtro a 3 de cada 4 diagnósticos del glosario.
+ */
 export const GLOSSARY_TAGS: readonly GlossaryTaxonomyEntry[] = [
   { key: 'urgency', internalCode: 'glossary-tag-urgency', name: 'Urgencia' },
   { key: 'chronic', internalCode: 'glossary-tag-chronic', name: 'Crónico' },
@@ -152,6 +182,11 @@ export const GLOSSARY_TAGS: readonly GlossaryTaxonomyEntry[] = [
   },
   { key: 'renal', internalCode: 'glossary-tag-renal', name: 'Renal' },
   {
+    key: 'urologic',
+    internalCode: 'glossary-tag-urologic',
+    name: 'Urológico',
+  },
+  {
     key: 'dermatologic',
     internalCode: 'glossary-tag-dermatologic',
     name: 'Dermatológico',
@@ -170,6 +205,31 @@ export const GLOSSARY_TAGS: readonly GlossaryTaxonomyEntry[] = [
     key: 'neurologic',
     internalCode: 'glossary-tag-neurologic',
     name: 'Neurológico',
+  },
+  {
+    key: 'hematologic',
+    internalCode: 'glossary-tag-hematologic',
+    name: 'Hematológico e inmunitario',
+  },
+  {
+    key: 'ophthalmologic',
+    internalCode: 'glossary-tag-ophthalmologic',
+    name: 'Oftalmológico',
+  },
+  {
+    key: 'ent',
+    internalCode: 'glossary-tag-ent',
+    name: 'Otorrinolaringológico',
+  },
+  {
+    key: 'congenital',
+    internalCode: 'glossary-tag-congenital',
+    name: 'Congénito',
+  },
+  {
+    key: 'trauma',
+    internalCode: 'glossary-tag-trauma',
+    name: 'Traumatismos y envenenamientos',
   },
 ];
 
@@ -244,6 +304,55 @@ export function glossarySynonymDesignationId(
 export function glossaryPropertyId(slug: string, propertyCode: string): string {
   return deterministicId(`glossary:property:${propertyCode}:${slug}`);
 }
+
+// --- Procedencia del catálogo curado (FND-25-03) -----------------------------
+//
+// Hasta esta ronda, todo concepto de término colgaba de `SEED.codeSystemVersionId`
+// (`mantra-core`): el code system "raíz" que agrupa los estados y enums
+// *operativos* del backend (ver `common/constants/concepts.ts`). Eso mezclaba
+// dos cosas de naturaleza distinta bajo la misma fila de `terminology_sources`
+// — "TERM_ACTIVE existe porque el backend lo necesita para arrancar" y "esta
+// definición clínica de Paracetamol fue escrita y revisada por una persona" —
+// y dejaba la procedencia real del catálogo curado (autoría interna, revisada,
+// nomenclatura cotejada contra CIE-10-ES/DCI-ATC/HL7 FHIR — ver el docblock de
+// `glossary-terms.catalog.ts`) auditable sólo como comentario TypeScript, no
+// como dato consultable en la base, pese a que `terminology_sources`/
+// `code_systems` existen exactamente para esto (mismo patrón que
+// `vademecum-seed.service.ts` usa para su propio dataset).
+//
+// Este code system propio no reemplaza esa fuente por una importación que no
+// ocurrió: documenta con honestidad la que sí es la procedencia real.
+// `GlossarySeedService` lo siembra una vez (Nivel 0) y lo usa para cada
+// `CatalogConcepts` de término, incluidos los ya sembrados en corridas
+// anteriores bajo `mantra-core` (ver `backfillTermCodeSystem`).
+
+/** `terminology_sources.code` de la procedencia del catálogo curado del glosario. */
+export const GLOSSARY_SOURCE_CODE = 'GLOSSARY_CURATED_ES';
+
+/** Id determinista de la fila de `terminology_sources` del catálogo curado. */
+export const glossarySourceId = deterministicId(
+  'seed:source:glossary-curated-es',
+);
+
+/** `code_systems.internal_code` del catálogo curado del glosario. */
+export const GLOSSARY_CODE_SYSTEM_INTERNAL_CODE = 'glossary-curated-es';
+
+/** Id determinista del `code_systems` del catálogo curado del glosario. */
+export const glossaryCodeSystemId = deterministicId(
+  'seed:code-system:glossary-curated-es',
+);
+
+/** URL canónica FHIR del code system del catálogo curado (interna, no externa). */
+export const GLOSSARY_CODE_SYSTEM_CANONICAL_URL =
+  'https://mantracore.health/fhir/CodeSystem/glossary-curated-es';
+
+/** Única versión del code system del catálogo curado del glosario. */
+export const GLOSSARY_CODE_SYSTEM_VERSION = '1.0.0';
+
+/** Id determinista de la versión del code system del catálogo curado. */
+export const glossaryCodeSystemVersionId = deterministicId(
+  `seed:code-system-version:glossary-curated-es:${GLOSSARY_CODE_SYSTEM_VERSION}`,
+);
 
 /** Id determinista de una relación tipada entre dos términos. */
 export function glossaryRelationshipId(

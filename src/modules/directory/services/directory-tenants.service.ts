@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { Pharmacies } from '../../pharmacy/entities/pharmacies.entity';
+import { PHARM } from '../../pharmacy/pharmacy.concepts';
 import { PinoLogger } from 'nestjs-pino';
 import { TenantTypeProfileService } from './tenant-type-profile.service';
 import {
@@ -15,12 +17,13 @@ import {
   TENANT_TYPE_CONCEPT_BY_CODE,
   type TenantTypeCode,
 } from '../directory.concepts';
+import { resolveLegalEntityType } from '../legal-entity-types';
 import {
   BranchesRepository,
   TenantMembershipsRepository,
   TenantsRepository,
 } from '../repositories';
-import { CatalogRepository } from '../../insurance/repositories';
+import { CatalogRepository } from '../../insurance/infrastructure/repositories';
 import type { Tenants } from '../entities';
 import {
   CreateChildTenantDto,
@@ -139,8 +142,11 @@ export class DirectoryTenantsService {
           dto.tenantTypeConceptId,
           CONCEPTS.TENANT_TYPE_PROVIDER,
         ),
-        legalEntityTypeConceptId:
-          dto.legalEntityTypeConceptId ?? CONCEPTS.LEGAL_ENTITY_COMPANY,
+        legalEntityTypeConceptId: resolveLegalEntityType(
+          dto.legalEntityType,
+          dto.legalEntityTypeConceptId,
+          CONCEPTS.LEGAL_ENTITY_COMPANY,
+        ),
         statusConceptId: DIR.TENANT_PENDING,
         verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
         dataResidencyRegionConceptId: dto.dataResidencyRegionConceptId,
@@ -150,9 +156,18 @@ export class DirectoryTenantsService {
       // FK son columnas uuid: persistir el tenant antes de la membership hija.
       await tx.flush();
 
-      // La fila propia del tipo (aseguradora o corredor) va en esta misma
-      // transacción: un PAYER sin su carrier es un tipo que no se sostiene.
-      this.typeProfile.materializeProfile(tx, tenant.id, dto, actor.id);
+      // La fila propia del tipo (aseguradora, corredor o unidad diagnóstica)
+      // va en esta misma transacción: un PAYER sin su carrier es un tipo que
+      // no se sostiene. El administrador de la práctica que provisiona un
+      // DIAGNOSTIC_CENTER es el owner declarado, no `actor` (quien lo
+      // aprovisiona por la puerta administrativa).
+      await this.typeProfile.materializeProfile(
+        tx,
+        tenant.id,
+        dto,
+        actor.id,
+        dto.ownerUserId,
+      );
 
       this.membershipsRepo.create(tx, {
         userId: dto.ownerUserId,
@@ -218,7 +233,7 @@ export class DirectoryTenantsService {
       // El sujeto de la vitrina de una organización es su propio tenant: es lo
       // que escribe `verify()` (`targetId: tenant.id`) y lo que lee la ficha
       // pública. Si eso cambiara, cambia en los dos lados o en ninguno.
-      await this.publicProfiles.updateOrganizationVitrina(tx, {
+      await this.publicProfiles.updateOrganizationShowcase(tx, {
         targetId: tenant.id,
         displayName: dto.displayName,
         headline: dto.headline,
@@ -277,18 +292,38 @@ export class DirectoryTenantsService {
       // El slug lleva el identificador y no el nombre a propósito: dos clínicas
       // pueden llamarse igual y el slug es único; el nombre bonito es el
       // `displayName`, que sí se puede repetir.
-      await this.publicProfiles.projectOrganization(tx, {
-        tenantId: tenant.id,
-        targetId: tenant.id,
-        slug: `organization-${tenant.id}`,
-        displayName: tenant.tradeName ?? tenant.legalName,
-        actorUserId: actor.id,
-        // Una farmacia verificada tiene que aparecer en la vertical de
-        // farmacias, no en la de organizaciones. Proyectarlas todas como
-        // organización dejaba `/public/search/pharmacies` en cero para siempre,
-        // y el buscador público con una vertical muerta.
-        targetTypeConceptId: vitrinaSegunTipo(tenant.tenantTypeConceptId),
-      });
+      const publicProfileId = await this.publicProfiles.projectOrganization(
+        tx,
+        {
+          tenantId: tenant.id,
+          targetId: tenant.id,
+          slug: `organization-${tenant.id}`,
+          displayName: tenant.tradeName ?? tenant.legalName,
+          actorUserId: actor.id,
+          // Una farmacia verificada tiene que aparecer en la vertical de
+          // farmacias, no en la de organizaciones. Proyectarlas todas como
+          // organización dejaba `/public/search/pharmacies` en cero para siempre,
+          // y el buscador público con una vertical muerta.
+          targetTypeConceptId: showcaseByKind(tenant.tenantTypeConceptId),
+        },
+      );
+
+      // Una farmacia verificada pasa a operar: su fila de `pharmacy.pharmacies`
+      // (nacida en borrador al registrarse) se activa, se marca verificada y se
+      // enlaza a la vitrina. Sin esto el portal de la farmacia decía «todavía no
+      // tiene una farmacia publicada» para siempre (P50).
+      if (tenant.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY) {
+        const pharmacies = await tx.find(Pharmacies, {
+          tenantId: tenant.id,
+          statusConceptId: PHARM.PHARMACY_DRAFT,
+        });
+        for (const pharmacy of pharmacies) {
+          pharmacy.statusConceptId = PHARM.PHARMACY_ACTIVE;
+          pharmacy.verificationStatusConceptId = PHARM.VERIFICATION_VERIFIED;
+          pharmacy.publicProfileId = publicProfileId;
+          touch(pharmacy, actor.id);
+        }
+      }
 
       this.logger.info(
         { operation: 'directory.tenant.verify', tenantId },
@@ -434,8 +469,11 @@ export class DirectoryTenantsService {
           dto.tenantTypeConceptId,
           parent.tenantTypeConceptId,
         ),
-        legalEntityTypeConceptId:
-          dto.legalEntityTypeConceptId ?? parent.legalEntityTypeConceptId,
+        legalEntityTypeConceptId: resolveLegalEntityType(
+          dto.legalEntityType,
+          dto.legalEntityTypeConceptId,
+          parent.legalEntityTypeConceptId,
+        ),
         statusConceptId: CONCEPTS.TENANT_ACTIVE,
         verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
         dataResidencyRegionConceptId:
@@ -446,7 +484,13 @@ export class DirectoryTenantsService {
       });
       await tx.flush();
 
-      this.typeProfile.materializeProfile(tx, child.id, dto, actor.id);
+      await this.typeProfile.materializeProfile(
+        tx,
+        child.id,
+        dto,
+        actor.id,
+        dto.adminUserId,
+      );
 
       this.membershipsRepo.create(tx, {
         userId: dto.adminUserId,
@@ -553,7 +597,7 @@ export class DirectoryTenantsService {
  * `verify-and-publish`. Mapear `HEALTH_OTHER` a laboratorio metería en esa
  * vertical a cualquier negocio de salud que no sea ninguna de las otras cosas.
  */
-function vitrinaSegunTipo(tenantTypeConceptId: string | undefined): string {
+function showcaseByKind(tenantTypeConceptId: string | undefined): string {
   if (tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY) {
     return COMM.PROFILE_TARGET_PHARMACY;
   }

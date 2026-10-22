@@ -33,28 +33,28 @@
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.defineMilestones` — `src/modules/tracking/controllers/tracking.controller.ts:72`
+- **Implementación:** `TrackingController.defineMilestones` — `src/modules/tracking/controllers/tracking.controller.ts:73`
 
 ### Qué es y para qué sirve (negocio)
 
 Definir el catálogo de hitos esperados. Caso de uso UC-37-02: Catálogo de hitos esperados. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:43`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/milestone-definitions` la atiende `TrackingController.defineMilestones` (src/modules/tracking/controllers/tracking.controller.ts:72). Exige sesión con alguno de los roles TRACKING_ADMIN. Valida el cuerpo como `DefineMilestonesDto` (8 campos, 5 obligatorios). Delega en `TrackingService.defineMilestones`. Crea filas en tracking.milestone_definitions. Lee tracking.milestone_definitions.
+`POST /tracking/milestone-definitions` la atiende `TrackingController.defineMilestones` (src/modules/tracking/controllers/tracking.controller.ts:73). Exige sesión con alguno de los roles TRACKING_ADMIN. Valida el cuerpo como `DefineMilestonesDto` (8 campos, 5 obligatorios). Delega en `TrackingService.defineMilestones`. Crea filas en tracking.milestone_definitions. Lee tracking.milestone_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:72` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:73` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -153,29 +153,29 @@ El árbol de decisión completo está en [flujos](../flujos/tracking.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.cancelShipment` — `src/modules/tracking/controllers/tracking.controller.ts:200`
+- **Implementación:** `TrackingController.cancelShipment` — `src/modules/tracking/controllers/tracking.controller.ts:204`
 
 ### Qué es y para qué sirve (negocio)
 
 Cancelar el envío y cerrar el sujeto. Caso de uso UC-37-10: Cancelar y cerrar. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/shipments/{id}/cancel` la atiende `TrackingController.cancelShipment` (src/modules/tracking/controllers/tracking.controller.ts:200). Exige sesión con alguno de los roles LOGISTICS_OPERATOR, TRACKING_ADMIN. Valida el cuerpo como `CancelShipmentDto` (1 campo, 1 obligatorio). Delega en `TrackingService.cancelShipment`. Crea filas en tracking.tracking_events. Actualiza tracking.shipments, tracking.trackable_subjects. Lee tracking.shipments, tracking.trackable_subjects.
+`POST /tracking/shipments/{id}/cancel` la atiende `TrackingController.cancelShipment` (src/modules/tracking/controllers/tracking.controller.ts:204). Exige sesión con alguno de los roles LOGISTICS_OPERATOR, TRACKING_ADMIN. Valida el cuerpo como `CancelShipmentDto` (1 campo, 1 obligatorio). Delega en `TrackingService.cancelShipment`. Crea filas en tracking.tracking_events. Actualiza tracking.shipments, tracking.trackable_subjects. Lee tracking.shipments, tracking.trackable_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: LOGISTICS_OPERATOR, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:200` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:200` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: LOGISTICS_OPERATOR, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:204` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:204` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -260,29 +260,29 @@ El árbol de decisión completo está en [flujos](../flujos/tracking.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.recordDeliveryProof` — `src/modules/tracking/controllers/tracking.controller.ts:167`
+- **Implementación:** `TrackingController.recordDeliveryProof` — `src/modules/tracking/controllers/tracking.controller.ts:171`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar la prueba de entrega y cerrar. Caso de uso UC-37-08: Prueba de entrega y cierre. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/shipments/{id}/delivery-proof` la atiende `TrackingController.recordDeliveryProof` (src/modules/tracking/controllers/tracking.controller.ts:167). Exige sesión con alguno de los roles COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN. Valida el cuerpo como `RecordDeliveryProofDto` (7 campos, 1 obligatorio). Delega en `TrackingService.recordDeliveryProof`. Crea filas en tracking.delivery_proofs, tracking.tracking_events. Actualiza tracking.shipments, tracking.trackable_subjects. Lee tracking.delivery_proofs, tracking.milestone_definitions, tracking.shipments, tracking.trackable_subjects.
+`POST /tracking/shipments/{id}/delivery-proof` la atiende `TrackingController.recordDeliveryProof` (src/modules/tracking/controllers/tracking.controller.ts:171). Exige sesión con alguno de los roles COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN. Valida el cuerpo como `RecordDeliveryProofDto` (7 campos, 1 obligatorio). Delega en `TrackingService.recordDeliveryProof`. Crea filas en tracking.delivery_proofs, tracking.tracking_events. Actualiza tracking.shipments, tracking.trackable_subjects. Lee tracking.delivery_proofs, tracking.milestone_definitions, tracking.shipments, tracking.trackable_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:167` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:167` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:171` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:171` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -383,29 +383,29 @@ El árbol de decisión completo está en [flujos](../flujos/tracking.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.dispatchShipment` — `src/modules/tracking/controllers/tracking.controller.ts:87`
+- **Implementación:** `TrackingController.dispatchShipment` — `src/modules/tracking/controllers/tracking.controller.ts:88`
 
 ### Qué es y para qué sirve (negocio)
 
 Despachar el envío. Caso de uso UC-37-03: Despachar envío. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:44`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/shipments/{id}/dispatch` la atiende `TrackingController.dispatchShipment` (src/modules/tracking/controllers/tracking.controller.ts:87). Exige sesión con alguno de los roles LOGISTICS_OPERATOR, TRACKING_ADMIN. Valida el cuerpo como `DispatchShipmentDto` (2 campos, 0 obligatorios). Delega en `TrackingService.dispatchShipment`. Crea filas en tracking.tracking_events. Actualiza tracking.shipments, tracking.trackable_subjects. Lee tracking.shipments, tracking.trackable_subjects.
+`POST /tracking/shipments/{id}/dispatch` la atiende `TrackingController.dispatchShipment` (src/modules/tracking/controllers/tracking.controller.ts:88). Exige sesión con alguno de los roles LOGISTICS_OPERATOR, TRACKING_ADMIN. Valida el cuerpo como `DispatchShipmentDto` (2 campos, 0 obligatorios). Delega en `TrackingService.dispatchShipment`. Crea filas en tracking.tracking_events. Actualiza tracking.shipments, tracking.trackable_subjects. Lee tracking.shipments, tracking.trackable_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: LOGISTICS_OPERATOR, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:87` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: LOGISTICS_OPERATOR, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:88` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:88` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -489,29 +489,29 @@ El árbol de decisión completo está en [flujos](../flujos/tracking.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.recomputeEta` — `src/modules/tracking/controllers/tracking.controller.ts:151`
+- **Implementación:** `TrackingController.recomputeEta` — `src/modules/tracking/controllers/tracking.controller.ts:155`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar una estimación de llegada. Caso de uso UC-37-07: Estimación de llegada. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/shipments/{id}/eta/recompute` la atiende `TrackingController.recomputeEta` (src/modules/tracking/controllers/tracking.controller.ts:151). Exige sesión con alguno de los roles SYSTEM, LOGISTICS_OPERATOR, TRACKING_ADMIN. Valida el cuerpo como `RecomputeEtaDto` (4 campos, 2 obligatorios). Delega en `TrackingService.recomputeEta`. Crea filas en tracking.eta_estimates. Actualiza tracking.shipments. Lee tracking.eta_estimates, tracking.shipments, tracking.trackable_subjects.
+`POST /tracking/shipments/{id}/eta/recompute` la atiende `TrackingController.recomputeEta` (src/modules/tracking/controllers/tracking.controller.ts:155). Exige sesión con alguno de los roles SYSTEM, LOGISTICS_OPERATOR, TRACKING_ADMIN. Valida el cuerpo como `RecomputeEtaDto` (4 campos, 2 obligatorios). Delega en `TrackingService.recomputeEta`. Crea filas en tracking.eta_estimates. Actualiza tracking.shipments. Lee tracking.eta_estimates, tracking.shipments, tracking.trackable_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, LOGISTICS_OPERATOR, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:151` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:151` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM, LOGISTICS_OPERATOR, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:155` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:155` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -602,29 +602,29 @@ El árbol de decisión completo está en [flujos](../flujos/tracking.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.recordException` — `src/modules/tracking/controllers/tracking.controller.ts:183`
+- **Implementación:** `TrackingController.recordException` — `src/modules/tracking/controllers/tracking.controller.ts:187`
 
 ### Qué es y para qué sirve (negocio)
 
 Marcar una excepción o reintento de entrega. Caso de uso UC-37-09: Excepción o reintento. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/shipments/{id}/exception` la atiende `TrackingController.recordException` (src/modules/tracking/controllers/tracking.controller.ts:183). Exige sesión con alguno de los roles COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN. Valida el cuerpo como `RecordExceptionDto` (4 campos, 1 obligatorio). Delega en `TrackingService.recordException`. Crea filas en tracking.delivery_proofs, tracking.tracking_events. Actualiza tracking.shipments, tracking.trackable_subjects. Lee tracking.shipments, tracking.trackable_subjects.
+`POST /tracking/shipments/{id}/exception` la atiende `TrackingController.recordException` (src/modules/tracking/controllers/tracking.controller.ts:187). Exige sesión con alguno de los roles COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN. Valida el cuerpo como `RecordExceptionDto` (4 campos, 1 obligatorio). Delega en `TrackingService.recordException`. Crea filas en tracking.delivery_proofs, tracking.tracking_events. Actualiza tracking.shipments, tracking.trackable_subjects. Lee tracking.shipments, tracking.trackable_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:183` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:183` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: COURIER, LOGISTICS_OPERATOR, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:187` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:187` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -716,29 +716,29 @@ El árbol de decisión completo está en [flujos](../flujos/tracking.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.recordHandoff` — `src/modules/tracking/controllers/tracking.controller.ts:135`
+- **Implementación:** `TrackingController.recordHandoff` — `src/modules/tracking/controllers/tracking.controller.ts:139`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar el traspaso entre responsables. Caso de uso UC-37-06: Traspaso entre responsables. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/shipments/{id}/handoffs` la atiende `TrackingController.recordHandoff` (src/modules/tracking/controllers/tracking.controller.ts:135). Exige sesión con alguno de los roles LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN. Valida el cuerpo como `RecordHandoffDto` (9 campos, 1 obligatorio). Delega en `TrackingService.recordHandoff`. Crea filas en tracking.shipment_handoffs, tracking.tracking_events. Actualiza tracking.shipments. Lee tracking.shipments, tracking.tracking_carriers.
+`POST /tracking/shipments/{id}/handoffs` la atiende `TrackingController.recordHandoff` (src/modules/tracking/controllers/tracking.controller.ts:139). Exige sesión con alguno de los roles LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN. Valida el cuerpo como `RecordHandoffDto` (9 campos, 1 obligatorio). Delega en `TrackingService.recordHandoff`. Crea filas en tracking.shipment_handoffs, tracking.tracking_events. Actualiza tracking.shipments. Lee tracking.shipments, tracking.tracking_carriers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:135` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:135` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:139` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:139` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -838,28 +838,28 @@ El árbol de decisión completo está en [flujos](../flujos/tracking.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.scanSla` — `src/modules/tracking/controllers/tracking.controller.ts:216`
+- **Implementación:** `TrackingController.scanSla` — `src/modules/tracking/controllers/tracking.controller.ts:220`
 
 ### Qué es y para qué sirve (negocio)
 
 Barrer los compromisos de hito vencidos. Caso de uso UC-37-11: Detectar incumplimiento de hito. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/sla/scan` la atiende `TrackingController.scanSla` (src/modules/tracking/controllers/tracking.controller.ts:216). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `ScanSlaDto` (1 campo, 0 obligatorios). Delega en `TrackingService.scanSla`. Crea filas en tracking.tracking_events. Actualiza tracking.trackable_subjects. Lee tracking.milestone_definitions, tracking.trackable_subjects.
+`POST /tracking/sla/scan` la atiende `TrackingController.scanSla` (src/modules/tracking/controllers/tracking.controller.ts:220). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `ScanSlaDto` (1 campo, 0 obligatorios). Delega en `TrackingService.scanSla`. Crea filas en tracking.tracking_events. Actualiza tracking.trackable_subjects. Lee tracking.milestone_definitions, tracking.trackable_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/tracking/controllers/tracking.controller.ts:216` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SYSTEM | `src/modules/tracking/controllers/tracking.controller.ts:220` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -932,28 +932,28 @@ El árbol de decisión completo está en [flujos](../flujos/tracking.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.openSubject` — `src/modules/tracking/controllers/tracking.controller.ts:56`
+- **Implementación:** `TrackingController.openSubject` — `src/modules/tracking/controllers/tracking.controller.ts:57`
 
 ### Qué es y para qué sirve (negocio)
 
 Abrir un sujeto rastreable y su envío. Caso de uso UC-37-01: Abrir sujeto y crear envío. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:42`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/trackable-subjects` la atiende `TrackingController.openSubject` (src/modules/tracking/controllers/tracking.controller.ts:56). Exige sesión con alguno de los roles TRACKING_ADMIN, LOGISTICS_OPERATOR. Valida el cuerpo como `OpenSubjectDto` (9 campos, 3 obligatorios). Delega en `TrackingService.openSubject`. Crea filas en tracking.shipments, tracking.trackable_subjects. Lee tracking.shipments, tracking.trackable_subjects, tracking.tracking_carriers.
+`POST /tracking/trackable-subjects` la atiende `TrackingController.openSubject` (src/modules/tracking/controllers/tracking.controller.ts:57). Exige sesión con alguno de los roles TRACKING_ADMIN, LOGISTICS_OPERATOR. Valida el cuerpo como `OpenSubjectDto` (9 campos, 3 obligatorios). Delega en `TrackingService.openSubject`. Crea filas en tracking.shipments, tracking.trackable_subjects. Lee tracking.shipments, tracking.trackable_subjects, tracking.tracking_carriers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: TRACKING_ADMIN, LOGISTICS_OPERATOR | `src/modules/tracking/controllers/tracking.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: TRACKING_ADMIN, LOGISTICS_OPERATOR | `src/modules/tracking/controllers/tracking.controller.ts:57` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1052,29 +1052,29 @@ El árbol de decisión completo está en [flujos](../flujos/tracking.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.recordEvent` — `src/modules/tracking/controllers/tracking.controller.ts:103`
+- **Implementación:** `TrackingController.recordEvent` — `src/modules/tracking/controllers/tracking.controller.ts:104`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar un evento y avanzar el hito. Caso de uso UC-37-04: Evento y avance de hito. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/trackable-subjects/{id}/events` la atiende `TrackingController.recordEvent` (src/modules/tracking/controllers/tracking.controller.ts:103). Exige sesión con alguno de los roles LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN. Valida el cuerpo como `RecordEventDto` (9 campos, 1 obligatorio). Delega en `TrackingService.recordEvent`. Crea filas en tracking.tracking_events. Actualiza tracking.trackable_subjects. Lee tracking.milestone_definitions, tracking.trackable_subjects.
+`POST /tracking/trackable-subjects/{id}/events` la atiende `TrackingController.recordEvent` (src/modules/tracking/controllers/tracking.controller.ts:104). Exige sesión con alguno de los roles LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN. Valida el cuerpo como `RecordEventDto` (9 campos, 1 obligatorio). Delega en `TrackingService.recordEvent`. Crea filas en tracking.tracking_events. Actualiza tracking.trackable_subjects. Lee tracking.milestone_definitions, tracking.trackable_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:103` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: LOGISTICS_OPERATOR, COURIER, TRACKING_ADMIN | `src/modules/tracking/controllers/tracking.controller.ts:104` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/tracking/controllers/tracking.controller.ts:104` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1174,26 +1174,26 @@ El árbol de decisión completo está en [flujos](../flujos/tracking.md).
 - **Bloque:** Integraciones y Contratos
 - **Riesgo:** ALTO — Ruta pública que escribe en la base
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TrackingController.ingestCarrierWebhook` — `src/modules/tracking/controllers/tracking.controller.ts:119`
+- **Implementación:** `TrackingController.ingestCarrierWebhook` — `src/modules/tracking/controllers/tracking.controller.ts:120`
 
 ### Qué es y para qué sirve (negocio)
 
 Ingerir el webhook del transportista. Caso de uso UC-37-05: Webhook del transportista. Dentro del módulo (descripción del modelo, en inglés): «Business-level tracking of anything that moves or progresses: pharmacy deliveries, lab specimen transport, ambulance dispatch, referral fulfilment, claim processing.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/tracking/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_37_tracking.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
-`POST /tracking/webhooks/carriers/{carrierCode}` la atiende `TrackingController.ingestCarrierWebhook` (src/modules/tracking/controllers/tracking.controller.ts:119). Es una ruta pública: no exige token. Valida el cuerpo como `CarrierWebhookDto` (5 campos, 3 obligatorios). Delega en `TrackingService.ingestCarrierWebhook`. Crea filas en tracking.tracking_events. Actualiza tracking.shipments, tracking.trackable_subjects. Lee tracking.shipments, tracking.trackable_subjects, tracking.tracking_carriers, tracking.tracking_events.
+`POST /tracking/webhooks/carriers/{carrierCode}` la atiende `TrackingController.ingestCarrierWebhook` (src/modules/tracking/controllers/tracking.controller.ts:120). Es una ruta pública: no exige token. Valida el cuerpo como `CarrierWebhookDto` (5 campos, 3 obligatorios). Delega en `TrackingService.ingestCarrierWebhook`. Crea filas en tracking.tracking_events. Actualiza tracking.shipments, tracking.trackable_subjects. Lee tracking.shipments, tracking.trackable_subjects, tracking.tracking_carriers, tracking.tracking_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/tracking/controllers/tracking.controller.ts:119` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/tracking/controllers/tracking.controller.ts:120` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

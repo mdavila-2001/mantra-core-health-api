@@ -47,7 +47,7 @@ runbooks/:id/versions ──> versión inmutable y vigente; runbook-executions d
 resilience-exercises/:id/complete ──> pass | fail derivado del objetivo de recuperación
 ```
 
-_Fuente: `src/modules/platform_ops/README.md:45`_
+_Fuente: `src/modules/platform_ops/README.md:80`_
 
 ### Etapas y operaciones
 

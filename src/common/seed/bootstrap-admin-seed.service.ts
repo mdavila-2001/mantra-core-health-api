@@ -8,7 +8,7 @@ import {
 } from '../../modules/iam/entities';
 import { TenantMemberships } from '../../modules/directory/entities';
 import { DIR } from '../../modules/directory/directory.concepts';
-import { IamUsersService } from '../../modules/iam/services';
+import { IamUsersService } from '../../modules/iam/application/services';
 import { CONCEPTS, SEED, deterministicId } from '../constants/concepts';
 import { createdBy } from '../persistence/audit-fields';
 

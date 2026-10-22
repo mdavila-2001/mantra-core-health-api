@@ -42,7 +42,7 @@
 
 Calcular la atribución multi-touch de una conversión. Caso de uso UC-50-12: Atribución multi-touch. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -54,10 +54,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:236` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -166,7 +166,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Lanzar una campaña multicanal desde un segmento. Caso de uso UC-50-03: Lanzar campaña multicanal desde un segmento. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -178,10 +178,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -291,7 +291,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Materializar la audiencia de la campaña desde su segmento. Caso de uso UC-50-04: Materializar la audiencia. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -303,11 +303,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER, SYSTEM | `src/modules/marketing/controllers/marketing.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:103` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -397,7 +397,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Publicar una versión de plantilla de contenido. Caso de uso UC-50-05: Publicar versión de plantilla. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -409,10 +409,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CONTENT_EDITOR, MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -514,7 +514,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Avanzar la inscripción al siguiente paso. Caso de uso UC-50-08: Avanzar la inscripción. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -526,11 +526,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:178` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -618,7 +618,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Cerrar la inscripción por meta, baja o rebote. Caso de uso UC-50-09: Cerrar la inscripción. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -630,11 +630,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:195` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:195` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -724,7 +724,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Crear un journey en borrador. Caso de uso UC-50-06: Diseñar journey con pasos. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -736,10 +736,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:135` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -837,7 +837,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Activar el journey e inscribir la cohorte inicial. Caso de uso UC-50-07: Activar e inscribir la cohorte. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -849,11 +849,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:163` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:163` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -949,7 +949,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Añadir pasos al journey. Caso de uso UC-50-06: Diseñar journey con pasos. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -961,11 +961,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:147` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:147` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1073,7 +1073,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Crear un segmento y ligarlo a su read model. Caso de uso UC-50-01: Crear segmento y ligarlo a su read model. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:10`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:44`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1085,10 +1085,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1180,7 +1180,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Recomputar la membresía del segmento. Caso de uso UC-50-02: Recomputar la membresía. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1192,11 +1192,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER, SYSTEM | `src/modules/marketing/controllers/marketing.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/marketing/controllers/marketing.controller.ts:74` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1299,7 +1299,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Registrar un touchpoint de marketing. Caso de uso UC-50-11: Registrar touchpoint (append-only). Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1311,10 +1311,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:220` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1415,7 +1415,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Crear un enlace rastreable con parámetros UTM. Caso de uso UC-50-10: Enlace rastreable y click. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1427,10 +1427,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MARKETING_MANAGER | `src/modules/marketing/controllers/marketing.controller.ts:208` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1522,7 +1522,7 @@ El árbol de decisión completo está en [flujos](../flujos/marketing.md).
 
 Resolver un enlace rastreable y registrar el click. Caso de uso UC-50-10: Enlace rastreable y click. Dentro del módulo (descripción del modelo, en inglés): «Multi-channel marketing on top of the CRM (module 49), the messaging fabric (module 35) and the loyalty/promotions engine (module 51).» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketing/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_50_marketing.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1533,7 +1533,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/marketi
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/marketing/controllers/tracked-link-redirect.controller.ts:36` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

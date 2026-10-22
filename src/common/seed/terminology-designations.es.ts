@@ -3,6 +3,9 @@ import { PROF } from '../../modules/profiles/profiles.concepts';
 import { DIR } from '../../modules/directory/directory.concepts';
 import { CHART } from '../../modules/chart/chart.concepts';
 import { CLIN } from '../../modules/clinical/clinical.concepts';
+import { INS } from '../../modules/insurance/domain/insurance.concepts';
+import { DUNIT } from '../../modules/diagnostic_units/diagnostic_units.concepts';
+import { DIAG } from '../../modules/diagnostics/diagnostics.concepts';
 import { definitionPropertyCode } from '../../modules/terminology/terminology.constants';
 
 /**
@@ -53,7 +56,7 @@ import { definitionPropertyCode } from '../../modules/terminology/terminology.co
  *
  * ## Cobertura, dicha en voz alta
  *
- * Cubre los **162 conceptos que componen los 63 conjuntos de valores** de
+ * Cubre los **526 conceptos que componen los 73 conjuntos de valores** de
  * `DYNAMIC_ENUM_CATALOG` — es decir, todo lo que el glosario puede llegar a
  * mostrar hoy navegando por etiquetas. El catálogo interno completo es mayor
  * (estados de auditoría, tipos de evento, cosas que ningún conjunto de valores
@@ -68,7 +71,13 @@ import { definitionPropertyCode } from '../../modules/terminology/terminology.co
  * clínico de la condición entraron con el conjunto que los ofrece, y llegaron
  * acá porque esa prueba se puso roja — que es exactamente para lo que está. Los
  * siete de v4.1.9 (los cinco estados del vínculo profesional–institución y los
- * dos peldaños intermedios de la escalera de verificación) entraron igual.
+ * dos peldaños intermedios de la escalera de verificación) entraron igual. Y los
+ * ocho de la consola de planes y coberturas (las dos monedas del plan y las seis
+ * categorías de cobertura) también: llegaron acá porque su conjunto de valores
+ * se publicó sin traducir y la prueba lo delató. Lo mismo los doce del alta de
+ * laboratorios e imagenología (los dos tipos de unidad diagnóstica, las siete
+ * modalidades y el país de la organización) y de la visibilidad del documento
+ * del expediente para el paciente.
  */
 
 /** El nombre y la explicación de un concepto en castellano. */
@@ -293,6 +302,69 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    PROF.RELATIONSHIP_MOTHER,
+    {
+      display: 'Madre',
+      definition:
+        'La madre del paciente. Declarar el parentesco no le otorga por sí solo la representación legal: eso es el tutor, y se acredita aparte.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_FATHER,
+    {
+      display: 'Padre',
+      definition:
+        'El padre del paciente. Igual que con la madre, el parentesco por sí solo no acredita la representación legal.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_SPOUSE,
+    {
+      display: 'Cónyuge o pareja',
+      definition:
+        'La persona con quien el paciente comparte su vida en pareja, esté o no casada con él.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_CHILD,
+    {
+      display: 'Hijo o hija',
+      definition:
+        'Un hijo o una hija del paciente. Es el contacto habitual de una persona mayor a la que acompaña su familia.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_SIBLING,
+    {
+      display: 'Hermano o hermana',
+      definition: 'Un hermano o una hermana del paciente.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_OTHER_RELATIVE,
+    {
+      display: 'Otro familiar',
+      definition:
+        'Un pariente que no es madre, padre, cónyuge, hijo ni hermano: abuela, tío, prima, sobrino.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_FRIEND,
+    {
+      display: 'Amistad',
+      definition:
+        'Alguien cercano al paciente sin vínculo de familia. Mucha gente vive lejos de la suya, y es a quien de verdad se llama.',
+    },
+  ],
+  [
+    PROF.RELATIONSHIP_OTHER,
+    {
+      display: 'Otra relación',
+      definition:
+        'Cualquier otro vínculo: un vecino, el encargado del edificio, quien cuida al paciente. Existe para no obligar a declarar un parentesco falso.',
+    },
+  ],
+  [
     PROF.RELATED_ACTIVE,
     {
       display: 'Vínculo vigente',
@@ -314,6 +386,22 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Apoderado del portal revocado',
       definition:
         'Se retiró el permiso: esa persona ya no puede entrar al portal en nombre del paciente.',
+    },
+  ],
+  [
+    PROF.PROXY_PENDING,
+    {
+      display: 'Apoderado del portal pendiente',
+      definition:
+        'Alguien pidió representar al paciente y todavía no respondió: hasta que acepte, esa persona no puede hacer nada en su nombre.',
+    },
+  ],
+  [
+    PROF.PROXY_REJECTED,
+    {
+      display: 'Apoderado del portal rechazado',
+      definition:
+        'El paciente no aceptó que esa persona lo represente, así que nunca tuvo permiso para entrar en su nombre.',
     },
   ],
   [
@@ -1883,6 +1971,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    CLIN.SERVICE_REQUEST_SATISFIED_BY_PRIOR,
+    {
+      display: 'Satisfecha por informe previo',
+      definition:
+        'El médico eligió reutilizar un informe reciente del mismo estudio en vez de repetirlo (antiduplicación, v4.2.17). No es facturable.',
+    },
+  ],
+  [
     CLIN.SERVICE_REQUEST_INTENT_PLAN,
     {
       display: 'Intención de plan',
@@ -1901,7 +1997,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_URGENT,
     {
-      display: 'Prioridad urgente',
+      display: 'Urgente',
       definition:
         'Se necesita antes que las órdenes de rutina, sin llegar a ser una emergencia.',
     },
@@ -1909,7 +2005,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_ASAP,
     {
-      display: 'Prioridad cuanto antes',
+      display: 'Lo antes posible',
       definition:
         'Se realiza en cuanto haya disponibilidad, por delante de lo urgente programado.',
     },
@@ -1917,7 +2013,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_STAT,
     {
-      display: 'Prioridad inmediata',
+      display: 'Inmediata',
       definition: 'Emergencia: se realiza de inmediato e interrumpe la cola.',
     },
   ],
@@ -2622,7 +2718,7 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
   [
     CLIN.SERVICE_REQUEST_PRIORITY_ROUTINE,
     {
-      display: 'Prioridad de rutina',
+      display: 'De rutina',
       definition:
         'Se realiza en el turno normal del prestador, sin adelantarse a otras órdenes.',
     },
@@ -2700,6 +2796,112 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Sucursal de sociedad extranjera',
       definition:
         'Establecimiento en Bolivia de una sociedad constituida en otro país, inscrito en el registro de comercio.',
+    },
+  ],
+  // --- Formas societarias de otras jurisdicciones (subtarea 1.1) ----------
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_LTDA,
+    {
+      display: 'Sociedad Limitada (Brasil)',
+      definition:
+        'Figura brasileña de responsabilidad limitada: los socios responden hasta el monto de su cuota, regida por el Código Civil.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_SA,
+    {
+      display: 'Sociedad Anónima (Brasil)',
+      definition:
+        'Capital dividido en acciones, abierta o cerrada, regida por la Lei das S.A. (6.404/1976).',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_MEI,
+    {
+      display: 'Microemprendedor Individual (Brasil)',
+      definition:
+        'Régimen simplificado brasileño para quien factura poco y trabaja por cuenta propia.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_EI,
+    {
+      display: 'Empresario Individual (Brasil)',
+      definition:
+        'Persona física brasileña que ejerce una actividad empresarial sin constituir sociedad.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_SLU,
+    {
+      display: 'Sociedad Limitada Unipersonal (Brasil)',
+      definition:
+        'Limitada brasileña de un solo socio, sin exigir un mínimo de capital.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_BR_FILIAL_EST,
+    {
+      display: 'Filial de sociedad extranjera (Brasil)',
+      definition:
+        'Establecimiento en Brasil de una sociedad constituida en otro país.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_US_LLC,
+    {
+      display: 'Compañía de Responsabilidad Limitada (LLC, EE. UU.)',
+      definition:
+        'Estructura estadounidense que combina la protección patrimonial de una corporación con la flexibilidad de una sociedad de personas.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_US_CORP,
+    {
+      display: 'Corporación (EE. UU.)',
+      definition:
+        'Entidad legal separada de sus accionistas, con capital dividido en acciones.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_US_SOLE_PROP,
+    {
+      display: 'Propietario único (EE. UU.)',
+      definition:
+        'Negocio no incorporado, operado y respondido por una sola persona.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_US_LLP,
+    {
+      display:
+        'Sociedad de Responsabilidad Limitada entre profesionales (EE. UU.)',
+      definition:
+        'Sociedad de personas donde cada socio responde por sus propios actos y no por los de los demás.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_US_BRANCH,
+    {
+      display: 'Sucursal extranjera (EE. UU.)',
+      definition:
+        'Establecimiento en Estados Unidos de una empresa constituida en otro país.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_AR_SAS,
+    {
+      display: 'Sociedad por Acciones Simplificada (Argentina)',
+      definition:
+        'Figura societaria argentina de trámite ágil, con capital dividido en acciones y responsabilidad limitada al aporte.',
+    },
+  ],
+  [
+    CONCEPTS.LEGAL_ENTITY_MX_S_RL,
+    {
+      display: 'Sociedad de Responsabilidad Limitada (México)',
+      definition:
+        'Figura mexicana con socios que responden hasta el monto de sus aportaciones, sin partes representadas en títulos negociables.',
     },
   ],
   /* --- la nota clínica narrativa (v4.1.4) -----------------------------------
@@ -3774,6 +3976,489 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Control de salud de rutina del niño',
       definition:
         'Control periódico de crecimiento y desarrollo. CIE-10: Z00.1.',
+    },
+  ],
+
+  // --- Seguros: moneda del plan y categorías de cobertura -----------------
+  // Vocabulario del propio sistema: lo que la aseguradora elige al armar un
+  // plan y sus coberturas. La definición se escribe para quien contrata o
+  // consulta el plan, no para quien lo configura.
+  [
+    CONCEPTS.CURRENCY_BOB,
+    {
+      display: 'Boliviano',
+      definition:
+        'Moneda de curso legal en Bolivia. El plan expresa en bolivianos sus copagos, deducibles y topes de cobertura.',
+    },
+  ],
+  [
+    CONCEPTS.CURRENCY_USD,
+    {
+      display: 'Dólar estadounidense',
+      definition:
+        'Moneda en la que algunos planes pactan sus importes. Los copagos, deducibles y topes se leen en dólares, no en bolivianos.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_GENERAL,
+    {
+      display: 'Cobertura general',
+      definition:
+        'Cobertura que no se limita a un ámbito asistencial concreto: vale para todo el plan.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_OUTPATIENT,
+    {
+      display: 'Consulta externa',
+      definition:
+        'Atención ambulatoria: consultas con el profesional sin quedar internado.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_EMERGENCY,
+    {
+      display: 'Emergencias',
+      definition:
+        'Atención inmediata por una urgencia, incluida la llegada por guardia.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_HOSPITALIZATION,
+    {
+      display: 'Hospitalización',
+      definition:
+        'Internación: la estadía en el centro de salud y lo que se hace durante ella.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_LAB_IMAGING,
+    {
+      display: 'Laboratorio e imagen',
+      definition:
+        'Análisis de laboratorio y estudios por imagen, como una radiografía o una ecografía.',
+    },
+  ],
+  [
+    INS.BENEFIT_CATEGORY_PHARMACY,
+    {
+      display: 'Farmacia',
+      definition:
+        'Medicamentos que el plan cubre cuando se retiran con receta.',
+    },
+  ],
+
+  // --- Campañas preventivas de la aseguradora (Tarea 4 · M-06) --------------
+  [
+    INS.CAMPAIGN_DRAFT,
+    {
+      display: 'Campaña en borrador',
+      definition:
+        'La aseguradora todavía está armando la campaña: sus afiliados no la ven.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_ACTIVE,
+    {
+      display: 'Campaña activa',
+      definition:
+        'La campaña está vigente y sus afiliados con cobertura vigente la ven en su portal.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PAUSED,
+    {
+      display: 'Campaña pausada',
+      definition:
+        'La aseguradora suspendió temporalmente la campaña; puede reactivarla o finalizarla.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_EXPIRED,
+    {
+      display: 'Campaña finalizada',
+      definition:
+        'La campaña se cerró de forma definitiva; no se reabre, se crea otra con otro código.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_TYPE_LABORATORY,
+    {
+      display: 'Campaña de laboratorio',
+      definition:
+        'Bonifica análisis clínicos de laboratorio, de la mano de un laboratorio aliado.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_TYPE_PHARMACY,
+    {
+      display: 'Campaña de farmacia',
+      definition:
+        'Bonifica medicamentos de prevención, de la mano de una farmacia aliada.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_TYPE_DIAGNOSTIC_IMAGING,
+    {
+      display: 'Campaña de diagnóstico por imagen',
+      definition:
+        'Bonifica estudios de imagen (mamografía, ecografía, radiografía), de la mano de un centro de diagnóstico aliado.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_TYPE_VACCINATION,
+    {
+      display: 'Campaña de vacunación',
+      definition: 'Bonifica una o más vacunas de prevención.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_ROLE_SPONSOR,
+    {
+      display: 'Aliado auspiciante',
+      definition:
+        'Financia la campaña sin prestar el servicio: una importadora o un fabricante de medicamentos.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_ROLE_PROVIDER,
+    {
+      display: 'Aliado prestador',
+      definition:
+        'Presta el servicio bonificado de la campaña: un laboratorio, una farmacia o un centro de diagnóstico.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_TYPE_IMPORTER,
+    {
+      display: 'Importadora de medicamentos',
+      definition:
+        'Empresa que importa medicamentos y auspicia la campaña preventiva.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_TYPE_MANUFACTURER,
+    {
+      display: 'Fabricante de medicamentos',
+      definition:
+        'Empresa que fabrica medicamentos y auspicia la campaña preventiva.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_TYPE_LABORATORY,
+    {
+      display: 'Laboratorio clínico',
+      definition:
+        'Laboratorio de análisis clínicos que presta el servicio de la campaña.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_TYPE_PHARMACY,
+    {
+      display: 'Farmacia aliada',
+      definition: 'Farmacia que dispensa el beneficio de la campaña.',
+    },
+  ],
+  [
+    INS.CAMPAIGN_PARTNER_TYPE_MEDICAL_CENTER,
+    {
+      display: 'Centro de diagnóstico',
+      definition:
+        'Centro de diagnóstico por imagen o de otro estudio que presta el servicio de la campaña.',
+    },
+  ],
+
+  // --- Unidades diagnósticas: tipo de unidad y modalidad ------------------
+  // Lo que declara el alta de un laboratorio o de un centro de imagenología.
+  // Las modalidades siguen la nomenclatura de radiología en castellano (la de
+  // la edición española de SNOMED CT para los procedimientos de imagen).
+  [
+    DUNIT.UNIT_TYPE_LABORATORY,
+    {
+      display: 'Laboratorio clínico',
+      definition:
+        'Unidad que analiza muestras del paciente —sangre, orina, otros fluidos o tejidos— y entrega resultados de laboratorio.',
+    },
+  ],
+  [
+    DUNIT.UNIT_TYPE_IMAGING,
+    {
+      display: 'Centro de diagnóstico por imágenes',
+      definition:
+        'Unidad que obtiene e informa estudios por imagen del cuerpo, como radiografías, ecografías, tomografías o resonancias.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_LABORATORY,
+    {
+      display: 'Laboratorio',
+      definition:
+        'Estudios que se hacen sobre una muestra del paciente en el laboratorio, no sobre imágenes del cuerpo.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_XRAY,
+    {
+      display: 'Radiografía',
+      definition:
+        'Imagen obtenida con rayos X. Es la forma más habitual de ver huesos, tórax y abdomen; usa radiación ionizante en dosis baja.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_ULTRASOUND,
+    {
+      display: 'Ecografía',
+      definition:
+        'Imagen obtenida con ultrasonido. No usa radiación, por eso se prefiere en el embarazo y para ver órganos blandos del abdomen, el cuello o la pelvis.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_CT,
+    {
+      display: 'Tomografía computarizada',
+      definition:
+        'Estudio que combina muchas imágenes de rayos X para mostrar el cuerpo en cortes. Da más detalle que una radiografía y usa más radiación.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_MRI,
+    {
+      display: 'Resonancia magnética',
+      definition:
+        'Estudio que obtiene imágenes con un campo magnético y ondas de radio, sin radiación. Es la de elección para cerebro, médula, articulaciones y tejidos blandos.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_MAMMOGRAPHY,
+    {
+      display: 'Mamografía',
+      definition:
+        'Radiografía de la mama con dosis baja de rayos X. Se usa para el tamizaje y el diagnóstico del cáncer de mama.',
+    },
+  ],
+  [
+    DUNIT.MODALITY_BONE_DENSITOMETRY,
+    {
+      display: 'Densitometría ósea',
+      definition:
+        'Estudio que mide la densidad mineral de los huesos, habitualmente de cadera y columna. Sirve para diagnosticar osteoporosis y estimar el riesgo de fractura.',
+    },
+  ],
+
+  // --- Organizaciones: país ----------------------------------------------
+  // ISO 3166-1. El nombre ya estaba en castellano; se añade la definición.
+  [
+    CONCEPTS.COUNTRY_BO,
+    {
+      display: 'Bolivia',
+      definition:
+        'Estado Plurinacional de Bolivia (código ISO BO). Es el país donde la organización está registrada y opera.',
+    },
+  ],
+
+  // --- Expediente: quién puede ver el documento ---------------------------
+  // Vocabulario del propio sistema. La definición se escribe para quien
+  // registra el documento: qué pasa con la historia del paciente al elegirla.
+  [
+    CHART.VISIBILITY_PATIENT_VISIBLE,
+    {
+      display: 'Visible para el paciente',
+      definition:
+        'El paciente puede ver este documento en su propia historia clínica desde el portal.',
+    },
+  ],
+  [
+    CHART.VISIBILITY_PROVIDER_ONLY,
+    {
+      display: 'Solo para el equipo de salud',
+      definition:
+        'El documento queda en la historia clínica pero el paciente no lo ve en el portal; solo lo consultan los profesionales autorizados.',
+    },
+  ],
+  // --- Recepción de muestras: tipo de espécimen y de contenedor (M20) -----
+  // HL7 v2-0487 para el espécimen; el color de tapa de los tubos sigue la
+  // convención ISO 6710. Traducción del proyecto, en lenguaje llano.
+  [
+    DIAG.SPECIMEN_TYPE_BLOOD_VENOUS,
+    {
+      display: 'Sangre venosa',
+      definition:
+        'Sangre extraída de una vena, habitualmente del pliegue del codo. Se usa entera, sin separar, por ejemplo para el hemograma.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_SERUM,
+    {
+      display: 'Suero',
+      definition:
+        'La parte líquida de la sangre que queda después de que coagula. Es la muestra de la mayoría de los análisis de química, hormonas y serología.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_PLASMA,
+    {
+      display: 'Plasma',
+      definition:
+        'La parte líquida de la sangre obtenida sin dejarla coagular, gracias a un anticoagulante del tubo. Se usa en coagulación y en algunas pruebas de química.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_URINE,
+    {
+      display: 'Orina',
+      definition:
+        'Una muestra de orina tomada en un solo momento, idealmente la primera de la mañana y del chorro medio.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_URINE_24H,
+    {
+      display: 'Orina de 24 horas',
+      definition:
+        'Toda la orina de un día completo, juntada en un mismo recipiente. Sirve para medir cuánto elimina el riñón en ese tiempo.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_BLOOD_ARTERIAL,
+    {
+      display: 'Sangre arterial',
+      definition:
+        'Sangre extraída de una arteria, por lo general de la muñeca. Se usa para medir los gases de la sangre.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_BLOOD_CAPILLARY,
+    {
+      display: 'Sangre capilar',
+      definition:
+        'Unas gotas de sangre obtenidas con un pinchazo en el dedo o en el talón del bebé.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_STOOL,
+    {
+      display: 'Heces',
+      definition:
+        'Una muestra de materia fecal, para buscar parásitos, sangre oculta o gérmenes.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_CSF,
+    {
+      display: 'Líquido cefalorraquídeo',
+      definition:
+        'El líquido que rodea el cerebro y la médula espinal. Lo obtiene un médico con una punción lumbar.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_SPUTUM,
+    {
+      display: 'Esputo',
+      definition:
+        'La flema que se expulsa al toser desde los pulmones, no la saliva. Se usa, por ejemplo, para buscar tuberculosis.',
+    },
+  ],
+  [
+    DIAG.SPECIMEN_TYPE_THROAT_SWAB,
+    {
+      display: 'Hisopado de garganta',
+      definition:
+        'Muestra tomada frotando un hisopo en la garganta, para buscar bacterias o virus.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_LAVENDER_EDTA,
+    {
+      display: 'Tubo tapa lila (EDTA)',
+      definition:
+        'Tubo con anticoagulante EDTA que conserva las células de la sangre. Es el del hemograma.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_GOLD_SST,
+    {
+      display: 'Tubo tapa amarilla (gel separador)',
+      definition:
+        'Tubo con activador de la coagulación y un gel que separa el suero de las células al centrifugar. Es el más usado en química.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_RED_PLAIN,
+    {
+      display: 'Tubo tapa roja',
+      definition:
+        'Tubo sin anticoagulante: la sangre coagula y se obtiene suero. Se usa en química y serología.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_LIGHT_BLUE_CITRATE,
+    {
+      display: 'Tubo tapa celeste (citrato)',
+      definition:
+        'Tubo con citrato de sodio al 3,2 %, que impide la coagulación de forma reversible. Es el de las pruebas de coagulación; debe llenarse hasta la marca.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_GREEN_HEPARIN,
+    {
+      display: 'Tubo tapa verde (heparina)',
+      definition:
+        'Tubo con heparina de litio como anticoagulante, para obtener plasma en pruebas de química urgentes.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_GRAY_FLUORIDE,
+    {
+      display: 'Tubo tapa gris (fluoruro)',
+      definition:
+        'Tubo con fluoruro de sodio, que frena el consumo de azúcar por las células. Se usa para medir glucosa y lactato.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_SYRINGE_BLOOD_GAS,
+    {
+      display: 'Jeringa de gasometría',
+      definition:
+        'Jeringa con heparina para sangre arterial. Se procesa enseguida y sin burbujas de aire.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_CUP_URINE_STERILE,
+    {
+      display: 'Frasco estéril de orina',
+      definition:
+        'Frasco de boca ancha y tapa a rosca, estéril, para una muestra de orina.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_JUG_URINE_24H,
+    {
+      display: 'Bidón de orina de 24 horas',
+      definition: 'Recipiente grande donde se junta toda la orina de un día.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_CUP_STOOL,
+    {
+      display: 'Frasco para heces',
+      definition:
+        'Frasco con tapa y, a veces, paleta incorporada, para la muestra de materia fecal.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_TUBE_STERILE,
+    {
+      display: 'Tubo estéril con tapa a rosca',
+      definition:
+        'Tubo estéril sin aditivos, para líquidos como el cefalorraquídeo.',
+    },
+  ],
+  [
+    DIAG.CONTAINER_TYPE_SWAB_TRANSPORT,
+    {
+      display: 'Hisopo con medio de transporte',
+      definition:
+        'Hisopo que se guarda en un tubo con un medio que mantiene vivos los gérmenes hasta el laboratorio.',
     },
   ],
 ];

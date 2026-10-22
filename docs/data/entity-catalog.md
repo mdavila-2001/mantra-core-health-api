@@ -1,18 +1,18 @@
 # Catálogo de entidades
 
 > Generado por `yarn docs:data:sync` (`tools/docs/generate-data-catalog.mjs`) cruzando las
-> **1239 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
+> **1262 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > `../Mantra Core Health Vault/SALUD/Entidades` vía `vault.mjs`, la misma fuente que usa
 > `yarn orm:catalog`; `SALUD_VAULT` la sobreescribe) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1193/1239** entidades tienen descripción de negocio
+> repositorio. **1198/1262** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
-> Este es el catálogo de lo **implementado**. La bóveda describe 1341 entidades en total
-> — la diferencia (102) son entidades diseñadas pero no materializadas aún en
+> Este es el catálogo de lo **implementado**. La bóveda describe 1356 entidades en total
+> — la diferencia (94) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
-## Por schema (60 schemas · 1239 entidades)
+## Por schema (63 schemas · 1262 entidades)
 
 ### `accounting` (42 entidades, módulo `accounting`)
 
@@ -31,7 +31,7 @@
 | `asset_depreciations` | `AssetDepreciations` | 11 | `id` | ✅ | asset_depreciations es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `asset_postings` | `AssetPostings` | 11 | `id` | — | asset_postings es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `asset_valuations` | `AssetValuations` | 17 | `id` | ✅ | asset_valuations es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
-| `assets` | `Assets` | 19 | `id` | ✅ | assets es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
+| `assets` | `Assets` | 20 | `id` | ✅ | assets es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `clearing_documents` | `ClearingDocuments` | 10 | `id` | — | clearing_documents es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `clearing_items` | `ClearingItems` | 10 | `id` | — | clearing_items es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `company_bank_accounts` | `CompanyBankAccounts` | 18 | `id` | ✅ | company_bank_accounts es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
@@ -49,7 +49,7 @@
 | `journal_entry_assignments` | `JournalEntryAssignments` | 30 | `id` | — | journal_entry_assignments es una tabla de asociación del módulo 16 · accounting (dominio Financiero y ERP): conecta entidades (`ledger_entries`, `cost_centers`, `profit_centers`) para representar relaciones muchos-a-much… |
 | `journal_transactions` | `JournalTransactions` | 22 | `id` | ✅ | journal_transactions es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `ledger_entries` | `LedgerEntries` | 16 | `id` | ✅ | ledger_entries es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
-| `liabilities` | `Liabilities` | 18 | `id` | ✅ | liabilities es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
+| `liabilities` | `Liabilities` | 19 | `id` | ✅ | liabilities es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `liability_payments` | `LiabilityPayments` | 12 | `id` | ✅ | liability_payments es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `liability_postings` | `LiabilityPostings` | 10 | `id` | — | liability_postings es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `liability_schedules` | `LiabilitySchedules` | 15 | `id` | ✅ | liability_schedules es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
@@ -339,7 +339,7 @@
 | `workflow_steps` | `WorkflowSteps` | 15 | `id` | ✅ | workflow_steps es un registro central de negocio del módulo 48 · automation (automatización y orquestación multi-agente), dominio Operaciones de Plataforma. |
 | `workflows` | `Workflows` | 14 | `id` | ✅ | workflows es un registro central de negocio del módulo 48 · automation (automatización y orquestación multi-agente), dominio Operaciones de Plataforma. |
 
-### `billing` (20 entidades, módulo `billing`)
+### `billing` (22 entidades, módulo `billing`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -357,9 +357,11 @@
 | `payable_payment_allocations` | `PayablePaymentAllocations` | 11 | `id` | — | payable_payment_allocations es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `payments_made` | `PaymentsMade` | 17 | `id` | ✅ | payments_made es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `payments_received` | `PaymentsReceived` | 18 | `id` | ✅ | payments_received es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
+| `quotation_installments` | `QuotationInstallments` | 8 | `id` | ✅ | quotation_installments es cada cuota del plan de pagos de una cotización, congelada al momento de cotizar: número de cuota, vencimiento y monto. Sin interés desde v4.2.18: los montos no tienen por qué ser iguales —quien … |
+| `quotations` | `Quotations` | 20 | `id` | ✅ | quotations es la cotización que un profesional le ofrece a un paciente antes de la atención: un servicio del catálogo, un precio ofrecido y un plan de pagos flexible y sin interés —anticipo, frecuencia y cuotas con fecha… |
 | `receivable_payment_allocations` | `ReceivablePaymentAllocations` | 11 | `id` | — | receivable_payment_allocations es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `reimbursements` | `Reimbursements` | 11 | `id` | ✅ | reimbursements es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
-| `service_catalog` | `ServiceCatalog` | 15 | `id` | ✅ | service_catalog es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
+| `service_catalog` | `ServiceCatalog` | 17 | `id` | ✅ | service_catalog es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `tax_codes` | `TaxCodes` | 14 | `id` | ✅ | tax_codes es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `tax_periods` | `TaxPeriods` | 13 | `id` | ✅ | tax_periods es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
 | `vendors` | `Vendors` | 14 | `id` | ✅ | vendors es un registro central de negocio del módulo 17 · billing (facturación, cuentas por cobrar/pagar y planificación financiera), dominio Financiero y ERP. |
@@ -369,7 +371,7 @@
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
 | `care_plan_activities` | `CarePlanActivities` | 11 | `id` | ✅ | care_plan_activities es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
-| `care_plans` | `CarePlans` | 15 | `id` | ✅ | care_plans es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
+| `care_plans` | `CarePlans` | 16 | `id` | ✅ | care_plans es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
 | `chart_template_assignments` | `ChartTemplateAssignments` | 11 | `id` | ✅ | chart_template_assignments es una tabla de asociación del módulo 15 · chart (dominio Clínico y Diagnóstico): conecta entidades (`specialty_chart_templates`) para representar relaciones muchos-a-muchos. |
 | `clinical_note_headers` | `ClinicalNoteHeaders` | 14 | `id` | ✅ | clinical_note_headers es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
 | `clinical_note_signatures` | `ClinicalNoteSignatures` | 8 | `id` | — | clinical_note_signatures es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
@@ -380,11 +382,11 @@
 | `physical_exam_findings` | `PhysicalExamFindings` | 8 | `id` | — | physical_exam_findings es un registro central de negocio del módulo 15 · chart (historia clínica versionada, notas y documentos), dominio Clínico y Diagnóstico. |
 | `specialty_chart_templates` | `SpecialtyChartTemplates` | 13 | `id` | ✅ | specialty_chart_templates guarda reglas y configuración de gobierno del módulo 15 · chart (dominio Clínico y Diagnóstico): parametriza el comportamiento del negocio sin tocar código. |
 
-### `clinical` (22 entidades, módulo `clinical`)
+### `clinical` (23 entidades, módulo `clinical`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `allergy_intolerances` | `AllergyIntolerances` | 15 | `id` | ✅ | allergy_intolerances es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
+| `allergy_intolerances` | `AllergyIntolerances` | 16 | `id` | ✅ | allergy_intolerances es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `allergy_reactions` | `AllergyReactions` | 10 | `id` | ✅ | allergy_reactions es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `appointments` | `Appointments` | 16 | `id` | ✅ | appointments es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `care_episodes` | `CareEpisodes` | 13 | `id` | ✅ | care_episodes es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
@@ -392,19 +394,20 @@
 | `diagnostic_reports` | `DiagnosticReports` | 16 | `id` | ✅ | diagnostic_reports es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `encounter_locations` | `EncounterLocations` | 13 | `id` | ✅ | encounter_locations es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `encounter_participants` | `EncounterParticipants` | 14 | `id` | ✅ | encounter_participants es una tabla de asociación del módulo 08 · clinical (dominio Clínico y Diagnóstico): conecta entidades (`encounters`) para representar relaciones muchos-a-muchos. |
-| `encounters` | `Encounters` | 18 | `id` | ✅ | encounters es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
+| `encounters` | `Encounters` | 20 | `id` | ✅ | encounters es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `family_member_history` | `FamilyMemberHistory` | 15 | `id` | ✅ | family_member_history es el historial auditable de `family_member` dentro del módulo 08 · clinical (dominio Clínico y Diagnóstico). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensib… |
 | `immunizations` | `Immunizations` | 15 | `id` | ✅ | immunizations es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `medication_records` | `MedicationRecords` | 16 | `id` | ✅ | medication_records es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
-| `medication_requests` | `MedicationRequests` | 31 | `id` | ✅ | medication_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 08 · clinical (dominio Clínico y Diagnóstico): responde a '¿qué está pasando ahora mismo?'. |
+| `medication_requests` | `MedicationRequests` | 33 | `id` | ✅ | medication_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 08 · clinical (dominio Clínico y Diagnóstico): responde a '¿qué está pasando ahora mismo?'. |
 | `observation_components` | `ObservationComponents` | 23 | `id` | ✅ | observation_components es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `observation_notes` | `ObservationNotes` | 5 | `id` | — | observation_notes es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `observation_performers` | `ObservationPerformers` | 8 | `id` | — | observation_performers es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `observation_reference_ranges` | `ObservationReferenceRanges` | 13 | `id` | — | observation_reference_ranges es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
 | `observations` | `Observations` | 44 | `id` | ✅ | observations es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
+| `patient_reported_health_statements` | `PatientReportedHealthStatements` | 14 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `prescription_signature_policies` | `PrescriptionSignaturePolicies` | 13 | `id` | ✅ | prescription_signature_policies registra cuándo una receta exige firma, de forma configurable por tenant. |
 | `procedures` | `Procedures` | 28 | `id` | ✅ | procedures es un registro central de negocio del módulo 08 · clinical (registro clínico central, órdenes y logística de encuentros), dominio Clínico y Diagnóstico. |
-| `service_requests` | `ServiceRequests` | 16 | `id` | ✅ | service_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 08 · clinical (dominio Clínico y Diagnóstico): responde a '¿qué está pasando ahora mismo?'. |
+| `service_requests` | `ServiceRequests` | 19 | `id` | ✅ | service_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 08 · clinical (dominio Clínico y Diagnóstico): responde a '¿qué está pasando ahora mismo?'. |
 | `social_history` | `SocialHistory` | 16 | `id` | ✅ | social_history es el historial auditable de `social` dentro del módulo 08 · clinical (dominio Clínico y Diagnóstico). Conserva cada versión pasada para poder demostrar el 'antes y después' de un dato sensible. |
 
 ### `clinical_ext` (13 entidades, módulo `clinical_ext`)
@@ -435,18 +438,20 @@
 | `file_links` | `FileLinks` | 13 | `id` | ✅ | file_links es una tabla de asociación del módulo 02 · common (dominio Núcleo y Terminología): conecta entidades (`files`) para representar relaciones muchos-a-muchos. |
 | `file_versions` | `FileVersions` | 22 | `id` | — | file_versions es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 | `files` | `Files` | 15 | `id` | ✅ | files es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
-| `identifiers` | `Identifiers` | 18 | `id` | ✅ | identifiers es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
+| `identifiers` | `Identifiers` | 19 | `id` | ✅ | identifiers es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 
-### `community` (38 entidades, módulo `community`)
+### `community` (40 entidades, módulo `community`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
 | `bookmarks` | `Bookmarks` | 10 | `id` | ✅ | bookmarks es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
+| `chat_auto_replies` | `ChatAutoReplies` | 15 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `comment_media` | `CommentMedia` | 8 | `id` | — | _sin descripción verificada en la bóveda_ |
 | `comments` | `Comments` | 20 | `id` | ✅ | comments es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `content_hashtags` | `ContentHashtags` | 9 | `id` | ✅ | content_hashtags es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `content_reports` | `ContentReports` | 11 | `id` | — | content_reports es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
-| `conversation_participants` | `ConversationParticipants` | 13 | `id` | ✅ | conversation_participants es una tabla de asociación del módulo 19 · community (dominio Marketing y Crecimiento): conecta entidades (`conversations`) para representar relaciones muchos-a-muchos. |
-| `conversations` | `Conversations` | 12 | `id` | ✅ | conversations es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
+| `conversation_participants` | `ConversationParticipants` | 17 | `id` | ✅ | conversation_participants es una tabla de asociación del módulo 19 · community (dominio Marketing y Crecimiento): conecta entidades (`conversations`) para representar relaciones muchos-a-muchos. |
+| `conversations` | `Conversations` | 13 | `id` | ✅ | conversations es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `direct_messages` | `DirectMessages` | 16 | `id` | ✅ | direct_messages es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `feed_items` | `FeedItems` | 15 | `id` | ✅ | feed_items es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `feedback_ticket_comments` | `FeedbackTicketComments` | 11 | `id` | ✅ | feedback_ticket_comments es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
@@ -556,6 +561,19 @@
 | `reindex_jobs` | `ReindexJobs` | 11 | `id` | — | reindex_jobs registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 62 · cross_store_consistency (dominio Datos y NoSQL): responde a '¿qué está pasando ahora mismo?'. |
 | `schema_migration_jobs` | `SchemaMigrationJobs` | 11 | `id` | — | schema_migration_jobs registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 62 · cross_store_consistency (dominio Datos y NoSQL): responde a '¿qué está pasando ahora mismo?'. |
 | `store_consistency_slos` | `StoreConsistencySlos` | 8 | `id` | — | store_consistency_slos es un registro central de negocio del módulo 62 · cross_store_consistency (proyección outbox, reconciliación y propagación de borrado), dominio Datos y NoSQL. |
+
+### `data_catalog` (8 entidades, módulo `data_catalog`)
+
+| Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
+|---|---|---:|---|:---:|---|
+| `catalog_annotation_revisions` | `CatalogAnnotationRevisions` | 10 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `catalog_annotations` | `CatalogAnnotations` | 34 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `catalog_change_events` | `CatalogChangeEvents` | 8 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `catalog_columns` | `CatalogColumns` | 24 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `catalog_evidence_items` | `CatalogEvidenceItems` | 9 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `catalog_objects` | `CatalogObjects` | 22 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `catalog_review_decisions` | `CatalogReviewDecisions` | 7 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `catalog_scan_runs` | `CatalogScanRuns` | 34 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 
 ### `delegated_access` (7 entidades, módulo `delegated_access`)
 
@@ -852,7 +870,7 @@
 | `identity_verification_cases` | `IdentityVerificationCases` | 16 | `id` | ✅ | identity_verification_cases es un registro central de negocio del módulo 27 · identity_assurance (verificación de identidad, aserciones y controles de fraude), dominio Identidad y Seguridad. |
 | `identity_verification_policies` | `IdentityVerificationPolicies` | 15 | `id` | — | identity_verification_policies guarda reglas y configuración de gobierno del módulo 27 · identity_assurance (dominio Identidad y Seguridad): parametriza el comportamiento del negocio sin tocar código. |
 
-### `insurance` (29 entidades, módulo `insurance`)
+### `insurance` (31 entidades, módulo `insurance`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -862,7 +880,7 @@
 | `claim_adjudication_versions` | `ClaimAdjudicationVersions` | 11 | `id` | — | claim_adjudication_versions es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `claim_appeal_decisions` | `ClaimAppealDecisions` | 12 | `id` | — | claim_appeal_decisions es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `claim_disputes` | `ClaimDisputes` | 16 | `id` | ✅ | claim_disputes es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `claim_line_adjudications` | `ClaimLineAdjudications` | 9 | `id` | — | claim_line_adjudications es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
+| `claim_line_adjudications` | `ClaimLineAdjudications` | 11 | `id` | — | claim_line_adjudications es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `claim_reversals` | `ClaimReversals` | 11 | `id` | — | claim_reversals es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `coordination_of_benefits` | `CoordinationOfBenefits` | 13 | `id` | — | coordination_of_benefits es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `coverage_dependents` | `CoverageDependents` | 12 | `id` | ✅ | coverage_dependents es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
@@ -870,20 +888,22 @@
 | `coverage_eligibility_responses` | `CoverageEligibilityResponses` | 10 | `id` | — | coverage_eligibility_responses es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `employer_groups` | `EmployerGroups` | 11 | `id` | ✅ | employer_groups es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_brokers` | `InsuranceBrokers` | 14 | `id` | ✅ | insurance_brokers es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `insurance_carriers` | `InsuranceCarriers` | 16 | `id` | ✅ | insurance_carriers es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `insurance_claim_lines` | `InsuranceClaimLines` | 11 | `id` | — | insurance_claim_lines es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `insurance_claims` | `InsuranceClaims` | 18 | `id` | ✅ | insurance_claims es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
+| `insurance_campaign_partners` | `InsuranceCampaignPartners` | 12 | `id` | ✅ | insurance_campaign_partners es una tabla de asociación del módulo 26 · insurance (dominio Financiero y ERP): registra a los aliados —laboratorios, farmacias, centros de diagnóstico (PROVIDER) o importadoras y fabricantes… |
+| `insurance_campaigns` | `InsuranceCampaigns` | 17 | `id` | ✅ | insurance_campaigns es el registro de campañas de prevención que una aseguradora publica junto a laboratorios, farmacias e importadoras/fabricantes de medicamentos, del módulo 26 · insurance (redes de seguros, operacione… |
+| `insurance_carriers` | `InsuranceCarriers` | 19 | `id` | ✅ | insurance_carriers es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
+| `insurance_claim_lines` | `InsuranceClaimLines` | 12 | `id` | — | insurance_claim_lines es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
+| `insurance_claims` | `InsuranceClaims` | 20 | `id` | ✅ | insurance_claims es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_plan_benefits` | `InsurancePlanBenefits` | 18 | `id` | ✅ | insurance_plan_benefits es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `insurance_plans` | `InsurancePlans` | 15 | `id` | ✅ | insurance_plans es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
+| `insurance_plans` | `InsurancePlans` | 16 | `id` | ✅ | insurance_plans es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_products` | `InsuranceProducts` | 13 | `id` | ✅ | insurance_products es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_reconciliation_batches` | `InsuranceReconciliationBatches` | 16 | `id` | ✅ | insurance_reconciliation_batches es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `insurance_reconciliation_items` | `InsuranceReconciliationItems` | 14 | `id` | ✅ | insurance_reconciliation_items es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `network_provider_memberships` | `NetworkProviderMemberships` | 20 | `id` | ✅ | network_provider_memberships es una tabla de asociación del módulo 26 · insurance (dominio Financiero y ERP): conecta entidades (`provider_networks`) para representar relaciones muchos-a-muchos. |
 | `patient_coverages` | `PatientCoverages` | 18 | `id` | ✅ | patient_coverages es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 | `patient_explanations_of_benefit` | `PatientExplanationsOfBenefit` | 9 | `id` | — | patient_explanations_of_benefit es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `prior_authorization_determinations` | `PriorAuthorizationDeterminations` | 13 | `id` | — | prior_authorization_determinations guarda reglas y configuración de gobierno del módulo 26 · insurance (dominio Financiero y ERP): parametriza el comportamiento del negocio sin tocar código. |
+| `prior_authorization_determinations` | `PriorAuthorizationDeterminations` | 15 | `id` | — | prior_authorization_determinations guarda reglas y configuración de gobierno del módulo 26 · insurance (dominio Financiero y ERP): parametriza el comportamiento del negocio sin tocar código. |
 | `prior_authorization_items` | `PriorAuthorizationItems` | 10 | `id` | — | prior_authorization_items es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
-| `prior_authorization_requests` | `PriorAuthorizationRequests` | 15 | `id` | ✅ | prior_authorization_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 26 · insurance (dominio Financiero y ERP): responde a '¿qué está pasando ahora mismo?'. |
+| `prior_authorization_requests` | `PriorAuthorizationRequests` | 16 | `id` | ✅ | prior_authorization_requests registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 26 · insurance (dominio Financiero y ERP): responde a '¿qué está pasando ahora mismo?'. |
 | `provider_networks` | `ProviderNetworks` | 13 | `id` | ✅ | provider_networks es un registro central de negocio del módulo 26 · insurance (redes de seguros, operaciones, apelaciones y conciliación), dominio Financiero y ERP. |
 
 ### `integration_contracts` (9 entidades, módulo `integration_contracts`)
@@ -956,6 +976,13 @@
 | `segment_members` | `SegmentMembers` | 12 | `id` | ✅ | segment_members es una tabla de asociación del módulo 50 · marketing (dominio Marketing y Crecimiento): conecta entidades (`segments`) para representar relaciones muchos-a-muchos. |
 | `segments` | `MarketingSegments` | 15 | `id` | ✅ | segments es un registro central de negocio del módulo 50 · marketing (automatización de marketing, journeys y atribución), dominio Marketing y Crecimiento. |
 | `tracked_links` | `TrackedLinks` | 15 | `id` | ✅ | tracked_links es una tabla de asociación del módulo 50 · marketing (dominio Marketing y Crecimiento): conecta entidades (`marketing_touchpoints`, `marketing_campaigns`) para representar relaciones muchos-a-muchos. |
+
+### `medical_groups` (2 entidades, módulo `medical_groups`)
+
+| Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
+|---|---|---:|---|:---:|---|
+| `group_members` | `MedicalGroupMembers` | 15 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `groups` | `MedicalGroups` | 22 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 
 ### `messaging` (22 entidades, módulo `messaging`)
 
@@ -1122,7 +1149,7 @@
 | `pharmacy_price_lists` | `PharmacyPriceLists` | 16 | `id` | ✅ | pharmacy_price_lists es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
 | `pharmacy_product_identifiers` | `PharmacyProductIdentifiers` | 10 | `id` | — | pharmacy_product_identifiers es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
 | `pharmacy_product_prices` | `PharmacyProductPrices` | 14 | `id` | — | pharmacy_product_prices es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
-| `pharmacy_products` | `PharmacyProducts` | 19 | `id` | ✅ | pharmacy_products es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
+| `pharmacy_products` | `PharmacyProducts` | 21 | `id` | ✅ | pharmacy_products es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
 | `pharmacy_sites` | `PharmacySites` | 16 | `id` | ✅ | pharmacy_sites es un registro central de negocio del módulo 24 · pharmacy (identidad de farmacia, sedes, catálogo y precios), dominio Farmacia. |
 
 ### `pharmacy_inventory` (21 entidades, módulo `pharmacy_inventory`)
@@ -1230,7 +1257,7 @@
 | `inventory_movements` | `InventoryMovements` | 9 | `id` | — | inventory_movements es un ledger inmutable (append-only) del módulo 14 · practice (dominio Práctica y Agenda): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `practice_accreditations` | `PracticeAccreditations` | 16 | `id` | ✅ | practice_accreditations es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `practice_settings` | `PracticeSettings` | 10 | `id` | ✅ | practice_settings guarda reglas y configuración de gobierno del módulo 14 · practice (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
-| `practice_sites` | `PracticeSites` | 17 | `id` | ✅ | practice_sites es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
+| `practice_sites` | `PracticeSites` | 18 | `id` | ✅ | practice_sites es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `practices` | `Practices` | 15 | `id` | ✅ | practices es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `practitioner_role_assignments` | `PractitionerRoleAssignments` | 19 | `id` | ✅ | practitioner_role_assignments es una tabla de asociación del módulo 14 · practice (dominio Práctica y Agenda): conecta entidades (`practitioner_support_assignments`, `practices`, `healthcare_services`) para representar r… |
 | `practitioner_support_assignments` | `PractitionerSupportAssignments` | 13 | `id` | ✅ | practitioner_support_assignments es una tabla de asociación del módulo 14 · practice (dominio Práctica y Agenda): conecta entidades (`practitioner_role_assignments`) para representar relaciones muchos-a-muchos. |
@@ -1283,20 +1310,20 @@
 |---|---|---:|---|:---:|---|
 | `administrator_profiles` | `AdministratorProfiles` | 8 | `profile_id` | ✅ | administrator_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `emergency_staff_profiles` | `EmergencyStaffProfiles` | 8 | `profile_id` | ✅ | emergency_staff_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `health_practitioner_profiles` | `HealthPractitionerProfiles` | 15 | `profile_id` | ✅ | health_practitioner_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `health_practitioner_profiles` | `HealthPractitionerProfiles` | 17 | `profile_id` | ✅ | health_practitioner_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `insurance_representative_profiles` | `InsuranceRepresentativeProfiles` | 8 | `profile_id` | ✅ | insurance_representative_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `jurisdiction_authorizations` | `JurisdictionAuthorizations` | 14 | `id` | ✅ | jurisdiction_authorizations es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `jurisdiction_authorizations` | `JurisdictionAuthorizations` | 15 | `id` | ✅ | jurisdiction_authorizations es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `patient_identity_links` | `PatientIdentityLinks` | 15 | `id` | ✅ | patient_identity_links es una tabla de asociación del módulo 05 · profiles (dominio Núcleo y Terminología): conecta entidades (`patient_profiles`) para representar relaciones muchos-a-muchos. |
 | `patient_merge_events` | `PatientMergeEvents` | 9 | `id` | — | patient_merge_events registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 05 · profiles (dominio Núcleo y Terminología): responde a '¿qué está pasando ahora mismo?'. |
 | `patient_portal_proxies` | `PatientPortalProxies` | 14 | `id` | ✅ | patient_portal_proxies es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `patient_profiles` | `PatientProfiles` | 13 | `profile_id` | ✅ | patient_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `person_account_links` | `PersonAccountLinks` | 13 | `id` | ✅ | person_account_links es una tabla de asociación del módulo 05 · profiles (dominio Núcleo y Terminología): conecta entidades (`persons`) para representar relaciones muchos-a-muchos. |
 | `person_profiles` | `PersonProfiles` | 9 | `id` | ✅ | person_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `persons` | `Persons` | 25 | `id` | ✅ | persons es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `persons` | `Persons` | 27 | `id` | ✅ | persons es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `practitioner_affiliations` | `PractitionerAffiliations` | 17 | `id` | ✅ | practitioner_affiliations es el historial laboral del profesional dentro del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. Guarda dónde ejerció: la institución, el c… |
 | `practitioner_languages` | `PractitionerLanguages` | 10 | `id` | ✅ | practitioner_languages es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `practitioner_specialties` | `PractitionerSpecialties` | 16 | `id` | ✅ | practitioner_specialties es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `professional_credentials` | `ProfessionalCredentials` | 19 | `id` | ✅ | professional_credentials es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `professional_credentials` | `ProfessionalCredentials` | 23 | `id` | ✅ | professional_credentials es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `provider_operator_profiles` | `ProviderOperatorProfiles` | 8 | `profile_id` | ✅ | provider_operator_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `related_persons` | `RelatedPersons` | 12 | `id` | ✅ | related_persons es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `secretary_profiles` | `SecretaryProfiles` | 7 | `profile_id` | ✅ | secretary_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
@@ -1316,6 +1343,15 @@
 | `promotions` | `Promotions` | 21 | `id` | ✅ | promotions es un registro central de negocio del módulo 51 · promotions (fidelización, descuentos, cupones y referidos), dominio Marketing y Crecimiento. |
 | `redemptions` | `Redemptions` | 18 | `id` | ✅ | redemptions es un registro central de negocio del módulo 51 · promotions (fidelización, descuentos, cupones y referidos), dominio Marketing y Crecimiento. |
 | `referral_programs` | `ReferralPrograms` | 19 | `id` | ✅ | referral_programs es un registro central de negocio del módulo 51 · promotions (fidelización, descuentos, cupones y referidos), dominio Marketing y Crecimiento. |
+
+### `qa_execution` (4 entidades, módulo `qa_execution`)
+
+| Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
+|---|---|---:|---|:---:|---|
+| `execution_plans` | `ExecutionPlans` | 31 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `execution_targets` | `ExecutionTargets` | 20 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `plan_approvals` | `PlanApprovals` | 8 | `id` | — | _sin descripción verificada en la bóveda_ |
+| `plan_events` | `PlanEvents` | 7 | `id` | — | _sin descripción verificada en la bóveda_ |
 
 ### `qa_lab` (13 entidades, módulo `qa_lab`)
 
@@ -1370,23 +1406,25 @@
 | `report_subscriptions` | `ReportSubscriptions` | 10 | `id` | ✅ | report_subscriptions es un registro central de negocio del módulo 39 · reporting (reporting, dashboards y distribución programada), dominio Auditoría y Reporting. |
 | `report_versions` | `ReportVersions` | 12 | `id` | ✅ | report_versions es un registro central de negocio del módulo 39 · reporting (reporting, dashboards y distribución programada), dominio Auditoría y Reporting. |
 
-### `scheduling` (16 entidades, módulo `scheduling`)
+### `scheduling` (18 entidades, módulo `scheduling`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `appointment_bookings` | `AppointmentBookings` | 20 | `id` | ✅ | appointment_bookings registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 41 · scheduling (dominio Práctica y Agenda): responde a '¿qué está pasando ahora mismo?'. |
+| `appointment_bookings` | `AppointmentBookings` | 24 | `id` | ✅ | appointment_bookings registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 41 · scheduling (dominio Práctica y Agenda): responde a '¿qué está pasando ahora mismo?'. |
+| `appointment_payment_states` | `AppointmentPaymentStates` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `appointment_reminders` | `AppointmentReminders` | 13 | `id` | ✅ | appointment_reminders es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `availability_exceptions` | `AvailabilityExceptions` | 12 | `id` | ✅ | availability_exceptions es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `availability_slots` | `AvailabilitySlots` | 13 | `id` | ✅ | availability_slots es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
-| `bookable_slots` | `BookableSlots` | 14 | `id` | ✅ | bookable_slots es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
+| `bookable_slots` | `BookableSlots` | 15 | `id` | ✅ | bookable_slots es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `booking_cancellations` | `BookingCancellations` | 15 | `id` | ✅ | booking_cancellations es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `booking_confirmation_rules` | `BookingConfirmationRules` | 16 | `id` | ✅ | booking_confirmation_rules registra las reglas que deciden si una reserva se confirma sola. |
 | `booking_policies` | `BookingPolicies` | 19 | `id` | ✅ | booking_policies guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `booking_reschedules` | `BookingReschedules` | 9 | `id` | — | booking_reschedules es un ledger inmutable (append-only) del módulo 41 · scheduling (dominio Práctica y Agenda): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `calendar_absences` | `CalendarAbsences` | 24 | `id` | ✅ | calendar_absences es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `practitioner_schedules` | `PractitionerSchedules` | 16 | `id` | ✅ | practitioner_schedules es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
+| `practitioner_service_offerings` | `PractitionerServiceOfferings` | 16 | `id` | ✅ | declara cómo ofrece un profesional un servicio del catálogo de su práctica: cuánto tarda como mínimo y como máximo, cuánto necesita antes y después, si el paciente puede reservarlo por su cuenta y si cada reserva requier… |
 | `schedulable_resources` | `SchedulableResources` | 15 | `id` | ✅ | schedulable_resources es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
-| `schedule_rules` | `ScheduleRules` | 15 | `id` | ✅ | schedule_rules guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
+| `schedule_rules` | `ScheduleRules` | 16 | `id` | ✅ | schedule_rules guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `schedule_templates` | `ScheduleTemplates` | 15 | `id` | ✅ | schedule_templates guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `slot_holds` | `SlotHolds` | 13 | `id` | ✅ | slot_holds registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 41 · scheduling (dominio Práctica y Agenda): responde a '¿qué está pasando ahora mismo?'. |
 | `waitlist_entries` | `WaitlistEntries` | 15 | `id` | ✅ | waitlist_entries es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
@@ -1444,7 +1482,7 @@
 | `record_revisions` | `RecordRevisions` | 11 | `id` | ✅ | record_revisions es un ledger inmutable (append-only) del módulo 11 · system_ops (dominio Operaciones de Plataforma): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `remediation_actions` | `RemediationActions` | 18 | `id` | ✅ | remediation_actions es un registro central de negocio del módulo 11 · system_ops (gobierno de datos y operaciones de sistema), dominio Operaciones de Plataforma. |
 | `remediation_plans` | `RemediationPlans` | 16 | `id` | ✅ | remediation_plans es un registro central de negocio del módulo 11 · system_ops (gobierno de datos y operaciones de sistema), dominio Operaciones de Plataforma. |
-| `restore_test_runs` | `RestoreTestRuns` | 11 | `id` | — | restore_test_runs es un ledger inmutable (append-only) del módulo 11 · system_ops (dominio Operaciones de Plataforma): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
+| `restore_test_runs` | `RestoreTestRuns` | 12 | `id` | — | restore_test_runs es un ledger inmutable (append-only) del módulo 11 · system_ops (dominio Operaciones de Plataforma): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `retention_executions` | `RetentionExecutions` | 13 | `id` | — | retention_executions es un ledger inmutable (append-only) del módulo 11 · system_ops (dominio Operaciones de Plataforma): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `retention_policies` | `SystemOpsRetentionPolicies` | 13 | `id` | ✅ | retention_policies guarda reglas y configuración de gobierno del módulo 11 · system_ops (dominio Operaciones de Plataforma): parametriza el comportamiento del negocio sin tocar código. |
 | `security_incidents` | `SecurityIncidents` | 20 | `id` | ✅ | security_incidents es un registro central de negocio del módulo 11 · system_ops (gobierno de datos y operaciones de sistema), dominio Operaciones de Plataforma. |

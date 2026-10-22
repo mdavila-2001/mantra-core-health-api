@@ -1,0 +1,24 @@
+=== ETAPA 4 · corrida COMPLETA de integracion — INTERRUMPIDA a proposito ===
+Motivo: 10 de 76 suites en ~25 min (2,5 min/suite) => >2 h para el resto, todas fallando
+por la MISMA causa (HALL-01, seed de aseguradoras). El radio ya estaba medido de forma
+estatica (54/76) y la muestra confirma el patron. Se prioriza aplicar el patch y volver
+a medir H3/H4, que es donde queda valor sin extraer.
+
+Resultado de las 10 suites que alcanzaron a correr:
+  FAIL test/integration/frontend-read-flows.int-spec.ts (45.503 s)
+  FAIL test/integration/organization-legal-representative.int-spec.ts (28.906 s)
+  FAIL test/integration/patient-own-profile.int-spec.ts (36.321 s)
+  FAIL test/integration/fx16-dependientes-y-tutor-legal.int-spec.ts (28.128 s)
+  FAIL test/integration/fx3-agenda-respiro-y-avisos.int-spec.ts (41.549 s)
+  FAIL test/integration/practitioner-registration.int-spec.ts (31.655 s)
+  FAIL test/integration/community-reads.int-spec.ts (40.541 s)
+  FAIL test/integration/waitlist-cupo-liberado.int-spec.ts (29.694 s)
+  FAIL test/integration/glossary.int-spec.ts (32.823 s)
+  FAIL test/integration/fx14-cockpit-contable.int-spec.ts (40.228 s)
+
+Todas FAIL. Causa comun observada en cada una:
+La siembra dejo 1 seed(s) omitido(s): aseguradoras de Bolivia
+(apariciones en el log: 148)
+
+VEREDICTO ETAPA 4 (suite completa): NOT_RUN — interrumpida con causa.
+VEREDICTO ETAPA 4 (dirigida al cambio): PASS — 32/32, ver h2-h5-suite-completa.txt

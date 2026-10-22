@@ -40,7 +40,7 @@ enlace (active) ── GET /r/{code} ──> click_count++ [+ touchpoint si hay 
 touchpoints del miembro en ventana ── attribution/compute ──> reparto con SUM(weight) = 1
 ```
 
-_Fuente: `src/modules/marketing/README.md:32`_
+_Fuente: `src/modules/marketing/README.md:66`_
 
 ### Etapas y operaciones
 

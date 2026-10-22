@@ -1,0 +1,26 @@
+{
+  "source": "wikidata-commons",
+  "retrievedAt": "2026-09-30T15:38:00.874Z",
+  "sparql": "https://query.wikidata.org/sparql",
+  "perQuery": {
+    "P4229/P18": 2056,
+    "P494/P18": 1668,
+    "P486/P18": 11106,
+    "P267/P18": 349,
+    "P4338/P18": 38,
+    "P267/P117": 3354
+  },
+  "uniqueFiles": 13578,
+  "rows": 18569,
+  "descartadasSinLicenciaLibre": 2,
+  "sinMetadatosCommons": 0,
+  "license": "Datos de Wikidata: CC0. Cada imagen: la licencia de su archivo en Commons (campo imageLicense), con atribución obligatoria según la licencia.",
+  "http": {
+    "requests": 0,
+    "retries": 0,
+    "cacheHits": 279,
+    "failures": 0,
+    "bytes": 0
+  },
+  "segundos": 1
+}

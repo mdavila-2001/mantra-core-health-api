@@ -1,0 +1,11 @@
+=== H1.S2.M3 · comandos que EXISTEN de verdad en package.json ===
+"build": "nest build"
+"lint": "eslint \"{src,apps,libs,test}/**/*.ts\""
+"typecheck": "tsc --noEmit --incremental false -p tsconfig.json"
+"test": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js"
+"test:integration": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-integration.json"
+"smoke": "cross-env ORM_SCHEMA_SYNC=off RATE_LIMIT_DISABLED=true node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --config ./test/jest-smoke.json"
+"test:cov": "node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --coverage"
+"test:e2e": "jest --config ./test/jest-e2e.json"
+
+=== total de scripts declarados: 112 ===

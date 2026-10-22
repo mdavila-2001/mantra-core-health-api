@@ -1,0 +1,132 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "value"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q500695"
+    },
+    "value": {
+     "type": "literal",
+     "value": "790"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q18553325"
+    },
+    "value": {
+     "type": "literal",
+     "value": "42738"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q178194"
+    },
+    "value": {
+     "type": "literal",
+     "value": "586"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q55783535"
+    },
+    "value": {
+     "type": "literal",
+     "value": "2688"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q55785274"
+    },
+    "value": {
+     "type": "literal",
+     "value": "101987"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q5198214"
+    },
+    "value": {
+     "type": "literal",
+     "value": "2686"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1337441"
+    },
+    "value": {
+     "type": "literal",
+     "value": "99749"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q55785069"
+    },
+    "value": {
+     "type": "literal",
+     "value": "420702"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q18553325"
+    },
+    "value": {
+     "type": "literal",
+     "value": "86788"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q55788117"
+    },
+    "value": {
+     "type": "literal",
+     "value": "420699"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q18556413"
+    },
+    "value": {
+     "type": "literal",
+     "value": "357027"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q55787770"
+    },
+    "value": {
+     "type": "literal",
+     "value": "357034"
+    }
+   }
+  ]
+ }
+}

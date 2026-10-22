@@ -94,6 +94,53 @@ export const CHECKSUM_VERIFICATION = {
 export const CHECKSUM_ALGORITHM_SHA256 = 'SHA256';
 export const CHECKSUM_SOURCE_CLIENT = 'client';
 export const CHECKSUM_SOURCE_SCAN = 'scan';
+/**
+ * El servidor leyó los bytes del proveedor y calculó el hash (MCH-021). Junto
+ * con `scan` —el verificador de integridad— son los únicos orígenes que
+ * habilitan servir una versión: `client` es sólo lo que alguien declaró.
+ */
+export const CHECKSUM_SOURCE_SERVER = 'server';
+export const CHECKSUM_SOURCES_TRUSTED: readonly string[] = [
+  CHECKSUM_SOURCE_SERVER,
+  CHECKSUM_SOURCE_SCAN,
+];
+
+/**
+ * Acceso temporal a una versión (MCH-009).
+ *
+ * El enlace que se emite es un canje contra este servicio, no la URI del
+ * proveedor: así el acceso se revoca cerrando el objeto y no hay que esperar a
+ * que caduque una firma emitida por S3. El tope de vida es corto a propósito —
+ * es PHI saliendo de nuestro control— y el mínimo lo impone el DTO.
+ */
+export const SIGNED_ACCESS = {
+  /** Vida por defecto cuando el cliente no pide ninguna. */
+  DEFAULT_SECONDS: 300,
+  /** Tope duro: lo que el cliente pida por encima se recorta a esto. */
+  MAX_SECONDS: 900,
+  /** Única operación que el enlace habilita. */
+  METHOD: 'GET',
+  /** Variable con el secreto de firma; comparte el de las URL de descarga. */
+  SECRET_ENV: 'DOWNLOAD_URL_SECRET',
+  /** Valor público de desarrollo, igual que en el servicio de archivos. */
+  INSECURE_DEV_SECRET: 'alovida-dev-download-secret',
+} as const;
+
+/**
+ * Finalidades con las que se puede pedir un objeto (MCH-010).
+ *
+ * El DTO acepta cualquier cadena de hasta 100 caracteres, así que sin esta
+ * lista el propósito era texto libre que sólo servía para llenar el registro de
+ * auditoría. Son los mismos cuatro que evalúa el PDP de `authz`
+ * (`CLINICAL_PURPOSE_CONCEPT`): declarar uno que la política no conoce no puede
+ * abrir un acceso que la política nunca autorizó.
+ */
+export const OBJECT_ACCESS_PURPOSES: readonly string[] = [
+  'TREATMENT',
+  'PAYMENT',
+  'OPERATIONS',
+  'EMERGENCY',
+];
 
 /** Comprobación de integridad (`object_integrity_checks`). */
 export const INTEGRITY_CHECK = {

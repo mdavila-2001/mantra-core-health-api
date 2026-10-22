@@ -110,6 +110,75 @@ export class DocumentsRepository {
   }
 
   /**
+   * Un documento por id, sin sus archivos.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del documento.
+   * @returns El documento, o `null` si no existe.
+   */
+  findRecordById(
+    em: EntityManager,
+    id: string,
+  ): Promise<DocumentRecords | null> {
+    return em.findOne(DocumentRecords, { id });
+  }
+
+  /**
+   * Documentos de un encuentro, con sus archivos (para el sello y el PDF
+   * oficial del cierre: el hash tiene que ser determinista).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param encounterId - Encuentro cuyos documentos se leen.
+   * @returns Documentos ordenados por `createdAt, id`, con `files` resuelto.
+   */
+  async findByEncounter(
+    em: EntityManager,
+    encounterId: string,
+  ): Promise<Array<DocumentRecords & { files: DocumentRecordFiles[] }>> {
+    const records = await em.find(
+      DocumentRecords,
+      { encounterId },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
+    );
+    if (records.length === 0) return [];
+
+    const files = await this.findFilesForRecords(
+      em,
+      records.map((record) => record.id),
+    );
+    const filesByRecord = new Map<string, DocumentRecordFiles[]>();
+    for (const file of files) {
+      const list = filesByRecord.get(file.documentRecordId) ?? [];
+      list.push(file);
+      filesByRecord.set(file.documentRecordId, list);
+    }
+
+    return records.map((record) =>
+      Object.assign(record, { files: filesByRecord.get(record.id) ?? [] }),
+    );
+  }
+
+  /**
+   * Archivos gobernados de un lote de documentos, en una sola consulta.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param recordIds - Documentos cuyos archivos se resuelven.
+   * @returns Archivos ordenados por `ordinal` ascendente; `[]` sin consultar
+   *   si `recordIds` viene vacío.
+   */
+  findFilesForRecords(
+    em: EntityManager,
+    recordIds: readonly string[],
+  ): Promise<DocumentRecordFiles[]> {
+    if (recordIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      DocumentRecordFiles,
+      { documentRecordId: { $in: recordIds } },
+      { orderBy: { ordinal: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create record.
    *
    * @param em - Contexto de persistencia o transacción activa.

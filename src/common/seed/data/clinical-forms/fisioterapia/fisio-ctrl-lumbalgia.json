@@ -1,0 +1,166 @@
+{
+  "code": "FISIO_CTRL_LUMBALGIA",
+  "name": "Rehabilitación de lumbalgia",
+  "specialty": {
+    "code": "FISIOTERAPIA",
+    "display": "Fisioterapia y Rehabilitación"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Banderas rojas, dolor, función y progreso del ejercicio."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de lumbalgia",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lumbalgia",
+      "code": "lumbalgia_banderas_rojas",
+      "name": "Banderas rojas",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Edad menor a 20 o mayor a 55 años",
+        "Traumatismo importante",
+        "Fiebre",
+        "Pérdida de peso no explicada",
+        "Antecedente de cáncer",
+        "Déficit neurológico progresivo",
+        "Alteración de esfínteres o anestesia en silla de montar",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: lumbalgia",
+      "code": "lumbalgia_ciatica",
+      "name": "Dolor irradiado por debajo de la rodilla",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lumbalgia",
+      "code": "lumbalgia_lasegue",
+      "name": "Signo de Lasègue",
+      "dataType": "string",
+      "required": false,
+      "options": ["Positivo", "Negativo", "No evaluado"]
+    },
+    {
+      "section": "Evaluación: lumbalgia",
+      "code": "dolor_intensidad",
+      "name": "Dolor (0 a 10)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: lumbalgia",
+      "code": "sesion_numero",
+      "name": "Sesión número",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: lumbalgia",
+      "code": "ejercicios",
+      "name": "Ejercicios indicados",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": ["Dolor ≤ 3", "Volvió a sus actividades", "Ninguna todavía"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

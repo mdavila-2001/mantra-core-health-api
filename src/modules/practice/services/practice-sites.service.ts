@@ -9,6 +9,8 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
+import { DEFAULT_APPOINTMENT_SERVICE } from '../../billing/default-services';
+import { ServiceCatalogRepository } from '../../billing/repositories';
 import {
   PracticesRepository,
   PracticeSitesRepository,
@@ -58,6 +60,7 @@ export class PracticeSitesService {
     private readonly spacesRepo: CareSpacesRepository,
     private readonly servicesRepo: HealthcareServicesRepository,
     private readonly rolesRepo: PractitionerRoleAssignmentsRepository,
+    private readonly serviceCatalogRepo: ServiceCatalogRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PracticeSitesService.name);
@@ -85,6 +88,22 @@ export class PracticeSitesService {
         actorUserId: actor.id,
       });
       await tx.flush();
+
+      // Toda práctica nace ofreciendo una consulta (FT-22-R01). En la misma
+      // transacción: una organización a la que le falló el catálogo no tiene
+      // nada que mostrarle a quien atiende, y arreglarlo después exige saber
+      // que hacía falta.
+      this.serviceCatalogRepo.create(tx, {
+        practiceId: practice.id,
+        code: DEFAULT_APPOINTMENT_SERVICE.code,
+        name: DEFAULT_APPOINTMENT_SERVICE.name,
+        defaultPrice: DEFAULT_APPOINTMENT_SERVICE.defaultPrice,
+        currencyConceptId: DEFAULT_APPOINTMENT_SERVICE.currencyConceptId,
+        isActive: true,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
       this.logger.info(
         { operation: 'practice.create', practiceId: practice.id },
         'Practice created',

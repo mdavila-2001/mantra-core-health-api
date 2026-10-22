@@ -1,5 +1,6 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 import { randomUUID } from 'node:crypto';
+import { RestoreObjectiveStatus } from '../policies';
 
 /**
  * Mapea la entidad persistente asociada a `restore_test_runs`.
@@ -63,6 +64,20 @@ export class RestoreTestRuns {
     nullable: true,
   })
   integrityCheckPassed?: boolean;
+
+  /**
+   * Evaluación trivalente de la corrida contra los objetivos de su política
+   * (MCH-023). `NOT_MEASURED` es el valor de las corridas sin evidencia
+   * suficiente — y el de las filas anteriores al patch v4.2.20, que se
+   * registraron cuando el sistema no sabía distinguir «no se midió» de «no
+   * incumple».
+   */
+  @Property({
+    fieldName: 'objective_status',
+    columnType: 'varchar',
+    default: RestoreObjectiveStatus.NOT_MEASURED,
+  })
+  objectiveStatus: RestoreObjectiveStatus = RestoreObjectiveStatus.NOT_MEASURED;
 
   /**
    * Identificador asociado a evidence file.

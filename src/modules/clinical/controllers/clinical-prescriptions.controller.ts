@@ -1,147 +1,88 @@
 import {
-  BadRequestException,
   Controller,
   Get,
-  NotFoundException,
+  Header,
   Param,
   ParseUUIDPipe,
-  Query,
   Res,
-  StreamableFile,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { PinoLogger } from 'nestjs-pino';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
 import {
-  CLINICAL_PROXY_SCOPE,
-  ClinicalReadService,
-} from '../services/clinical-read.service';
-import { PrescriptionDocumentsService } from '../services/prescription-documents.service';
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+  AccessLogged,
+} from '../../../common';
+import { PrescriptionPdfService } from '../services';
 
-function pageNumber(
-  value: string | undefined,
-  fallback: number,
-  maximum: number,
-  minimum = 0,
-): number {
-  if (value === undefined) return fallback;
-  if (
-    !/^\d+$/.test(value) ||
-    Number(value) > maximum ||
-    Number(value) < minimum
-  ) {
-    throw new BadRequestException('Paginación inválida');
-  }
-  return Number(value);
-}
-
+/**
+ * PDF oficial de una receta médica (B.3). Sin `ClinicalRecordAccessGuard`:
+ * ese guard evalúa `request.params.patientProfileId`, que esta ruta no tiene
+ * (`:id` es la receta), así que sería un no-op — mismo criterio que
+ * `ChartEncountersController` con el PDF del encuentro. La autorización la
+ * hace el servicio: el propio prescriptor pasa siempre, y quien no lo es
+ * pasa por `ClinicalReadService.assertPuedeLeerHistoria`.
+ */
 @ApiTags('clinical-prescriptions')
 @ApiBearerAuth()
-@Roles('PATIENT', 'PRACTITIONER', 'CLINICIAN')
-@Controller('clinical')
+@Roles('CLINICIAN', 'PRACTITIONER', 'PATIENT')
+@Controller('clinical/prescriptions')
 export class ClinicalPrescriptionsController {
   constructor(
-    private readonly read: ClinicalReadService,
-    private readonly documents: PrescriptionDocumentsService,
-    private readonly logger: PinoLogger,
+    private readonly prescriptionPdfService: PrescriptionPdfService,
   ) {}
 
-  @Get('patients/:patientProfileId/prescriptions')
-  async list(
-    @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
-    @CurrentUser() actor: AuthenticatedUser,
-    @Query('offset') rawOffset?: string,
-    @Query('limit') rawLimit?: string,
-    @Res({ passthrough: true }) response?: Response,
-  ) {
-    await this.read.assertPuedeLeerHistoria(
-      patientProfileId,
-      actor,
-      CLINICAL_PROXY_SCOPE.PRESCRIPTIONS_READ,
-    );
-    response?.setHeader('Cache-Control', 'private, no-store');
-    const page = await this.documents.list(
-      patientProfileId,
-      pageNumber(rawOffset, 0, 1_000_000),
-      pageNumber(rawLimit, 20, 100, 1),
-    );
-    this.logger.info(
-      {
-        operation: 'clinical.prescription.list',
-        actorId: actor.id,
-        patientProfileId,
-        count: page.items.length,
-      },
-      'Consulta de recetas emitidas',
-    );
-    return page;
-  }
-
-  @Get('patients/:patientProfileId/prescriptions/history.pdf')
-  async history(
-    @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
-    @CurrentUser() actor: AuthenticatedUser,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<StreamableFile> {
-    await this.read.assertOwnRecord(
-      patientProfileId,
-      actor,
-      undefined,
-      CLINICAL_PROXY_SCOPE.PRESCRIPTIONS_READ,
-    );
-    const rows = await this.documents.all(patientProfileId);
-    const buffer = await this.documents.pdf(rows, 'Historial de recetas');
-    this.logger.info(
-      {
-        operation: 'clinical.prescription.history.download',
-        actorId: actor.id,
-        patientProfileId,
-        count: rows.length,
-      },
-      'Descarga de histórico de recetas',
-    );
-    response.setHeader('Content-Type', 'application/pdf');
-    response.setHeader(
-      'Content-Disposition',
-      `attachment; filename="historial-recetas-${new Date().toISOString().slice(0, 10)}.pdf"`,
-    );
-    response.setHeader('Cache-Control', 'private, no-store');
-    return new StreamableFile(buffer);
-  }
-
-  @Get('prescriptions/:id/pdf')
-  async one(
+  /**
+   * 404 si la receta no existe, 403 si el actor no puede leerla. Nunca 422
+   * por estado: un borrador o una receta invalidada igual se descargan, con
+   * marca de agua — es lo que un profesional necesita para revisar lo que
+   * escribió, y lo que un paciente necesita para saber qué dejó de valer.
+   *
+   * `no-store`: la caché del navegador no debe conservar un documento
+   * clínico después de cerrar sesión.
+   */
+  @Get(':id/pdf')
+  @AccessLogged({ resourceType: 'PRESCRIPTION_PDF', resourceId: 'param:id' })
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar el PDF oficial de una receta',
+    description:
+      'Autoriza al prescriptor y a quien puede leer la historia del paciente dueño de la receta.',
+  })
+  @ApiOkResponse({
+    description:
+      'PDF de la receta (oficial si está emitida; con marca de agua si no)',
+    content: {
+      'application/pdf': { schema: { type: 'string', format: 'binary' } },
+    },
+  })
+  @ApiForbiddenResponse({
+    description: 'El actor no puede leer esta receta',
+  })
+  @ApiNotFoundResponse({ description: 'La receta no existe' })
+  async getPrescriptionPdf(
     @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
     @CurrentUser() actor: AuthenticatedUser,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<StreamableFile> {
-    const row = await this.documents.one(id);
-    try {
-      await this.read.assertPuedeLeerHistoria(
-        row.patientProfileId,
-        actor,
-        CLINICAL_PROXY_SCOPE.PRESCRIPTIONS_READ,
-      );
-    } catch {
-      // Un ID ajeno y uno inexistente dan la misma respuesta pública.
-      throw new NotFoundException('Receta emitida no encontrada');
-    }
-    const buffer = await this.documents.pdf([row], 'Receta médica');
-    this.logger.info(
-      {
-        operation: 'clinical.prescription.download',
-        actorId: actor.id,
-        prescriptionId: id,
-      },
-      'Descarga de receta',
+  ): Promise<void> {
+    res.setHeader('Cache-Control', 'private, no-store');
+    const { buffer, fileName } = await this.prescriptionPdfService.render(
+      id,
+      actor,
     );
-    response.setHeader('Content-Type', 'application/pdf');
-    response.setHeader(
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
       'Content-Disposition',
-      `attachment; filename="receta-${row.issuedAt!.toISOString().slice(0, 10)}-${id.slice(-6)}.pdf"`,
+      `attachment; filename*=UTF-8''${encodeURIComponent(fileName)}`,
     );
-    response.setHeader('Cache-Control', 'private, no-store');
-    return new StreamableFile(buffer);
+    res.send(buffer);
   }
 }

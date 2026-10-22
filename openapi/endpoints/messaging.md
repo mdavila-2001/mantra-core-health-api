@@ -420,6 +420,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El trabajo no está en ejecución | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 422 | `PRECONDITION_FAILED` | El trabajo está reservado por otro worker | Excepción explícita en src/modules/messaging/services/queues.service.ts |
+| 422 | `PRECONDITION_FAILED` | Storage intent requires its lifecycle coordinator | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -557,6 +558,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El trabajo no está en ejecución | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 422 | `PRECONDITION_FAILED` | El trabajo está reservado por otro worker | Excepción explícita en src/modules/messaging/services/queues.service.ts |
+| 422 | `PRECONDITION_FAILED` | Storage intent requires its lifecycle coordinator | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1123,6 +1125,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Cola no encontrada | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cola no está activa | Excepción explícita en src/modules/messaging/services/queues.service.ts |
+| 422 | `PRECONDITION_FAILED` | Storage intent requires its lifecycle coordinator | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2053,6 +2056,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Cola no encontrada | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cola no está activa | Excepción explícita en src/modules/messaging/services/queues.service.ts |
+| 422 | `PRECONDITION_FAILED` | Storage intent requires its lifecycle coordinator | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2186,6 +2190,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Entrada de cola muerta no encontrada | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 404 | `NOT_FOUND` | Cola de destino no encontrada | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Storage intent requires its lifecycle coordinator | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cola de destino no está activa | Excepción explícita en src/modules/messaging/services/queues.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

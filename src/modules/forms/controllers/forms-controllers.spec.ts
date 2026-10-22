@@ -103,6 +103,7 @@ describe('FormsFieldsController', () => {
   function build() {
     const fieldsService = {
       createFieldDefinition: mockFn(),
+      updateFieldDefinition: mockFn(),
       addDependency: mockFn(),
       upsertLocalization: mockFn(),
       createAccessRule: mockFn(),
@@ -112,6 +113,27 @@ describe('FormsFieldsController', () => {
       fieldsService,
     };
   }
+
+  // CL-61 / CL-69 — la ruta que el generador llamaba para renombrar y daba 404.
+  it('delegates updateFieldDefinition y la abre a quien atiende (CL-69)', async () => {
+    const d = build();
+    await d.controller.updateFieldDefinition('f1', { name: 'x' }, actor);
+    expect(d.fieldsService.updateFieldDefinition).toHaveBeenCalledWith(
+      'f1',
+      { name: 'x' },
+      actor,
+    );
+    const roles = Reflect.getMetadata(
+      ROLES_KEY,
+      Object.getOwnPropertyDescriptor(
+        FormsFieldsController.prototype,
+        'updateFieldDefinition',
+      )!.value,
+    ) as string[];
+    expect(roles).toEqual(
+      expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
+    );
+  });
 
   it('delegates createFieldDefinition (UC-09-02)', async () => {
     const d = build();
@@ -154,13 +176,37 @@ describe('FormsFieldsController', () => {
   });
 });
 
+describe('FormsFieldsController · CL-68 roles', () => {
+  it.each([
+    'createFieldDefinition',
+    'addDependency',
+    'upsertLocalization',
+  ] as const)(
+    '%s exige personal de salud o SECURITY_ADMIN, no cualquier sesión',
+    (method) => {
+      const roles = Reflect.getMetadata(
+        ROLES_KEY,
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- se lee la metadata del método, no se invoca
+        FormsFieldsController.prototype[method],
+      );
+      expect(roles).toEqual(['CLINICIAN', 'PRACTITIONER', 'SECURITY_ADMIN']);
+      expect(roles).not.toContain('PATIENT');
+    },
+  );
+});
+
 describe('FormsAssignmentsController', () => {
   /**
    * Construye el sistema bajo prueba con dependencias controladas.
    * @returns Resultado de build.
    */
   function build() {
-    const assignmentsService = { createAssignment: mockFn() };
+    const assignmentsService = {
+      createAssignment: mockFn(),
+      updateAssignment: mockFn(),
+      retireAssignment: mockFn(),
+      reorderAssignments: mockFn(),
+    };
     const readService = {
       listAssignments: mockFn(),
       getExtensionBudget: mockFn(),
@@ -174,6 +220,48 @@ describe('FormsAssignmentsController', () => {
       readService,
     };
   }
+
+  // CL-61 — las tres rutas que el generador ya llamaba y daban 404.
+  it('delegates updateAssignment, retireAssignment y reorderAssignments (CL-61)', async () => {
+    const d = build();
+    await d.controller.updateAssignment('as1', { required: true }, actor);
+    expect(d.assignmentsService.updateAssignment).toHaveBeenCalledWith(
+      'as1',
+      { required: true },
+      actor,
+    );
+    await d.controller.retireAssignment('as1', actor);
+    expect(d.assignmentsService.retireAssignment).toHaveBeenCalledWith(
+      'as1',
+      actor,
+    );
+    const order = { targetResourceConceptId: 'rt', assignmentIds: ['as1'] };
+    await d.controller.reorderAssignments(order, actor);
+    expect(d.assignmentsService.reorderAssignments).toHaveBeenCalledWith(
+      order,
+      actor,
+    );
+  });
+
+  it('las rutas de edición abren la puerta a quien atiende (CL-61)', () => {
+    const roles = (handler: string): string[] =>
+      Reflect.getMetadata(
+        ROLES_KEY,
+        Object.getOwnPropertyDescriptor(
+          FormsAssignmentsController.prototype,
+          handler,
+        )!.value,
+      ) as string[];
+    for (const handler of [
+      'updateAssignment',
+      'retireAssignment',
+      'reorderAssignments',
+    ]) {
+      expect(roles(handler)).toEqual(
+        expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
+      );
+    }
+  });
 
   it('delegates createAssignment (UC-09-06)', async () => {
     const d = build();
@@ -209,7 +297,7 @@ describe('FormsAssignmentsController', () => {
     // campo y no colgarlo de ningún sitio. Los límites de tenant y política los
     // aplica el servicio; acá se comprueba que la puerta del rol esté abierta,
     // que es lo que se cerró sin querer si alguien recorta este decorador.
-    const rolesDe = (handler: string): string[] =>
+    const roles = (handler: string): string[] =>
       Reflect.getMetadata(
         ROLES_KEY,
         Object.getOwnPropertyDescriptor(
@@ -217,10 +305,10 @@ describe('FormsAssignmentsController', () => {
           handler,
         )!.value,
       ) as string[];
-    expect(rolesDe('createAssignment')).toEqual(
+    expect(roles('createAssignment')).toEqual(
       expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
     );
-    expect(rolesDe('getBudget')).toEqual(
+    expect(roles('getBudget')).toEqual(
       expect.arrayContaining(['PRACTITIONER', 'CLINICIAN', 'SECURITY_ADMIN']),
     );
   });
@@ -294,7 +382,7 @@ describe('FormsInstancesController', () => {
 });
 
 describe('FormsMeController', () => {
-  const paciente = { id: 'u-1', patientProfileId: 'pp-1' } as any;
+  const patient = { id: 'u-1', patientProfileId: 'pp-1' } as any;
 
   /**
    * Construye el sistema bajo prueba con dependencias controladas.
@@ -313,28 +401,28 @@ describe('FormsMeController', () => {
 
   it('delegates listMyInstances with the actor and the default limit', async () => {
     const d = build();
-    await d.controller.listMyInstances(paciente, undefined);
-    expect(d.readService.listMyInstances).toHaveBeenCalledWith(paciente, 50);
+    await d.controller.listMyInstances(patient, undefined);
+    expect(d.readService.listMyInstances).toHaveBeenCalledWith(patient, 50);
   });
 
   it('delegates getMyInstance with the actor of the session', async () => {
     const d = build();
-    await d.controller.getMyInstance('i1', paciente);
-    expect(d.readService.getMyInstance).toHaveBeenCalledWith('i1', paciente);
+    await d.controller.getMyInstance('i1', patient);
+    expect(d.readService.getMyInstance).toHaveBeenCalledWith('i1', patient);
   });
 
   it('declares no role requirement: the filter is the patient claim', () => {
     // Igual que surveys/me: sin @Roles ni en la clase ni en los handlers — el
     // guard de roles deja pasar y el servicio exige el perfil de paciente.
-    const rolesDe = (handler: string): unknown =>
+    const roles = (handler: string): unknown =>
       Reflect.getMetadata(
         ROLES_KEY,
         Object.getOwnPropertyDescriptor(FormsMeController.prototype, handler)!
           .value,
       );
     expect(Reflect.getMetadata(ROLES_KEY, FormsMeController)).toBeUndefined();
-    expect(rolesDe('listMyInstances')).toBeUndefined();
-    expect(rolesDe('getMyInstance')).toBeUndefined();
+    expect(roles('listMyInstances')).toBeUndefined();
+    expect(roles('getMyInstance')).toBeUndefined();
   });
 });
 

@@ -1,0 +1,130 @@
+{
+  "code": "MEDGEN_CTRL_IRA",
+  "name": "Infección respiratoria aguda en adultos",
+  "specialty": { "code": "MEDICINA_GENERAL", "display": "Medicina General" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Criterios de Centor/McIsaac para faringoamigdalitis y CURB-65 si se sospecha neumonía."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: infección respiratoria aguda",
+      "code": "centor_fiebre",
+      "name": "Fiebre mayor a 38 °C",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "section": "Evaluación: infección respiratoria aguda",
+      "code": "centor_sin_tos",
+      "name": "Ausencia de tos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: infección respiratoria aguda",
+      "code": "centor_adenopatias",
+      "name": "Adenopatías cervicales anteriores dolorosas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: infección respiratoria aguda",
+      "code": "centor_exudado",
+      "name": "Exudado o tumefacción amigdalina",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: infección respiratoria aguda",
+      "code": "ira_rinorrea",
+      "name": "Rinorrea",
+      "dataType": "string",
+      "required": false,
+      "options": ["Ausente", "Acuosa", "Purulenta"]
+    },
+    {
+      "section": "Evaluación: infección respiratoria aguda",
+      "code": "centor_puntaje",
+      "name": "Puntaje de Centor/McIsaac",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: infección respiratoria aguda",
+      "code": "frecuencia_respiratoria",
+      "name": "Frecuencia respiratoria (rpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: infección respiratoria aguda",
+      "code": "saturacion_de_oxigeno",
+      "name": "Saturación de oxígeno (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: infección respiratoria aguda",
+      "code": "crepitantes",
+      "name": "Crepitantes (sospecha de neumonía)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hidratación y antipiréticos",
+        "Antibiótico sólo si está indicado",
+        "Signos de alarma"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

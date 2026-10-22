@@ -26,6 +26,12 @@ function build() {
     findById: mockFn(),
     create: mockFn(),
     findExpirable: mockFn().mockResolvedValue([]),
+    // Las dos lecturas de FT-07-R05. `ConsentsService` no las usa —son de
+    // `PractitionerAccessRequestsService`— pero el doble se pasa tipado como
+    // `ConsentsRepository`, así que el contrato tiene que estar completo o
+    // `yarn typecheck` no compila.
+    findByPatientCreatorCategory: mockFn().mockResolvedValue([]),
+    findPendingForPatient: mockFn().mockResolvedValue([]),
   };
   const provisionsRepo = {
     findOpenByConsent: mockFn().mockResolvedValue([]),

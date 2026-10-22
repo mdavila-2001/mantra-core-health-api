@@ -99,8 +99,8 @@ puede no aparecer sin que nada esté roto. Para verificar, subir temporalmente a
 
 ### 1.8 ¿Se está mirando el servicio correcto?
 
-Cada proceso exporta con su propio nombre: `redesa-api`, `redesa-worker-messaging`, etc. Buscar
-trabajo de un worker bajo `redesa-api` no devuelve nada.
+Cada proceso exporta con su propio nombre: `alovida-api`, `alovida-worker-messaging`, etc. Buscar
+trabajo de un worker bajo `alovida-api` no devuelve nada.
 
 ```bash
 curl -s http://localhost:16686/api/services | jq -r '.data[]'
@@ -241,7 +241,7 @@ Es un incidente de seguridad. Procedimiento completo en
 curl -s http://localhost:16686/api/services | jq -r '.data[]'
 
 # Últimas trazas de un servicio
-curl -s "http://localhost:16686/api/traces?service=redesa-api&limit=5" \
+curl -s "http://localhost:16686/api/traces?service=alovida-api&limit=5" \
   | jq -r '.data[] | "\(.traceID) \(.spans|length) spans"'
 
 # Una traza concreta, por el x-trace-id que dio el usuario

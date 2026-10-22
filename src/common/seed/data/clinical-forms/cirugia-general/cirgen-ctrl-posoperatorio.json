@@ -1,0 +1,127 @@
+{
+  "code": "CIRGEN_CTRL_POSOPERATORIO",
+  "name": "Control posoperatorio",
+  "specialty": { "code": "CIRUGIA_GENERAL", "display": "Cirugía General" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Herida, dolor, tránsito y complicaciones graduadas por Clavien-Dindo (clasificación publicada de uso libre)."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: posoperatorio",
+      "code": "cirugia_realizada",
+      "name": "Cirugía realizada",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: posoperatorio",
+      "code": "fecha_cirugia",
+      "name": "Fecha de la cirugía",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Evaluación: posoperatorio",
+      "code": "herida",
+      "name": "Herida",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Limpia y seca",
+        "Eritema",
+        "Secreción serosa",
+        "Secreción purulenta",
+        "Dehiscencia"
+      ]
+    },
+    {
+      "section": "Evaluación: posoperatorio",
+      "code": "dolor_intensidad",
+      "name": "Dolor (0 a 10)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: posoperatorio",
+      "code": "transito",
+      "name": "Tránsito intestinal",
+      "dataType": "string",
+      "required": false,
+      "options": ["Conservado", "Sin gases ni heces"]
+    },
+    {
+      "section": "Evaluación: posoperatorio",
+      "code": "fiebre",
+      "name": "Fiebre",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: posoperatorio",
+      "code": "clavien_dindo",
+      "name": "Complicación (Clavien-Dindo)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Sin complicaciones",
+        "I",
+        "II",
+        "IIIa",
+        "IIIb",
+        "IVa",
+        "IVb",
+        "V"
+      ]
+    },
+    {
+      "section": "Evaluación: posoperatorio",
+      "code": "retiro_puntos",
+      "name": "Retiro de puntos hoy",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

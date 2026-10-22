@@ -7,20 +7,20 @@ import { loadTelemetryConfig, resolveServiceName } from './telemetry.config';
 describe('telemetry.config', () => {
   describe('resolveServiceName', () => {
     it('deriva el nombre de la API del entrypoint principal', () => {
-      expect(resolveServiceName('/app/dist/src/main.js')).toBe('redesa-api');
+      expect(resolveServiceName('/app/dist/src/main.js')).toBe('alovida-api');
     });
 
     it('deriva el nombre de cada worker de su entrypoint', () => {
       expect(resolveServiceName('/app/dist/src/worker-messaging.js')).toBe(
-        'redesa-worker-messaging',
+        'alovida-worker-messaging',
       );
       expect(
         resolveServiceName('/app/dist/src/worker-cross_store_consistency.js'),
-      ).toBe('redesa-worker-cross_store_consistency');
+      ).toBe('alovida-worker-cross_store_consistency');
     });
 
     it('cae a la API cuando no hay entrypoint conocido', () => {
-      expect(resolveServiceName(undefined)).toBe('redesa-api');
+      expect(resolveServiceName(undefined)).toBe('alovida-api');
     });
   });
 
@@ -33,7 +33,7 @@ describe('telemetry.config', () => {
     it('aplica los valores por defecto documentados', () => {
       const config = loadTelemetryConfig({ NODE_ENV: 'development' });
 
-      expect(config.serviceNamespace).toBe('redesa');
+      expect(config.serviceNamespace).toBe('alovida');
       expect(config.environment).toBe('development');
       expect(config.exporter.protocol).toBe('http/protobuf');
       expect(config.exporter.endpoint).toBe('http://localhost:4318/v1/traces');
@@ -50,7 +50,7 @@ describe('telemetry.config', () => {
     it('respeta los valores explícitos del entorno', () => {
       const config = loadTelemetryConfig({
         OTEL_ENABLED: 'true',
-        OTEL_SERVICE_NAME: 'redesa-worker-billing',
+        OTEL_SERVICE_NAME: 'alovida-worker-billing',
         OTEL_SERVICE_VERSION: '1.4.2',
         OTEL_DEPLOYMENT_ENVIRONMENT: 'staging',
         OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'http://jaeger:4318/v1/traces',
@@ -61,7 +61,7 @@ describe('telemetry.config', () => {
       });
 
       expect(config.enabled).toBe(true);
-      expect(config.serviceName).toBe('redesa-worker-billing');
+      expect(config.serviceName).toBe('alovida-worker-billing');
       expect(config.serviceVersion).toBe('1.4.2');
       expect(config.environment).toBe('staging');
       expect(config.exporter.endpoint).toBe('http://jaeger:4318/v1/traces');

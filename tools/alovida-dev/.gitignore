@@ -1,0 +1,9 @@
+/demo-access/
+/imagenes-demo/
+/model-seed.env
+/__pycache__/
+*.dump
+*.csv
+
+# Dockerfile de herramientas: no es un archivo de datos de seed.
+!Dockerfile.seed

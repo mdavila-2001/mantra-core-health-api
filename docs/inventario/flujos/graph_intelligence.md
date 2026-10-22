@@ -51,7 +51,7 @@ MANTENIMIENTO
   projections/reconcile > actualiza, invalida rutas y CADUCA el riesgo
 ```
 
-_Fuente: `src/modules/graph_intelligence/README.md:41`_
+_Fuente: `src/modules/graph_intelligence/README.md:85`_
 
 ### Etapas y operaciones
 

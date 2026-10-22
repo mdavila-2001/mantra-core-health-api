@@ -36,8 +36,8 @@
 | [payment_receipts](#payment_receipts) | Cataloga recibos emitidos por pagos para ofrecer comprobantes trazables a pacientes u organizaciones. | 18 | 10 | 0 | COINCIDE |
 | [payment_splits](#payment_splits) | Define distribución de un cobro entre prestadores, establecimientos o beneficiarios participantes. | 15 | 8 | 2 | COINCIDE |
 | [payment_status_inquiries](#payment_status_inquiries) | Registra consultas de estado realizadas a proveedores para reconciliar transacciones de pago. | 15 | 8 | 0 | COINCIDE |
-| [payment_transactions](#payment_transactions) | Conserva transacciones de pago y su resultado para vincularlas con obligaciones, recibos y conciliaciones. | 24 | 15 | 11 | COINCIDE |
-| [payment_webhook_events](#payment_webhook_events) | Conserva eventos de pago recibidos por webhook para procesar cambios de estado y mantener evidencia de origen. | 13 | 6 | 0 | COINCIDE |
+| [payment_transactions](#payment_transactions) | Conserva transacciones de pago y su resultado para vincularlas con obligaciones, recibos y conciliaciones. | 24 | 15 | 10 | COINCIDE |
+| [payment_webhook_events](#payment_webhook_events) | Conserva eventos de pago recibidos por webhook para procesar cambios de estado y mantener evidencia de origen. | 13 | 6 | 2 | COINCIDE |
 | [payout_items](#payout_items) | Detalla transacciones y ajustes incluidos en un desembolso a prestadores o cuentas conectadas. | 12 | 4 | 1 | COINCIDE |
 | [payouts](#payouts) | Agrupa fondos transferidos a prestadores o cuentas conectadas como resultado de cobros procesados. | 21 | 10 | 1 | COINCIDE |
 | [plan_eligibility_rules](#plan_eligibility_rules) | Establece condiciones bajo las cuales un tenant o cliente puede contratar un plan. | 11 | 3 | 0 | COINCIDE |
@@ -2791,7 +2791,7 @@ Conserva transacciones de pago y su resultado para vincularlas con obligaciones,
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_42_payments.puml: payment_transactions`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_42_payments.puml` · **DDL:** `SQL/42_payments/02_tables.sql`
 - **Entidad del ORM:** `PaymentTransactions` — `src/modules/payments/entities/payment_transactions.entity.ts`
-- **Resumen:** 24 columnas · 15 índices · 14 FK salientes · 24 entrantes · 11 operaciones
+- **Resumen:** 24 columnas · 15 índices · 14 FK salientes · 24 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -2870,7 +2870,7 @@ Conserva transacciones de pago y su resultado para vincularlas con obligaciones,
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_payment_transactions_gateway_transaction_ref` | sí | gateway_transaction_ref | Garantiza que no se repita la combinación (gateway_transaction_ref) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «gateway_transaction_ref», la primera columna del índice _(CONSULTA)_ |
-| `ix_payment_transactions_payment_intent_id` | no | payment_intent_id | Soporta la clave foránea fk_payment_transactions_payment_intent_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «payment_intent_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_payment_transactions_payment_intent_id` | no | payment_intent_id | Soporta la clave foránea fk_payment_transactions_payment_intent_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «payment_intent_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_payment_transactions_payer_business_partner_id` | no | payer_business_partner_id | Soporta la clave foránea fk_payment_transactions_payer_business_partner_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_payment_transactions_payee_business_partner_id` | no | payee_business_partner_id | Soporta la clave foránea fk_payment_transactions_payee_business_partner_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_payment_transactions_contract_id` | no | contract_id | Soporta la clave foránea fk_payment_transactions_contract_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2879,7 +2879,7 @@ Conserva transacciones de pago y su resultado para vincularlas con obligaciones,
 | `ix_payment_transactions_gateway_id` | no | gateway_id | Soporta la clave foránea fk_payment_transactions_gateway_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_payment_transactions_transaction_type_concept_id` | no | transaction_type_concept_id | Soporta la clave foránea fk_payment_transactions_transaction_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_payment_transactions_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_payment_transactions_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_payment_transactions_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_payment_transactions_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_payment_transactions_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_payment_transactions_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_payment_transactions_failure_reason_concept_id` | no | failure_reason_concept_id | Soporta la clave foránea fk_payment_transactions_failure_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_payment_transactions_journal_transaction_id` | no | journal_transaction_id | Soporta la clave foránea fk_payment_transactions_journal_transaction_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_payment_transactions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_payment_transactions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2898,13 +2898,12 @@ Conserva transacciones de pago y su resultado para vincularlas con obligaciones,
 | POST /payments/callbacks/{callbackPath} | ACTUALIZA | POR_TIPO |
 | POST /payments/callbacks/{callbackPath} | LEE | DIRECTA |
 | POST /payments/intents/{id}/transactions | CREA | DIRECTA |
+| POST /payments/intents/{id}/transactions | LEE | DIRECTA |
 | POST /payments/reconciliation-runs | LEE | DIRECTA |
 | POST /payments/settlements/import | ACTUALIZA | POR_TIPO |
 | POST /payments/settlements/import | LEE | DIRECTA |
-| POST /payments/transactions/{id}/cancellation-requests | ACTUALIZA | POR_TIPO |
 | POST /payments/transactions/{id}/cancellation-requests | LEE | DIRECTA |
 | POST /payments/transactions/{id}/refunds | LEE | DIRECTA |
-| POST /payments/transactions/{id}/status-inquiry | ACTUALIZA | POR_TIPO |
 | POST /payments/transactions/{id}/status-inquiry | LEE | DIRECTA |
 
 #### Gobierno
@@ -2930,7 +2929,7 @@ Conserva eventos de pago recibidos por webhook para procesar cambios de estado y
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_42_payments.puml: payment_webhook_events`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_42_payments.puml` · **DDL:** `SQL/42_payments/02_tables.sql`
 - **Entidad del ORM:** `PaymentWebhookEvents` — `src/modules/payments/entities/payment_webhook_events.entity.ts`
-- **Resumen:** 13 columnas · 6 índices · 4 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 13 columnas · 6 índices · 4 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -2963,7 +2962,7 @@ Conserva eventos de pago recibidos por webhook para procesar cambios de estado y
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_payment_webhook_events_gateway_event_ref` | sí | gateway_event_ref | Garantiza que no se repita la combinación (gateway_event_ref) _(DOCUMENTO)_ |
+| `uq_payment_webhook_events_gateway_event_ref` | sí | gateway_event_ref | Garantiza que no se repita la combinación (gateway_event_ref) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «gateway_event_ref», la primera columna del índice _(CONSULTA)_ |
 | `ix_payment_webhook_events_gateway_id` | no | gateway_id | Soporta la clave foránea fk_payment_webhook_events_gateway_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_payment_webhook_events_gateway_connection_id` | no | gateway_connection_id | Soporta la clave foránea fk_payment_webhook_events_gateway_connection_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_payment_webhook_events_related_intent_id` | no | related_intent_id | Soporta la clave foránea fk_payment_webhook_events_related_intent_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -2978,7 +2977,10 @@ Conserva eventos de pago recibidos por webhook para procesar cambios de estado y
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /payments/callbacks/{callbackPath} | CREA | DIRECTA |
+| POST /payments/callbacks/{callbackPath} | LEE | DIRECTA |
 
 #### Gobierno
 

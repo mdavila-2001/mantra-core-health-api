@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { StorageLifecycleModule } from '../../common/storage/storage-lifecycle.module';
+import { IdentityEvidenceLifecycleModule } from '../identity_assurance/identity-evidence-lifecycle.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import {
@@ -39,7 +41,11 @@ import {
  * publica drafts genéricos. Guard global de auth; `AuthModule` provee el token.
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    StorageLifecycleModule,
+    IdentityEvidenceLifecycleModule,
+  ],
   controllers: [
     GovernanceCatalogController,
     RetentionExecutionController,

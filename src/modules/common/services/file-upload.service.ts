@@ -1,4 +1,13 @@
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Optional,
+} from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
+import { SEED } from '../../../common/constants/concepts';
+import { StoragePublicationService } from '../../../common/storage/storage-publication.service';
+import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -12,13 +21,21 @@ import {
   sniffMimeType,
   type AuthenticatedUser,
   type FileStorageAdapter,
+  type SniffedMimeType,
 } from '../../../common';
 
-/** Roles cuyo trabajo exige leer archivos que no subieron ellos mismos (p. ej. revisar evidencia de identidad). */
-const FILE_REVIEWER_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'];
 import { FileVersionsRepository, FilesRepository } from '../repositories';
+import { AttachableFileService } from './attachable-file.service';
+import { canActorReadOwnFile } from './file-access';
 import { FilesService } from './files.service';
-import type { FileContentDto, FileResponseDto, UploadFileDto } from '../dto';
+import type { Files } from '../entities';
+import type {
+  FileCategory,
+  FileContentDto,
+  FileResponseDto,
+  FileSensitivity,
+  UploadFileDto,
+} from '../dto';
 
 /** Lo que llega del interceptor de multer, acotado a lo que aquí se usa. */
 export interface UploadedFileBytes {
@@ -35,6 +52,50 @@ export interface UploadedFileBytes {
    */
   buffer: Buffer;
 }
+
+/**
+ * Bytes generados por el propio servidor (un certificado, un reporte) que hay
+ * que persistir como archivo. A diferencia de {@link UploadedFileBytes}, el
+ * tipo MIME lo declara quien llama y no se sniffea: el servidor sabe qué
+ * escribió, y el sniff existe para no confiar en lo que declara un cliente
+ * externo — acá no hay cliente externo.
+ */
+export interface GeneratedFileInput {
+  /**
+   * Contenido binario a persistir.
+   */
+  buffer: Buffer;
+  /**
+   * Nombre con el que se registra el archivo (sin extensión implícita: se
+   * incluye acá si corresponde).
+   */
+  originalName: string;
+  /**
+   * Tipo MIME exacto del contenido generado.
+   */
+  mimeType: 'application/json' | 'application/pdf';
+  /**
+   * Clasificación funcional del archivo, igual que en una subida real.
+   */
+  category: FileCategory;
+  /**
+   * Sensibilidad del contenido, igual que en una subida real.
+   */
+  sensitivity: FileSensitivity;
+}
+
+/**
+ * Lo que devuelve una pre-carga anónima: el archivo, más el tamaño y el tipo
+ * detectado, que `FileResponseDto` no expone porque viven en su versión
+ * (`common.file_versions`) y esta vía todavía no tiene versión que leer para
+ * responder — el cliente de la pre-carga necesita mostrarlos de inmediato.
+ */
+export type AnonymousUploadResult = FileResponseDto & {
+  /** Tamaño real de lo escrito, calculado por el adaptador de almacenamiento. */
+  readonly sizeBytes: number;
+  /** Tipo MIME detectado por firma binaria, no el declarado por el cliente. */
+  readonly mimeType: string;
+};
 
 /**
  * Subida y descarga reales de archivos: mueve los bytes contra el adaptador de
@@ -72,7 +133,9 @@ export class FileUploadService {
     private readonly filesService: FilesService,
     private readonly filesRepo: FilesRepository,
     private readonly fileVersionsRepo: FileVersionsRepository,
+    private readonly attachableFiles: AttachableFileService,
     private readonly logger: PinoLogger,
+    @Optional() private readonly publication?: StoragePublicationService,
   ) {
     this.logger.setContext(FileUploadService.name);
   }
@@ -145,28 +208,78 @@ export class FileUploadService {
       );
     }
 
+    return this.persistBytes(
+      { buffer: file.buffer, originalName: file.originalname },
+      { category: dto.category, sensitivity: dto.sensitivity },
+      detectedMimeType,
+      actor,
+      'common.file.upload',
+    );
+  }
+
+  /**
+   * Persiste bytes ya validados y crea el archivo con su versión 1.
+   *
+   * Tramo común de {@link upload} y {@link storeGenerated}: ambos llegan acá
+   * con un tipo MIME ya decidido —uno por firma binaria, el otro porque el
+   * propio servidor lo generó— y de acá en más el camino es idéntico: pasar
+   * por `StoragePublicationService` si está cableado, o guardar directo con el
+   * adaptador activo.
+   *
+   * @param bytes - Contenido y nombre a persistir.
+   * @param classification - Categoría y sensibilidad del archivo.
+   * @param mimeType - Tipo MIME ya decidido, sin volver a detectarlo.
+   * @param actor - Usuario autenticado dueño del archivo, o `null` para una
+   *   pre-carga anónima.
+   * @param operation - Nombre de la operación, para el registro.
+   * @returns El archivo recién creado.
+   * @throws StorageLifecycleDenied si el binding físico exige reserva y no
+   *   hay `StoragePublicationService` cableado.
+   */
+  private async persistBytes(
+    bytes: { buffer: Buffer; originalName: string },
+    classification: { category: FileCategory; sensitivity: FileSensitivity },
+    mimeType: string,
+    actor: AuthenticatedUser | null,
+    operation: string,
+  ): Promise<FileResponseDto> {
+    if (this.publication) {
+      const result = await this.publishUpload(
+        {
+          buffer: bytes.buffer,
+          originalname: bytes.originalName,
+          mimetype: mimeType,
+        },
+        classification,
+        mimeType,
+        actor,
+      );
+      return result.created;
+    }
+    if (loadStorageEnv().lifecycleBinding)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
     const stored = await this.storage.store({
-      buffer: file.buffer,
-      originalName: file.originalname,
-      mimeType: detectedMimeType,
+      buffer: bytes.buffer,
+      originalName: bytes.originalName,
+      mimeType,
     });
 
     this.logger.info(
       {
-        operation: 'common.file.upload',
-        actorId: actor.id,
+        operation,
+        actorId: actor?.id,
         sizeBytes: stored.sizeBytes,
-        mimeType: detectedMimeType,
+        mimeType,
       },
-      'Uploaded file stored, registering metadata',
+      'File bytes stored, registering metadata',
     );
 
     return this.filesService.createFile(
       {
-        originalName: file.originalname,
-        category: dto.category,
-        sensitivity: dto.sensitivity,
-        mimeType: detectedMimeType,
+        originalName: bytes.originalName,
+        category: classification.category,
+        sensitivity: classification.sensitivity,
+        mimeType,
         sizeBytes: stored.sizeBytes,
         contentHash: stored.contentHash,
         storageUri: stored.storageUri,
@@ -176,15 +289,200 @@ export class FileUploadService {
   }
 
   /**
-   * Devuelve el contenido de la versión vigente de un archivo.
+   * Persiste un artefacto generado por el propio servidor (un certificado, un
+   * reporte) como archivo, sin pasar por el sniff de contenido: el tipo MIME
+   * lo aporta quien llama porque es quien escribió los bytes.
    *
-   * Rechaza lo que se sabe infectado, pero **sí** sirve una versión con el
-   * escaneo todavía pendiente: en este despliegue no hay antivirus cableado
-   * (`recordScanResult` espera un callback que nadie emite), así que exigir
-   * `SCAN_CLEAN` dejaría ilegible para siempre todo lo que se suba. La URL
-   * firmada de `FilesService.generateDownloadUrl` sí mantiene la regla estricta,
-   * porque una vez emitida ya no se puede revisar; esta ruta revalida en cada
-   * petición.
+   * Reutiliza el mismo camino de {@link upload} a partir de la detección del
+   * tipo (`{@link persistBytes}`): mismo cableado de `StoragePublicationService`
+   * o adaptador directo, mismo registro de `common.files`.
+   *
+   * @param input - Bytes, nombre, tipo MIME, categoría y sensibilidad.
+   * @param actor - Usuario autenticado a nombre de quien se registra el archivo.
+   * @returns El archivo recién creado.
+   * @throws PreconditionFailedException si el contenido viene vacío o excede
+   *   el tamaño máximo configurado.
+   */
+  async storeGenerated(
+    input: GeneratedFileInput,
+    actor: AuthenticatedUser,
+  ): Promise<FileResponseDto> {
+    if (!input.buffer.byteLength) {
+      throw new PreconditionFailedException(
+        'El artefacto generado no tiene contenido',
+      );
+    }
+    if (input.buffer.byteLength > this.maxSizeBytes) {
+      throw new PreconditionFailedException(
+        'El artefacto generado excede el tamaño máximo permitido',
+        { maxSizeBytes: this.maxSizeBytes, sizeBytes: input.buffer.byteLength },
+      );
+    }
+
+    return this.persistBytes(
+      { buffer: input.buffer, originalName: input.originalName },
+      { category: input.category, sensitivity: input.sensitivity },
+      input.mimeType,
+      actor,
+      'common.file.store-generated',
+    );
+  }
+
+  /**
+   * Pre-carga sin sesión: mismas comprobaciones de tamaño y contenido que
+   * {@link upload}, pero el archivo nace **sin dueño**
+   * (`created_by_user_id`/`recorded_by_user_id` NULL) y sólo admite los
+   * formatos que declare `policy.allowedMimeTypes` — más estricto que la
+   * lista por categoría, porque esta vía no exige autenticación y conviene
+   * acotarla al mínimo que el llamador necesita.
+   *
+   * Nace para el registro público de organización (subtarea 1.2): quien la
+   * usa sube un PDF antes de que exista su cuenta. El archivo queda
+   * huérfano hasta que alguien lo reclama dentro de una transacción
+   * autenticada (`AttachableFileService.claimAnonymousUpload`), que es quien
+   * le asigna tenant y dueño. Deuda conocida: nada purga las subidas
+   * anónimas que nunca se reclaman.
+   *
+   * No reutiliza `UPLOAD_MIME_ALLOWLIST` ni `isMimeTypeAllowedForCategory`
+   * a propósito: esa lista gobierna todo el sistema y `DOCUMENT` admite
+   * bastante más que PDF; restringir a un uso puntual es responsabilidad de
+   * quien llama, no de la lista global.
+   *
+   * @param file - Contenido recibido por multipart.
+   * @param dto - Clasificación funcional del archivo.
+   * @param policy - Formatos admitidos para este uso y el nombre de la
+   *   operación, para el registro.
+   * @returns El archivo recién creado, sin dueño, con el tamaño y el tipo
+   *   detectado que `FileResponseDto` no expone.
+   * @throws PreconditionFailedException si el contenido viene vacío, excede
+   *   el máximo configurado o no corresponde a uno de los formatos admitidos.
+   */
+  async uploadAnonymous(
+    file: UploadedFileBytes | undefined,
+    dto: UploadFileDto,
+    policy: {
+      readonly allowedMimeTypes: readonly SniffedMimeType[];
+      readonly operation: string;
+    },
+  ): Promise<AnonymousUploadResult> {
+    if (!file?.buffer?.byteLength) {
+      throw new PreconditionFailedException(
+        'No se recibió contenido en el campo "file"',
+      );
+    }
+    // Multer ya corta por `limits.fileSize`, pero se revalida aquí por la
+    // misma razón que en `upload`: que el límite siga vigente si el servicio
+    // se invoca desde otro transporte.
+    if (file.buffer.byteLength > this.maxSizeBytes) {
+      throw new PreconditionFailedException(
+        'El archivo excede el tamaño máximo permitido',
+        { maxSizeBytes: this.maxSizeBytes, sizeBytes: file.buffer.byteLength },
+      );
+    }
+
+    const detectedMimeType = sniffMimeType(file.buffer);
+    if (
+      !detectedMimeType ||
+      !policy.allowedMimeTypes.includes(detectedMimeType)
+    ) {
+      throw new PreconditionFailedException('Solo se admiten documentos PDF', {
+        detectedMimeType: detectedMimeType ?? null,
+        allowedMimeTypes: policy.allowedMimeTypes,
+      });
+    }
+
+    if (this.publication) {
+      const result = await this.publishUpload(
+        file,
+        dto,
+        detectedMimeType,
+        null,
+      );
+      return {
+        ...result.created,
+        sizeBytes: result.stored.sizeBytes,
+        mimeType: detectedMimeType,
+      };
+    }
+    if (loadStorageEnv().lifecycleBinding)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
+    const stored = await this.storage.store({
+      buffer: file.buffer,
+      originalName: file.originalname,
+      mimeType: detectedMimeType,
+    });
+
+    this.logger.info(
+      {
+        operation: policy.operation,
+        sizeBytes: stored.sizeBytes,
+        mimeType: detectedMimeType,
+      },
+      'Anonymous upload stored, registering metadata',
+    );
+
+    const created = await this.filesService.createFile(
+      {
+        originalName: file.originalname,
+        category: dto.category,
+        sensitivity: dto.sensitivity,
+        mimeType: detectedMimeType,
+        sizeBytes: stored.sizeBytes,
+        contentHash: stored.contentHash,
+        storageUri: stored.storageUri,
+      },
+      null,
+    );
+    return {
+      ...created,
+      sizeBytes: stored.sizeBytes,
+      mimeType: detectedMimeType,
+    };
+  }
+
+  private async publishUpload(
+    file: UploadedFileBytes,
+    dto: { category: FileCategory; sensitivity: FileSensitivity },
+    mimeType: string,
+    actor: AuthenticatedUser | null,
+  ) {
+    if (!this.publication)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
+    return this.publication.publish(
+      { buffer: file.buffer, originalName: file.originalname, mimeType },
+      // This is the existing technical upload tenant, NOT proof of evidence ownership.
+      {
+        tenantId: SEED.tenantId,
+        producer: actor ? 'common.upload' : 'common.anonymous-upload',
+        targetId: randomUUID(),
+      },
+      async (context) => ({
+        stored: context.stored,
+        created: await this.filesService.createFile(
+          {
+            originalName: file.originalname,
+            category: dto.category,
+            sensitivity: dto.sensitivity,
+            mimeType,
+            sizeBytes: context.stored.sizeBytes,
+            contentHash: context.stored.contentHash,
+            storageUri: context.stored.storageUri,
+          },
+          actor,
+          context,
+        ),
+      }),
+    );
+  }
+
+  /**
+   * Devuelve el contenido de la versión vigente de un archivo **propio**.
+   *
+   * Autoriza por propiedad o rol de revisión (`canActorReadOwnFile`). Para el
+   * archivo que el actor puede ver por **contexto** —el adjunto que le mandaron
+   * en una conversación, la foto de un comentario de un post que sí puede
+   * leer— esta ruta responde 403 y es correcto que lo haga: quien conoce ese
+   * contexto es otro módulo. Ver {@link downloadForAuthorizedContext}.
    *
    * @param fileId - Identificador del archivo.
    * @param actor - Usuario autenticado que pide el contenido.
@@ -211,49 +509,99 @@ export class FileUploadService {
     // ninguna comprobación de propiedad, sólo autenticación. Los roles de
     // revisión existen porque alguien (no necesariamente quien subió el
     // archivo) tiene que poder ver la evidencia para aprobarla o rechazarla.
-    if (
-      file.createdByUserId !== actor.id &&
-      !actor.roles.some((role) => FILE_REVIEWER_ROLES.includes(role))
-    ) {
+    if (!canActorReadOwnFile(file, actor)) {
       throw new ForbiddenException('No tiene acceso a este archivo');
     }
-    if (
-      file.deletedAt ||
-      file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED
-    ) {
-      throw new PreconditionFailedException('El archivo está borrado', {
-        fileId,
-      });
-    }
-    if (!file.currentVersionId) {
-      throw new PreconditionFailedException(
-        'El archivo no tiene una versión vigente',
-        { fileId },
-      );
+
+    return this.serveCurrentVersion(forked, file, 'common.file.download');
+  }
+
+  /**
+   * Bytes de un archivo cuya lectura **ya autorizó el módulo dueño del
+   * contexto** (5.1 · FT-32-R02).
+   *
+   * No es `download()` sin el chequeo de dueño: es la mitad de abajo, la que
+   * resuelve la versión vigente y trae los bytes, expuesta para que quien sí
+   * sabe de contexto la invoque **después** de decidir. La diferencia importa
+   * porque en este sistema «puede verlo» casi nunca significa «lo subió»: el
+   * receptor de un mensaje no subió el adjunto que le mandaron, y aun así es
+   * exactamente quien tiene derecho a abrirlo.
+   *
+   * **Contrato con quien llama, y no es negociable:** esta función **no
+   * autoriza nada**. Invocarla sin haber comprobado el contexto convierte
+   * cualquier `fileId` en público para toda sesión. El único llamador legítimo
+   * hoy, `CommunityMessagingReadService`, comprueba antes perfil propio,
+   * participación activa y asociación a un mensaje vivo. Cualquier llamador
+   * nuevo debe aportar una prueba contextual equivalente.
+   *
+   * Tampoco es `downloadPublicMedia()`: aquélla autoriza por **lo que el
+   * archivo es** (imagen, sensibilidad normal) y por eso no sirve acá — un
+   * adjunto de chat se sube como `PHI` y puede ser un PDF, así que aquella
+   * ruta lo rechazaría con un 404 que no explica nada.
+   *
+   * @param fileId - Archivo cuyo contexto ya fue autorizado por el llamador.
+   * @param operation - Operación del llamador, para el registro.
+   * @returns Bytes y tipo MIME para servirlos por HTTP.
+   * @throws ResourceNotFoundException si el archivo o su versión no existen.
+   * @throws PreconditionFailedException si está borrado o su versión vigente
+   *   resultó infectada.
+   */
+  async downloadForAuthorizedContext(
+    fileId: string,
+    operation: string,
+  ): Promise<FileContentDto> {
+    const forked = this.em.fork();
+
+    const file = await this.filesRepo.findById(forked, fileId);
+    if (!file) {
+      throw new ResourceNotFoundException('Archivo no encontrado', { fileId });
     }
 
-    const version = await this.fileVersionsRepo.findById(
-      forked,
-      file.currentVersionId,
-    );
-    if (!version) {
-      throw new ResourceNotFoundException('Versión vigente no encontrada', {
+    return this.serveCurrentVersion(forked, file, operation);
+  }
+
+  /**
+   * La versión vigente de un archivo ya autorizado, lista para servir.
+   *
+   * **Quién valida qué, y por qué no se valida acá.** El estado del archivo
+   * —borrado, sin versión vigente, versión infectada— lo decide
+   * `AttachableFileService`, que ya era el dueño de esa pregunta para todo el
+   * sistema (`assertUsableBy` la contesta en perfiles, community y adjuntos
+   * clínicos). Cuando 5.1 necesitó servir bytes autorizados por contexto, esa
+   * comprobación estuvo un rato escrita **dos veces**, acá y allá, con dos
+   * juegos de mensajes; que coincidieran era cuestión de suerte. Esta función
+   * conserva una sola responsabilidad: traer los bytes de una versión que otro
+   * ya declaró utilizable.
+   *
+   * Se sirve una versión con el escaneo **pendiente** —no infectada— porque en
+   * este despliegue no hay antivirus cableado (`recordScanResult` espera un
+   * callback que nadie emite) y exigir `SCAN_CLEAN` dejaría ilegible para
+   * siempre todo lo que se suba. Queda el aviso en el registro. La URL firmada
+   * de `FilesService.generateDownloadUrl` sí mantiene la regla estricta, porque
+   * una vez emitida ya no se puede revisar; esta ruta revalida en cada
+   * petición.
+   *
+   * @param forked - Contexto de persistencia ya abierto por quien llama.
+   * @param file - Archivo cuya lectura ya fue autorizada.
+   * @param operation - Operación del llamador, para el registro.
+   * @returns Bytes y tipo MIME para servirlos por HTTP.
+   */
+  private async serveCurrentVersion(
+    forked: EntityManager,
+    file: Files,
+    operation: string,
+  ): Promise<FileContentDto> {
+    const fileId = file.id;
+    const { version } =
+      await this.attachableFiles.assertUsableForAuthorizedContext(
+        forked,
         fileId,
-      });
-    }
-    if (version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED) {
-      this.logger.warn(
-        { operation: 'common.file.download', fileId, versionId: version.id },
-        'Refused download of an infected version',
+        { operation },
       );
-      throw new PreconditionFailedException(
-        'La versión vigente resultó infectada',
-        { fileId },
-      );
-    }
+
     if (version.malwareScanStatusConceptId === CONCEPTS.SCAN_PENDING) {
       this.logger.warn(
-        { operation: 'common.file.download', fileId, versionId: version.id },
+        { operation, fileId, versionId: version.id },
         'Serving a version whose malware scan is still pending',
       );
     }

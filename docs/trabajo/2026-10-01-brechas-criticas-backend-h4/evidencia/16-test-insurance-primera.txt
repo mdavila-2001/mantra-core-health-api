@@ -1,0 +1,147 @@
+﻿node.exe : (node:15028) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En C:\Users\Usuario\AppData\Roaming\npm\corepack.ps1: 24 Carácter: 5
++     & "node$exe"  "$basedir/node_modules/corepack/dist/corepack.js" $ ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:15028) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/modules/insurance/services/insurer-received-claims.service.spec.ts (41.064 s)
+  ● InsurerReceivedClaimsService.decide › límite › rechazar con un motivo de exactamente cinco caracteres pasa
+
+    expect(received).resolves.toBeDefined()
+
+    Received promise rejected instead of resolved
+    Rejected to value: [PreconditionFailedException: Falta el motivo: al menos 5 caracteres]
+
+      633 |       const d = build({ administra: true });
+      634 |
+    > 635 |       await expect(
+          |             ^
+      636 |         decidir(d, { outcome: 'REJECTED', reason: '  Nada ' }),
+      637 |       ).resolves.toBeDefined();
+      638 |     });
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at Object.expect (modules/insurance/services/insurer-received-claims.service.spec.ts:635:13)
+
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:11672) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/modules/insurance/controllers/insurance-controllers.spec.ts (55.854 s)
+  ● Insurance controllers (delegación) › la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 4
+
+      Array [
+        "BILLING_OPERATOR",
+        "SECURITY_ADMIN",
+    +   "BILLING",
+    +   "FINANCE",
+    +   "INSURANCE_OPERATOR",
+    +   "USER",
+      ]
+
+      260 |   it('la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN', () => {
+      261 |     const roles = Reflect.getMetadata('requiredRoles', ClaimsReadController);
+    > 262 |     expect(roles).toEqual(['BILLING_OPERATOR', 'SECURITY_ADMIN']);
+          |                   ^
+      263 |   });
+      264 |
+      265 |   /** Las membresías se resuelven por origen; las disputas conservan su política. */
+
+      at Object.toEqual (modules/insurance/controllers/insurance-controllers.spec.ts:262:19)
+
+(node:2284) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:22788) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+
+Summary of all failing tests
+FAIL modules/insurance/services/insurer-received-claims.service.spec.ts (41.064 s)
+  ● InsurerReceivedClaimsService.decide › límite › rechazar con un motivo de exactamente cinco caracteres pasa
+
+    expect(received).resolves.toBeDefined()
+
+    Received promise rejected instead of resolved
+    Rejected to value: [PreconditionFailedException: Falta el motivo: al menos 5 caracteres]
+
+      633 |       const d = build({ administra: true });
+      634 |
+    > 635 |       await expect(
+          |             ^
+      636 |         decidir(d, { outcome: 'REJECTED', reason: '  Nada ' }),
+      637 |       ).resolves.toBeDefined();
+      638 |     });
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at Object.expect (modules/insurance/services/insurer-received-claims.service.spec.ts:635:13)
+
+FAIL modules/insurance/controllers/insurance-controllers.spec.ts (55.854 s)
+  ● Insurance controllers (delegación) › la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 4
+
+      Array [
+        "BILLING_OPERATOR",
+        "SECURITY_ADMIN",
+    +   "BILLING",
+    +   "FINANCE",
+    +   "INSURANCE_OPERATOR",
+    +   "USER",
+      ]
+
+      260 |   it('la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN', () => {
+      261 |     const roles = Reflect.getMetadata('requiredRoles', ClaimsReadController);
+    > 262 |     expect(roles).toEqual(['BILLING_OPERATOR', 'SECURITY_ADMIN']);
+          |                   ^
+      263 |   });
+      264 |
+      265 |   /** Las membresías se resuelven por origen; las disputas conservan su política. */
+
+      at Object.toEqual (modules/insurance/controllers/insurance-controllers.spec.ts:262:19)
+
+
+Test Suites: 2 failed, 33 passed, 35 total
+Tests:       2 failed, 597 passed, 599 total
+Snapshots:   0 total
+Time:        103.997 s
+Ran all test suites matching src/modules/insurance.

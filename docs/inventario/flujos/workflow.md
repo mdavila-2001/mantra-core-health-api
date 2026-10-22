@@ -50,7 +50,7 @@ INSTANCIAS
   instances/sweep-timeouts > vencidas → ESCALATED (instancia y tareas), SKIP LOCKED
 ```
 
-_Fuente: `src/modules/workflow/README.md:28`_
+_Fuente: `src/modules/workflow/README.md:59`_
 
 ### Etapas y operaciones
 

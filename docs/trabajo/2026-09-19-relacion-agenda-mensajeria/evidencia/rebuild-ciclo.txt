@@ -1,0 +1,111 @@
+=== CICLO LIMPIO A MANO · 2026-09-20T08:17:34-04:00 ===
+rebuild_stack.py aborto en 0/4 (database/SQL vendorizado vs politica v4.0.9).
+Se ejecutan los mismos pasos que el haria, sin ese chequeo.
+
+--- 1/3 down -v ---
+ Volume mantra-redesa_postgres_data Removed 
+ Volume mantra-redesa_mongodb_data Removed 
+ Volume mantra-redesa_opensearch_data Removed 
+ Volume mantra-redesa_redis_data Removed 
+
+--- 2/3 up infra + postgres-init (materializa desde database/SQL) ---
+ Container mantra-redesa-mongodb-1 Healthy 
+ Container mantra-redesa-mongo-init-1 Starting 
+ Container mantra-redesa-mongo-init-1 Started 
+ Container mantra-redesa-opensearch-1 Healthy 
+ Container mantra-redesa-opensearch-init-1 Starting 
+ Container mantra-redesa-opensearch-init-1 Started 
+
+esperando a postgres healthy...
+postgres responde tras 1 intentos
+
+esperando a que postgres-init termine el DDL...
+  intento 1 · tablas=697
+  intento 2 · tablas=709
+  intento 3 · tablas=787
+  intento 4 · tablas=890
+  intento 5 · tablas=1005
+  intento 6 · tablas=1175
+DDL materializado: 1175 tablas
+=== 3/3 carga del paquete de seeds (revision 2.4.0-v4.0.11) ===
+$ python salud-db/load_seeds.py --skip-prod
+  pg           cross_store_consistency.data_movement_jobs +16      ya:0      
+  pg           cross_store_consistency.schema_migration_jobs +16      ya:0      
+  pg           cross_store_consistency.archive_jobs       +16      ya:0      
+  pg           cross_store_consistency.store_consistency_slos +16      ya:0      
+  pg           lakehouse.data_lake_zones                  +14      ya:0      
+  pg           lakehouse.lakehouse_catalogs               +16      ya:0      
+  pg           lakehouse.data_products                    +16      ya:0      
+  pg           lakehouse.data_product_versions            +16      ya:0      
+  pg           lakehouse.lakehouse_datasets               +16      ya:0      
+  pg           lakehouse.lakehouse_schema_versions        +16      ya:0      
+  pg           lakehouse.lakehouse_partitions             +16      ya:0      
+  pg           lakehouse.lakehouse_files                  +16      ya:0      
+  pg           lakehouse.transformation_definitions       +16      ya:0      
+  pg           lakehouse.transformation_runs              +16      ya:0      
+  pg           lakehouse.lakehouse_quality_rules          +16      ya:0      
+  pg           lakehouse.lakehouse_quality_runs           +16      ya:0      
+  pg           lakehouse.lakehouse_quality_issues         +16      ya:0      
+  pg           lakehouse.lakehouse_lineage_edges          +16      ya:0      
+  pg           lakehouse.research_projects                +16      ya:0      
+  pg           lakehouse.cohort_definitions               +16      ya:0      
+  pg           lakehouse.dataset_release_requests         +16      ya:0      
+  pg           lakehouse.dataset_release_manifests        +16      ya:0      
+  mongo        document_envelopes                         +7       ya:7        [dup:2]
+  mongo        document_version_documents                 +7       ya:7        [dup:2]
+  mongo        fhir_resource_documents                    +8       ya:8      
+  mongo        fhir_bundle_documents                      +8       ya:8      
+  mongo        external_payload_documents                 +8       ya:8      
+  mongo        webhook_payload_documents                  +8       ya:8      
+  mongo        dynamic_form_snapshot_documents            +8       ya:8      
+  mongo        context_documents                          +8       ya:8      
+  mongo        workflow_definition_documents              +8       ya:8      
+  mongo        ai_execution_documents                     +7       ya:7        [dup:2]
+  mongo        cms_content_documents                      +8       ya:8      
+  mongo        document_quarantine_documents              +8       ya:8      
+  mongo        document_schema_registry                   +8       ya:8      
+  redis        session_cache_entries                      +16      ya:0        [SET con TTL declarado]
+  redis        refresh_family_cache_entries               +16      ya:0        [SET con TTL declarado]
+  redis        mfa_challenge_entries                      +16      ya:0        [SET con TTL declarado]
+  redis        password_reset_entries                     +16      ya:0        [SET con TTL declarado]
+  redis        rate_limit_buckets                         +16      ya:0        [SET con TTL declarado]
+  redis        idempotency_entries                        +16      ya:0        [SET con TTL declarado]
+  redis        authorization_cache_entries                +16      ya:0        [SET con TTL declarado]
+  redis        availability_cache_entries                 +16      ya:0        [SET con TTL declarado]
+  redis        distributed_lock_entries                   +16      ya:0        [SET con TTL declarado]
+  redis        realtime_presence_entries                  +16      ya:0        [SET con TTL declarado]
+  redis        job_progress_entries                       +16      ya:0        [SET con TTL declarado]
+  redis        notification_debounce_entries              +16      ya:0        [SET con TTL declarado]
+  redis        cache_invalidation_stream                  +16      ya:0        [SET con TTL declarado]
+  redis        outbox_delivery_dedup_entries              +16      ya:0        [SET con TTL declarado]
+  TOTAL insertados: 23730 · ya existentes: 1066
+
+  Avisos (8):
+    - technical_data_type: 78 valores agregados desde los seeds (placeholders sintéticos — vocabulario canónico §3.2 sigue TODO)
+    - OpenSearch provider_directory_search_docs: 8 docs con error — 1º: {'type': 'mapper_parsing_exception', 'reason': 'failed to parse field [geo] of type [geo_point]', 'caused_by': {'type': 'parse_exception', 'reason': 'field must be either [lon|lat], [type|coordinates], or [geohash]'}}
+    - OpenSearch organization_directory_search_docs: 8 docs con error — 1º: {'type': 'mapper_parsing_exception', 'reason': 'failed to parse field [geo] of type [geo_point]', 'caused_by': {'type': 'parse_exception', 'reason': 'field must be either [lon|lat], [type|coordinates], or [geohash]'}}
+    - community.conversation_participants: 16 recs sin NOT NULL ['is_favorite', 'is_pinned'] — saltados (TODO: defecto del paquete de seeds)
+    - 55_document_store mock: tipos string vs validadores $jsonSchema (binData/date/array) — insertados con bypass_document_validation (TODO: regenerar mock con tipos BSON)
+    - mongo document_envelopes: 2 docs con clave natural duplicada en el paquete — saltados (equivalente a ON CONFLICT DO NOTHING)
+    - mongo document_version_documents: 2 docs con clave natural duplicada en el paquete — saltados (equivalente a ON CONFLICT DO NOTHING)
+    - mongo ai_execution_documents: 2 docs con clave natural duplicada en el paquete — saltados (equivalente a ON CONFLICT DO NOTHING)
+exit=0
+
+=== ESTADO DESPUES DEL CICLO LIMPIO · 2026-09-20T08:27:39-04:00 ===
+  code  |                  id                  |           state_concept_id           
+--------+--------------------------------------+--------------------------------------
+ EMAIL  | 96be0595-d496-5457-95ac-e8c77f3da292 | 38a1d301-f40d-5b17-a695-5e6d605f8b19
+ IN_APP | d0240273-f75e-5405-9db2-8dd6769eb263 | 38a1d301-f40d-5b17-a695-5e6d605f8b19
+(2 rows)
+
+ codigos_duplicados 
+--------------------
+                 12
+(1 row)
+
+                  id                  |  code  
+--------------------------------------+--------
+ d0f53ea3-7e50-5578-add3-270341b1186c | ACTIVE
+ 38a1d301-f40d-5b17-a695-5e6d605f8b19 | ACTIVE
+(2 rows)
+

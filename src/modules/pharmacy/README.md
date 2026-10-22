@@ -4,6 +4,48 @@ Identidad de farmacia con licencias, sedes dispensadoras, catálogo de productos
 identificadores, listas de precios y precios versionados, integración externa con
 mapeo de productos, retiro de catálogo y proyección al read-model.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/pharmacy -name '*.controller.ts' | wc -l
+  find src/modules/pharmacy -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/pharmacy -name '*.entity.ts' | wc -l
+  find src/modules/pharmacy -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **3 controllers, 22 rutas HTTP, 9 entidades y 10 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`DirectoryModule`).
+
+Entidades (`tableName`, 9 de 9 archivos `*.entity.ts`): `pharmacies`, `pharmacy_external_product_mappings`, `pharmacy_integration_connections`, `pharmacy_licenses`, `pharmacy_price_lists`, `pharmacy_product_identifiers`, `pharmacy_product_prices`, `pharmacy_products`, `pharmacy_sites`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /public/medications` | pública | `pharmacy-public` |
+| `GET /public/medications/:conceptId/availability` | pública | `pharmacy-public` |
+| `GET /pharmacy/pharmacies` | sesión | `pharmacy-read` |
+| `GET /pharmacy/pharmacies/:id` | sesión | `pharmacy-read` |
+| `GET /pharmacy/pharmacies/:id/licenses` | sesión | `pharmacy-read` |
+| `GET /pharmacy/pharmacies/:id/contacts` | sesión | `pharmacy-read` |
+| `GET /pharmacy/sites` | sesión | `pharmacy-read` |
+| `GET /pharmacy/catalog-products` | sesión | `pharmacy-read` |
+| `GET /pharmacy/products` | sesión | `pharmacy-read` |
+| `GET /pharmacy/sites/:siteId/prices` | sesión | `pharmacy-read` |
+| `POST /pharmacies` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/licenses/:licenseId/verify` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/sites` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/products` | SECURITY_ADMIN | `pharmacy` |
+| `PATCH /pharmacies/:pharmacyId/products/:productId` | SECURITY_ADMIN | `pharmacy` |
+| `DELETE /pharmacies/:pharmacyId/products/:productId` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists/:priceListId/prices` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/price-lists/:priceListId/close` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/integration-connections` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/integration-connections/:connId/product-mappings` | SECURITY_ADMIN | `pharmacy` |
+| `POST /pharmacies/:pharmacyId/projections` | SECURITY_ADMIN | `pharmacy` |
+
 ## Endpoints (UC → ruta)
 
 | UC | Método y ruta | Resumen |
@@ -16,6 +58,7 @@ mapeo de productos, retiro de catálogo y proyección al read-model.
 | UC-24-06 | `POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices` | Fijar/versionar precio |
 | UC-24-07 | `POST /pharmacies/{pharmacyId}/integration-connections` | Establecer conexión de integración |
 | UC-24-08 | `POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings` | Mapear producto a código externo |
+| P47 §2 | `PATCH /pharmacies/{pharmacyId}/products/{productId}` | Editar marca, genérico, concentración, empaque y receta de un producto activo (`null` borra el dato) |
 | UC-24-09 | `DELETE /pharmacies/{pharmacyId}/products/{productId}` | Retirar (soft-delete) producto en cascada |
 | UC-24-10 | `POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close` | Cerrar/expirar lista de precios |
 | UC-24-11 | `POST /pharmacies/{pharmacyId}/projections` | Proyectar catálogo y precios a read-model |
@@ -26,8 +69,10 @@ mapeo de productos, retiro de catálogo y proyección al read-model.
 | --- | --- |
 | `GET /pharmacy/pharmacies` | Directorio de farmacias publicadas del tenant activo |
 | `GET /pharmacy/pharmacies/{id}` | Perfil de una farmacia: ficha y sedes con dirección y coordenadas |
-| `GET /pharmacy/products?search=&conceptId=&limit=` | Búsqueda de productos por texto o por medicamento del vademécum |
-| `GET /pharmacy/sites/{siteId}/prices?product=` | Precios públicos vigentes de una sede |
+| `GET /pharmacy/sites?search=&lat=&lng=&limit=` | Sedes publicadas, sueltas, con distancia Haversine si hay origen (carril A) |
+| `GET /pharmacy/products?search=&conceptId=&pharmacyId=&limit=` | Búsqueda de productos por texto, medicamento del vademécum o farmacia (`pharmacyId`: carril A) |
+| `GET /pharmacy/sites/{siteId}/prices?product=` | Precios públicos vigentes de una sede, con `requiresPrescription` por producto (carril A) |
+| `GET /pharmacy/catalog-products?search=&source=&atc=&limit=` | Catálogo universal de medicamentos (registros sanitarios oficiales): lo que una farmacia busca para dar de alta un producto |
 
 Visible = farmacia `ACTIVE` **y** `VERIFIED` del tenant del contexto (mismo
 criterio que el directorio de unidades diagnósticas); sedes y productos,
@@ -41,6 +86,31 @@ aseguradora (`insurer_tenant_id`) nunca sale por esta cara aunque esté marcada
 visible: es un acuerdo entre partes, no precio de mostrador. `conceptId` de la
 búsqueda es el `medication_concept_id` del vademécum (`terminology`, códigos
 ATC): el mismo con que la receta identifica el fármaco.
+
+## Catálogo universal de medicamentos
+
+Un producto de farmacia **no se tipea**: se elige de un registro sanitario
+oficial. Cada fuente (`cima-medicamentos`, `invima-medicamentos`,
+`anvisa-medicamentos`, y `agemed-medicamentos` cuando se cargue) es un
+`code_system` de `terminology` con un concepto por registro y sus datos en
+`concept_properties` (códigos en `pharmacy-catalog.properties.ts`, escritos por
+`tools/terminology-import/load-medicine-catalog.mjs`). Las fuentes **no se
+fusionan**: cada una conserva su id de origen; el ancla común con la receta es el
+**ATC nivel 5**, por igualdad exacta de código contra el code system `vademecum`.
+
+- `POST /pharmacies/{id}/products` acepta `catalogProductId` (+
+  `catalogPresentationCode`). Con él, `brandName`, `genericName`,
+  `strengthText`, `packageSizeText`, `requiresPrescription` y
+  `medicationConceptId` **los deriva el servidor** y mandarlos es un `400`.
+  Un registro no vigente es `422`; el mismo producto y presentación dos veces
+  es `409` (índices únicos parciales de `v4.2.32`). Sin `catalogProductId` el alta
+  sigue como producto cargado a mano.
+- La búsqueda lista también los registros no vigentes (`selectable: false`):
+  esconderlos haría que «no está» y «está dado de baja» se vieran igual. No filtra
+  por tenant: el registro sanitario es el mismo para todas las farmacias.
+- **Pendiente en la API real:** edición (`PATCH`), precio por lista, imágenes y
+  descripción del producto. Hoy sólo existen en el simulador del front (P47); las
+  dos últimas no tienen columna en el modelo.
 
 ## Entidades
 
@@ -93,3 +163,12 @@ archivo para que el módulo sea auto-contenido.
   `controllers/pharmacy.controller.spec.ts` (mockea servicios).
 - Smoke de integración: `test/smoke/modules/pharmacy.smoke.ts`
   (`PHARMACY_SMOKE`), encadena el ciclo completo sobre `ctx.vars`.
+
+## Revisión backend 2026-10-05
+
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/pharmacy.md)
+registra que las mutaciones administrativas sólo exigen rol global y no atan el
+actor a farmacia ni tenant. También faltan comprobaciones entre farmacia, sede,
+práctica y aseguradora. La corrida dirigida pasó 22 suites y 278 tests; emitió
+dos advertencias de import JSON sin atributo y no prueba aislamiento de tenant
+ni claves foráneas reales.

@@ -431,8 +431,8 @@ export class IdentityChecksService {
       );
     }
 
-    const requeridos = await this.checksRepo.findRequiredByCase(tx, kase.id);
-    for (const check of requeridos) {
+    const required = await this.checksRepo.findRequiredByCase(tx, kase.id);
+    for (const check of required) {
       if (!OPEN_CHECK_STATES.includes(check.statusConceptId)) continue;
       const previous = await this.resultsRepo.findLatestByCheck(tx, check.id);
       const resultVersion =

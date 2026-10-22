@@ -1,5 +1,5 @@
 # =========================================================================
-# Mantra Core Technologies - REDESA Health Ecosystem
+# Mantra Core Technologies - ALOVIDA Health Ecosystem
 # Instala una tarea programada de Windows que corre scripts/docker-prune.sh
 # todos los dias, sin depender de que alguien recuerde usar `yarn docker:up`
 # o `yarn docker:api:refresh`. Es el respaldo para cuando alguien levanta el

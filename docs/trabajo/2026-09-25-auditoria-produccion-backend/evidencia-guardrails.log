@@ -1,0 +1,13 @@
+== Guardrails ALOVIDA ==
+
+[UNSCOPED_MUTATION] 8 hallazgo(s):
+  src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:57 — @Post mutante sin @Roles ni @Public: 
+  src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:68 — @Delete mutante sin @Roles ni @Public: ':id'
+  src/modules/insurance/controllers/insurance-portability.controller.ts:53 — @Post mutante sin @Roles ni @Public: 'export'
+  src/modules/pharma_lab/controllers/pharma-lab-notices.controller.ts:48 — @Post mutante sin @Roles ni @Public: ':noticeId/read'
+  src/modules/profiles/controllers/tenant-practitioner-requests.controller.ts:69 — @Post mutante sin @Roles ni @Public: ':tenantId/practitioner-requests/:affiliationId/approve'
+  src/modules/profiles/controllers/tenant-practitioner-requests.controller.ts:81 — @Post mutante sin @Roles ni @Public: ':tenantId/practitioner-requests/:affiliationId/reject'
+  src/modules/profiles/controllers/tenant-practitioner-requests.controller.ts:104 — @Post mutante sin @Roles ni @Public: ':tenantId/practitioner-requests/:affiliationId/revoke'
+  src/modules/surveys/controllers/surveys-patient.controller.ts:61 — @Post mutante sin @Roles ni @Public: ':id/responses'
+
+Total: 8 (bloqueantes: 0, informativos: 8)

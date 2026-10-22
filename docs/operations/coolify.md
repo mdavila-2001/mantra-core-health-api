@@ -157,7 +157,7 @@ Deriva detectada entre el modelo y la base: 71 diferencias
 ```
 
 Las 45 tablas ausentes incluyen el schema `pharma_lab` entero —B-8 de
-`REGISTRO-DEFECTOS.md`, todavía abierto— y sus tablas de historia en `audit`.
+`docs/progress/REGISTRO-DEFECTOS.md`, todavía abierto— y sus tablas de historia en `audit`.
 Las 24 divergencias de obligatoriedad son columnas que la base exige NOT NULL y
 la entidad declara opcionales: un INSERT que no las escriba falla.
 
@@ -210,8 +210,15 @@ base sin una sola tabla y la aplicación devolviendo 500 en la primera
 escritura. Que el modelo tenga repositorio propio (B-2) arregla el versionado;
 el despliegue sigue viendo un solo `git clone`.
 
-Por eso `docker-compose.coolify.yml` monta `./database/SQL`, que es la copia
-versionada dentro de este repositorio. **Después de tocar el DDL:**
+Por eso `docker-compose.coolify.yml` usa `./database/SQL`, la copia versionada
+dentro de este repositorio. Y no la **monta**: la **hornea** en la imagen
+(`docker/db-init/Dockerfile`). Coolify clona el repositorio dentro de un
+contenedor auxiliar y lanza `docker compose` contra el socket del host, así que
+un `volumes: ./docker/db-init:/init/bin` lo resuelve el demonio —en el host, donde
+esa ruta no existe—: Docker crea el directorio VACÍO, lo monta igual y el
+arranque muere con `exit 127` (`bash: /init/bin/init-postgres.sh: No such file or
+directory`). El contexto de build sí viaja, que es como se construyen `api` y los
+workers. **Después de tocar el DDL:**
 
 ```bash
 yarn db:vendor         # copia el modelo a database/
@@ -298,13 +305,98 @@ que ninguna otra cosa.
 
 ---
 
-## 7 · Qué mirar cuando algo falla
+## 7 · Acceso remoto a PostgreSQL para testers de datos
+
+El servicio `postgres` del compose publica el puerto **5432 del host** hacia
+internet (`POSTGRES_PUBLIC_PORT`, por defecto `5432`). Es la **única** base del
+stack que se expone: Mongo, Redis, OpenSearch y MinIO siguen solo en la red
+interna `alovida`.
+
+### El tráfico va sin cifrar
+
+`DB_SSL` está vacío y el contenedor no lleva certificado, así que la conexión
+del tester viaja en claro: contraseña incluida en el primer intercambio, y
+después las filas. Sobre una base con historias clínicas eso es material
+sensible atravesando internet sin TLS.
+
+Mientras siga así, lo que reduce el riesgo es que el rol expuesto solo lea, que
+la contraseña sea larga y de un solo uso, y que el puerto se cierre en cuanto
+los testers terminen. Para cerrarlo del todo hay que montar un certificado en
+el contenedor y exigir `hostssl` en `pg_hba.conf`; eso no está hecho.
+
+### Lo que hay que hacer una sola vez en el servidor
+
+1. **Abrir el puerto en el firewall** del servidor. En Ubuntu con `ufw`:
+
+   ```bash
+   sudo ufw allow 5432/tcp
+   ```
+
+   Sin esto el contenedor publica el puerto pero nadie llega.
+
+2. **Crear el rol de solo lectura.** El rol `alovida` (`POSTGRES_USER`) es el
+   dueño del esquema y **no se reparte**: quien tenga esa contraseña puede
+   borrar la base. Los testers reciben `alovida_reader`, que solo hace SELECT.
+
+   El script está en el repositorio y es idempotente, así que se puede volver a
+   correr después de cada migración sin miedo:
+
+   ```bash
+   docker cp scripts/postgres/provision-reader-role.sql <contenedor-postgres>:/tmp/
+   docker exec <contenedor-postgres> psql -U alovida -d alovida_health \
+     -v role_reader=alovida_reader -v owner=alovida -v database=alovida_health \
+     -f /tmp/provision-reader-role.sql
+   ```
+
+3. **Ponerle contraseña al lector.** El script no la fija —no contiene
+   contraseñas, igual que `provision-roles.sql`— y un rol con LOGIN sin
+   contraseña no autentica a nadie bajo `scram-sha-256`:
+
+   ```bash
+   openssl rand -base64 18   # guardar el valor: es lo que se reparte
+   docker exec <contenedor-postgres> psql -U alovida -d alovida_health \
+     -c "ALTER ROLE alovida_reader PASSWORD '<PASSWORD_LECTOR>'"
+   ```
+
+### Lo que se entrega a los testers
+
+```
+postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health
+```
+
+Comprobación desde fuera. La segunda es la que importa: leer el catálogo de
+concesiones describe la intención, pero que el lector no puede escribir solo se
+demuestra intentando escribir y recibiendo un `42501`.
+
+```bash
+psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health" \
+  -c 'select count(*) from information_schema.tables'
+
+psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health" \
+  -c 'insert into accounting.account_determination_rules default values'
+#   ERROR: permission denied for table account_determination_rules
+```
+
+### Para volver a cerrarlo
+
+Cambiar `POSTGRES_PUBLIC_PORT` no basta: hay que dejar el puerto atado al
+loopback del servidor. En `docker-compose.coolify.yml`, en el servicio
+`postgres`, poner `"127.0.0.1:5432:5432"`, redesplegar y cerrar el puerto en el
+firewall (`sudo ufw delete allow 5432/tcp`). Desde ese momento se entra por
+túnel SSH: `ssh -L 5432:localhost:5432 usuario@servidor`.
+
+---
+
+## 8 · Qué mirar cuando algo falla
 
 | Síntoma | Causa casi segura |
 |---|---|
 | `"WEBHOOK_SIGNING_KEY" is required` | Falta uno de los cinco secretos de producción |
 | `AUDIO_TTS_DATA_KEY (>=32 caracteres) es obligatoria` | Ídem, y sorprende porque el TTS está apagado |
 | `MOCK_PROVIDER_BASE_URL está configurada en producción` | Alguien heredó la variable de un `.env` de desarrollo. El emulador da por verificado a cualquiera; el arranque se niega a propósito |
+| `service "postgres-init" didn't complete successfully: exit 127` | El script no llegó al contenedor: alguien volvió a montar `./docker/db-init` en vez de hornearlo. 127 es «orden no encontrada», y bash lo devuelve también cuando el archivo que se le pasa no existe. Ver § 4 |
+| `postgres-init` sale con **3** | Un `.sql` falló bajo `ON_ERROR_STOP=1`. El error real está en el log del contenedor, unas líneas antes; el nombre del archivo lo dice la línea `>>> patches/…` anterior |
+| `role "mantra" does not exist` | Un patch con el nombre del rol del stack viejo escrito a mano. El dueño es `POSTGRES_USER`; se resuelve con `current_user`, no renombrando roles en el servidor |
 | `column "…" of relation "…" does not exist` en un alta | `api-migrate` no corrió o falló |
 | `relation "pharma_lab.…" does not exist` | Lo mismo |
 | `host not found in upstream "api"` | El frontend se desplegó antes que el backend, que es quien crea la red `alovida`. Desplegar el backend y volver a lanzar éste |
@@ -316,7 +408,7 @@ que ninguna otra cosa.
 
 ---
 
-## 8 · Copias de seguridad
+## 9 · Copias de seguridad
 
 Lo único que no se puede reconstruir son los volúmenes. `postgres_data` es el
 crítico:

@@ -8,10 +8,10 @@
  */
 
 /** Prefijo de producto para `service.name`. Ver convención `<producto>-<componente>`. */
-export const SERVICE_PREFIX = 'redesa';
+export const SERVICE_PREFIX = 'alovida';
 
 /** Namespace lógico bajo el que se agrupan los 21 servicios en la UI de trazas. */
-export const DEFAULT_SERVICE_NAMESPACE = 'redesa';
+export const DEFAULT_SERVICE_NAMESPACE = 'alovida';
 
 /**
  * Nombre del tracer con el que se emiten los spans manuales del backend.
@@ -20,7 +20,7 @@ export const DEFAULT_SERVICE_NAMESPACE = 'redesa';
  * vistazo un span creado por el código de negocio de uno creado por una
  * instrumentación automática (`@opentelemetry/instrumentation-pg`, etc.).
  */
-export const TRACER_NAME = 'redesa-health-api';
+export const TRACER_NAME = 'alovida-health-api';
 
 /**
  * Token de inyección de la configuración de telemetría ya validada.

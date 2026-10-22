@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import {
+  StoragePublicationService,
+  guardStorageMutation,
+} from '../../../common/storage/storage-publication.service';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { IdentityEvidenceRecords } from '../entities';
 
@@ -57,6 +61,9 @@ export interface CreateEvidenceData {
 /** Acceso a datos de `identity_assurance.identity_evidence_records`. */
 @Injectable()
 export class IdentityEvidenceRecordsRepository {
+  constructor(
+    @Optional() private readonly publication?: StoragePublicationService,
+  ) {}
   /**
    * Crea create.
    *
@@ -64,7 +71,13 @@ export class IdentityEvidenceRecordsRepository {
    * @param data - Valor de data requerido por la operación.
    * @returns Resultado de create conforme al contrato `IdentityEvidenceRecords`.
    */
-  create(em: EntityManager, data: CreateEvidenceData): IdentityEvidenceRecords {
+  async create(
+    em: EntityManager,
+    data: CreateEvidenceData,
+  ): Promise<IdentityEvidenceRecords> {
+    await guardStorageMutation(em, this.publication);
+    if (data.evidenceFileId)
+      await this.publication?.guardFile(em, data.evidenceFileId);
     return em.create(
       IdentityEvidenceRecords,
       {
@@ -83,6 +96,40 @@ export class IdentityEvidenceRecordsRepository {
         createdByUserId: data.actorUserId,
       },
       { partial: true },
+    );
+  }
+
+  /**
+   * La evidencia más reciente aportada para el caso.
+   *
+   * El autoservicio abre exactamente un registro de evidencia por caso
+   * (`openVerification`), pero esto trae "la más reciente" y no "la única"
+   * porque nada en el esquema lo garantiza a nivel de constraint.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param caseId - Caso al que pertenece la evidencia.
+   * @returns La evidencia más reciente del caso, o `null` si no aportó ninguna.
+   */
+  findLatestByCase(
+    em: EntityManager,
+    caseId: string,
+  ): Promise<IdentityEvidenceRecords | null> {
+    return em.findOne(
+      IdentityEvidenceRecords,
+      { identityVerificationCaseId: caseId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /** Todas las evidencias de un caso, en el orden en que se recibieron. */
+  findByCase(
+    em: EntityManager,
+    caseId: string,
+  ): Promise<IdentityEvidenceRecords[]> {
+    return em.find(
+      IdentityEvidenceRecords,
+      { identityVerificationCaseId: caseId },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
     );
   }
 }

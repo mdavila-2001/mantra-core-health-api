@@ -56,7 +56,7 @@ MANTENIMIENTO
   admin/archive-jobs ──────────────> sin manifiesto frío no se purga lo caliente
 ```
 
-_Fuente: `src/modules/cross_store_consistency/README.md:46`_
+_Fuente: `src/modules/cross_store_consistency/README.md:85`_
 
 ### Etapas y operaciones
 

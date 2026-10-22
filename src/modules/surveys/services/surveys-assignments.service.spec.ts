@@ -9,7 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { SurveysAssignmentsService } from './surveys-assignments.service';
 import { SURVEYS, TARGET_TYPE_BY_CODE } from '../surveys.concepts';
-import { SCHED } from '../../scheduling/scheduling.concepts';
+import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -345,10 +345,10 @@ describe('SurveysAssignmentsService', () => {
       );
 
       const [, data] = d.invitationsRepo.create.mock.calls[0];
-      const dias =
+      const days =
         (data.expiresAt.getTime() - data.issuedAt.getTime()) /
         (24 * 60 * 60 * 1000);
-      expect(dias).toBeCloseTo(7, 5);
+      expect(days).toBeCloseTo(7, 5);
     });
   });
 });

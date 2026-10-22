@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { LockMode } from '@mikro-orm/core';
 import {
   Liabilities,
   LiabilitySchedules,
   LiabilityPayments,
   LiabilityPostings,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { createdBy, touch } from '../../../common';
 
 /** Acceso a pasivos, cuotas, pagos y sus posteos (UC-16-12). */
 @Injectable()
@@ -32,8 +33,185 @@ export class LiabilityRepository {
   findScheduleById(
     em: EntityManager,
     id: string,
+    options: {
+      /**
+       * Bloquea la fila (`FOR UPDATE`) hasta que cierre la transacción: es lo
+       * que impide que dos pagos simultáneos de la misma cuota la lean ambos
+       * como pendiente (T26 · AC-26-13). Sólo tiene sentido dentro de
+       * `em.transactional`.
+       */
+      forUpdate?: boolean;
+    } = {},
   ): Promise<LiabilitySchedules | null> {
-    return em.findOne(LiabilitySchedules, { id });
+    return em.findOne(
+      LiabilitySchedules,
+      { id },
+      options.forUpdate ? { lockMode: LockMode.PESSIMISTIC_WRITE } : {},
+    );
+  }
+
+  /**
+   * Los pasivos de una práctica (FT-26: auto-servicio del doctor), del más
+   * reciente al más antiguo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Identificador de practice.
+   * @returns Resultado de list by practice conforme al contrato `Promise<Liabilities[]>`.
+   */
+  listByPractice(
+    em: EntityManager,
+    practiceId: string,
+  ): Promise<Liabilities[]> {
+    return em.find(
+      Liabilities,
+      { practiceId },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
+  /**
+   * Enciende o apaga la automatización de un pasivo (FT-26).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del pasivo.
+   * @param automated - El nuevo valor del interruptor.
+   */
+  async setAutomated(
+    em: EntityManager,
+    id: string,
+    automated: boolean,
+    actorUserId?: string,
+  ): Promise<Liabilities | null> {
+    const liability = await em.findOne(Liabilities, { id });
+    if (!liability) return null;
+    liability.automated = automated;
+    // Quién y cuándo (T26 · AC-26-8), igual que en activos.
+    touch(liability, actorUserId);
+    await em.flush();
+    return liability;
+  }
+
+  /**
+   * Crea el pasivo (FT-26: alta desde el auto-servicio del doctor).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create liability conforme al contrato `Liabilities`.
+   */
+  createLiability(
+    em: EntityManager,
+    data: {
+      practiceId: string;
+      code: string;
+      name: string;
+      liabilityTypeConceptId?: string;
+      accountId?: string;
+      principalAmount: string;
+      outstandingAmount: string;
+      interestRate?: string;
+      startDate: Date;
+      dueDate?: Date;
+      creditorName?: string;
+      statusConceptId: string;
+      automated: boolean;
+      actorUserId?: string;
+    },
+  ): Liabilities {
+    return em.create(
+      Liabilities,
+      {
+        practiceId: data.practiceId,
+        code: data.code,
+        name: data.name,
+        liabilityTypeConceptId: data.liabilityTypeConceptId,
+        accountId: data.accountId,
+        principalAmount: data.principalAmount,
+        outstandingAmount: data.outstandingAmount,
+        interestRate: data.interestRate,
+        startDate: data.startDate,
+        dueDate: data.dueDate,
+        creditorName: data.creditorName,
+        statusConceptId: data.statusConceptId,
+        automated: data.automated,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
+  }
+
+  /**
+   * Crea una cuota del cronograma de amortización (FT-26).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param data - Valor de data requerido por la operación.
+   * @returns Resultado de create schedule conforme al contrato `LiabilitySchedules`.
+   */
+  createSchedule(
+    em: EntityManager,
+    data: {
+      liabilityId: string;
+      installmentNumber: number;
+      dueDate: Date;
+      principalDue: string;
+      interestDue: string;
+      currencyConceptId?: string;
+      statusConceptId: string;
+      actorUserId?: string;
+    },
+  ): LiabilitySchedules {
+    return em.create(
+      LiabilitySchedules,
+      {
+        liabilityId: data.liabilityId,
+        installmentNumber: data.installmentNumber,
+        dueDate: data.dueDate,
+        principalDue: data.principalDue,
+        interestDue: data.interestDue,
+        currencyConceptId: data.currencyConceptId,
+        statusConceptId: data.statusConceptId,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
+    );
+  }
+
+  /**
+   * Las cuotas de un pasivo, en orden de vencimiento (FT-26).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param liabilityId - Identificador del pasivo.
+   * @returns Resultado de list schedules conforme al contrato `Promise<LiabilitySchedules[]>`.
+   */
+  listSchedules(
+    em: EntityManager,
+    liabilityId: string,
+  ): Promise<LiabilitySchedules[]> {
+    return em.find(
+      LiabilitySchedules,
+      { liabilityId },
+      { orderBy: { installmentNumber: 'ASC' } },
+    );
+  }
+
+  /**
+   * La próxima cuota pendiente de un pasivo, la de menor número (FT-26:
+   * "registrar avance" paga siempre la que sigue, nunca una fuera de orden).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param liabilityId - Identificador del pasivo.
+   * @param pendingStatusConceptId - El concepto de estado "pendiente".
+   * @returns Resultado de find next due schedule conforme al contrato `Promise<LiabilitySchedules | null>`.
+   */
+  findNextDueSchedule(
+    em: EntityManager,
+    liabilityId: string,
+    pendingStatusConceptId: string,
+  ): Promise<LiabilitySchedules | null> {
+    return em.findOne(
+      LiabilitySchedules,
+      { liabilityId, statusConceptId: pendingStatusConceptId },
+      { orderBy: { installmentNumber: 'ASC' } },
+    );
   }
 
   /**

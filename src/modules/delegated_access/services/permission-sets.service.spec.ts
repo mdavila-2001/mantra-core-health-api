@@ -19,17 +19,19 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
   const setsRepo = {
     findByCode: mockFn().mockResolvedValue(null),
     findById: mockFn(),
     create: mockFn(),
+    findByTenantPage: mockFn().mockResolvedValue([]),
   };
   const itemsRepo = {
     create: mockFn(),
     deleteBySet: mockFn().mockResolvedValue(0),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  em.fork = mockFn(() => em);
   const service = new PermissionSetsService(
     em as any,
     setsRepo,
@@ -100,6 +102,49 @@ describe('PermissionSetsService', () => {
       expect(set.versionNumber).toBe(2);
       expect(d.itemsRepo.deleteBySet).toHaveBeenCalledWith(d.tx, 's1');
       expect(res).toEqual({ id: 's1', versionNumber: 2, itemCount: 1 });
+    });
+  });
+
+  describe('listByTenant (CV-13)', () => {
+    it('lists only the sets of the given tenant, one page under the limit', async () => {
+      const d = build();
+      d.setsRepo.findByTenantPage.mockResolvedValue([
+        {
+          id: 'set-1',
+          code: 'C1',
+          name: 'Set 1',
+          delegateTypeConceptId: 'dt-1',
+          statusConceptId: STATUS.ACTIVE,
+          versionNumber: 1,
+          createdAt: new Date('2026-01-01'),
+        },
+      ]);
+      const res = await d.service.listByTenant('tenant-a', { limit: 10 });
+      expect(d.setsRepo.findByTenantPage).toHaveBeenCalledWith(
+        d.em,
+        'tenant-a',
+        undefined,
+        11,
+      );
+      expect(res.items).toHaveLength(1);
+      expect(res.nextCursor).toBeNull();
+    });
+
+    it('returns a cursor when there is one more row than the limit', async () => {
+      const d = build();
+      const row = (id: string) => ({
+        id,
+        code: id,
+        name: id,
+        delegateTypeConceptId: 'dt-1',
+        statusConceptId: STATUS.ACTIVE,
+        versionNumber: 1,
+        createdAt: new Date('2026-01-01'),
+      });
+      d.setsRepo.findByTenantPage.mockResolvedValue([row('a'), row('b')]);
+      const res = await d.service.listByTenant('tenant-a', { limit: 1 });
+      expect(res.items).toHaveLength(1);
+      expect(res.nextCursor).not.toBeNull();
     });
   });
 });

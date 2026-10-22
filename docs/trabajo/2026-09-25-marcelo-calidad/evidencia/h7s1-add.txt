@@ -1,0 +1,11 @@
+➤ YN0000: · Yarn 4.14.1
+➤ YN0000: ┌ Resolution step
+➤ YN0085: │ + xlsx@https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
+➤ YN0000: └ Completed in 1s 55ms
+➤ YN0000: ┌ Fetch step
+➤ YN0013: │ A package was added to the project (+ 7.7 MiB).
+➤ YN0000: └ Completed in 0s 700ms
+➤ YN0000: ┌ Link step
+➤ YN0000: └ Completed in 0s 558ms
+➤ YN0000: · Done in 2s 500ms
+exit=0

@@ -1,0 +1,220 @@
+{
+  "code": "CARDIO_CTRL_FA",
+  "name": "Control de fibrilación auricular y anticoagulación",
+  "specialty": { "code": "CARDIOLOGIA", "display": "Cardiología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Estructura de la NT 022; riesgo embólico por CHA₂DS₂-VASc y de sangrado por HAS-BLED (puntajes publicados de uso libre)."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de fibrilación auricular",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: fibrilación auricular",
+      "code": "fa_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": true,
+      "options": ["Paroxística", "Persistente", "Permanente"]
+    },
+    {
+      "section": "Evaluación: fibrilación auricular",
+      "code": "fa_estrategia",
+      "name": "Estrategia",
+      "dataType": "string",
+      "required": false,
+      "options": ["Control de frecuencia", "Control de ritmo"]
+    },
+    {
+      "section": "Evaluación: fibrilación auricular",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: fibrilación auricular",
+      "code": "chads_vasc",
+      "name": "CHA₂DS₂-VASc: factores presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Insuficiencia cardíaca",
+        "Hipertensión",
+        "Edad ≥ 75 (2)",
+        "Diabetes",
+        "ACV o embolia previa (2)",
+        "Enfermedad vascular",
+        "Edad 65–74",
+        "Sexo femenino"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: fibrilación auricular",
+      "code": "chads_vasc_puntaje",
+      "name": "CHA₂DS₂-VASc — puntaje",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: fibrilación auricular",
+      "code": "has_bled_puntaje",
+      "name": "HAS-BLED — puntaje",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: fibrilación auricular",
+      "code": "anticoagulante",
+      "name": "Anticoagulación",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Warfarina o acenocumarol",
+        "Anticoagulante directo",
+        "Sin anticoagulación"
+      ]
+    },
+    {
+      "section": "Evaluación: fibrilación auricular",
+      "code": "inr",
+      "name": "Último INR",
+      "dataType": "decimal",
+      "required": true,
+      "showWhen": {
+        "field": "anticoagulante",
+        "equals": "Warfarina o acenocumarol"
+      }
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "sangrado",
+      "name": "Sangrado desde el último control",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "sangrado_donde",
+      "name": "¿Dónde y de qué gravedad?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "sangrado", "equals": true }
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Frecuencia en reposo < 110 lpm",
+        "INR entre 2 y 3 (si usa warfarina)",
+        "Anticoagulado si CHA₂DS₂-VASc lo indica",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Signos de sangrado",
+        "Interacciones con otros fármacos",
+        "Controles de INR"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -12,6 +12,7 @@ import { AuthTokenModule } from '../../src/common/auth/auth-token.module';
 import { JwtAuthGuard } from '../../src/common/auth/jwt-auth.guard';
 import { JwtStrategy } from '../../src/common/auth/jwt.strategy';
 import { RolesGuard } from '../../src/common/auth/roles.guard';
+import { SessionValidator } from '../../src/common/auth/session-validator';
 import { TokenService } from '../../src/common/auth/token.service';
 import { AllExceptionsFilter } from '../../src/common/filters/all-exceptions.filter';
 import { AdminCatalogController } from '../../src/modules/data_catalog/controllers/admin-catalog.controller';
@@ -122,6 +123,11 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
         CatalogGovernanceService,
         CatalogScanService,
         JwtStrategy,
+        // Lo que se prueba es el catálogo, no la sesión: se da por activa.
+        {
+          provide: SessionValidator,
+          useValue: { assertActive: async () => undefined },
+        },
         { provide: APP_GUARD, useClass: JwtAuthGuard },
         { provide: APP_GUARD, useClass: RolesGuard },
         { provide: APP_FILTER, useClass: AllExceptionsFilter },
@@ -305,7 +311,9 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
       expect(operaciones).toHaveLength(15);
       const operationIds = operaciones.map((o) => o.op.operationId);
       expect(
-        operationIds.every((id) => id && id.startsWith('adminCatalog')),
+        operationIds.every(
+          (id) => id && id.startsWith('AdminCatalogController_'),
+        ),
       ).toBe(true);
       expect(new Set(operationIds).size).toBe(15);
       const por = (m: string, r: string) =>

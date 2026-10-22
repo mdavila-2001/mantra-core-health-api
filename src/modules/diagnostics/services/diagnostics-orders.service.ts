@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { DiagnosticOrdersRepository } from '../repositories';
-import { CATEGORIAS_DIAGNOSTICAS } from '../diagnostics.concepts';
+import { DIAGNOSTIC_CATEGORIES } from '../diagnostics.concepts';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
 
 /**
@@ -65,7 +65,7 @@ export class DiagnosticsOrdersService {
         em,
         custodianTenantId,
         patientProfileId,
-        CATEGORIAS_DIAGNOSTICAS,
+        DIAGNOSTIC_CATEGORIES,
         over,
       ),
       this.ordersRepo.findReportsByPatient(
@@ -84,12 +84,15 @@ export class DiagnosticsOrdersService {
         id: row.id,
         patientProfileId: row.patientProfileId,
         encounterId: row.encounterId,
+        formInstanceId: row.formInstanceId,
         codeConceptId: row.codeConceptId,
         categoryConceptId: row.categoryConceptId,
         statusConceptId: row.statusConceptId,
         priorityConceptId: row.priorityConceptId,
         requesterProfileId: row.requesterProfileId,
         createdAt: row.createdAt,
+        previousDiagnosticReportId: row.previousDiagnosticReportId,
+        duplicateOverrideReason: row.duplicateOverrideReason,
       })),
       reports: this.cut(reports, limit, 'reports', truncated).map((row) => ({
         id: row.id,

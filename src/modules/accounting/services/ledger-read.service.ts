@@ -1,11 +1,26 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { getCurrentTenantId, ResourceNotFoundException } from '../../../common';
+import {
+  decodeKeysetCursor,
+  encodeKeysetCursor,
+  getCurrentTenantId,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  type AuthenticatedUser,
+} from '../../../common';
 import { Practices } from '../../practice/entities';
+import { PracticeTenantLookupService } from '../../practice/services';
 import { AccountsRepository, JournalRepository } from '../repositories';
 import { ACCT } from '../accounting.concepts';
+import { toBigIntCents, toText, amountInBase } from './money';
 import type {
+  BalanceSheetResponseDto,
   ChartOfAccountsResponseDto,
+  FinancialStatementLineDto,
+  FinancialStatementQueryDto,
+  GeneralLedgerQueryDto,
+  GeneralLedgerResponseDto,
+  IncomeStatementResponseDto,
   JournalTransactionDetailDto,
   ListJournalQueryDto,
   ListJournalResponseDto,
@@ -52,12 +67,64 @@ export class LedgerReadService {
    * @param em - Contexto de persistencia.
    * @param journalRepo - Asientos y sus líneas.
    * @param accountsRepo - Plan de cuentas.
+   * @param practiceTenantLookup - Vínculo activo profesional↔práctica (Carril 18),
+   *   para las lecturas nuevas de TAREA-20 (AC-20-12). Opcional para no romper
+   *   la construcción en los specs previos que no lo necesitan.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly journalRepo: JournalRepository,
     private readonly accountsRepo: AccountsRepository,
+    private readonly practiceTenantLookup?: PracticeTenantLookupService,
   ) {}
+
+  /**
+   * Carril 18 — igual que `LedgerService.assertPractitionerOwnsPractice`
+   * (duplicado deliberado y mínimo: unificarlo en un guard compartido es
+   * refactor fuera del alcance de esta tarea). Un `PRACTITIONER` sólo puede
+   * leer los libros de una práctica a la que está vinculado con una
+   * asignación de rol ACTIVE; `SECURITY_ADMIN`/`ACCOUNTING_APPROVER` pasan
+   * sin restricción. AC-20-12: la respuesta es **422**, no una lista vacía —
+   * vacío y prohibido son cosas distintas.
+   */
+  private async assertPractitionerOwnsPractice(
+    actor: AuthenticatedUser,
+    practiceId: string,
+  ): Promise<void> {
+    if (
+      actor.roles.includes('SECURITY_ADMIN') ||
+      actor.roles.includes('ACCOUNTING_APPROVER')
+    ) {
+      return;
+    }
+    if (!actor.roles.includes('PRACTITIONER')) {
+      return;
+    }
+    if (!actor.practitionerProfileId) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene un perfil profesional asociado',
+        { actorId: actor.id },
+      );
+    }
+    // Sin lookup inyectado (specs previos), no hay forma de verificar: se
+    // deniega en vez de tratar "no puedo verificar" como "está permitido".
+    if (!this.practiceTenantLookup) {
+      throw new PreconditionFailedException(
+        'No se pudo verificar la vinculación del profesional con la práctica',
+        { practiceId },
+      );
+    }
+    const practiceIds =
+      await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
+        actor.practitionerProfileId,
+      );
+    if (!practiceIds.includes(practiceId)) {
+      throw new PreconditionFailedException(
+        'El profesional no tiene una vinculación activa con esa práctica',
+        { practiceId },
+      );
+    }
+  }
 
   /**
    * Comprueba que la práctica consultada pertenece al tenant activo.
@@ -73,22 +140,22 @@ export class LedgerReadService {
    * contrario para no revelar su existencia complicaría el diagnóstico sin
    * ganar nada — el id ya lo tenía quien preguntó.
    */
-  private async verificarPracticaDelTenant(practiceId: string): Promise<void> {
+  private async verifyPracticeTenant(practiceId: string): Promise<void> {
     const tenantId = getCurrentTenantId();
     // Sin tenant en contexto son los carriles internos (`SYSTEM`, workers), que
     // no pasan por la cabecera. No hay nada que acotar contra qué.
     if (tenantId === undefined) return;
 
-    const practica = await this.em
+    const practice = await this.em
       .fork()
       .findOne(Practices, { id: practiceId }, { fields: ['id', 'tenantId'] });
 
-    if (practica === null) {
+    if (practice === null) {
       throw new ResourceNotFoundException('Práctica no encontrada', {
         practiceId,
       });
     }
-    if (practica.tenantId !== tenantId) {
+    if (practice.tenantId !== tenantId) {
       throw new ForbiddenException(
         'La práctica consultada pertenece a otra organización',
       );
@@ -106,26 +173,26 @@ export class LedgerReadService {
     practiceId: string,
     limit = LEDGER_DEFAULT_LIMIT,
   ): Promise<ChartOfAccountsResponseDto> {
-    await this.verificarPracticaDelTenant(practiceId);
+    await this.verifyPracticeTenant(practiceId);
 
     const em = this.em.fork();
-    const cuentas = await this.accountsRepo.findByPractice(
+    const accounts = await this.accountsRepo.findByPractice(
       em,
       practiceId,
       limit,
     );
 
     return {
-      items: cuentas.map((cuenta) => ({
-        id: cuenta.id,
-        code: cuenta.code,
-        name: cuenta.name,
-        accountTypeConceptId: cuenta.accountTypeConceptId,
-        normalBalanceConceptId: cuenta.normalBalanceConceptId,
-        parentAccountId: cuenta.parentAccountId ?? null,
-        currencyConceptId: cuenta.currencyConceptId ?? null,
+      items: accounts.map((account) => ({
+        id: account.id,
+        code: account.code,
+        name: account.name,
+        accountTypeConceptId: account.accountTypeConceptId,
+        normalBalanceConceptId: account.normalBalanceConceptId,
+        parentAccountId: account.parentAccountId ?? null,
+        currencyConceptId: account.currencyConceptId ?? null,
       })),
-      count: cuentas.length,
+      count: accounts.length,
       limit,
     };
   }
@@ -139,12 +206,12 @@ export class LedgerReadService {
   async listJournal(
     query: ListJournalQueryDto,
   ): Promise<ListJournalResponseDto> {
-    await this.verificarPracticaDelTenant(query.practiceId);
+    await this.verifyPracticeTenant(query.practiceId);
 
     const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
     const em = this.em.fork();
 
-    const asientos = await this.journalRepo.findTransactions(
+    const entries = await this.journalRepo.findTransactions(
       em,
       {
         practiceId: query.practiceId,
@@ -161,7 +228,7 @@ export class LedgerReadService {
     );
 
     return {
-      items: asientos.map((a) => ({
+      items: entries.map((a) => ({
         id: a.id,
         transactionNumber: a.transactionNumber ?? null,
         transactionDate: a.transactionDate,
@@ -172,7 +239,7 @@ export class LedgerReadService {
         totalAmount: a.totalAmount ?? null,
         postedAt: a.postedAt ?? null,
       })),
-      count: asientos.length,
+      count: entries.length,
       limit,
     };
   }
@@ -188,40 +255,37 @@ export class LedgerReadService {
     transactionId: string,
   ): Promise<JournalTransactionDetailDto> {
     const em = this.em.fork();
-    const asiento = await this.journalRepo.findTransactionById(
-      em,
-      transactionId,
-    );
-    if (!asiento) {
+    const entry = await this.journalRepo.findTransactionById(em, transactionId);
+    if (!entry) {
       throw new ResourceNotFoundException('Asiento no encontrado', {
         transactionId,
       });
     }
     // Acá la práctica se conoce recién al cargar el asiento, así que la
     // comprobación va después de la carga y antes de devolver nada.
-    await this.verificarPracticaDelTenant(asiento.practiceId);
+    await this.verifyPracticeTenant(entry.practiceId);
 
-    const lineas = await this.journalRepo.findEntriesByTransaction(
+    const lines = await this.journalRepo.findEntriesByTransaction(
       em,
       transactionId,
     );
 
     return {
-      id: asiento.id,
-      practiceId: asiento.practiceId,
-      transactionNumber: asiento.transactionNumber ?? null,
-      transactionDate: asiento.transactionDate,
-      fiscalPeriodId: asiento.fiscalPeriodId ?? null,
-      statusConceptId: asiento.statusConceptId,
-      currencyConceptId: asiento.currencyConceptId ?? null,
-      totalAmount: asiento.totalAmount ?? null,
-      postedAt: asiento.postedAt ?? null,
-      lines: lineas.map((l) => ({
+      id: entry.id,
+      practiceId: entry.practiceId,
+      transactionNumber: entry.transactionNumber ?? null,
+      transactionDate: entry.transactionDate,
+      fiscalPeriodId: entry.fiscalPeriodId ?? null,
+      statusConceptId: entry.statusConceptId,
+      currencyConceptId: entry.currencyConceptId ?? null,
+      totalAmount: entry.totalAmount ?? null,
+      postedAt: entry.postedAt ?? null,
+      lines: lines.map((l) => ({
         id: l.id,
         lineNo: l.lineNo ?? null,
         accountId: l.accountId,
         directionConceptId: l.directionConceptId,
-        amountBase: importeEnBase(l),
+        amountBase: amountInBase(l),
         costCenterId: l.costCenterId ?? null,
         currencyConceptId: l.currencyConceptId ?? null,
       })),
@@ -246,12 +310,12 @@ export class LedgerReadService {
   async trialBalance(
     query: TrialBalanceQueryDto,
   ): Promise<TrialBalanceResponseDto> {
-    await this.verificarPracticaDelTenant(query.practiceId);
+    await this.verifyPracticeTenant(query.practiceId);
 
     const em = this.em.fork();
 
     // Sólo lo POSTEADO: un borrador no es un hecho contable.
-    const asientos = await this.journalRepo.findTransactions(
+    const entries = await this.journalRepo.findTransactions(
       em,
       {
         practiceId: query.practiceId,
@@ -265,48 +329,48 @@ export class LedgerReadService {
       TRIAL_BALANCE_MAX_TRANSACTIONS,
     );
 
-    const lineas = await this.journalRepo.findEntriesByTransactions(
+    const lines = await this.journalRepo.findEntriesByTransactions(
       em,
-      asientos.map((a) => a.id),
+      entries.map((a) => a.id),
     );
 
-    const cuentas = await this.accountsRepo.findByPractice(
+    const accounts = await this.accountsRepo.findByPractice(
       em,
       query.practiceId,
       TRIAL_BALANCE_MAX_ACCOUNTS,
     );
-    const porId = new Map(cuentas.map((c) => [c.id, c]));
+    const byId = new Map(accounts.map((c) => [c.id, c]));
 
     /** Sumas por cuenta, en céntimos enteros: el dinero no se suma en flotante. */
-    const sumas = new Map<string, { debe: bigint; haber: bigint }>();
-    for (const linea of lineas) {
-      const actual = sumas.get(linea.accountId) ?? { debe: 0n, haber: 0n };
-      const importe = aCentimos(importeEnBase(linea));
-      if (linea.directionConceptId === ACCT.DIRECTION_DEBIT) {
-        actual.debe += importe;
+    const sums = new Map<string, { debe: bigint; haber: bigint }>();
+    for (const line of lines) {
+      const actual = sums.get(line.accountId) ?? { debe: 0n, haber: 0n };
+      const amount = toBigIntCents(amountInBase(line));
+      if (line.directionConceptId === ACCT.DIRECTION_DEBIT) {
+        actual.debe += amount;
       } else {
-        actual.haber += importe;
+        actual.haber += amount;
       }
-      sumas.set(linea.accountId, actual);
+      sums.set(line.accountId, actual);
     }
 
-    let totalDebe = 0n;
-    let totalHaber = 0n;
-    const items = [...sumas.entries()]
-      .map(([accountId, { debe, haber }]) => {
-        totalDebe += debe;
-        totalHaber += haber;
-        const cuenta = porId.get(accountId);
-        const deudora = cuenta?.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
-        const saldo = deudora ? debe - haber : haber - debe;
+    let totalMust = 0n;
+    let totalHave = 0n;
+    const items = [...sums.entries()]
+      .map(([accountId, { debe: must, haber }]) => {
+        totalMust += must;
+        totalHave += haber;
+        const account = byId.get(accountId);
+        const debtor = account?.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
+        const balance = debtor ? must - haber : haber - must;
         return {
           accountId,
-          code: cuenta?.code ?? null,
-          name: cuenta?.name ?? null,
-          normalBalanceConceptId: cuenta?.normalBalanceConceptId ?? null,
-          debit: aTexto(debe),
-          credit: aTexto(haber),
-          balance: aTexto(saldo),
+          code: account?.code ?? null,
+          name: account?.name ?? null,
+          normalBalanceConceptId: account?.normalBalanceConceptId ?? null,
+          debit: toText(must),
+          credit: toText(haber),
+          balance: toText(balance),
         };
       })
       // Por código, que es como se lee un balance; las cuentas sin código —que
@@ -316,14 +380,457 @@ export class LedgerReadService {
     return {
       items,
       count: items.length,
-      totalDebit: aTexto(totalDebe),
-      totalCredit: aTexto(totalHaber),
+      totalDebit: toText(totalMust),
+      totalCredit: toText(totalHave),
       /** La comprobación que se hace primero: si no cuadra, no se sigue. */
-      balanced: totalDebe === totalHaber,
-      transactionsIncluded: asientos.length,
-      truncated: asientos.length >= TRIAL_BALANCE_MAX_TRANSACTIONS,
+      balanced: totalMust === totalHave,
+      transactionsIncluded: entries.length,
+      truncated: entries.length >= TRIAL_BALANCE_MAX_TRANSACTIONS,
     };
   }
+
+  /**
+   * Libro mayor de **una** cuenta (TAREA-20 S3): sus movimientos POSTEADOS,
+   * del más antiguo al más reciente, con saldo corrido.
+   *
+   * A diferencia del libro diario, que lista asientos completos, acá cada
+   * fila es una línea contra `accountId` — la contrapartida no aparece,
+   * exactamente como un mayor en papel: una hoja por cuenta.
+   *
+   * Pagina por **cursor** (`transactionDate`, `id`), nunca por `limit` con
+   * desplazamiento (AC-20-14): una cuenta con movimiento constante no puede
+   * ofrecer «página 5» de forma estable.
+   *
+   * @param query - Práctica y cuenta obligatorias; ventana y cursor opcionales.
+   * @returns La página pedida, con el saldo de apertura de la ventana.
+   */
+  async generalLedger(
+    query: GeneralLedgerQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<GeneralLedgerResponseDto> {
+    await this.verifyPracticeTenant(query.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, query.practiceId);
+
+    const em = this.em.fork();
+    const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
+
+    const account = await this.accountsRepo.findById(em, query.accountId);
+    if (!account || account.practiceId !== query.practiceId) {
+      throw new ResourceNotFoundException(
+        'Cuenta no encontrada en la práctica',
+        {
+          accountId: query.accountId,
+        },
+      );
+    }
+    const debtor = account.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
+
+    // Sólo lo POSTEADO: un borrador no es un hecho contable (mismo criterio
+    // que trialBalance).
+    const entries = await this.journalRepo.findTransactions(
+      em,
+      {
+        practiceId: query.practiceId,
+        statusConceptId: ACCT.TXN_POSTED,
+        ...(query.from === undefined ? {} : { from: new Date(query.from) }),
+        ...(query.to === undefined ? {} : { to: new Date(query.to) }),
+      },
+      TRIAL_BALANCE_MAX_TRANSACTIONS,
+    );
+    const dateByTransaction = new Map(
+      entries.map((a) => [a.id, a.transactionDate] as const),
+    );
+    const numberByTransaction = new Map(
+      entries.map((a) => [a.id, a.transactionNumber ?? null] as const),
+    );
+
+    const lines = (
+      await this.journalRepo.findEntriesByTransactions(
+        em,
+        entries.map((a) => a.id),
+      )
+    )
+      .filter((l) => l.accountId === query.accountId)
+      .map((l) => ({
+        id: l.id,
+        transactionId: l.transactionId,
+        transactionDate: dateByTransaction.get(l.transactionId) as Date,
+        directionConceptId: l.directionConceptId,
+        amount: amountInBase(l),
+        memo: l.memo ?? null,
+      }))
+      // Cronológico, ascendente: es como se lee un mayor. `id` desempata
+      // dentro del mismo instante para que el orden sea estable entre páginas.
+      .sort((a, b) => {
+        const byDate =
+          a.transactionDate.getTime() - b.transactionDate.getTime();
+        return byDate !== 0 ? byDate : a.id.localeCompare(b.id);
+      });
+
+    // Saldo corrido calculado sobre TODA la serie, desde el origen, antes de
+    // recortar la página: así el saldo de apertura de la página 2 es exacto
+    // aunque la página 1 nunca se haya pedido.
+    let accumulated = 0n;
+    const withBalance = lines.map((line) => {
+      const amount = toBigIntCents(line.amount);
+      accumulated +=
+        line.directionConceptId === ACCT.DIRECTION_DEBIT
+          ? debtor
+            ? amount
+            : -amount
+          : debtor
+            ? -amount
+            : amount;
+      return { ...line, runningBalance: accumulated };
+    });
+
+    const after = query.cursor ? decodeKeysetCursor(query.cursor) : undefined;
+    const afterDate =
+      typeof after?.transactionDate === 'string'
+        ? new Date(after.transactionDate).getTime()
+        : undefined;
+    const afterId = typeof after?.id === 'string' ? after.id : undefined;
+
+    const start =
+      afterDate === undefined
+        ? 0
+        : withBalance.findIndex((l) => {
+            const cmp = l.transactionDate.getTime() - afterDate;
+            return (
+              cmp > 0 ||
+              (cmp === 0 &&
+                afterId !== undefined &&
+                l.id.localeCompare(afterId) > 0)
+            );
+          });
+    const from = start === -1 ? withBalance.length : start;
+
+    const openingBalance =
+      from > 0 ? toText(withBalance[from - 1].runningBalance) : '0.00';
+    const page = withBalance.slice(from, from + limit);
+    const last = page.at(-1);
+    const hadMore = from + limit < withBalance.length;
+
+    return {
+      accountId: account.id,
+      code: account.code,
+      name: account.name,
+      normalBalanceConceptId: account.normalBalanceConceptId,
+      currencyConceptId: account.currencyConceptId ?? null,
+      openingBalance: openingBalance,
+      items: page.map((l) => ({
+        id: l.id,
+        transactionId: l.transactionId,
+        transactionNumber: numberByTransaction.get(l.transactionId) ?? null,
+        transactionDate: l.transactionDate,
+        directionConceptId: l.directionConceptId,
+        debit:
+          l.directionConceptId === ACCT.DIRECTION_DEBIT ? l.amount : '0.00',
+        credit:
+          l.directionConceptId === ACCT.DIRECTION_CREDIT ? l.amount : '0.00',
+        runningBalance: toText(l.runningBalance),
+        memo: l.memo,
+      })),
+      count: page.length,
+      limit,
+      nextCursor:
+        hadMore && last
+          ? encodeKeysetCursor({
+              transactionDate: last.transactionDate.toISOString(),
+              id: last.id,
+            })
+          : null,
+    };
+  }
+
+  /**
+   * Agrega las líneas POSTEADAS de una práctica por cuenta, con el
+   * `accountTypeConceptId` incluido — lo que `trialBalance` no expone porque
+   * no lo necesita, y que el estado de resultados y el balance general sí.
+   *
+   * Reutiliza la misma fuente que `trialBalance` (asientos POSTEADOS +
+   * `amount`/`amount_base`) a propósito: si este agregado y el libro mayor
+   * dieran números distintos para la misma cuenta habría dos fuentes de
+   * verdad, que es exactamente lo que AC-20-7 prohíbe.
+   */
+  private async aggregatePostedByAccount(
+    practiceId: string,
+    filters: { fiscalPeriodId?: string; from?: Date; to?: Date },
+  ): Promise<{
+    items: Array<
+      FinancialStatementLineDto & { normalBalanceConceptId: string | null }
+    >;
+    truncated: boolean;
+  }> {
+    const em = this.em.fork();
+
+    const entries = await this.journalRepo.findTransactions(
+      em,
+      {
+        practiceId,
+        statusConceptId: ACCT.TXN_POSTED,
+        ...filters,
+      },
+      TRIAL_BALANCE_MAX_TRANSACTIONS,
+    );
+    const lines = await this.journalRepo.findEntriesByTransactions(
+      em,
+      entries.map((a) => a.id),
+    );
+    const accounts = await this.accountsRepo.findByPractice(
+      em,
+      practiceId,
+      TRIAL_BALANCE_MAX_ACCOUNTS,
+    );
+    const byId = new Map(accounts.map((c) => [c.id, c]));
+
+    const sums = new Map<string, bigint>();
+    for (const line of lines) {
+      const account = byId.get(line.accountId);
+      const debtor = account?.normalBalanceConceptId === ACCT.DIRECTION_DEBIT;
+      const amount = toBigIntCents(amountInBase(line));
+      const sign =
+        line.directionConceptId === ACCT.DIRECTION_DEBIT
+          ? debtor
+            ? amount
+            : -amount
+          : debtor
+            ? -amount
+            : amount;
+      sums.set(line.accountId, (sums.get(line.accountId) ?? 0n) + sign);
+    }
+
+    const items = [...sums.entries()]
+      .map(([accountId, balance]) => {
+        const account = byId.get(accountId);
+        return {
+          accountId,
+          code: account?.code ?? null,
+          name: account?.name ?? null,
+          accountTypeConceptId: account?.accountTypeConceptId ?? '',
+          normalBalanceConceptId: account?.normalBalanceConceptId ?? null,
+          amount: toText(balance),
+        };
+      })
+      .sort((a, b) => (a.code ?? '￿').localeCompare(b.code ?? '￿'));
+
+    return {
+      items,
+      truncated: entries.length >= TRIAL_BALANCE_MAX_TRANSACTIONS,
+    };
+  }
+
+  /**
+   * Estado de resultados (TAREA-20 S3): ingresos y gastos POSTEADOS de la
+   * ventana pedida. Ver AC-20-7: agrega desde la misma fuente que el libro
+   * mayor, así que no puede divergir de él para la misma cuenta y período.
+   *
+   * @param query - Práctica obligatoria; ventana, período y cursor opcionales.
+   */
+  async incomeStatement(
+    query: FinancialStatementQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<IncomeStatementResponseDto> {
+    await this.verifyPracticeTenant(query.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, query.practiceId);
+    const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
+
+    const { items, truncated } = await this.aggregatePostedByAccount(
+      query.practiceId,
+      {
+        ...(query.fiscalPeriodId === undefined
+          ? {}
+          : { fiscalPeriodId: query.fiscalPeriodId }),
+        ...(query.from === undefined ? {} : { from: new Date(query.from) }),
+        ...(query.to === undefined ? {} : { to: new Date(query.to) }),
+      },
+    );
+
+    const revenueItems = items.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_REVENUE,
+    );
+    const expenseItems = items.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EXPENSE,
+    );
+
+    const { page, nextCursor } = paginateByCode(
+      [...revenueItems, ...expenseItems],
+      query.cursor,
+      limit,
+    );
+    const revenuePage = page.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_REVENUE,
+    );
+    const expensePage = page.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EXPENSE,
+    );
+
+    const totalRevenue = revenueItems.reduce(
+      (acc, i) => acc + toBigIntCents(i.amount),
+      0n,
+    );
+    const totalExpense = expenseItems.reduce(
+      (acc, i) => acc + toBigIntCents(i.amount),
+      0n,
+    );
+
+    return {
+      revenueItems: revenuePage.map(withoutNormalBalance),
+      expenseItems: expensePage.map(withoutNormalBalance),
+      totalRevenue: toText(totalRevenue),
+      totalExpense: toText(totalExpense),
+      netIncome: toText(totalRevenue - totalExpense),
+      count: page.length,
+      limit,
+      nextCursor,
+      truncated,
+    };
+  }
+
+  /**
+   * Balance general (TAREA-20 S3): activo, pasivo y patrimonio a una fecha
+   * de corte (`query.to`, por omisión hoy). Distinto del balance de sumas y
+   * saldos, que no clasifica por tipo de cuenta.
+   *
+   * El patrimonio incorpora el resultado del período (`netIncomeOfPeriod`)
+   * porque este módulo no tiene asiento de cierre: sin sumarlo, activo no
+   * cuadraría contra pasivo + patrimonio pese a que la partida doble esté
+   * intacta (AC-20-6).
+   *
+   * @param query - Práctica obligatoria; fecha de corte y cursor opcionales.
+   */
+  async balanceSheet(
+    query: FinancialStatementQueryDto,
+    actor: AuthenticatedUser,
+  ): Promise<BalanceSheetResponseDto> {
+    await this.verifyPracticeTenant(query.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, query.practiceId);
+    const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
+    const asOf = query.to === undefined ? undefined : new Date(query.to);
+
+    const { items, truncated } = await this.aggregatePostedByAccount(
+      query.practiceId,
+      asOf === undefined ? {} : { to: asOf },
+    );
+
+    const assetItems = items.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_ASSET,
+    );
+    const liabilityItems = items.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_LIABILITY,
+    );
+    const equityItems = items.filter(
+      (i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EQUITY,
+    );
+    const revenueTotal = items
+      .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_REVENUE)
+      .reduce((acc, i) => acc + toBigIntCents(i.amount), 0n);
+    const expenseTotal = items
+      .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EXPENSE)
+      .reduce((acc, i) => acc + toBigIntCents(i.amount), 0n);
+    const netIncome = revenueTotal - expenseTotal;
+
+    const { page, nextCursor } = paginateByCode(
+      [...assetItems, ...liabilityItems, ...equityItems],
+      query.cursor,
+      limit,
+    );
+
+    const totalAssets = assetItems.reduce(
+      (acc, i) => acc + toBigIntCents(i.amount),
+      0n,
+    );
+    const totalLiabilities = liabilityItems.reduce(
+      (acc, i) => acc + toBigIntCents(i.amount),
+      0n,
+    );
+    const totalEquityDeclared = equityItems.reduce(
+      (acc, i) => acc + toBigIntCents(i.amount),
+      0n,
+    );
+    const totalEquity = totalEquityDeclared + netIncome;
+    const totalLiabilitiesAndEquity = totalLiabilities + totalEquity;
+
+    return {
+      assetItems: page
+        .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_ASSET)
+        .map(withoutNormalBalance),
+      liabilityItems: page
+        .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_LIABILITY)
+        .map(withoutNormalBalance),
+      equityItems: page
+        .filter((i) => i.accountTypeConceptId === ACCT.ACCOUNT_TYPE_EQUITY)
+        .map(withoutNormalBalance),
+      netIncomeOfPeriod: toText(netIncome),
+      totalAssets: toText(totalAssets),
+      totalLiabilities: toText(totalLiabilities),
+      totalEquity: toText(totalEquity),
+      totalLiabilitiesAndEquity: toText(totalLiabilitiesAndEquity),
+      balanced: totalAssets === totalLiabilitiesAndEquity,
+      count: page.length,
+      limit,
+      nextCursor,
+      truncated,
+    };
+  }
+}
+
+/** Quita el campo interno `normalBalanceConceptId` antes de responder. */
+function withoutNormalBalance(
+  item: FinancialStatementLineDto & { normalBalanceConceptId: string | null },
+): FinancialStatementLineDto {
+  const { normalBalanceConceptId: _normalBalanceConceptId, ...rest } = item;
+  return rest;
+}
+
+/**
+ * Pagina una lista ya ordenada por `code` con un cursor keyset simple.
+ *
+ * Los informes financieros agregan por cuenta (decenas, no miles): no hace
+ * falta re-consultar la base por página, alcanza con cortar el arreglo ya
+ * calculado — igual que `trialBalance` ya calcula todo de una vez.
+ */
+function paginateByCode<T extends { accountId: string; code: string | null }>(
+  items: T[],
+  cursor: string | undefined,
+  limit: number,
+): { page: T[]; nextCursor: string | null } {
+  const sorted = [...items].sort(
+    (a, b) =>
+      (a.code ?? '￿').localeCompare(b.code ?? '￿') ||
+      a.accountId.localeCompare(b.accountId),
+  );
+
+  let from = 0;
+  if (cursor) {
+    const after = decodeKeysetCursor(cursor);
+    const afterCode = typeof after.code === 'string' ? after.code : null;
+    const afterId =
+      typeof after.accountId === 'string' ? after.accountId : undefined;
+    from = sorted.findIndex(
+      (i) =>
+        (i.code ?? '￿').localeCompare(afterCode ?? '￿') > 0 ||
+        ((i.code ?? '￿') === (afterCode ?? '￿') &&
+          afterId !== undefined &&
+          i.accountId.localeCompare(afterId) > 0),
+    );
+    if (from === -1) from = sorted.length;
+  }
+
+  const page = sorted.slice(from, from + limit);
+  const last = page.at(-1);
+  const hasMore = from + limit < sorted.length;
+
+  return {
+    page,
+    nextCursor:
+      hasMore && last
+        ? encodeKeysetCursor({
+            code: last.code ?? '',
+            accountId: last.accountId,
+          })
+        : null,
+  };
 }
 
 /**
@@ -335,52 +842,3 @@ export class LedgerReadService {
  */
 const TRIAL_BALANCE_MAX_TRANSACTIONS = 10_000;
 const TRIAL_BALANCE_MAX_ACCOUNTS = 5_000;
-
-/**
- * El importe de una línea **en moneda base**.
- *
- * `amount_base` sólo se llena cuando hubo conversión: la columna existe para
- * guardar el resultado de aplicar `fx_rate` a `amount`. Cuando el asiento ya
- * está en la moneda base —que es el caso corriente— queda **nula**, y el
- * importe vive en `amount`.
- *
- * Leer sólo `amount_base` daba un balance **entero en cero que además decía que
- * cuadraba**: 0 = 0. Eso es peor que fallar, porque un informe contable vacío
- * con el sello de «cuadra» se firma sin mirarlo. Lo destapó ejecutarlo contra
- * datos reales; ninguna prueba con dobles lo habría visto, porque los dobles
- * llenaban la columna que el código leía.
- */
-function importeEnBase(linea: {
-  amountBase?: string | null;
-  amount?: string | null;
-}): string {
-  return linea.amountBase ?? linea.amount ?? '0.00';
-}
-
-/**
- * El importe como entero de céntimos.
- *
- * El dinero **no se suma en coma flotante**: `0.1 + 0.2` no da `0.3`, y un
- * balance que no cuadra por un céntimo es indistinguible de uno que no cuadra
- * por un error real. Los importes llegan como texto decimal desde `numeric` de
- * PostgreSQL justamente para no perder precisión en el camino.
- */
-function aCentimos(valor: string | number | null | undefined): bigint {
-  if (valor === null || valor === undefined) {
-    return 0n;
-  }
-  const texto = String(valor).trim();
-  const negativo = texto.startsWith('-');
-  const [entera = '0', decimal = ''] = texto.replace('-', '').split('.');
-  const centimos = BigInt(entera) * 100n + BigInt((decimal + '00').slice(0, 2));
-  return negativo ? -centimos : centimos;
-}
-
-/** De céntimos a texto decimal, que es como viaja el dinero en el contrato. */
-function aTexto(centimos: bigint): string {
-  const negativo = centimos < 0n;
-  const abs = negativo ? -centimos : centimos;
-  const entera = abs / 100n;
-  const resto = abs % 100n;
-  return `${negativo ? '-' : ''}${entera}.${resto.toString().padStart(2, '0')}`;
-}

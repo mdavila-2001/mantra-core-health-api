@@ -3,13 +3,13 @@
   Fuente real: src/modules/diagnostic_units/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `diagnostic_units`
 
-**Fuente:** [`src/modules/diagnostic_units/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/diagnostic_units/README.md)
-· 5 controllers · 7 services · 12 repositories · 10 entidades · 13 DTO
+**Fuente:** [`src/modules/diagnostic_units/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/diagnostic_units/README.md)
+· 5 controllers · 8 services · 12 repositories · 10 entidades · 13 DTO
 
 ---
 
@@ -19,6 +19,47 @@ Gestión del ciclo de vida de **unidades diagnósticas** (laboratorios, imagenol
 sus sitios operativos, especialidades, ofertas de estudio (paneles), cronogramas y
 versiones de precio (append-only), equipamiento/calibración, acreditaciones y
 asignación de especialistas; más la reproyección del perfil público.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/diagnostic_units -name '*.controller.ts' | wc -l
+  find src/modules/diagnostic_units -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/diagnostic_units -name '*.entity.ts' | wc -l
+  find src/modules/diagnostic_units -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **5 controllers, 21 rutas HTTP, 10 entidades y 8 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`CommunityModule`, `CommonModule`, `PracticeModule`).
+
+Entidades (`tableName`, 10 de 10 archivos `*.entity.ts`): `diagnostic_equipment`, `diagnostic_price_schedules`, `diagnostic_study_components`, `diagnostic_study_offerings`, `diagnostic_study_prices`, `diagnostic_unit_accreditations`, `diagnostic_unit_practitioner_assignments`, `diagnostic_unit_sites`, `diagnostic_unit_specialties`, `diagnostic_units`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `PATCH /diagnostic-equipment/:id` | SECURITY_ADMIN | `diagnostic-equipment` |
+| `POST /price-schedules/:scheduleId/study-prices` | SECURITY_ADMIN | `diagnostic-pricing` |
+| `POST /study-prices/:priceId/close` | SECURITY_ADMIN | `diagnostic-pricing` |
+| `DELETE /diagnostic-study-offerings/:id` | SECURITY_ADMIN | `diagnostic-pricing` |
+| `POST /diagnostic-unit-accreditations/:id/renew` | SECURITY_ADMIN | `diagnostic-unit-accreditations` |
+| `PATCH /diagnostic-unit-sites/:siteId` | SECURITY_ADMIN | `diagnostic-unit-sites` |
+| `POST /diagnostic-unit-sites/:siteId/equipment` | SECURITY_ADMIN | `diagnostic-unit-sites` |
+| `GET /diagnostic-units` | sesión | `diagnostic-units` |
+| `GET /diagnostic-units/administration` | SECURITY_ADMIN | `diagnostic-units` |
+| `GET /diagnostic-units/search` | sesión | `diagnostic-units` |
+| `GET /diagnostic-units/:id` | sesión | `diagnostic-units` |
+| `GET /diagnostic-units/:id/administration` | SECURITY_ADMIN | `diagnostic-units` |
+| `POST /diagnostic-units` | SECURITY_ADMIN | `diagnostic-units` |
+| `POST /diagnostic-units/:id/sites` | SECURITY_ADMIN | `diagnostic-units` |
+| `POST /diagnostic-units/:id/verify-and-publish` | SECURITY_ADMIN | `diagnostic-units` |
+| `PUT /diagnostic-units/:id/specialties` | SECURITY_ADMIN | `diagnostic-units` |
+| `POST /diagnostic-units/:id/study-offerings` | SECURITY_ADMIN | `diagnostic-units` |
+| `POST /diagnostic-units/:id/price-schedules` | SECURITY_ADMIN | `diagnostic-units` |
+| `POST /diagnostic-units/:id/practitioner-assignments` | SECURITY_ADMIN | `diagnostic-units` |
+| `POST /diagnostic-units/:id/accreditations` | SECURITY_ADMIN | `diagnostic-units` |
+| `POST /diagnostic-units/:id/reproject` | SECURITY_ADMIN | `diagnostic-units` |
 
 ## Endpoints (UC → ruta)
 
@@ -79,7 +120,9 @@ asignación de especialistas; más la reproyección del perfil público.
 Guard JWT global. Las lecturas del directorio aceptan cualquier sesión con tenant
 activo y nunca reciben `tenantId` del cliente; los comandos requieren rol
 `SECURITY_ADMIN` (`@Roles('SECURITY_ADMIN')`) y `@CurrentUser()` como actor.
-Los identificadores de ruta se validan con `ParseUUIDPipe`.
+Los identificadores de ruta se validan con `ParseUUIDPipe`. Los comandos todavía
+no comparan el tenant activo contra los recursos cargados por UUID; ver la
+[revisión ALOVIDA](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/diagnostic_units.md).
 
 ## Conceptos
 
@@ -100,4 +143,5 @@ reglas de aseguradora, importes internos ni PHI.
   `EntityManager`) y controladores (mockean servicios).
 - Smoke transversal: `test/smoke/modules/diagnostic_units.smoke.ts`
   (`DIAGNOSTIC_UNITS_SMOKE`) encadena los 12 casos de uso.
-
+- `corepack yarn test src/modules/diagnostic_units --runInBand --silent`: 11
+  suites y 94 pruebas aprobadas durante la revisión.

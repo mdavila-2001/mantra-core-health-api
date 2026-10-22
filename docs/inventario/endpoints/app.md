@@ -46,8 +46,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/app.controller.ts:30` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -108,7 +108,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/app.controller.ts:42` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -169,8 +169,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/persistence/health/data-sources.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -233,8 +233,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/persistence/health/data-sources.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -295,7 +295,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/app.controller.ts:55` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -353,7 +353,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/app.controller.ts:63` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -374,14 +374,16 @@ _No se identificó un DTO de respuesta con campos._
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: MongoDB no confirmó el ping; Error: Redis no respondió PONG; Error: OpenSearch está en estado red |
+| 500 | `INTERNAL` | Error: MongoDB no confirmó el ping; Error: Redis no respondió PONG; Error: OpenSearch está en estado red; Error: RLS_ENFORCE=true pero el rol de runtime "{role.rolsuper ? 'es superusua…}": las políticas no aíslan nada / RLS_ENFORCE=true pero no se pudo resolver el rol de… |
 | 503 | `DEPENDENCY_UNAVAILABLE` | ServiceUnavailableException: {{ code: ErrorCode.DEPENDENCY_UNAVAILABLE, message: 'Una o m…} |
 
 El árbol de decisión completo está en [flujos](../flujos/app.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/hardening/mch-013.int-spec.ts:28` |
 
 ### Flujos
 

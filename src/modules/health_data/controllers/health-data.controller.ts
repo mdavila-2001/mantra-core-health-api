@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   HealthIngestionService,
   CanonicalResourcesService,
@@ -85,6 +90,11 @@ export class HealthDataController {
    * clínico pueda trabajar. Las dos filas —sistema y conexión— se crean en una
    * sola llamada porque el sistema es sólo el padre del que cuelga la conexión.
    */
+  @Audited({
+    action: 'HEALTH_DATA_SOURCE_CONNECTED',
+    entity: 'health_source_connection',
+    entityId: 'result.id',
+  })
   @Post('source-connections')
   @Roles('HEALTH_DATA_ADMIN', 'CLINICAL_INFORMATICIAN', 'DATA_PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -100,6 +110,11 @@ export class HealthDataController {
   }
 
   /** UC-52-01. */
+  @Audited({
+    action: 'INGESTION_BATCH_OPENED',
+    entity: 'health_ingestion_batch',
+    entityId: 'result.id',
+  })
   @Post('ingestion-batches')
   @Roles('INGESTION_WORKER', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -116,6 +131,11 @@ export class HealthDataController {
   }
 
   /** UC-52-02. */
+  @Audited({
+    action: 'INGESTION_RECORD_ADDED',
+    entity: 'health_ingestion_record',
+    entityId: 'result.id',
+  })
   @Post('ingestion-batches/:id/records')
   @Roles('INGESTION_WORKER', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -132,6 +152,11 @@ export class HealthDataController {
   }
 
   /** UC-52-02. */
+  @Audited({
+    action: 'INGESTION_BATCH_CLOSED',
+    entity: 'health_ingestion_batch',
+    entityId: 'param:id',
+  })
   @Post('ingestion-batches/:id/close')
   @Roles('INGESTION_WORKER', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -147,6 +172,11 @@ export class HealthDataController {
   }
 
   /** UC-52-03. */
+  @Audited({
+    action: 'CANONICAL_RESOURCE_PROJECTED',
+    entity: 'canonical_health_resource',
+    entityId: 'result.id',
+  })
   @Post('canonical-resources/project')
   @Roles('INGESTION_WORKER', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -162,6 +192,11 @@ export class HealthDataController {
   }
 
   /** UC-52-04. */
+  @Audited({
+    action: 'CANONICAL_RESOURCE_IDENTIFIER_REGISTERED',
+    entity: 'canonical_health_resource',
+    entityId: 'param:id',
+  })
   @Post('canonical-resources/:id/identifiers')
   @Roles('INGESTION_WORKER', 'CLINICAL_INFORMATICIAN', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -177,6 +212,11 @@ export class HealthDataController {
   }
 
   /** UC-52-05. */
+  @Audited({
+    action: 'CANONICAL_RESOURCE_RELATIONSHIP_CREATED',
+    entity: 'canonical_health_resource',
+    entityId: 'param:id',
+  })
   @Post('canonical-resources/:id/relationships')
   @Roles('DATA_STEWARD', 'CLINICAL_INFORMATICIAN', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -192,6 +232,11 @@ export class HealthDataController {
   }
 
   /** UC-52-06. */
+  @Audited({
+    action: 'CANONICAL_RESOURCE_BINDING_CREATED',
+    entity: 'canonical_health_resource',
+    entityId: 'param:id',
+  })
   @Post('canonical-resources/:id/bindings')
   @Roles('CLINICAL_INFORMATICIAN', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -208,6 +253,11 @@ export class HealthDataController {
   }
 
   /** UC-52-07. */
+  @Audited({
+    action: 'CANONICAL_RESOURCE_VERSION_VALIDATED',
+    entity: 'canonical_health_resource_version',
+    entityId: 'param:id',
+  })
   @Post('versions/:id/validate')
   // Validar una versión contra su perfil FHIR es trabajo de informática
   // clínica, igual que las relaciones y los amarres del recurso —que sí lo
@@ -228,6 +278,11 @@ export class HealthDataController {
   }
 
   /** UC-52-08. */
+  @Audited({
+    action: 'DATA_QUALITY_RUN_RECORDED',
+    entity: 'health_data_quality_run',
+    entityId: 'result.id',
+  })
   @Post('quality-runs')
   @Roles('DATA_STEWARD', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -243,6 +298,11 @@ export class HealthDataController {
   }
 
   /** UC-52-09. */
+  @Audited({
+    action: 'IDENTITY_MATCH_CANDIDATE_RESOLVED',
+    entity: 'patient_match_candidate',
+    entityId: 'param:id',
+  })
   @Post('identity/candidates/:id/decision')
   @Roles('MPI_STEWARD', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -259,6 +319,11 @@ export class HealthDataController {
   }
 
   /** UC-52-10. */
+  @Audited({
+    action: 'PATIENT_TIMELINE_ENTRY_PROJECTED',
+    entity: 'patient_timeline_entry',
+    entityId: 'result.id',
+  })
   @Post('timeline-entries')
   @Roles('SYSTEM', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -273,6 +338,11 @@ export class HealthDataController {
   }
 
   /** UC-52-11. */
+  @Audited({
+    action: 'DEIDENTIFICATION_RUN_RECORDED',
+    entity: 'health_deidentification_run',
+    entityId: 'result.id',
+  })
   @Post('deidentification-runs')
   @Roles('PRIVACY_OFFICER', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -289,6 +359,11 @@ export class HealthDataController {
   }
 
   /** UC-52-14. */
+  @Audited({
+    action: 'CANONICAL_RESOURCE_RETIRED',
+    entity: 'canonical_health_resource',
+    entityId: 'param:id',
+  })
   @Post('canonical-resources/:id/retire')
   @Roles('CLINICAL_INFORMATICIAN', 'HEALTH_DATA_ADMIN')
   @HttpCode(HttpStatus.OK)

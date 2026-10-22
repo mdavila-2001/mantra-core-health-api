@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -89,6 +90,11 @@ export class FormsDefinitionSetsController {
   }
 
   /** UC-09-01. */
+  @Audited({
+    action: 'FORM_DEFINITION_SET_CREATED',
+    entity: 'field_definition_set',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -103,6 +109,11 @@ export class FormsDefinitionSetsController {
   }
 
   /** UC-09-03. */
+  @Audited({
+    action: 'FORM_DEFINITION_VERSION_PUBLISHED',
+    entity: 'field_definition_set_version',
+    entityId: 'param:ver',
+  })
   @Post(':id/versions/:ver/publish')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -117,6 +128,11 @@ export class FormsDefinitionSetsController {
   }
 
   /** UC-09-13. */
+  @Audited({
+    action: 'FORM_DEFINITION_MIGRATION_RUN',
+    entity: 'field_schema_migration',
+    entityId: 'param:migrationId',
+  })
   @Post(':id/migrations/:migrationId/run')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

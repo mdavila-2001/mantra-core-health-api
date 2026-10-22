@@ -24,39 +24,39 @@ import { MODULE_CONCEPT_SEEDS } from './module-concepts';
  */
 
 /** Códigos tal como quedan almacenados, en el orden en que los siembra el seed. */
-function codigosAlmacenados(): { code: string; origen: string }[] {
-  const almacenados = Object.entries(CONCEPT_DEFS).map(([nombre, def]) => ({
+function storedCodes(): { code: string; origen: string }[] {
+  const stored = Object.entries(CONCEPT_DEFS).map(([name, def]) => ({
     code: def.code,
-    origen: `CONCEPT_DEFS.${nombre} (${def.key})`,
+    origen: `CONCEPT_DEFS.${name} (${def.key})`,
   }));
 
   for (const seed of MODULE_CONCEPT_SEEDS) {
-    almacenados.push({
+    stored.push({
       code: seed.key,
       origen: `MODULE_CONCEPT_SEEDS (${seed.key})`,
     });
   }
 
-  return almacenados;
+  return stored;
 }
 
 /**
  * Agrupa por código y devuelve solo los repetidos.
  *
- * @param entradas - Códigos almacenados con su procedencia.
+ * @param entries - Códigos almacenados con su procedencia.
  */
-function duplicados(
-  entradas: { code: string; origen: string }[],
+function duplicates(
+  entries: { code: string; origen: string }[],
 ): Record<string, string[]> {
-  const porCodigo = new Map<string, string[]>();
-  for (const entrada of entradas) {
-    const previos = porCodigo.get(entrada.code) ?? [];
-    previos.push(entrada.origen);
-    porCodigo.set(entrada.code, previos);
+  const byCode = new Map<string, string[]>();
+  for (const entry of entries) {
+    const previous = byCode.get(entry.code) ?? [];
+    previous.push(entry.origen);
+    byCode.set(entry.code, previous);
   }
 
   return Object.fromEntries(
-    [...porCodigo.entries()].filter(([, origenes]) => origenes.length > 1),
+    [...byCode.entries()].filter(([, origins]) => origins.length > 1),
   );
 }
 
@@ -64,25 +64,25 @@ describe('catálogo de conceptos internos', () => {
   it('no declara dos conceptos con el mismo código almacenado', () => {
     // El mensaje de fallo nombra las claves en conflicto: sin eso, quien lo
     // rompa dentro de seis meses ve un número y no sabe qué tocó.
-    expect(duplicados(codigosAlmacenados())).toEqual({});
+    expect(duplicates(storedCodes())).toEqual({});
   });
 
   it('no declara dos conceptos con la misma clave', () => {
     // La clave es la semilla del UUIDv5: repetirla es darle a dos conceptos
     // distintos el mismo id, que es peor que la colisión de código porque no
     // falla —uno pisa al otro en silencio—.
-    const claves = [
+    const keys = [
       ...Object.values(CONCEPT_DEFS).map((def) => def.key),
       ...MODULE_CONCEPT_SEEDS.map((seed) => seed.key),
     ];
-    expect(claves.length).toBe(new Set(claves).size);
+    expect(keys.length).toBe(new Set(keys).size);
   });
 
   it('guarda de los conceptos de módulo la clave, no su código humano', () => {
     // Fijar la decisión: los módulos repiten códigos genéricos (ACTIVE,
     // PENDING...) y por eso el seed almacena la clave. Si alguien "corrige"
     // esto para guardar `seed.code`, la cadena entera vuelve a caerse.
-    const codigosHumanos = MODULE_CONCEPT_SEEDS.map((seed) => seed.code);
-    expect(codigosHumanos.length).toBeGreaterThan(new Set(codigosHumanos).size);
+    const humanCodes = MODULE_CONCEPT_SEEDS.map((seed) => seed.code);
+    expect(humanCodes.length).toBeGreaterThan(new Set(humanCodes).size);
   });
 });

@@ -112,18 +112,29 @@ export class AuthzGrantsService {
         );
       }
 
+      // MCH-034: dos asignaciones del mismo rol en tenants/sedes/consultorios
+      // distintos son ámbitos distintos, no un duplicado. Sólo es conflicto la
+      // repetición EXACTA del mismo ámbito.
       const existing = await this.assignmentsRepo.findActive(
         tx,
         userId,
         role.id,
+        {
+          tenantId: dto.tenantId,
+          branchId: dto.branchId,
+          practiceId: dto.practiceId,
+        },
       );
       if (existing) {
         throw new ConflictException(
-          'El usuario ya tiene ese rol asignado y activo',
+          'El usuario ya tiene ese rol asignado y activo en ese ámbito',
           {
             userId,
             roleId: role.id,
             roleCode: role.code,
+            tenantId: dto.tenantId,
+            branchId: dto.branchId,
+            practiceId: dto.practiceId,
           },
         );
       }

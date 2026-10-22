@@ -1,0 +1,179 @@
+{
+  "code": "NNAC25_TI_09_SINDROME_CORONARIO_AGUDO",
+  "name": "Síndrome coronario agudo (NNAC 2025)",
+  "specialty": {
+    "code": "MEDICINA_INTENSIVA",
+    "display": "Medicina Intensiva"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Terapia Intensiva (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/964-norma-nacional-de-atencion-clinica-de-terapia-intensiva?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 9, pág. 104; niveles de atención II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Prolongado en reposo",
+        "Dolor similar al síndrome coronario agudo anterior",
+        "Dolor torácico (independientemente de la característica)",
+        "Palpitaciones",
+        "Disnea",
+        "Dolor abdominal",
+        "Monitoreo continuo",
+        "Oxígeno si SatO2 < 90%, o signos de dificultad respiratoria",
+        "ECG < 10 minutos, transmitido a la historia clínica",
+        "Independientemente de la manifestación clínica del PASO 1",
+        "Supra ST > 1 mm en el punto J en al menos dos derivaciones consecutivas",
+        "BRI agudo (idealmente en comparación con ECG anterior)",
+        "Por ECG (independientemente de la manifestación clínica del PASO 1)",
+        "Infracción de ST > 0,5 mm (sin diagnóstico diferencial obvio, por ejemplo, distensión, miocardiopatía hipertrófica)",
+        "Inversión de onda T profunda > 2 mm",
+        "Cambio de ECG dinámico",
+        "TV sostenida",
+        "Solicitud de troponina para todos los pacientes con dolor torácico sin un diagnóstico diferencial evidente",
+        "Dosificar Troponina-T 3 horas después de la llegada en casos seleccionados de duda diagnóstica",
+        "AngioTC de arterias coronarias (si se dispone en su centro)",
+        "Gammagrafía de perfusión miocárdica de estrés (si se dispone en su centro)",
+        "Ecocardiograma de estrés",
+        "Ergometría",
+        "Todos los casos de IAM probable/confirmado sin Supra ST deben ser hospitalizados en una Unidad de Terapia Intensiva",
+        "Descartado infarto agudo de miocardio",
+        "Alta hospitalaria tras descartar otras causas de posible dolor torácico",
+        "Criterios de ingreso hospitalario",
+        "El diagnóstico más frecuente en este grupo es el infarto agudo de miocardio",
+        "Pacientes que no cumplan criterios para los dos grupos anteriores (pacientes que se descartaron o se internaron)",
+        "Grupo heterogéneo"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 104. El infarto agudo de miocardio (IAM) se define como la necrosis de cardiomiocitos en un contexto clínico consistente con isquemia miocárdica aguda."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "I24: Otras enfermedades isquémicas agudas del corazón",
+        "I24.0: Trombosis coronaria que no resulta en infarto del miocardio",
+        "I24.1: Síndrome de Dressler",
+        "I24.8: Otras formas de enfermedad isquémica aguda del corazón",
+        "I24.9: Enfermedad isquémica aguda del corazón, no especificada",
+        "I21: Infarto agudo de miocardio",
+        "I20.0: Angina inestable"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Rotura de pared libre y/o taponamiento",
+        "Rotura de músculo papilar",
+        "Rotura de septum interventricular",
+        "Arritmias ventriculares: Taquicardia ventricular, fibrilación ventricular, ritmo idioventricular acelerado, taquicardia de la unión",
+        "Arritmias supraventriculares: Fibrilación auricular, flutter auricular, taquicardia paroxística",
+        "Edema pulmonar agudo",
+        "Choque cardiogénico"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 9, pág. 104); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

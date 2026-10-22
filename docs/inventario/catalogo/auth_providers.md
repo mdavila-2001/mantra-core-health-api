@@ -351,7 +351,7 @@ Registra intentos de acceso federado para auditar autenticaciones y diagnosticar
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/auth_providers/README.md:32` |
+| Append-only | sí (declarado) | `src/modules/auth_providers/README.md:64` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |

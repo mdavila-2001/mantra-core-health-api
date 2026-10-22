@@ -1,0 +1,197 @@
+{
+  "code": "HEMATO_CTRL_ANEMIA",
+  "name": "Control de anemia ferropénica",
+  "specialty": { "code": "HEMATOLOGIA", "display": "Hematología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Hemoglobina ajustada por altitud, causa y respuesta al hierro."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de anemia",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: anemia",
+      "code": "anemia_hemoglobina",
+      "name": "Hemoglobina (g/dL)",
+      "dataType": "decimal",
+      "required": true,
+      "description": "Ajustar por altitud de residencia."
+    },
+    {
+      "section": "Evaluación: anemia",
+      "code": "anemia_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Astenia",
+        "Disnea de esfuerzo",
+        "Palpitaciones",
+        "Pica",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: anemia",
+      "code": "anemia_perdidas",
+      "name": "Posibles pérdidas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Menstruación abundante",
+        "Sangrado digestivo",
+        "Parasitosis",
+        "Ninguna conocida"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: anemia",
+      "code": "anemia_vcm",
+      "name": "VCM y ferritina, si se conocen",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: anemia",
+      "code": "ferritina",
+      "name": "Ferritina (ng/mL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: anemia",
+      "code": "vcm",
+      "name": "VCM (fL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: anemia",
+      "code": "altitud_residencia",
+      "name": "Altitud de residencia (m s. n. m.)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: anemia",
+      "code": "reticulocitos",
+      "name": "Reticulocitos (%)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hemoglobina normal para su altitud",
+        "Causa identificada",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Hierro con el estómago vacío y con vitamina C",
+        "Alimentos con hierro"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

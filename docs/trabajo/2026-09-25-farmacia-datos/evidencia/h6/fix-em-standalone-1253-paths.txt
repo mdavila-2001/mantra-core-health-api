@@ -1,0 +1,16 @@
+{"level":40,"time":1790346679641,"pid":22688,"hostname":"Marcelo","context":"VerificationBypassService","event":"verification_bypass.active","nodeEnv":"development","msg":"DEV_VERIFICATION_BYPASS activo: la Guía de profesionales y la elegibilidad para citas no filtran por estado de verificación."}
+[33m[Nest] 22688  - [39m25/09/2026, 10:31:37 [33m   WARN[39m [33mDuplicate DTO detected: "BrokerProfileDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.[39m
+[33m[Nest] 22688  - [39m25/09/2026, 10:31:37 [33m   WARN[39m [33mDuplicate DTO detected: "CreateAssignmentDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.[39m
+[33m[Nest] 22688  - [39m25/09/2026, 10:31:37 [33m   WARN[39m [33mDuplicate DTO detected: "CreateAffiliationDto" is defined multiple times with different schemas.
+Consider using unique class names or applying @ApiExtraModels() decorator with custom schema names.
+Note: This will throw an error in the next major version.[39m
+  44/44 rutas públicas marcadas, 233 tags globales, 935 descripciones y 10525 respuestas de error añadidas.
+OpenAPI generado: 1253 paths, 1364 operaciones, 1226 esquemas.
+  → D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api-fix-em\openapi\openapi.json
+  → D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api-fix-em\openapi\openapi.yaml
+{"level":30,"time":1790346697472,"pid":22688,"hostname":"Marcelo","context":"PersistenceModule","msg":"Persistencia: «postgres-write» y «postgres-read» son equivalentes; comparten un único pool (postgresql://neondb_owner@ep-shy-snow-acyd0u4s-pooler.sa-east-1.aws.neon.tech:5432/alovida?ssl=off)."}
+EXIT:0

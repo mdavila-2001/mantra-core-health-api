@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
@@ -23,6 +24,7 @@ import type {
   RegulatoryDocuments,
 } from '../entities';
 import { RegulatoryDocumentsService } from '../services';
+import { PharmaLabScopeGuard } from '../guards';
 
 /**
  * Repositorio documental legal y regulatorio (UC-17-31 a UC-17-33).
@@ -39,6 +41,7 @@ import { RegulatoryDocumentsService } from '../services';
   'LEGAL_COUNSEL',
   'PLATFORM_ADMIN',
 )
+@UseGuards(PharmaLabScopeGuard)
 @Controller('pharma-labs/:pharmaLabId/regulatory-documents')
 export class RegulatoryDocumentsController {
   /**

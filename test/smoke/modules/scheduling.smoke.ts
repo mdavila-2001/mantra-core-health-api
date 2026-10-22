@@ -16,7 +16,7 @@ import { UUID_ABSENT, UUID_BAD } from '../smoke-kit';
  *   400, porque `offsetsMinutes` no llevaba decorador de class-validator y el
  *   pipe global lo trataba como propiedad ajena al DTO.
  *
- * Ambos los descubrió `tools/redesa/seed-dev-data.mjs` al poblar un entorno de
+ * Ambos los descubrió `tools/alovida/seed-dev-data.mjs` al poblar un entorno de
  * desarrollo, no la batería. Estos casos existen para que la próxima vez la
  * descubra la batería.
  *
@@ -406,7 +406,11 @@ export const SCHEDULING_SMOKE: SmokeCase[] = [
     name: 'happy: cancelar la cita',
     method: 'post',
     path: (c) => `/scheduling/bookings/${c.vars.schedBookingId}/cancel`,
-    body: () => ({ cancelledBy: 'PATIENT', isNoShow: false }),
+    body: () => ({
+      cancelledBy: 'PATIENT',
+      isNoShow: false,
+      reasonText: 'El paciente ya no puede asistir',
+    }),
     expectedStatus: 200,
   },
   {
@@ -415,7 +419,10 @@ export const SCHEDULING_SMOKE: SmokeCase[] = [
     name: 'límite: cancelar dos veces',
     method: 'post',
     path: (c) => `/scheduling/bookings/${c.vars.schedBookingId}/cancel`,
-    body: () => ({ cancelledBy: 'PATIENT' }),
+    body: () => ({
+      cancelledBy: 'PATIENT',
+      reasonText: 'El paciente ya no puede asistir',
+    }),
     expectedStatus: 409,
   },
   {

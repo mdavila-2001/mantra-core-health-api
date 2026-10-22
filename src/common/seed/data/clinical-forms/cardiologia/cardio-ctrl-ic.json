@@ -1,0 +1,248 @@
+{
+  "code": "CARDIO_CTRL_IC",
+  "name": "Control de insuficiencia cardíaca",
+  "specialty": { "code": "CARDIOLOGIA", "display": "Cardiología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Estructura de la historia clínica de la NT 022; contenido de la visita de seguimiento: clase funcional NYHA, signos de congestión (criterios de Framingham), peso seco y fracción de eyección."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de insuficiencia cardíaca",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: insuficiencia cardíaca",
+      "code": "ic_clase_nyha",
+      "name": "Clase funcional NYHA",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Clase I — sin limitación de la actividad física",
+        "Clase II — limitación leve: síntomas con la actividad ordinaria",
+        "Clase III — limitación marcada: síntomas con actividad menor a la ordinaria",
+        "Clase IV — síntomas en reposo"
+      ]
+    },
+    {
+      "section": "Evaluación: insuficiencia cardíaca",
+      "code": "ic_signos",
+      "name": "Signos y síntomas (Framingham)",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Ortopnea",
+        "Disnea paroxística nocturna",
+        "Ingurgitación yugular",
+        "Crepitantes pulmonares",
+        "Tercer ruido (galope)",
+        "Edema de miembros inferiores",
+        "Hepatomegalia"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: insuficiencia cardíaca",
+      "code": "ic_edema_grado",
+      "name": "Edema (fóvea)",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Sin edema",
+        "+ (2 mm)",
+        "++ (4 mm)",
+        "+++ (6 mm)",
+        "++++ (8 mm)"
+      ]
+    },
+    {
+      "section": "Evaluación: insuficiencia cardíaca",
+      "code": "ic_peso_seco",
+      "name": "Peso de referencia (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: insuficiencia cardíaca",
+      "code": "peso_hoy",
+      "name": "Peso de hoy (kg)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: insuficiencia cardíaca",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: insuficiencia cardíaca",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: insuficiencia cardíaca",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: insuficiencia cardíaca",
+      "code": "fevi",
+      "name": "Última fracción de eyección (%)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: insuficiencia cardíaca",
+      "code": "fevi_tipo",
+      "name": "Tipo según fracción de eyección",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Reducida (≤ 40 %)",
+        "Levemente reducida (41–49 %)",
+        "Preservada (≥ 50 %)",
+        "Sin ecocardiograma"
+      ]
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "internaciones_ic_anio",
+      "name": "Internaciones por insuficiencia cardíaca en el último año",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "potasio",
+      "name": "Último potasio (mEq/L)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "creatinina",
+      "name": "Última creatinina (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sin congestión",
+        "Peso estable",
+        "Recibe los cuatro pilares de tratamiento si la FE está reducida",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pesarse todos los días",
+        "Restricción de sal y líquidos",
+        "Signos de alarma",
+        "Adherencia a la medicación"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

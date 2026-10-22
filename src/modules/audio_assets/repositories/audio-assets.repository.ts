@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import { StoragePublicationService } from '../../../common/storage/storage-publication.service';
+import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
+import { loadStorageEnv } from '../../../common/storage/storage.env';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { randomUUID } from 'node:crypto';
 import type {
@@ -28,7 +31,10 @@ import type {
 } from './audio-assets.repository.types';
 @Injectable()
 export class AudioAssetsRepository {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    @Optional() private readonly publication?: StoragePublicationService,
+  ) {}
 
   async findTemplate(
     templateKey: string,
@@ -117,24 +123,72 @@ export class AudioAssetsRepository {
     assetId: string,
     source: AudioAssets,
   ): Promise<AudioAssets> {
-    await this.em.getConnection().execute(
-      `update audio_assets.audio_assets set storage_provider=?, storage_key=?, bytes=?, duration_ms=?, checksum_sha256=?,
+    if (loadStorageEnv().lifecycleBinding && !this.publication)
+      throw new StorageLifecycleDenied('LIFECYCLE_WIRING_MISSING');
+    const write = async (tx: EntityManager) => {
+      let physicalIdentity;
+      if (this.publication?.protectedNamespace) {
+        await this.publication.lockNamespace(tx);
+        const target = await tx.findOne(
+          AudioAssets,
+          { id: assetId },
+          { refresh: true },
+        );
+        const persistedSource = await tx.findOne(
+          AudioAssets,
+          { id: source.id },
+          { refresh: true },
+        );
+        if (
+          !target?.tenantId ||
+          !persistedSource ||
+          target.tenantId !== persistedSource.tenantId ||
+          persistedSource.generationStatus !== 'READY' ||
+          persistedSource.storageKey !== source.storageKey ||
+          !source.storageKey ||
+          !source.checksumSha256 ||
+          !source.bytes
+        )
+          throw new StorageLifecycleDenied('PRODUCER_OWNERSHIP_UNKNOWN');
+        physicalIdentity = await this.publication.guardLocator(
+          tx,
+          source.storageKey,
+          {
+            contentHash: source.checksumSha256,
+            sizeBytes: Number(source.bytes),
+          },
+        );
+      }
+      await tx.getConnection().execute(
+        `update audio_assets.audio_assets set storage_provider=?, storage_key=?, bytes=?, duration_ms=?, checksum_sha256=?,
        generation_status='READY', failure_code=null, generated_at=coalesce(generated_at, now()), updated_at=now(),
        metadata=coalesce(metadata, '{}'::jsonb) || ?::jsonb where id=? and generation_status<>'READY'`,
-      [
-        source.storageProvider ?? null,
-        source.storageKey ?? null,
-        source.bytes ?? null,
-        source.durationMs ?? null,
-        source.checksumSha256 ?? null,
-        JSON.stringify({ reusedFromAssetId: source.id }),
-        assetId,
-      ],
-      'run',
-    );
-    const result = await this.findAssetById(assetId);
-    if (!result) throw new Error('Asset reutilizado no encontrado');
-    return result;
+        [
+          source.storageProvider ?? null,
+          source.storageKey ?? null,
+          source.bytes ?? null,
+          source.durationMs ?? null,
+          source.checksumSha256 ?? null,
+          JSON.stringify({
+            reusedFromAssetId: source.id,
+            ...(physicalIdentity
+              ? { storagePhysicalIdentity: physicalIdentity }
+              : {}),
+          }),
+          assetId,
+        ],
+        'run',
+        tx.getTransactionContext(),
+      );
+      const result = await tx.findOne(
+        AudioAssets,
+        { id: assetId },
+        { refresh: true },
+      );
+      if (!result) throw new Error('Asset reutilizado no encontrado');
+      return result;
+    };
+    return this.em.transactional(write);
   }
 
   async touchUsage(assetId: string): Promise<void> {
@@ -173,8 +227,13 @@ export class AudioAssetsRepository {
     );
   }
 
-  markReady(input: MarkAudioAssetReadyInput): Promise<AudioAssets> {
-    return markAudioAssetReady(this.em, input);
+  markReady(
+    input: MarkAudioAssetReadyInput,
+    publicationTx?: EntityManager,
+  ): Promise<AudioAssets> {
+    if (loadStorageEnv().lifecycleBinding && !publicationTx)
+      throw new StorageLifecycleDenied('PUBLICATION_TRANSACTION_REQUIRED');
+    return markAudioAssetReady(this.em, input, publicationTx);
   }
 
   /**
@@ -197,7 +256,7 @@ export class AudioAssetsRepository {
       : 'FAILED_PERMANENT';
     await this.em.nativeUpdate(
       AudioAssets,
-      { id: assetId },
+      { id: assetId, generationStatus: { $ne: 'READY' } },
       { generationStatus: status, failureCode, updatedAt: new Date() },
     );
     return retryable ? 0 : this.releaseBudget(assetId);
@@ -213,7 +272,7 @@ export class AudioAssetsRepository {
   async markFallbackOnly(assetId: string, reason: string): Promise<number> {
     await this.em.nativeUpdate(
       AudioAssets,
-      { id: assetId },
+      { id: assetId, generationStatus: { $ne: 'READY' } },
       {
         generationStatus: 'FALLBACK_ONLY',
         failureCode: reason,

@@ -1,5 +1,5 @@
 # =========================================================================
-# Mantra Core Technologies · REDESA Health Ecosystem
+# Mantra Core Technologies · ALOVIDA Health Ecosystem
 # Configuración del OpenTelemetry Collector para STAGING y PRODUCCIÓN.
 #
 # Por qué existe: en producción los 21 procesos NO deben hablar directamente

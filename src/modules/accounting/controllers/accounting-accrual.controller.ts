@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AccrualService } from '../services';
 import {
   CreateAccrualObjectDto,
@@ -22,6 +27,11 @@ export class AccountingAccrualController {
   constructor(private readonly accrualService: AccrualService) {}
 
   /** UC-16-06. */
+  @Audited({
+    action: 'ACCRUAL_OBJECT_CREATED',
+    entity: 'accrual_object',
+    entityId: 'result.id',
+  })
   @Post('accrual-objects')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -34,6 +44,11 @@ export class AccountingAccrualController {
   }
 
   /** UC-16-07. */
+  @Audited({
+    action: 'ACCRUALS_RUN',
+    entity: 'accrual_object',
+    entityId: 'result.id',
+  })
   @Post('accruals/run')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

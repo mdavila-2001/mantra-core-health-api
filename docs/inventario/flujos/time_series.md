@@ -49,7 +49,7 @@ CONSULTA
                        bucket múltiplo de 1 h / 1 día  ──> continuous_sli_hourly / _daily
 ```
 
-_Fuente: `src/modules/time_series/README.md:44`_
+_Fuente: `src/modules/time_series/README.md:78`_
 
 ### Etapas y operaciones
 

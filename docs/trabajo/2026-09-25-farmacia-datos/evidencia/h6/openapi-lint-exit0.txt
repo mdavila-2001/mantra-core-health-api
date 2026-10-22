@@ -1,0 +1,6 @@
+[90mvalidating openapi\openapi.yaml using lint rules for api 'alovida-health@v1'...
+[39m[90mopenapi\openapi.yaml: validated in 977ms
+
+[39m[32mWoohoo! Your API description is valid. 🎉
+[39m
+EXIT:0

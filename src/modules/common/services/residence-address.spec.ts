@@ -9,11 +9,11 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { CONCEPTS } from '../../../common';
+import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
 import {
-  boDepartmentConceptId,
-  boMunicipalityConceptId,
-} from '../../../common/seed/bo-geography.catalog';
-import { createResidenceAddress } from './residence-address';
+  createResidenceAddress,
+  replaceResidenceAddress,
+} from './residence-address';
 
 /** Repositorio de direcciones reducido a lo único que el ayudante usa. */
 function buildRepo() {
@@ -24,21 +24,36 @@ function buildRepo() {
   };
 }
 
+/**
+ * Repositorio de conceptos reducido a `findById`, con un único municipio
+ * sembrado: el esquema real de `terminology.catalog_concepts` (código
+ * `SIGLA-NOMBRE`), no el del catálogo estático retirado.
+ */
+function buildConcepts(
+  municipalities: Record<string, { code: string; display: string }> = {},
+) {
+  return {
+    findById: mockFn((_tx: any, id: string) => municipalities[id] ?? null),
+  } as any;
+}
+
 describe('createResidenceAddress', () => {
   const tx = {} as any;
 
-  it('deriva el departamento del municipio, sin recibirlo', () => {
+  it('deriva el departamento del municipio, sin recibirlo', async () => {
     const { repo, rows } = buildRepo();
+    const sacaba = 'concept-sacaba';
+    const concepts = buildConcepts({
+      [sacaba]: { code: 'CB-SACABA', display: 'Sacaba' },
+    });
 
-    // Sacaba es de Cochabamba: su código del INE empieza en 03.
-    const sacaba = boMunicipalityConceptId('031001');
-    const escribio = createResidenceAddress(repo, tx, {
+    const wrote = await createResidenceAddress(repo, tx, concepts, {
       personId: 'person-1',
       municipalityConceptId: sacaba,
       actorUserId: 'user-1',
     });
 
-    expect(escribio).toBe(true);
+    expect(wrote).toBe(true);
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       ownerId: 'person-1',
@@ -50,33 +65,173 @@ describe('createResidenceAddress', () => {
     });
   });
 
-  it('sin municipio no escribe nada: el domicilio es opcional', () => {
+  it('sin municipio no escribe nada: el domicilio es opcional', async () => {
     const { repo, rows } = buildRepo();
+    const concepts = buildConcepts();
 
-    const escribio = createResidenceAddress(repo, tx, {
+    const wrote = await createResidenceAddress(repo, tx, concepts, {
       personId: 'person-1',
       actorUserId: 'user-1',
     });
 
-    expect(escribio).toBe(false);
+    expect(wrote).toBe(false);
     // Una dirección con país y nada más no es un dato, es una fila.
     expect(rows).toHaveLength(0);
   });
 
-  it('rechaza un uuid que no sea de un municipio del catálogo', () => {
+  it('rechaza un uuid que no exista en el catálogo de municipios', async () => {
     const { repo, rows } = buildRepo();
+    // Forma de uuid válida —pasa el `@IsUUID` del DTO— pero no está sembrado.
+    const concepts = buildConcepts();
 
-    // Forma de uuid válida —pasa el `@IsUUID` del DTO— pero es un departamento.
-    expect(
-      () =>
-        createResidenceAddress(repo, tx, {
-          personId: 'person-1',
-          municipalityConceptId: boDepartmentConceptId('SC'),
-          actorUserId: 'user-1',
-        }),
+    await expect(
+      createResidenceAddress(repo, tx, concepts, {
+        personId: 'person-1',
+        municipalityConceptId: 'concept-inexistente',
+        actorUserId: 'user-1',
+      }),
       // Sin esta comprobación el `INSERT` reventaría por integridad referencial,
       // con un error que no le dice nada a quien se está registrando.
-    ).toThrow(/no pertenece al catálogo/);
+    ).rejects.toThrow(/no pertenece al catálogo/);
     expect(rows).toHaveLength(0);
+  });
+});
+
+/**
+ * Quitar el punto del mapa — el tercer estado que faltaba.
+ *
+ * `undefined` conserva el punto vigente y un par de números lo mueve; las dos
+ * cosas ya andaban. Lo que no había forma de hacer era **borrarlo**: la mezcla
+ * conserva lo anterior cuando no llega nada, así que una ubicación mal puesta
+ * sólo se podía cambiar por otra. Desde que el perfil deja mover el pin, eso
+ * dejó de ser aceptable.
+ */
+describe('replaceResidenceAddress · quitar el punto del mapa', () => {
+  const tx = {} as any;
+
+  /** La fila vigente, con su punto puesto. */
+  const CURRENT = {
+    id: 'addr-1',
+    municipalityConceptId: 'mun-1',
+    lines: 'Av. Banzer 3er anillo',
+    latitude: '-17.78',
+    longitude: '-63.18',
+  };
+
+  /** Repositorio con una dirección vigente y captura de lo que se escribe. */
+  function withCurrent() {
+    const written: any[] = [];
+    return {
+      escritas: written,
+      repo: {
+        findCurrentByOwnerAndUse: mockFn(async () => CURRENT),
+        closeCurrent: mockFn(),
+        create: mockFn((_tx: any, data: any) => written.push(data)),
+      } as any,
+    };
+  }
+
+  const concepts = () =>
+    buildConcepts({
+      'mun-1': { code: 'SC-Santa Cruz', display: 'Santa Cruz' },
+    });
+
+  it('`null` en las dos QUITA el punto y conserva el resto de la dirección', async () => {
+    const { repo, escritas: written } = withCurrent();
+
+    await replaceResidenceAddress(
+      repo,
+      tx,
+      concepts(),
+      {
+        personId: 'person-1',
+        useConceptId: CONCEPTS.ADDR_USE_HOME,
+        latitude: null,
+        longitude: null,
+        actorUserId: 'user-1',
+      },
+      new Date('2026-09-10T12:00:00.000Z'),
+    );
+
+    expect(written).toHaveLength(1);
+    expect(written[0].latitude).toBeUndefined();
+    expect(written[0].longitude).toBeUndefined();
+    // La calle no se toca: quitar el pin no es mudarse.
+    expect(written[0].lines).toBe('Av. Banzer 3er anillo');
+  });
+
+  it('sin coordenadas en el cuerpo, el punto vigente se conserva', async () => {
+    // La distinción que hace falta: no mandarlas es «no lo toqué».
+    const { repo, escritas: written } = withCurrent();
+
+    await replaceResidenceAddress(
+      repo,
+      tx,
+      concepts(),
+      {
+        personId: 'person-1',
+        useConceptId: CONCEPTS.ADDR_USE_HOME,
+        lines: 'Calle Nueva 100',
+        actorUserId: 'user-1',
+      },
+      new Date('2026-09-10T12:00:00.000Z'),
+    );
+
+    // La columna es `numeric` y se escribe como texto: lo que importa acá es
+    // que el punto sobrevive, no su representación.
+    expect(Number(written[0].latitude)).toBe(-17.78);
+    expect(Number(written[0].longitude)).toBe(-63.18);
+  });
+
+  it('un par de números mueve el punto', async () => {
+    const { repo, escritas: written } = withCurrent();
+
+    await replaceResidenceAddress(
+      repo,
+      tx,
+      concepts(),
+      {
+        personId: 'person-1',
+        useConceptId: CONCEPTS.ADDR_USE_HOME,
+        latitude: -16.5,
+        longitude: -68.15,
+        actorUserId: 'user-1',
+      },
+      new Date('2026-09-10T12:00:00.000Z'),
+    );
+
+    expect(Number(written[0].latitude)).toBe(-16.5);
+    expect(Number(written[0].longitude)).toBe(-68.15);
+  });
+
+  it('quitar un punto que ya no estaba no escribe una fila nueva', async () => {
+    // `sinCambios` tiene que seguir valiendo: si no, cada PATCH que repite el
+    // mismo domicilio abriría una fila más en el historial.
+    const written: any[] = [];
+    const repo = {
+      findCurrentByOwnerAndUse: mockFn(async () => ({
+        ...CURRENT,
+        latitude: undefined,
+        longitude: undefined,
+      })),
+      closeCurrent: mockFn(),
+      create: mockFn((_tx: any, data: any) => written.push(data)),
+    } as any;
+
+    await replaceResidenceAddress(
+      repo,
+      tx,
+      concepts(),
+      {
+        personId: 'person-1',
+        useConceptId: CONCEPTS.ADDR_USE_HOME,
+        latitude: null,
+        longitude: null,
+        actorUserId: 'user-1',
+      },
+      new Date('2026-09-10T12:00:00.000Z'),
+    );
+
+    expect(written).toHaveLength(0);
   });
 });

@@ -292,6 +292,26 @@ export class TerminologySeedService {
       await em.flush();
     }
 
+    // `SupportAdmin` (TAREA-15, P-15-1): la cuenta con la que la empresa firma
+    // el chat de agenda. Sin credencial de login — nadie entra como la
+    // empresa —, y real en `iam.users` por la misma razón que el worker: es
+    // quien queda como `created_by_user_id` de la conversación y del mensaje.
+    if (!(await em.findOne(Users, { id: SEED.supportAdminUserId }))) {
+      em.create(
+        Users,
+        {
+          id: SEED.supportAdminUserId,
+          statusConceptId: CONCEPTS.USER_ACTIVE,
+          displayName: SEED.supportAdminDisplayName,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      inserted++;
+      await em.flush();
+    }
+
     if (inserted > 0) {
       this.logger.info(
         { inserted },
@@ -371,32 +391,34 @@ export class TerminologySeedService {
         ),
       ]);
 
-    const yaEstaLaDesignacion = new Set(
+    const designationAlreadyPresent = new Set(
       existingDesignations.map((row) => row.id),
     );
-    const yaEstaLaPropiedad = new Set(existingProperties.map((row) => row.id));
+    const propertyAlreadyPresent = new Set(
+      existingProperties.map((row) => row.id),
+    );
     // Traducir un concepto que no existe violaría la FK y abortaría el arranque
     // entero. Se filtra y se avisa: el catálogo declarado y el sembrado pueden
     // divergir mientras alguien está a mitad de mover un concepto de módulo.
-    const conceptoSembrado = new Set(existingConcepts.map((row) => row.id));
+    const seededConcept = new Set(existingConcepts.map((row) => row.id));
 
     let inserted = 0;
-    const huerfanos: string[] = [];
+    const orphaned: string[] = [];
 
-    for (const [conceptId, traduccion] of SPANISH_DESIGNATIONS) {
-      if (!conceptoSembrado.has(conceptId)) {
-        huerfanos.push(conceptId);
+    for (const [conceptId, translation] of SPANISH_DESIGNATIONS) {
+      if (!seededConcept.has(conceptId)) {
+        orphaned.push(conceptId);
         continue;
       }
 
       const designationId = spanishDesignationId(conceptId);
-      if (!yaEstaLaDesignacion.has(designationId)) {
+      if (!designationAlreadyPresent.has(designationId)) {
         em.create(
           ConceptDesignations,
           {
             id: designationId,
             conceptId,
-            value: traduccion.display,
+            value: translation.display,
             languageConceptId: CONCEPTS.LANG_ES,
             designationTypeConceptId: CONCEPTS.DESIG_PREFERRED,
             preferred: true,
@@ -409,7 +431,7 @@ export class TerminologySeedService {
       }
 
       const propertyId = spanishDefinitionPropertyId(conceptId);
-      if (!yaEstaLaPropiedad.has(propertyId)) {
+      if (!propertyAlreadyPresent.has(propertyId)) {
         em.create(
           ConceptProperties,
           {
@@ -417,7 +439,7 @@ export class TerminologySeedService {
             conceptId,
             propertyCode: SPANISH_DEFINITION_PROPERTY_CODE,
             dataType: SPANISH_DEFINITION_DATA_TYPE,
-            valueJson: traduccion.definition,
+            valueJson: translation.definition,
             createdAt: now,
             updatedAt: now,
           },
@@ -429,9 +451,9 @@ export class TerminologySeedService {
 
     await em.flush();
 
-    if (huerfanos.length > 0) {
+    if (orphaned.length > 0) {
       this.logger.warn(
-        { operation: 'seed.terminology.es', count: huerfanos.length },
+        { operation: 'seed.terminology.es', count: orphaned.length },
         'Hay traducciones declaradas para conceptos que no están en el catálogo: se omiten',
       );
     }

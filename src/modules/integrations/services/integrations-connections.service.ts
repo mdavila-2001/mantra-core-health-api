@@ -224,6 +224,7 @@ export class IntegrationsConnectionsService {
         connectionId,
         INTEG.MSG_QUEUED,
         INTEG.MSG_HELD,
+        actor.id,
       );
 
       this.logger.warn(

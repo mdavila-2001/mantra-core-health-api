@@ -4,18 +4,36 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
   Post,
   Query,
-  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PractitionerAccountingService } from '../services';
 import {
   PaidConsultationsResponseDto,
   RegisterConsultationIncomeDto,
   RegisterSimpleEntryDto,
   PractitionerEntryResponseDto,
+  CapitalizeAssetDto,
+  AssetResponseDto,
+  AssetSummaryDto,
+  SetAutomationDto,
+  RegisterAssetProgressDto,
+  CreateOwnLiabilityDto,
+  LiabilityCreatedResponseDto,
+  LiabilitySummaryDto,
+  LiabilityScheduleResponseDto,
+  RegisterLiabilityProgressDto,
+  ProgressRegisteredResponseDto,
 } from '../dto';
 
 /**
@@ -51,6 +69,11 @@ export class AccountingPractitionerController {
   }
 
   /** Registrar el ingreso de una consulta pagada. */
+  @Audited({
+    action: 'PRACTITIONER_CONSULTATION_INCOME_REGISTERED',
+    entity: 'journal_transaction',
+    entityId: 'result.id',
+  })
   @Post('consultation-income')
   @Roles('PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -67,6 +90,11 @@ export class AccountingPractitionerController {
   }
 
   /** Registrar un gasto o un ingreso que no proviene de una consulta. */
+  @Audited({
+    action: 'PRACTITIONER_ENTRY_REGISTERED',
+    entity: 'journal_transaction',
+    entityId: 'result.id',
+  })
   @Post('entries')
   @Roles('PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
@@ -80,5 +108,154 @@ export class AccountingPractitionerController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerEntryResponseDto> {
     return this.practitionerAccounting.registerSimpleEntry(dto, actor);
+  }
+
+  /* ==========================================================================
+      FT-26 — auto-servicio de activos y pasivos del doctor.
+      ========================================================================== */
+
+  /** Los activos de una práctica del profesional. */
+  @Get('assets')
+  @Roles('PRACTITIONER')
+  @ApiOperation({ summary: 'Listar los activos propios de una práctica' })
+  listAssets(
+    @Query('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<readonly AssetSummaryDto[]> {
+    return this.practitionerAccounting.listAssets(practiceId, actor);
+  }
+
+  /** Da de alta un activo propio. Mismo contrato que `SECURITY_ADMIN` usa en `/accounting/assets/capitalize`. */
+  @Audited({
+    action: 'PRACTITIONER_ASSET_CAPITALIZED',
+    entity: 'asset',
+    entityId: 'result.id',
+  })
+  @Post('assets')
+  @Roles('PRACTITIONER')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Dar de alta un activo propio' })
+  capitalizeAsset(
+    @Body() dto: CapitalizeAssetDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AssetResponseDto> {
+    return this.practitionerAccounting.capitalizeOwnAsset(dto, actor);
+  }
+
+  /** Prende o apaga la automatización de un activo propio. */
+  @Audited({
+    action: 'ASSET_AUTOMATION_CHANGED',
+    entity: 'asset',
+    entityId: 'param:id',
+  })
+  @Patch('assets/:id/automation')
+  @Roles('PRACTITIONER')
+  @ApiOperation({ summary: 'Prender o apagar la automatización de un activo' })
+  setAssetAutomation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SetAutomationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.practitionerAccounting.setAssetAutomation(id, dto, actor);
+  }
+
+  /** "Registrar avance": una corrida de depreciación acotada a este activo. */
+  @Audited({
+    action: 'PRACTITIONER_ASSET_PROGRESS_REGISTERED',
+    entity: 'asset',
+    entityId: 'param:id',
+  })
+  @Post('assets/:id/progress')
+  @Roles('PRACTITIONER')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Registrar el avance (depreciación) de un activo' })
+  registerAssetProgress(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RegisterAssetProgressDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ProgressRegisteredResponseDto> {
+    return this.practitionerAccounting.registerAssetProgress(id, dto, actor);
+  }
+
+  /** Los pasivos de una práctica del profesional. */
+  @Get('liabilities')
+  @Roles('PRACTITIONER')
+  @ApiOperation({ summary: 'Listar los pasivos propios de una práctica' })
+  listLiabilities(
+    @Query('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<readonly LiabilitySummaryDto[]> {
+    return this.practitionerAccounting.listLiabilities(practiceId, actor);
+  }
+
+  /** Da de alta un pasivo propio con su cronograma de amortización. */
+  @Audited({
+    action: 'PRACTITIONER_LIABILITY_CREATED',
+    entity: 'liability',
+    entityId: 'result.id',
+  })
+  @Post('liabilities')
+  @Roles('PRACTITIONER')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Dar de alta un pasivo propio (préstamo)' })
+  createLiability(
+    @Body() dto: CreateOwnLiabilityDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LiabilityCreatedResponseDto> {
+    return this.practitionerAccounting.createOwnLiability(dto, actor);
+  }
+
+  /** El cronograma cuota por cuota de un pasivo propio (T26 · AC-26-10). */
+  @Get('liabilities/:id/schedule')
+  @Roles('PRACTITIONER')
+  @ApiOperation({
+    summary: 'Cronograma de cuotas de un pasivo propio',
+    description:
+      'Capital e interés separados por cuota, en orden de vencimiento. Sólo el profesional vinculado a la práctica del pasivo; un pasivo ajeno responde 422, no un cronograma vacío.',
+  })
+  readLiabilitySchedule(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LiabilityScheduleResponseDto> {
+    return this.practitionerAccounting.readLiabilitySchedule(id, actor);
+  }
+
+  /** Prende o apaga la automatización de un pasivo propio. */
+  @Audited({
+    action: 'LIABILITY_AUTOMATION_CHANGED',
+    entity: 'liability',
+    entityId: 'param:id',
+  })
+  @Patch('liabilities/:id/automation')
+  @Roles('PRACTITIONER')
+  @ApiOperation({ summary: 'Prender o apagar la automatización de un pasivo' })
+  setLiabilityAutomation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SetAutomationDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    return this.practitionerAccounting.setLiabilityAutomation(id, dto, actor);
+  }
+
+  /** "Registrar avance": liquida la próxima cuota pendiente del pasivo. */
+  @Audited({
+    action: 'PRACTITIONER_LIABILITY_PROGRESS_REGISTERED',
+    entity: 'liability',
+    entityId: 'param:id',
+  })
+  @Post('liabilities/:id/progress')
+  @Roles('PRACTITIONER')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Registrar el avance (pago de cuota) de un pasivo' })
+  registerLiabilityProgress(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RegisterLiabilityProgressDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ProgressRegisteredResponseDto> {
+    return this.practitionerAccounting.registerLiabilityProgress(
+      id,
+      dto,
+      actor,
+    );
   }
 }

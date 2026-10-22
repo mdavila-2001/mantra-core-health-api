@@ -1,0 +1,19 @@
+src/modules/terminology/import/xlsx-parser.spec.ts(4,23): error TS7016: Could not find a declaration file for module 'xlsx'. '/tmp/claude-0/-home-user/f30032fb-3999-534d-b01b-8344441866fe/scratchpad/api-work/node_modules/xlsx/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/xlsx` if it exists or add a new declaration (.d.ts) file containing `declare module 'xlsx';`
+src/modules/terminology/import/xlsx-parser.ts(10,23): error TS7016: Could not find a declaration file for module 'xlsx'. '/tmp/claude-0/-home-user/f30032fb-3999-534d-b01b-8344441866fe/scratchpad/api-work/node_modules/xlsx/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/xlsx` if it exists or add a new declaration (.d.ts) file containing `declare module 'xlsx';`
+src/modules/terminology/import/xlsx-parser.ts(11,44): error TS7016: Could not find a declaration file for module 'xlsx'. '/tmp/claude-0/-home-user/f30032fb-3999-534d-b01b-8344441866fe/scratchpad/api-work/node_modules/xlsx/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/xlsx` if it exists or add a new declaration (.d.ts) file containing `declare module 'xlsx';`
+src/modules/terminology/import/xlsx-parser.ts(110,42): error TS7006: Parameter 'record' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(110,50): error TS7006: Parameter 'recordIndex' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(128,33): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(129,21): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(129,27): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(139,24): error TS7006: Parameter 'column' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(154,39): error TS7006: Parameter 'record' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(154,47): error TS7006: Parameter 'index' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(155,25): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(158,23): error TS7006: Parameter 'cell' implicitly has an 'any' type.
+src/modules/terminology/import/xlsx-parser.ts(158,29): error TS7006: Parameter 'indexColumn' implicitly has an 'any' type.
+src/modules/terminology/services/concept-file-import.service.spec.ts(13,23): error TS7016: Could not find a declaration file for module 'xlsx'. '/tmp/claude-0/-home-user/f30032fb-3999-534d-b01b-8344441866fe/scratchpad/api-work/node_modules/xlsx/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/xlsx` if it exists or add a new declaration (.d.ts) file containing `declare module 'xlsx';`

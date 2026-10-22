@@ -1,0 +1,36 @@
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api-wt-sync\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api-wt-sync\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api-wt-sync\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" (from D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api-wt-sync\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:29060) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/modules/insurance/controllers/insurance-controllers.spec.ts (6.199 s)
+  ● Insurance controllers (delegación) › la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 4
+
+      Array [
+        "BILLING_OPERATOR",
+        "SECURITY_ADMIN",
+    +   "BILLING",
+    +   "FINANCE",
+    +   "INSURANCE_OPERATOR",
+    +   "USER",
+      ]
+
+    [0m [90m 257 |[39m   it([32m'la lectura de solicitudes exige BILLING_OPERATOR o SECURITY_ADMIN'[39m[33m,[39m () [33m=>[39m {
+     [90m 258 |[39m     [36mconst[39m roles [33m=[39m [33mReflect[39m[33m.[39mgetMetadata([32m'requiredRoles'[39m[33m,[39m [33mClaimsReadController[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 259 |[39m     expect(roles)[33m.[39mtoEqual([[32m'BILLING_OPERATOR'[39m[33m,[39m [32m'SECURITY_ADMIN'[39m])[33m;[39m
+     [90m     |[39m                   [31m[1m^[22m[39m
+     [90m 260 |[39m   })[33m;[39m
+     [90m 261 |[39m
+     [90m 262 |[39m   [90m/** Las membresías se resuelven por origen; las disputas conservan su política. */[39m[0m
+
+      at Object.toEqual (modules/insurance/controllers/insurance-controllers.spec.ts:259:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 20 passed, 21 total
+Snapshots:   0 total
+Time:        6.666 s
+Ran all test suites matching insurance-controllers.

@@ -22,7 +22,7 @@ import {
 import { SURVEYS, TARGET_TYPE_BY_CODE } from '../surveys.concepts';
 import { AppointmentBookings } from '../../scheduling/entities/appointment_bookings.entity';
 import { BookableSlots } from '../../scheduling/entities/bookable_slots.entity';
-import { SCHED } from '../../scheduling/scheduling.concepts';
+import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 
 /** Milisegundos de un día, para derivar la ventana de respuesta. */
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -30,7 +30,7 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 /**
  * Reparto del instrumento: a qué se asocia y a quién se le pide.
  *
- * La regla que gobierna todo este servicio es de REDESA y no es negociable:
+ * La regla que gobierna todo este servicio es de ALOVIDA y no es negociable:
  * **solo responde quien tiene una atención registrada y completada**. Por eso
  * la invitación se emite contra una reserva en estado completado y no de
  * cualquier otra forma; sin reserva completada no hay a quién invitar, y sin

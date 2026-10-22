@@ -21,7 +21,7 @@ perdida puede ser una dosis de medicación o un cobro duplicado.
 ## 3. Aislamiento de dominio verificable
 
 Un módulo no accede a repositorios/entidades de otro dominio directamente — se verifica
-mecánicamente con `tools/redesa/coverage-report.mjs` (`DIRECT_CROSS_DOMAIN_ACCESS`). Única
+mecánicamente con `tools/alovida/coverage-report.mjs` (`DIRECT_CROSS_DOMAIN_ACCESS`). Única
 excepción conocida y aceptada: `billing → practice`, de solo lectura y deliberadamente estrecha
 (`ARCH-001`, [matriz de trazabilidad](../governance/traceability-matrix.md)).
 
@@ -37,7 +37,7 @@ en el catálogo, gobernado, no una migración de esquema ni un despliegue de có
 Todo endpoint mutante (`POST`/`PUT`/`PATCH`/`DELETE`) debe declarar explícitamente `@Roles(...)`
 o `@Public()` — no puede quedar protegido solo implícitamente por el guard JWT global sin una
 decisión de autorización explícita. Verificado: **0** endpoints mutantes sin esta política
-(`ORPHAN_ENDPOINT` en `tools/redesa/coverage-report.mjs`).
+(`ORPHAN_ENDPOINT` en `tools/alovida/coverage-report.mjs`).
 
 ## 6. Acceso a PHI: rol Y alcance clínico, no rol O alcance
 

@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import {
+  StoragePublicationService,
+  guardStorageMutation,
+} from '../../../common/storage/storage-publication.service';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -41,6 +45,7 @@ export class LegalHoldService {
     private readonly repo: LegalHoldRepository,
     private readonly governanceRepo: GovernanceRepository,
     private readonly logger: PinoLogger,
+    @Optional() private readonly publication?: StoragePublicationService,
   ) {
     this.logger.setContext(LegalHoldService.name);
   }
@@ -51,6 +56,7 @@ export class LegalHoldService {
     actor: AuthenticatedUser,
   ): Promise<IdResultDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const active = await this.repo.findActive(
         tx,
         dto.tenantId,
@@ -98,6 +104,7 @@ export class LegalHoldService {
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
     return this.em.transactional(async (tx) => {
+      await guardStorageMutation(tx, this.publication);
       const hold = await this.repo.findById(tx, id);
       if (!hold)
         throw new ResourceNotFoundException('Legal hold no encontrado', { id });

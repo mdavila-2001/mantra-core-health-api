@@ -1,0 +1,537 @@
+{
+  "generatedAt": "2026-09-30T15:50:28.360Z",
+  "perLayer": {
+    "cie10es-diagnosticos": 102131,
+    "cie10es-procedimientos": 78948,
+    "cima": 2380,
+    "medlineplus-es": 1016,
+    "medlineplus-es-pruebas": 302,
+    "wikidata-anatomia": 1904
+  },
+  "summary": [
+    {
+      "codeSystem": "cie10es-diagnosticos-2026",
+      "version": "2026",
+      "concepts": 102131,
+      "designations": 102131,
+      "properties": 1131375,
+      "memberships": 229117,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "cie10es-procedimientos-2026",
+      "version": "2026",
+      "concepts": 78948,
+      "designations": 78948,
+      "properties": 868428,
+      "memberships": 160533,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "cima-vtm",
+      "version": "2026-09-30",
+      "concepts": 2380,
+      "designations": 2380,
+      "properties": 45264,
+      "memberships": 6745,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "medlineplus-es",
+      "version": "2026-09-30",
+      "concepts": 1016,
+      "designations": 3549,
+      "properties": 16562,
+      "memberships": 3090,
+      "relationships": 2835
+    },
+    {
+      "codeSystem": "medlineplus-es-lab",
+      "version": "2026-09-30",
+      "concepts": 302,
+      "designations": 796,
+      "properties": 4530,
+      "memberships": 604,
+      "relationships": 0
+    },
+    {
+      "codeSystem": "wikidata-anatomia",
+      "version": "2026-09-30",
+      "concepts": 1904,
+      "designations": 5505,
+      "properties": 20485,
+      "memberships": 3808,
+      "relationships": 0
+    }
+  ],
+  "sample": [
+    {
+      "codeSystem": {
+        "id": "75edf907-a1c9-2886-12ec-0889b5689b44",
+        "internalCode": "cie10es-diagnosticos-2026",
+        "name": "CIE-10-ES Diagnósticos 2026 (6.ª ed.)",
+        "canonicalUrl": "https://mantracore.health/fhir/CodeSystem/cie10es-diagnosticos-2026"
+      },
+      "source": {
+        "id": "ea6ab826-bec1-5db5-50d3-b91c7089f799",
+        "code": "SANIDAD_CIE10ES",
+        "name": "CIE-10-ES (Ministerio de Sanidad de España)",
+        "owner": "Ministerio de Sanidad — Unidad Técnica de Codificación CIE-10-ES",
+        "officialUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/home.htm",
+        "license": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU."
+      },
+      "version": {
+        "id": "e40eca8e-8e3d-8e44-5c1f-a94b6791277b",
+        "version": "2026"
+      },
+      "concept": [
+        "e6a3cf6b-0df7-6fc8-ea18-a1e73c136b3c",
+        "e40eca8e-8e3d-8e44-5c1f-a94b6791277b",
+        "A00",
+        "Cólera",
+        null,
+        "beff218d-ac3a-5e2c-844b-d21461dbdf5a"
+      ],
+      "properties": [
+        [
+          "e33ef9ec-11df-030a-265a-fb88dd8e5b3f",
+          "e6a3cf6b-0df7-6fc8-ea18-a1e73c136b3c",
+          "glossary-slug",
+          "string",
+          "\"cie10es-dx-a00\""
+        ],
+        [
+          "224b9f00-85e2-f923-ce56-31e8e5c34054",
+          "e6a3cf6b-0df7-6fc8-ea18-a1e73c136b3c",
+          "code_system",
+          "string",
+          "\"cie10es-diagnosticos-2026\""
+        ],
+        [
+          "d2249ca1-edfb-97e2-792e-797fc129bf8b",
+          "e6a3cf6b-0df7-6fc8-ea18-a1e73c136b3c",
+          "source",
+          "string",
+          "\"sanidad-cie10es-2026\""
+        ],
+        [
+          "1e669407-ef74-9764-ccd4-219e71ea765f",
+          "e6a3cf6b-0df7-6fc8-ea18-a1e73c136b3c",
+          "source_name",
+          "string",
+          "\"CIE-10-ES Diagnósticos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2025-05-22)\""
+        ]
+      ],
+      "memberships": [
+        [
+          "03db03a1-2a33-5406-b132-6d6b3172d8cd",
+          "9675c3e5-17aa-5426-9577-22e1be4103e8",
+          "e6a3cf6b-0df7-6fc8-ea18-a1e73c136b3c",
+          true
+        ],
+        [
+          "7ff70684-fc1d-51cb-8ddb-45c48d6d3b5d",
+          "15031608-d915-5d2a-a093-fadbfa0a1a2f",
+          "e6a3cf6b-0df7-6fc8-ea18-a1e73c136b3c",
+          true
+        ],
+        [
+          "3c8494d5-21ae-5262-bcd6-80d2ab589563",
+          "412c4930-b18d-540e-86b2-4436451f1f75",
+          "e6a3cf6b-0df7-6fc8-ea18-a1e73c136b3c",
+          true
+        ]
+      ]
+    },
+    {
+      "codeSystem": {
+        "id": "1e227e09-9d60-ac36-ce7c-3c1134937d8e",
+        "internalCode": "cie10es-procedimientos-2026",
+        "name": "CIE-10-ES Procedimientos 2026 (6.ª ed.)",
+        "canonicalUrl": "https://mantracore.health/fhir/CodeSystem/cie10es-procedimientos-2026"
+      },
+      "source": {
+        "id": "ea6ab826-bec1-5db5-50d3-b91c7089f799",
+        "code": "SANIDAD_CIE10ES",
+        "name": "CIE-10-ES (Ministerio de Sanidad de España)",
+        "owner": "Ministerio de Sanidad — Unidad Técnica de Codificación CIE-10-ES",
+        "officialUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/home.htm",
+        "license": "Ministerio de Sanidad, aviso legal (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-CM (© NCHS) e ICD-10-PCS (© CMS), obras del gobierno de EE. UU."
+      },
+      "version": {
+        "id": "7eb9c50b-314e-e45d-bdff-4a95761cfcd0",
+        "version": "2026"
+      },
+      "concept": [
+        "d6f1b47e-7450-c84a-8a60-c984ec4b8ef2",
+        "7eb9c50b-314e-e45d-bdff-4a95761cfcd0",
+        "0016070",
+        "Derivación de ventrículo cerebral a nasofaringe, con sustituto de tejido autólogo, abordaje abierto",
+        null,
+        "beff218d-ac3a-5e2c-844b-d21461dbdf5a"
+      ],
+      "properties": [
+        [
+          "ab24fb9d-3fa3-9015-7176-ef32320db782",
+          "d6f1b47e-7450-c84a-8a60-c984ec4b8ef2",
+          "glossary-slug",
+          "string",
+          "\"cie10es-px-0016070\""
+        ],
+        [
+          "62e7cfe6-9e8d-cd89-42e0-b5adfc1a6d00",
+          "d6f1b47e-7450-c84a-8a60-c984ec4b8ef2",
+          "code_system",
+          "string",
+          "\"cie10es-procedimientos-2026\""
+        ],
+        [
+          "49186744-b85d-1c70-f5f1-e6f7bb43c68f",
+          "d6f1b47e-7450-c84a-8a60-c984ec4b8ef2",
+          "source",
+          "string",
+          "\"sanidad-cie10es-2026\""
+        ],
+        [
+          "d7ea5812-aefc-0be8-c4f1-9dc10e1a07ec",
+          "d6f1b47e-7450-c84a-8a60-c984ec4b8ef2",
+          "source_name",
+          "string",
+          "\"CIE-10-ES Procedimientos, 6.ª edición 2026 — Ministerio de Sanidad (tabla de referencia del 2026-06-02)\""
+        ]
+      ],
+      "memberships": [
+        [
+          "ccea757a-a695-5652-a6c7-35f07fc05be0",
+          "9675c3e5-17aa-5426-9577-22e1be4103e8",
+          "d6f1b47e-7450-c84a-8a60-c984ec4b8ef2",
+          true
+        ],
+        [
+          "f01822d8-4477-5f89-931c-4ebaf388af1e",
+          "666eeae9-841f-5f2a-8044-2c28e72c0035",
+          "d6f1b47e-7450-c84a-8a60-c984ec4b8ef2",
+          true
+        ],
+        [
+          "d8f5796b-18c0-5beb-8bd9-8713cc41c8c8",
+          "9675c3e5-17aa-5426-9577-22e1be4103e8",
+          "79d4bc46-f760-bcd9-1f82-0e7789126832",
+          true
+        ]
+      ]
+    },
+    {
+      "codeSystem": {
+        "id": "8b7ed2d8-84a3-ecf2-4f90-961425e00bc4",
+        "internalCode": "cima-vtm",
+        "name": "CIMA — principios activos (VTM) con medicamentos autorizados",
+        "canonicalUrl": "https://mantracore.health/fhir/CodeSystem/cima-vtm"
+      },
+      "source": {
+        "id": "65ba927a-5d84-6672-7161-435646df6370",
+        "code": "AEMPS_CIMA",
+        "name": "CIMA — AEMPS",
+        "owner": "Agencia Española de Medicamentos y Productos Sanitarios (AEMPS)",
+        "officialUrl": "https://cima.aemps.es/cima/publico/home.html",
+        "license": "AEMPS, aviso legal: «Se autoriza la reproducción total o parcial de los contenidos de la web, siempre que se cite expresamente su origen» (con fecha de última actualización del documento). https://www.aemps.gob.es/aviso-legal/"
+      },
+      "version": {
+        "id": "62bbe61b-1e6b-fc93-7f1e-db158517b8f1",
+        "version": "2026-09-30"
+      },
+      "concept": [
+        "7bece576-415e-884d-f9db-c77d97807d57",
+        "62bbe61b-1e6b-fc93-7f1e-db158517b8f1",
+        "116084008",
+        "Abacavir",
+        "Abacavir Tarbis está indicado en el tratamiento antirretroviral combinado para el tratamiento de la infección por el Virus de la Inmunodeficiencia Humana (VIH) en adultos, adolescentes y niños (ver secciones 4.4 y 5.1).\n\nLa demostración del beneficio del tratamiento con Abacavir Tarbis se basa principalmente en los resultados de los estudios realizados con un régimen de dos veces al día en pacientes adultos que no habían recibido previamente un tratamiento combinado (ver sección 5.1)\n\nAntes de iniciar el tratamiento con abacavir, se debe llevar a cabo una prueba de detección del alelo HLA-B*5701 en los pacientes infectados por el VIH, independientemente del origen racial (ver sección 4.4). Abacavir no se debe emplear en pacientes portadores del alelo HLA-B*5701.",
+        "beff218d-ac3a-5e2c-844b-d21461dbdf5a"
+      ],
+      "properties": [
+        [
+          "d7694820-3a12-1d18-a208-1404b4d924ef",
+          "7bece576-415e-884d-f9db-c77d97807d57",
+          "glossary-slug",
+          "string",
+          "\"cima-vtm-116084008\""
+        ],
+        [
+          "a5ee7723-93f2-22aa-c3af-2bae9645f7e7",
+          "7bece576-415e-884d-f9db-c77d97807d57",
+          "code_system",
+          "string",
+          "\"cima-vtm\""
+        ],
+        [
+          "52532f9f-00ba-432c-b29e-7af608c0348b",
+          "7bece576-415e-884d-f9db-c77d97807d57",
+          "source",
+          "string",
+          "\"aemps-cima\""
+        ],
+        [
+          "c126b31c-5d4b-d7db-a76b-283b1b3d21be",
+          "7bece576-415e-884d-f9db-c77d97807d57",
+          "source_name",
+          "string",
+          "\"CIMA — Centro de Información online de Medicamentos de la AEMPS\""
+        ]
+      ],
+      "memberships": [
+        [
+          "a90bef29-ca18-5693-8058-04e1a2366e72",
+          "9675c3e5-17aa-5426-9577-22e1be4103e8",
+          "7bece576-415e-884d-f9db-c77d97807d57",
+          true
+        ],
+        [
+          "829889b3-c1be-59b2-88cb-da79f2fea6f4",
+          "c12418a9-ef5e-5a14-81ce-eafb1e894918",
+          "7bece576-415e-884d-f9db-c77d97807d57",
+          true
+        ],
+        [
+          "6b1be3f2-ee68-5aeb-aa9a-28df551bfcbf",
+          "412c4930-b18d-540e-86b2-4436451f1f75",
+          "7bece576-415e-884d-f9db-c77d97807d57",
+          true
+        ]
+      ]
+    },
+    {
+      "codeSystem": {
+        "id": "d25b6fce-fad5-12a0-4d93-81d6cae41c65",
+        "internalCode": "medlineplus-es",
+        "name": "MedlinePlus en español — temas de salud",
+        "canonicalUrl": "https://mantracore.health/fhir/CodeSystem/medlineplus-es"
+      },
+      "source": {
+        "id": "b09ef56d-89bf-f711-1aae-6e861e1d5f55",
+        "code": "NLM_MEDLINEPLUS_ES",
+        "name": "MedlinePlus en español (NLM)",
+        "owner": "U.S. National Library of Medicine",
+        "officialUrl": "https://medlineplus.gov/spanish/",
+        "license": "MedlinePlus (U.S. National Library of Medicine): los resúmenes de temas de salud y la información de pruebas médicas son de dominio público; atribución pedida: «Fuente: MedlinePlus, National Library of Medicine». La Enciclopedia A.D.A.M. y las monografías de medicamentos NO son de dominio público y no se importan. https://medlineplus.gov/about/using/usingcontent/"
+      },
+      "version": {
+        "id": "99e1245b-98c6-98e3-d338-6b9b3459b1d6",
+        "version": "2026-09-30"
+      },
+      "concept": [
+        "056be919-c312-9410-dce6-8ba9163eb5e2",
+        "99e1245b-98c6-98e3-d338-6b9b3459b1d6",
+        "6604",
+        "¿Cuánto ejercicio debo hacer?",
+        "Hacer ejercicio en forma regular es una de las mejores cosas que puede hacer para su salud. Tiene muchos beneficios, incluyendo mejorar su salud general y estado físico y bajar su riesgo de muchas enfermedades crónicas. Para obtener el mayor beneficio, las recomendaciones sobre la cantidad de ejercicio que necesita son:\n\nPara adultos\n\nTrate de hacer un total entre 150 a 300 minutos de actividad aeróbica de intensidad moderada o entre 75 a 150 minutos de alta intensidad cada semana, o una combinación de ambos:\n\n• Trate de distribuir esta cantidad de ejercicio durante varios días de la semana. Eso es mejor que tratar de hacer todo en sólo un par de días\n\n• Es posible que algunos días no disponga de períodos largos de tiempo para hacer ejercicio. Puede comenzar lentamente y tratar de dividir sus ejercicios en segmentos. Incluso cortos periodos de ejercicio pueden ayudar\n\n• Las actividades aeróbicas incluyen caminar rápido, trotar, nadar y andar en bicicleta\n\n• El ejercicio de intensidad moderada significa que usted debería poder decir algunas palabras de corrido, pero no poder cantar, por ejemplo\n\n• El ejercicio de alta intensidad significa que, al hacer esta actividad física, usted no puede decir más que unas pocas palabras sin tener que parar para tomar aire\n\nAdemás, haga actividades de fortalecimiento dos o más días a la semana:\n\n• Las actividades de fortalecimiento incluyen levantar pesas, trabajar con bandas elásticas y hacer abdominales y flexiones\n\n• Elija actividades que trabajen todas las diferentes partes del cuerpo: piernas, caderas, espalda, pecho, estómago, hombros y brazos. Debe repetir cada ejercicio entre 8 y 12 veces. En la medida que gane fuerza, aumente a dos o tres series de cada ejercicio para mejores resultados\n\nSi usted es una persona mayor, también puede beneficiarse de una mezcla de actividades que incluya ejercicios aeróbicos, entrenamiento de fuerza o resistencia y entrenamiento del equilibrio. El entrenamiento del equilibrio, como caminar con los talones y luego apoyar las puntas de los pies o mantenerse de pie sobre una sola pierna, puede ayudar a mejorar su estabilidad y prevenir caídas. Antes de comenzar a hacer ejercicio, consulte con su proveedor de atención médica para saber el tipo o la cantidad de actividad más adecuada para usted en función de su estado físico y su salud.\n\nPara niños preescolares (de 3 a 5 años)\n\nPara ayudar a los niños preescolares con su desarrollo y crecimiento, ellos deben estar físicamente activos durante el día.\n\n• Deben practicar juegos estructurados y desestructurados. El juego estructurado tiene un objetivo y está dirigido por un adulto. Ejemplos incluyen practicar un deporte o un juego. El juego no estructurado es libre y creativo, como jugar en el patio de recreo\n\n• Incentive el juego activo con una variedad de actividades\n\nPara niños y adolescentes\n\nDeben hacer 60 minutos o más de actividad física todos los días, la mayoría de intensidad moderada:\n\n• Las actividades deben variar y ser adecuadas para la edad y el desarrollo físico del niño\n\n• Las actividades aeróbicas de intensidad moderada incluyen caminar, correr, saltar, jugar en el patio, jugar al baloncesto y andar en bicicleta\n\nComo parte de los 60 minutos o más de actividad física diaria, deben tratar de hacer cada una de las siguientes actividades al menos tres días a la semana: Actividad aeróbica de alta intensidad, fortalecimiento muscular y fortalecimiento de los huesos:\n\n• Las actividades aeróbicas de alta intensidad incluyen correr, saltos de tijera (jumping jacks en inglés) y nadar rápido\n\n• El ejercicio para fortalecer los músculos incluye jugar en el parque, jugar a las remolcadas, y hacer flexiones y dominadas\n\n• Las actividades de fortalecimiento óseo incluyen saltar a la cuerda, saltar con una sola pierna, hacer saltos de tijera, jugar vóleibol y entrenar con bandas elásticas\n\nPersonas mayores, mujeres embarazadas y personas con problemas crónicos de salud\n\nLas personas mayores, las mujeres embarazadas y quienes tienen discapacidades deben consultar con su proveedor de atención médica sobre cuánto ejercicio requieren y qué tipos de ellos pueden hacer.\n\nSugerencias para el ejercicio\n\nLas personas que están tratando de perder peso pueden necesitar hacer más ejercicio. También necesitan ajustar su dieta, para poder quemar más calorías de las que consumen.\n\nSi ha estado inactivo, puede que tenga que comenzar a ejercitarse despacio. Puede seguir agregando más actividad física lentamente. Cuanto más pueda hacer, mejor. Pero trate de no abrumarse y haga lo que pueda. Hacer un poco de ejercicio es siempre mejor que no hacer nada. Incluso pequeños incrementos de ejercicio pueden ser beneficiosos para su salud.\n\nNIH: Instituto Nacional del Corazón, los Pulmones y la Sangre",
+        "beff218d-ac3a-5e2c-844b-d21461dbdf5a"
+      ],
+      "properties": [
+        [
+          "fba88634-a4f6-f4ab-c46c-3061767fdc67",
+          "056be919-c312-9410-dce6-8ba9163eb5e2",
+          "glossary-slug",
+          "string",
+          "\"medlineplus-es-6604\""
+        ],
+        [
+          "23a8a17c-f7cc-1e86-77c9-862570632cc9",
+          "056be919-c312-9410-dce6-8ba9163eb5e2",
+          "code_system",
+          "string",
+          "\"medlineplus-es\""
+        ],
+        [
+          "051b690d-b9c1-8c60-a537-5ee905b25dbb",
+          "056be919-c312-9410-dce6-8ba9163eb5e2",
+          "source",
+          "string",
+          "\"nlm-medlineplus-es\""
+        ],
+        [
+          "baccd1ef-4eaf-637f-308e-f257f9247d1b",
+          "056be919-c312-9410-dce6-8ba9163eb5e2",
+          "source_name",
+          "string",
+          "\"MedlinePlus en español — Temas de salud (U.S. National Library of Medicine)\""
+        ]
+      ],
+      "memberships": [
+        [
+          "ce4584e0-de9b-50c7-bb29-130e76af486a",
+          "9675c3e5-17aa-5426-9577-22e1be4103e8",
+          "056be919-c312-9410-dce6-8ba9163eb5e2",
+          true
+        ],
+        [
+          "d9649323-5f89-59e9-b551-248ab429c869",
+          "d6725316-d3e6-5f92-adb7-048338a70b33",
+          "056be919-c312-9410-dce6-8ba9163eb5e2",
+          true
+        ],
+        [
+          "856f272f-275e-5da9-8ecc-8b877fa4dbd0",
+          "9675c3e5-17aa-5426-9577-22e1be4103e8",
+          "61d57dbd-2fe1-9442-965c-d562b52014af",
+          true
+        ]
+      ]
+    },
+    {
+      "codeSystem": {
+        "id": "0df12d5d-172f-c189-b705-ac1cd417a8e0",
+        "internalCode": "medlineplus-es-lab",
+        "name": "MedlinePlus en español — pruebas médicas",
+        "canonicalUrl": "https://mantracore.health/fhir/CodeSystem/medlineplus-es-lab"
+      },
+      "source": {
+        "id": "b09ef56d-89bf-f711-1aae-6e861e1d5f55",
+        "code": "NLM_MEDLINEPLUS_ES",
+        "name": "MedlinePlus en español (NLM)",
+        "owner": "U.S. National Library of Medicine",
+        "officialUrl": "https://medlineplus.gov/spanish/pruebas-de-laboratorio/",
+        "license": "MedlinePlus (U.S. National Library of Medicine): los resúmenes de temas de salud y la información de pruebas médicas son de dominio público; atribución pedida: «Fuente: MedlinePlus, National Library of Medicine». La Enciclopedia A.D.A.M. y las monografías de medicamentos NO son de dominio público y no se importan. https://medlineplus.gov/about/using/usingcontent/"
+      },
+      "version": {
+        "id": "fe0f51d4-997d-9b68-81b5-0e715f6fe4d7",
+        "version": "2026-09-30"
+      },
+      "concept": [
+        "6beca598-125c-2905-0ed2-450e9061a4a0",
+        "fe0f51d4-997d-9b68-81b5-0e715f6fe4d7",
+        "17-hidroxiprogesterona",
+        "17-hidroxiprogesterona",
+        "Una prueba de 17-hidroxiprogesterona mide la cantidad de 17-hidroxiprogesterona (17-OHP) en una muestra de sangre. La 17-OHP es una sustancia que producen las glándulas suprarrenales. Los proveedores de atención médica pueden usar esta prueba para ayudar a diagnosticar un grupo de trastornos genéticos poco comunes que afectan las glándulas suprarrenales. Esos trastornos genéticos de las glándulas suprarrenales se conocen como hiperplasia suprarrenal congénita (HSC). Las glándulas suprarrenales son dos pequeños órganos que se encuentran encima de cada riñón. Producen diferentes tipos de hormonas, que son mensajeros químicos en el torrente sanguíneo que controlan las acciones de ciertas células u órganos.\n\nNormalmente, las glándulas suprarrenales utilizan 17-OHP para producir una hormona llamada cortisol. Esta hormona ayuda a controlar sus niveles de energía, glucosa en la sangre (también llamada azúcar en la sangre), presión arterial y la respuesta de su cuerpo al estrés, las enfermedades y las lesiones.\n\nPara utilizar la 17-OHP, las glándulas suprarrenales necesitan una enzima llamada 21-hidroxilasa. Una enzima es una proteína que acelera ciertas reacciones químicas en el cuerpo. El cuerpo produce la enzima 21-hidroxilasa gracias a un gen específico. Los genes son partes del ADN de las células que se heredan de los padres. Usted hereda dos copias de cada gen, una de cada padre. Los genes contienen información que determina cómo es su cuerpo y cómo funciona.\n\nUna mutación en este gen causa la HSC. Los cambios en los genes también se denominan variantes genéticas o mutaciones. En el tipo más común de HSC, el cuerpo no puede producir suficiente 21-hidroxilasa. Esto hace que las glándulas suprarrenales trabajen más para utilizar la 17-OHP para producir cortisol. Cuando las glándulas suprarrenales trabajan más, se agrandan y producen niveles anormalmente altos de 17-OHP.\n\nSin suficiente 21-hidroxilasa para ayudar a utilizar la 17-OHP para producir cortisol, los niveles de 17-OHP aumentan. Para eliminar este exceso de 17-OHP, las glándulas suprarrenales la utilizan para producir más hormonas sexuales masculinas de lo normal. Esto ocurre en niños y adultos de ambos sexos. Por ello, las pruebas de hormonas sexuales masculinas, incluida la testosterona, se suelen realizar junto con las pruebas de 17-OHP para ayudar a diagnosticar la HSC.",
+        "beff218d-ac3a-5e2c-844b-d21461dbdf5a"
+      ],
+      "properties": [
+        [
+          "36be6e16-db3a-97f0-090b-f27124178907",
+          "6beca598-125c-2905-0ed2-450e9061a4a0",
+          "glossary-slug",
+          "string",
+          "\"medlineplus-lab-17-hidroxiprogesterona\""
+        ],
+        [
+          "8b8ca7ed-5858-ab0c-437f-46c681512083",
+          "6beca598-125c-2905-0ed2-450e9061a4a0",
+          "code_system",
+          "string",
+          "\"medlineplus-es-lab\""
+        ],
+        [
+          "84f63f70-9b91-48c3-cc91-123171ffebe0",
+          "6beca598-125c-2905-0ed2-450e9061a4a0",
+          "source",
+          "string",
+          "\"nlm-medlineplus-es-pruebas\""
+        ],
+        [
+          "8ae11482-5977-f57c-6805-95980c3cc251",
+          "6beca598-125c-2905-0ed2-450e9061a4a0",
+          "source_name",
+          "string",
+          "\"MedlinePlus en español — Pruebas médicas (U.S. National Library of Medicine)\""
+        ]
+      ],
+      "memberships": [
+        [
+          "70164af9-55d8-55b4-b276-f7717746f58c",
+          "9675c3e5-17aa-5426-9577-22e1be4103e8",
+          "6beca598-125c-2905-0ed2-450e9061a4a0",
+          true
+        ],
+        [
+          "6b9dd1e1-8a58-512b-8f24-715de48b91ee",
+          "7153001b-f514-5f9a-928f-9c5bffef626a",
+          "6beca598-125c-2905-0ed2-450e9061a4a0",
+          true
+        ],
+        [
+          "e21346a8-7bc1-57e7-8518-6a9cd22009d1",
+          "9675c3e5-17aa-5426-9577-22e1be4103e8",
+          "463501d9-77a0-b758-ad25-fc31655a870f",
+          true
+        ]
+      ]
+    },
+    {
+      "codeSystem": {
+        "id": "4bf9b0c7-6807-653f-9ee8-0f8ea4339fcc",
+        "internalCode": "wikidata-anatomia",
+        "name": "Wikidata — anatomía con identificador TA98/TA2",
+        "canonicalUrl": "https://mantracore.health/fhir/CodeSystem/wikidata-anatomia"
+      },
+      "source": {
+        "id": "dd33e237-baf6-a10d-229d-6963ae849a2e",
+        "code": "WIKIDATA",
+        "name": "Wikidata (Wikimedia Foundation, CC0)",
+        "owner": "Comunidad de Wikidata / Wikimedia Foundation",
+        "officialUrl": "https://www.wikidata.org/",
+        "license": "Wikidata: datos bajo CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/). Etiquetas y descripciones en castellano aportadas por la comunidad de Wikidata. Imagen: licencia de su archivo en Wikimedia Commons."
+      },
+      "version": {
+        "id": "a2c3f209-471f-595f-3c0a-61dc13479e93",
+        "version": "2026-09-30"
+      },
+      "concept": [
+        "bf3ddc85-be92-c357-1ffe-e29d1fba75d7",
+        "a2c3f209-471f-595f-3c0a-61dc13479e93",
+        "Q9597",
+        "Abdomen",
+        "cavidad del cuerpo humano, situada entre el tórax y la pelvis",
+        "beff218d-ac3a-5e2c-844b-d21461dbdf5a"
+      ],
+      "properties": [
+        [
+          "1bd0d53a-7c0f-75c7-be8f-0c792c7a869e",
+          "bf3ddc85-be92-c357-1ffe-e29d1fba75d7",
+          "glossary-slug",
+          "string",
+          "\"wikidata-anatomia-q9597\""
+        ],
+        [
+          "6547bbde-9aa3-0255-0c8c-e0440942b229",
+          "bf3ddc85-be92-c357-1ffe-e29d1fba75d7",
+          "code_system",
+          "string",
+          "\"wikidata-anatomia\""
+        ],
+        [
+          "ea243d4b-02a1-7b68-545a-e2617b267abb",
+          "bf3ddc85-be92-c357-1ffe-e29d1fba75d7",
+          "source",
+          "string",
+          "\"wikidata\""
+        ],
+        [
+          "3c7443d0-4765-f2cd-ffb7-1223897222ff",
+          "bf3ddc85-be92-c357-1ffe-e29d1fba75d7",
+          "source_name",
+          "string",
+          "\"Wikidata — estructuras anatómicas (Q4936952) con identificador TA98 (P1323) o TA2 (P7173); etiqueta y descripción ES de la comunidad\""
+        ]
+      ],
+      "memberships": [
+        [
+          "ef87f513-2a1d-5466-8a4a-4441526c2819",
+          "9675c3e5-17aa-5426-9577-22e1be4103e8",
+          "bf3ddc85-be92-c357-1ffe-e29d1fba75d7",
+          true
+        ],
+        [
+          "0eeb476c-be52-5c98-a689-c9ba28575c0d",
+          "4f5423be-98cd-5be4-ad48-1eed4527dad3",
+          "bf3ddc85-be92-c357-1ffe-e29d1fba75d7",
+          true
+        ],
+        [
+          "9c990beb-8275-5c1a-a998-b00b275e12b4",
+          "9675c3e5-17aa-5426-9577-22e1be4103e8",
+          "55500402-2dd5-5a23-e5d4-e0dde996c080",
+          true
+        ]
+      ]
+    }
+  ]
+}

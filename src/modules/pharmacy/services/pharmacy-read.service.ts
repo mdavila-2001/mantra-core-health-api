@@ -1,11 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { requireTenantId, ResourceNotFoundException } from '../../../common';
+import {
+  CONCEPTS,
+  marketplaceTenantScope,
+  ResourceNotFoundException,
+} from '../../../common';
 import type { Addresses } from '../../common/entities';
+import { DOCUMENT_TYPE_CODE_BY_ROLE } from '../../directory/affiliation-documents';
 import type { CatalogConcepts } from '../../terminology/entities';
 import type {
   Pharmacies,
   PharmacyPriceLists,
+  PharmacyProducts,
   PharmacySites,
 } from '../entities';
 import type {
@@ -13,7 +19,10 @@ import type {
   PharmacyDetailDto,
   PharmacyDirectoryItemDto,
   PharmacyDirectoryResponseDto,
+  PharmacyProductReadDto,
   PharmacyProductSearchResponseDto,
+  PharmacySiteListItemDto,
+  PharmacySiteListResponseDto,
   PharmacySitePricesResponseDto,
   PharmacySiteReadDto,
 } from '../dto';
@@ -47,7 +56,7 @@ export class PharmacyReadService {
 
   /** El directorio: farmacias publicadas del tenant, con sus números. */
   async listPharmacies(): Promise<PharmacyDirectoryResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) return { items: [], count: 0 };
@@ -85,7 +94,7 @@ export class PharmacyReadService {
 
   /** El perfil de una farmacia: su ficha y sus sedes con dirección resuelta. */
   async getPharmacy(id: string): Promise<PharmacyDetailDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacy = await this.readRepo.findVisibleById(em, tenantId, id);
     // 404 también para la de otro tenant o la no publicada: confirmar que ese
@@ -96,9 +105,10 @@ export class PharmacyReadService {
       });
     }
 
-    const [sites, productOwners] = await Promise.all([
+    const [sites, productOwners, legal] = await Promise.all([
       this.readRepo.findActiveSites(em, [pharmacy.id]),
       this.readRepo.findActiveProductOwners(em, [pharmacy.id]),
+      this.resolveLegalProfile(em, pharmacy.tenantId),
     ]);
     const { addressBySite, conceptById } = await this.resolveSiteContext(
       em,
@@ -116,7 +126,157 @@ export class PharmacyReadService {
       sites: sites.map((site) =>
         this.toSiteItem(site, addressBySite.get(site.id), conceptById),
       ),
+      ...legal,
     };
+  }
+
+  /**
+   * La ficha legal de la farmacia, leída de su organización: NIT (documento
+   * `NIT_EXHIBICION` del alta institucional), forma societaria
+   * (`directory.tenants`) y casa matriz (`common.addresses` de uso laboral).
+   *
+   * Sólo se atribuye cuando la organización dueña **es una farmacia**
+   * (`TENANT_TYPE_PHARMACY`): si la farmacia cuelga de otra clase de
+   * organización, esos datos son de otra entidad y servirlos como de esta
+   * farmacia sería afirmar algo falso. Lo que no está llega `null`.
+   *
+   * @param em - Contexto de persistencia de esta lectura.
+   * @param tenantId - La organización dueña de la farmacia.
+   */
+  private async resolveLegalProfile(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<PharmacyLegalProfile> {
+    const tenant = await this.readRepo.findTenant(em, tenantId);
+    if (
+      !tenant ||
+      tenant.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_PHARMACY
+    ) {
+      return NO_LEGAL_PROFILE;
+    }
+
+    const [documents, headquarters] = await Promise.all([
+      this.readRepo.findActiveAffiliationDocuments(em, tenant.id),
+      this.readRepo.findHeadquartersAddress(em, tenant.id, new Date()),
+    ]);
+    const concepts = await this.readRepo.findConcepts(
+      em,
+      unique([
+        tenant.legalEntityTypeConceptId,
+        ...documents.map((document) => document.documentTypeConceptId),
+      ]),
+    );
+    const conceptById = new Map(
+      concepts.map((concept) => [concept.id, concept]),
+    );
+
+    // Los documentos vienen del más nuevo al más viejo: ante dos NIT activos
+    // (una corrección cargada sin dar de baja el anterior) gana el último.
+    const taxDocument = documents.find(
+      (document) =>
+        conceptById.get(document.documentTypeConceptId)?.code ===
+        TAX_DOCUMENT_TYPE_CODE,
+    );
+    let taxId = nonBlank(taxDocument?.documentNumber);
+    if (taxId === null && taxDocument?.identifierId) {
+      const [identifier] = await this.readRepo.findIdentifiers(em, [
+        taxDocument.identifierId,
+      ]);
+      taxId = nonBlank(identifier?.value);
+    }
+
+    const latitude = coordinate(headquarters?.latitude);
+    const longitude = coordinate(headquarters?.longitude);
+    return {
+      taxId,
+      // La genérica `COMPANY` es la de las filas anteriores al diccionario de
+      // formas societarias: nadie la eligió, así que no se sirve como una.
+      companyType:
+        tenant.legalEntityTypeConceptId === CONCEPTS.LEGAL_ENTITY_COMPANY
+          ? null
+          : optionalConcept(conceptById, tenant.legalEntityTypeConceptId),
+      legalAddressText: headquarters ? addressText(headquarters) : null,
+      headquarters:
+        latitude !== null && longitude !== null
+          ? { latitude, longitude }
+          : null,
+    };
+  }
+
+  /**
+   * Las sedes publicadas del tenant, sueltas: lo que «elegir farmacia»
+   * necesita antes de que la persona haya buscado nada — a diferencia de
+   * {@link getPharmacy}, que exige entrar primero a UNA farmacia.
+   *
+   * Reusa exactamente los mismos finders que {@link listPharmacies} y
+   * {@link getPharmacy} (sedes publicadas, dirección resuelta) más el
+   * Haversine que ya usa `pharmacy_inventory` para `availability` — es el
+   * mismo cálculo, sólo que acá se lista sin evaluarlo contra pedidos.
+   *
+   * @param query - Texto, origen (para ordenar por distancia) y tope.
+   */
+  async listSites(query: {
+    search?: string;
+    origin?: GeoPoint;
+    limit: number;
+  }): Promise<PharmacySiteListResponseDto> {
+    const tenantId = marketplaceTenantScope();
+    const em = this.em.fork();
+    const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
+    if (pharmacies.length === 0) return { items: [], count: 0 };
+
+    const pharmacyIds = pharmacies.map((pharmacy) => pharmacy.id);
+    const [sites, productOwners] = await Promise.all([
+      this.readRepo.findActiveSites(em, pharmacyIds),
+      this.readRepo.findActiveProductOwners(em, pharmacyIds),
+    ]);
+    const { addressBySite } = await this.resolveSiteContext(em, sites, []);
+
+    const pharmacyById = new Map(
+      pharmacies.map((pharmacy) => [pharmacy.id, pharmacy]),
+    );
+    const productCount = countBy(productOwners, (row) => row.pharmacyId);
+    const term = query.search?.trim().toLocaleLowerCase('es');
+
+    const items: PharmacySiteListItemDto[] = sites
+      .map((site) => {
+        const pharmacy = pharmacyById.get(site.pharmacyId)!;
+        const address = addressBySite.get(site.id);
+        const latitude = coordinate(address?.latitude);
+        const longitude = coordinate(address?.longitude);
+        return {
+          siteId: site.id,
+          siteName: site.name,
+          pharmacyId: pharmacy.id,
+          pharmacyName: displayName(pharmacy),
+          addressText: address ? addressText(address) : null,
+          latitude,
+          longitude,
+          distanceKm:
+            query.origin && latitude !== null && longitude !== null
+              ? haversineKm(query.origin, { lat: latitude, lng: longitude })
+              : null,
+          homeDeliveryAvailable: site.homeDeliveryAvailable ?? null,
+          pickupAvailable: site.pickupAvailable ?? null,
+          productCount: productCount.get(pharmacy.id) ?? 0,
+        };
+      })
+      .filter(
+        (item) =>
+          term === undefined ||
+          term === '' ||
+          item.pharmacyName.toLocaleLowerCase('es').includes(term) ||
+          item.siteName.toLocaleLowerCase('es').includes(term),
+      )
+      .sort(
+        (a, b) =>
+          (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity) ||
+          a.pharmacyName.localeCompare(b.pharmacyName, 'es') ||
+          a.siteName.localeCompare(b.siteName, 'es'),
+      )
+      .slice(0, query.limit);
+
+    return { items, count: items.length };
   }
 
   /**
@@ -124,25 +284,36 @@ export class PharmacyReadService {
    *
    * `conceptId` acota por el medicamento del vademécum: es el mismo
    * `medication_concept_id` con que la receta identifica el fármaco, así que
-   * una prescripción encuentra sus productos sin traducir nada.
+   * una prescripción encuentra sus productos sin traducir nada. `pharmacyId`
+   * acota a lo publicado por una sola farmacia — una no visible o ajena no
+   * existe para esta lectura, así que devuelve vacío sin filtrar información.
    *
-   * @param filter - Texto o medicamento del vademécum.
+   * @param filter - Texto, medicamento del vademécum, y farmacia puntual.
    * @param limit - Tope del listado.
    */
   async searchProducts(
-    filter: ProductSearchFilter,
+    filter: ProductSearchFilter & { pharmacyId?: string },
     limit: number,
   ): Promise<PharmacyProductSearchResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
     if (pharmacies.length === 0) {
       return { items: [], limit, truncated: false };
     }
 
+    const pharmacyIds = filter.pharmacyId
+      ? pharmacies
+          .filter((pharmacy) => pharmacy.id === filter.pharmacyId)
+          .map((pharmacy) => pharmacy.id)
+      : pharmacies.map((pharmacy) => pharmacy.id);
+    if (pharmacyIds.length === 0) {
+      return { items: [], limit, truncated: false };
+    }
+
     const rows = await this.readRepo.findActiveProducts(
       em,
-      pharmacies.map((pharmacy) => pharmacy.id),
+      pharmacyIds,
       filter,
       limit + 1,
     );
@@ -165,19 +336,13 @@ export class PharmacyReadService {
     );
 
     return {
-      items: page.map((row) => ({
-        id: row.id,
-        pharmacyId: row.pharmacyId,
-        pharmacyName: nameByPharmacy.get(row.pharmacyId) ?? 'Sin registrar',
-        productCode: row.productCode,
-        brandName: row.brandName ?? null,
-        genericName: row.genericName ?? null,
-        strengthText: row.strengthText ?? null,
-        packageSizeText: row.packageSizeText ?? null,
-        dosageForm: optionalConcept(conceptById, row.dosageFormConceptId),
-        medication: optionalConcept(conceptById, row.medicationConceptId),
-        requiresPrescription: row.requiresPrescription ?? null,
-      })),
+      items: page.map((row) =>
+        toProductReadDto(
+          row,
+          nameByPharmacy.get(row.pharmacyId) ?? 'Sin registrar',
+          conceptById,
+        ),
+      ),
       limit,
       truncated,
     };
@@ -199,7 +364,7 @@ export class PharmacyReadService {
     siteId: string,
     productId?: string,
   ): Promise<PharmacySitePricesResponseDto> {
-    const tenantId = requireTenantId();
+    const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
 
     const site = await this.readRepo.findActiveSiteById(em, siteId);
@@ -264,6 +429,7 @@ export class PharmacyReadService {
           strengthText: product.strengthText ?? null,
           packageSizeText: product.packageSizeText ?? null,
           medication: optionalConcept(conceptById, product.medicationConceptId),
+          requiresPrescription: product.requiresPrescription ?? null,
           priceListId: list.id,
           priceListCode: list.code,
           currency: optionalConcept(conceptById, list.currencyConceptId),
@@ -402,18 +568,65 @@ export class PharmacyReadService {
   }
 }
 
+/** Código del tipo de documento de afiliación que lleva el NIT. */
+const TAX_DOCUMENT_TYPE_CODE = DOCUMENT_TYPE_CODE_BY_ROLE.TAX_IDENTIFIER_DOC;
+
+/** Los campos legales que el perfil suma sobre el item del directorio. */
+type PharmacyLegalProfile = Pick<
+  PharmacyDetailDto,
+  'taxId' | 'companyType' | 'legalAddressText' | 'headquarters'
+>;
+
+/** La ficha legal cuando no hay de dónde leerla: todo dicho `null`. */
+const NO_LEGAL_PROFILE: PharmacyLegalProfile = {
+  taxId: null,
+  companyType: null,
+  legalAddressText: null,
+  headquarters: null,
+};
+
+/** El texto recortado, o `null` si no queda nada. */
+function nonBlank(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
 /** El nombre con que la farmacia se muestra: comercial, o la razón social. */
 export function displayName(pharmacy: Pharmacies): string {
   const trade = pharmacy.tradeName?.trim();
   return trade && trade !== '' ? trade : pharmacy.legalName;
 }
 
+/**
+ * Un producto como lo lista la búsqueda (`GET /pharmacy/products`), que es
+ * también lo que responde el `PATCH` de edición (P47 §2).
+ */
+export function toProductReadDto(
+  row: PharmacyProducts,
+  pharmacyName: string,
+  concepts: ReadonlyMap<string, CatalogConcepts>,
+): PharmacyProductReadDto {
+  return {
+    id: row.id,
+    pharmacyId: row.pharmacyId,
+    pharmacyName,
+    productCode: row.productCode,
+    brandName: row.brandName ?? null,
+    genericName: row.genericName ?? null,
+    strengthText: row.strengthText ?? null,
+    packageSizeText: row.packageSizeText ?? null,
+    dosageForm: optionalConcept(concepts, row.dosageFormConceptId),
+    medication: optionalConcept(concepts, row.medicationConceptId),
+    requiresPrescription: row.requiresPrescription ?? null,
+  };
+}
+
 /** La dirección en una línea, o null si no tiene ninguna parte con texto. */
 export function addressText(address: Addresses): string | null {
-  const partes = [address.lines, address.city, address.postalCode]
-    .map((parte) => parte?.trim())
-    .filter((parte): parte is string => Boolean(parte));
-  return partes.length === 0 ? null : partes.join(', ');
+  const parts = [address.lines, address.city, address.postalCode]
+    .map((part) => part?.trim())
+    .filter((part): part is string => Boolean(part));
+  return parts.length === 0 ? null : parts.join(', ');
 }
 
 /** Una coordenada `numeric` (string de BD) como número, o null. */
@@ -421,6 +634,38 @@ export function coordinate(value: string | undefined): number | null {
   if (value === undefined) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+/** Un punto WGS84 desde donde medir distancias (carril A, H4). */
+export interface GeoPoint {
+  readonly lat: number;
+  readonly lng: number;
+}
+
+/** Radio medio terrestre en km, para el Haversine. */
+const EARTH_RADIUS_KM = 6371;
+
+/**
+ * Distancia Haversine en km entre dos puntos WGS84, con un decimal.
+ *
+ * Copiado a propósito de
+ * `pharmacy_inventory/services/pharmacy-inventory-read.service.ts:haversineKm`
+ * en vez de importarlo: ese módulo es de sólo lectura para este carril
+ * (reservado de otro dueño) y esta cara de lectura no depende de él. Es
+ * distancia en línea recta sobre la esfera media terrestre — suficiente para
+ * ordenar sedes de una ciudad, no pretende ser distancia de ruta.
+ */
+export function haversineKm(a: GeoPoint, b: GeoPoint): number {
+  const toRad = (degrees: number): number => (degrees * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const withoutLat = Math.sin(dLat / 2);
+  const withoutLng = Math.sin(dLng / 2);
+  const h =
+    withoutLat * withoutLat +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * withoutLng * withoutLng;
+  const distance = 2 * EARTH_RADIUS_KM * Math.asin(Math.sqrt(h));
+  return Math.round(distance * 10) / 10;
 }
 
 /** Si una lista es de mostrador: sin aseguradora de por medio. */

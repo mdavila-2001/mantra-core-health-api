@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   ConcurrencyConflictException,
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
@@ -10,12 +11,31 @@ import {
 } from '../../../common';
 import { CareEpisodesRepository, EncountersRepository } from '../repositories';
 import {
+  AttachFileToEncounterDto,
   CheckInEncounterDto,
   CloseEncounterDto,
   EncounterResponseDto,
 } from '../dto';
+import { Encounters } from '../entities';
 import { CLIN } from '../clinical.concepts';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
+import { EncounterSealService } from './encounter-seal.service';
+import { ClinicalReadService } from './clinical-read.service';
+// P25 (BR-11): adjuntar un archivo ya subido al encuentro por su ruta clínica,
+// calcado de `ProceduresService.attachFile`.
+import { FilesService } from '../../common/services';
+import {
+  OwnerType,
+  type FileLinkResponseDto,
+  type LinkedFilePageDto,
+} from '../../common/dto';
+
+/**
+ * Código del estado `ENCOUNTER_FINISHED` (`CLIN.ENCOUNTER_FINISHED` sólo
+ * expone el uuid derivado; el 409 de la subtarea 4.2 necesita el código
+ * legible del concepto, no su identificador).
+ */
+const ENCOUNTER_FINISHED_STATUS_CODE = 'ENC_FINISHED';
 
 /**
  * UC-08-02 (check-in) y UC-08-14 (cierre) de encuentros. El check-in abre el
@@ -32,15 +52,81 @@ export class EncountersService {
    * @param episodesRepo - Valor de episodes repo requerido por la operación.
    * @param clinicalNotifications - Emisión in-app del carril P1.
    * @param logger - Valor de logger requerido por la operación.
+   * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
+   * @param filesService - Vincula archivos ya subidos al encuentro (P25).
    */
   constructor(
     private readonly em: EntityManager,
     private readonly encountersRepo: EncountersRepository,
     private readonly episodesRepo: CareEpisodesRepository,
     private readonly clinicalNotifications: ClinicalNotificationsService,
+    private readonly seal: EncounterSealService,
     private readonly logger: PinoLogger,
+    private readonly clinicalRead: ClinicalReadService,
+    private readonly filesService: FilesService,
   ) {
     this.logger.setContext(EncountersService.name);
+  }
+
+  /**
+   * P25 (BR-11): liga un archivo ya subido a este encuentro. 404 antes de
+   * autorizar; el paciente sale de la fila, nunca del cuerpo (MCH-007). Si el
+   * encuentro está cerrado y sellado, el vínculo no toca su contenido ni su
+   * hash: vive en `common.file_links`. La regla del sello sobre adjuntos
+   * posteriores es de BR-14 (CL-07) y no se decide acá.
+   */
+  async attachFile(
+    encounterId: string,
+    dto: AttachFileToEncounterDto,
+    actor: AuthenticatedUser,
+  ): Promise<FileLinkResponseDto> {
+    const encounter = await this.encountersRepo.findById(this.em, encounterId);
+    if (!encounter) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId,
+      });
+    }
+    await this.clinicalRead.assertCanWriteHistory(
+      encounter.patientProfileId,
+      actor,
+    );
+    this.logger.info(
+      {
+        operation: 'clinical.encounter.attach_file',
+        encounterId,
+        fileId: dto.fileId,
+      },
+      'Attaching file to encounter',
+    );
+    return this.filesService.createLink(
+      dto.fileId,
+      { ownerType: OwnerType.ENCOUNTER, ownerId: encounter.id },
+      actor,
+    );
+  }
+
+  /**
+   * P25 (BR-11 §1.C): los adjuntos de un encuentro, por la ruta clínica. 404
+   * antes de autorizar; listar es leer la historia (`assertPuedeLeerHistoria`).
+   */
+  async listAttachments(
+    encounterId: string,
+    actor: AuthenticatedUser,
+  ): Promise<LinkedFilePageDto> {
+    const encounter = await this.encountersRepo.findById(this.em, encounterId);
+    if (!encounter) {
+      throw new ResourceNotFoundException('Encuentro no encontrado', {
+        encounterId,
+      });
+    }
+    await this.clinicalRead.assertCanReadHistory(
+      encounter.patientProfileId,
+      actor,
+    );
+    return this.filesService.listLinkedFilesOf(
+      OwnerType.ENCOUNTER,
+      encounter.id,
+    );
   }
 
   /** UC-08-02: abre (check-in) un encuentro con participantes y ubicación. */
@@ -65,6 +151,16 @@ export class EncountersService {
               episodeId: dto.episodeId,
             },
           );
+        }
+      }
+
+      if (dto.appointmentId) {
+        const appointmentEncounter = await this.resolverAppointmentEncounter(
+          tx,
+          dto.appointmentId,
+        );
+        if (appointmentEncounter) {
+          return appointmentEncounter;
         }
       }
 
@@ -120,18 +216,108 @@ export class EncountersService {
         { operation: 'clinical.encounter.check-in', encounterId: encounter.id },
         'Encounter opened',
       );
-      return {
-        id: encounter.id,
-        patientProfileId: encounter.patientProfileId,
-        episodeId: encounter.episodeId ?? null,
-        status: encounter.statusConceptId,
-        participantIds,
-        locationIds,
-        startAt: encounter.startAt ?? null,
-        endAt: encounter.endAt ?? null,
-        createdAt: encounter.createdAt,
-      };
+      return this.toResponse(encounter, participantIds, locationIds);
     });
+  }
+
+  /**
+   * Idempotencia del check-in por cita (subtarea 4.2): si la cita ya tiene un
+   * encuentro en curso, lo devuelve sin escribir nada; si ya tiene uno
+   * finalizado, rechaza con 409. Sin encuentro previo (o en cualquier otro
+   * estado), devuelve `null` para que `checkIn` cree uno nuevo.
+   *
+   * @param tx - Transacción activa del check-in.
+   * @param appointmentId - Cita clínica referenciada por el check-in.
+   * @returns La respuesta del encuentro reutilizado, o `null` si hay que crear uno.
+   */
+  private async resolverAppointmentEncounter(
+    tx: EntityManager,
+    appointmentId: string,
+  ): Promise<EncounterResponseDto | null> {
+    // D-3: serializa los check-in concurrentes sobre la misma cita. Si la cita
+    // no existe, se sigue igual: la FK plana produce el mismo 422 de hoy.
+    await this.encountersRepo.findAppointmentForUpdate(tx, appointmentId);
+
+    const previous = await this.encountersRepo.findByAppointmentId(
+      tx,
+      appointmentId,
+    );
+    const previousEncounter = previous[0];
+    if (!previousEncounter) {
+      return null;
+    }
+
+    if (previousEncounter.statusConceptId === CLIN.ENCOUNTER_IN_PROGRESS) {
+      const [participants, locations] = await Promise.all([
+        this.encountersRepo.findActiveParticipants(
+          tx,
+          previousEncounter.id,
+          CLIN.PARTICIPANT_ACTIVE,
+        ),
+        this.encountersRepo.findActiveLocations(
+          tx,
+          previousEncounter.id,
+          CLIN.LOCATION_ACTIVE,
+        ),
+      ]);
+      this.logger.info(
+        {
+          operation: 'clinical.encounter.check-in',
+          encounterId: previousEncounter.id,
+          reused: true,
+        },
+        'Encounter reused',
+      );
+      return this.toResponse(
+        previousEncounter,
+        participants.map((p) => p.id),
+        locations.map((l) => l.id),
+      );
+    }
+
+    if (previousEncounter.statusConceptId === CLIN.ENCOUNTER_FINISHED) {
+      throw new ConflictException(
+        'La cita ya cuenta con un encuentro clínico finalizado.',
+        {
+          appointmentId,
+          encounterId: previousEncounter.id,
+          status: ENCOUNTER_FINISHED_STATUS_CODE,
+          endAt: previousEncounter.endAt ?? null,
+        },
+      );
+    }
+
+    return null;
+  }
+
+  /**
+   * Arma el `EncounterResponseDto` a partir del encuentro y sus participantes
+   * y ubicaciones (creados o reutilizados). Extraído para que el check-in y el
+   * cierre emitan exactamente la misma forma de respuesta.
+   *
+   * @param encounter - Encuentro persistido.
+   * @param participantIds - Identificadores de sus participantes activos.
+   * @param locationIds - Identificadores de sus ubicaciones activas.
+   * @returns El DTO de respuesta del módulo.
+   */
+  private toResponse(
+    encounter: Encounters,
+    participantIds: string[],
+    locationIds: string[],
+  ): EncounterResponseDto {
+    return {
+      id: encounter.id,
+      patientProfileId: encounter.patientProfileId,
+      episodeId: encounter.episodeId ?? null,
+      status: encounter.statusConceptId,
+      participantIds,
+      locationIds,
+      startAt: encounter.startAt ?? null,
+      endAt: encounter.endAt ?? null,
+      createdAt: encounter.createdAt,
+      contentHash: encounter.contentHash ?? null,
+      sealedAt: encounter.sealedAt ?? null,
+    };
   }
 
   /** UC-08-14: cierra un encuentro en curso y sus periodos activos. */
@@ -144,13 +330,18 @@ export class EncountersService {
       { operation: 'clinical.encounter.close', encounterId },
       'Closing encounter',
     );
-    const cerrado = await this.em.transactional(async (tx) => {
+    const closed = await this.em.transactional(async (tx) => {
       const encounter = await this.encountersRepo.findById(tx, encounterId);
       if (!encounter) {
         throw new ResourceNotFoundException('Encuentro no encontrado', {
           encounterId,
         });
       }
+      // MCH-007: la ruta sólo trae el id; el paciente sale de la fila.
+      await this.clinicalRead.assertCanWriteHistory(
+        encounter.patientProfileId,
+        actor,
+      );
       if (encounter.statusConceptId !== CLIN.ENCOUNTER_IN_PROGRESS) {
         throw new PreconditionFailedException('El encuentro no está en curso', {
           encounterId,
@@ -197,33 +388,30 @@ export class EncountersService {
         touch(l, actor.id);
       }
 
+      encounter.contentHash = await this.seal.computeHash(tx, encounter);
+      encounter.sealedAt = now;
+
       await tx.flush();
 
       this.logger.info(
         { operation: 'clinical.encounter.close', encounterId },
         'Encounter closed',
       );
-      return {
-        id: encounter.id,
-        patientProfileId: encounter.patientProfileId,
-        episodeId: encounter.episodeId ?? null,
-        status: encounter.statusConceptId,
-        participantIds: participants.map((p) => p.id),
-        locationIds: locations.map((l) => l.id),
-        startAt: encounter.startAt ?? null,
-        endAt: encounter.endAt ?? null,
-        createdAt: encounter.createdAt,
-      };
+      return this.toResponse(
+        encounter,
+        participants.map((p) => p.id),
+        locations.map((l) => l.id),
+      );
     });
 
     // Carril P1: «tu consulta está disponible». Fuera de la transacción por lo
     // mismo que en la receta — el encuentro ya está cerrado y no puede
     // desandarse porque falle un aviso.
     await this.clinicalNotifications.encounterClosed(
-      cerrado.id,
-      cerrado.patientProfileId,
+      closed.id,
+      closed.patientProfileId,
       actor.id,
     );
-    return cerrado;
+    return closed;
   }
 }

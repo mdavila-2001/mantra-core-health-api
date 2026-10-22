@@ -683,6 +683,27 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
+    ALTER TABLE "community"."chat_auto_replies"
+        ADD CONSTRAINT "fk_chat_auto_replies_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."chat_auto_replies"
+        ADD CONSTRAINT "fk_chat_auto_replies_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."chat_auto_replies"
+        ADD CONSTRAINT "fk_chat_auto_replies_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
     ALTER TABLE "community"."direct_messages"
         ADD CONSTRAINT "fk_direct_messages_content_type_concept_id" FOREIGN KEY ("content_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
@@ -1252,5 +1273,26 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
     ALTER TABLE "community"."feedback_ticket_events"
         ADD CONSTRAINT "fk_feedback_ticket_events_changed_by_user_id" FOREIGN KEY ("changed_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: common.files (requiere schema common)
+DO $$ BEGIN
+    ALTER TABLE "community"."comment_media"
+        ADD CONSTRAINT "fk_comment_media_file_id" FOREIGN KEY ("file_id")
+        REFERENCES "common"."files" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "community"."comment_media"
+        ADD CONSTRAINT "fk_comment_media_media_role_concept_id" FOREIGN KEY ("media_role_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "community"."comment_media"
+        ADD CONSTRAINT "fk_comment_media_created_by_user_id" FOREIGN KEY ("created_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;

@@ -1,0 +1,68 @@
+=== Importación de conceptos por archivo — llamadas reales
+Versión de trabajo creada para la verificación: POST /terminology/code-systems/{id}/versions → HTTP 201
+
+PASS · un archivo correcto entra entero
+  HTTP 201 · {"format":"csv","profile":"conceptos","dryRun":false,"totalRead":2,"errors":0,"batchId":"7859f32b-e123-43ed-9962-5ed898e99a00","aborted":false,"inserted":2,"skipped":0}
+
+PASS · el mismo archivo otra vez no duplica
+  HTTP 201 · {"format":"csv","profile":"conceptos","dryRun":false,"totalRead":2,"errors":0,"batchId":"0c332543-0607-4b07-b92b-0300e692b7fa","aborted":false,"inserted":0,"skipped":2}
+
+Conceptos en la versión tras importar dos veces el mismo archivo de 2 filas: 2 (con el prefijo del archivo: 2)
+
+PASS · validar sin escribir devuelve 200 y no crea nada
+  HTTP 200 · {"format":"csv","profile":"conceptos","dryRun":true,"totalRead":1,"errors":0,"batchId":null,"aborted":false,"inserted":0,"skipped":0} · preview: 1 filas
+
+PASS · una fila inválida aborta el archivo completo
+  HTTP 200 · {"format":"csv","profile":"conceptos","dryRun":false,"totalRead":2,"errors":1,"batchId":null,"aborted":true,"inserted":0,"skipped":0} · errorSamples[0]={"line":3,"message":"«code» está vacía","column":"code"}
+
+PASS · un archivo sin contenido se rechaza por vacío
+  HTTP 422 · {"code":"IMPORT_EMPTY_FILE","message":"El archivo llegó vacío","correlationId":"35","details":{"versionId":"ce1cee96-be1f-4cb5-8085-fcfa092319d6"},"timestamp":"2026-09-25T15:10:44.195Z","path":"/terminology/versions/ce1cee96-be1f-4cb5-8085-fcfa092319d6/import-file"}
+
+PASS · un archivo que no es ninguno de los formatos se rechaza
+  HTTP 422 · {"code":"IMPORT_FORMAT_UNSUPPORTED","message":"no es un archivo de texto ni una planilla","correlationId":"36","details":{"versionId":"ce1cee96-be1f-4cb5-8085-fcfa092319d6"},"timestamp":"2026-09-25T15:10:44.210Z","path":"/terminology/versions/ce1cee96-be1f-4cb5-8085-fcfa092319d6/import-file"}
+
+PASS · un perfil que no existe se rechaza con su propio código
+  HTTP 422 · {"code":"IMPORT_PROFILE_UNKNOWN","message":"No se puede importar «designaciones»","correlationId":"37","details":{"profile":"designaciones"},"timestamp":"2026-09-25T15:10:44.224Z","path":"/terminology/versions/ce1cee96-be1f-4cb5-8085-fcfa092319d6/import-file"}
+
+PASS · sin archivo la petición no llega al importador
+  HTTP 422 · {"code":"PRECONDITION_FAILED","message":"Falta el archivo","correlationId":"38","details":{"versionId":"ce1cee96-be1f-4cb5-8085-fcfa092319d6"},"timestamp":"2026-09-25T15:10:44.245Z","path":"/terminology/versions/ce1cee96-be1f-4cb5-8085-fcfa092319d6/import-file"}
+
+PASS · una versión que no existe se rechaza
+  HTTP 404 · {"code":"NOT_FOUND","message":"Versión no encontrada","correlationId":"39","details":{"versionId":"00000000-0000-4000-8000-000000000000"},"timestamp":"2026-09-25T15:10:44.263Z","path":"/terminology/versions/00000000-0000-4000-8000-000000000000/import-file"}
+
+PASS · sin sesión no se puede importar
+  HTTP 401 · {"code":"UNAUTHENTICATED","message":"Unauthorized","correlationId":"40","timestamp":"2026-09-25T15:10:44.268Z","path":"/terminology/versions/ce1cee96-be1f-4cb5-8085-fcfa092319d6/import-file"}
+
+PASS · con sesión pero sin el rol tampoco
+  HTTP 403 · {"code":"FORBIDDEN","message":"Rol insuficiente para la operación","correlationId":"42","timestamp":"2026-09-25T15:10:44.459Z","path":"/terminology/versions/ce1cee96-be1f-4cb5-8085-fcfa092319d6/import-file"}
+
+PASS · la plantilla tampoco se descarga sin el rol
+  HTTP 403 · {"code":"FORBIDDEN","message":"Rol insuficiente para la operación","correlationId":"43","timestamp":"2026-09-25T15:10:44.473Z","path":"/terminology/import-template"}
+
+PASS · la plantilla se descarga
+  HTTP 200 · Content-Type: text/csv; charset=utf-8
+  Content-Disposition: attachment; filename="plantilla-conceptos.csv"
+  contenido:
+    code,display,definition
+    ZZ-000,Ejemplo sintético,Fila de ejemplo de la plantilla
+
+PASS · la plantilla descargada se vuelve a importar sin un solo problema
+  HTTP 200 · {"format":"csv","profile":"conceptos","dryRun":true,"totalRead":1,"errors":0,"batchId":null,"aborted":false,"inserted":0,"skipped":0} · preview: 1 filas
+
+
+=== El camino que ya existía: NDJSON
+Comprueba que ensanchar el importador no le cambió el comportamiento.
+
+PASS · NDJSON validado sin escribir
+  HTTP 200 · {"format":"ndjson","profile":"conceptos","dryRun":true,"totalRead":5,"errors":0,"aborted":false,"inserted":0,"skipped":0}
+
+PASS · NDJSON importado de verdad
+  HTTP 201 · {"format":"ndjson","profile":"conceptos","dryRun":false,"totalRead":5,"errors":0,"aborted":false,"inserted":5,"skipped":0}
+
+PASS · el mismo NDJSON otra vez no duplica
+  HTTP 201 · {"format":"ndjson","profile":"conceptos","dryRun":false,"totalRead":5,"errors":0,"aborted":false,"inserted":0,"skipped":5}
+
+PASS · un NDJSON con líneas rotas aborta el archivo entero
+  HTTP 200 · {"format":"ndjson","profile":"conceptos","dryRun":false,"totalRead":3,"errors":2,"aborted":true,"inserted":0,"skipped":0}
+  primer problema: {"line":2,"message":"la línea no es un JSON válido"}
+

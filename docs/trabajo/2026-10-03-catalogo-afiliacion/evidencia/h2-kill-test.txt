@@ -1,0 +1,2 @@
+--- KILL-TEST: alta de aseguradora con la API arrancada ---
+KILL-TEST alta de aseguradora -> 422 El catálogo de documentos de afiliación no está disponible {"valueSet":"VS_AFFILIATION_DOCUMENT_TYPE"}

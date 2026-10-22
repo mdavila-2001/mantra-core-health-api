@@ -6,19 +6,38 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
+import { ClinicalRecordAccessGuard } from '../guards';
 import { DiagnosticReportsService, ServiceRequestsService } from '../services';
 import {
+  CheckDuplicateStudyDto,
   CreateDiagnosticReportDto,
   CreateServiceRequestDto,
   DiagnosticReportResponseDto,
+  DuplicateStudyCheckResultDto,
   ReleaseDiagnosticReportDto,
   ServiceRequestResponseDto,
 } from '../dto';
 
-/** Endpoints de órdenes clínicas: peticiones de servicio y reportes diagnósticos. */
+/**
+ * Endpoints de órdenes clínicas: peticiones de servicio y reportes diagnósticos.
+ *
+ * SEC-01: llevan el guard del expediente las dos altas cuyo `patientProfileId`
+ * viaja en el cuerpo. `service-requests/duplicate-check` **no** lo lleva a
+ * propósito: no persiste nada y ya pasa por la misma política dentro de
+ * `ServiceRequestsService.checkDuplicate`, así que montarlo duplicaría la
+ * consulta de autorización sin cambiar ninguna respuesta.
+ * `diagnostic-reports/:id/release` tampoco: su paciente sale del reporte ya
+ * cargado, y lo autoriza el servicio (MCH-007).
+ */
 @ApiTags('clinical-orders')
 @ApiBearerAuth()
 @Roles('CLINICIAN', 'PRACTITIONER')
@@ -35,8 +54,38 @@ export class ClinicalOrdersController {
     private readonly diagnosticReportsService: DiagnosticReportsService,
   ) {}
 
+  /**
+   * Antiduplicación de estudios (T-26, subtarea 3.2). Va declarada ANTES de
+   * `service-requests` a propósito: Express no la confundiría con un `:id`
+   * (este controller no tiene ninguno), pero el orden documenta la relación
+   * — es la pre-validación del alta de abajo.
+   */
+  @Audited({
+    action: 'SERVICE_REQUEST_DUPLICATE_CHECKED',
+    entity: 'service_request',
+    entityId: 'result.id',
+  })
+  @Post('service-requests/duplicate-check')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)',
+  })
+  checkDuplicateStudy(
+    @Body() dto: CheckDuplicateStudyDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DuplicateStudyCheckResultDto> {
+    return this.serviceRequestsService.checkDuplicate(dto, actor);
+  }
+
   /** UC-08-05. */
+  @Audited({
+    action: 'SERVICE_REQUEST_CREATED',
+    entity: 'service_request',
+    entityId: 'result.id',
+  })
   @Post('service-requests')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una orden de servicio' })
   createServiceRequest(
@@ -47,7 +96,13 @@ export class ClinicalOrdersController {
   }
 
   /** UC-08-06. */
+  @Audited({
+    action: 'DIAGNOSTIC_REPORT_CREATED',
+    entity: 'diagnostic_report',
+    entityId: 'result.id',
+  })
   @Post('diagnostic-reports')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Emitir un reporte diagnóstico desde la orden' })
   createDiagnosticReport(
@@ -57,10 +112,27 @@ export class ClinicalOrdersController {
     return this.diagnosticReportsService.create(dto, actor);
   }
 
-  /** UC-08-07. */
+  /**
+   * UC-08-07. **Obsoleta (D-E, BR-17/CL-46):** no escribe el evento de
+   * liberación que lee «Mis resultados». Se conserva sin borrar por decisión
+   * de producto (Q-02); ver el `@deprecated` en
+   * `DiagnosticReportsService.release`. Usar
+   * `POST /diagnostics/reports/:reportId/versions/:versionId/release`.
+   */
+  @Audited({
+    action: 'DIAGNOSTIC_REPORT_RELEASED',
+    entity: 'diagnostic_report',
+    entityId: 'param:id',
+  })
   @Post('diagnostic-reports/:id/release')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Liberar los resultados de un reporte diagnóstico' })
+  @ApiOperation({
+    summary: 'Liberar los resultados de un reporte diagnóstico',
+    deprecated: true,
+    description:
+      'Obsoleta (D-E): no escribe diagnostic_release_events y el paciente no ' +
+      've lo liberado por acá. Usar diagnostics/reports/:reportId/versions/:versionId/release.',
+  })
   releaseDiagnosticReport(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: ReleaseDiagnosticReportDto,

@@ -363,3 +363,101 @@ export class InvoiceResponseDto {
   @ApiProperty()
   lineCount!: number;
 }
+
+/**
+ * Una factura en el listado (CV-12) — proyección liviana, sin `lineCount`
+ * para no forzar una consulta de líneas por fila (evitaría el mismo patrón
+ * N+1 que BR-30 pide cerrar en el front, ver TX-27).
+ */
+export class InvoiceSummaryDto {
+  /** Identificador único de la instancia. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Número de factura. */
+  @ApiProperty()
+  invoiceNumber!: string;
+
+  /** Paciente facturado. */
+  @ApiProperty({ format: 'uuid' })
+  patientProfileId!: string;
+
+  /** Concepto de estado. */
+  @ApiProperty({ format: 'uuid' })
+  status!: string;
+
+  /** Fecha de emisión. */
+  @ApiProperty({ type: String, format: 'date' })
+  issueDate!: Date;
+
+  /** Fecha de vencimiento, si tiene. */
+  @ApiPropertyOptional({ type: String, format: 'date' })
+  dueDate?: Date;
+
+  /** Importe total. */
+  @ApiPropertyOptional()
+  total?: string;
+
+  /** Saldo pendiente. */
+  @ApiPropertyOptional()
+  balance?: string;
+
+  /** Fecha de alta. */
+  @ApiProperty({ type: String, format: 'date-time' })
+  createdAt!: Date;
+}
+
+/** Página de facturas de la práctica. */
+export class ListInvoicesResponseDto {
+  /** Facturas de esta página, ordenadas por `id`. */
+  @ApiProperty({ type: [InvoiceSummaryDto] })
+  items!: InvoiceSummaryDto[];
+
+  /** Cantidad devuelta en esta página. */
+  @ApiProperty() count!: number;
+
+  /** Tope aplicado a la consulta. */
+  @ApiProperty() limit!: number;
+
+  /** Cursor opaco de continuación, o `null` si ésta es la última página. */
+  @ApiProperty({ nullable: true, type: String })
+  nextCursor!: string | null;
+}
+
+/** Una línea de factura, para el detalle (CV-12). */
+export class InvoiceLineDto {
+  /** Identificador único de la instancia. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Descripción de la línea. */
+  @ApiPropertyOptional()
+  description?: string;
+
+  /** Cantidad facturada. */
+  @ApiProperty()
+  quantity!: string;
+
+  /** Precio unitario. */
+  @ApiProperty()
+  unitPrice!: string;
+
+  /** Descuento de la línea, si tiene. */
+  @ApiPropertyOptional()
+  discount?: string;
+
+  /** Impuesto de la línea, si tiene. */
+  @ApiPropertyOptional()
+  taxAmount?: string;
+
+  /** Importe total de la línea. */
+  @ApiPropertyOptional()
+  lineTotal?: string;
+}
+
+/** Detalle de una factura: cabecera (igual que {@link InvoiceResponseDto}) + líneas. */
+export class InvoiceDetailDto extends InvoiceResponseDto {
+  /** Líneas de la factura. */
+  @ApiProperty({ type: [InvoiceLineDto] })
+  lines!: InvoiceLineDto[];
+}

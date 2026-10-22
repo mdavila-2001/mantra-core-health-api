@@ -6,7 +6,7 @@
 > [`docs/reports/openapi-generation-notes.md`](openapi-generation-notes.md). Se conserva aquí solo
 > como registro de trazabilidad histórica.
 
-# REDESA Health API — Primeros 30 endpoints (Salud)
+# ALOVIDA Health API — Primeros 30 endpoints (Salud)
 
 Contrato único de los 30 endpoints implementados. Alineado con Swagger (`/docs`),
 los README por módulo y la colección Postman (`docs/postman/`). Selección por orden

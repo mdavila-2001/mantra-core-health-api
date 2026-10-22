@@ -1,0 +1,6 @@
+$ corepack yarn test --testPathPatterns="app.module.wiring"
+PASS MCH-012 · todo módulo de dominio está conectado al arranque encuentra los módulos de dominio (el inventario no quedó vacío)
+PASS MCH-012 · todo módulo de dominio está conectado al arranque ningún módulo de dominio queda fuera del grafo de AppModule
+Suites: 1 passed, 0 failed, 1 total
+Tests:  2 passed, 0 failed, 0 skipped, 2 total
+exit=0

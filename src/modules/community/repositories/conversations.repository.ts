@@ -195,6 +195,45 @@ export class ConversationsRepository {
   }
 
   /**
+   * Los mensajes **vivos** que llevan un archivo como adjunto (5.1 · FT-32-R02).
+   *
+   * Es la consulta inversa que la autorización contextual necesita: a quien
+   * pide los bytes con un `fileId` en la mano no se le puede preguntar de qué
+   * conversación es —el `fileId` solo no lo dice—, y es la conversación la que
+   * decide si puede verlo. Sin este paso, autorizar un adjunto de chat exigiría
+   * confiar en un `conversationId` que manda el propio cliente, que es
+   * justamente el parámetro que un atacante controla.
+   *
+   * `deletedAt: null` a propósito: borrar un mensaje tiene que dejar de dar
+   * acceso a su adjunto. La lectura del hilo ya oculta el contenido de los
+   * mensajes borrados; si acá no se filtrara, el archivo seguiría siendo
+   * descargable por su id después de que la burbuja dijera «Se eliminó este
+   * mensaje».
+   *
+   * Devuelve **todos** los vivos y no el primero: el mismo archivo puede estar
+   * adjunto en más de un mensaje (un reenvío), y el lector puede participar en
+   * una de esas conversaciones y no en las otras. Quedarse con uno arbitrario
+   * daría un 404 correcto para el archivo equivocado.
+   *
+   * Va por `ix_direct_messages_attachment_file_id`, que el modelo canónico ya
+   * declara (`SQL/19_community/04_indexes.sql:309`): no hace falta índice nuevo.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param attachmentFileId - Archivo del que se piden los mensajes.
+   * @returns Los mensajes vivos que lo llevan adjunto, del más reciente al más antiguo.
+   */
+  findLiveMessagesByAttachmentFileId(
+    em: EntityManager,
+    attachmentFileId: string,
+  ): Promise<DirectMessages[]> {
+    return em.find(
+      DirectMessages,
+      { attachmentFileId, deletedAt: null },
+      { orderBy: { createdAt: 'DESC', id: 'DESC' } },
+    );
+  }
+
+  /**
    * Obtiene find participants.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -228,44 +267,44 @@ export class ConversationsRepository {
    * acotadas por perfil, no un recorrido de la tabla.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param perfilA - Uno de los dos perfiles.
-   * @param perfilB - El otro.
+   * @param profileA - Uno de los dos perfiles.
+   * @param profileB - El otro.
    * @param directTypeConceptId - Concepto que marca una conversación directa.
    * @param activeStatusConceptId - Estado que cuenta como vivo.
    * @returns La conversación directa compartida, o `null`.
    */
   async findDirectBetween(
     em: EntityManager,
-    perfilA: string,
-    perfilB: string,
+    profileA: string,
+    profileB: string,
     directTypeConceptId: string,
     activeStatusConceptId: string,
   ): Promise<Conversations | null> {
-    const [deA, deB] = await Promise.all([
+    const [membersOfA, membersOfB] = await Promise.all([
       em.find(ConversationParticipants, {
-        participantProfileId: perfilA,
+        participantProfileId: profileA,
         statusConceptId: activeStatusConceptId,
       }),
       em.find(ConversationParticipants, {
-        participantProfileId: perfilB,
+        participantProfileId: profileB,
         statusConceptId: activeStatusConceptId,
       }),
     ]);
 
-    const deBPorConversacion = new Set(
-      deB.map((participacion) => participacion.conversationId),
+    const bByConversation = new Set(
+      membersOfB.map((participation) => participation.conversationId),
     );
-    const compartidas = deA
-      .map((participacion) => participacion.conversationId)
-      .filter((conversationId) => deBPorConversacion.has(conversationId));
-    if (compartidas.length === 0) return null;
+    const shared = membersOfA
+      .map((participation) => participation.conversationId)
+      .filter((conversationId) => bByConversation.has(conversationId));
+    if (shared.length === 0) return null;
 
     // Sólo las directas: los dos pueden compartir además un grupo, y un grupo
     // no es el hilo al que lleva «Escribir al doctor».
-    const candidatas = await em.find(
+    const candidates = await em.find(
       Conversations,
       {
-        id: { $in: compartidas },
+        id: { $in: shared },
         conversationTypeConceptId: directTypeConceptId,
         statusConceptId: activeStatusConceptId,
       },
@@ -274,19 +313,21 @@ export class ConversationsRepository {
 
     // Si hubiera más de una —creadas antes de que esto existiera—, gana la más
     // activa: es donde está la conversación que la gente reconoce.
-    for (const conversacion of candidatas) {
-      const participantes = await em.find(ConversationParticipants, {
-        conversationId: conversacion.id,
+    for (const conversation of candidates) {
+      const participants = await em.find(ConversationParticipants, {
+        conversationId: conversation.id,
       });
       // Exactamente los dos: una directa con un tercero adentro no es la
       // conversación privada que se está buscando.
-      const perfiles = new Set(
-        participantes.map(
-          (participacion) => participacion.participantProfileId,
-        ),
+      const profiles = new Set(
+        participants.map((participation) => participation.participantProfileId),
       );
-      if (perfiles.size === 2 && perfiles.has(perfilA) && perfiles.has(perfilB))
-        return conversacion;
+      if (
+        profiles.size === 2 &&
+        profiles.has(profileA) &&
+        profiles.has(profileB)
+      )
+        return conversation;
     }
     return null;
   }
@@ -338,8 +379,12 @@ export class ConversationsRepository {
   /**
    * Mensajes de una conversación (UC-19-14, cara de lectura).
    *
-   * Descendente porque una conversación se abre por el final; lo borrado no
-   * viaja al cliente.
+   * Descendente porque una conversación se abre por el final.
+   *
+   * **Lo eliminado sí viaja** (F4.5): con `deletedAt` puesto y sin cuerpo,
+   * para que el hilo muestre «Se eliminó este mensaje» donde estaba y las
+   * citas que apuntaban a él no queden apuntando a la nada. Quien lo enmascara
+   * es el servicio de lectura, no esta consulta.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param conversationId - Conversación a leer.
@@ -357,7 +402,6 @@ export class ConversationsRepository {
       DirectMessages,
       {
         conversationId,
-        deletedAt: null,
         ...(after
           ? {
               $or: [
@@ -392,21 +436,21 @@ export class ConversationsRepository {
     readerProfileId: string,
     lastReadMessageId: string | undefined,
   ): Promise<number> {
-    const deOtros = {
+    const ofOthers = {
       conversationId,
       deletedAt: null,
       senderProfileId: { $ne: readerProfileId },
     } as const;
 
-    if (!lastReadMessageId) return em.count(DirectMessages, deOtros);
+    if (!lastReadMessageId) return em.count(DirectMessages, ofOthers);
 
     const lastRead = await em.findOne(DirectMessages, {
       id: lastReadMessageId,
     });
-    if (!lastRead?.sentAt) return em.count(DirectMessages, deOtros);
+    if (!lastRead?.sentAt) return em.count(DirectMessages, ofOthers);
 
     return em.count(DirectMessages, {
-      ...deOtros,
+      ...ofOthers,
       sentAt: { $gt: lastRead.sentAt },
     });
   }
@@ -466,6 +510,24 @@ export class ConversationsRepository {
     id: string,
   ): Promise<DirectMessages | null> {
     return em.findOne(DirectMessages, { id });
+  }
+
+  /**
+   * Un mensaje, pero sólo si es de esa conversación (editar, borrar, fijar).
+   *
+   * Se exige la conversación en la consulta y no se comprueba después: un id
+   * de mensaje de otro hilo tiene que dar «no existe», no «no es tuyo».
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param conversationId - Conversación a la que tiene que pertenecer.
+   * @param messageId - Identificador del mensaje.
+   */
+  findMessageInConversation(
+    em: EntityManager,
+    conversationId: string,
+    messageId: string,
+  ): Promise<DirectMessages | null> {
+    return em.findOne(DirectMessages, { id: messageId, conversationId });
   }
 
   /**

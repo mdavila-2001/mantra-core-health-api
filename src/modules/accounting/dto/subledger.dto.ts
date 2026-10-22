@@ -126,11 +126,19 @@ export class ClearingItemInputDto {
 /** Cuerpo de `POST /accounting/clearing-documents` (UC-16-09). */
 export class CreateClearingDto {
   /**
-   * Identificador asociado a tenant.
+   * Organización dueña del documento de compensación. Opcional: es la de la
+   * práctica (`practices.tenant_id`) y el servidor la deriva; si viene, tiene
+   * que coincidir (403 si no). Informe B, C9: ninguna respuesta de práctica
+   * expone su tenant, así que el cliente no tenía de dónde sacarla.
    */
-  @ApiProperty({ format: 'uuid' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Organización del documento. Si se omite, es la de la práctica; si viene, debe coincidir.',
+  })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de clearing number mantenido por la instancia.

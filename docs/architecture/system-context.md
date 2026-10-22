@@ -11,7 +11,7 @@ flowchart TB
     Partner[Sistema externo<br/>proveedor de pago, laboratorio, aseguradora]
   end
 
-  API[["REDESA Health API<br/>(NestJS, 61 módulos, 915 operaciones)"]]
+  API[["ALOVIDA Health API<br/>(NestJS, 61 módulos, 915 operaciones)"]]
 
   Patient -->|HTTPS + JWT| API
   Clinician -->|HTTPS + JWT| API

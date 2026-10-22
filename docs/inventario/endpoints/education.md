@@ -42,7 +42,7 @@
 
 Iniciar un intento de evaluación. Caso de uso UC-47-08: Iniciar intento. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -54,11 +54,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: LEARNER, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:167` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:167` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -148,7 +148,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Enviar y calificar el intento. Caso de uso UC-47-09: Enviar y calificar. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -160,11 +160,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: LEARNER, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:184` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:184` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -256,7 +256,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Acreditar las horas CME al profesional. Caso de uso UC-47-12: Acreditar CME. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -268,11 +268,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:233` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:233` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -368,7 +368,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Revocar el certificado y revertir sus créditos CME. Caso de uso UC-47-14: Revocar y revertir CME. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -380,11 +380,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:266` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:266` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -472,7 +472,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Diseñar una evaluación con sus preguntas. Caso de uso UC-47-07: Diseñar evaluación. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -484,11 +484,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: EDUCATION_ADMIN, COURSE_AUTHOR | `src/modules/education/controllers/education.controller.ts:151` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:151` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -611,7 +611,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Abrir una cohorte del curso. Caso de uso UC-47-04: Abrir cohorte. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -623,11 +623,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:107` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -726,7 +726,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Asignar un instructor al curso. Caso de uso UC-47-03: Asignar instructor. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -738,11 +738,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:91` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -843,7 +843,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Publicar una reseña del curso. Caso de uso UC-47-13: Publicar reseña. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -855,11 +855,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: LEARNER, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:249` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:249` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -949,7 +949,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Publicar una versión nueva del curso. Caso de uso UC-47-02: Publicar versión del curso. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -961,11 +961,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: EDUCATION_ADMIN, COURSE_AUTHOR | `src/modules/education/controllers/education.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:75` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1052,7 +1052,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Publicar un curso con sus módulos y lecciones. Caso de uso UC-47-01: Publicar curso con módulos y lecciones. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:10`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:44`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1064,10 +1064,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: EDUCATION_ADMIN, COURSE_AUTHOR | `src/modules/education/controllers/education.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1217,7 +1217,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Inscribir a un aprendiz. Caso de uso UC-47-05: Inscribir aprendiz. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1229,10 +1229,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: EDUCATION_ADMIN, LEARNER | `src/modules/education/controllers/education.controller.ts:120` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1332,7 +1332,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Emitir el certificado verificable. Caso de uso UC-47-11: Emitir certificado. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1344,11 +1344,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, EDUCATION_ADMIN | `src/modules/education/controllers/education.controller.ts:217` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:217` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1440,7 +1440,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Completar el curso. Caso de uso UC-47-10: Completar curso. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1452,9 +1452,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, EDUCATION_ADMIN, LEARNER | `src/modules/education/controllers/education.controller.ts:201` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:201` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1526,7 +1526,7 @@ El árbol de decisión completo está en [flujos](../flujos/education.md).
 
 Registrar el progreso de una lección. Caso de uso UC-47-06: Registrar progreso. Dentro del módulo (descripción del modelo, en inglés): «A learning platform for doctors and staff (the "doctor courses" the clients asked for): structured courses with modules and lessons, instructors, cohorts and enrollments, progress tracking, assessments/quizzes with attempts and grading…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/education/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_47_education.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1538,11 +1538,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/educati
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: LEARNER, EDUCATION_ADMIN, SYSTEM | `src/modules/education/controllers/education.controller.ts:135` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/education/controllers/education.controller.ts:135` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

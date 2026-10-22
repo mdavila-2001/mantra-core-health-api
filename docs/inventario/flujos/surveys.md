@@ -3,12 +3,12 @@
 # Flujos del módulo `surveys`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 12 (12 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 17 (17 con decisiones propias, 0 sin ellas)
 - Inventario de endpoints del módulo: [surveys](../endpoints/surveys.md)
 
 ## Proceso: Módulo Surveys — Cuestionarios y encuestas de satisfacción
 
-- **Código:** `surveys` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 12
+- **Código:** `surveys` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 17
 - **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/surveys/README.md`
@@ -31,9 +31,14 @@ _Fuente: `src/modules/surveys/README.md:3`_
 | `ctrl:SurveysTemplatesController` | Operaciones de SurveysTemplatesController que el README no asigna a un caso de uso | GET /surveys/templates | PRACTITIONER · CLINICIAN | BAJO | 3 |
 |  |  | POST /surveys/templates | PRACTITIONER · CLINICIAN | MEDIO | 2 |
 |  |  | GET /surveys/templates/{id} | PRACTITIONER · CLINICIAN | BAJO | 3 |
+|  |  | PATCH /surveys/templates/{id} | PRACTITIONER · CLINICIAN | MEDIO | 4 |
 |  |  | POST /surveys/templates/{id}/deactivate | PRACTITIONER · CLINICIAN | MEDIO | 2 |
 |  |  | POST /surveys/templates/{id}/questions | PRACTITIONER · CLINICIAN | MEDIO | 4 |
+|  |  | DELETE /surveys/templates/{id}/questions/{questionId} | PRACTITIONER · CLINICIAN | ALTO | 4 |
+|  |  | PATCH /surveys/templates/{id}/questions/{questionId} | PRACTITIONER · CLINICIAN | MEDIO | 4 |
+|  |  | PUT /surveys/templates/{id}/questions/order | PRACTITIONER · CLINICIAN | BAJO | 3 |
 |  |  | GET /surveys/templates/{id}/responses | PRACTITIONER · CLINICIAN | BAJO | 6 |
+|  |  | POST /surveys/templates/{id}/versions | PRACTITIONER · CLINICIAN | MEDIO | 3 |
 |  |  | POST /surveys/templates/{id}/versions/{versionNumber}/publish | PRACTITIONER · CLINICIAN | MEDIO | 5 |
 
 ### Diagrama — etapas `ctrl:SurveysAssignmentsController`, `ctrl:SurveysPatientController`, `ctrl:SurveysTemplatesController`
@@ -65,10 +70,15 @@ flowchart LR
     o18["GET /surveys/templates"]:::op
     o19["POST /surveys/templates"]:::op
     o20["GET /surveys/templates/{id}"]:::op
-    o21["POST /surveys/templates/{id}/deactivate"]:::op
-    o22["POST /surveys/templates/{id}/questions"]:::op
-    o23["GET /surveys/templates/{id}/responses"]:::op
-    o24["POST /surveys/templates/{id}/versions/{versionNumber}/publish"]:::op
+    o21["PATCH /surveys/templates/{id}"]:::op
+    o22["POST /surveys/templates/{id}/deactivate"]:::op
+    o23["POST /surveys/templates/{id}/questions"]:::op
+    o24["DELETE /surveys/templates/{id}/questions/{questionId}"]:::op
+    o25["PATCH /surveys/templates/{id}/questions/{questionId}"]:::op
+    o26["PUT /surveys/templates/{id}/questions/order"]:::op
+    o27["GET /surveys/templates/{id}/responses"]:::op
+    o28["POST /surveys/templates/{id}/versions"]:::op
+    o29["POST /surveys/templates/{id}/versions/{versionNumber}/publish"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -112,24 +122,47 @@ flowchart LR
   a2 --> o21
   o21 -->|"ACTUALIZA"| t4
   o21 -->|"LEE"| t4
+  o21 -->|"ACTUALIZA"| t5
+  o21 -->|"LEE"| t5
   a2 --> o22
-  o22 -->|"CREA"| t14
-  o22 -->|"LEE"| t14
+  o22 -->|"ACTUALIZA"| t4
   o22 -->|"LEE"| t4
-  o22 -->|"LEE"| t5
   a2 --> o23
-  o23 -->|"LEE"| t16
-  o23 -->|"LEE"| t9
+  o23 -->|"CREA"| t14
   o23 -->|"LEE"| t14
-  o23 -->|"LEE"| t17
   o23 -->|"LEE"| t4
   o23 -->|"LEE"| t5
   a2 --> o24
+  o24 -->|"BORRA"| t14
   o24 -->|"LEE"| t14
-  o24 -->|"ACTUALIZA"| t4
   o24 -->|"LEE"| t4
-  o24 -->|"ACTUALIZA"| t5
   o24 -->|"LEE"| t5
+  a2 --> o25
+  o25 -->|"ACTUALIZA"| t14
+  o25 -->|"LEE"| t14
+  o25 -->|"LEE"| t4
+  o25 -->|"LEE"| t5
+  a2 --> o26
+  o26 -->|"LEE"| t14
+  o26 -->|"LEE"| t4
+  o26 -->|"LEE"| t5
+  a2 --> o27
+  o27 -->|"LEE"| t16
+  o27 -->|"LEE"| t9
+  o27 -->|"LEE"| t14
+  o27 -->|"LEE"| t17
+  o27 -->|"LEE"| t4
+  o27 -->|"LEE"| t5
+  a2 --> o28
+  o28 -->|"LEE"| t4
+  o28 -->|"CREA"| t5
+  o28 -->|"LEE"| t5
+  a2 --> o29
+  o29 -->|"LEE"| t14
+  o29 -->|"ACTUALIZA"| t4
+  o29 -->|"LEE"| t4
+  o29 -->|"ACTUALIZA"| t5
+  o29 -->|"LEE"| t5
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -418,7 +451,7 @@ Responder el cuestionario
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Solo un paciente puede ver sus cuestionarios |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cuestionario no encontrado |
 | 409 | `CONFLICT` | ConflictException: Este cuestionario ya fue respondido |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El plazo para responder este cuestionario venció; PreconditionFailedException: Hay más de una respuesta para la misma pregunta; PreconditionFailedException: La respuesta no corresponde a una pregunta de este cuestionario; PreconditionFailedException: Esta pregunta espera una respuesta de texto; PreconditionFailedException: Esta pregunta espera un valor numérico; PreconditionFailedException: El valor está fuera de la escala de la pregunta; PreconditionFailedException: Esta pregunta espera sí o no; PreconditionFailedException: Esta pregunta espera al menos una opción; PreconditionFailedException: Esta pregunta admite una sola opción; PreconditionFailedException: Se eligieron opciones que la pregunta no ofrece; PreconditionFailedException: Hay opciones repetidas en la respuesta; PreconditionFailedException: Tipo de pregunta desconocido; PreconditionFailedException: Faltan respuestas a preguntas obligatorias |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay más de una respuesta para la misma pregunta; PreconditionFailedException: La respuesta no corresponde a una pregunta de este cuestionario; PreconditionFailedException: Esta pregunta espera una respuesta de texto; PreconditionFailedException: Esta pregunta espera un valor numérico; PreconditionFailedException: El valor está fuera de la escala de la pregunta; PreconditionFailedException: Esta pregunta espera sí o no; PreconditionFailedException: Esta pregunta espera al menos una opción; PreconditionFailedException: Esta pregunta admite una sola opción; PreconditionFailedException: Se eligieron opciones que la pregunta no ofrece; PreconditionFailedException: Hay opciones repetidas en la respuesta; PreconditionFailedException: Tipo de pregunta desconocido; PreconditionFailedException: Faltan respuestas a preguntas obligatorias; PreconditionFailedException: El plazo para responder este cuestionario venció |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -454,85 +487,88 @@ flowchart TD
   n13 -->|"no"| n15
   n16[("ACTUALIZA surveys.survey_invitations")]:::efecto
   n15 -->|"sí"| n16
-  n17(["422 PRECONDITION_FAILED El plazo para responder este cuestionario venció"]):::error
+  n17["Llama a TemplatesRepository.listQuestions"]:::llamada
   n16 --> n17
-  n18["Llama a TemplatesRepository.listQuestions"]:::llamada
-  n15 -->|"no"| n18
-  n19[("LEE surveys.survey_questions")]:::efecto
+  n15 -->|"no"| n17
+  n18[("LEE surveys.survey_questions")]:::efecto
+  n17 --> n18
+  n19["Llama a SurveysResponsesService.validateAnswers"]:::llamada
   n18 --> n19
-  n20["Llama a SurveysResponsesService.validateAnswers"]:::llamada
+  n20["Repite: por cada const answer de answers"]:::bucle
   n19 --> n20
-  n21["Repite: por cada const answer de answers"]:::bucle
-  n20 --> n21
-  n22{"seen.has(answer.questionId)"}:::decision
-  n21 -->|"cada elemento"| n22
-  n23(["422 PRECONDITION_FAILED Hay más de una respuesta para la misma pregunta"]):::error
-  n22 -->|"sí"| n23
-  n24{"!question"}:::decision
-  n22 -->|"no"| n24
-  n25(["422 PRECONDITION_FAILED La respuesta no corresponde a una pregunta de este cuestionario"]):::error
-  n24 -->|"sí"| n25
-  n26["Llama a SurveysResponsesService.validateAnswerValue"]:::llamada
-  n24 -->|"no"| n26
-  n27{"según type"}:::decision
-  n26 --> n27
-  n28{"typeof answer.valueText !== 'string' || answer.valueText.trim() === ''"}:::decision
-  n27 -->|"'TEXT'"| n28
-  n29(["422 PRECONDITION_FAILED Esta pregunta espera una respuesta de texto"]):::error
-  n28 -->|"sí"| n29
-  n30{"typeof answer.valueNumber !== 'number'"}:::decision
-  n27 -->|"'SCALE'"| n30
-  n31(["422 PRECONDITION_FAILED Esta pregunta espera un valor numérico"]):::error
-  n30 -->|"sí"| n31
-  n32{"answer.valueNumber ‹ min || answer.valueNumber › max"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED El valor está fuera de la escala de la pregunta"]):::error
-  n32 -->|"sí"| n33
-  n34{"typeof answer.valueBoolean !== 'boolean'"}:::decision
-  n27 -->|"'BOOLEAN'"| n34
-  n35(["422 PRECONDITION_FAILED Esta pregunta espera sí o no"]):::error
-  n34 -->|"sí"| n35
-  n36{"chosen.length === 0"}:::decision
-  n27 -->|"'MULTIPLE_CHOICE'"| n36
-  n37(["422 PRECONDITION_FAILED Esta pregunta espera al menos una opción"]):::error
-  n36 -->|"sí"| n37
-  n38{"type === 'SINGLE_CHOICE' && chosen.length › 1"}:::decision
-  n36 -->|"no"| n38
-  n39(["422 PRECONDITION_FAILED Esta pregunta admite una sola opción"]):::error
-  n38 -->|"sí"| n39
-  n40{"invalid.length › 0"}:::decision
-  n38 -->|"no"| n40
-  n41(["422 PRECONDITION_FAILED Se eligieron opciones que la pregunta no ofrece"]):::error
-  n40 -->|"sí"| n41
-  n42{"new Set(chosen).size !== chosen.length"}:::decision
-  n40 -->|"no"| n42
-  n43(["422 PRECONDITION_FAILED Hay opciones repetidas en la respuesta"]):::error
-  n42 -->|"sí"| n43
-  n44(["422 PRECONDITION_FAILED Tipo de pregunta desconocido"]):::error
-  n27 -->|"por defecto"| n44
-  n45{"missing.length › 0"}:::decision
-  n28 -->|"no"| n45
-  n32 -->|"no"| n45
-  n34 -->|"no"| n45
-  n42 -->|"no"| n45
-  n21 -->|"al terminar"| n45
-  n46(["422 PRECONDITION_FAILED Faltan respuestas a preguntas obligatorias"]):::error
-  n45 -->|"sí"| n46
-  n47["Llama a ResponsesRepository.createResponse"]:::llamada
-  n45 -->|"no"| n47
-  n48[("CREA surveys.survey_responses")]:::efecto
+  n21{"seen.has(answer.questionId)"}:::decision
+  n20 -->|"cada elemento"| n21
+  n22(["422 PRECONDITION_FAILED Hay más de una respuesta para la misma pregunta"]):::error
+  n21 -->|"sí"| n22
+  n23{"!question"}:::decision
+  n21 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED La respuesta no corresponde a una pregunta de este cuestionario"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a SurveysResponsesService.validateAnswerValue"]:::llamada
+  n23 -->|"no"| n25
+  n26{"según type"}:::decision
+  n25 --> n26
+  n27{"typeof answer.valueText !== 'string' || answer.valueText.trim() === ''"}:::decision
+  n26 -->|"'TEXT'"| n27
+  n28(["422 PRECONDITION_FAILED Esta pregunta espera una respuesta de texto"]):::error
+  n27 -->|"sí"| n28
+  n29{"typeof answer.valueNumber !== 'number'"}:::decision
+  n26 -->|"'SCALE'"| n29
+  n30(["422 PRECONDITION_FAILED Esta pregunta espera un valor numérico"]):::error
+  n29 -->|"sí"| n30
+  n31{"answer.valueNumber ‹ min || answer.valueNumber › max"}:::decision
+  n29 -->|"no"| n31
+  n32(["422 PRECONDITION_FAILED El valor está fuera de la escala de la pregunta"]):::error
+  n31 -->|"sí"| n32
+  n33{"typeof answer.valueBoolean !== 'boolean'"}:::decision
+  n26 -->|"'BOOLEAN'"| n33
+  n34(["422 PRECONDITION_FAILED Esta pregunta espera sí o no"]):::error
+  n33 -->|"sí"| n34
+  n35{"chosen.length === 0"}:::decision
+  n26 -->|"'MULTIPLE_CHOICE'"| n35
+  n36(["422 PRECONDITION_FAILED Esta pregunta espera al menos una opción"]):::error
+  n35 -->|"sí"| n36
+  n37{"type === 'SINGLE_CHOICE' && chosen.length › 1"}:::decision
+  n35 -->|"no"| n37
+  n38(["422 PRECONDITION_FAILED Esta pregunta admite una sola opción"]):::error
+  n37 -->|"sí"| n38
+  n39{"invalid.length › 0"}:::decision
+  n37 -->|"no"| n39
+  n40(["422 PRECONDITION_FAILED Se eligieron opciones que la pregunta no ofrece"]):::error
+  n39 -->|"sí"| n40
+  n41{"new Set(chosen).size !== chosen.length"}:::decision
+  n39 -->|"no"| n41
+  n42(["422 PRECONDITION_FAILED Hay opciones repetidas en la respuesta"]):::error
+  n41 -->|"sí"| n42
+  n43(["422 PRECONDITION_FAILED Tipo de pregunta desconocido"]):::error
+  n26 -->|"por defecto"| n43
+  n44{"missing.length › 0"}:::decision
+  n27 -->|"no"| n44
+  n31 -->|"no"| n44
+  n33 -->|"no"| n44
+  n41 -->|"no"| n44
+  n20 -->|"al terminar"| n44
+  n45(["422 PRECONDITION_FAILED Faltan respuestas a preguntas obligatorias"]):::error
+  n44 -->|"sí"| n45
+  n46["Llama a ResponsesRepository.createResponse"]:::llamada
+  n44 -->|"no"| n46
+  n47[("CREA surveys.survey_responses")]:::efecto
+  n46 --> n47
+  n48["Repite: por cada const answer de dto.answers"]:::bucle
   n47 --> n48
-  n49["Repite: por cada const answer de dto.answers"]:::bucle
-  n48 --> n49
-  n50["Llama a ResponsesRepository.createAnswer"]:::llamada
-  n49 -->|"cada elemento"| n50
-  n51[("CREA surveys.survey_answers")]:::efecto
+  n49["Llama a ResponsesRepository.createAnswer"]:::llamada
+  n48 -->|"cada elemento"| n49
+  n50[("CREA surveys.survey_answers")]:::efecto
+  n49 --> n50
+  n51[("ACTUALIZA surveys.survey_invitations · ACTUALIZA surveys.survey_invitations")]:::efecto
   n50 --> n51
-  n52[("ACTUALIZA surveys.survey_invitations · ACTUALIZA surveys.survey_invitations")]:::efecto
+  n48 -->|"al terminar"| n51
+  n52{"'expiredAt' in outcome"}:::decision
   n51 --> n52
-  n49 -->|"al terminar"| n52
-  n53(("201 Responde con éxito")):::ok
-  n52 --> n53
+  n53(["422 PRECONDITION_FAILED El plazo para responder este cuestionario venció"]):::error
+  n52 -->|"sí"| n53
+  n54(("201 Responde con éxito")):::ok
+  n52 -->|"no"| n54
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -704,7 +740,95 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /surveys/templates/{id}/deactivate
+#### 9. PATCH /surveys/templates/{id}
+
+Corregir título, consigna y plazo del borrador
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: La plantilla no tiene versiones |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado; PreconditionFailedException: La versión ya está publicada: cree una versión nueva para modificar el cuestionario |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a SurveysTemplatesService.updateTemplate"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a SurveysTemplatesService.loadOwnedTemplate"]:::llamada
+  n4 --> n5
+  n6["Llama a TemplatesRepository.findTemplateById"]:::llamada
+  n5 --> n6
+  n7[("LEE surveys.survey_templates")]:::efecto
+  n6 --> n7
+  n8{"!template"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10{"template.tenantId !== tenantId"}:::decision
+  n8 -->|"no"| n10
+  n11(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a SurveysTemplatesService.resolveOwner"]:::llamada
+  n10 -->|"no"| n12
+  n13{"!owner"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
+  n13 -->|"sí"| n14
+  n15{"template.ownerPractitionerId !== this.resolveOwner(undefined, actor)"}:::decision
+  n13 -->|"no"| n15
+  n16(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a SurveysTemplatesService.loadDraftVersion"]:::llamada
+  n15 -->|"no"| n17
+  n18["Llama a TemplatesRepository.findLatestVersion"]:::llamada
+  n17 --> n18
+  n19[("LEE surveys.survey_versions")]:::efecto
+  n18 --> n19
+  n20{"!version"}:::decision
+  n19 --> n20
+  n21(["404 NOT_FOUND La plantilla no tiene versiones"]):::error
+  n20 -->|"sí"| n21
+  n22{"version.publicationStatusConceptId !== SURVEYS.VERSION_DRAFT"}:::decision
+  n20 -->|"no"| n22
+  n23(["422 PRECONDITION_FAILED La versión ya está publicada: cree una versión nueva para modificar el cuestionario"]):::error
+  n22 -->|"sí"| n23
+  n24[("ACTUALIZA surveys.survey_templates")]:::efecto
+  n22 -->|"no"| n24
+  n25{"dto.title !== undefined"}:::decision
+  n24 --> n25
+  n26[("ACTUALIZA surveys.survey_templates")]:::efecto
+  n25 -->|"sí"| n26
+  n27{"dto.description !== undefined"}:::decision
+  n26 --> n27
+  n25 -->|"no"| n27
+  n28[("ACTUALIZA surveys.survey_templates")]:::efecto
+  n27 -->|"sí"| n28
+  n29{"dto.responseWindowDays !== undefined"}:::decision
+  n28 --> n29
+  n27 -->|"no"| n29
+  n30[("ACTUALIZA surveys.survey_versions")]:::efecto
+  n29 -->|"sí"| n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
+  n29 -->|"no"| n31
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 10. POST /surveys/templates/{id}/deactivate
 
 Desactivar la encuesta
 
@@ -768,7 +892,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /surveys/templates/{id}/questions
+#### 11. POST /surveys/templates/{id}/questions
 
 Configurar una pregunta y su tipo de respuesta
 
@@ -839,28 +963,30 @@ flowchart TD
   n24 -->|"no"| n26
   n27(["404 NOT_FOUND Plantilla no encontrada"]):::error
   n26 -->|"sí"| n27
-  n28["Llama a TemplatesRepository.findLatestVersion"]:::llamada
+  n28["Llama a SurveysTemplatesService.loadDraftVersion"]:::llamada
   n26 -->|"no"| n28
-  n29[("LEE surveys.survey_versions")]:::efecto
+  n29["Llama a TemplatesRepository.findLatestVersion"]:::llamada
   n28 --> n29
-  n30{"!version"}:::decision
+  n30[("LEE surveys.survey_versions")]:::efecto
   n29 --> n30
-  n31(["404 NOT_FOUND La plantilla no tiene versiones"]):::error
-  n30 -->|"sí"| n31
-  n32{"version.publicationStatusConceptId !== SURVEYS.VERSION_DRAFT"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED La versión ya está publicada: cree una versión nueva para modificar el cuestionario"]):::error
-  n32 -->|"sí"| n33
-  n34["Llama a TemplatesRepository.countQuestions"]:::llamada
-  n32 -->|"no"| n34
-  n35[("LEE surveys.survey_questions")]:::efecto
-  n34 --> n35
-  n36["Llama a TemplatesRepository.createQuestion"]:::llamada
+  n31{"!version"}:::decision
+  n30 --> n31
+  n32(["404 NOT_FOUND La plantilla no tiene versiones"]):::error
+  n31 -->|"sí"| n32
+  n33{"version.publicationStatusConceptId !== SURVEYS.VERSION_DRAFT"}:::decision
+  n31 -->|"no"| n33
+  n34(["422 PRECONDITION_FAILED La versión ya está publicada: cree una versión nueva para modificar el cuestionario"]):::error
+  n33 -->|"sí"| n34
+  n35["Llama a TemplatesRepository.countQuestions"]:::llamada
+  n33 -->|"no"| n35
+  n36[("LEE surveys.survey_questions")]:::efecto
   n35 --> n36
-  n37[("CREA surveys.survey_questions")]:::efecto
+  n37["Llama a TemplatesRepository.createQuestion"]:::llamada
   n36 --> n37
-  n38(("201 Responde con éxito")):::ok
+  n38[("CREA surveys.survey_questions")]:::efecto
   n37 --> n38
+  n39(("201 Responde con éxito")):::ok
+  n38 --> n39
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -869,7 +995,294 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. GET /surveys/templates/{id}/responses
+#### 12. DELETE /surveys/templates/{id}/questions/{questionId}
+
+Quitar una pregunta del borrador
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: La plantilla no tiene versiones; ResourceNotFoundException: Pregunta no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado; PreconditionFailedException: La versión ya está publicada: cree una versión nueva para modificar el cuestionario |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SurveysTemplatesService.deleteQuestion"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a SurveysTemplatesService.loadOwnedTemplate"]:::llamada
+  n4 --> n5
+  n6["Llama a TemplatesRepository.findTemplateById"]:::llamada
+  n5 --> n6
+  n7[("LEE surveys.survey_templates")]:::efecto
+  n6 --> n7
+  n8{"!template"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10{"template.tenantId !== tenantId"}:::decision
+  n8 -->|"no"| n10
+  n11(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a SurveysTemplatesService.resolveOwner"]:::llamada
+  n10 -->|"no"| n12
+  n13{"!owner"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
+  n13 -->|"sí"| n14
+  n15{"template.ownerPractitionerId !== this.resolveOwner(undefined, actor)"}:::decision
+  n13 -->|"no"| n15
+  n16(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a SurveysTemplatesService.loadDraftVersion"]:::llamada
+  n15 -->|"no"| n17
+  n18["Llama a TemplatesRepository.findLatestVersion"]:::llamada
+  n17 --> n18
+  n19[("LEE surveys.survey_versions")]:::efecto
+  n18 --> n19
+  n20{"!version"}:::decision
+  n19 --> n20
+  n21(["404 NOT_FOUND La plantilla no tiene versiones"]):::error
+  n20 -->|"sí"| n21
+  n22{"version.publicationStatusConceptId !== SURVEYS.VERSION_DRAFT"}:::decision
+  n20 -->|"no"| n22
+  n23(["422 PRECONDITION_FAILED La versión ya está publicada: cree una versión nueva para modificar el cuestionario"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a SurveysTemplatesService.loadDraftQuestion"]:::llamada
+  n22 -->|"no"| n24
+  n25["Llama a TemplatesRepository.findQuestionById"]:::llamada
+  n24 --> n25
+  n26[("LEE surveys.survey_questions")]:::efecto
+  n25 --> n26
+  n27{"!question || question.surveyVersionId !== version.id"}:::decision
+  n26 --> n27
+  n28(["404 NOT_FOUND Pregunta no encontrada"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a TemplatesRepository.removeQuestion"]:::llamada
+  n27 -->|"no"| n29
+  n30[("BORRA surveys.survey_questions")]:::efecto
+  n29 --> n30
+  n31["Llama a TemplatesRepository.listQuestions"]:::llamada
+  n30 --> n31
+  n32[("LEE surveys.survey_questions")]:::efecto
+  n31 --> n32
+  n33(("200 Responde con éxito")):::ok
+  n32 --> n33
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 13. PATCH /surveys/templates/{id}/questions/{questionId}
+
+Corregir una pregunta del borrador
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: La plantilla no tiene versiones; ResourceNotFoundException: Pregunta no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado; PreconditionFailedException: La versión ya está publicada: cree una versión nueva para modificar el cuestionario; PreconditionFailedException: Las preguntas de elección requieren al menos dos opciones; PreconditionFailedException: Este tipo de pregunta no admite opciones; PreconditionFailedException: Las opciones no pueden repetirse; PreconditionFailedException: El máximo de la escala debe ser mayor que el mínimo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a SurveysTemplatesService.updateQuestion"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a SurveysTemplatesService.loadOwnedTemplate"]:::llamada
+  n4 --> n5
+  n6["Llama a TemplatesRepository.findTemplateById"]:::llamada
+  n5 --> n6
+  n7[("LEE surveys.survey_templates")]:::efecto
+  n6 --> n7
+  n8{"!template"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10{"template.tenantId !== tenantId"}:::decision
+  n8 -->|"no"| n10
+  n11(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a SurveysTemplatesService.resolveOwner"]:::llamada
+  n10 -->|"no"| n12
+  n13{"!owner"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
+  n13 -->|"sí"| n14
+  n15{"template.ownerPractitionerId !== this.resolveOwner(undefined, actor)"}:::decision
+  n13 -->|"no"| n15
+  n16(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a SurveysTemplatesService.loadDraftVersion"]:::llamada
+  n15 -->|"no"| n17
+  n18["Llama a TemplatesRepository.findLatestVersion"]:::llamada
+  n17 --> n18
+  n19[("LEE surveys.survey_versions")]:::efecto
+  n18 --> n19
+  n20{"!version"}:::decision
+  n19 --> n20
+  n21(["404 NOT_FOUND La plantilla no tiene versiones"]):::error
+  n20 -->|"sí"| n21
+  n22{"version.publicationStatusConceptId !== SURVEYS.VERSION_DRAFT"}:::decision
+  n20 -->|"no"| n22
+  n23(["422 PRECONDITION_FAILED La versión ya está publicada: cree una versión nueva para modificar el cuestionario"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a SurveysTemplatesService.loadDraftQuestion"]:::llamada
+  n22 -->|"no"| n24
+  n25["Llama a TemplatesRepository.findQuestionById"]:::llamada
+  n24 --> n25
+  n26[("LEE surveys.survey_questions")]:::efecto
+  n25 --> n26
+  n27{"!question || question.surveyVersionId !== version.id"}:::decision
+  n26 --> n27
+  n28(["404 NOT_FOUND Pregunta no encontrada"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a SurveysTemplatesService.validateQuestionShape"]:::llamada
+  n27 -->|"no"| n29
+  n30{"needsOptions && (!dto.options || dto.options.length ‹ 2)"}:::decision
+  n29 --> n30
+  n31(["422 PRECONDITION_FAILED Las preguntas de elección requieren al menos dos opciones"]):::error
+  n30 -->|"sí"| n31
+  n32{"!needsOptions && dto.options && dto.options.length › 0"}:::decision
+  n30 -->|"no"| n32
+  n33(["422 PRECONDITION_FAILED Este tipo de pregunta no admite opciones"]):::error
+  n32 -->|"sí"| n33
+  n34{"needsOptions && dto.options"}:::decision
+  n32 -->|"no"| n34
+  n35{"unique.size !== dto.options.length"}:::decision
+  n34 -->|"sí"| n35
+  n36(["422 PRECONDITION_FAILED Las opciones no pueden repetirse"]):::error
+  n35 -->|"sí"| n36
+  n37{"dto.answerType === 'SCALE'"}:::decision
+  n35 -->|"no"| n37
+  n34 -->|"no"| n37
+  n38{"max ‹= min"}:::decision
+  n37 -->|"sí"| n38
+  n39(["422 PRECONDITION_FAILED El máximo de la escala debe ser mayor que el mínimo"]):::error
+  n38 -->|"sí"| n39
+  n40{"dto.questionText !== undefined"}:::decision
+  n38 -->|"no"| n40
+  n37 -->|"no"| n40
+  n41[("ACTUALIZA surveys.survey_questions")]:::efecto
+  n40 -->|"sí"| n41
+  n42[("ACTUALIZA surveys.survey_questions")]:::efecto
+  n41 --> n42
+  n40 -->|"no"| n42
+  n43{"dto.required !== undefined"}:::decision
+  n42 --> n43
+  n44[("ACTUALIZA surveys.survey_questions")]:::efecto
+  n43 -->|"sí"| n44
+  n45[("ACTUALIZA surveys.survey_questions · ACTUALIZA surveys.survey_questions · ACTUALIZA surveys.survey_questions…")]:::efecto
+  n44 --> n45
+  n43 -->|"no"| n45
+  n46(("200 Responde con éxito")):::ok
+  n45 --> n46
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 14. PUT /surveys/templates/{id}/questions/order
+
+Reordenar el cuestionario del borrador
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: La plantilla no tiene versiones |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado; PreconditionFailedException: La versión ya está publicada: cree una versión nueva para modificar el cuestionario; PreconditionFailedException: Hay preguntas que no pertenecen a la versión en borrador |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a SurveysTemplatesService.reorderQuestions"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a SurveysTemplatesService.loadOwnedTemplate"]:::llamada
+  n4 --> n5
+  n6["Llama a TemplatesRepository.findTemplateById"]:::llamada
+  n5 --> n6
+  n7[("LEE surveys.survey_templates")]:::efecto
+  n6 --> n7
+  n8{"!template"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10{"template.tenantId !== tenantId"}:::decision
+  n8 -->|"no"| n10
+  n11(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a SurveysTemplatesService.resolveOwner"]:::llamada
+  n10 -->|"no"| n12
+  n13{"!owner"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
+  n13 -->|"sí"| n14
+  n15{"template.ownerPractitionerId !== this.resolveOwner(undefined, actor)"}:::decision
+  n13 -->|"no"| n15
+  n16(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a SurveysTemplatesService.loadDraftVersion"]:::llamada
+  n15 -->|"no"| n17
+  n18["Llama a TemplatesRepository.findLatestVersion"]:::llamada
+  n17 --> n18
+  n19[("LEE surveys.survey_versions")]:::efecto
+  n18 --> n19
+  n20{"!version"}:::decision
+  n19 --> n20
+  n21(["404 NOT_FOUND La plantilla no tiene versiones"]):::error
+  n20 -->|"sí"| n21
+  n22{"version.publicationStatusConceptId !== SURVEYS.VERSION_DRAFT"}:::decision
+  n20 -->|"no"| n22
+  n23(["422 PRECONDITION_FAILED La versión ya está publicada: cree una versión nueva para modificar el cuestionario"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a TemplatesRepository.listQuestions"]:::llamada
+  n22 -->|"no"| n24
+  n25[("LEE surveys.survey_questions")]:::efecto
+  n24 --> n25
+  n26{"unknown.length › 0"}:::decision
+  n25 --> n26
+  n27(["422 PRECONDITION_FAILED Hay preguntas que no pertenecen a la versión en borrador"]):::error
+  n26 -->|"sí"| n27
+  n28(("200 Responde con éxito")):::ok
+  n26 -->|"no"| n28
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. GET /surveys/templates/{id}/responses
 
 Revisar las respuestas de los pacientes
 
@@ -929,7 +1342,81 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /surveys/templates/{id}/versions/{versionNumber}/publish
+#### 16. POST /surveys/templates/{id}/versions
+
+Abrir una versión nueva del cuestionario
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: La plantilla no tiene versiones |
+| 409 | `CONFLICT` | ConflictException: Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no tiene perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a SurveysTemplatesService.createNextVersion"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a SurveysTemplatesService.loadOwnedTemplate"]:::llamada
+  n4 --> n5
+  n6["Llama a TemplatesRepository.findTemplateById"]:::llamada
+  n5 --> n6
+  n7[("LEE surveys.survey_templates")]:::efecto
+  n6 --> n7
+  n8{"!template"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10{"template.tenantId !== tenantId"}:::decision
+  n8 -->|"no"| n10
+  n11(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a SurveysTemplatesService.resolveOwner"]:::llamada
+  n10 -->|"no"| n12
+  n13{"!owner"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED La sesión no tiene perfil profesional asociado"]):::error
+  n13 -->|"sí"| n14
+  n15{"template.ownerPractitionerId !== this.resolveOwner(undefined, actor)"}:::decision
+  n13 -->|"no"| n15
+  n16(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a TemplatesRepository.findLatestVersion"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE surveys.survey_versions")]:::efecto
+  n17 --> n18
+  n19{"!latest"}:::decision
+  n18 --> n19
+  n20(["404 NOT_FOUND La plantilla no tiene versiones"]):::error
+  n19 -->|"sí"| n20
+  n21{"latest.publicationStatusConceptId === SURVEYS.VERSION_DRAFT"}:::decision
+  n19 -->|"no"| n21
+  n22(["409 CONFLICT Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a TemplatesRepository.createVersion"]:::llamada
+  n21 -->|"no"| n23
+  n24[("CREA surveys.survey_versions")]:::efecto
+  n23 --> n24
+  n25(("201 Responde con éxito")):::ok
+  n24 --> n25
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 17. POST /surveys/templates/{id}/versions/{versionNumber}/publish
 
 Publicar la encuesta y configurar su vigencia
 

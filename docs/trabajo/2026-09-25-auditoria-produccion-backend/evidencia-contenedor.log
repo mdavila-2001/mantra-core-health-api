@@ -1,0 +1,2 @@
+name=/mantra-redesa-api-1 image=mantra-redesa-api:local image_id=sha256:e853d81f69c34881d5fc1ceeb7be72e14ae2f528a37208df1a2f8d3d4e979f99 created=2026-09-25T04:58:17.643024075Z health=healthy
+{"node":"v24.20.0","mode":"development","commit":"desconocido","rls":"false","appRoleConfigured":false}

@@ -73,12 +73,14 @@ function build() {
     warn: mockFn(),
     error: mockFn(),
   };
+  const gateway: any = { notifyUser: mockFn() };
   const service = new NotificationsService(
     em,
     notificationsRepo,
     logger as any,
+    gateway,
   );
-  return { service, tx, notificationsRepo, logger };
+  return { service, tx, notificationsRepo, logger, gateway };
 }
 
 /**
@@ -87,12 +89,12 @@ function build() {
  * @param overrides - Lo que la prueba quiera cambiar.
  * @returns La fila doblada.
  */
-function fila(overrides: Record<string, unknown> = {}): any {
+function row(overrides: Record<string, unknown> = {}): any {
   return {
     id: 'in-app-1',
     categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.CLINICAL,
-    subject: 'Tu receta está lista',
-    bodyText: 'Podés verla en tu historia clínica.',
+    subject: 'Su receta está lista',
+    bodyText: 'Puede verla en su historia clínica.',
     relatedResourceType: 'PRESCRIPTION',
     relatedResourceId: 'rx-1',
     statusConceptId: CONCEPTS.INAPP_UNREAD,
@@ -110,7 +112,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
         destination: { type: 'PRESCRIPTION', id: 'rx-1' },
       });
 
@@ -151,7 +153,7 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'SOCIAL',
-        subject: 'Le gustó tu publicación',
+        subject: 'Le gustó su publicación',
       });
 
       expect(res.suppressed).toBe(true);
@@ -210,18 +212,114 @@ describe('NotificationsService · carril P1 (campana)', () => {
       const res = await d.service.emitInApp({
         recipientUserId: RECIPIENT,
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
+        subject: 'Su receta está lista',
       });
 
       expect(res.failed).toBe(true);
       expect(d.logger.error).toHaveBeenCalled();
+    });
+
+    it('AG-22: empuja notification:new por el gateway después del commit', async () => {
+      const d = build();
+
+      await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'CLINICAL',
+        subject: 'Su receta está lista',
+        bodyText: 'Puede verla en su historia clínica.',
+        destination: { type: 'PRESCRIPTION', id: 'rx-1' },
+      });
+
+      expect(d.gateway.notifyUser).toHaveBeenCalledTimes(1);
+      const [recipientUserId, payload] = d.gateway.notifyUser.mock
+        .calls[0] as any[];
+      expect(recipientUserId).toBe(RECIPIENT);
+      expect(payload).toMatchObject({
+        id: 'in-app-1',
+        category: 'CLINICAL',
+        subject: 'Su receta está lista',
+        destination: { type: 'PRESCRIPTION', id: 'rx-1' },
+      });
+    });
+
+    it('AG-22: no empuja nada cuando la preferencia suprime el aviso', async () => {
+      const d = build();
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        {
+          categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.SOCIAL,
+          optedIn: false,
+          quietHoursJson: null,
+        },
+      ]);
+
+      await d.service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'SOCIAL',
+        subject: 'Nueva reacción',
+      });
+
+      expect(d.gateway.notifyUser).not.toHaveBeenCalled();
+    });
+
+    it('AG-22: no rompe la emisión si el gateway no está disponible (specs sin socket)', async () => {
+      const tx = { flush: mockFn() };
+      const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+      const notificationsRepo: any = {
+        findActiveChannelByType: mockFn(() =>
+          Promise.resolve({
+            id: CHANNEL,
+            stateConceptId: CONCEPTS.STATE_ACTIVE,
+            channelTypeConceptId: CONCEPTS.CHANNEL_TYPE_IN_APP,
+          }),
+        ),
+        findUnreadInAppForResource: mockFn(() => Promise.resolve(null)),
+        findPreferences: mockFn(() => Promise.resolve([])),
+        createNotificationRequest: mockFn((_em: any, data: any) => ({
+          id: REQUEST,
+          ...data,
+        })),
+        findChannelConfigs: mockFn(() =>
+          Promise.resolve([{ id: CONFIG, providerId: 'provider-1' }]),
+        ),
+        findProviderById: mockFn(() =>
+          Promise.resolve({
+            id: 'provider-1',
+            adapterCode: 'IN_APP_DIRECT',
+            adapterVersion: '1',
+          }),
+        ),
+        createDelivery: mockFn(() => ({ id: 'delivery-1' })),
+        createInAppNotification: mockFn(() => ({ id: 'in-app-1' })),
+      };
+      const logger = {
+        setContext: mockFn(),
+        info: mockFn(),
+        warn: mockFn(),
+        error: mockFn(),
+      };
+      // Sin cuarto argumento, tal como los specs de este archivo antes de
+      // AG-22: `emitInApp` no puede asumir que el gateway existe.
+      const service = new NotificationsService(
+        em,
+        notificationsRepo,
+        logger as any,
+      );
+
+      const res = await service.emitInApp({
+        recipientUserId: RECIPIENT,
+        category: 'CLINICAL',
+        subject: 'Su receta está lista',
+      });
+
+      expect(res.suppressed).toBe(false);
+      expect(res.inAppNotificationId).toBe('in-app-1');
     });
   });
 
   describe('listMine', () => {
     it('proyecta la fila al DTO de la campana, con la categoría resuelta y el destino navegable', async () => {
       const d = build();
-      d.notificationsRepo.listInAppPage.mockResolvedValue([fila()]);
+      d.notificationsRepo.listInAppPage.mockResolvedValue([row()]);
       d.notificationsRepo.countUnreadInApp.mockResolvedValue(3);
 
       const page = await d.service.listMine(actor as any, {});
@@ -232,8 +330,8 @@ describe('NotificationsService · carril P1 (campana)', () => {
       expect(page.items[0]).toEqual({
         id: 'in-app-1',
         category: 'CLINICAL',
-        subject: 'Tu receta está lista',
-        bodyText: 'Podés verla en tu historia clínica.',
+        subject: 'Su receta está lista',
+        bodyText: 'Puede verla en su historia clínica.',
         destination: { type: 'PRESCRIPTION', id: 'rx-1' },
         payloadJson: null,
         unread: true,
@@ -256,8 +354,8 @@ describe('NotificationsService · carril P1 (campana)', () => {
     it('devuelve cursor cuando hay más de las pedidas', async () => {
       const d = build();
       d.notificationsRepo.listInAppPage.mockResolvedValue([
-        fila({ id: 'a' }),
-        fila({ id: 'b' }),
+        row({ id: 'a' }),
+        row({ id: 'b' }),
       ]);
 
       const page = await d.service.listMine(actor as any, { limit: 1 });
@@ -270,21 +368,24 @@ describe('NotificationsService · carril P1 (campana)', () => {
   describe('markAllInAppRead', () => {
     it('marca las no leídas conservando la primera lectura de cada una', async () => {
       const d = build();
-      const yaLeida = fila({
+      const alreadyRead = row({
         id: 'vieja',
         readAt: new Date('2026-08-01T00:00:00.000Z'),
       });
-      const sinLeer = fila({ id: 'nueva' });
-      d.notificationsRepo.findUnreadInApp.mockResolvedValue([yaLeida, sinLeer]);
+      const withoutRead = row({ id: 'nueva' });
+      d.notificationsRepo.findUnreadInApp.mockResolvedValue([
+        alreadyRead,
+        withoutRead,
+      ]);
       d.notificationsRepo.countUnreadInApp.mockResolvedValue(0);
 
       const res = await d.service.markAllInAppRead(actor as any);
 
       expect(res.marked).toBe(2);
       expect(res.unreadCount).toBe(0);
-      expect(sinLeer.statusConceptId).toBe(CONCEPTS.INAPP_READ);
+      expect(withoutRead.statusConceptId).toBe(CONCEPTS.INAPP_READ);
       // `??=`: cuándo se enteró es un dato, y repisarlo lo perdería.
-      expect(yaLeida.readAt).toEqual(new Date('2026-08-01T00:00:00.000Z'));
+      expect(alreadyRead.readAt).toEqual(new Date('2026-08-01T00:00:00.000Z'));
     });
   });
 });

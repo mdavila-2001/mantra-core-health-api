@@ -1,0 +1,193 @@
+{
+  "code": "NNAC25_MI_13_GLOMERULONEFRITIS_POSTESTREPTO",
+  "name": "Glomerulonefritis postestreptocócica (NNAC 2025)",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Medicina Interna (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/963-norma-nacional-de-atencion-clinica-de-medicina-interna?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 13, pág. 118; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "1 a 2 semanas cepas estreptocócicas nefritogénicas faríngeas",
+        "Hematuria macroscópica (total, indolora, roja, parduzca o negra)",
+        "Piuria",
+        "Cilindros hemáticos",
+        "Edema (generalizada, abdomen, palpebral, facial y distal)",
+        "Hipertensión arterial",
+        "Insuficiencia renal oligúrica",
+        "Artralgia"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 118. Es una lesión aguda inflamatoria de predominio glomerular y de patogenia inmune que es desencadenada por una infección previa con cepas nefritogénicas específicas del estreptococo beta-hemolítico del grupo A."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pacientes inmunocomprometidos",
+        "Alcoholismo",
+        "Diabetes mellitus",
+        "Bajo nivel socio económico",
+        "Amigdalitis Estreptocócica",
+        "Infecciones estretocócicas de la piel (Impétigo)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["N03: Síndrome nefrítico crónico"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Falla Renal Aguda",
+        "Edema Agudo de Pulmón",
+        "Insuficiencia Cardiaca",
+        "Encefalopatía Hipertensiva",
+        "Edema cerebral",
+        "Enfermedad Renal Crónica (1%)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 13, pág. 118); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_hospitalizacion",
+      "name": "Criterios de hospitalización que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Edema importante, anasarca, dificultad respiratoria",
+        "Necesidad de terapéutica diurética intravenosa",
+        "Biopsia Renal",
+        "Aumento de la creatinina",
+        "Disminución de la diuresis - anuria"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de la NNAC que se cumplen (referencia o alta)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Restricción de sodio y agua",
+        "Hábitos saludables de vida",
+        "Evitar uso de medicamentos nefrotóxicos (AINES: diclofenaco, indometacina, etc.)"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

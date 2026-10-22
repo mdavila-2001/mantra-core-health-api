@@ -11,12 +11,12 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [survey_answers](#survey_answers) | Conserva respuestas por pregunta para permitir análisis de experiencia sin mezclar resultados con reseñas públicas. | 12 | 2 | 2 | COINCIDE |
-| [survey_assignments](#survey_assignments) | Asocia versiones de encuestas a profesionales o tipos de atención que deben utilizarlas. | 11 | 2 | 3 | COINCIDE |
+| [survey_assignments](#survey_assignments) | Asocia versiones de encuestas a profesionales o tipos de atención que deben utilizarlas. | 11 | 2 | 4 | COINCIDE |
 | [survey_invitations](#survey_invitations) | Emite invitaciones para responder una encuesta a un paciente después de una atención y controla su vigencia. | 15 | 5 | 7 | COINCIDE |
-| [survey_questions](#survey_questions) | Define preguntas que componen cada versión de un cuestionario post-visita. | 14 | 1 | 8 | COINCIDE |
+| [survey_questions](#survey_questions) | Define preguntas que componen cada versión de un cuestionario post-visita. | 14 | 1 | 14 | COINCIDE |
 | [survey_responses](#survey_responses) | Registra respuestas privadas de pacientes a encuestas post-visita sin alimentar la calificación pública de prestadores. | 11 | 4 | 2 | COINCIDE |
-| [survey_templates](#survey_templates) | Define cuestionarios post-atención que profesionales pueden usar para consultar la experiencia del paciente. | 11 | 2 | 13 | COINCIDE |
-| [survey_versions](#survey_versions) | Preserva versiones inmutables de cuestionarios para conocer qué preguntas se presentaron en cada atención. | 13 | 1 | 11 | COINCIDE |
+| [survey_templates](#survey_templates) | Define cuestionarios post-atención que profesionales pueden usar para consultar la experiencia del paciente. | 11 | 2 | 21 | COINCIDE |
+| [survey_versions](#survey_versions) | Preserva versiones inmutables de cuestionarios para conocer qué preguntas se presentaron en cada atención. | 13 | 1 | 20 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -169,7 +169,7 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_assignments`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyAssignments` — `src/modules/surveys/entities/survey_assignments.entity.ts`
-- **Resumen:** 11 columnas · 2 índices · 5 FK salientes · 1 entrantes · 3 operaciones
+- **Resumen:** 11 columnas · 2 índices · 5 FK salientes · 1 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -209,6 +209,7 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | CREA | DIRECTA |
 | POST /surveys/assignments | CREA | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
@@ -317,7 +318,7 @@ Define preguntas que componen cada versión de un cuestionario post-visita.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_questions`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyQuestions` — `src/modules/surveys/entities/survey_questions.entity.ts`
-- **Resumen:** 14 columnas · 1 índices · 4 FK salientes · 1 entrantes · 8 operaciones
+- **Resumen:** 14 columnas · 1 índices · 4 FK salientes · 1 entrantes · 14 operaciones
 
 #### Columnas
 
@@ -358,12 +359,18 @@ Define preguntas que componen cada versión de un cuestionario post-visita.
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | CREA | DIRECTA |
 | GET /surveys/me/invitations/{id} | LEE | DIRECTA |
 | POST /surveys/me/invitations/{id}/responses | LEE | DIRECTA |
 | GET /surveys/templates | LEE | DIRECTA |
 | GET /surveys/templates/{id} | LEE | DIRECTA |
 | POST /surveys/templates/{id}/questions | CREA | DIRECTA |
 | POST /surveys/templates/{id}/questions | LEE | DIRECTA |
+| DELETE /surveys/templates/{id}/questions/{questionId} | BORRA | POR_TIPO |
+| DELETE /surveys/templates/{id}/questions/{questionId} | LEE | DIRECTA |
+| PATCH /surveys/templates/{id}/questions/{questionId} | ACTUALIZA | POR_TIPO |
+| PATCH /surveys/templates/{id}/questions/{questionId} | LEE | DIRECTA |
+| PUT /surveys/templates/{id}/questions/order | LEE | DIRECTA |
 | GET /surveys/templates/{id}/responses | LEE | DIRECTA |
 | POST /surveys/templates/{id}/versions/{versionNumber}/publish | LEE | DIRECTA |
 
@@ -459,7 +466,7 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_templates; BIZ note`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyTemplates` — `src/modules/surveys/entities/survey_templates.entity.ts`
-- **Resumen:** 11 columnas · 2 índices · 5 FK salientes · 1 entrantes · 13 operaciones
+- **Resumen:** 11 columnas · 2 índices · 5 FK salientes · 1 entrantes · 21 operaciones
 
 #### Columnas
 
@@ -499,6 +506,8 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | ACTUALIZA | POR_TIPO |
+| POST /billing/service-catalog | CREA | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
 | GET /surveys/me/invitations | LEE | DIRECTA |
@@ -506,10 +515,16 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 | GET /surveys/templates | LEE | DIRECTA |
 | POST /surveys/templates | CREA | DIRECTA |
 | GET /surveys/templates/{id} | LEE | DIRECTA |
+| PATCH /surveys/templates/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /surveys/templates/{id} | LEE | DIRECTA |
 | POST /surveys/templates/{id}/deactivate | ACTUALIZA | POR_TIPO |
 | POST /surveys/templates/{id}/deactivate | LEE | DIRECTA |
 | POST /surveys/templates/{id}/questions | LEE | DIRECTA |
+| DELETE /surveys/templates/{id}/questions/{questionId} | LEE | DIRECTA |
+| PATCH /surveys/templates/{id}/questions/{questionId} | LEE | DIRECTA |
+| PUT /surveys/templates/{id}/questions/order | LEE | DIRECTA |
 | GET /surveys/templates/{id}/responses | LEE | DIRECTA |
+| POST /surveys/templates/{id}/versions | LEE | DIRECTA |
 | POST /surveys/templates/{id}/versions/{versionNumber}/publish | ACTUALIZA | POR_TIPO |
 | POST /surveys/templates/{id}/versions/{versionNumber}/publish | LEE | DIRECTA |
 
@@ -536,7 +551,7 @@ Preserva versiones inmutables de cuestionarios para conocer qué preguntas se pr
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_versions; BIZ note`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyVersions` — `src/modules/surveys/entities/survey_versions.entity.ts`
-- **Resumen:** 13 columnas · 1 índices · 4 FK salientes · 4 entrantes · 11 operaciones
+- **Resumen:** 13 columnas · 1 índices · 4 FK salientes · 4 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -579,6 +594,8 @@ Preserva versiones inmutables de cuestionarios para conocer qué preguntas se pr
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | ACTUALIZA | POR_TIPO |
+| POST /billing/service-catalog | CREA | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
 | GET /surveys/me/invitations | LEE | DIRECTA |
@@ -586,8 +603,15 @@ Preserva versiones inmutables de cuestionarios para conocer qué preguntas se pr
 | GET /surveys/templates | LEE | DIRECTA |
 | POST /surveys/templates | CREA | DIRECTA |
 | GET /surveys/templates/{id} | LEE | DIRECTA |
+| PATCH /surveys/templates/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /surveys/templates/{id} | LEE | DIRECTA |
 | POST /surveys/templates/{id}/questions | LEE | DIRECTA |
+| DELETE /surveys/templates/{id}/questions/{questionId} | LEE | DIRECTA |
+| PATCH /surveys/templates/{id}/questions/{questionId} | LEE | DIRECTA |
+| PUT /surveys/templates/{id}/questions/order | LEE | DIRECTA |
 | GET /surveys/templates/{id}/responses | LEE | DIRECTA |
+| POST /surveys/templates/{id}/versions | CREA | DIRECTA |
+| POST /surveys/templates/{id}/versions | LEE | DIRECTA |
 | POST /surveys/templates/{id}/versions/{versionNumber}/publish | ACTUALIZA | POR_TIPO |
 | POST /surveys/templates/{id}/versions/{versionNumber}/publish | LEE | DIRECTA |
 

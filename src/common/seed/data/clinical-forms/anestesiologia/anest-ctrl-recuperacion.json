@@ -1,0 +1,118 @@
+{
+  "code": "ANEST_CTRL_RECUPERACION",
+  "name": "Recuperación posanestésica",
+  "specialty": { "code": "ANESTESIOLOGIA", "display": "Anestesiología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Puntaje de Aldrete (publicado) para el alta de la sala de recuperación, dolor y náuseas."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: recuperación posanestésica",
+      "code": "aldrete_actividad",
+      "name": "Aldrete — actividad",
+      "dataType": "string",
+      "required": false,
+      "options": ["2 — mueve 4 extremidades", "1 — mueve 2", "0 — no mueve"]
+    },
+    {
+      "section": "Evaluación: recuperación posanestésica",
+      "code": "aldrete_respiracion",
+      "name": "Aldrete — respiración",
+      "dataType": "string",
+      "required": false,
+      "options": ["2 — respira y tose", "1 — disnea", "0 — apnea"]
+    },
+    {
+      "section": "Evaluación: recuperación posanestésica",
+      "code": "aldrete_circulacion",
+      "name": "Aldrete — circulación",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "2 — PA ± 20 % del basal",
+        "1 — ± 20–50 %",
+        "0 — ± más de 50 %"
+      ]
+    },
+    {
+      "section": "Evaluación: recuperación posanestésica",
+      "code": "aldrete_conciencia",
+      "name": "Aldrete — conciencia",
+      "dataType": "string",
+      "required": false,
+      "options": ["2 — despierto", "1 — responde al llamado", "0 — no responde"]
+    },
+    {
+      "section": "Evaluación: recuperación posanestésica",
+      "code": "aldrete_saturacion",
+      "name": "Aldrete — saturación",
+      "dataType": "string",
+      "required": false,
+      "options": ["2 — > 92 % al aire", "1 — necesita O₂", "0 — < 90 % con O₂"]
+    },
+    {
+      "section": "Evaluación: recuperación posanestésica",
+      "code": "aldrete_total",
+      "name": "Aldrete — total (alta con ≥ 9)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: recuperación posanestésica",
+      "code": "dolor_intensidad",
+      "name": "Dolor (0 a 10)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: recuperación posanestésica",
+      "code": "nauseas",
+      "name": "Náuseas o vómitos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

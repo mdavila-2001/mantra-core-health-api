@@ -71,6 +71,7 @@ CREATE INDEX IF NOT EXISTS "ix_schedule_rules_schedule_template_id" ON "scheduli
 CREATE INDEX IF NOT EXISTS "ix_schedule_rules_created_by_user_id" ON "scheduling"."schedule_rules" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_schedule_rules_updated_by_user_id" ON "scheduling"."schedule_rules" ("updated_by_user_id");
+CREATE INDEX IF NOT EXISTS "ix_schedule_rules_booking_mode_concept_id" ON "scheduling"."schedule_rules" ("booking_mode_concept_id");
 
 CREATE INDEX IF NOT EXISTS "gist_schedule_rules_effective_period" ON "scheduling"."schedule_rules" USING gist (daterange(valid_from, valid_to, '[)'));
 
@@ -229,3 +230,11 @@ CREATE INDEX IF NOT EXISTS "ix_calendar_absences_range" ON "scheduling"."calenda
 CREATE INDEX IF NOT EXISTS "ix_calendar_absences_approval_status_concept_id" ON "scheduling"."calendar_absences" ("approval_status_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_calendar_absences_time_off_request_id" ON "scheduling"."calendar_absences" ("time_off_request_id");
+
+CREATE UNIQUE INDEX IF NOT EXISTS "ux_appointment_payment_states_booking" ON "scheduling"."appointment_payment_states" ("appointment_booking_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_states_tenant_status" ON "scheduling"."appointment_payment_states" ("tenant_id", "status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_states_status_concept_id" ON "scheduling"."appointment_payment_states" ("status_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_appointment_payment_states_marked_by_user_id" ON "scheduling"."appointment_payment_states" ("marked_by_user_id");

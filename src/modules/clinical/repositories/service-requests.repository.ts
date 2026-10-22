@@ -20,6 +20,10 @@ export interface CreateServiceRequestData {
    */
   encounterId?: string;
   /**
+   * P43: instancia de formulario de origen (ya validada por el servicio).
+   */
+  formInstanceId?: string;
+  /**
    * Identificador asociado a code concept.
    */
   codeConceptId: string;
@@ -47,6 +51,16 @@ export interface CreateServiceRequestData {
    * Identificador asociado a performer tenant.
    */
   performerTenantId?: string;
+  /**
+   * El informe diagnóstico previo que satisface este pedido, si el motor de
+   * duplicidad encontró uno y el médico decidió (antiduplicación, v4.2.17).
+   */
+  previousDiagnosticReportId?: string;
+  /**
+   * Justificación clínica para repetir un estudio duplicado. `undefined`
+   * cuando la orden reutiliza el informe previo o no hubo duplicado.
+   */
+  duplicateOverrideReason?: string;
   /**
    * Identificador asociado a actor user.
    */
@@ -81,6 +95,7 @@ export class ServiceRequestsRepository {
         custodianTenantId: data.custodianTenantId,
         patientProfileId: data.patientProfileId,
         encounterId: data.encounterId,
+        formInstanceId: data.formInstanceId,
         codeConceptId: data.codeConceptId,
         categoryConceptId: data.categoryConceptId,
         intentConceptId: data.intentConceptId,
@@ -88,6 +103,8 @@ export class ServiceRequestsRepository {
         statusConceptId: data.statusConceptId,
         requesterProfileId: data.requesterProfileId,
         performerTenantId: data.performerTenantId,
+        previousDiagnosticReportId: data.previousDiagnosticReportId,
+        duplicateOverrideReason: data.duplicateOverrideReason,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

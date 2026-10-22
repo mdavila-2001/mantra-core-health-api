@@ -13,9 +13,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   requireTenantId,
+  AccessLogged,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -63,6 +65,10 @@ export class DiagnosticsImagingController {
    * encontrar su resultado sin conocer de antemano el uuid del estudio.
    */
   @Get('diagnostics/patients/:patientProfileId/imaging-studies')
+  @AccessLogged({
+    resourceType: 'IMAGING_STUDIES',
+    patient: 'param:patientProfileId',
+  })
   @ApiOperation({ summary: 'Listar los estudios de imagen del paciente' })
   listStudies(
     @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
@@ -77,6 +83,11 @@ export class DiagnosticsImagingController {
     );
   }
 
+  @Audited({
+    action: 'IMAGING_ENDPOINT_CREATED',
+    entity: 'imaging_endpoint',
+    entityId: 'result.id',
+  })
   @Post('diagnostics/imaging-endpoints')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -90,6 +101,11 @@ export class DiagnosticsImagingController {
   }
 
   /** UC-20-11. */
+  @Audited({
+    action: 'IMAGING_STUDY_STORED',
+    entity: 'imaging_study',
+    entityId: 'result.id',
+  })
   @Post('dicomweb/studies')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -103,6 +119,11 @@ export class DiagnosticsImagingController {
   }
 
   /** UC-20-12. */
+  @Audited({
+    action: 'CLINICAL_MEDIA_ATTACHED',
+    entity: 'clinical_media',
+    entityId: 'result.id',
+  })
   @Post('diagnostics/clinical-media')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Adjuntar media clínica / imagen al chart' })
@@ -114,6 +135,11 @@ export class DiagnosticsImagingController {
   }
 
   /** UC-20-13. */
+  @Audited({
+    action: 'IMAGING_DOSE_RECORDED',
+    entity: 'imaging_study',
+    entityId: 'param:id',
+  })
   @Post('diagnostics/imaging-studies/:id/dose-events')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar evento de dosis de radiación' })
@@ -126,6 +152,11 @@ export class DiagnosticsImagingController {
   }
 
   /** UC-20-14. */
+  @Audited({
+    action: 'IMAGING_DATA_QUALITY_RECORDED',
+    entity: 'diagnostic_data_quality_event',
+    entityId: 'result.id',
+  })
   @Post('diagnostics/data-quality-events')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

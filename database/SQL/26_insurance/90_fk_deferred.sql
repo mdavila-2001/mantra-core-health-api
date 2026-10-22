@@ -387,6 +387,69 @@ DO $$ BEGIN
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_campaigns"
+        ADD CONSTRAINT "fk_insurance_campaigns_campaign_type_concept_id" FOREIGN KEY ("campaign_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_campaigns"
+        ADD CONSTRAINT "fk_insurance_campaigns_target_condition_concept_id" FOREIGN KEY ("target_condition_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_campaigns"
+        ADD CONSTRAINT "fk_insurance_campaigns_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_campaigns"
+        ADD CONSTRAINT "fk_insurance_campaigns_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_campaigns"
+        ADD CONSTRAINT "fk_insurance_campaigns_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_campaign_partners"
+        ADD CONSTRAINT "fk_insurance_campaign_partners_partner_role_concept_id" FOREIGN KEY ("partner_role_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_campaign_partners"
+        ADD CONSTRAINT "fk_insurance_campaign_partners_partner_type_concept_id" FOREIGN KEY ("partner_type_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_campaign_partners"
+        ADD CONSTRAINT "fk_insurance_campaign_partners_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_campaign_partners"
+        ADD CONSTRAINT "fk_insurance_campaign_partners_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
 -- destino: profiles.patient_profiles (requiere schema profiles)
 DO $$ BEGIN
     ALTER TABLE "insurance"."patient_coverages"
@@ -562,6 +625,13 @@ DO $$ BEGIN
         REFERENCES "clinical"."medication_requests" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: pharmacy_inventory.inventory_reservations (requiere schema pharmacy_inventory)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."prior_authorization_requests"
+        ADD CONSTRAINT "fk_prior_authorization_requests_inventory_reservation_id" FOREIGN KEY ("inventory_reservation_id")
+        REFERENCES "pharmacy_inventory"."inventory_reservations" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "insurance"."prior_authorization_requests"
@@ -667,6 +737,20 @@ DO $$ BEGIN
         REFERENCES "clinical"."encounters" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: pharmacy_inventory.inventory_reservations (requiere schema pharmacy_inventory)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_claims"
+        ADD CONSTRAINT "fk_insurance_claims_inventory_reservation_id" FOREIGN KEY ("inventory_reservation_id")
+        REFERENCES "pharmacy_inventory"."inventory_reservations" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: clinical.service_requests (requiere schema clinical)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_claims"
+        ADD CONSTRAINT "fk_insurance_claims_service_request_id" FOREIGN KEY ("service_request_id")
+        REFERENCES "clinical"."service_requests" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "insurance"."insurance_claims"
@@ -714,6 +798,13 @@ DO $$ BEGIN
     ALTER TABLE "insurance"."insurance_claim_lines"
         ADD CONSTRAINT "fk_insurance_claim_lines_medication_dispensation_line_id" FOREIGN KEY ("medication_dispensation_line_id")
         REFERENCES "pharmacy_inventory"."medication_dispensation_lines" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: pharmacy_inventory.inventory_reservation_lines (requiere schema pharmacy_inventory)
+DO $$ BEGIN
+    ALTER TABLE "insurance"."insurance_claim_lines"
+        ADD CONSTRAINT "fk_insurance_claim_lines_inventory_reservation_line_id" FOREIGN KEY ("inventory_reservation_line_id")
+        REFERENCES "pharmacy_inventory"."inventory_reservation_lines" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

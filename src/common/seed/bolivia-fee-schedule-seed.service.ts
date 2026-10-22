@@ -39,10 +39,15 @@ export interface BoliviaFeeScheduleResult {
   properties: number;
   /** Membresías de la expansión creadas. */
   memberships: number;
+  /**
+   * Filas ya existentes que el seed corrigió: nombres con el OCR enmendado,
+   * propiedades con otro valor y marcas de revisión que dejaron de aplicar.
+   */
+  reconciled: number;
 }
 
 /** Cuántos ids se consultan por vuelta contra la base. */
-const TAMANO_DE_BLOQUE = 500;
+const BLOCK_SIZE = 500;
 
 /**
  * Materializa el nomenclador de procedimientos con su precio de referencia,
@@ -69,11 +74,17 @@ const TAMANO_DE_BLOQUE = 500;
  * llevan la propiedad `procedure:review-needed`, que es lo que permite
  * revisarlas sin volver al PDF.
  *
- * Ese detector encuentra sólo lo obvio —letras y dígitos mezclados dentro de una
- * palabra—, así que **no llevar la marca no certifica nada**. Se carga igual
- * porque un nomenclador incompleto no sirve para cotizar y porque el texto
- * crudo, marcado, es honesto; inventar la corrección sería peor: un nombre de
- * procedimiento plausible pero falso no se distingue del bueno.
+ * Desde el 2026-10-01 el extractor (`tools/bolivia-datasets/ocr_es.py`) corrige
+ * SÓLO LETRAS y sólo cuando el resultado es una palabra de un léxico oficial en
+ * castellano (CIE-10-ES, MedlinePlus, fichas técnicas de CIMA): «Resecci6n» →
+ * «Resección», «quirdrgico» → «quirúrgico». El importe nunca se toca, el código
+ * sigue saliendo del texto original (los ids no cambian) y lo que no se resuelve
+ * con certeza conserva la marca. Inventar la corrección seguiría siendo peor: un
+ * nombre plausible pero falso no se distingue del bueno.
+ *
+ * Como el seed antes sólo insertaba, una base viva se quedaba con el texto viejo
+ * para siempre. `reconcile` alinea las filas existentes con el dataset: nombre,
+ * propiedades y marca de revisión.
  *
  * Idempotente por ids deterministas, como el resto de la cadena. Corre después
  * de `TerminologySeedService`: los conceptos cuelgan de
@@ -104,12 +115,13 @@ export class BoliviaFeeScheduleSeedService {
 
     const em = this.orm.em.fork();
     const now = new Date();
-    const contadores: BoliviaFeeScheduleResult = {
+    const counters: BoliviaFeeScheduleResult = {
       valueSets: 0,
       versions: 0,
       procedures: 0,
       properties: 0,
       memberships: 0,
+      reconciled: 0,
     };
 
     // --- Nivel 1: el conjunto ---
@@ -132,7 +144,7 @@ export class BoliviaFeeScheduleSeedService {
         },
         { partial: true },
       );
-      contadores.valueSets += 1;
+      counters.valueSets += 1;
     }
     await em.flush();
 
@@ -159,39 +171,100 @@ export class BoliviaFeeScheduleSeedService {
         },
         { partial: true },
       );
-      contadores.versions += 1;
+      counters.versions += 1;
     }
     await em.flush();
 
-    contadores.procedures += await this.seedConcepts(em, now);
-    contadores.properties += await this.seedProperties(em, now);
-    contadores.memberships += await this.seedMemberships(em, now);
+    counters.procedures += await this.seedConcepts(em, now);
+    counters.properties += await this.seedProperties(em, now);
+    counters.memberships += await this.seedMemberships(em, now);
+    counters.reconciled += await this.reconcile(em, now);
 
     const total =
-      contadores.valueSets +
-      contadores.versions +
-      contadores.procedures +
-      contadores.properties +
-      contadores.memberships;
+      counters.valueSets +
+      counters.versions +
+      counters.procedures +
+      counters.properties +
+      counters.memberships +
+      counters.reconciled;
     if (total > 0) {
       this.logger.info(
-        { operation: 'seed.bolivia-fee-schedule', ...contadores },
+        { operation: 'seed.bolivia-fee-schedule', ...counters },
         'Nomenclador de procedimientos materializado',
       );
     }
-    return contadores;
+    return counters;
+  }
+
+  /**
+   * Alinea con el dataset las filas que ya estaban en la base: el nombre del
+   * procedimiento, el valor de cada propiedad declarada, y borra las propiedades
+   * que el dataset ya no declara (la marca de revisión de una fila que quedó
+   * limpia, el grupo que resultó ser una fila pegada).
+   *
+   * @param em - Contexto de persistencia.
+   * @param now - Instante de la corrida.
+   * @returns Cuántas filas cambió o borró.
+   */
+  private async reconcile(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+  ): Promise<number> {
+    let changes = 0;
+    const names = new Map(
+      BOLIVIA_PROCEDURES.map((p) => [boFeeConceptId(p.code), p.nombre]),
+    );
+    const declared = new Map(
+      BOLIVIA_PROCEDURES.flatMap((p) =>
+        this.propertiesOf(p).map(
+          ([code, value]) => [boFeePropertyId(p.code, code), value] as const,
+        ),
+      ),
+    );
+    const ownCodes = Object.values(BO_FEE_PROPERTY_CODES);
+    const ids = [...names.keys()];
+    for (let i = 0; i < ids.length; i += BLOCK_SIZE) {
+      const block = ids.slice(i, i + BLOCK_SIZE);
+      for (const concept of await em.find(CatalogConcepts, {
+        id: { $in: block },
+      })) {
+        const name = names.get(concept.id);
+        if (name !== undefined && concept.display !== name) {
+          concept.display = name;
+          concept.updatedAt = now;
+          changes += 1;
+        }
+      }
+      const properties = await em.find(ConceptProperties, {
+        conceptId: { $in: block },
+        propertyCode: { $in: ownCodes },
+      });
+      for (const property of properties) {
+        const value = declared.get(property.id);
+        if (value === undefined) {
+          em.remove(property);
+          changes += 1;
+        } else if (property.valueJson !== value) {
+          property.valueJson = value;
+          property.updatedAt = now;
+          changes += 1;
+        }
+      }
+      await em.flush();
+    }
+    return changes;
   }
 
   /** Rompe si el nomenclador declara dos veces el mismo código. */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
-    for (const procedimiento of BOLIVIA_PROCEDURES) {
-      if (vistos.has(procedimiento.code)) {
+    const seen = new Set<string>();
+    for (const procedure of BOLIVIA_PROCEDURES) {
+      if (seen.has(procedure.code)) {
         throw new Error(
-          `El nomenclador declara el código "${procedimiento.code}" más de una vez`,
+          `El nomenclador declara el código "${procedure.code}" más de una vez`,
         );
       }
-      vistos.add(procedimiento.code);
+      seen.add(procedure.code);
     }
   }
 
@@ -200,26 +273,26 @@ export class BoliviaFeeScheduleSeedService {
     em: ReturnType<MikroORM['em']['fork']>,
     now: Date,
   ): Promise<number> {
-    const existentes = await this.existingIds(
+    const existing = await this.existingIds(
       em,
       CatalogConcepts,
       BOLIVIA_PROCEDURES.map((p) => boFeeConceptId(p.code)),
     );
 
-    let creados = 0;
-    for (const procedimiento of BOLIVIA_PROCEDURES) {
-      const id = boFeeConceptId(procedimiento.code);
-      if (existentes.has(id)) continue;
+    let created = 0;
+    for (const procedure of BOLIVIA_PROCEDURES) {
+      const id = boFeeConceptId(procedure.code);
+      if (existing.has(id)) continue;
       em.create(
         CatalogConcepts,
         {
           id,
           codeSystemVersionId: SEED.codeSystemVersionId,
-          code: boFeeConceptCode(procedimiento.code),
+          code: boFeeConceptCode(procedure.code),
           // En castellano y sin designación aparte: el arancel boliviano no
           // tiene versión en inglés que valga la pena persistir, igual que los
           // departamentos y los establecimientos.
-          display: procedimiento.nombre,
+          display: procedure.nombre,
           abstract: false,
           selectable: true,
           stateConceptId: CONCEPTS.TERM_ACTIVE,
@@ -228,11 +301,11 @@ export class BoliviaFeeScheduleSeedService {
         },
         { partial: true },
       );
-      creados += 1;
-      if (creados % TAMANO_DE_BLOQUE === 0) await em.flush();
+      created += 1;
+      if (created % BLOCK_SIZE === 0) await em.flush();
     }
     await em.flush();
-    return creados;
+    return created;
   }
 
   /** Especialidad, grupo, precio, unidad y la marca de revisión. */
@@ -240,42 +313,42 @@ export class BoliviaFeeScheduleSeedService {
     em: ReturnType<MikroORM['em']['fork']>,
     now: Date,
   ): Promise<number> {
-    const declaradas = BOLIVIA_PROCEDURES.flatMap((procedimiento) =>
-      this.propertiesOf(procedimiento).map(([propertyCode, value]) => ({
-        id: boFeePropertyId(procedimiento.code, propertyCode),
-        conceptId: boFeeConceptId(procedimiento.code),
+    const declared = BOLIVIA_PROCEDURES.flatMap((procedure) =>
+      this.propertiesOf(procedure).map(([propertyCode, value]) => ({
+        id: boFeePropertyId(procedure.code, propertyCode),
+        conceptId: boFeeConceptId(procedure.code),
         propertyCode,
         value,
       })),
     );
 
-    const existentes = await this.existingIds(
+    const existing = await this.existingIds(
       em,
       ConceptProperties,
-      declaradas.map((p) => p.id),
+      declared.map((p) => p.id),
     );
 
-    let creadas = 0;
-    for (const propiedad of declaradas) {
-      if (existentes.has(propiedad.id)) continue;
+    let created = 0;
+    for (const property of declared) {
+      if (existing.has(property.id)) continue;
       em.create(
         ConceptProperties,
         {
-          id: propiedad.id,
-          conceptId: propiedad.conceptId,
-          propertyCode: propiedad.propertyCode,
+          id: property.id,
+          conceptId: property.conceptId,
+          propertyCode: property.propertyCode,
           dataType: BO_FEE_PROPERTY_DATA_TYPE,
-          valueJson: propiedad.value,
+          valueJson: property.value,
           createdAt: now,
           updatedAt: now,
         },
         { partial: true },
       );
-      creadas += 1;
-      if (creadas % TAMANO_DE_BLOQUE === 0) await em.flush();
+      created += 1;
+      if (created % BLOCK_SIZE === 0) await em.flush();
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /**
@@ -285,20 +358,15 @@ export class BoliviaFeeScheduleSeedService {
    * «false» en cuatro mil filas es ruido, y la ausencia ya significa «no se
    * detectó daño» — que no es lo mismo que «está bien», pero es lo que se sabe.
    */
-  private propertiesOf(
-    procedimiento: BoliviaProcedureSeed,
-  ): [string, string][] {
-    const pares: [string, string | null][] = [
-      [BO_FEE_PROPERTY_CODES.especialidad, procedimiento.especialidad],
-      [BO_FEE_PROPERTY_CODES.grupo, procedimiento.grupo],
-      [BO_FEE_PROPERTY_CODES.precio, String(procedimiento.precio)],
-      [BO_FEE_PROPERTY_CODES.unidad, procedimiento.unidad],
-      [
-        BO_FEE_PROPERTY_CODES.revision,
-        procedimiento.ocrSospechoso ? 'true' : null,
-      ],
+  private propertiesOf(procedure: BoliviaProcedureSeed): [string, string][] {
+    const pairs: [string, string | null][] = [
+      [BO_FEE_PROPERTY_CODES.especialidad, procedure.especialidad],
+      [BO_FEE_PROPERTY_CODES.grupo, procedure.grupo],
+      [BO_FEE_PROPERTY_CODES.precio, String(procedure.precio)],
+      [BO_FEE_PROPERTY_CODES.unidad, procedure.unidad],
+      [BO_FEE_PROPERTY_CODES.revision, procedure.ocrSospechoso ? 'true' : null],
     ];
-    return pares.filter((par): par is [string, string] => Boolean(par[1]));
+    return pairs.filter((par): par is [string, string] => Boolean(par[1]));
   }
 
   /** La expansión, en el orden del arancel. */
@@ -307,37 +375,37 @@ export class BoliviaFeeScheduleSeedService {
     now: Date,
   ): Promise<number> {
     const versionIdentifier = boFeeVersionId();
-    const existentes = await this.existingIds(
+    const existing = await this.existingIds(
       em,
       ValueSetMembers,
       BOLIVIA_PROCEDURES.map((p) => boFeeMemberId(p.code)),
     );
 
-    let creadas = 0;
+    let created = 0;
     let ordinal = 0;
-    for (const procedimiento of BOLIVIA_PROCEDURES) {
-      const id = boFeeMemberId(procedimiento.code);
-      const posicion = ordinal;
+    for (const procedure of BOLIVIA_PROCEDURES) {
+      const id = boFeeMemberId(procedure.code);
+      const position = ordinal;
       ordinal += 1;
-      if (existentes.has(id)) continue;
+      if (existing.has(id)) continue;
       em.create(
         ValueSetMembers,
         {
           id,
           valueSetVersionId: versionIdentifier,
-          conceptId: boFeeConceptId(procedimiento.code),
+          conceptId: boFeeConceptId(procedure.code),
           included: true,
-          ordinal: posicion,
+          ordinal: position,
           createdAt: now,
           updatedAt: now,
         },
         { partial: true },
       );
-      creadas += 1;
-      if (creadas % TAMANO_DE_BLOQUE === 0) await em.flush();
+      created += 1;
+      if (created % BLOCK_SIZE === 0) await em.flush();
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /**
@@ -351,16 +419,16 @@ export class BoliviaFeeScheduleSeedService {
     entity: new () => T,
     ids: string[],
   ): Promise<Set<string>> {
-    const encontrados = new Set<string>();
-    for (let i = 0; i < ids.length; i += TAMANO_DE_BLOQUE) {
-      const bloque = ids.slice(i, i + TAMANO_DE_BLOQUE);
-      const filas = await em.find(
+    const found = new Set<string>();
+    for (let i = 0; i < ids.length; i += BLOCK_SIZE) {
+      const block = ids.slice(i, i + BLOCK_SIZE);
+      const rows = await em.find(
         entity,
-        { id: { $in: bloque } },
+        { id: { $in: block } },
         { fields: ['id'] as never },
       );
-      for (const fila of filas) encontrados.add((fila as { id: string }).id);
+      for (const row of rows) found.add((row as { id: string }).id);
     }
-    return encontrados;
+    return found;
   }
 }

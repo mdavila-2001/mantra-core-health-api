@@ -3,6 +3,7 @@ import { defineConfig } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { loadOrmEnv, type OrmEnv } from './orm.env';
 import { createOrmLoggerFactory } from '../observability/orm.logger';
+import { warnIfRlsRoleFallbackIsUnsafe } from './rls-role-resolution';
 import { HistoryMirrorSubscriber } from '../subscribers/history-mirror.subscriber';
 
 /**
@@ -34,6 +35,10 @@ const APPLICATION_NAME = 'mantra-redesa-health-api';
  *            en tests sin tocar `process.env`.
  */
 export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
+  warnIfRlsRoleFallbackIsUnsafe({
+    DB_APP_USER: process.env.DB_APP_USER,
+    RLS_ENFORCE: process.env.RLS_ENFORCE,
+  });
   return defineConfig({
     host: env.connection.host,
     port: env.connection.port,
@@ -95,7 +100,14 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
     // `application_name` es una opción de primer nivel. No anidarla bajo
     // `connection`: esa clave la reserva `pg` para inyectar un objeto Connection
     // propio y pasarle un literal rompe el establecimiento de la conexión.
-    driverOptions: { application_name: APPLICATION_NAME },
+    //
+    // `ssl` sólo se incluye cuando `DB_SSL` está activo: `pg` distingue entre
+    // la clave ausente y `ssl: false`, y contra el contenedor del compose —que
+    // no tiene certificado— pasar el objeto rompería la conexión.
+    driverOptions: {
+      application_name: APPLICATION_NAME,
+      ...(env.connection.ssl ? { ssl: { rejectUnauthorized: true } } : {}),
+    },
 
     // Todas las marcas temporales del modelo son `timestamptz`. Forzar UTC evita
     // que la zona horaria del contenedor se cuele en las conversiones y produzca
@@ -112,7 +124,7 @@ export function buildOrmConfig(env: OrmEnv = loadOrmEnv()) {
       disableForeignKeys: false,
     },
 
-    // Espejo de versionado (REDESA §2): puebla `audit.<tabla>_history` en cada
+    // Espejo de versionado (ALOVIDA §2): puebla `audit.<tabla>_history` en cada
     // flush para todo agregado con tabla de historial, dentro de su transacción.
     subscribers: [new HistoryMirrorSubscriber()],
 

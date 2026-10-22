@@ -1,0 +1,9 @@
+$ yarn docs:endpoints:generate
+Documentación generada: 1415 endpoints, 71 módulos, 72 archivos Markdown.
+exit=0
+
+$ yarn docs:modules:sync
+Sin README.md: ops_console — omitido (todos los módulos deberían tener uno, ver docs/reports/system-inventory.md)
+Sin README.md: public — omitido (todos los módulos deberían tener uno, ver docs/reports/system-inventory.md)
+Sincronizados 68 módulos → docs/modules/
+exit=0

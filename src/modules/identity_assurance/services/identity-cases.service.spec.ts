@@ -36,7 +36,11 @@ function build() {
     findExpirable: mockFn().mockResolvedValue([]),
   };
   const policiesRepo = { findById: mockFn() };
-  const evidenceRepo = { create: mockFn() };
+  const evidenceRepo = {
+    create: mockFn(),
+    findLatestByCase: mockFn().mockResolvedValue(null),
+    findByCase: mockFn().mockResolvedValue([]),
+  };
   const checksRepo = {
     create: mockFn(),
     countByCaseAndStatus: mockFn().mockResolvedValue(1),

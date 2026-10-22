@@ -10,21 +10,21 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 75 | COINCIDE |
+| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 125 | COINCIDE |
 | [catalog_import_batches](#catalog_import_batches) | Agrupa importaciones de terminología para trazar la carga de fuentes externas y sus resultados. | 13 | 6 | 3 | COINCIDE |
-| [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 11 | COINCIDE |
-| [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 8 | COINCIDE |
-| [concept_designations](#concept_designations) | Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos para su búsqueda y presentación. | 11 | 5 | 11 | COINCIDE |
+| [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 17 | COINCIDE |
+| [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 14 | COINCIDE |
+| [concept_designations](#concept_designations) | Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos para su búsqueda y presentación. | 11 | 5 | 20 | COINCIDE |
 | [concept_maps](#concept_maps) | Mantiene correspondencias entre conceptos o sistemas de códigos para facilitar intercambio y normalización semántica. | 12 | 6 | 3 | COINCIDE |
-| [concept_properties](#concept_properties) | Registra propiedades descriptivas de conceptos para ampliar su significado sin duplicar el concepto principal. | 10 | 3 | 13 | COINCIDE |
-| [concept_relationships](#concept_relationships) | Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonamiento sobre terminología clínica. | 10 | 5 | 7 | COINCIDE |
+| [concept_properties](#concept_properties) | Registra propiedades descriptivas de conceptos para ampliar su significado sin duplicar el concepto principal. | 10 | 3 | 21 | COINCIDE |
+| [concept_relationships](#concept_relationships) | Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonamiento sobre terminología clínica. | 10 | 5 | 10 | COINCIDE |
 | [tenant_catalog_policies](#tenant_catalog_policies) | Define políticas de catálogo por tenant para gobernar qué terminologías se habilitan en cada organización sanitaria. | 14 | 6 | 3 | COINCIDE |
 | [tenant_concept_config](#tenant_concept_config) | Guarda configuraciones de conceptos por tenant para permitir ajustes locales sin alterar el concepto canónico compartido. | 12 | 5 | 3 | COINCIDE |
 | [terminology_sources](#terminology_sources) | Identifica fuentes de terminología sanitaria para registrar procedencia y gobierno de los catálogos clínicos. | 14 | 7 | 4 | COINCIDE |
-| [value_set_members](#value_set_members) | Asocia conceptos concretos a versiones de un conjunto de valores para delimitar sus opciones válidas. | 10 | 5 | 24 | COINCIDE |
+| [value_set_members](#value_set_members) | Asocia conceptos concretos a versiones de un conjunto de valores para delimitar sus opciones válidas. | 10 | 5 | 37 | COINCIDE |
 | [value_set_rules](#value_set_rules) | Describe reglas de inclusión o selección de miembros de conjuntos de valores usadas por catálogos clínicos. | 12 | 5 | 2 | COINCIDE |
-| [value_set_versions](#value_set_versions) | Preserva versiones de conjuntos de valores para reproducir qué opciones estaban vigentes al capturar información. | 12 | 6 | 23 | COINCIDE |
-| [value_sets](#value_sets) | Define conjuntos de conceptos permitidos que pueden utilizar formularios y procesos clínicos como vocabularios controlados. | 12 | 7 | 28 | COINCIDE |
+| [value_set_versions](#value_set_versions) | Preserva versiones de conjuntos de valores para reproducir qué opciones estaban vigentes al capturar información. | 12 | 6 | 35 | COINCIDE |
+| [value_sets](#value_sets) | Define conjuntos de conceptos permitidos que pueden utilizar formularios y procesos clínicos como vocabularios controlados. | 12 | 7 | 36 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -196,7 +196,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: catalog_concepts`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CatalogConcepts` — `src/modules/terminology/entities/catalog_concepts.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 75 operaciones
+- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 125 operaciones
 
 #### Columnas
 
@@ -2755,12 +2755,12 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_catalog_concepts_code_system_version_id` | no | code_system_version_id | Soporta la clave foránea fk_catalog_concepts_code_system_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «code_system_version_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_catalog_concepts_code_system_version_id` | no | code_system_version_id | Soporta la clave foránea fk_catalog_concepts_code_system_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «code_system_version_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_catalog_concepts_replaced_by_concept_id` | no | replaced_by_concept_id | Soporta la clave foránea fk_catalog_concepts_replaced_by_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_catalog_concepts_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_catalog_concepts_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_catalog_concepts_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_catalog_concepts_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_catalog_concepts_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_catalog_concepts_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uq_catalog_concepts_version_code` | sí | code_system_version_id, code | Garantiza que no se repita la combinación (code_system_version_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_catalog_concepts_code_system_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «code_system_version_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_catalog_concepts_version_code` | sí | code_system_version_id, code | Garantiza que no se repita la combinación (code_system_version_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_catalog_concepts_code_system_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «code_system_version_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_catalog_concepts_display` | no | display | _sin uso detectado estáticamente_ |
 | `gin_catalog_concepts_search` | no | (to_tsvector('simple', (coalesce(code, '')))) | GIN para búsqueda textual gobernada _(DOCUMENTO)_ |
 
@@ -2774,9 +2774,12 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| GET /clinical/patients/{patientProfileId}/prescriptions | LEE | DIRECTA |
-| GET /clinical/patients/{patientProfileId}/prescriptions/history.pdf | LEE | DIRECTA |
+| GET /billing/service-catalog/procedures | LEE | POR_SQL |
+| GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
+| POST /clinical/service-requests | LEE | DIRECTA |
+| POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
 | GET /f/{slug} | LEE | POR_SQL |
 | POST /internal/community/search/reindex | LEE | POR_SQL |
 | GET /l/{slug} | LEE | POR_SQL |
@@ -2792,23 +2795,58 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | GET /public/search/practitioners | LEE | DIRECTA |
 | GET /s/{slug} | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /admin/content-packs/{code}/apply | ACTUALIZA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | GET /diagnostic-units | LEE | DIRECTA |
 | GET /diagnostic-units/{id} | LEE | DIRECTA |
 | GET /diagnostic-units/{id}/administration | LEE | DIRECTA |
 | GET /diagnostic-units/administration | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
+| GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | POST /admin/tenants | LEE | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | LEE | DIRECTA |
+| GET /tenants/me | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
+| POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
+| POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
+| GET /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
+| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
+| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | LEE | POR_SQL |
+| GET /['insurance/campaigns', 'insurance-campaigns']/active | LEE | POR_SQL |
+| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | LEE | POR_SQL |
+| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | LEE | POR_SQL |
 | GET /insurance-brokers | LEE | DIRECTA |
 | GET /insurance-brokers/{id} | LEE | DIRECTA |
 | GET /insurance-brokers/{id}/clients | LEE | DIRECTA |
 | GET /insurance-carriers | LEE | DIRECTA |
 | GET /insurance-carriers/{id} | LEE | DIRECTA |
+| GET /insurance-claims | LEE | DIRECTA |
+| GET /insurance-claims/{id} | LEE | DIRECTA |
+| GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
+| GET /insurance/my-claims | LEE | DIRECTA |
+| POST /insurance/patients/conversation | LEE | POR_SQL |
+| POST /insurance/patients/search | LEE | POR_SQL |
+| POST /insurance/portability/export | LEE | DIRECTA |
+| GET /insurance/received-claims | LEE | DIRECTA |
+| POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
+| GET /practitioner-settlement-batches | LEE | DIRECTA |
+| POST /practitioner-settlement-batches | LEE | DIRECTA |
+| GET /practitioner-settlement-batches/{id} | LEE | DIRECTA |
+| GET /prior-authorization-requests/{id} | LEE | DIRECTA |
+| GET /prior-authorization-requests/inbox | LEE | DIRECTA |
+| GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/products | LEE | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
+| GET /pharmacy/catalog-products | LEE | DIRECTA |
 | GET /pharmacy/pharmacies | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
+| GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
+| GET /pharmacy/pharmacies/{id}/licenses | LEE | DIRECTA |
 | GET /pharmacy/products | LEE | DIRECTA |
+| GET /pharmacy/sites | LEE | DIRECTA |
 | GET /pharmacy/sites/{siteId}/prices | LEE | DIRECTA |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
@@ -2827,9 +2865,19 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
 | GET /practices/{practiceId}/organization | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| GET /profiles/patients/me | LEE | POR_SQL |
+| PATCH /profiles/patients/me | LEE | POR_SQL |
+| DELETE /profiles/patients/me/photo | LEE | POR_SQL |
+| PUT /profiles/patients/me/photo | LEE | POR_SQL |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | POR_SQL |
 | POST /profiles/practitioners/me/affiliations | LEE | POR_SQL |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
+| GET /promotions/me | LEE | DIRECTA |
+| GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
+| GET /public/profiles/o/{slug}/services | LEE | POR_SQL |
+| GET /scheduling/bookings | LEE | DIRECTA |
+| POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 | GET /terminology/CodeSystem/$lookup | LEE | DIRECTA |
 | POST /terminology/ConceptMap/$translate | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
@@ -2837,11 +2885,13 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /terminology/concepts/{conceptId}/$deprecate | ACTUALIZA | POR_TIPO |
 | POST /terminology/concepts/{conceptId}/$deprecate | LEE | DIRECTA |
 | POST /terminology/concepts/{conceptId}/designations | LEE | DIRECTA |
+| GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |
 | POST /terminology/concepts/{conceptId}/properties | LEE | DIRECTA |
 | POST /terminology/concepts/{conceptId}/relationships | LEE | DIRECTA |
 | GET /terminology/concepts/glossary-graph | LEE | DIRECTA |
 | PUT /terminology/tenants/{tenantId}/catalog-policies | LEE | DIRECTA |
 | GET /terminology/value-sets/{id}/$expand | LEE | DIRECTA |
+| GET /terminology/value-sets/$glossary-facets | LEE | POR_SQL |
 | POST /terminology/ValueSet/{id}/$expand | LEE | DIRECTA |
 | POST /terminology/versions/{versionId}/import | CREA | DIRECTA |
 | POST /terminology/versions/{versionId}/import | LEE | DIRECTA |
@@ -2945,7 +2995,7 @@ Registra versiones de sistemas de códigos para preservar el contexto temporal d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: code_system_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CodeSystemVersions` — `src/modules/terminology/entities/code_system_versions.entity.ts`
-- **Resumen:** 14 columnas · 6 índices · 4 FK salientes · 2 entrantes · 11 operaciones
+- **Resumen:** 14 columnas · 6 índices · 4 FK salientes · 2 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -2981,12 +3031,12 @@ Registra versiones de sistemas de códigos para preservar el contexto temporal d
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_code_system_versions_code_system_id` | no | code_system_id | Soporta la clave foránea fk_code_system_versions_code_system_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «code_system_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_code_system_versions_code_system_id` | no | code_system_id | Soporta la clave foránea fk_code_system_versions_code_system_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «code_system_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_code_system_versions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_code_system_versions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_code_system_versions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_code_system_versions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_code_system_versions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_code_system_versions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uq_code_system_versions_code_system_id_version` | sí | code_system_id, version | Garantiza que no se repita la combinación (code_system_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_code_system_versions_code_system_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «code_system_id», la primera columna del índice _(CONSULTA)_ |
-| `uq_code_system_versions_system_version` | sí | code_system_id, version | Garantiza que no se repita la combinación (code_system_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_code_system_versions_code_system_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «code_system_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_code_system_versions_code_system_id_version` | sí | code_system_id, version | Garantiza que no se repita la combinación (code_system_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_code_system_versions_code_system_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «code_system_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_code_system_versions_system_version` | sí | code_system_id, version | Garantiza que no se repita la combinación (code_system_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_code_system_versions_code_system_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «code_system_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -3001,6 +3051,12 @@ Registra versiones de sistemas de códigos para preservar el contexto temporal d
 |---|---|---|
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
+| GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
+| POST /insurance/portability/export | LEE | POR_SQL |
+| POST /pharmacies/{pharmacyId}/products | LEE | POR_SQL |
+| GET /pharmacy/catalog-products | LEE | POR_SQL |
 | GET /terminology/code-systems/{id}/versions | LEE | DIRECTA |
 | POST /terminology/code-systems/{id}/versions | CREA | DIRECTA |
 | POST /terminology/code-systems/{id}/versions | LEE | DIRECTA |
@@ -3034,7 +3090,7 @@ Define sistemas de codificación sanitaria que permiten interpretar identificado
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: code_systems`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CodeSystems` — `src/modules/terminology/entities/code_systems.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 5 FK salientes · 4 entrantes · 8 operaciones
+- **Resumen:** 15 columnas · 8 índices · 5 FK salientes · 4 entrantes · 14 operaciones
 
 #### Columnas
 
@@ -3074,7 +3130,7 @@ Define sistemas de codificación sanitaria que permiten interpretar identificado
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_code_systems_internal_code` | sí | internal_code | Garantiza que no se repita la combinación (internal_code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «internal_code», la primera columna del índice _(CONSULTA)_ |
+| `uq_code_systems_internal_code` | sí | internal_code | Garantiza que no se repita la combinación (internal_code) _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «internal_code», la primera columna del índice _(CONSULTA)_ |
 | `uq_code_systems_canonical_url` | sí | canonical_url | Garantiza que no se repita la combinación (canonical_url) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «canonical_url», la primera columna del índice _(CONSULTA)_ |
 | `ix_code_systems_source_id` | no | source_id | Soporta la clave foránea fk_code_systems_source_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_code_systems_content_type_concept_id` | no | content_type_concept_id | Soporta la clave foránea fk_code_systems_content_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3096,6 +3152,12 @@ Define sistemas de codificación sanitaria que permiten interpretar identificado
 |---|---|---|
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
+| GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
+| POST /insurance/portability/export | LEE | POR_SQL |
+| POST /pharmacies/{pharmacyId}/products | LEE | POR_SQL |
+| GET /pharmacy/catalog-products | LEE | POR_SQL |
 | GET /terminology/code-systems | LEE | DIRECTA |
 | POST /terminology/code-systems | CREA | DIRECTA |
 | POST /terminology/code-systems | LEE | DIRECTA |
@@ -3126,7 +3188,7 @@ Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: concept_designations`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ConceptDesignations` — `src/modules/terminology/entities/concept_designations.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 11 operaciones
+- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -3158,8 +3220,8 @@ Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_concept_designations_concept_id` | no | concept_id | Soporta la clave foránea fk_concept_designations_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_concept_designations_language_concept_id` | no | language_concept_id | Soporta la clave foránea fk_concept_designations_language_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «language_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_concept_designations_concept_id` | no | concept_id | Soporta la clave foránea fk_concept_designations_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_concept_designations_language_concept_id` | no | language_concept_id | Soporta la clave foránea fk_concept_designations_language_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «language_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_concept_designations_designation_type_concept_id` | no | designation_type_concept_id | Soporta la clave foránea fk_concept_designations_designation_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_concept_designations_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_concept_designations_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_concept_designations_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_concept_designations_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3168,17 +3230,26 @@ Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/service-requests | LEE | DIRECTA |
+| POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /admin/content-packs/{code}/apply | ACTUALIZA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| GET /insurance-claims/{id} | LEE | DIRECTA |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| GET /system-context/dynamic-enums | LEE | DIRECTA |
 | GET /terminology/CodeSystem/$lookup | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
 | POST /terminology/concepts/{conceptId}/designations | ACTUALIZA | POR_TIPO |
 | POST /terminology/concepts/{conceptId}/designations | CREA | DIRECTA |
 | POST /terminology/concepts/{conceptId}/designations | LEE | DIRECTA |
+| GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |
 | GET /terminology/concepts/glossary-graph | LEE | DIRECTA |
+| GET /terminology/value-sets/$glossary-facets | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -3276,7 +3347,7 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: concept_properties`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ConceptProperties` — `src/modules/terminology/entities/concept_properties.entity.ts`
-- **Resumen:** 10 columnas · 3 índices · 3 FK salientes · 0 entrantes · 13 operaciones
+- **Resumen:** 10 columnas · 3 índices · 3 FK salientes · 0 entrantes · 21 operaciones
 
 #### Columnas
 
@@ -3305,7 +3376,7 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_concept_properties_concept_id` | no | concept_id | Soporta la clave foránea fk_concept_properties_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_concept_properties_concept_id` | no | concept_id | Soporta la clave foránea fk_concept_properties_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_concept_properties_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_concept_properties_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_concept_properties_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_concept_properties_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -3313,13 +3384,21 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /billing/service-catalog/procedure-specialties | LEE | POR_SQL |
+| GET /billing/service-catalog/procedures | LEE | POR_SQL |
+| POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /admin/content-packs/{code}/apply | ACTUALIZA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/products | LEE | DIRECTA |
+| GET /pharmacy/catalog-products | LEE | DIRECTA |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
 | GET /terminology/CodeSystem/$lookup | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
 | POST /terminology/concepts/{conceptId}/designations | CREA | DIRECTA |
+| GET /terminology/concepts/{conceptId}/glossary-article | LEE | DIRECTA |
+| GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |
 | POST /terminology/concepts/{conceptId}/properties | ACTUALIZA | POR_TIPO |
 | POST /terminology/concepts/{conceptId}/properties | CREA | DIRECTA |
 | POST /terminology/concepts/{conceptId}/properties | LEE | DIRECTA |
@@ -3350,7 +3429,7 @@ Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: concept_relationships`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ConceptRelationships` — `src/modules/terminology/entities/concept_relationships.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 5 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 10 columnas · 5 índices · 5 FK salientes · 0 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -3381,9 +3460,9 @@ Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonam
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_concept_relationships_source_concept_id` | no | source_concept_id | Soporta la clave foránea fk_concept_relationships_source_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «source_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_concept_relationships_target_concept_id` | no | target_concept_id | Soporta la clave foránea fk_concept_relationships_target_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «target_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_concept_relationships_relationship_type_concept_id` | no | relationship_type_concept_id | Soporta la clave foránea fk_concept_relationships_relationship_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «relationship_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_concept_relationships_source_concept_id` | no | source_concept_id | Soporta la clave foránea fk_concept_relationships_source_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «source_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_concept_relationships_target_concept_id` | no | target_concept_id | Soporta la clave foránea fk_concept_relationships_target_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «target_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_concept_relationships_relationship_type_concept_id` | no | relationship_type_concept_id | Soporta la clave foránea fk_concept_relationships_relationship_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «relationship_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_concept_relationships_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_concept_relationships_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_concept_relationships_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_concept_relationships_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -3391,9 +3470,12 @@ Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonam
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
+| GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |
 | POST /terminology/concepts/{conceptId}/relationships | CREA | DIRECTA |
 | POST /terminology/concepts/{conceptId}/relationships | LEE | DIRECTA |
 | GET /terminology/concepts/glossary-graph | LEE | DIRECTA |
@@ -3601,7 +3683,7 @@ Identifica fuentes de terminología sanitaria para registrar procedencia y gobie
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_terminology_sources_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `uq_terminology_sources_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_terminology_sources_source_type_concept_id` | no | source_type_concept_id | Soporta la clave foránea fk_terminology_sources_source_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_terminology_sources_jurisdiction_concept_id` | no | jurisdiction_concept_id | Soporta la clave foránea fk_terminology_sources_jurisdiction_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_terminology_sources_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_terminology_sources_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3647,7 +3729,7 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_set_members`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSetMembers` — `src/modules/terminology/entities/value_set_members.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 24 operaciones
+- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 37 operaciones
 
 #### Columnas
 
@@ -3678,7 +3760,7 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_value_set_members_value_set_version_id` | no | value_set_version_id | Soporta la clave foránea fk_value_set_members_value_set_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «value_set_version_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_value_set_members_concept_id` | no | concept_id | Soporta la clave foránea fk_value_set_members_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_value_set_members_concept_id` | no | concept_id | Soporta la clave foránea fk_value_set_members_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_value_set_members_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_value_set_members_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_value_set_members_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_value_set_members_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `uq_value_set_members_version_concept` | sí | value_set_version_id, concept_id | Garantiza que no se repita la combinación (value_set_version_id, concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_members_value_set_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «value_set_version_id», la primera columna del índice _(CONSULTA)_ |
@@ -3700,21 +3782,34 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 | GET /public/search/organizations | LEE | DIRECTA |
 | GET /public/search/pharmacies | LEE | DIRECTA |
 | GET /public/search/practitioners | LEE | DIRECTA |
+| POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| GET /tenants/me | LEE | DIRECTA |
+| POST /iam/auth/register-organization | LEE | DIRECTA |
+| POST /iam/auth/register-patient | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
 | GET /profiles/patients | LEE | DIRECTA |
+| POST /profiles/patients/me/dependents | LEE | DIRECTA |
+| POST /profiles/patients/search | LEE | DIRECTA |
 | POST /profiles/practitioners | LEE | DIRECTA |
+| POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/specialties | LEE | DIRECTA |
+| PATCH /profiles/practitioners/me | LEE | DIRECTA |
+| POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
+| PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
 | POST /terminology/concepts/{conceptId}/$deprecate | ACTUALIZA | POR_TIPO |
 | POST /terminology/concepts/{conceptId}/$deprecate | LEE | DIRECTA |
+| GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |
 | GET /terminology/concepts/glossary-graph | LEE | DIRECTA |
-| GET /terminology/value-sets | LEE | DIRECTA |
+| GET /terminology/value-sets | LEE | POR_SQL |
 | GET /terminology/value-sets/{id}/$expand | LEE | DIRECTA |
+| GET /terminology/value-sets/$glossary-facets | LEE | POR_SQL |
 | POST /terminology/ValueSet/{id}/$expand | BORRA | DIRECTA |
 | POST /terminology/ValueSet/{id}/$expand | CREA | DIRECTA |
 
@@ -3810,7 +3905,7 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_set_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSetVersions` — `src/modules/terminology/entities/value_set_versions.entity.ts`
-- **Resumen:** 12 columnas · 6 índices · 4 FK salientes · 3 entrantes · 23 operaciones
+- **Resumen:** 12 columnas · 6 índices · 4 FK salientes · 3 entrantes · 35 operaciones
 
 #### Columnas
 
@@ -3845,12 +3940,12 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_value_set_versions_value_set_id` | no | value_set_id | Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_value_set_versions_value_set_id` | no | value_set_id | Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_value_set_versions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_value_set_versions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_value_set_versions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_value_set_versions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_value_set_versions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_value_set_versions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uq_value_set_versions_value_set_id_version` | sí | value_set_id, version | Garantiza que no se repita la combinación (value_set_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
-| `uq_value_set_versions_set_version` | sí | value_set_id, version | Garantiza que no se repita la combinación (value_set_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_value_set_versions_value_set_id_version` | sí | value_set_id, version | Garantiza que no se repita la combinación (value_set_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_value_set_versions_set_version` | sí | value_set_id, version | Garantiza que no se repita la combinación (value_set_id, version) _(DOCUMENTO)_; Soporta la clave foránea fk_value_set_versions_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «value_set_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -3872,18 +3967,30 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 | GET /public/search/practitioners | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| GET /tenants/me | LEE | DIRECTA |
+| POST /iam/auth/register-organization | LEE | DIRECTA |
+| POST /iam/auth/register-patient | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
 | GET /profiles/patients | LEE | DIRECTA |
+| POST /profiles/patients/me/dependents | LEE | DIRECTA |
+| POST /profiles/patients/search | LEE | DIRECTA |
 | POST /profiles/practitioners | LEE | DIRECTA |
+| POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/specialties | LEE | DIRECTA |
+| PATCH /profiles/practitioners/me | LEE | DIRECTA |
+| POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
+| PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
+| GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |
 | GET /terminology/concepts/glossary-graph | LEE | DIRECTA |
 | GET /terminology/value-sets | LEE | DIRECTA |
 | POST /terminology/value-sets | CREA | DIRECTA |
 | GET /terminology/value-sets/{id}/$expand | LEE | DIRECTA |
+| GET /terminology/value-sets/$glossary-facets | LEE | POR_SQL |
 | POST /terminology/ValueSet/{id}/$expand | ACTUALIZA | POR_TIPO |
 | POST /terminology/ValueSet/{id}/$expand | LEE | DIRECTA |
 
@@ -3910,7 +4017,7 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_sets`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSets` — `src/modules/terminology/entities/value_sets.entity.ts`
-- **Resumen:** 12 columnas · 7 índices · 4 FK salientes · 25 entrantes · 28 operaciones
+- **Resumen:** 12 columnas · 7 índices · 4 FK salientes · 25 entrantes · 36 operaciones
 
 #### Columnas
 
@@ -3967,7 +4074,7 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_value_sets_internal_code` | sí | internal_code | Garantiza que no se repita la combinación (internal_code) _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «internal_code», la primera columna del índice _(CONSULTA)_ |
+| `uq_value_sets_internal_code` | sí | internal_code | Garantiza que no se repita la combinación (internal_code) _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «internal_code», la primera columna del índice _(CONSULTA)_ |
 | `uq_value_sets_canonical_url` | sí | canonical_url | Garantiza que no se repita la combinación (canonical_url) _(DOCUMENTO)_ |
 | `ix_value_sets_jurisdiction_concept_id` | no | jurisdiction_concept_id | Soporta la clave foránea fk_value_sets_jurisdiction_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_value_sets_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_value_sets_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3986,10 +4093,6 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| GET /clinical/patients/{patientProfileId}/prescriptions | LEE | DIRECTA |
-| GET /clinical/patients/{patientProfileId}/prescriptions/history.pdf | LEE | DIRECTA |
-| GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
-| GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
 | GET /public/search | LEE | DIRECTA |
 | GET /public/search/diagnostic-units | LEE | DIRECTA |
 | GET /public/search/insurers | LEE | DIRECTA |
@@ -3999,20 +4102,32 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 | GET /public/search/practitioners | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| GET /tenants/me | LEE | DIRECTA |
+| POST /iam/auth/register-organization | LEE | DIRECTA |
+| POST /iam/auth/register-patient | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
 | GET /profiles/patients | LEE | DIRECTA |
+| POST /profiles/patients/me/dependents | LEE | DIRECTA |
+| POST /profiles/patients/search | LEE | DIRECTA |
 | POST /profiles/practitioners | LEE | DIRECTA |
+| POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/specialties | LEE | DIRECTA |
+| PATCH /profiles/practitioners/me | LEE | DIRECTA |
+| POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
+| PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
+| GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |
 | GET /terminology/concepts/glossary-graph | LEE | DIRECTA |
 | PUT /terminology/tenants/{tenantId}/catalog-policies | LEE | DIRECTA |
 | GET /terminology/value-sets | LEE | DIRECTA |
 | POST /terminology/value-sets | CREA | DIRECTA |
 | POST /terminology/value-sets | LEE | DIRECTA |
 | GET /terminology/value-sets/{id}/$expand | LEE | DIRECTA |
+| GET /terminology/value-sets/$glossary-facets | LEE | DIRECTA |
 | POST /terminology/ValueSet/{id}/$expand | LEE | DIRECTA |
 
 #### Gobierno

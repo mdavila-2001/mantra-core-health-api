@@ -1,0 +1,13 @@
+PASS catálogo público tipoDeUnidad 2 opciones
+PASS catálogo público modalidad 7 opciones
+PASS catálogo público pais 1 opciones
+PASS catálogo público jurisdiccion 2 opciones
+PASS laboratorio unipersonal (cuerpo del front) = 201 status=201 
+     SELECT unidad: t|1
+     SELECT representante (persona vinculada al tenant): 1
+PASS el dueño inicia sesión status=200
+PASS imagenología SRL con seis papeles y gerencias = 201 status=201 
+     SELECT ofertas: 2
+     representantes registrados: 4
+PASS SRL sin constitución (rechazo de la API) = 422 status=422
+TODO PASS

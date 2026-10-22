@@ -96,6 +96,13 @@ export class PractitionerRoleAssignments {
   @Property({ fieldName: 'valid_to', columnType: 'date', nullable: true })
   validTo?: Date;
 
+  @Property({
+    fieldName: 'contact_phone',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  contactPhone?: string;
+
   /**
    * Identificador asociado a status concept.
    */

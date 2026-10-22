@@ -2,11 +2,26 @@ import { BadRequestException } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { CONCEPTS } from '../../../common';
-import {
-  boDepartmentConceptId,
-  boMunicipalityByConceptId,
-} from '../../../common/seed/bo-geography.catalog';
+import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
+import type { CatalogConceptsRepository } from '../../terminology/repositories';
+import type { Addresses } from '../entities';
 import type { AddressesRepository } from '../repositories';
+
+/**
+ * La sigla del departamento, a partir del `code` del municipio.
+ *
+ * Los 340 municipios de `VS_BO_MUNICIPALITY` —los que de verdad sembró el
+ * generador del modelo, ver el aviso arriba de `writeAddress`— codifican
+ * `<SIGLA>-<NOMBRE>` (`SC-SANTA_CRUZ_DE_LA_SIERRA`, `LP-EL_ALTO`...);
+ * verificado contra los 340 códigos de Neon, sin una sola excepción. No hay
+ * una relación explícita municipio→departamento en
+ * `terminology.concept_relationships` —se buscó y no existe—, así que esto
+ * es lo único que hay para derivarlo sin inventar un vínculo que el modelo
+ * no declara.
+ */
+function departmentSiglaFromMunicipalityCode(code: string): string | undefined {
+  return code.match(/^([A-Z]{2})-/)?.[1];
+}
 
 /** Lo que hace falta para escribir una dirección de una persona. */
 export interface ResidenceAddressData {
@@ -54,18 +69,35 @@ export interface ResidenceAddressData {
  * Tarija con el departamento de Beni, y no habría criterio para decidir cuál de
  * los dos gana.
  *
- * ## Por qué valida contra el catálogo
+ * ## Por qué valida contra el catálogo, y contra CUÁL
  *
  * `municipality_concept_id` es FK a `terminology.catalog_concepts`. Un uuid con
  * forma válida que no sea un municipio pasaría el `@IsUUID` del DTO y reventaría
  * en el `INSERT`, con un error de integridad que no le dice nada a nadie. Acá se
  * rechaza con un 400 que nombra el problema.
  *
+ * La validación es contra la **base**, con `CatalogConceptsRepository`, y no
+ * contra el catálogo estático `bo-geography.catalog.ts` (`boMunicipalityByConceptId`,
+ * retirado de acá en ALV-009-bis). Los dos declaran los mismos 340 municipios
+ * bajo el mismo código `VS_BO_MUNICIPALITY`, pero con **dos juegos de uuids que
+ * no se cruzan**: el generador del modelo (`salud-db/gen_seeds.py`, lo que hay
+ * de verdad en Neon) deriva el concepto del código `SC-SANTA_CRUZ_DE_LA_SIERRA`;
+ * el catálogo estático de este archivo lo deriva de `geo:bo:municipality:070101`
+ * (el INE). Verificado contra la base viva: `terminology.catalog_concepts` tiene
+ * cero filas con el esquema `geo:bo:municipality:*` — nunca se sembró—, así que
+ * el `uuid` que el catálogo estático consideraba válido **no existe** (`422` en
+ * el `INSERT`), y el que sí existe (el de terminología) lo rechazaba este método
+ * («no pertenece al catálogo») por comparar contra el juego equivocado. Ningún
+ * uuid pasaba las dos capas a la vez. El departamento no tiene este problema
+ * —`geo:bo:department:SC` sí está sembrado— así que su derivación no cambió.
+ *
  * No hace nada si no se eligió municipio: el domicilio es opcional y una
  * dirección con país y nada más no es un dato, es una fila.
  *
  * @param repo - Repositorio de `common.addresses`.
  * @param tx - Contexto transaccional de quien escribe.
+ * @param concepts - Repositorio de `terminology.catalog_concepts`, para validar
+ *   el municipio contra lo que de verdad hay sembrado.
  * @param data - Persona, municipio elegido y actor.
  * @returns `true` si escribió la dirección.
  * @throws BadRequestException si el municipio no pertenece a `VS_BO_MUNICIPALITY`.
@@ -76,9 +108,10 @@ export interface ResidenceAddressData {
 export function createResidenceAddress(
   repo: AddressesRepository,
   tx: EntityManager,
+  concepts: CatalogConceptsRepository,
   data: ResidenceAddressData,
-): boolean {
-  return writeAddress(repo, tx, data, CONCEPTS.ADDR_USE_HOME);
+): Promise<boolean> {
+  return writeAddress(repo, tx, concepts, data, CONCEPTS.ADDR_USE_HOME);
 }
 
 /**
@@ -91,6 +124,8 @@ export function createResidenceAddress(
  *
  * @param repo - Repositorio de `common.addresses`.
  * @param tx - Contexto transaccional.
+ * @param concepts - Repositorio de `terminology.catalog_concepts`. Ver
+ *   {@link createResidenceAddress} para por qué la validación pasa por acá.
  * @param data - Persona, municipio, calle, coordenadas y actor.
  * @returns `true` si escribió la dirección.
  * @throws BadRequestException si el municipio no pertenece a `VS_BO_MUNICIPALITY`.
@@ -98,37 +133,42 @@ export function createResidenceAddress(
 export function createWorkAddress(
   repo: AddressesRepository,
   tx: EntityManager,
+  concepts: CatalogConceptsRepository,
   data: ResidenceAddressData,
-): boolean {
-  return writeAddress(repo, tx, data, CONCEPTS.ADDR_USE_WORK);
+): Promise<boolean> {
+  return writeAddress(repo, tx, concepts, data, CONCEPTS.ADDR_USE_WORK);
 }
 
 /**
  * El cuerpo compartido por los dos usos: lo único que los distingue es el
  * concepto de uso.
  */
-function writeAddress(
+async function writeAddress(
   repo: AddressesRepository,
   tx: EntityManager,
+  concepts: CatalogConceptsRepository,
   data: ResidenceAddressData,
   useConceptId: string,
-): boolean {
-  const coordenadas = coordinatesOf(data);
+): Promise<boolean> {
+  const coordinates = coordinatesOf(data);
 
   // Sin municipio, sin calle y sin coordenadas no hay dirección: una fila con
   // país y nada más no es un dato, es una fila.
-  if (!data.municipalityConceptId && !data.lines && !coordenadas) {
+  if (!data.municipalityConceptId && !data.lines && !coordinates) {
     return false;
   }
 
   const municipality = data.municipalityConceptId
-    ? boMunicipalityByConceptId(data.municipalityConceptId)
+    ? await concepts.findById(tx, data.municipalityConceptId)
     : undefined;
   if (data.municipalityConceptId && !municipality) {
     throw new BadRequestException(
       'El municipio indicado no pertenece al catálogo de municipios de Bolivia',
     );
   }
+  const departmentSigla = municipality
+    ? departmentSiglaFromMunicipalityCode(municipality.code)
+    : undefined;
 
   repo.create(tx, {
     ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
@@ -136,16 +176,16 @@ function writeAddress(
     countryConceptId: CONCEPTS.COUNTRY_BO,
     municipalityConceptId: data.municipalityConceptId,
     // Derivado, nunca recibido: ver arriba.
-    administrativeAreaConceptId: municipality
-      ? boDepartmentConceptId(municipality.department)
+    administrativeAreaConceptId: departmentSigla
+      ? boDepartmentConceptId(departmentSigla)
       : undefined,
     // `city` es texto libre y el municipio ya es el dato de catálogo; se copia
     // el nombre para que quien lea la dirección sin resolver conceptos —un
     // export, un sobre— tenga algo legible.
-    city: municipality?.name,
+    city: municipality?.display,
     lines: data.lines,
-    latitude: coordenadas?.latitude,
-    longitude: coordenadas?.longitude,
+    latitude: coordinates?.latitude,
+    longitude: coordinates?.longitude,
     useConceptId,
     typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
     actorUserId: data.actorUserId,
@@ -169,5 +209,164 @@ function coordinatesOf(
   return {
     latitude: String(data.latitude),
     longitude: String(data.longitude),
+  };
+}
+
+/* ============================================================================
+    ALV-009: corregir el domicilio ya declarado, y leerlo de vuelta.
+
+    Nace acá y no en `profiles` para que el profesional lo use sin duplicar
+    la lógica de "cerrar la vigente y abrir otra" que `ProfilesPatientsService`
+    ya tenía local (`reemplazarDireccion`). El servicio de pacientes NO se
+    tocó: sigue con su copia — un refactor a esta función queda de
+    seguimiento. Lo que sí comparten los dos es la tabla y el criterio de
+    vigencia (`valid_to null` o futuro).
+    ========================================================================== */
+
+/** Lo que hace falta para reemplazar el domicilio ya declarado de una persona. */
+export interface ReplaceResidenceAddressData {
+  /** La persona dueña de la dirección. */
+  readonly personId: string;
+  /** `ADDR_USE_HOME` o `ADDR_USE_WORK`. */
+  readonly useConceptId: string;
+  /** `undefined` = no vino en este `PATCH`, se conserva lo vigente. */
+  readonly municipalityConceptId?: string;
+  /**
+   * Calle y número. `undefined` conserva lo vigente; `''` la borra —es el
+   * único de los tres con una forma explícita de vaciarse, porque es el
+   * único cuya ausencia total tiene sentido (una dirección sin calle, con
+   * sólo el municipio, sigue siendo un dato).
+   */
+  readonly lines?: string;
+  /**
+   * Ambas o ninguna: el DTO ya rechaza el par incompleto.
+   *
+   * Tres estados, no dos: `undefined` conserva el punto vigente, un par de
+   * números lo mueve, y **`null` en las dos lo quita**. Sin el tercero, una
+   * ubicación mal puesta sólo se podía cambiar por otra —nunca borrar—, porque
+   * la mezcla de aquí abajo conserva lo anterior cuando no llega nada.
+   */
+  readonly latitude?: number | null;
+  readonly longitude?: number | null;
+  /** Quién edita, para la auditoría y el cierre de la fila anterior. */
+  readonly actorUserId: string;
+}
+
+/**
+ * El número de una columna `numeric` que MikroORM mapea a `string`.
+ *
+ * `undefined` (sin fila vigente, o columna sin dato) se preserva tal cual:
+ * `Number(undefined)` es `NaN`, y un `NaN !== NaN` rompería la comparación
+ * de "sin cambios" de más abajo aunque nada haya cambiado.
+ */
+function columnNumber(value: string | undefined): number | undefined {
+  return value === undefined ? undefined : Number(value);
+}
+
+/**
+ * Cierra la fila vigente y abre otra con la mezcla de lo que llegó y lo que
+ * ya estaba — mismo criterio que `ProfilesPatientsService.reemplazarDireccion`.
+ *
+ * No hace nada si, tras la mezcla, nada cambió: evita una fila nueva por
+ * cada `PATCH` que repite el mismo domicilio.
+ *
+ * @param repo - Repositorio de `common.addresses`.
+ * @param tx - Transacción activa.
+ * @param concepts - Repositorio de `terminology.catalog_concepts`, para
+ *   validar el municipio. Ver {@link createResidenceAddress}.
+ * @param data - Persona, uso, lo que trae el cuerpo y el actor.
+ * @param now - Instante de la edición, fin de vigencia de la anterior.
+ */
+export async function replaceResidenceAddress(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  concepts: CatalogConceptsRepository,
+  data: ReplaceResidenceAddressData,
+  now: Date,
+): Promise<void> {
+  const current = await repo.findCurrentByOwnerAndUse(
+    tx,
+    data.personId,
+    data.useConceptId,
+  );
+
+  const municipalityConceptId =
+    data.municipalityConceptId ?? current?.municipalityConceptId;
+  const lines =
+    data.lines === undefined
+      ? current?.lines
+      : data.lines.trim() === ''
+        ? undefined
+        : data.lines.trim();
+  // Quitar el punto: los dos extremos en `null` (ver `latitude` en la interfaz).
+  const removesGps = data.latitude === null && data.longitude === null;
+  const hasGps =
+    !removesGps && data.latitude !== undefined && data.longitude !== undefined;
+  const latitude = removesGps
+    ? undefined
+    : hasGps
+      ? (data.latitude ?? undefined)
+      : columnNumber(current?.latitude);
+  const longitude = removesGps
+    ? undefined
+    : hasGps
+      ? (data.longitude ?? undefined)
+      : columnNumber(current?.longitude);
+
+  const withoutChanges =
+    (current?.municipalityConceptId ?? undefined) === municipalityConceptId &&
+    (current?.lines ?? undefined) === lines &&
+    columnNumber(current?.latitude) === latitude &&
+    columnNumber(current?.longitude) === longitude;
+  if (withoutChanges) return;
+
+  if (current) repo.closeCurrent(current, now, data.actorUserId);
+
+  const write =
+    data.useConceptId === CONCEPTS.ADDR_USE_WORK
+      ? createWorkAddress
+      : createResidenceAddress;
+  await write(repo, tx, concepts, {
+    personId: data.personId,
+    municipalityConceptId,
+    lines,
+    latitude,
+    longitude,
+    actorUserId: data.actorUserId,
+  });
+}
+
+/** Una dirección, tal como la ve un perfil propio. Mismo contrato que `OwnAddressDto`. */
+export interface AddressSummary {
+  readonly lines?: string;
+  readonly city?: string;
+  readonly municipalityConceptId?: string;
+  readonly latitude?: number;
+  readonly longitude?: number;
+}
+
+/**
+ * Traduce una fila de `common.addresses` al resumen que un perfil devuelve.
+ *
+ * `undefined` —y no un objeto vacío— cuando no hay fila: la pantalla
+ * distingue «no lo declaró» de «lo declaró sin datos».
+ */
+export function summarizeAddress(
+  row?: Addresses | null,
+): AddressSummary | undefined {
+  if (!row) return undefined;
+  return {
+    ...(row.lines === undefined ? {} : { lines: row.lines }),
+    ...(row.city === undefined ? {} : { city: row.city }),
+    ...(row.municipalityConceptId === undefined
+      ? {}
+      : { municipalityConceptId: row.municipalityConceptId }),
+    // Las coordenadas viajan juntas o no viajan: media coordenada no ubica
+    // nada. Se compara con `== null` y no `=== undefined`: la columna es
+    // nullable y la base devuelve `null`, no `undefined` — con la
+    // comparación estricta `Number(null)` (que es 0) se cuela.
+    ...(row.latitude == null || row.longitude == null
+      ? {}
+      : { latitude: Number(row.latitude), longitude: Number(row.longitude) }),
   };
 }

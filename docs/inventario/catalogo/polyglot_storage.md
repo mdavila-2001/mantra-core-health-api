@@ -1446,7 +1446,7 @@ Registra verificaciones de salud de almacenes para detectar indisponibilidad o f
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/polyglot_storage/README.md:41` |
+| Append-only | sí (declarado) | `src/modules/polyglot_storage/README.md:76` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |

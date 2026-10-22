@@ -49,13 +49,13 @@ export class DrugInteractionsRepository {
   /** Busca la interacción de un par de sustancias en cualquier orden (A,B) o (B,A). */
   findByPair(
     em: EntityManager,
-    aId: string,
+    toId: string,
     bId: string,
   ): Promise<DrugInteractions | null> {
     return em.findOne(DrugInteractions, {
       $or: [
-        { substanceAConceptId: aId, substanceBConceptId: bId },
-        { substanceAConceptId: bId, substanceBConceptId: aId },
+        { substanceAConceptId: toId, substanceBConceptId: bId },
+        { substanceAConceptId: bId, substanceBConceptId: toId },
       ],
     });
   }

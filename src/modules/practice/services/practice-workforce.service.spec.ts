@@ -22,10 +22,19 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const forked = { find: mockFn().mockResolvedValue([]) };
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => forked),
+  };
   const practicesRepo = { findById: mockFn() };
   const sitesRepo = { findById: mockFn() };
-  const rolesRepo = { findById: mockFn(), create: mockFn() };
+  const rolesRepo = {
+    findById: mockFn(),
+    create: mockFn(),
+    findByPractitioner: mockFn(),
+    findByPracticePage: mockFn().mockResolvedValue([]),
+  };
   const supportRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PracticeWorkforceService(
@@ -36,7 +45,15 @@ function build() {
     supportRepo as any,
     logger as any,
   );
-  return { service, tx, practicesRepo, sitesRepo, rolesRepo, supportRepo };
+  return {
+    service,
+    tx,
+    forked,
+    practicesRepo,
+    sitesRepo,
+    rolesRepo,
+    supportRepo,
+  };
 }
 
 describe('PracticeWorkforceService', () => {
@@ -126,6 +143,111 @@ describe('PracticeWorkforceService', () => {
         actor,
       );
       expect(res.status).toBe(PRAC.SUPPORT_ACTIVE);
+    });
+  });
+
+  describe('listMyAssignments (Carril 18)', () => {
+    const professional = { id: 'u1', practitionerProfileId: 'hp1' } as any;
+
+    it('rejects when the actor has no practitioner profile', async () => {
+      const d = build();
+      await expect(
+        d.service.listMyAssignments({ id: 'u1' } as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('attaches the organization logo from its public profile, keyed by practiceId', async () => {
+      const d = build();
+      d.rolesRepo.findByPractitioner.mockResolvedValue([
+        {
+          id: 'r1',
+          practiceId: 'p1',
+          roleConceptId: 'role-attending',
+          statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+          isPrimary: true,
+          createdAt: new Date('2026-01-01'),
+        },
+      ]);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        name: 'Hospital Central',
+        typeConceptId: 'org-hospital',
+      });
+      d.forked.find.mockResolvedValue([
+        { targetId: 'p1', avatarFileId: 'file-1' },
+      ]);
+
+      const [row] = await d.service.listMyAssignments(professional);
+
+      expect(row.avatarUrl).toBe('/public/media/file-1');
+    });
+
+    it('has no logo when the organization never published a public profile', async () => {
+      const d = build();
+      d.rolesRepo.findByPractitioner.mockResolvedValue([
+        {
+          id: 'r1',
+          practiceId: 'p1',
+          roleConceptId: 'role-attending',
+          statusConceptId: PRAC.ROLE_ASSIGNMENT_PENDING,
+          isPrimary: false,
+          createdAt: new Date('2026-01-01'),
+        },
+      ]);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        name: 'Hospital Central',
+        typeConceptId: 'org-hospital',
+      });
+      d.forked.find.mockResolvedValue([]);
+
+      const [row] = await d.service.listMyAssignments(professional);
+
+      expect(row.avatarUrl).toBeNull();
+    });
+  });
+
+  describe('listPracticeAssignments (CV-14)', () => {
+    it('throws 404 without distinguishing "does not exist" from "another tenant" (isolation)', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: 'tenant-b',
+      });
+      await expect(
+        d.service.listPracticeAssignments('p1', 'tenant-a', {}),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.rolesRepo.findByPracticePage).not.toHaveBeenCalled();
+    });
+
+    it('lists a page scoped to the practice, with a cursor when there is more', async () => {
+      const d = build();
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        tenantId: 'tenant-a',
+      });
+      const row = (id: string) => ({
+        id,
+        practiceId: 'p1',
+        practitionerProfileId: 'pp-1',
+        statusConceptId: PRAC.ROLE_ASSIGNMENT_PENDING,
+        createdAt: new Date('2026-01-01'),
+      });
+      d.rolesRepo.findByPracticePage.mockResolvedValue([row('a'), row('b')]);
+
+      const res = await d.service.listPracticeAssignments('p1', 'tenant-a', {
+        limit: 1,
+      });
+
+      expect(d.rolesRepo.findByPracticePage).toHaveBeenCalledWith(
+        d.forked,
+        'p1',
+        undefined,
+        undefined,
+        2,
+      );
+      expect(res.items).toHaveLength(1);
+      expect(res.nextCursor).not.toBeNull();
     });
   });
 });

@@ -140,6 +140,30 @@ CREATE INDEX IF NOT EXISTS "ix_network_provider_memberships_created_by_user_id" 
 
 CREATE INDEX IF NOT EXISTS "ix_network_provider_memberships_updated_by_user_id" ON "insurance"."network_provider_memberships" ("updated_by_user_id");
 
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_insurance_campaigns_carrier_code" ON "insurance"."insurance_campaigns" ("insurance_carrier_id", "code");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaigns_carrier_status_validity" ON "insurance"."insurance_campaigns" ("insurance_carrier_id", "status_concept_id", "valid_from", "valid_to");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaigns_campaign_type_concept_id" ON "insurance"."insurance_campaigns" ("campaign_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaigns_target_condition_concept_id" ON "insurance"."insurance_campaigns" ("target_condition_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaigns_created_by_user_id" ON "insurance"."insurance_campaigns" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaigns_updated_by_user_id" ON "insurance"."insurance_campaigns" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaign_partners_insurance_campaign_id" ON "insurance"."insurance_campaign_partners" ("insurance_campaign_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaign_partners_partner_role_concept_id" ON "insurance"."insurance_campaign_partners" ("partner_role_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaign_partners_partner_type_concept_id" ON "insurance"."insurance_campaign_partners" ("partner_type_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaign_partners_network_provider_membership_id" ON "insurance"."insurance_campaign_partners" ("network_provider_membership_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaign_partners_created_by_user_id" ON "insurance"."insurance_campaign_partners" ("created_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_campaign_partners_updated_by_user_id" ON "insurance"."insurance_campaign_partners" ("updated_by_user_id");
+
 CREATE INDEX IF NOT EXISTS "ix_patient_coverages_patient_profile_id" ON "insurance"."patient_coverages" ("patient_profile_id");
 
 CREATE INDEX IF NOT EXISTS "ix_patient_coverages_insurance_plan_id" ON "insurance"."patient_coverages" ("insurance_plan_id");
@@ -214,6 +238,8 @@ CREATE INDEX IF NOT EXISTS "ix_prior_authorization_requests_service_request_id" 
 
 CREATE INDEX IF NOT EXISTS "ix_prior_authorization_requests_medication_request_id" ON "insurance"."prior_authorization_requests" ("medication_request_id");
 
+CREATE INDEX IF NOT EXISTS "ix_prior_authorization_requests_inventory_reservation_id" ON "insurance"."prior_authorization_requests" ("inventory_reservation_id");
+
 CREATE INDEX IF NOT EXISTS "ix_prior_authorization_requests_requesting_provider_ty_ace534e5" ON "insurance"."prior_authorization_requests" ("requesting_provider_type_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_prior_authorization_requests_status_concept_id" ON "insurance"."prior_authorization_requests" ("status_concept_id");
@@ -260,6 +286,10 @@ CREATE INDEX IF NOT EXISTS "ix_insurance_claims_encounter_id" ON "insurance"."in
 
 CREATE INDEX IF NOT EXISTS "ix_insurance_claims_prior_authorization_request_id" ON "insurance"."insurance_claims" ("prior_authorization_request_id");
 
+CREATE INDEX IF NOT EXISTS "ix_insurance_claims_inventory_reservation_id" ON "insurance"."insurance_claims" ("inventory_reservation_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_claims_service_request_id" ON "insurance"."insurance_claims" ("service_request_id");
+
 CREATE INDEX IF NOT EXISTS "ix_insurance_claims_status_concept_id" ON "insurance"."insurance_claims" ("status_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_insurance_claims_currency_concept_id" ON "insurance"."insurance_claims" ("currency_concept_id");
@@ -277,6 +307,8 @@ CREATE INDEX IF NOT EXISTS "ix_insurance_claim_lines_service_concept_id" ON "ins
 CREATE INDEX IF NOT EXISTS "ix_insurance_claim_lines_diagnostic_study_offering_id" ON "insurance"."insurance_claim_lines" ("diagnostic_study_offering_id");
 
 CREATE INDEX IF NOT EXISTS "ix_insurance_claim_lines_medication_dispensation_line_id" ON "insurance"."insurance_claim_lines" ("medication_dispensation_line_id");
+
+CREATE INDEX IF NOT EXISTS "ix_insurance_claim_lines_inventory_reservation_line_id" ON "insurance"."insurance_claim_lines" ("inventory_reservation_line_id");
 
 CREATE INDEX IF NOT EXISTS "ix_claim_adjudication_versions_insurance_claim_id" ON "insurance"."claim_adjudication_versions" ("insurance_claim_id");
 

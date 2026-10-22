@@ -1,0 +1,141 @@
+{
+  "tsFiles": 4545,
+  "suites": 712,
+  "controllers": 257,
+  "httpMethodDecorators": 1365,
+  "moduleDirectories": 69,
+  "unsafe": {
+    "anyAssertions": 0,
+    "tsIgnore": 0
+  },
+  "largestRuntimeFiles": [
+    {
+      "file": "src\\common\\constants\\concepts.ts",
+      "lines": 6733,
+      "decisions": 0
+    },
+    {
+      "file": "src\\common\\seed\\terminology-designations.es.ts",
+      "lines": 4049,
+      "decisions": 0
+    },
+    {
+      "file": "src\\modules\\scheduling\\services\\scheduling-bookings.service.ts",
+      "lines": 3331,
+      "decisions": 160
+    },
+    {
+      "file": "src\\modules\\procedures_perioperative\\dto\\periop.dto.ts",
+      "lines": 2847,
+      "decisions": 0
+    },
+    {
+      "file": "src\\modules\\profiles\\services\\profiles-practitioners.service.ts",
+      "lines": 2805,
+      "decisions": 137
+    },
+    {
+      "file": "src\\modules\\ads\\dto\\ads.dto.ts",
+      "lines": 2752,
+      "decisions": 0
+    },
+    {
+      "file": "src\\modules\\pharmacy_inventory\\services\\pharmacy-orders.service.ts",
+      "lines": 2558,
+      "decisions": 131
+    },
+    {
+      "file": "src\\modules\\profiles\\services\\profiles-patients.service.ts",
+      "lines": 2479,
+      "decisions": 123
+    },
+    {
+      "file": "src\\modules\\scheduling\\services\\scheduling-catalog.service.ts",
+      "lines": 2254,
+      "decisions": 118
+    },
+    {
+      "file": "src\\modules\\community\\repositories\\public-search.repository.ts",
+      "lines": 1824,
+      "decisions": 59
+    },
+    {
+      "file": "src\\modules\\platform_ops\\dto\\platform-ops.dto.ts",
+      "lines": 1782,
+      "decisions": 0
+    },
+    {
+      "file": "src\\modules\\health_data\\dto\\health-data.dto.ts",
+      "lines": 1772,
+      "decisions": 0
+    },
+    {
+      "file": "src\\modules\\polyglot_storage\\dto\\polyglot-storage.dto.ts",
+      "lines": 1757,
+      "decisions": 0
+    },
+    {
+      "file": "src\\modules\\automation\\dto\\automation.dto.ts",
+      "lines": 1684,
+      "decisions": 0
+    },
+    {
+      "file": "src\\modules\\promotions\\dto\\promotions.dto.ts",
+      "lines": 1670,
+      "decisions": 0
+    }
+  ],
+  "mostBranchingFiles": [
+    {
+      "file": "src\\modules\\scheduling\\services\\scheduling-bookings.service.ts",
+      "lines": 3331,
+      "decisions": 160
+    },
+    {
+      "file": "src\\modules\\profiles\\services\\profiles-practitioners.service.ts",
+      "lines": 2805,
+      "decisions": 137
+    },
+    {
+      "file": "src\\modules\\pharmacy_inventory\\services\\pharmacy-orders.service.ts",
+      "lines": 2558,
+      "decisions": 131
+    },
+    {
+      "file": "src\\modules\\profiles\\services\\profiles-patients.service.ts",
+      "lines": 2479,
+      "decisions": 123
+    },
+    {
+      "file": "src\\modules\\scheduling\\services\\scheduling-catalog.service.ts",
+      "lines": 2254,
+      "decisions": 118
+    },
+    {
+      "file": "src\\modules\\promotions\\services\\promotions-loyalty.service.ts",
+      "lines": 1563,
+      "decisions": 83
+    },
+    {
+      "file": "src\\modules\\messaging\\services\\notifications.service.ts",
+      "lines": 1378,
+      "decisions": 81
+    },
+    {
+      "file": "src\\modules\\procedures_perioperative\\services\\periop-cases.service.ts",
+      "lines": 1573,
+      "decisions": 77
+    },
+    {
+      "file": "src\\modules\\promotions\\services\\promotions-discounts.service.ts",
+      "lines": 970,
+      "decisions": 73
+    },
+    {
+      "file": "src\\modules\\tracking\\services\\tracking.service.ts",
+      "lines": 1229,
+      "decisions": 72
+    }
+  ],
+  "note": "decision counts are AST decision nodes per file, not a calibrated complexity score; comments count toward lines"
+}

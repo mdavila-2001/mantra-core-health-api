@@ -1,89 +1,44 @@
 import { jest } from '@jest/globals';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+
+/**
+ * Ejecuta la operación mock fn.
+ *
+ * @param impl - Valor de impl requerido por la operación.
+ * @returns Resultado de mock fn conforme al contrato `any`.
+ */
+const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ClinicalPrescriptionsController } from './clinical-prescriptions.controller';
-import { CLINICAL_PROXY_SCOPE } from '../services/clinical-read.service';
 
-const actor = { id: 'user-1', roles: ['PATIENT'] } as any;
-
-function setup() {
-  const read = {
-    assertOwnRecord: jest
-      .fn<() => Promise<void>>()
-      .mockResolvedValue(undefined),
-    assertPuedeLeerHistoria: jest
-      .fn<() => Promise<void>>()
-      .mockResolvedValue(undefined),
-  };
-  const documents = {
-    list: jest
-      .fn<() => Promise<any>>()
-      .mockResolvedValue({ items: [], total: 0 }),
-    one: jest.fn<() => Promise<any>>().mockResolvedValue({
-      id: 'rx-1',
-      patientProfileId: 'patient-1',
-      issuedAt: new Date(),
-    }),
-    all: jest.fn<() => Promise<any[]>>().mockResolvedValue([]),
-    pdf: jest
-      .fn<() => Promise<Buffer>>()
-      .mockResolvedValue(Buffer.from('%PDF')),
-  };
-  const response = { setHeader: jest.fn() } as any;
-  const logger = { info: jest.fn() };
-  return {
-    controller: new ClinicalPrescriptionsController(
-      read as any,
-      documents as any,
-      logger as any,
-    ),
-    read,
-    documents,
-    response,
-  };
-}
+const actor = { id: 'user-1', roles: [] } as any;
 
 describe('ClinicalPrescriptionsController', () => {
-  it('autoriza antes de leer el histórico completo', async () => {
-    const d = setup();
-    d.read.assertOwnRecord.mockRejectedValueOnce(new ForbiddenException());
-    await expect(
-      d.controller.history('patient-1', actor, d.response),
-    ).rejects.toBeInstanceOf(ForbiddenException);
-    expect(d.read.assertOwnRecord).toHaveBeenCalledWith(
-      'patient-1',
-      actor,
-      undefined,
-      CLINICAL_PROXY_SCOPE.PRESCRIPTIONS_READ,
+  it('delega en el servicio y fija los headers del PDF', async () => {
+    const prescriptionPdfService = {
+      render: mockFn().mockResolvedValue({
+        buffer: Buffer.from('%PDF-bytes'),
+        fileName: 'receta-req1.pdf',
+      }),
+    };
+    const controller = new ClinicalPrescriptionsController(
+      prescriptionPdfService as any,
     );
-    expect(d.documents.all).not.toHaveBeenCalled();
-  });
+    const res = { setHeader: mockFn(), send: mockFn() } as any;
 
-  it('oculta la existencia de una receta ajena', async () => {
-    const d = setup();
-    d.read.assertPuedeLeerHistoria.mockRejectedValueOnce(
-      new ForbiddenException(),
-    );
-    await expect(
-      d.controller.one('rx-1', actor, d.response),
-    ).rejects.toBeInstanceOf(NotFoundException);
-    expect(d.read.assertPuedeLeerHistoria).toHaveBeenCalledWith(
-      'patient-1',
-      actor,
-      CLINICAL_PROXY_SCOPE.PRESCRIPTIONS_READ,
-    );
-    expect(d.documents.pdf).not.toHaveBeenCalled();
-  });
+    await controller.getPrescriptionPdf('req1', res, actor);
 
-  it('devuelve un PDF sin caché para el titular', async () => {
-    const d = setup();
-    await d.controller.one('rx-1', actor, d.response);
-    expect(d.response.setHeader).toHaveBeenCalledWith(
-      'Content-Type',
-      'application/pdf',
-    );
-    expect(d.response.setHeader).toHaveBeenCalledWith(
+    expect(prescriptionPdfService.render).toHaveBeenCalledWith('req1', actor);
+    expect(res.setHeader).toHaveBeenCalledWith(
       'Cache-Control',
       'private, no-store',
     );
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Content-Type',
+      'application/pdf',
+    );
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'Content-Disposition',
+      "attachment; filename*=UTF-8''receta-req1.pdf",
+    );
+    expect(res.send).toHaveBeenCalledWith(Buffer.from('%PDF-bytes'));
   });
 });

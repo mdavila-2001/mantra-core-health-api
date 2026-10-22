@@ -3,9 +3,9 @@
 # Endpoints del módulo `clinical_ext`
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
-- **Operaciones:** 26 (26 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 8 · MEDIO 13 · BAJO 5
-- **Tablas distintas que tocan:** 15
+- **Operaciones:** 27 (27 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 6 · MEDIO 14 · BAJO 7
+- **Tablas distintas que tocan:** 18
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/clinical-ext.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -20,8 +20,8 @@
 | 6 | POST | `/cds-rules` | Crear una regla CDS en borrador | MEDIO | 2 | SECURITY_ADMIN |
 | 7 | POST | `/cds-rules/{id}/versions/publish` | Publicar una versión de la regla CDS | MEDIO | 2 | SECURITY_ADMIN |
 | 8 | POST | `/cds-rules/{id}/versions/rollback` | Rollback de la versión activa de la regla CDS | MEDIO | 2 | SECURITY_ADMIN |
-| 9 | POST | `/cds/check-interactions` | Detectar interacciones medicamentosas al prescribir | ALTO | 2 | sesión (sin roles) |
-| 10 | POST | `/cds/evaluate` | Evaluar reglas CDS y generar alertas | ALTO | 2 | sesión (sin roles) |
+| 9 | POST | `/cds/check-interactions` | Detectar interacciones medicamentosas al prescribir | BAJO | 1 | CLINICIAN, PRACTITIONER |
+| 10 | POST | `/cds/evaluate` | Evaluar reglas CDS y generar alertas | MEDIO | 2 | CLINICIAN, PRACTITIONER |
 | 11 | PATCH | `/clinical-alerts/{id}/acknowledge` | Reconocer una alerta clínica | BAJO | 1 | CLINICIAN, PRACTITIONER |
 | 12 | PATCH | `/clinical-alerts/{id}/override` | Override (sobreescribir) una alerta clínica | BAJO | 1 | CLINICIAN, PRACTITIONER |
 | 13 | POST | `/drug-interactions` | Registrar un par de interacción medicamentosa | MEDIO | 1 | SECURITY_ADMIN |
@@ -35,9 +35,10 @@
 | 21 | GET | `/referrals` | Listar derivaciones de un paciente | BAJO | 1 | CLINICIAN, PRACTITIONER |
 | 22 | POST | `/referrals` | Emitir una referencia desde un encuentro | MEDIO | 2 | CLINICIAN, PRACTITIONER |
 | 23 | PATCH | `/referrals/{id}/respond` | Responder / aceptar una referencia inter-tenant | MEDIO | 2 | CLINICIAN, PRACTITIONER |
-| 24 | POST | `/virtual-encounters` | Iniciar una sesión de telesalud | MEDIO | 2 | CLINICIAN, PRACTITIONER |
-| 25 | PATCH | `/virtual-encounters/{id}/end` | Finalizar una sesión de telesalud | MEDIO | 2 | CLINICIAN, PRACTITIONER |
-| 26 | PATCH | `/virtual-encounters/{id}/join` | Unirse a una sesión de telesalud | MEDIO | 2 | CLINICIAN, PRACTITIONER |
+| 24 | GET | `/referrals/me` | Mis derivaciones | BAJO | 3 | CLINICIAN, PRACTITIONER, PATIENT |
+| 25 | POST | `/virtual-encounters` | Iniciar una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER |
+| 26 | PATCH | `/virtual-encounters/{id}/end` | Finalizar una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER |
+| 27 | PATCH | `/virtual-encounters/{id}/join` | Unirse a una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER, PATIENT |
 
 ---
 
@@ -48,29 +49,29 @@
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CareGapsController.close` — `src/modules/clinical_ext/controllers/care-gaps.controller.ts:52`
+- **Implementación:** `CareGapsController.close` — `src/modules/clinical_ext/controllers/care-gaps.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
-Cerrar una brecha de cuidado por evento clínico. Caso de uso UC-18-10: Cerrar brecha por evento clínico. Dominio: Clínico y Diagnóstico.
+Cerrar una brecha de cuidado por evento clínico. Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:24`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /care-gaps/{id}/close` la atiende `CareGapsController.close` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:52). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CloseCareGapDto` (2 campos, 0 obligatorios). Delega en `CareGapsService.close`. Actualiza clinical_ext.care_gaps. Lee clinical_ext.care_gaps.
+`PATCH /care-gaps/{id}/close` la atiende `CareGapsController.close` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:62). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CloseCareGapDto` (2 campos, 0 obligatorios). Delega en `CareGapsService.close`. Actualiza clinical_ext.care_gaps. Lee clinical_ext.care_gaps.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:52` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:62` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:62` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -137,7 +138,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-10`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CareGapsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -148,28 +149,28 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CareGapsController.recompute` — `src/modules/clinical_ext/controllers/care-gaps.controller.ts:41`
+- **Implementación:** `CareGapsController.recompute` — `src/modules/clinical_ext/controllers/care-gaps.controller.ts:46`
 
 ### Qué es y para qué sirve (negocio)
 
-Detectar y abrir brechas de cuidado (batch). Caso de uso UC-18-09: Detectar y abrir brechas de cuidado. Dominio: Clínico y Diagnóstico.
+Detectar y abrir brechas de cuidado (batch). Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /care-gaps/recompute` la atiende `CareGapsController.recompute` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:41). Exige sesión; el controlador no declara roles. Valida el cuerpo como `RecomputeCareGapsDto` (5 campos, 3 obligatorios). Delega en `CareGapsService.recompute`. Crea filas en clinical_ext.care_gaps. Lee clinical_ext.care_gaps.
+`POST /care-gaps/recompute` la atiende `CareGapsController.recompute` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:46). Exige sesión; el controlador no declara roles. Valida el cuerpo como `RecomputeCareGapsDto` (5 campos, 3 obligatorios). Delega en `CareGapsService.recompute`. Crea filas en clinical_ext.care_gaps. Lee clinical_ext.care_gaps.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:46` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -246,7 +247,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-09`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CareGapsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -257,7 +258,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CareTeamsController.listByPatient` — `src/modules/clinical_ext/controllers/care-teams.controller.ts:68`
+- **Implementación:** `CareTeamsController.listByPatient` — `src/modules/clinical_ext/controllers/care-teams.controller.ts:84`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -267,17 +268,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /care-teams` la atiende `CareTeamsController.listByPatient` (src/modules/clinical_ext/controllers/care-teams.controller.ts:68). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `CareTeamsService.listByPatient`. Lee clinical_ext.care_teams.
+`GET /care-teams` la atiende `CareTeamsController.listByPatient` (src/modules/clinical_ext/controllers/care-teams.controller.ts:84). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `CareTeamsService.listByPatient`. Lee clinical_ext.care_teams.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-teams.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-teams.controller.ts:84` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -317,7 +318,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:CareTeamsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CareTeamsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -328,28 +329,28 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CareTeamsController.create` — `src/modules/clinical_ext/controllers/care-teams.controller.ts:39`
+- **Implementación:** `CareTeamsController.create` — `src/modules/clinical_ext/controllers/care-teams.controller.ts:45`
 
 ### Qué es y para qué sirve (negocio)
 
-Crear un equipo de cuidado con sus miembros. Caso de uso UC-18-01: Crear equipo de cuidado con miembros. Dominio: Clínico y Diagnóstico.
+Crear un equipo de cuidado con sus miembros. Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:15`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /care-teams` la atiende `CareTeamsController.create` (src/modules/clinical_ext/controllers/care-teams.controller.ts:39). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateCareTeamDto` (11 campos, 4 obligatorios). Delega en `CareTeamsService.create`. Crea filas en clinical_ext.care_team_members, clinical_ext.care_teams.
+`POST /care-teams` la atiende `CareTeamsController.create` (src/modules/clinical_ext/controllers/care-teams.controller.ts:45). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateCareTeamDto` (11 campos, 4 obligatorios). Delega en `CareTeamsService.create`. Crea filas en clinical_ext.care_team_members, clinical_ext.care_teams.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-teams.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-teams.controller.ts:45` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -445,7 +446,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-01`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CareTeamsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -456,27 +457,27 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CareTeamsController.setResponsible` — `src/modules/clinical_ext/controllers/care-teams.controller.ts:50`
+- **Implementación:** `CareTeamsController.setResponsible` — `src/modules/clinical_ext/controllers/care-teams.controller.ts:61`
 
 ### Qué es y para qué sirve (negocio)
 
-Designar miembro responsable (transferir liderazgo). Caso de uso UC-18-02: Transferir liderazgo. Dominio: Clínico y Diagnóstico.
+Designar miembro responsable (transferir liderazgo). Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:16`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /care-teams/{id}/members/{memberId}/set-responsible` la atiende `CareTeamsController.setResponsible` (src/modules/clinical_ext/controllers/care-teams.controller.ts:50). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `CareTeamsService.setResponsible`. Actualiza clinical_ext.care_team_members. Lee clinical_ext.care_team_members, clinical_ext.care_teams.
+`PATCH /care-teams/{id}/members/{memberId}/set-responsible` la atiende `CareTeamsController.setResponsible` (src/modules/clinical_ext/controllers/care-teams.controller.ts:61). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `CareTeamsService.setResponsible`. Actualiza clinical_ext.care_team_members. Lee clinical_ext.care_team_members, clinical_ext.care_teams.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-teams.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, memberId | `src/modules/clinical_ext/controllers/care-teams.controller.ts:50` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/care-teams.controller.ts:61` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, memberId | `src/modules/clinical_ext/controllers/care-teams.controller.ts:61` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -525,7 +526,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-02`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CareTeamsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -536,7 +537,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CdsController.createRule` — `src/modules/clinical_ext/controllers/cds.controller.ts:41`
+- **Implementación:** `CdsController.createRule` — `src/modules/clinical_ext/controllers/cds.controller.ts:53`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -546,18 +547,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /cds-rules` la atiende `CdsController.createRule` (src/modules/clinical_ext/controllers/cds.controller.ts:41). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCdsRuleDto` (7 campos, 2 obligatorios). Delega en `CdsService.createRule`. Crea filas en clinical_ext.cds_rules. Lee clinical_ext.cds_rules.
+`POST /cds-rules` la atiende `CdsController.createRule` (src/modules/clinical_ext/controllers/cds.controller.ts:53). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCdsRuleDto` (7 campos, 2 obligatorios). Delega en `CdsService.createRule`. Crea filas en clinical_ext.cds_rules. Lee clinical_ext.cds_rules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:53` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -622,7 +623,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: El código de regla ya existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lógica de la regla no se puede interpretar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | UnparseableCdsRuleError: logic_json no es un objeto; UnparseableCdsRuleError: op 'in' exige un array en value; UnparseableCdsRuleError: op '{op}' exige un número en value; UnparseableCdsRuleError: operador no soportado: {op}; UnparseableCdsRuleError: nodo de lógica no reconocido |
 
 El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
@@ -634,7 +637,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -645,35 +648,35 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CdsController.publish` — `src/modules/clinical_ext/controllers/cds.controller.ts:53`
+- **Implementación:** `CdsController.publish` — `src/modules/clinical_ext/controllers/cds.controller.ts:70`
 
 ### Qué es y para qué sirve (negocio)
 
-Publicar una versión de la regla CDS. Caso de uso UC-18-13: Publicar versión de regla CDS con rollback. Dominio: Clínico y Diagnóstico.
+Publicar una versión de la regla CDS. Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:27`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /cds-rules/{id}/versions/publish` la atiende `CdsController.publish` (src/modules/clinical_ext/controllers/cds.controller.ts:53). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PublishRuleVersionDto` (3 campos, 0 obligatorios). Delega en `CdsService.publishVersion`. Actualiza clinical_ext.cds_rules. Lee clinical_ext.cds_rules.
+`POST /cds-rules/{id}/versions/publish` la atiende `CdsController.publish` (src/modules/clinical_ext/controllers/cds.controller.ts:70). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PublishRuleVersionDto` (3 campos, 0 obligatorios). Delega en `CdsService.publishVersion`. Actualiza clinical_ext.cds_rules. Lee clinical_ext.cds_rules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/cds.controller.ts:53` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:70` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/cds.controller.ts:70` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical_ext.cds_rules` | ESCRIBE | ACTUALIZA | POR_TIPO | CdsController.publish → CdsService.publishVersion | `src/modules/clinical_ext/services/cds.service.ts:122` |
+| `clinical_ext.cds_rules` | ESCRIBE | ACTUALIZA | POR_TIPO | CdsController.publish → CdsService.publishVersion | `src/modules/clinical_ext/services/cds.service.ts:126` |
 | `clinical_ext.cds_rules` | LEE | LEE | DIRECTA | CdsController.publish → CdsService.publishVersion → CdsRulesRepository.findById | `src/modules/clinical_ext/repositories/cds-rules.repository.ts:65` |
 
 ### Parámetros
@@ -727,7 +730,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Regla CDS no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lógica de la regla no se puede interpretar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | UnparseableCdsRuleError: logic_json no es un objeto; UnparseableCdsRuleError: op 'in' exige un array en value; UnparseableCdsRuleError: op '{op}' exige un número en value; UnparseableCdsRuleError: operador no soportado: {op}; UnparseableCdsRuleError: nodo de lógica no reconocido |
 
 El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
@@ -739,7 +744,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-13`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -750,7 +755,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CdsController.rollback` — `src/modules/clinical_ext/controllers/cds.controller.ts:66`
+- **Implementación:** `CdsController.rollback` — `src/modules/clinical_ext/controllers/cds.controller.ts:88`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -760,23 +765,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /cds-rules/{id}/versions/rollback` la atiende `CdsController.rollback` (src/modules/clinical_ext/controllers/cds.controller.ts:66). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CdsService.rollbackVersion`. Actualiza clinical_ext.cds_rules. Lee clinical_ext.cds_rules.
+`POST /cds-rules/{id}/versions/rollback` la atiende `CdsController.rollback` (src/modules/clinical_ext/controllers/cds.controller.ts:88). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CdsService.rollbackVersion`. Actualiza clinical_ext.cds_rules. Lee clinical_ext.cds_rules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/cds.controller.ts:66` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:88` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/cds.controller.ts:88` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical_ext.cds_rules` | ESCRIBE | ACTUALIZA | POR_TIPO | CdsController.rollback → CdsService.rollbackVersion | `src/modules/clinical_ext/services/cds.service.ts:160` |
+| `clinical_ext.cds_rules` | ESCRIBE | ACTUALIZA | POR_TIPO | CdsController.rollback → CdsService.rollbackVersion | `src/modules/clinical_ext/services/cds.service.ts:167` |
 | `clinical_ext.cds_rules` | LEE | LEE | DIRECTA | CdsController.rollback → CdsService.rollbackVersion → CdsRulesRepository.findById | `src/modules/clinical_ext/repositories/cds-rules.repository.ts:65` |
 
 ### Parámetros
@@ -821,7 +826,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -830,36 +835,35 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Origen:** CONTRATO
 - **Nombre:** Detectar interacciones medicamentosas al prescribir
 - **Bloque:** Clínico y Diagnóstico
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CdsController.checkInteractions` — `src/modules/clinical_ext/controllers/cds.controller.ts:89`
+- **Implementación:** `CdsController.checkInteractions` — `src/modules/clinical_ext/controllers/cds.controller.ts:137`
 
 ### Qué es y para qué sirve (negocio)
 
-Detectar interacciones medicamentosas al prescribir. Caso de uso UC-18-04: Detectar interacciones medicamentosas. Dominio: Clínico y Diagnóstico.
+Detectar interacciones medicamentosas al prescribir. Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /cds/check-interactions` la atiende `CdsController.checkInteractions` (src/modules/clinical_ext/controllers/cds.controller.ts:89). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CheckInteractionsDto` (4 campos, 2 obligatorios). Delega en `CdsService.checkInteractions`. Crea filas en clinical_ext.clinical_alerts. Lee clinical_ext.drug_interactions.
+`POST /cds/check-interactions` la atiende `CdsController.checkInteractions` (src/modules/clinical_ext/controllers/cds.controller.ts:137). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CheckInteractionsDto` (4 campos, 2 obligatorios). Delega en `CdsService.checkInteractions`. Lee clinical_ext.drug_interactions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/cds.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/cds.controller.ts:137` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical_ext.clinical_alerts` | ESCRIBE | CREA | DIRECTA | CdsController.checkInteractions → CdsService.checkInteractions → ClinicalAlertsRepository.create | `src/modules/clinical_ext/repositories/clinical-alerts.repository.ts:104` |
 | `clinical_ext.drug_interactions` | LEE | LEE | DIRECTA | CdsController.checkInteractions → CdsService.checkInteractions → DrugInteractionsRepository.findByPair | `src/modules/clinical_ext/repositories/drug-interactions.repository.ts:55` |
 
 ### Cuerpo — DTO `CheckInteractionsDto` · `application/json`
@@ -909,6 +913,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `alerts[].severityConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a severity concept. | `src/modules/clinical_ext/dto/cds.dto.ts:350` |
 | `alerts[].ruleId` | `string` | No | formato uuid | — | Identificador asociado a rule. | `src/modules/clinical_ext/dto/cds.dto.ts:356` |
 | `count` | `number` | Sí | — | — | Nº de alertas generadas | `src/modules/clinical_ext/dto/cds.dto.ts:371` |
+| `unevaluatedRuleIds` | `array<string>` | No | formato uuid | — | Reglas activas que no se pudieron evaluar porque su lógica no se entiende. Ausente cuando todas se evaluaron: una alerta que no se disparó por eso no puede confundirse con una que no aplica. | `src/modules/clinical_ext/dto/cds.dto.ts:379` |
 
 ### Respuestas posibles
 
@@ -926,11 +931,12 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:196` |
 | CONTROLADOR | `src/modules/clinical_ext/controllers/cds.controller.spec.ts:62` |
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-04`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -939,30 +945,30 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Origen:** CONTRATO
 - **Nombre:** Evaluar reglas CDS y generar alertas
 - **Bloque:** Clínico y Diagnóstico
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CdsController.evaluate` — `src/modules/clinical_ext/controllers/cds.controller.ts:78`
+- **Implementación:** `CdsController.evaluate` — `src/modules/clinical_ext/controllers/cds.controller.ts:113`
 
 ### Qué es y para qué sirve (negocio)
 
-Evaluar reglas CDS y generar alertas. Caso de uso UC-18-03: Evaluar reglas CDS y generar alertas. Dominio: Clínico y Diagnóstico.
+Evaluar reglas CDS y generar alertas. Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /cds/evaluate` la atiende `CdsController.evaluate` (src/modules/clinical_ext/controllers/cds.controller.ts:78). Exige sesión; el controlador no declara roles. Valida el cuerpo como `EvaluateCdsDto` (9 campos, 1 obligatorio). Delega en `CdsService.evaluate`. Crea filas en clinical_ext.clinical_alerts. Lee clinical_ext.cds_rules.
+`POST /cds/evaluate` la atiende `CdsController.evaluate` (src/modules/clinical_ext/controllers/cds.controller.ts:113). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `EvaluateCdsDto` (9 campos, 1 obligatorio). Delega en `CdsService.evaluate`. Crea filas en clinical_ext.clinical_alerts. Lee clinical_ext.cds_rules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/cds.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/cds.controller.ts:113` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1026,6 +1032,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | `alerts[].severityConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a severity concept. | `src/modules/clinical_ext/dto/cds.dto.ts:350` |
 | `alerts[].ruleId` | `string` | No | formato uuid | — | Identificador asociado a rule. | `src/modules/clinical_ext/dto/cds.dto.ts:356` |
 | `count` | `number` | Sí | — | — | Nº de alertas generadas | `src/modules/clinical_ext/dto/cds.dto.ts:371` |
+| `unevaluatedRuleIds` | `array<string>` | No | formato uuid | — | Reglas activas que no se pudieron evaluar porque su lógica no se entiende. Ausente cuando todas se evaluaron: una alerta que no se disparó por eso no puede confundirse con una que no aplica. | `src/modules/clinical_ext/dto/cds.dto.ts:379` |
 
 ### Respuestas posibles
 
@@ -1044,11 +1051,12 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/br14-encuentros-seguridad-clinica.int-spec.ts:188` |
 | CONTROLADOR | `src/modules/clinical_ext/controllers/cds.controller.spec.ts:55` |
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-03`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1059,27 +1067,27 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ClinicalAlertsController.acknowledge` — `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:32`
+- **Implementación:** `ClinicalAlertsController.acknowledge` — `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:37`
 
 ### Qué es y para qué sirve (negocio)
 
-Reconocer una alerta clínica. Caso de uso UC-18-05: Reconocer / override de alerta. Dominio: Clínico y Diagnóstico.
+Reconocer una alerta clínica. Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:19`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /clinical-alerts/{id}/acknowledge` la atiende `ClinicalAlertsController.acknowledge` (src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:32). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ClinicalAlertsService.acknowledge`. Lee clinical_ext.clinical_alerts.
+`PATCH /clinical-alerts/{id}/acknowledge` la atiende `ClinicalAlertsController.acknowledge` (src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:37). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ClinicalAlertsService.acknowledge`. Lee clinical_ext.clinical_alerts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:32` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:32` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:37` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:37` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1127,7 +1135,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-05`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:ClinicalAlertsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1138,7 +1146,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ClinicalAlertsController.override` — `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:43`
+- **Implementación:** `ClinicalAlertsController.override` — `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:53`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1148,19 +1156,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /clinical-alerts/{id}/override` la atiende `ClinicalAlertsController.override` (src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:43). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `OverrideAlertDto` (1 campo, 0 obligatorios). Delega en `ClinicalAlertsService.override`. Lee clinical_ext.clinical_alerts.
+`PATCH /clinical-alerts/{id}/override` la atiende `ClinicalAlertsController.override` (src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:53). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `OverrideAlertDto` (1 campo, 0 obligatorios). Delega en `ClinicalAlertsService.override`. Lee clinical_ext.clinical_alerts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:43` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:53` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/clinical-alerts.controller.ts:53` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1226,7 +1234,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:ClinicalAlertsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:ClinicalAlertsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1237,7 +1245,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CdsController.createDrugInteraction` — `src/modules/clinical_ext/controllers/cds.controller.ts:102`
+- **Implementación:** `CdsController.createDrugInteraction` — `src/modules/clinical_ext/controllers/cds.controller.ts:157`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1247,18 +1255,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /drug-interactions` la atiende `CdsController.createDrugInteraction` (src/modules/clinical_ext/controllers/cds.controller.ts:102). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDrugInteractionDto` (5 campos, 2 obligatorios). Delega en `CdsService.createDrugInteraction`. Crea filas en clinical_ext.drug_interactions.
+`POST /drug-interactions` la atiende `CdsController.createDrugInteraction` (src/modules/clinical_ext/controllers/cds.controller.ts:157). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDrugInteractionDto` (5 campos, 2 obligatorios). Delega en `CdsService.createDrugInteraction`. Crea filas en clinical_ext.drug_interactions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/cds.controller.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1323,7 +1331,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CdsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1334,7 +1342,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CareGapsController.createSchedule` — `src/modules/clinical_ext/controllers/care-gaps.controller.ts:78`
+- **Implementación:** `CareGapsController.createSchedule` — `src/modules/clinical_ext/controllers/care-gaps.controller.ts:98`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1344,18 +1352,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /immunization-schedules` la atiende `CareGapsController.createSchedule` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:78). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateImmunizationScheduleDto` (7 campos, 2 obligatorios). Delega en `CareGapsService.createSchedule`. Crea filas en clinical_ext.immunization_schedules.
+`POST /immunization-schedules` la atiende `CareGapsController.createSchedule` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:98). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateImmunizationScheduleDto` (7 campos, 2 obligatorios). Delega en `CareGapsService.createSchedule`. Crea filas en clinical_ext.immunization_schedules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:98` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1424,7 +1432,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:CareGapsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CareGapsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1435,7 +1443,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrderSetsController.create` — `src/modules/clinical_ext/controllers/order-sets.controller.ts:36`
+- **Implementación:** `OrderSetsController.create` — `src/modules/clinical_ext/controllers/order-sets.controller.ts:41`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1445,18 +1453,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /order-sets` la atiende `OrderSetsController.create` (src/modules/clinical_ext/controllers/order-sets.controller.ts:36). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateOrderSetDto` (12 campos, 4 obligatorios). Delega en `OrderSetsService.create`. Crea filas en clinical_ext.order_set_items, clinical_ext.order_sets. Lee clinical_ext.order_sets.
+`POST /order-sets` la atiende `OrderSetsController.create` (src/modules/clinical_ext/controllers/order-sets.controller.ts:41). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateOrderSetDto` (12 campos, 4 obligatorios). Delega en `OrderSetsService.create`. Crea filas en clinical_ext.order_set_items, clinical_ext.order_sets. Lee clinical_ext.order_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/order-sets.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/clinical_ext/controllers/order-sets.controller.ts:41` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1552,7 +1560,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:OrderSetsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:OrderSetsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1563,29 +1571,29 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrderSetsController.apply` — `src/modules/clinical_ext/controllers/order-sets.controller.ts:50`
+- **Implementación:** `OrderSetsController.apply` — `src/modules/clinical_ext/controllers/order-sets.controller.ts:60`
 
 ### Qué es y para qué sirve (negocio)
 
-Aplicar un order set (fan-out de órdenes). Caso de uso UC-18-06: Aplicar order set (fan-out). Dominio: Clínico y Diagnóstico.
+Aplicar un order set (fan-out de órdenes). Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /order-sets/{id}/apply` la atiende `OrderSetsController.apply` (src/modules/clinical_ext/controllers/order-sets.controller.ts:50). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ApplyOrderSetDto` (4 campos, 2 obligatorios). Delega en `OrderSetsService.apply`. Crea filas en clinical.service_requests. Lee clinical_ext.order_set_items, clinical_ext.order_sets.
+`POST /order-sets/{id}/apply` la atiende `OrderSetsController.apply` (src/modules/clinical_ext/controllers/order-sets.controller.ts:60). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ApplyOrderSetDto` (4 campos, 2 obligatorios). Delega en `OrderSetsService.apply`. Crea filas en clinical.service_requests. Lee clinical_ext.order_set_items, clinical_ext.order_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/order-sets.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/order-sets.controller.ts:50` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/order-sets.controller.ts:60` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/order-sets.controller.ts:60` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1593,7 +1601,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 |---|---|---|---|---|---|
 | `clinical_ext.order_set_items` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → OrderSetsRepository.itemsBySet | `src/modules/clinical_ext/repositories/order-sets.repository.ts:119` |
 | `clinical_ext.order_sets` | LEE | LEE | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → OrderSetsRepository.findById | `src/modules/clinical_ext/repositories/order-sets.repository.ts:97` |
-| `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:78` |
+| `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | OrderSetsController.apply → OrderSetsService.apply → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:92` |
 
 ### Parámetros
 
@@ -1669,7 +1677,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-06`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:OrderSetsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1680,29 +1688,29 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CareGapsController.projectImmunizationPlan` — `src/modules/clinical_ext/controllers/care-gaps.controller.ts:64`
+- **Implementación:** `CareGapsController.projectImmunizationPlan` — `src/modules/clinical_ext/controllers/care-gaps.controller.ts:79`
 
 ### Qué es y para qué sirve (negocio)
 
-Proyectar el plan de inmunización y abrir brechas. Caso de uso UC-18-11: Proyectar plan de inmunización y abrir brechas. Dominio: Clínico y Diagnóstico.
+Proyectar el plan de inmunización y abrir brechas. Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:25`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /patients/{id}/immunization-plan/project` la atiende `CareGapsController.projectImmunizationPlan` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:64). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ProjectImmunizationPlanDto` (3 campos, 1 obligatorio). Delega en `CareGapsService.projectImmunizationPlan`. Crea filas en clinical_ext.care_gaps. Lee clinical_ext.care_gaps, clinical_ext.immunization_schedules.
+`POST /patients/{id}/immunization-plan/project` la atiende `CareGapsController.projectImmunizationPlan` (src/modules/clinical_ext/controllers/care-gaps.controller.ts:79). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ProjectImmunizationPlanDto` (3 campos, 1 obligatorio). Delega en `CareGapsService.projectImmunizationPlan`. Crea filas en clinical_ext.care_gaps. Lee clinical_ext.care_gaps, clinical_ext.immunization_schedules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:64` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:79` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/care-gaps.controller.ts:79` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1774,7 +1782,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-11`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:CareGapsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1803,16 +1811,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `clinical_ext.prescription_favorites` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.listOwn → PrescriptionFavoritesService.listOwn → PrescriptionFavoritesRepository.findByPractitioner | `src/modules/clinical_ext/repositories/prescription-favorites.repository.ts:80` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.listOwn → PrescriptionFavoritesService.listOwn → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/repositories/health-practitioner-profiles.repository.ts:64` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.listOwn → PrescriptionFavoritesService.listOwn → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/repositories/person-account-links.repository.ts:80` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.listOwn → PrescriptionFavoritesService.listOwn → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.listOwn → PrescriptionFavoritesService.listOwn → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo
 
@@ -1850,7 +1858,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:PrescriptionFavoritesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:PrescriptionFavoritesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1879,10 +1887,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1890,8 +1898,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical_ext.prescription_favorites` | ESCRIBE | CREA | DIRECTA | PrescriptionFavoritesController.create → PrescriptionFavoritesService.create → PrescriptionFavoritesRepository.create | `src/modules/clinical_ext/repositories/prescription-favorites.repository.ts:129` |
 | `clinical_ext.prescription_favorites` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.create → PrescriptionFavoritesService.create → PrescriptionFavoritesRepository.countByPractitioner | `src/modules/clinical_ext/repositories/prescription-favorites.repository.ts:115` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.create → PrescriptionFavoritesService.create → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/repositories/health-practitioner-profiles.repository.ts:64` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.create → PrescriptionFavoritesService.create → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/repositories/person-account-links.repository.ts:80` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.create → PrescriptionFavoritesService.create → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.create → PrescriptionFavoritesService.create → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Cuerpo — DTO `CreatePrescriptionFavoriteDto` · `application/json`
 
@@ -1957,8 +1965,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 409 | `CONFLICT` | ConflictException: Ya tenés un favorito con ese nombre |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lista de favoritos llegó a su máximo; borrá alguno antes de guardar otro |
+| 409 | `CONFLICT` | ConflictException: Ya tiene un favorito con ese nombre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lista de favoritos llegó a su máximo; borre alguno antes de guardar otro |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
@@ -1969,7 +1977,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:PrescriptionFavoritesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:PrescriptionFavoritesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1980,7 +1988,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PrescriptionFavoritesController.remove` — `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:68`
+- **Implementación:** `PrescriptionFavoritesController.remove` — `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:73`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1990,17 +1998,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /prescription-favorites/{id}` la atiende `PrescriptionFavoritesController.remove` (src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:68). Exige sesión; el controlador no declara roles. Delega en `PrescriptionFavoritesService.remove`. Borra de clinical_ext.prescription_favorites. Lee clinical_ext.prescription_favorites, profiles.health_practitioner_profiles, profiles.person_account_links.
+`DELETE /prescription-favorites/{id}` la atiende `PrescriptionFavoritesController.remove` (src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:73). Exige sesión; el controlador no declara roles. Delega en `PrescriptionFavoritesService.remove`. Borra de clinical_ext.prescription_favorites. Lee clinical_ext.prescription_favorites, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:68` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:73` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:73` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2008,8 +2016,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `clinical_ext.prescription_favorites` | BORRA | BORRA | POR_TIPO | PrescriptionFavoritesController.remove → PrescriptionFavoritesService.remove | `src/modules/clinical_ext/services/prescription-favorites.service.ts:190` |
 | `clinical_ext.prescription_favorites` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.remove → PrescriptionFavoritesService.remove → PrescriptionFavoritesRepository.findById | `src/modules/clinical_ext/repositories/prescription-favorites.repository.ts:101` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.remove → PrescriptionFavoritesService.remove → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/repositories/health-practitioner-profiles.repository.ts:64` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.remove → PrescriptionFavoritesService.remove → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/repositories/person-account-links.repository.ts:80` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.remove → PrescriptionFavoritesService.remove → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PrescriptionFavoritesController.remove → PrescriptionFavoritesService.remove → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
 ### Parámetros
 
@@ -2044,7 +2052,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:PrescriptionFavoritesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:PrescriptionFavoritesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2055,7 +2063,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.listByPatient` — `src/modules/clinical_ext/controllers/referrals.controller.ts:67`
+- **Implementación:** `ReferralsController.listByPatient` — `src/modules/clinical_ext/controllers/referrals.controller.ts:83`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2065,17 +2073,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /referrals` la atiende `ReferralsController.listByPatient` (src/modules/clinical_ext/controllers/referrals.controller.ts:67). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.listByPatient`. Lee clinical_ext.referrals.
+`GET /referrals` la atiende `ReferralsController.listByPatient` (src/modules/clinical_ext/controllers/referrals.controller.ts:83). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.listByPatient`. Lee clinical_ext.referrals.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:83` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2115,7 +2123,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:ReferralsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:ReferralsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2126,28 +2134,28 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.create` — `src/modules/clinical_ext/controllers/referrals.controller.ts:40`
+- **Implementación:** `ReferralsController.create` — `src/modules/clinical_ext/controllers/referrals.controller.ts:46`
 
 ### Qué es y para qué sirve (negocio)
 
-Emitir una referencia desde un encuentro. Caso de uso UC-18-07: Emitir referencia. Dominio: Clínico y Diagnóstico.
+Emitir una referencia desde un encuentro. Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:21`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /referrals` la atiende `ReferralsController.create` (src/modules/clinical_ext/controllers/referrals.controller.ts:40). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ClinicalExtCreateReferralDto` (10 campos, 1 obligatorio). Delega en `ReferralsService.create`. Crea filas en clinical_ext.referrals. Lee clinical_ext.referrals.
+`POST /referrals` la atiende `ReferralsController.create` (src/modules/clinical_ext/controllers/referrals.controller.ts:46). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ClinicalExtCreateReferralDto` (10 campos, 1 obligatorio). Delega en `ReferralsService.create`. Crea filas en clinical_ext.referrals. Lee clinical_ext.referrals.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:46` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2223,11 +2231,11 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:28` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:32` |
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-07`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:ReferralsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2238,35 +2246,35 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReferralsController.respond` — `src/modules/clinical_ext/controllers/referrals.controller.ts:51`
+- **Implementación:** `ReferralsController.respond` — `src/modules/clinical_ext/controllers/referrals.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
-Responder / aceptar una referencia inter-tenant. Caso de uso UC-18-08: Aceptar / rechazar referencia inter-tenant. Dominio: Clínico y Diagnóstico.
+Responder / aceptar una referencia inter-tenant. Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:22`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /referrals/{id}/respond` la atiende `ReferralsController.respond` (src/modules/clinical_ext/controllers/referrals.controller.ts:51). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RespondReferralDto` (1 campo, 1 obligatorio). Delega en `ReferralsService.respond`. Actualiza clinical_ext.referrals. Lee clinical_ext.referrals.
+`PATCH /referrals/{id}/respond` la atiende `ReferralsController.respond` (src/modules/clinical_ext/controllers/referrals.controller.ts:62). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `RespondReferralDto` (1 campo, 1 obligatorio). Delega en `ReferralsService.respond`. Actualiza clinical_ext.referrals. Lee clinical_ext.referrals.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:51` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/referrals.controller.ts:62` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/referrals.controller.ts:62` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.respond → ReferralsService.respond | `src/modules/clinical_ext/services/referrals.service.ts:128` |
+| `clinical_ext.referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | ReferralsController.respond → ReferralsService.respond | `src/modules/clinical_ext/services/referrals.service.ts:135` |
 | `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.respond → ReferralsService.respond → ReferralsRepository.findById | `src/modules/clinical_ext/repositories/referrals.repository.ts:73` |
 
 ### Parámetros
@@ -2323,43 +2331,110 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:35` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:39` |
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-08`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:ReferralsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
-## 24. POST /virtual-encounters
+## 24. GET /referrals/me
 
 - **Origen:** CONTRATO
-- **Nombre:** Iniciar una sesión de telesalud
+- **Nombre:** Mis derivaciones
 - **Bloque:** Clínico y Diagnóstico
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VirtualEncountersController.create` — `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:39`
+- **Implementación:** `ReferralsController.listMine` — `src/modules/clinical_ext/controllers/referrals.controller.ts:97`
 
 ### Qué es y para qué sirve (negocio)
 
-Iniciar una sesión de telesalud. Caso de uso UC-18-12: Telesalud: iniciar / unirse / finalizar. Dominio: Clínico y Diagnóstico.
+Mis derivaciones. Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinical_ext/README.md:26`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /virtual-encounters` la atiende `VirtualEncountersController.create` (src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:39). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateVirtualEncounterDto` (4 campos, 1 obligatorio). Delega en `VirtualEncountersService.create`. Crea filas en clinical_ext.virtual_encounters. Lee clinical_ext.virtual_encounters.
+`GET /referrals/me` la atiende `ReferralsController.listMine` (src/modules/clinical_ext/controllers/referrals.controller.ts:97). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `ReferralsService.listMine`. Lee clinical_ext.referrals, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical_ext/controllers/referrals.controller.ts:97` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `clinical_ext.referrals` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → ReferralsRepository.findByPatient | `src/modules/clinical_ext/repositories/referrals.repository.ts:113` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ReferralsController.listMine → ReferralsService.listMine → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/clinical_ext/controllers/referrals.controller.spec.ts:45` |
+
+### Flujos
+
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:ReferralsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 25. POST /virtual-encounters
+
+- **Origen:** CONTRATO
+- **Nombre:** Iniciar una sesión de telesalud
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `VirtualEncountersController.create` — `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:44`
+
+### Qué es y para qué sirve (negocio)
+
+Iniciar una sesión de telesalud. Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /virtual-encounters` la atiende `VirtualEncountersController.create` (src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:44). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateVirtualEncounterDto` (4 campos, 1 obligatorio). Delega en `VirtualEncountersService.create`. Crea filas en clinical_ext.virtual_encounters. Lee clinical_ext.virtual_encounters, clinical.encounter_participants, clinical.encounters.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:44` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -2367,6 +2442,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 |---|---|---|---|---|---|
 | `clinical_ext.virtual_encounters` | ESCRIBE | CREA | DIRECTA | VirtualEncountersController.create → VirtualEncountersService.create → VirtualEncountersRepository.create | `src/modules/clinical_ext/repositories/virtual-encounters.repository.ts:67` |
 | `clinical_ext.virtual_encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.create → VirtualEncountersService.create → VirtualEncountersRepository.findByEncounter | `src/modules/clinical_ext/repositories/virtual-encounters.repository.ts:53` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | VirtualEncountersController.create → VirtualEncountersService.create → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:371` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.create → VirtualEncountersService.create → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
 
 ### Cuerpo — DTO `CreateVirtualEncounterDto` · `application/json`
 
@@ -2413,7 +2490,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/clinica
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La sesión virtual pertenece a otra organización.; ForbiddenException: No participa de este encuentro clínico. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro clínico no encontrado |
 | 409 | `CONFLICT` | ConflictException: El encuentro ya tiene una sesión virtual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2423,22 +2501,23 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/virtual-encounters.controller.spec.ts:34` |
+| INTEGRACION | `test/integration/virtual-encounter-auth.int-spec.ts:109` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/virtual-encounters.controller.spec.ts:35` |
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `UC-18-12`
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:VirtualEncountersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
-## 25. PATCH /virtual-encounters/{id}/end
+## 26. PATCH /virtual-encounters/{id}/end
 
 - **Origen:** CONTRATO
 - **Nombre:** Finalizar una sesión de telesalud
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VirtualEncountersController.end` — `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:61`
+- **Implementación:** `VirtualEncountersController.end` — `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:77`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2448,26 +2527,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /virtual-encounters/{id}/end` la atiende `VirtualEncountersController.end` (src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:61). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `EndVirtualEncounterDto` (1 campo, 0 obligatorios). Delega en `VirtualEncountersService.end`. Actualiza clinical_ext.virtual_encounters. Lee clinical_ext.virtual_encounters.
+`PATCH /virtual-encounters/{id}/end` la atiende `VirtualEncountersController.end` (src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:77). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `EndVirtualEncounterDto` (1 campo, 0 obligatorios). Delega en `VirtualEncountersService.end`. Actualiza clinical_ext.virtual_encounters. Lee clinical_ext.virtual_encounters, clinical.encounter_participants, clinical.encounters.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:61` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:77` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:77` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical_ext.virtual_encounters` | ESCRIBE | ACTUALIZA | POR_TIPO | VirtualEncountersController.end → VirtualEncountersService.end | `src/modules/clinical_ext/services/virtual-encounters.service.ts:140` |
+| `clinical_ext.virtual_encounters` | ESCRIBE | ACTUALIZA | POR_TIPO | VirtualEncountersController.end → VirtualEncountersService.end | `src/modules/clinical_ext/services/virtual-encounters.service.ts:149` |
 | `clinical_ext.virtual_encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.end → VirtualEncountersService.end → VirtualEncountersRepository.findById | `src/modules/clinical_ext/repositories/virtual-encounters.repository.ts:45` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | VirtualEncountersController.end → VirtualEncountersService.end → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:371` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.end → VirtualEncountersService.end → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
 
 ### Parámetros
 
@@ -2512,8 +2593,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión virtual no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La sesión virtual pertenece a otra organización.; ForbiddenException: No participa de este encuentro clínico. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión virtual no encontrada; ResourceNotFoundException: Encuentro clínico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no está en progreso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2523,22 +2604,23 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/virtual-encounters.controller.spec.ts:47` |
+| INTEGRACION | `test/integration/virtual-encounter-auth.int-spec.ts:120` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/virtual-encounters.controller.spec.ts:58` |
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:VirtualEncountersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:VirtualEncountersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
-## 26. PATCH /virtual-encounters/{id}/join
+## 27. PATCH /virtual-encounters/{id}/join
 
 - **Origen:** CONTRATO
 - **Nombre:** Unirse a una sesión de telesalud
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `VirtualEncountersController.join` — `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:50`
+- **Implementación:** `VirtualEncountersController.join` — `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:60`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2548,24 +2630,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /virtual-encounters/{id}/join` la atiende `VirtualEncountersController.join` (src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:50). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `VirtualEncountersService.join`. Actualiza clinical_ext.virtual_encounters. Lee clinical_ext.virtual_encounters.
+`PATCH /virtual-encounters/{id}/join` la atiende `VirtualEncountersController.join` (src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:60). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, PATIENT. Delega en `VirtualEncountersService.join`. Actualiza clinical_ext.virtual_encounters. Lee clinical_ext.virtual_encounters, clinical.encounter_participants, clinical.encounters.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:50` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, PATIENT | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:60` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/clinical_ext/controllers/virtual-encounters.controller.ts:60` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical_ext.virtual_encounters` | ESCRIBE | ACTUALIZA | POR_TIPO | VirtualEncountersController.join → VirtualEncountersService.join | `src/modules/clinical_ext/services/virtual-encounters.service.ts:106` |
+| `clinical_ext.virtual_encounters` | ESCRIBE | ACTUALIZA | POR_TIPO | VirtualEncountersController.join → VirtualEncountersService.join | `src/modules/clinical_ext/services/virtual-encounters.service.ts:114` |
 | `clinical_ext.virtual_encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.join → VirtualEncountersService.join → VirtualEncountersRepository.findById | `src/modules/clinical_ext/repositories/virtual-encounters.repository.ts:45` |
+| `clinical.encounter_participants` | LEE | LEE | DIRECTA | VirtualEncountersController.join → VirtualEncountersService.join → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findActiveParticipants | `src/modules/clinical/repositories/encounters.repository.ts:371` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | VirtualEncountersController.join → VirtualEncountersService.join → VirtualEncountersService.requireEncounterParticipant → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
 
 ### Parámetros
 
@@ -2592,8 +2676,8 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión virtual no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La sesión virtual pertenece a otra organización.; ForbiddenException: No participa de este encuentro clínico. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión virtual no encontrada; ResourceNotFoundException: Encuentro clínico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no está agendada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2603,11 +2687,12 @@ El árbol de decisión completo está en [flujos](../flujos/clinical_ext.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/clinical_ext/controllers/virtual-encounters.controller.spec.ts:40` |
+| INTEGRACION | `test/integration/virtual-encounter-auth.int-spec.ts:115` |
+| CONTROLADOR | `src/modules/clinical_ext/controllers/virtual-encounters.controller.spec.ts:41` |
 
 ### Flujos
 
-- Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support — etapa `ctrl:VirtualEncountersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- `clinical_ext` — coordinación y soporte clínico — etapa `ctrl:VirtualEncountersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

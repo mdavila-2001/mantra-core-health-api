@@ -162,14 +162,19 @@ export class AssetService {
       'Running depreciation batch',
     );
     return this.em.transactional(async (tx) => {
-      let assets = await this.assetRepo.activeAssets(
+      // Las filas de los activos se leen bloqueadas (`FOR UPDATE`) ANTES de
+      // comprobar o crear la depreciación del periodo. Dos corridas
+      // concurrentes sobre el mismo (activo, periodo) se serializan en esta
+      // lectura: la segunda espera a que la primera confirme, relee y
+      // `findDepreciation` ya encuentra la fila → la omite. Es la garantía
+      // que el modelo no declara (no hay UK sobre `asset_depreciations`),
+      // resuelta en la capa de la API sin tocar esquema (T26 · AC-26-5).
+      const assets = await this.assetRepo.activeAssets(
         tx,
         dto.practiceId,
         ACCT.ASSET_ACTIVE,
+        { assetId: dto.assetId, forUpdate: true },
       );
-      if (dto.assetId) {
-        assets = assets.filter((a) => a.id === dto.assetId);
-      }
 
       const transactionIds: string[] = [];
       let depreciated = 0;

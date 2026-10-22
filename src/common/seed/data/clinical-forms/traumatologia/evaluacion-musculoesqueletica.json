@@ -1,11 +1,11 @@
 {
   "code": "TRAUMA_EVALUACION_BASE",
-  "name": "Evaluación musculoesquelética — versión general base",
+  "name": "Traumatología y ortopedia — consulta inicial (ficha base)",
   "specialty": {
     "code": "TRAUMATOLOGIA",
     "display": "Traumatología y ortopedia"
   },
-  "version": 1,
+  "version": 2,
   "provenance": {
     "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02, examen del aparato locomotor",
     "organization": "Ministerio de Salud del Perú (MINSA)",
@@ -13,110 +13,217 @@
     "license": "Norma técnica estatal de acceso público",
     "sourceVersion": "V.02",
     "retrievedAt": "2026-08-14",
-    "note": "Estructura de anamnesis y examen locomotor del formato oficial. Las escalas funcionales de sociedades científicas quedaron fuera por licencia — ver README."
+    "note": "Estructura de anamnesis y examen locomotor del formato oficial. Las escalas funcionales de sociedades científicas quedaron fuera por licencia — ver README. v2 (2026-10-02): reorganizada en secciones (motivo, antecedentes, examen, diagnóstico presuntivo, plan); las clasificaciones con categorías finitas pasan a lista cerrada; cada sí/no que tiene detalle pregunta «¿cuál?»; el diagnóstico presuntivo abre las observaciones que ese cuadro exige registrar. Instrumentos de uso libre incorporados: clasificación de Gustilo, escala de fuerza MRC."
   },
   "fields": [
     {
+      "section": "Lesión",
       "code": "mecanismo_de_lesion",
-      "name": "Mecanismo de lesión",
+      "name": "Mecanismo de la lesión",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Lesión",
+      "code": "mecanismo_tipo",
+      "name": "Tipo de mecanismo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Caída de propia altura",
+        "Caída de altura",
+        "Accidente de tránsito",
+        "Deportivo",
+        "Sobreuso",
+        "Sin traumatismo"
+      ]
+    },
+    {
+      "section": "Lesión",
       "code": "fecha_de_la_lesion",
       "name": "Fecha de la lesión",
       "dataType": "date",
       "required": false
     },
     {
+      "section": "Lesión",
       "code": "segmento_afectado",
       "name": "Segmento afectado",
       "dataType": "string",
       "required": true
     },
     {
+      "section": "Lesión",
       "code": "lateralidad",
       "name": "Lateralidad",
       "dataType": "string",
-      "required": false
+      "required": false,
+      "options": ["Derecho", "Izquierdo", "Bilateral", "No aplica"]
     },
     {
+      "section": "Dolor y función",
       "code": "dolor_en_reposo",
       "name": "Dolor en reposo",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Dolor y función",
       "code": "intensidad_del_dolor",
-      "name": "Intensidad del dolor (0–10)",
+      "name": "Intensidad del dolor (0 a 10)",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Dolor y función",
       "code": "impotencia_funcional",
       "name": "Impotencia funcional",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Dolor y función",
       "code": "deformidad",
-      "name": "Deformidad visible",
+      "name": "Deformidad",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Dolor y función",
+      "code": "deformidad_descripcion",
+      "name": "¿Cuál? (angulación, acortamiento, rotación)",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "deformidad", "equals": true }
+    },
+    {
+      "section": "Dolor y función",
       "code": "edema_local",
       "name": "Edema local",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Dolor y función",
       "code": "equimosis",
       "name": "Equimosis",
       "dataType": "boolean",
       "required": false
     },
     {
+      "section": "Dolor y función",
+      "code": "herida",
+      "name": "Herida abierta",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Dolor y función",
+      "code": "gustilo",
+      "name": "Fractura expuesta (Gustilo)",
+      "dataType": "string",
+      "required": true,
+      "options": ["No hay fractura", "Tipo I", "Tipo II", "Tipo III"],
+      "showWhen": { "field": "herida", "equals": true }
+    },
+    {
+      "section": "Dolor y función",
+      "code": "antitetanica",
+      "name": "Vacuna antitetánica al día",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "herida", "equals": true }
+    },
+    {
+      "section": "Examen",
       "code": "rango_de_movilidad",
       "name": "Rango de movilidad",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "fuerza_muscular",
-      "name": "Fuerza muscular (0–5)",
+      "name": "Fuerza muscular (MRC 0 a 5)",
       "dataType": "integer",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "estabilidad_articular",
       "name": "Estabilidad articular",
       "dataType": "text",
       "required": false
     },
     {
-      "code": "estado_neurovascular_distal",
+      "section": "Examen",
+      "code": "neurovascular",
       "name": "Estado neurovascular distal",
+      "dataType": "string",
+      "required": true,
+      "options": ["Conservado", "Alterado"]
+    },
+    {
+      "section": "Examen",
+      "code": "neurovascular_alteracion",
+      "name": "¿Qué está alterado?",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Pulso",
+        "Relleno capilar",
+        "Sensibilidad",
+        "Movilidad",
+        "Dolor desproporcionado (síndrome compartimental)"
+      ],
+      "multiple": true,
+      "showWhen": { "field": "neurovascular", "equals": "Alterado" }
+    },
+    {
+      "section": "Examen",
+      "code": "estado_neurovascular_distal",
+      "name": "Estado neurovascular — detalle",
       "dataType": "text",
       "required": true
     },
     {
+      "section": "Examen",
       "code": "imagenes_solicitadas",
       "name": "Imágenes solicitadas",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Examen",
       "code": "hallazgos_imagenologicos",
       "name": "Hallazgos imagenológicos",
       "dataType": "text",
       "required": false
     },
     {
+      "section": "Diagnóstico presuntivo y observaciones",
+      "code": "diagnostico_presuntivo",
+      "name": "Diagnóstico presuntivo (lo que se sospecha)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Fractura",
+        "Esguince",
+        "Luxación",
+        "Lesión meniscal o ligamentaria de rodilla",
+        "Lumbalgia mecánica",
+        "Tendinopatía"
+      ],
+      "allowOther": true,
+      "description": "Si el cuadro ya está diagnosticado, el seguimiento se hace con su ficha específica de la especialidad."
+    },
+    {
+      "section": "Conducta",
       "code": "conducta",
-      "name": "Conducta",
+      "name": "Conducta (inmovilización, cirugía, rehabilitación)",
       "dataType": "text",
       "required": true
     }
-  ]
+  ],
+  "kind": "BASE"
 }

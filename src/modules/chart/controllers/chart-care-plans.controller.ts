@@ -7,9 +7,16 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
+import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { ChartCarePlansService } from '../services';
 import {
   ActivityResponseDto,
@@ -18,7 +25,13 @@ import {
   UpdateActivityDto,
 } from '../dto';
 
-/** Endpoints de planes de cuidado del chart (`/charts/care-plans`). */
+/**
+ * Endpoints de planes de cuidado del chart (`/charts/care-plans`).
+ *
+ * SEC-01: el alta lleva el guard del expediente —`patientProfileId` viaja en el
+ * cuerpo—; la actualización de una actividad no, porque su paciente sale del
+ * plan ya cargado: esa la autoriza el servicio (MCH-007).
+ */
 @ApiTags('chart-care-plans')
 @ApiBearerAuth()
 @Roles('CLINICIAN', 'PRACTITIONER')
@@ -32,7 +45,13 @@ export class ChartCarePlansController {
   constructor(private readonly carePlansService: ChartCarePlansService) {}
 
   /** UC-15-10. */
+  @Audited({
+    action: 'CARE_PLAN_CREATED',
+    entity: 'care_plan',
+    entityId: 'result.id',
+  })
   @Post()
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un plan de cuidado con actividades' })
   createCarePlan(
@@ -43,6 +62,11 @@ export class ChartCarePlansController {
   }
 
   /** UC-15-11. */
+  @Audited({
+    action: 'CARE_PLAN_ACTIVITY_UPDATED',
+    entity: 'care_plan_activity',
+    entityId: 'param:activityId',
+  })
   @Patch(':planId/activities/:activityId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Actualizar una actividad del plan de cuidado' })

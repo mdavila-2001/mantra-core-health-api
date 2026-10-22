@@ -40,7 +40,7 @@
 
 Definir un contrato de integración. Caso de uso UC-31-01: Definir contrato (DRAFT). Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -52,10 +52,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -149,7 +149,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Configurar perfil de autenticación sender-constrained. Caso de uso UC-31-03: Configurar perfil de autenticación (ACTIVE). Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -161,11 +161,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:104` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:104` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -264,7 +264,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Rotar las credenciales de un perfil de autenticación. Caso de uso UC-31-11: Rotar credenciales del perfil. Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -276,11 +276,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, apId | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:118` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -368,7 +368,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Ejecutar un intercambio idempotente (inbound). Caso de uso UC-31-05: Intercambio idempotente inbound (replay por clave). Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -380,11 +380,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:145` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:145` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -489,7 +489,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Registrar un intento de intercambio outbound. Caso de uso UC-31-06: Registrar intento outbound. Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -501,11 +501,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:163` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, recordId | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:163` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -612,7 +612,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Retirar el contrato (soft-delete lógico). Caso de uso UC-31-11: Retirar contrato (soft-delete lógico). Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -624,11 +624,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:189` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:189` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -714,7 +714,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Avanzar el cursor de sincronización. Caso de uso UC-31-08: Avanzar cursor de sincronización (monótono). Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -726,11 +726,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:176` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:176` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -824,7 +824,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Publicar una nueva versión de contrato. Caso de uso UC-31-02: Publicar versión (max+1, DRAFT). Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -836,11 +836,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:77` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -937,7 +937,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Activar una versión y transicionar el estado del contrato. Caso de uso UC-31-10: Activar versión y transicionar estado. Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -949,11 +949,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, versionId | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:89` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1038,7 +1038,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Suscribir un webhook al contrato. Caso de uso UC-31-04: Suscribir webhook (contrato ACTIVE). Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -1050,11 +1050,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:133` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integration_contracts/controllers/integration-contracts.controller.ts:133` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1152,7 +1152,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Reintentar un intercambio fallido. Caso de uso UC-31-07: Reintentar intercambio fallido. Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -1164,11 +1164,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: recordId | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:46` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1263,7 +1263,7 @@ El árbol de decisión completo está en [flujos](../flujos/integration_contract
 
 Entregar y verificar un webhook firmado. Caso de uso UC-31-09: Entregar y verificar webhook firmado. Dentro del módulo (descripción del modelo, en inglés): «Supports ministries, government data centers, insurers, pharmacies, diagnostic units and other external systems through versioned contracts, sender-constrained authentication, idempotency and complete exchange evidence.» Dominio: Integraciones y Contratos.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integration_contracts/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_31_integration_contracts.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:33`)
 
 ### Cómo se atiende (sistema)
 
@@ -1275,11 +1275,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: subscriptionId | `src/modules/integration_contracts/controllers/integration-exchanges.controller.ts:58` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1345,7 +1345,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/integra
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Suscripción de webhook no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suscripción no está ACTIVE; PreconditionFailedException: La suscripción aún no es válida; PreconditionFailedException: La suscripción ya expiró; PreconditionFailedException: No hay versión ACTIVE del contrato para entregar; PreconditionFailedException: La suscripción no tiene callbackUri para entregar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suscripción no está ACTIVE; PreconditionFailedException: La suscripción aún no es válida; PreconditionFailedException: La suscripción ya expiró; PreconditionFailedException: No hay versión ACTIVE del contrato para entregar; PreconditionFailedException: La suscripción no tiene callbackUri para entregar; PreconditionFailedException: El cuerpo del despacho excede el tamaño permitido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/integration_contracts.md).

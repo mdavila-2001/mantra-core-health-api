@@ -3,8 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPT_DEFS,
   CONCEPTS,
   ConflictException,
+  decodeKeysetCursor,
+  encodeKeysetCursor,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
@@ -25,6 +28,10 @@ import {
   EarnPointsDto,
   RedeemPointsDto,
   PointsLedgerResponseDto,
+  MyLoyaltyResponseDto,
+  MyLoyaltyMembershipDto,
+  MyPointsLedgerQueryDto,
+  MyPointsLedgerPageResponseDto,
   RecomputeBalanceResponseDto,
   ExpirePointsDto,
   ExpirePointsResponseDto,
@@ -87,6 +94,41 @@ const QUALIFYING_EVENT_CONCEPT: Readonly<Record<QualifyingEvent, string>> = {
   FIRST_BOOKING: CONCEPTS.QUALIFY_FIRST_BOOKING,
   FIRST_PAYMENT: CONCEPTS.QUALIFY_FIRST_PAYMENT,
 };
+
+/**
+ * Cuantos programas activos del tenant se consideran al buscar la membresia del
+ * paciente. El portal no conoce ids de programa: se busca entre los activos.
+ */
+const PROGRAMS_PORTAL = 20;
+
+/** Movimientos por pagina cuando el cliente no pide un tope. */
+const MOVEMENTS_PER_PAGE = 20;
+
+/**
+ * Codigo legible de los conceptos del ledger de puntos.
+ *
+ * Se publica el `code` del propio catalogo -nunca el uuid, que es interno- y
+ * solo para los conceptos que el dominio de puntos declara. Un concepto ajeno
+ * no se traduce: se omite, que es mas honesto que inventarle un nombre.
+ */
+const CONCEPT_CODE: Readonly<Record<string, string>> = Object.freeze(
+  Object.fromEntries(
+    (
+      [
+        'POINTS_EARN',
+        'POINTS_REDEEM',
+        'POINTS_EXPIRE',
+        'POINTS_ADJUST',
+        'REASON_SIGNUP',
+        'REASON_EVENT',
+        'REASON_REDEMPTION',
+        'REASON_EXPIRY',
+        'REASON_REFERRAL',
+        'REASON_MANUAL',
+      ] as const
+    ).map((name) => [CONCEPTS[name], CONCEPT_DEFS[name].code]),
+  ),
+);
 
 const DEFAULT_SWEEP_BATCH = 100;
 const REFERRAL_CODE_BYTES = 6;
@@ -1244,6 +1286,262 @@ export class PromotionsLoyaltyService {
   }
 
   /** Los puntos se transportan como cadena decimal con 2 decimales. */
+  /* ─── Autoservicio del paciente (R-T-E6B1) ───────────────────────────── */
+
+  /**
+   * Mi membresía y mi saldo.
+   *
+   * El titular sale del token (`patientProfileId`, claim `pid`): no hay
+   * parámetro de miembro que alguien pueda cambiar. No estar inscrito devuelve
+   * `enrolled: false` con 200, porque es un estado normal del portal y no un
+   * error — y no se fabrica una membresía para rellenar la pantalla.
+   */
+  async myLoyalty(
+    actor: AuthenticatedUser,
+    tenantId: string,
+  ): Promise<MyLoyaltyResponseDto> {
+    const memberRefId = this.requireOwnPatientProfileId(actor);
+    this.logger.info(
+      { operation: 'promotions.loyalty.me.read', tenantId },
+      'Leyendo la membresía de lealtad del titular',
+    );
+
+    const own = await this.findOwnMembership(this.em, tenantId, memberRefId);
+    if (!own) {
+      return { enrolled: false };
+    }
+
+    const tiers = await this.loyaltyRepo.findTiersByProgram(
+      this.em,
+      own.membership.loyaltyProgramId,
+    );
+    const tier = tiers.find(
+      (candidate) => candidate.id === own.membership.currentTierId,
+    );
+
+    const membership: MyLoyaltyMembershipDto = {
+      membershipId: own.membership.id,
+      programName: own.programName,
+      ...(own.pointsCurrencyName
+        ? { pointsCurrencyName: own.pointsCurrencyName }
+        : {}),
+      pointsBalance: own.membership.pointsBalance ?? '0',
+      lifetimePoints: own.membership.lifetimePoints ?? '0',
+      ...(tier
+        ? {
+            tier: {
+              code: tier.code,
+              name: tier.name,
+              ...(tier.multiplier ? { multiplier: tier.multiplier } : {}),
+              minPoints: tier.minPoints,
+            },
+          }
+        : {}),
+      ...(own.membership.enrolledAt
+        ? { enrolledAt: own.membership.enrolledAt }
+        : {}),
+      active: own.membership.statusConceptId === CONCEPTS.MEMBERSHIP_ACTIVE,
+    };
+
+    return { enrolled: true, membership };
+  }
+
+  /**
+   * Mis movimientos, más nuevos primero y paginados por cursor.
+   *
+   * El cursor es el keyset canónico del repo (`(recorded_at, id)` en
+   * base64url): opaco para el cliente y con orden estable. Nunca se devuelve el
+   * ledger completo — el tope máximo lo impone el DTO.
+   */
+  async myPointsLedger(
+    actor: AuthenticatedUser,
+    tenantId: string,
+    query: MyPointsLedgerQueryDto,
+  ): Promise<MyPointsLedgerPageResponseDto> {
+    const memberRefId = this.requireOwnPatientProfileId(actor);
+    const limit = query.limit ?? MOVEMENTS_PER_PAGE;
+    this.logger.info(
+      { operation: 'promotions.loyalty.me.ledger', tenantId, limit },
+      'Leyendo los movimientos de puntos del titular',
+    );
+
+    const own = await this.findOwnMembership(this.em, tenantId, memberRefId);
+    if (!own) {
+      // Sin membresía no hay movimientos. Es el mismo vacío honesto del saldo.
+      return { entries: [] };
+    }
+
+    const after = query.cursor
+      ? this.decodeLedgerCursor(query.cursor)
+      : undefined;
+
+    // Una fila de más para saber si hay página siguiente sin pagar un `count`,
+    // igual que el resto de las lecturas del producto.
+    const rows = await this.loyaltyRepo.findLedgerPageByMembership(
+      this.em,
+      own.membership.id,
+      limit + 1,
+      after,
+    );
+    const hasMore = rows.length > limit;
+    const page = hasMore ? rows.slice(0, limit) : rows;
+    const last = page.at(-1);
+
+    return {
+      entries: page.map((entry) => this.myLedgerEntry(entry)),
+      ...(hasMore && last
+        ? {
+            nextCursor: encodeKeysetCursor({
+              recordedAt: last.recordedAt.toISOString(),
+              id: last.id,
+            }),
+          }
+        : {}),
+    };
+  }
+
+  /**
+   * Canjear mis propios puntos.
+   *
+   * Reutiliza {@link redeemPoints} —saldo nunca negativo, idempotencia, ledger
+   * append-only— con la membresía **derivada del token**. El paciente no elige
+   * sobre qué membresía opera.
+   *
+   * La comprobación de la clave de idempotencia es de aislamiento, no de
+   * concurrencia: sin ella, repetir una clave que pertenece a otra persona
+   * devolvería su entrada de ledger y su saldo. El candado real de la
+   * idempotencia sigue dentro de la transacción de `redeemPoints`.
+   */
+  async redeemOwnPoints(
+    actor: AuthenticatedUser,
+    tenantId: string,
+    dto: RedeemPointsDto,
+  ): Promise<PointsLedgerResponseDto> {
+    const memberRefId = this.requireOwnPatientProfileId(actor);
+    const own = await this.findOwnMembership(this.em, tenantId, memberRefId);
+    if (!own) {
+      throw new PreconditionFailedException(
+        'No tiene una membresía de lealtad en este programa',
+      );
+    }
+
+    const previous = await this.loyaltyRepo.findLedgerEntryByKey(
+      this.em,
+      dto.idempotencyKey,
+    );
+    if (previous && previous.loyaltyMembershipId !== own.membership.id) {
+      throw new ConflictException(
+        'La clave de idempotencia pertenece a otro canje',
+        { idempotencyKey: dto.idempotencyKey },
+      );
+    }
+
+    return this.redeemPoints(own.membership.id, dto, actor);
+  }
+
+  /**
+   * El perfil de paciente del actor.
+   *
+   * Sale del token y de ningún otro lugar. Una cuenta sin perfil de paciente no
+   * puede tener membresía de paciente: es una precondición, no un 403.
+   */
+  private requireOwnPatientProfileId(actor: AuthenticatedUser): string {
+    const patientProfileId = actor.patientProfileId;
+    if (!patientProfileId) {
+      throw new PreconditionFailedException(
+        'La cuenta no tiene perfil de paciente',
+      );
+    }
+    return patientProfileId;
+  }
+
+  /**
+   * La membresía del titular entre los programas activos del tenant.
+   *
+   * El portal no conoce ids de programa, así que se busca entre los activos del
+   * tenant del contexto. Con más de una membresía se toma la más antigua, que
+   * es el orden que devuelve el repositorio; hoy el producto tiene un programa
+   * por tenant y, si eso cambia, **elegir cuál es decisión de producto**, no de
+   * este servicio.
+   */
+  private async findOwnMembership(
+    em: EntityManager,
+    tenantId: string,
+    memberRefId: string,
+  ): Promise<{
+    membership: LoyaltyMemberships;
+    programName: string;
+    pointsCurrencyName?: string;
+  } | null> {
+    const programs = await this.loyaltyRepo.findActivePrograms(
+      em,
+      CONCEPTS.LOYALTY_ACTIVE,
+      PROGRAMS_PORTAL,
+      tenantId,
+    );
+    if (programs.length === 0) {
+      return null;
+    }
+
+    const memberships = await this.loyaltyRepo.findMembershipsByMemberRef(
+      em,
+      programs.map((program) => program.id),
+      CONCEPTS.REWARD_MEMBER_PATIENT,
+      memberRefId,
+    );
+    const membership = memberships[0];
+    if (!membership) {
+      return null;
+    }
+
+    const program = programs.find(
+      (candidate) => candidate.id === membership.loyaltyProgramId,
+    );
+    return {
+      membership,
+      programName: program?.name ?? '',
+      ...(program?.pointsCurrencyName
+        ? { pointsCurrencyName: program.pointsCurrencyName }
+        : {}),
+    };
+  }
+
+  /** Una entrada del ledger, con los conceptos dichos por su código. */
+  private myLedgerEntry(entry: PointsLedgerEntries) {
+    const direction = CONCEPT_CODE[entry.directionConceptId];
+    const reason = CONCEPT_CODE[entry.reasonConceptId];
+    return {
+      entryId: entry.id,
+      ...(direction ? { direction } : {}),
+      points: entry.points,
+      ...(reason ? { reason } : {}),
+      ...(entry.balanceAfter ? { balanceAfter: entry.balanceAfter } : {}),
+      ...(entry.expiresAt ? { expiresAt: entry.expiresAt } : {}),
+      occurredAt: entry.occurredAt ?? entry.recordedAt,
+    };
+  }
+
+  /**
+   * El cursor de la página siguiente, ya validado.
+   *
+   * `decodeKeysetCursor` rechaza con 400 lo que no sea un objeto plano de
+   * escalares; acá se comprueba además que traiga las dos claves por las que se
+   * ordena, porque un cursor a medias produciría una ventana arbitraria.
+   */
+  private decodeLedgerCursor(cursor: string): { recordedAt: Date; id: string } {
+    const key = decodeKeysetCursor(cursor);
+    const recordedAt = key['recordedAt'];
+    const id = key['id'];
+    if (typeof recordedAt !== 'string' || typeof id !== 'string') {
+      throw new PreconditionFailedException('Cursor de movimientos inválido');
+    }
+    const date = new Date(recordedAt);
+    if (Number.isNaN(date.getTime())) {
+      throw new PreconditionFailedException('Cursor de movimientos inválido');
+    }
+    return { recordedAt: date, id };
+  }
+
   private round(value: number): string {
     return value.toFixed(2);
   }

@@ -168,6 +168,33 @@ export class CallbackResultDto {
    */
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
+
+  /**
+   * Si el evento cambió el estado local. Un callback fuera de orden o
+   * contradictorio se acusa recibo sin aplicarse (MCH-011).
+   */
+  @ApiProperty({
+    description: 'true si el evento cambió el estado local de la transacción',
+  })
+  applied!: boolean;
+
+  /**
+   * Decisión de la máquina de estados sobre el evento.
+   */
+  @ApiProperty({
+    description: 'Cómo se interpretó el evento frente al estado ya conocido',
+    enum: ['aplicar', 'duplicado', 'obsoleto', 'contradiccion'],
+  })
+  decision!: string;
+
+  /**
+   * Valor de reconciliation required mantenido por la instancia.
+   */
+  @ApiProperty({
+    description:
+      'true si el proveedor afirmó algo incompatible con un estado terminal y hace falta conciliar',
+  })
+  reconciliationRequired!: boolean;
 }
 
 /** Cuerpo de `POST /payments/transactions/{id}/refunds` (UC-42-08). */

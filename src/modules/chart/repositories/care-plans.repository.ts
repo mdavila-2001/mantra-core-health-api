@@ -18,6 +18,10 @@ export interface CreateCarePlanData {
    */
   encounterId?: string;
   /**
+   * P43: instancia de formulario de origen (ya validada por el servicio).
+   */
+  formInstanceId?: string;
+  /**
    * Identificador asociado a status concept.
    */
   statusConceptId: string;
@@ -113,6 +117,43 @@ export class CarePlansRepository {
   }
 
   /**
+   * Planes de cuidados de un encuentro, con sus actividades (para el sello y
+   * el PDF oficial del cierre: el hash tiene que ser determinista).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param encounterId - Encuentro cuyos planes se leen.
+   * @returns Planes ordenados por `createdAt, id`, con `activities` resuelto.
+   */
+  async findByEncounter(
+    em: EntityManager,
+    encounterId: string,
+  ): Promise<Array<CarePlans & { activities: CarePlanActivities[] }>> {
+    const plans = await em.find(
+      CarePlans,
+      { encounterId },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
+    );
+    if (plans.length === 0) return [];
+
+    const activities = await this.findActivitiesForPlans(
+      em,
+      plans.map((plan) => plan.id),
+    );
+    const activitiesByPlan = new Map<string, CarePlanActivities[]>();
+    for (const activity of activities) {
+      const list = activitiesByPlan.get(activity.carePlanId) ?? [];
+      list.push(activity);
+      activitiesByPlan.set(activity.carePlanId, list);
+    }
+
+    return plans.map((plan) =>
+      Object.assign(plan, {
+        activities: activitiesByPlan.get(plan.id) ?? [],
+      }),
+    );
+  }
+
+  /**
    * Actividades de varios planes a la vez.
    *
    * El expediente pinta las actividades de cada plan: resolverlas plan a plan
@@ -172,6 +213,7 @@ export class CarePlansRepository {
         patientProfileId: data.patientProfileId,
         conditionId: data.conditionId,
         encounterId: data.encounterId,
+        formInstanceId: data.formInstanceId,
         statusConceptId: data.statusConceptId,
         intentConceptId: data.intentConceptId,
         goalText: data.goalText,

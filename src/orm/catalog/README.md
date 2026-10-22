@@ -81,3 +81,10 @@ yarn orm:catalog     # borra y reescribe indexes/ y foreign-keys/ y schemas.cata
 
 Los archivos escritos a mano (`catalog.types.ts`, `extensions.catalog.ts`,
 `types.catalog.ts`, `physical.catalog.ts`) **no** se tocan al regenerar.
+
+## Verificación y límite conocido
+
+Ejecutar `corepack yarn test --runInBand --silent src/orm`. El catálogo no aplica
+DDL por sí solo; la materialización requiere PostgreSQL descartable. El enum
+`technical_data_type` sigue provisional; el plan de cierre está en el
+[informe de revisión](../../../docs/revision-backend-2026-10-04/nucleo/orm-catalogo.md).

@@ -13,13 +13,13 @@
 | [identity_assertions](#identity_assertions) | Registra afirmaciones de identidad verificadas para que otros procesos puedan consumir evidencia confiable de atributos. | 14 | 7 | 6 | COINCIDE |
 | [identity_authorities](#identity_authorities) | Cataloga autoridades que emiten identidades o credenciales usadas para verificar personas en procesos médicos. | 14 | 10 | 2 | COINCIDE |
 | [identity_authority_endpoints](#identity_authority_endpoints) | Registra endpoints de autoridades de identidad para consultar o verificar atributos con fuentes autorizadas. | 13 | 7 | 4 | COINCIDE |
-| [identity_check_results](#identity_check_results) | Conserva resultados de controles de identidad para explicar qué validaciones fueron satisfactorias o fallidas. | 11 | 4 | 6 | COINCIDE |
-| [identity_checks](#identity_checks) | Representa verificaciones individuales ejecutadas dentro de un caso de identidad. | 12 | 6 | 19 | COINCIDE |
-| [identity_evidence_records](#identity_evidence_records) | Cataloga evidencia presentada o consultada durante verificaciones para fundamentar sus resultados. | 14 | 8 | 5 | COINCIDE |
+| [identity_check_results](#identity_check_results) | Conserva resultados de controles de identidad para explicar qué validaciones fueron satisfactorias o fallidas. | 11 | 4 | 8 | COINCIDE |
+| [identity_checks](#identity_checks) | Representa verificaciones individuales ejecutadas dentro de un caso de identidad. | 12 | 6 | 21 | COINCIDE |
+| [identity_evidence_records](#identity_evidence_records) | Cataloga evidencia presentada o consultada durante verificaciones para fundamentar sus resultados. | 14 | 8 | 15 | COINCIDE |
 | [identity_fraud_signals](#identity_fraud_signals) | Documenta señales de posible fraude de identidad para apoyar revisión de riesgo y protección de cuentas. | 11 | 6 | 4 | COINCIDE |
-| [identity_manual_review_cases](#identity_manual_review_cases) | Encola casos que requieren revisión humana cuando la verificación automática no resuelve la identidad con suficiente certeza. | 14 | 7 | 4 | COINCIDE |
-| [identity_verification_attempts](#identity_verification_attempts) | Registra intentos de verificación para conservar métodos, tiempos y resultados parciales del proceso. | 13 | 7 | 10 | COINCIDE |
-| [identity_verification_cases](#identity_verification_cases) | Agrupa procesos de verificación de identidad para seguir su estado, sujeto y resultado. | 16 | 6 | 27 | COINCIDE |
+| [identity_manual_review_cases](#identity_manual_review_cases) | Encola casos que requieren revisión humana cuando la verificación automática no resuelve la identidad con suficiente certeza. | 14 | 7 | 6 | COINCIDE |
+| [identity_verification_attempts](#identity_verification_attempts) | Registra intentos de verificación para conservar métodos, tiempos y resultados parciales del proceso. | 13 | 7 | 13 | COINCIDE |
+| [identity_verification_cases](#identity_verification_cases) | Agrupa procesos de verificación de identidad para seguir su estado, sujeto y resultado. | 16 | 6 | 34 | COINCIDE |
 | [identity_verification_policies](#identity_verification_policies) | Define políticas que determinan requisitos y métodos de verificación de identidad para personas usuarias o pacientes. | 15 | 8 | 2 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -400,7 +400,7 @@ Conserva resultados de controles de identidad para explicar qué validaciones fu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_check_results`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityCheckResults` — `src/modules/identity_assurance/entities/identity_check_results.entity.ts`
-- **Resumen:** 11 columnas · 4 índices · 4 FK salientes · 1 entrantes · 6 operaciones
+- **Resumen:** 11 columnas · 4 índices · 4 FK salientes · 1 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -445,6 +445,8 @@ Conserva resultados de controles de identidad para explicar qué validaciones fu
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
 | POST /identity/manual-review/{id}/decision | CREA | DIRECTA |
 | POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| GET /identity/me/verification-cases | LEE | DIRECTA |
+| GET /identity/me/verification-cases/{caseId} | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | CREA | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 
@@ -471,7 +473,7 @@ Representa verificaciones individuales ejecutadas dentro de un caso de identidad
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_checks`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityChecks` — `src/modules/identity_assurance/entities/identity_checks.entity.ts`
-- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 1 entrantes · 19 operaciones
+- **Resumen:** 12 columnas · 6 índices · 6 FK salientes · 1 entrantes · 21 operaciones
 
 #### Columnas
 
@@ -527,6 +529,8 @@ Representa verificaciones individuales ejecutadas dentro de un caso de identidad
 | POST /identity/me/practitioner/identity-verification | CREA | DIRECTA |
 | POST /identity/me/practitioner/license-verification | CREA | DIRECTA |
 | POST /identity/me/tenants/{tenantId}/verification | CREA | DIRECTA |
+| GET /identity/me/verification-cases | LEE | DIRECTA |
+| GET /identity/me/verification-cases/{caseId} | LEE | DIRECTA |
 | POST /identity/verification-cases/{id}/assertions | LEE | DIRECTA |
 | POST /identity/verification-cases/{id}/checks:plan | CREA | DIRECTA |
 | POST /identity/verification-cases/expire-sweep | ACTUALIZA | POR_TIPO |
@@ -560,7 +564,7 @@ Cataloga evidencia presentada o consultada durante verificaciones para fundament
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_evidence_records`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityEvidenceRecords` — `src/modules/identity_assurance/entities/identity_evidence_records.entity.ts`
-- **Resumen:** 14 columnas · 8 índices · 8 FK salientes · 0 entrantes · 5 operaciones
+- **Resumen:** 14 columnas · 8 índices · 8 FK salientes · 0 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -598,8 +602,8 @@ Cataloga evidencia presentada o consultada durante verificaciones para fundament
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_identity_evidence_records_identity_verification_case_id` | no | identity_verification_case_id | Soporta la clave foránea fk_identity_evidence_records_identity_verification_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_identity_evidence_records_evidence_type_concept_id` | no | evidence_type_concept_id | Soporta la clave foránea fk_identity_evidence_records_evidence_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_identity_evidence_records_identity_verification_case_id` | no | identity_verification_case_id | Soporta la clave foránea fk_identity_evidence_records_identity_verification_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «identity_verification_case_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_identity_evidence_records_evidence_type_concept_id` | no | evidence_type_concept_id | Soporta la clave foránea fk_identity_evidence_records_evidence_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «evidence_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_identity_evidence_records_issuer_authority_id` | no | issuer_authority_id | Soporta la clave foránea fk_identity_evidence_records_issuer_authority_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_identity_evidence_records_evidence_file_id` | no | evidence_file_id | Soporta la clave foránea fk_identity_evidence_records_evidence_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_identity_evidence_records_evidence_quality_concept_id` | no | evidence_quality_concept_id | Soporta la clave foránea fk_identity_evidence_records_evidence_quality_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -615,7 +619,17 @@ Cataloga evidencia presentada o consultada durante verificaciones para fundament
 | POST /identity/me/practitioner/identity-verification | CREA | DIRECTA |
 | POST /identity/me/practitioner/license-verification | CREA | DIRECTA |
 | POST /identity/me/tenants/{tenantId}/verification | CREA | DIRECTA |
+| GET /identity/me/verification-cases | LEE | DIRECTA |
+| GET /identity/me/verification-cases/{caseId} | LEE | DIRECTA |
+| GET /identity/verification-cases/{id} | LEE | DIRECTA |
 | POST /identity/verification-cases/{id}/evidence | CREA | DIRECTA |
+| POST /internal/identity/evidence/lifecycle-scan | BORRA | POR_SQL |
+| POST /internal/identity/evidence/lifecycle-scan | ACTUALIZA | POR_SQL |
+| POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
+| POST /internal/identity/evidence/storage-purge-review | LEE | POR_SQL |
+| POST /internal/governance/retention-executions/run | BORRA | POR_SQL |
+| POST /internal/governance/retention-executions/run | ACTUALIZA | POR_SQL |
+| POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -711,7 +725,7 @@ Encola casos que requieren revisión humana cuando la verificación automática 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_manual_review_cases`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityManualReviewCases` — `src/modules/identity_assurance/entities/identity_manual_review_cases.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -748,7 +762,7 @@ Encola casos que requieren revisión humana cuando la verificación automática 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_identity_manual_review_cases_identity_verification_case_id` | no | identity_verification_case_id | Soporta la clave foránea fk_identity_manual_review_cases_identity_verification_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «identity_verification_case_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_identity_manual_review_cases_identity_verification_case_id` | no | identity_verification_case_id | Soporta la clave foránea fk_identity_manual_review_cases_identity_verification_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «identity_verification_case_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_identity_manual_review_cases_review_reason_concept_id` | no | review_reason_concept_id | Soporta la clave foránea fk_identity_manual_review_cases_review_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_identity_manual_review_cases_assigned_to_user_id` | no | assigned_to_user_id | Soporta la clave foránea fk_identity_manual_review_cases_assigned_to_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_identity_manual_review_cases_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_identity_manual_review_cases_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
@@ -762,6 +776,8 @@ Encola casos que requieren revisión humana cuando la verificación automática 
 |---|---|---|
 | POST /identity/manual-review/{id}/decision | ACTUALIZA | POR_TIPO |
 | POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| GET /identity/me/verification-cases | LEE | DIRECTA |
+| GET /identity/me/verification-cases/{caseId} | LEE | DIRECTA |
 | POST /identity/verification-cases/{id}/manual-review | CREA | DIRECTA |
 | POST /identity/verification-cases/{id}/manual-review | LEE | DIRECTA |
 
@@ -788,7 +804,7 @@ Registra intentos de verificación para conservar métodos, tiempos y resultados
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_verification_attempts`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityVerificationAttempts` — `src/modules/identity_assurance/entities/identity_verification_attempts.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 0 entrantes · 10 operaciones
+- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 0 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -851,6 +867,9 @@ Registra intentos de verificación para conservar métodos, tiempos y resultados
 | POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /internal/identity/checks/dispatchable | LEE | DIRECTA |
+| POST /internal/identity/evidence/lifecycle-scan | LEE | POR_SQL |
+| POST /internal/identity/evidence/storage-purge-review | LEE | POR_SQL |
+| POST /internal/governance/retention-executions/run | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -875,7 +894,7 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_verification_cases`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityVerificationCases` — `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts`
-- **Resumen:** 16 columnas · 6 índices · 6 FK salientes · 7 entrantes · 27 operaciones
+- **Resumen:** 16 columnas · 6 índices · 6 FK salientes · 7 entrantes · 34 operaciones
 
 #### Columnas
 
@@ -920,10 +939,10 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_identity_verification_cases_subject_type_concept_id` | no | subject_type_concept_id | Soporta la clave foránea fk_identity_verification_cases_subject_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «subject_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_identity_verification_cases_subject_type_concept_id` | no | subject_type_concept_id | Soporta la clave foránea fk_identity_verification_cases_subject_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «subject_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_identity_verification_cases_identity_verification_policy_id` | no | identity_verification_policy_id | Soporta la clave foránea fk_identity_verification_cases_identity_verification_policy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_identity_verification_cases_requested_assurance_lev_ebd923e4` | no | requested_assurance_level_concept_id | Soporta la clave foránea fk_identity_verification_cases_requested_assurance_lev_ee8e6b18: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_identity_verification_cases_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_identity_verification_cases_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_identity_verification_cases_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_identity_verification_cases_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_identity_verification_cases_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_identity_verification_cases_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_identity_verification_cases_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_identity_verification_cases_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -947,8 +966,10 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 | POST /identity/me/tenants/{tenantId}/verification | LEE | DIRECTA |
 | GET /identity/me/verification-cases | LEE | DIRECTA |
 | GET /identity/me/verification-cases/{caseId} | LEE | DIRECTA |
+| GET /identity/me/verification-types | LEE | DIRECTA |
 | GET /identity/verification-cases | LEE | DIRECTA |
 | POST /identity/verification-cases | CREA | DIRECTA |
+| GET /identity/verification-cases/{id} | LEE | DIRECTA |
 | POST /identity/verification-cases/{id}/assertions | LEE | DIRECTA |
 | POST /identity/verification-cases/{id}/checks:plan | LEE | DIRECTA |
 | POST /identity/verification-cases/{id}/evidence | LEE | DIRECTA |
@@ -958,6 +979,11 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 | POST /identity/verification-cases/expire-sweep | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
+| POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
+| POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
+| DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
+| PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
+| POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 
 #### Gobierno
 

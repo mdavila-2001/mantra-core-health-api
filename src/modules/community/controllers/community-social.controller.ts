@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -10,7 +11,9 @@ import {
   Post,
   Put,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
@@ -20,6 +23,7 @@ import {
 } from '../../../common';
 import {
   CommunitySocialService,
+  CommunityChatAutoReplyService,
   CommunitySocialReadService,
 } from '../services';
 import {
@@ -35,7 +39,9 @@ import {
   CommentResponseDto,
   ReactionResponseDto,
   IdResponseDto,
+  ChatAutoReplyDto,
   PublicProfileDetailDto,
+  UpsertChatAutoReplyDto,
   PostPageDto,
   PostDetailDto,
   CommentThreadPageDto,
@@ -68,10 +74,12 @@ export class CommunitySocialController {
    *
    * @param service - Escrituras del grafo social.
    * @param readService - Lecturas del grafo social.
+   * @param autoReplyService - La respuesta automática por inactividad (F4.7).
    */
   constructor(
     private readonly service: CommunitySocialService,
     private readonly readService: CommunitySocialReadService,
+    private readonly autoReplyService: CommunityChatAutoReplyService,
   ) {}
 
   /** Bootstrap: crea el perfil público (nodo raíz social). */
@@ -276,6 +284,42 @@ export class CommunitySocialController {
     return this.readService.getProfileBySlug(slug, actor);
   }
 
+  /**
+   * F4.7 · La respuesta automática por inactividad de un perfil.
+   *
+   * **Va declarada antes que `profiles/:profileId`**, por el mismo motivo que
+   * `by-slug`: el router prueba en orden.
+   *
+   * `null` cuando nunca se configuró — que no es lo mismo que estar apagada, y
+   * la pantalla los dibuja distinto.
+   */
+  @Get('profiles/:profileId/auto-reply')
+  @ApiOperation({ summary: 'Respuesta automática por inactividad del perfil' })
+  getAutoReply(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ChatAutoReplyDto | null> {
+    return this.autoReplyService.get(profileId, actor);
+  }
+
+  /**
+   * F4.7 · Configura la respuesta automática del perfil.
+   *
+   * `PUT` y no `PATCH`: hay **una sola fila por perfil** y se manda entera, así
+   * que quien configura no tiene que saber si ya existía. Sólo el titular del
+   * perfil — lo comprueba el servicio, que es donde hay base para comprobarlo.
+   */
+  @Put('profiles/:profileId/auto-reply')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Configurar la respuesta automática del perfil' })
+  upsertAutoReply(
+    @Param('profileId', ParseUUIDPipe) profileId: string,
+    @Body() dto: UpsertChatAutoReplyDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ChatAutoReplyDto> {
+    return this.autoReplyService.upsert(profileId, dto, actor);
+  }
+
   /** Ficha del perfil, con sellos de verificación y prestigio. */
   @Get('profiles/:profileId')
   @ApiOperation({ summary: 'Ficha de un perfil público' })
@@ -329,6 +373,35 @@ export class CommunitySocialController {
       cursor,
       limit: limit ?? DEFAULT_PAGE_LIMIT,
     });
+  }
+
+  /**
+   * FND-01: el contenido de un adjunto de comentario, para quien tiene sesión
+   * y puede ver el post del que cuelga — no sólo para quien lo subió.
+   *
+   * Declarada con un segmento fijo (`media`) antes que nada bajo `comments/`
+   * capture `:id`: hoy no hay otra ruta `comments/:algo` en este controlador,
+   * pero es la misma cautela que ya deja escrita `listLinks` en
+   * `CommonFilesController` para `links` contra `:id/content`.
+   */
+  @Get('comments/media/:fileId/content')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar el adjunto de un comentario (imagen, sticker o GIF)',
+  })
+  async getCommentMediaContent(
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @Res() res: Response,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Query('actorProfileId') actorProfileId?: string,
+  ): Promise<void> {
+    const content = await this.readService.getCommentMedia(
+      fileId,
+      actor,
+      actorProfileId,
+    );
+    res.setHeader('Content-Type', content.mimeType);
+    res.send(content.buffer);
   }
 
   /** Resumen de reacciones de una publicación. */

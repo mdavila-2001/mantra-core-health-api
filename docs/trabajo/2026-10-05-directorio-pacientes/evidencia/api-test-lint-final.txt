@@ -1,0 +1,68 @@
+
+C:\Alovida\mantra-core-health-api\src\common\seed\audio-assets-seed.service.ts
+  160:18  error  Insert `⏎·····`  prettier/prettier
+  183:18  error  Insert `⏎·····`  prettier/prettier
+
+C:\Alovida\mantra-core-health-api\src\modules\insurance\services\claims.service.ts
+  140:14  error  Replace `·inventoryReservationId:·dto.inventoryReservationId,·serviceRequestId:·dto.serviceRequestId` with `⏎··············inventoryReservationId:·dto.inventoryReservationId,⏎··············serviceRequestId:·dto.serviceRequestId,⏎···········`  prettier/prettier
+  163:14  error  Replace `·coverageId:·dto.patientCoverageId,·carrierId:·dto.insuranceCarrierId` with `⏎··············coverageId:·dto.patientCoverageId,⏎··············carrierId:·dto.insuranceCarrierId,⏎···········`                                              prettier/prettier
+
+C:\Alovida\mantra-core-health-api\src\modules\scheduling\services\scheduling-bookings.service.ts
+   465:45  error  Replace `'Slot·no·encontrado',` with `⏎··········'Slot·no·encontrado',⏎·········`                                  prettier/prettier
+   470:47  error  Replace `'El·slot·está·bloqueado',` with `⏎··········'El·slot·está·bloqueado',⏎·········`                          prettier/prettier
+   471:1   error  Insert `··`                                                                                                        prettier/prettier
+   472:1   error  Insert `··`                                                                                                        prettier/prettier
+   477:37  error  Replace `'El·slot·no·tiene·cupos·disponibles',` with `⏎··········'El·slot·no·tiene·cupos·disponibles',⏎·········`  prettier/prettier
+   478:1   error  Insert `··`                                                                                                        prettier/prettier
+   479:1   error  Insert `··`                                                                                                        prettier/prettier
+   768:37  error  Replace `'La·reserva·temporal·expiró',` with `⏎··········'La·reserva·temporal·expiró',⏎·········`                  prettier/prettier
+   769:1   error  Insert `··`                                                                                                        prettier/prettier
+   770:1   error  Insert `··`                                                                                                        prettier/prettier
+   780:45  error  Replace `'Slot·no·encontrado',` with `⏎··········'Slot·no·encontrado',⏎·········`                                  prettier/prettier
+   781:1   error  Insert `··`                                                                                                        prettier/prettier
+   782:1   error  Insert `··`                                                                                                        prettier/prettier
+   791:47  error  Replace `'Ese·horario·ya·pasó.',` with `⏎··········'Ese·horario·ya·pasó.',⏎·········`                              prettier/prettier
+   792:1   error  Insert `··`                                                                                                        prettier/prettier
+   793:1   error  Insert `··`                                                                                                        prettier/prettier
+   794:1   error  Insert `··`                                                                                                        prettier/prettier
+  1415:45  error  Replace `'Cita·no·encontrada',` with `⏎··········'Cita·no·encontrada',⏎·········`                                  prettier/prettier
+  1416:1   error  Insert `··`                                                                                                        prettier/prettier
+  1417:1   error  Insert `··`                                                                                                        prettier/prettier
+  1456:45  error  Replace `'Slot·destino·no·encontrado',` with `⏎··········'Slot·destino·no·encontrado',⏎·········`                  prettier/prettier
+  1457:1   error  Insert `··`                                                                                                        prettier/prettier
+  1458:1   error  Insert `··`                                                                                                        prettier/prettier
+  1463:37  error  Replace `'El·slot·destino·no·tiene·cupos',` with `⏎··········'El·slot·destino·no·tiene·cupos',⏎·········`          prettier/prettier
+  1464:1   error  Insert `··`                                                                                                        prettier/prettier
+  1465:1   error  Insert `··`                                                                                                        prettier/prettier
+  1628:45  error  Replace `'Cita·no·encontrada',` with `⏎··········'Cita·no·encontrada',⏎·········`                                  prettier/prettier
+  1629:1   error  Insert `··`                                                                                                        prettier/prettier
+  1630:1   error  Insert `··`                                                                                                        prettier/prettier
+  1647:37  error  Replace `'La·cita·ya·está·cancelada',` with `⏎··········'La·cita·ya·está·cancelada',⏎·········`                    prettier/prettier
+  2349:45  error  Replace `'Cupo·propuesto·no·encontrado',` with `⏎··········'Cupo·propuesto·no·encontrado',⏎·········`              prettier/prettier
+  2350:1   error  Insert `··`                                                                                                        prettier/prettier
+  2351:1   error  Insert `··`                                                                                                        prettier/prettier
+  2356:37  error  Replace `'El·cupo·propuesto·no·tiene·lugar',` with `⏎··········'El·cupo·propuesto·no·tiene·lugar',⏎·········`      prettier/prettier
+  2357:1   error  Insert `··`                                                                                                        prettier/prettier
+  2358:1   error  Insert `··`                                                                                                        prettier/prettier
+  2576:45  error  Replace `'Cita·no·encontrada',` with `⏎··········'Cita·no·encontrada',⏎·········`                                  prettier/prettier
+  2577:1   error  Insert `··`                                                                                                        prettier/prettier
+  2578:1   error  Insert `··`                                                                                                        prettier/prettier
+  2671:43  error  Replace `'Cita·no·encontrada',` with `⏎········'Cita·no·encontrada',⏎·······`                                      prettier/prettier
+  3125:43  error  Replace `'Cita·no·encontrada',` with `⏎········'Cita·no·encontrada',⏎·······`                                      prettier/prettier
+
+C:\Alovida\mantra-core-health-api\src\modules\scheduling\services\scheduling-delay.service.ts
+  101:43  error  Replace `'Cita·no·encontrada',` with `⏎········'Cita·no·encontrada',⏎·······`        prettier/prettier
+  146:43  error  Replace `'Recurso·no·encontrado',` with `⏎········'Recurso·no·encontrado',⏎·······`  prettier/prettier
+  147:1   error  Insert `··`                                                                          prettier/prettier
+  148:1   error  Insert `··`                                                                          prettier/prettier
+
+C:\Alovida\mantra-core-health-api\src\modules\scheduling\services\scheduling-waitlist.service.ts
+  296:47  error  Replace `'Slot·no·encontrado',` with `⏎············'Slot·no·encontrado',⏎···········`  prettier/prettier
+  402:47  error  Replace `'Cita·no·encontrada',` with `⏎············'Cita·no·encontrada',⏎···········`  prettier/prettier
+  403:1   error  Insert `··`                                                                            prettier/prettier
+  404:1   error  Insert `··`                                                                            prettier/prettier
+
+✖ 53 problems (53 errors, 0 warnings)
+  53 errors and 0 warnings potentially fixable with the `--fix` option.
+
+EXIT_CODE=1

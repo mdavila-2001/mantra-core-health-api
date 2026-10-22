@@ -1,0 +1,8 @@
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" (from C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+
+Test Suites: 66 passed, 66 total
+Tests:       591 passed, 591 total
+Snapshots:   0 total
+Time:        51.539 s
+Ran all test suites matching src/modules/clinical|src/modules/chart|src/modules/clinical_ext.

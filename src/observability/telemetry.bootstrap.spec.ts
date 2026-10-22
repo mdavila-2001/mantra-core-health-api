@@ -42,9 +42,9 @@ describe('telemetry.bootstrap', () => {
     it('deja registrada la configuración leída aunque esté deshabilitada', () => {
       startTelemetry({
         OTEL_ENABLED: 'false',
-        OTEL_SERVICE_NAME: 'redesa-api',
+        OTEL_SERVICE_NAME: 'alovida-api',
       });
-      expect(getTelemetryConfig()?.serviceName).toBe('redesa-api');
+      expect(getTelemetryConfig()?.serviceName).toBe('alovida-api');
       expect(getTelemetryConfig()?.enabled).toBe(false);
     });
 

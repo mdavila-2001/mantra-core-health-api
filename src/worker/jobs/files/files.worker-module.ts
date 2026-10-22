@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FileStorageModule } from '../../../common';
 import { MalwareScanJob } from './malware-scan.job';
+import { StorageLifecycleJob } from './storage-lifecycle.job';
 
 export { MalwareScanJob } from './malware-scan.job';
 
@@ -14,6 +15,6 @@ export { MalwareScanJob } from './malware-scan.job';
  */
 @Module({
   imports: [FileStorageModule],
-  providers: [MalwareScanJob],
+  providers: [MalwareScanJob, StorageLifecycleJob],
 })
 export class FilesWorkerModule {}

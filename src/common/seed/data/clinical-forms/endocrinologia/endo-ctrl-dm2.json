@@ -1,0 +1,252 @@
+{
+  "code": "ENDO_CTRL_DM2",
+  "name": "Control de diabetes mellitus tipo 2",
+  "specialty": { "code": "ENDOCRINOLOGIA", "display": "Endocrinología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "HEARTS-D: diagnóstico y manejo de la diabetes tipo 2",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/who-ucn-ncd-20.1",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Visita de control de HEARTS-D: glucemia y HbA1c, hipoglucemias, pie, ojo y riñón, y factores de riesgo cardiovascular."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de diabetes tipo 2",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "dm_glucemia_capilar",
+      "name": "Glucemia capilar (mg/dL)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "dm_hba1c",
+      "name": "Última HbA1c (%)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "dm_sintomas",
+      "name": "Síntomas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Poliuria",
+        "Polidipsia",
+        "Pérdida de peso",
+        "Visión borrosa",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "dm_pie",
+      "name": "Examen del pie",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sensibilidad conservada (monofilamento)",
+        "Sensibilidad disminuida",
+        "Úlcera o lesión presente",
+        "No evaluado"
+      ]
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "dm_hipoglucemias",
+      "name": "Episodios de hipoglucemia desde el último control",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diabetes tipo 2",
+      "code": "perimetro_abdominal_cm",
+      "name": "Perímetro abdominal (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "fondo_de_ojo",
+      "name": "Fondo de ojo en el último año",
+      "dataType": "string",
+      "required": false,
+      "options": ["Normal", "Retinopatía", "No realizado"]
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "albuminuria",
+      "name": "Relación albúmina/creatinina en orina (mg/g)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "tfg",
+      "name": "Filtrado glomerular estimado (mL/min/1,73 m²)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Complicaciones y daño de órgano",
+      "code": "dm_complicaciones",
+      "name": "Complicaciones conocidas",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Neuropatía",
+        "Pie diabético",
+        "Retinopatía",
+        "Nefropatía",
+        "Cardiopatía isquémica",
+        "Ninguna"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "HbA1c < 7 %",
+        "PA < 130/80 mmHg",
+        "LDL < 100 mg/dL",
+        "Pies sin lesiones",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Alimentación",
+        "Actividad física",
+        "Cuidado de los pies",
+        "Reconocer y tratar una hipoglucemia",
+        "Automonitoreo"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

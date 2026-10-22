@@ -15,14 +15,14 @@ import { ContentPacksService } from './content-packs.service';
  * de demostración no se creen sin contraseña, y que el cero de una segunda
  * aplicación se reporte como lo que es.
  */
-function armar() {
-  const seed = (resultado: unknown = { inserted: 0 }) => ({
+function build() {
+  const seed = (result: unknown = { inserted: 0 }) => ({
     run: jest
       .fn<(...args: unknown[]) => Promise<unknown>>()
-      .mockResolvedValue(resultado),
+      .mockResolvedValue(result),
   });
 
-  const dobles = {
+  const double = {
     glossary: seed(),
     facilities: seed(),
     insurance: seed(),
@@ -41,18 +41,18 @@ function armar() {
   };
 
   const service = new ContentPacksService(
-    dobles.glossary as never,
-    dobles.facilities as never,
-    dobles.insurance as never,
-    dobles.feeSchedule as never,
-    dobles.vademecum as never,
-    dobles.clinicalForms as never,
-    dobles.providerAccounts as never,
-    dobles.geography as never,
+    double.glossary as never,
+    double.facilities as never,
+    double.insurance as never,
+    double.feeSchedule as never,
+    double.vademecum as never,
+    double.clinicalForms as never,
+    double.providerAccounts as never,
+    double.geography as never,
     logger as never,
   );
 
-  return { service, dobles, logger };
+  return { service, dobles: double, logger };
 }
 
 describe('ContentPacksService', () => {
@@ -64,8 +64,8 @@ describe('ContentPacksService', () => {
   });
 
   it('ofrece el catálogo completo', () => {
-    const { service } = armar();
-    expect(service.listar()).toHaveLength(CONTENT_PACKS.length);
+    const { service } = build();
+    expect(service.list()).toHaveLength(CONTENT_PACKS.length);
   });
 
   it.each([
@@ -75,25 +75,25 @@ describe('ContentPacksService', () => {
     ['ARANCEL_BO', 'feeSchedule'],
     ['VADEMECUM', 'vademecum'],
     ['FORMULARIOS_CLINICOS', 'clinicalForms'],
-  ])('%s corre su propio seed y ninguno más', async (code, esperado) => {
-    const { service, dobles } = armar();
+  ])('%s corre su propio seed y ninguno más', async (code, expected) => {
+    const { service, dobles: doubles } = build();
 
-    await service.aplicar(code);
+    await service.apply(code);
 
-    for (const [nombre, doble] of Object.entries(dobles)) {
+    for (const [name, double] of Object.entries(doubles)) {
       // Las aseguradoras arrastran los departamentos a propósito: declaran
       // domicilio con uno de ellos.
-      const deberiaCorrer =
-        nombre === esperado ||
-        (code === 'ASEGURADORAS_BO' && nombre === 'geography');
-      expect(doble.run).toHaveBeenCalledTimes(deberiaCorrer ? 1 : 0);
+      const shouldRun =
+        name === expected ||
+        (code === 'ASEGURADORAS_BO' && name === 'geography');
+      expect(double.run).toHaveBeenCalledTimes(shouldRun ? 1 : 0);
     }
   });
 
   it('un código desconocido es 404, no un paquete vacío', async () => {
-    const { service } = armar();
+    const { service } = build();
 
-    await expect(service.aplicar('NO_EXISTE')).rejects.toBeInstanceOf(
+    await expect(service.apply('NO_EXISTE')).rejects.toBeInstanceOf(
       ResourceNotFoundException,
     );
   });
@@ -102,58 +102,58 @@ describe('ContentPacksService', () => {
     // Sin contraseña el seed no haría nada y devolvería un cero indistinguible
     // de «ya estaban». Decir qué falta es más útil que un cero mudo.
     delete process.env.SEED_DEMO_PASSWORD;
-    const { service, dobles } = armar();
+    const { service, dobles: doubles } = build();
 
-    await expect(service.aplicar('CUENTAS_DEMO')).rejects.toBeInstanceOf(
+    await expect(service.apply('CUENTAS_DEMO')).rejects.toBeInstanceOf(
       PreconditionFailedException,
     );
-    expect(dobles.providerAccounts.run).not.toHaveBeenCalled();
+    expect(doubles.providerAccounts.run).not.toHaveBeenCalled();
   });
 
   it('la contraseña de la petición gana sobre la del entorno', async () => {
     // Quien aplica el paquete desde la pantalla no puede tocar las variables
     // del servidor.
     process.env.SEED_DEMO_PASSWORD = 'la-del-entorno';
-    const { service, dobles } = armar();
+    const { service, dobles: doubles } = build();
 
-    await service.aplicar('CUENTAS_DEMO', 'la-de-la-peticion');
+    await service.apply('CUENTAS_DEMO', 'la-de-la-peticion');
 
-    expect(dobles.providerAccounts.run).toHaveBeenCalledWith(
+    expect(doubles.providerAccounts.run).toHaveBeenCalledWith(
       'la-de-la-peticion',
     );
   });
 
   it('sin contraseña en la petición cae a la del entorno', async () => {
     process.env.SEED_DEMO_PASSWORD = 'la-del-entorno';
-    const { service, dobles } = armar();
+    const { service, dobles: doubles } = build();
 
-    await service.aplicar('CUENTAS_DEMO');
+    await service.apply('CUENTAS_DEMO');
 
-    expect(dobles.providerAccounts.run).toHaveBeenCalledWith('la-del-entorno');
+    expect(doubles.providerAccounts.run).toHaveBeenCalledWith('la-del-entorno');
   });
 
   it('suma los contadores del seed y conserva su forma cruda', async () => {
-    const { service, dobles } = armar();
-    dobles.clinicalForms.run.mockResolvedValue({
+    const { service, dobles: doubles } = build();
+    doubles.clinicalForms.run.mockResolvedValue({
       templates: 43,
       specialties: 36,
     });
 
-    const resultado = await service.aplicar('FORMULARIOS_CLINICOS');
+    const result = await service.apply('FORMULARIOS_CLINICOS');
 
-    expect(resultado.inserted).toBe(79);
+    expect(result.inserted).toBe(79);
     // Y el detalle no se pierde: el agregado es para leer de un vistazo.
-    expect(resultado.counters).toEqual({ templates: 43, specialties: 36 });
-    expect(resultado.tookMs).toBeGreaterThanOrEqual(0);
+    expect(result.counters).toEqual({ templates: 43, specialties: 36 });
+    expect(result.tookMs).toBeGreaterThanOrEqual(0);
   });
 
   it('re-aplicar devuelve cero filas, que es «ya estaba»', async () => {
     // Los seeds convergen: no hace falta guardar ninguna marca de aplicado.
-    const { service, dobles } = armar();
-    dobles.vademecum.run.mockResolvedValue({ inserted: 0 });
+    const { service, dobles: doubles } = build();
+    doubles.vademecum.run.mockResolvedValue({ inserted: 0 });
 
-    const resultado = await service.aplicar('VADEMECUM');
+    const result = await service.apply('VADEMECUM');
 
-    expect(resultado.inserted).toBe(0);
+    expect(result.inserted).toBe(0);
   });
 });

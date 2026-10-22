@@ -37,11 +37,11 @@
 
 Declarar afiliación entre organizaciones. Caso de uso UC-22-07: Declarar afiliación (incluye guard de frontera de datos). Dentro del módulo (descripción del modelo, en inglés): «Keeps one generic infrastructure model while giving hospitals, diagnostic units and pharmacies explicit domain identities.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /orgext/affiliations` la atiende `OrgextAffiliationsController.declare` (src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:37). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAffiliationDto` (9 campos, 2 obligatorios). Delega en `OrgextAffiliationsService.declare`. Crea filas en organization_extensions.organization_affiliations. Lee organization_extensions.organization_affiliations, organization_extensions.organization_data_boundaries.
+`POST /orgext/affiliations` la atiende `OrgextAffiliationsController.declare` (src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:37). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `OrganizationExtensionsCreateAffiliationDto` (9 campos, 2 obligatorios). Delega en `OrgextAffiliationsService.declare`. Crea filas en organization_extensions.organization_affiliations. Lee organization_extensions.organization_affiliations, organization_extensions.organization_data_boundaries.
 
 ### Requerimientos
 
@@ -49,10 +49,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -62,19 +62,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | `organization_extensions.organization_affiliations` | LEE | LEE | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrganizationAffiliationsRepository.findActiveDuplicate | `src/modules/organization_extensions/repositories/organization-affiliations.repository.ts:76` |
 | `organization_extensions.organization_data_boundaries` | LEE | LEE | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrganizationDataBoundariesRepository.countActiveForTenant | `src/modules/organization_extensions/repositories/organization-data-boundaries.repository.ts:84` |
 
-### Cuerpo — DTO `CreateAffiliationDto` · `application/json`
+### Cuerpo — DTO `OrganizationExtensionsCreateAffiliationDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `primaryTenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant primario (organizador) | `src/modules/organization_extensions/dto/create-affiliation.dto.ts:17` |
-| `participatingTenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant participante | `src/modules/organization_extensions/dto/create-affiliation.dto.ts:24` |
-| `affiliationTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de afiliación (concepto) | `src/modules/organization_extensions/dto/create-affiliation.dto.ts:35` |
-| `hostPracticeSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sitio de práctica anfitrión | `src/modules/organization_extensions/dto/create-affiliation.dto.ts:46` |
-| `healthcareServiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio de salud implicado | `src/modules/organization_extensions/dto/create-affiliation.dto.ts:57` |
-| `contractReference` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia de contrato | `src/modules/organization_extensions/dto/create-affiliation.dto.ts:69` |
-| `dataUseAgreementId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Acuerdo de uso de datos (DUA) firmado | `src/modules/organization_extensions/dto/create-affiliation.dto.ts:80` |
-| `validFrom` | `string` | No | — | `@IsOptional()` `@IsDateString()` | Vigente desde (ISO date-time) | `src/modules/organization_extensions/dto/create-affiliation.dto.ts:88` |
-| `validTo` | `string` | No | — | `@IsOptional()` `@IsDateString()` | Vigente hasta (ISO date-time) | `src/modules/organization_extensions/dto/create-affiliation.dto.ts:96` |
+| `primaryTenantId` | `string` | Sí | formato uuid | — | Tenant primario (organizador) | sin fuente |
+| `participatingTenantId` | `string` | Sí | formato uuid | — | Tenant participante | sin fuente |
+| `affiliationTypeConceptId` | `string` | No | formato uuid | — | Tipo de afiliación (concepto) | sin fuente |
+| `hostPracticeSiteId` | `string` | No | formato uuid | — | Sitio de práctica anfitrión | sin fuente |
+| `healthcareServiceId` | `string` | No | formato uuid | — | Servicio de salud implicado | sin fuente |
+| `contractReference` | `string` | No | longitud máxima 200 | — | Referencia de contrato | sin fuente |
+| `dataUseAgreementId` | `string` | No | formato uuid | — | Acuerdo de uso de datos (DUA) firmado | sin fuente |
+| `validFrom` | `string` | No | — | — | Vigente desde (ISO date-time) | sin fuente |
+| `validTo` | `string` | No | — | — | Vigente hasta (ISO date-time) | sin fuente |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -107,20 +107,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/organization_extensions/dto/responses.dto.ts:82` |
-| `practitionerProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a practitioner profile. | sin fuente |
-| `organizationName` | `string` | Sí | — | — | Institución. | sin fuente |
-| `roleTitle` | `string` | Sí | — | — | Cargo. | sin fuente |
-| `departmentText` | `string` | No | admite null | — | Servicio o departamento. | sin fuente |
-| `practiceSiteId` | `string` | No | formato uuid; admite null | — | Sede de la plataforma, si la institución está dentro. | sin fuente |
-| `affiliationTypeConceptId` | `string` | No | formato uuid; admite null | — | Tipo de vínculo. | sin fuente |
-| `startDate` | `string` | Sí | formato date | — | Inicio del vínculo. | sin fuente |
-| `endDate` | `string` | No | formato date; admite null | — | Fin del vínculo, o `null` si sigue vigente. | sin fuente |
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/organization_extensions/dto/responses.dto.ts:82` |
+| `practitionerProfileId` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `organizationName` | `string` | Sí | — | — | — | sin fuente |
+| `roleTitle` | `object` | No | admite null | — | — | sin fuente |
+| `practiceSiteId` | `object` | No | formato uuid; admite null | — | — | sin fuente |
+| `healthFacilityConceptId` | `object` | No | formato uuid; admite null | — | — | sin fuente |
+| `affiliationTypeConceptId` | `object` | No | formato uuid; admite null | — | — | sin fuente |
+| `startDate` | `string` | Sí | formato date | — | — | sin fuente |
+| `endDate` | `string` | No | formato date; admite null | — | — | sin fuente |
 | `current` | `boolean` | Sí | — | — | Derivado de `endDate`: sin fin declarado, sigue vigente | sin fuente |
-| `status` | `string` | Sí | formato uuid | — | Estado del registro (concept id). | `src/modules/organization_extensions/dto/responses.dto.ts:95` |
-| `statusKind` | `object` | Sí | valores: pendiente, declarado, aprobado, rechazado, revocado, desconocido | — | El mismo estado, en algo sobre lo que una pantalla pueda ramificar. El concept id sigue viajando en `status` y es la verdad; esto es una derivación de conveniencia. Existe porque la alternativa era que el frontend comparara uuids escritos a mano, que es exactamente lo que el proyecto prohíbe: los conceptos se resuelven en el servidor. `desconocido` cuando el estado no es ninguno de los tres esperados. Es preferible a suponer: cuando exista el value set de estados —donde entra `declarado`— las pantallas que ya distinguen los casos conocidos no van a mentir sobre el nuevo, van a decir que no lo reconocen. | sin fuente |
-| `decisionReasonText` | `string` | No | admite null | — | Por qué la organización rechazó o dio de baja el vínculo. **Lo lee el profesional**, no es una nota interna. Un rechazo sin motivo es mudo para quien lo recibe, y quien lo escribe tiene que saber que se lee. `null` en cualquier otro estado. | sin fuente |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/organization_extensions/dto/responses.dto.ts:99` |
+| `status` | `string` | Sí | formato uuid | — | — | `src/modules/organization_extensions/dto/responses.dto.ts:95` |
+| `statusKind` | `string` | Sí | valores: pendiente, declarado, aprobado, rechazado, revocado, desconocido | — | — | sin fuente |
+| `decisionReasonText` | `string` | No | admite null | — | — | sin fuente |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/organization_extensions/dto/responses.dto.ts:99` |
 
 ### Respuestas posibles
 
@@ -161,7 +161,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 
 Terminar afiliación y revocar acceso. Caso de uso UC-22-09: Terminar afiliación y revocar acceso. Dentro del módulo (descripción del modelo, en inglés): «Keeps one generic infrastructure model while giving hospitals, diagnostic units and pharmacies explicit domain identities.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -173,9 +173,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:49` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -239,7 +239,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 
 Definir frontera de datos (residencia/RLS). Caso de uso UC-22-08: Definir frontera de datos (residencia/RLS). Dentro del módulo (descripción del modelo, en inglés): «Keeps one generic infrastructure model while giving hospitals, diagnostic units and pharmacies explicit domain identities.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -251,10 +251,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-data-boundaries.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -354,7 +354,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 
 Registrar licencia de instalación. Caso de uso UC-22-05: Registrar licencia de instalación (pendiente). Dentro del módulo (descripción del modelo, en inglés): «Keeps one generic infrastructure model while giving hospitals, diagnostic units and pharmacies explicit domain identities.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:44`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -366,10 +366,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -471,7 +471,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 
 Verificar / rechazar licencia. Caso de uso UC-22-06: Verificar / rechazar licencia. Dentro del módulo (descripción del modelo, en inglés): «Keeps one generic infrastructure model while giving hospitals, diagnostic units and pharmacies explicit domain identities.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -483,11 +483,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:50` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -571,7 +571,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 
 Especializar practice/tenant como hospital. Caso de uso UC-22-01: Especializar practice/tenant como hospital (estado borrador). Dentro del módulo (descripción del modelo, en inglés): «Keeps one generic infrastructure model while giving hospitals, diagnostic units and pharmacies explicit domain identities.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:40`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -583,10 +583,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -684,7 +684,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 
 Activar hospital y publicar perfil. Caso de uso UC-22-02: Activar hospital (guard: licencia verificada). Dentro del módulo (descripción del modelo, en inglés): «Keeps one generic infrastructure model while giving hospitals, diagnostic units and pharmacies explicit domain identities.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:41`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -696,11 +696,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:51` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -789,7 +789,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 
 Definir línea de servicio hospitalaria. Caso de uso UC-22-03: Definir línea de servicio (hospital activo). Dentro del módulo (descripción del modelo, en inglés): «Keeps one generic infrastructure model while giving hospitals, diagnostic units and pharmacies explicit domain identities.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:42`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -801,11 +801,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:64` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -900,7 +900,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 
 Retirar (soft-delete) línea de servicio. Caso de uso UC-22-04: Retirar (soft-delete) línea de servicio. Dentro del módulo (descripción del modelo, en inglés): «Keeps one generic infrastructure model while giving hospitals, diagnostic units and pharmacies explicit domain identities.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organization_extensions/README.md:43`) · MODELO (`Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
@@ -912,9 +912,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, lineId | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:77` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

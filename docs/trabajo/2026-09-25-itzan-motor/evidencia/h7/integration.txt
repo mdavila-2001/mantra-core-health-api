@@ -1,0 +1,74 @@
+H7.S1.M3 — Regresión de integración
+===================================
+
+1) El comando que documenta el repositorio no termina
+-----------------------------------------------------
+$ yarn test:integration --ci --runInBand
+
+FATAL ERROR: Ineffective mark-compacts near heap limit
+Allocation failed - JavaScript heap out of memory
+
+Murió tras 6 de unas 90 suites. Causa: `--runInBand` corre todas en el proceso
+principal, y cada suite arranca la aplicación entera. Ese flag desactiva el
+`workerIdleMemoryLimit: "1GB"` que `test/jest-integration.json` ya declara, porque
+ese reciclado sólo existe si hay worker.
+
+El workflow del repositorio lo corre SIN ese flag
+(.github/workflows/docs.yml:389 → `yarn test:integration --ci`).
+
+
+2) El radio del diff, aislado
+-----------------------------
+Este carril toca src/modules/terminology/** y altas en
+src/common/errors/error-codes.ts. Nada más.
+
+$ yarn test:integration --ci --runInBand \
+    test/integration/glossary.int-spec.ts \
+    test/integration/terminology.int-spec.ts \
+    test/integration/terminology/concept-file-import.int-spec.ts
+
+Test Suites: 1 failed, 2 passed, 3 total
+Tests:       1 failed, 24 passed, 25 total
+Time:        204.336 s
+
+  PASS  terminology/concept-file-import.int-spec.ts   4 de 4
+  PASS  terminology.int-spec.ts                      20 de 20
+  FAIL  glossary.int-spec.ts                          1 rojo
+
+
+3) El rojo de glossary es heredado — comprobado en las dos ramas
+----------------------------------------------------------------
+En la rama de este carril:
+
+  ● Glosario médico (integración) › exclusión de borradores ›
+    un término en TERM_DRAFT no aparece en la búsqueda por categoría ni en la ficha
+    expected 404 "Not Found", got 200 "OK"
+    at test/integration/glossary.int-spec.ts:370:10
+
+En la rama de integración sin tocar (4dcaa279), mismo comando:
+
+  JEST_EXIT_EN_DEV=1
+  FAIL test/integration/glossary.int-spec.ts (221.084 s)
+    ● Glosario médico (integración) › exclusión de borradores ›
+      un término en TERM_DRAFT no aparece en la búsqueda por categoría ni en la ficha
+      expected 404 "Not Found", got 200 "OK"
+  Test Suites: 1 failed, 1 total
+  Tests:       1 failed, 9 passed, 10 total
+
+Mismo spec, mismo caso, mismo mensaje. Heredado.
+
+Por grafo de importaciones tampoco podría ser de acá: ese spec depende de las
+entidades del glosario y de sus seeds, y ninguno de los archivos que este carril
+modifica aparece entre sus dependencias.
+
+
+4) Por qué una corrida local completa no es comparable con la del gate
+-----------------------------------------------------------------------
+El gate levanta los cinco almacenes limpios y corre la suite contra ellos. La
+corrida local fue contra una base que lleva el día en uso. Varias suites de
+integración dependen del estado de los datos —la de flujos de lectura del
+frontend, la del alta de organización, la de la agenda—, así que sus rojos
+locales no dicen nada sobre el código.
+
+Lo que sí es comparable, y se hizo, es correr el mismo spec en las dos ramas y
+comparar la salida literal.

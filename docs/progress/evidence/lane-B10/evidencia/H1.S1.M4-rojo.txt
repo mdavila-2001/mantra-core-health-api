@@ -1,0 +1,13 @@
+$ corepack yarn test --testPathPatterns="scheduling-bookings.repository"
+FAIL SchedulingBookingsRepository · findProfessionalCommitmentsOverlapping atribuye cada cita al recurso de SU CUPO, no a la columna nulable de la cita
+   Error: expect(received).toContain(expected) // indexOf
+   
+   Expected substring: "JOIN scheduling.schedulable_resources r ON r.id = s.resource_id"
+   Received string:    "SELECT b.id, s.start_at AS \"startAt\", s.end_at AS \"endAt\", b.status_concept_id AS \"statusConceptId\", r.name AS \"resourceName\", r.time_zone AS \"timeZone\", b.patient_profile_id AS \"patientProfileId\" FROM scheduling.appointment_bookings b JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id JOIN scheduling.schedulable_resources r ON r.id = b.resource_id WHERE r.resource_ref_id = ? AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles') AND b.status_concept_id IN (?) AND s.start_at < ? AND s.end_at > ? AND (? IS NULL OR b.id <> ?) ORDER BY s.start_at ASC"
+       at Object.toContain (C:\wt\m4-api\src\modules\scheduling\repositories\scheduling-bookings.repository.spec.ts:49:17)
+       at processTicksAndRejections (node:internal/process/task_queues:103:5)
+PASS SchedulingBookingsRepository · findProfessionalCommitmentsOverlapping sigue comparando rangos por el cupo, con bordes estrictos (tocarse no es pisarse)
+PASS SchedulingBookingsRepository · findProfessionalCommitmentsOverlapping sin estados que comprometan no consulta la base
+Suites: 0 passed, 1 failed, 1 total
+Tests:  2 passed, 1 failed, 0 skipped, 3 total
+exit=1

@@ -8,6 +8,9 @@ import { FileVersions } from '../entities';
  * no tiene `updated_at` ni `row_version`, solo `recorded_at` + autor.
  */
 export interface CreateFileVersionData {
+  bucketOrContainer?: string;
+  objectKey?: string;
+  objectVersion?: string;
   /**
    * Identificador asociado a file.
    */
@@ -72,6 +75,26 @@ export class FileVersionsRepository {
     return em.findOne(FileVersions, { id });
   }
 
+  /**
+   * Varias versiones por id, en **una sola consulta** (5.2 · AC-5.2-2).
+   *
+   * Existe para que listar adjuntos con su tipo y su tamaño no cueste una
+   * consulta por adjunto: quien llama junta los `currentVersionId` de la página
+   * y los resuelve de una vez. Los ids que no existan simplemente no vuelven;
+   * quien llama decide qué hacer con el hueco.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Versiones a traer. Vacío devuelve vacío sin consultar.
+   * @returns Las versiones encontradas, sin orden garantizado.
+   */
+  findByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<FileVersions[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(FileVersions, { id: { $in: [...ids] } });
+  }
+
   /** Busca una versión concreta acotada a su archivo (validación de pertenencia). */
   findByFileAndId(
     em: EntityManager,
@@ -117,6 +140,9 @@ export class FileVersionsRepository {
   /** Construye la entidad en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateFileVersionData): FileVersions {
     return em.create(FileVersions, {
+      bucketOrContainer: data.bucketOrContainer,
+      objectKey: data.objectKey,
+      objectVersion: data.objectVersion,
       fileId: data.fileId,
       versionNumber: data.versionNumber,
       storageProviderConceptId: data.storageProviderConceptId,

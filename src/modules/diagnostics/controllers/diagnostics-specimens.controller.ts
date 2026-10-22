@@ -1,14 +1,23 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  requireTenantId,
+  AccessLogged,
+  type AuthenticatedUser,
+} from '../../../common';
+import { LabStaffGuard } from '../guards';
 import { DiagnosticsSpecimensService } from '../services';
 import {
   CreateSpecimenDto,
@@ -18,16 +27,23 @@ import {
   ContainerCustodyEventDto,
   ResourceCreatedDto,
   AccessionCreatedDto,
+  AccessionDetailDto,
+  SpecimenDetailDto,
 } from '../dto';
 
 /**
  * Endpoints del agregado de especímenes: alta (soporte), acesión (UC-20-01),
  * rechazo (UC-20-02), alta de contenedor (soporte) y cadena de custodia
  * (UC-20-03). Capa fina: valida parámetros y delega en el servicio.
+ *
+ * Autoriza `LabStaffGuard` en lugar de `@Roles('CLINICIAN', 'PRACTITIONER')`:
+ * esos dos roles siguen pasando igual, y además el personal de un laboratorio
+ * (`DIAGNOSTIC_CENTER`) por su membresía — sin ella, el laboratorio que se
+ * registraba no podía recibir una muestra en su propia recepción.
  */
 @ApiTags('diagnostics-specimens')
 @ApiBearerAuth()
-@Roles('CLINICIAN', 'PRACTITIONER')
+@UseGuards(LabStaffGuard)
 @Controller('diagnostics')
 export class DiagnosticsSpecimensController {
   /**
@@ -38,6 +54,11 @@ export class DiagnosticsSpecimensController {
   constructor(private readonly service: DiagnosticsSpecimensService) {}
 
   /** Soporte: alta de espécimen. */
+  @Audited({
+    action: 'SPECIMEN_CREATED',
+    entity: 'specimen',
+    entityId: 'result.id',
+  })
   @Post('specimens')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un espécimen (soporte para acesión)' })
@@ -48,7 +69,43 @@ export class DiagnosticsSpecimensController {
     return this.service.createSpecimen(dto, actor);
   }
 
+  /**
+   * Lectura (CL-47): detalle de una acesión con sus especímenes, contenedores
+   * y cadena de custodia. Antes de esta ruta, `diagnostics` sólo tenía `POST`
+   * para el circuito de especímenes: abrir el detalle de una acesión concreta
+   * no tenía dónde ir.
+   */
+  @Get('accessions/:id')
+  @AccessLogged({ resourceType: 'ACCESSION', resourceId: 'param:id' })
+  @ApiOperation({
+    summary: 'Detalle de una acesión (especímenes, contenedores y custodia)',
+    description: 'Acotado al tenant del contexto: otro laboratorio recibe 404.',
+  })
+  getAccession(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AccessionDetailDto> {
+    return this.service.getAccession(id, requireTenantId());
+  }
+
+  /** Lectura (CL-47): detalle de un espécimen con su cadena de custodia. */
+  @Get('specimens/:id')
+  @AccessLogged({ resourceType: 'SPECIMEN', resourceId: 'param:id' })
+  @ApiOperation({
+    summary: 'Detalle de un espécimen (con su cadena de custodia)',
+    description: 'Acotado al tenant del contexto: otro laboratorio recibe 404.',
+  })
+  getSpecimen(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<SpecimenDetailDto> {
+    return this.service.getSpecimen(id, requireTenantId());
+  }
+
   /** UC-20-01. */
+  @Audited({
+    action: 'SPECIMEN_ACCESSIONED',
+    entity: 'laboratory_accession',
+    entityId: 'result.id',
+  })
   @Post('accessions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Acesionar especímenes recibidos en laboratorio' })
@@ -60,6 +117,11 @@ export class DiagnosticsSpecimensController {
   }
 
   /** UC-20-02. */
+  @Audited({
+    action: 'SPECIMEN_REJECTED',
+    entity: 'specimen',
+    entityId: 'param:id',
+  })
   @Post('specimens/:id/rejection')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Rechazar espécimen y solicitar recolección' })
@@ -72,6 +134,11 @@ export class DiagnosticsSpecimensController {
   }
 
   /** Soporte: alta de contenedor. */
+  @Audited({
+    action: 'SPECIMEN_CONTAINER_CREATED',
+    entity: 'specimen_container',
+    entityId: 'result.id',
+  })
   @Post('specimens/:id/containers')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -86,6 +153,11 @@ export class DiagnosticsSpecimensController {
   }
 
   /** UC-20-03. */
+  @Audited({
+    action: 'SPECIMEN_CUSTODY_EVENT_RECORDED',
+    entity: 'specimen_container',
+    entityId: 'param:id',
+  })
   @Post('containers/:id/custody-events')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

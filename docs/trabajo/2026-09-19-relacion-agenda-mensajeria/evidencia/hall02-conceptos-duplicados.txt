@@ -1,0 +1,48 @@
+=== HALL-02 · causa raiz: conceptos DUPLICADOS por codigo ===
+
+$ select code, count(*) from terminology.catalog_concepts group by code having count(*)>1
+ codigos_con_duplicado 
+-----------------------
+                    18
+(1 row)
+
+   code    | veces 
+-----------+-------
+ OTRO      |     6
+ ACTIVE    |     2
+ ALTA      |     2
+ BAJA      |     2
+ BOB       |     2
+ CERRADO   |     2
+ CRITICA   |     2
+ EMAIL     |     2
+ EN        |     2
+ FREE      |     2
+ MEDIA     |     2
+ PATIENT   |     2
+ PENDIENTE |     2
+ PENDING   |     2
+ PERMITIR  |     2
+(15 rows)
+
+
+El caso concreto que mata la relacion (code=ACTIVE):
+                  id                  |  code  | display 
+--------------------------------------+--------+---------
+ 38a1d301-f40d-5b17-a695-5e6d605f8b19 | ACTIVE | Active
+ d0f53ea3-7e50-5578-add3-270341b1186c | ACTIVE | Active
+(2 rows)
+
+  38a1d301-... = el que deriva el backend (CONCEPTS.STATE_ACTIVE, clave 'state:active')
+  d0f53ea3-... = el que sembro el paquete, y al que apuntan los message_channels
+
+$ select code, state_concept_id from messaging.message_channels where code in ('IN_APP','EMAIL')
+  code  |           state_concept_id           
+--------+--------------------------------------
+ EMAIL  | d0f53ea3-7e50-5578-add3-270341b1186c
+ IN_APP | d0f53ea3-7e50-5578-add3-270341b1186c
+(2 rows)
+
+
+CONSECUENCIA: notifications.service.ts:132 compara state_concept_id !== CONCEPTS.STATE_ACTIVE
+y lanza 'El canal no esta activo'. El canal ESTA activo por codigo y NO lo esta por uuid.

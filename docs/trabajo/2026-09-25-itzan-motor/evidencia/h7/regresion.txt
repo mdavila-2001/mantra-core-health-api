@@ -1,0 +1,11 @@
+=== suite unitaria completa
+2026-09-25T10:43:01-04:00
+
+(se omiten los avisos de deprecación de las dependencias, que no son de este cambio)
+
+Test Suites: 1 skipped, 714 passed, 714 of 715 total
+Tests:       1 skipped, 8657 passed, 8658 total
+Snapshots:   0 total
+Time:        727.347 s
+Ran all test suites.
+exit=0

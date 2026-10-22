@@ -1,0 +1,23 @@
+=== El contrato publicado, antes y después
+Antes = el artefacto tal como estaba en el corte del carril (343795cc).
+
+--- /terminology/versions/{versionId}/import-file
+  antes:   códigos 201, 400, 401, 403, 404, 409, 413, 422, 429, 500
+  después: códigos 200, 201, 400, 401, 403, 404, 409, 413, 422, 429, 500
+
+--- /terminology/import-template
+  antes:   la ruta no existía
+  después: códigos 200, 400, 401, 403, 429, 500
+
+--- ImportConceptsFileResponseDto
+  antes:   (no estaba en el contrato)
+  después: aborted, batchId, dryRun, errorSamples, errors, format, inserted, preview, profile, skipped, totalRead
+
+--- ImportPreviewRowDto
+  antes:   (no estaba en el contrato)
+  después: line
+
+--- ImportFileIssueDto
+  antes:   (no estaba en el contrato)
+  después: column, line, message
+

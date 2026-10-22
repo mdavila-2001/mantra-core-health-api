@@ -6,38 +6,38 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 |-----|--------|-----------|----|-------------|---------|----------|
 | 00 | platform _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 0 |
 | 01 | iam | 14 | 75 | 13 | 65 | 0 |
-| 02 | common | 7 | 48 | 0 | 51 | 0 |
+| 02 | common | 7 | 48 | 0 | 52 | 0 |
 | 03 | terminology | 15 | 69 | 0 | 88 | 0 |
 | 04 | directory | 7 | 55 | 0 | 51 | 0 |
-| 05 | profiles | 19 | 125 | 0 | 134 | 0 |
+| 05 | profiles | 19 | 127 | 2 | 136 | 0 |
 | 06 | authz | 15 | 100 | 15 | 90 | 0 |
 | 07 | consent | 10 | 81 | 0 | 101 | 0 |
-| 08 | clinical | 22 | 214 | 6 | 236 | 0 |
+| 08 | clinical | 22 | 215 | 6 | 237 | 0 |
 | 09 | forms | 16 | 103 | 0 | 113 | 1 |
 | 10 | audit | 123 | 513 | 0 | 653 | 0 |
 | 11 | system_ops | 29 | 169 | 0 | 178 | 0 |
 | 12 | integrations | 10 | 49 | 0 | 55 | 0 |
 | 13 | geo | 6 | 31 | 0 | 35 | 0 |
-| 14 | practice | 11 | 80 | 0 | 84 | 0 |
+| 14 | practice | 11 | 81 | 0 | 85 | 0 |
 | 15 | chart | 11 | 70 | 0 | 80 | 1 |
 | 16 | accounting | 42 | 304 | 1 | 356 | 13 |
-| 17 | billing | 20 | 140 | 0 | 156 | 17 |
+| 17 | billing | 22 | 150 | 0 | 167 | 17 |
 | 18 | clinical_ext | 13 | 91 | 0 | 101 | 1 |
-| 19 | community | 38 | 233 | 0 | 244 | 1 |
+| 19 | community | 40 | 242 | 4 | 254 | 1 |
 | 20 | diagnostics | 36 | 251 | 0 | 301 | 0 |
 | 21 | deployment _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 0 |
 | 22 | organization_extensions | 5 | 49 | 0 | 55 | 0 |
 | 23 | diagnostic_units | 10 | 69 | 0 | 77 | 0 |
 | 24 | pharmacy | 9 | 64 | 0 | 72 | 0 |
-| 25 | pharmacy_inventory | 20 | 141 | 0 | 154 | 6 |
-| 26 | insurance | 29 | 187 | 0 | 206 | 0 |
+| 25 | pharmacy_inventory | 20 | 142 | 0 | 154 | 6 |
+| 26 | insurance | 29 | 191 | 0 | 210 | 0 |
 | 27 | identity_assurance | 11 | 69 | 0 | 76 | 0 |
 | 28 | telemetry | 14 | 73 | 0 | 83 | 0 |
 | 29 | delegated_access | 7 | 51 | 0 | 57 | 0 |
 | 30 | read_models | 13 | 74 | 0 | 89 | 76 |
 | 31 | integration_contracts | 9 | 47 | 0 | 55 | 0 |
 | 32 | workflow | 8 | 49 | 0 | 55 | 9 |
-| 33 | integrity _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 15 |
+| 33 | integrity _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 21 |
 | 34 | portal_catalog _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 0 |
 | 35 | messaging | 22 | 142 | 0 | 150 | 0 |
 | 36 | qa_lab | 13 | 79 | 0 | 92 | 0 |
@@ -45,7 +45,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 | 38 | erp | 51 | 429 | 0 | 494 | 14 |
 | 39 | reporting | 12 | 70 | 0 | 86 | 0 |
 | 40 | auth_providers | 9 | 50 | 0 | 58 | 1 |
-| 41 | scheduling | 16 | 109 | 5 | 114 | 1 |
+| 41 | scheduling | 17 | 115 | 11 | 118 | 1 |
 | 42 | payments | 52 | 349 | 0 | 404 | 6 |
 | 43 | ads | 73 | 388 | 0 | 497 | 0 |
 | 44 | health_context | 10 | 53 | 0 | 62 | 0 |
@@ -56,7 +56,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 | 49 | crm | 32 | 227 | 0 | 278 | 5 |
 | 50 | marketing | 14 | 121 | 0 | 130 | 0 |
 | 51 | promotions | 11 | 71 | 0 | 87 | 0 |
-| 52 | health_data | 34 | 178 | 0 | 254 | 9 |
+| 52 | health_data | 34 | 178 | 0 | 255 | 9 |
 | 53 | procedures_perioperative | 35 | 220 | 0 | 262 | 8 |
 | 54 | polyglot_storage | 20 | 29 | 0 | 35 | 4 |
 | 55 | document_store _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 18 |
@@ -69,8 +69,9 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 | 62 | cross_store_consistency | 20 | 0 | 0 | 43 | 4 |
 | 63 | lakehouse | 18 | 0 | 0 | 42 | 4 |
 | 64 | audio_assets | 4 | 1 | 0 | 10 | 0 |
-| 65 | surveys | 7 | 36 | 35 | 17 | 0 |
-| **Σ** | **64** | **1168** | | **75** | | **292** |
+| 65 | surveys | 7 | 36 | 0 | 17 | 0 |
+| 66 | medical_groups | 2 | 14 | 0 | 10 | 0 |
+| **Σ** | **67** | **1175** | | **52** | | **299** |
 
 ## Detalle de entidades saltadas y avisos
 
@@ -240,6 +241,9 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 - `diagnostic_study_prices` — stub de cruce (tabla real en su módulo dueño)
 - `patient_coverages` — stub de cruce (tabla real en su módulo dueño)
 - `claim_adjudication_versions` — stub de cruce (tabla real en su módulo dueño)
+- `insurance_claims` — stub de cruce (tabla real en su módulo dueño)
+- `prior_authorization_requests` — stub de cruce (tabla real en su módulo dueño)
+- `service_requests` — stub de cruce (tabla real en su módulo dueño)
 - `identity_verification_attempts` — stub de cruce (tabla real en su módulo dueño)
 - `user_activity_events` — stub de cruce (tabla real en su módulo dueño)
 - `practitioner_delegate_assignments` — stub de cruce (tabla real en su módulo dueño)
@@ -249,6 +253,9 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 - `coordination_of_benefits` — stub de cruce (tabla real en su módulo dueño)
 - `audit_log` — stub de cruce (tabla real en su módulo dueño)
 - `data_access_log` — stub de cruce (tabla real en su módulo dueño)
+- `billing_quotations` — stub de cruce (tabla real en su módulo dueño)
+- `medical_groups_groups` — stub de cruce (tabla real en su módulo dueño)
+- `medical_groups_group_members` — stub de cruce (tabla real en su módulo dueño)
 
 ### 35 · messaging
 - ⚠ índice 'uq_adapter_inbound_events_provider_id' omitido: columna(s) inexistente(s) ['received_time_bucket'] en adapter_inbound_events (¿tipo no-SQL descartado? requiere PostGIS)

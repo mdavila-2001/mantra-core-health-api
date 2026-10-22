@@ -1,0 +1,228 @@
+{
+  "code": "NEURO_CTRL_ACV",
+  "name": "Accidente cerebrovascular: evaluación y seguimiento",
+  "specialty": { "code": "NEUROLOGIA", "display": "Neurología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "NIH Stroke Scale",
+    "organization": "National Institute of Neurological Disorders and Stroke (NINDS/NIH)",
+    "url": "https://www.ninds.nih.gov/health-information/stroke/assess-and-treat/nih-stroke-scale",
+    "license": "Dominio público (Gobierno de los EE. UU.)",
+    "retrievedAt": "2026-10-02",
+    "note": "Déficit por la escala NIHSS (dominio público), discapacidad por escala de Rankin modificada y prevención secundaria."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de accidente cerebrovascular",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "acv_cincinnati",
+      "name": "Escala de Cincinnati",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Asimetría facial",
+        "Caída de un brazo",
+        "Alteración del habla",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "acv_hora_inicio",
+      "name": "Hora de inicio o de la última vez visto bien",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "acv_glasgow",
+      "name": "Escala de Glasgow (3–15)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "acv_glucemia",
+      "name": "Glucemia capilar (mg/dL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "nihss",
+      "name": "NIHSS (0–42)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "acv_tipo",
+      "name": "Tipo",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Isquémico",
+        "Hemorrágico",
+        "Accidente isquémico transitorio",
+        "No establecido"
+      ]
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "rankin",
+      "name": "Escala de Rankin modificada",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "0 — sin síntomas",
+        "1 — sin discapacidad significativa",
+        "2 — discapacidad leve",
+        "3 — moderada",
+        "4 — moderadamente grave",
+        "5 — grave",
+        "6 — fallecido"
+      ]
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "disfagia_tamizaje",
+      "name": "Tamizaje de disfagia",
+      "dataType": "string",
+      "required": false,
+      "options": ["Normal", "Alterado", "No realizado"]
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: accidente cerebrovascular",
+      "code": "frecuencia_cardiaca",
+      "name": "Frecuencia cardíaca (lpm)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "metas_cumplidas",
+      "name": "Metas de control que cumple hoy",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "PA < 130/80 mmHg",
+        "Antiagregado o anticoagulado según causa",
+        "Estatina",
+        "En rehabilitación",
+        "Ninguna todavía"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Reconocer un nuevo ACV (cara, brazo, habla: llamar ya)",
+        "Adherencia",
+        "Rehabilitación"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

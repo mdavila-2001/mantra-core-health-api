@@ -45,7 +45,7 @@ finops/storage-cost-snapshots ──> idempotente por ámbito y periodo
 ops/integrity/:datasetId/verify ──> hashes distintos + política ⇒ colocación QUARANTINED
 ```
 
-_Fuente: `src/modules/polyglot_storage/README.md:46`_
+_Fuente: `src/modules/polyglot_storage/README.md:81`_
 
 ### Etapas y operaciones
 

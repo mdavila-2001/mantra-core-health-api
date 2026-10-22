@@ -44,7 +44,7 @@
 
 Crear una colección vectorial con su vínculo de tenant. Caso de uso UC-59-02: Colección gobernada + binding de tenant. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -56,10 +56,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -172,7 +172,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Encolar un job de embedding. Caso de uso UC-59-04: Encolar job de embedding. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -184,13 +184,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:140` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CABECERA | idempotency-key (obligatoria) | `contrato (parameters)` |
 | CABECERA | Idempotency-Key (opcional) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:140` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -304,11 +304,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AI_GOVERNANCE_OFFICER, RAG_COLLECTION_ADMIN, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:185` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:185` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -402,7 +402,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Migrar la colección a un modelo nuevo. Caso de uso UC-59-11: Re-embeber tras cambio de modelo. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -414,11 +414,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:168` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:168` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -521,7 +521,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reconciliar el manifiesto canónico contra el vectorial. Caso de uso UC-59-12: Reconciliar canónico vs vectorial. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -533,11 +533,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, RECONCILIATION_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:178` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -646,7 +646,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Propagar el borrado de la fuente a los embeddings. Caso de uso UC-59-10: Propagar borrado a embeddings. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -658,10 +658,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRIVACY_OFFICER, DPO, SYSTEM, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:162` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -764,7 +764,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ejecutar un lote del job de embedding. Caso de uso UC-59-05: Chunking + embedding + upsert. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -776,11 +776,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:77` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -948,9 +948,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, EMBEDDING_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1012,7 +1012,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar y aprobar una versión de modelo de embedding. Caso de uso UC-59-01: Registrar y aprobar versión de modelo. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1024,10 +1024,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1146,11 +1146,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: AI_GOVERNANCE_OFFICER, MLOPS_ENGINEER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:74` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1248,7 +1248,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir una política de acceso RAG. Caso de uso UC-59-03: Definir y publicar política. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1260,10 +1260,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1384,11 +1384,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-governance.controller.ts:123` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-governance.controller.ts:123` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1484,7 +1484,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Abrir una sesión de retrieval gobernada por consentimiento. Caso de uso UC-59-06: Sesión consent-aware. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1496,10 +1496,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, AGENT_RUNTIME, SYSTEM, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1604,7 +1604,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Materializar la evidencia citable. Caso de uso UC-59-08: Evidencia citable. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1616,11 +1616,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:128` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:128` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1652,10 +1652,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `citations` | `array<EvidenceInputDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(MAX_EVIDENCE)` `@ValidateNested({ each: true })` `@Type(() => EvidenceInputDto)` | — | `src/modules/vector_rag/dto/vector-rag.dto.ts:1035` |
-| `citations[].vectorChunkId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/vector_rag/dto/vector-rag.dto.ts:1005` |
-| `citations[].quotedTextRedacted` | `string` | Sí | — | `@IsString()` | Fragmento citado, ya redactado | `src/modules/vector_rag/dto/vector-rag.dto.ts:1012` |
-| `citations[].sourceUri` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/vector_rag/dto/vector-rag.dto.ts:1021` |
+| `citations` | `array<VectorRagEvidenceInputDto>` | Sí | mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(MAX_EVIDENCE)` `@ValidateNested({ each: true })` `@Type(() => EvidenceInputDto)` | — | `src/modules/vector_rag/dto/vector-rag.dto.ts:1035` |
+| `citations[].vectorChunkId` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `citations[].quotedTextRedacted` | `string` | Sí | — | — | Fragmento citado, ya redactado | sin fuente |
+| `citations[].sourceUri` | `string` | No | longitud máxima 500 | — | — | sin fuente |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1731,7 +1731,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Capturar feedback de la sesión. Caso de uso UC-59-09: Feedback de relevancia y seguridad. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1743,11 +1743,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:145` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:145` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1848,7 +1848,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ranquear los candidatos y filtrarlos por consentimiento y etiquetas. Caso de uso UC-59-07: Ranquear y filtrar. Dentro del módulo (descripción del modelo, en inglés): «Stores governed embeddings and retrieval evidence for protocols, policies, education, support and carefully approved clinical contexts.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_rag/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_59_vector_rag.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1860,11 +1860,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/vector_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, RETRIEVAL_WORKER, PLATFORM_ADMIN | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/vector_rag/controllers/vector-runtime.controller.ts:110` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

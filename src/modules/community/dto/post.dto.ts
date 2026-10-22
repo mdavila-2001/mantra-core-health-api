@@ -86,6 +86,18 @@ export class MentionInputDto {
   offsetEnd?: number;
 }
 
+/**
+ * Tope del cuerpo de una publicación.
+ *
+ * Era 5 000. Un artículo médico (una publicación con la etiqueta
+ * `articulo-medico`) lleva títulos, listas e imágenes intercaladas escritos como
+ * marcas dentro del mismo texto, y 5 000 caracteres no alcanzan: la pantalla de
+ * artículos ya prometía 20 000 y el servidor rechazaba con 400 todo lo que
+ * pasara de 5 000. La columna `community.posts.body_text` es `text`, así que el
+ * cambio es sólo de validación, sin DDL.
+ */
+export const POST_BODY_MAX_LENGTH = 20000;
+
 /** Cuerpo de `POST /community/profiles/{profileId}/posts` (UC-19-01). */
 export class CreatePostDto {
   /**
@@ -93,11 +105,11 @@ export class CreatePostDto {
    */
   @ApiProperty({
     description: 'Texto del post (sin PHI identificable)',
-    maxLength: 5000,
+    maxLength: POST_BODY_MAX_LENGTH,
   })
   @IsString()
   @MinLength(1)
-  @MaxLength(5000)
+  @MaxLength(POST_BODY_MAX_LENGTH)
   bodyText!: string;
 
   /**

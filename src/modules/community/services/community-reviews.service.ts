@@ -103,14 +103,14 @@ export class CommunityReviewsService {
    * @param targetSubjectId - Sujeto de la vitrina calificada.
    * @throws PreconditionFailedException si la atención no habilita la reseña.
    */
-  private async assertAtencionElegible(
+  private async assertEligibleCare(
     em: EntityManager,
     encounterId: string,
     patientProfileId: string,
     targetSubjectId: string,
   ): Promise<void> {
-    const encuentro = await this.encountersRepo.findById(em, encounterId);
-    if (!encuentro) {
+    const encounter = await this.encountersRepo.findById(em, encounterId);
+    if (!encounter) {
       // El mismo mensaje que los demás casos: decir «ese encuentro no existe»
       // le confirmaría a quien prueba uuids cuáles sí existen.
       throw new PreconditionFailedException(
@@ -118,13 +118,13 @@ export class CommunityReviewsService {
         { encounterId },
       );
     }
-    if (encuentro.patientProfileId !== patientProfileId) {
+    if (encounter.patientProfileId !== patientProfileId) {
       throw new PreconditionFailedException(
         'La atención declarada no habilita una reseña',
         { encounterId },
       );
     }
-    if (encuentro.statusConceptId !== CLIN.ENCOUNTER_FINISHED) {
+    if (encounter.statusConceptId !== CLIN.ENCOUNTER_FINISHED) {
       throw new PreconditionFailedException('La atención todavía no terminó', {
         encounterId,
       });
@@ -134,19 +134,84 @@ export class CommunityReviewsService {
     // estado**: en un encuentro terminado los participantes quedan en
     // `PART_COMPLETED`, así que el listado de «participantes activos» del módulo
     // clínico devolvería vacío justo en el único caso que habilita una reseña.
-    const participo =
+    const participated =
       (await em.findOne(EncounterParticipants, {
         encounterId,
         practitionerProfileId: targetSubjectId,
       })) !== null;
-    const atendio =
-      encuentro.primaryPractitionerId === targetSubjectId || participo;
-    if (!atendio) {
+    const attended =
+      encounter.primaryPractitionerId === targetSubjectId || participated;
+    if (!attended) {
       throw new PreconditionFailedException(
         'La atención declarada no fue con este profesional',
         { encounterId },
       );
     }
+  }
+
+  /**
+   * Califico la atención que recibí, nombrándola por el **encuentro** y no por
+   * la vitrina del profesional (C.2).
+   *
+   * ## Por qué hace falta si `publishReview` ya existe
+   *
+   * Porque el paciente no conoce —ni tiene por qué conocer— el uuid de la
+   * vitrina que va a calificar. La ficha pública se abre por slug y **no
+   * publica su id**: un identificador interno regalado a un anónimo no se
+   * vuelve a esconder. Sin esta ruta, la única forma de calificar desde la
+   * ficha era que la lectura pública filtrara ese uuid, que es exactamente lo
+   * que no hace.
+   *
+   * ## No es una segunda implementación de la regla
+   *
+   * Acá sólo se **resuelve el destinatario**: del encuentro sale el
+   * profesional que atendió y de él su vitrina. Todo lo demás —que la atención
+   * sea de quien reseña, que haya terminado, que la haya atendido ese
+   * profesional y que no haya reseñado ya ese encuentro— lo sigue comprobando
+   * `publishReview`, en un solo lugar.
+   *
+   * ## El error no confirma nada
+   *
+   * Un encuentro que no existe, uno sin profesional y uno cuyo profesional no
+   * tiene vitrina dan **el mismo** mensaje que una atención ajena. Distinguirlos
+   * le confirmaría a quien prueba uuids cuáles sí existen, que es justo lo que
+   * `assertAtencionElegible` evita con el mismo texto.
+   *
+   * @param dto - La atención, las estrellas, el texto y cómo quiere firmar.
+   * @param actor - El paciente autenticado.
+   * @returns El id de la reseña y si quedó verificada.
+   * @throws PreconditionFailedException si la atención no habilita una reseña.
+   */
+  async publishOwnReview(
+    dto: CreateReviewDto,
+    actor: AuthenticatedUser,
+  ): Promise<ReviewResponseDto> {
+    const target = await this.resolveTargetOfEncounter(dto.verifiedEncounterId);
+    return this.publishReview(target, dto, actor);
+  }
+
+  /**
+   * La vitrina del profesional que atendió ese encuentro.
+   *
+   * @param encounterId - La atención declarada.
+   * @returns El identificador del perfil público a calificar.
+   * @throws PreconditionFailedException si no se puede resolver, con el mismo
+   *   mensaje que cualquier otro motivo de rechazo.
+   */
+  private async resolveTargetOfEncounter(encounterId: string): Promise<string> {
+    const em = this.em.fork();
+    const encounter = await this.encountersRepo.findById(em, encounterId);
+    const practitionerId = encounter?.primaryPractitionerId;
+    const showcase = practitionerId
+      ? await this.profilesRepo.findByTarget(em, practitionerId)
+      : null;
+    if (!showcase) {
+      throw new PreconditionFailedException(
+        'La atención declarada no habilita una reseña',
+        { encounterId },
+      );
+    }
+    return showcase.id;
   }
 
   /** UC-19-11: publica una review verificada con puntuaciones por dimensión. */
@@ -182,7 +247,7 @@ export class CommunityReviewsService {
 
       // La elegibilidad: la atención tiene que existir, ser de este paciente,
       // haber sido con este profesional y estar terminada.
-      await this.assertAtencionElegible(
+      await this.assertEligibleCare(
         tx,
         dto.verifiedEncounterId,
         reviewerPatientProfileId,
@@ -308,16 +373,16 @@ export class CommunityReviewsService {
         });
       }
 
-      const previa = await this.reviewsRepo.findResponseByResponder(
+      const previous = await this.reviewsRepo.findResponseByResponder(
         tx,
         reviewId,
         profileId,
       );
-      if (previa) {
+      if (previous) {
         throw new ConflictException('Ya respondiste esta reseña', { reviewId });
       }
 
-      const respuesta = this.reviewsRepo.createResponse(tx, {
+      const response = this.reviewsRepo.createResponse(tx, {
         reviewId,
         responderPublicProfileId: profileId,
         responseText: dto.responseText,
@@ -326,7 +391,7 @@ export class CommunityReviewsService {
       });
       await tx.flush();
 
-      return { id: respuesta.id };
+      return { id: response.id };
     });
   }
 }

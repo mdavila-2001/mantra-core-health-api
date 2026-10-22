@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `profiles`.
- * 131 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 132 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const profilesIndexes: readonly IndexTuple[] = [
@@ -30,6 +30,7 @@ export const profilesIndexes: readonly IndexTuple[] = [
   ['jurisdiction_authorizations', 'ix_jurisdiction_authorizations_jurisdiction_concept_id', ['jurisdiction_concept_id'], false, 'btree'],
   ['jurisdiction_authorizations', 'ix_jurisdiction_authorizations_practice_scope_concept_id', ['practice_scope_concept_id'], false, 'btree'],
   ['jurisdiction_authorizations', 'ix_jurisdiction_authorizations_state_concept_id', ['state_concept_id'], false, 'btree'],
+  ['jurisdiction_authorizations', 'ix_jurisdiction_authorizations_file_id', ['file_id'], false, 'btree'],
   ['jurisdiction_authorizations', 'ix_jurisdiction_authorizations_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['jurisdiction_authorizations', 'ix_jurisdiction_authorizations_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['patient_identity_links', 'ix_patient_identity_links_patient_profile_id', ['patient_profile_id'], false, 'btree'],

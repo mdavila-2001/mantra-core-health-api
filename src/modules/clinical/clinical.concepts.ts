@@ -116,6 +116,18 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'SR_REVOKED',
       display: 'Service request revoked',
     },
+    /**
+     * Antiduplicación de estudios (v4.2.17, subtarea 3.2). La orden nace en
+     * este estado cuando el médico eligió reutilizar un informe previo en vez
+     * de repetir el estudio: queda enlazada a él vía
+     * `previous_diagnostic_report_id`, sin `duplicate_override_reason`, y no
+     * es facturable (`LinkedClaimOrderService` la excluye). Value set
+     * dinámico, dueño este archivo: sin nota `vs_*` en la bóveda (v4.1.9).
+     */
+    SERVICE_REQUEST_SATISFIED_BY_PRIOR: {
+      code: 'SR_SATISFIED_BY_PRIOR',
+      display: 'Service request satisfied by prior result',
+    },
     SERVICE_REQUEST_INTENT_PLAN: { code: 'SR_PLAN', display: 'Plan intent' },
     SERVICE_REQUEST_INTENT_PROPOSAL: {
       code: 'SR_PROPOSAL',
@@ -477,6 +489,19 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       display: 'Condition recurrence',
     },
     CONDITION_RELAPSE: { code: 'COND_RELAPSE', display: 'Condition relapse' },
+    /* Estado de verificación (HL7 FHIR `condition-ver-status`), completado más
+       allá de `CONDITION_CONFIRMED`: un diagnóstico presuntivo (`PROVISIONAL`)
+       se decide con `POST /clinical/conditions/:id/verification` y termina
+       confirmado o refutado. `REFUTED` es terminal: lo descartado no vuelve a
+       estudio, se registra de nuevo si reaparece. */
+    CONDITION_PROVISIONAL: {
+      code: 'COND_PROVISIONAL',
+      display: 'Condition provisional',
+    },
+    CONDITION_REFUTED: {
+      code: 'COND_REFUTED',
+      display: 'Condition refuted',
+    },
     /* Curso clínico: eje distinto del estado. Decide qué transiciones son
        clínicamente válidas (una condición `CHRONIC` no pasa a `RESOLVED`) y si
        tiene sentido ofrecer una fecha esperada de resolución. No es un concepto
@@ -534,7 +559,7 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     ALLERGY_CRITICALITY_HIGH: { code: 'ALG_HIGH', display: 'High criticality' },
 
     // --- medication_requests / records -----------------------------------------
-    // Máquina de estados canónica (REDESA CAN-RX-001..004):
+    // Máquina de estados canónica (ALOVIDA CAN-RX-001..004):
     // DRAFT (editable/eliminable por el autor) → ISSUED (inmutable, sellada) →
     // dispensación (administer → COMPLETED). Una receta emitida NUNCA se edita:
     // corrección = REPLACED (+ nueva receta relacionada) o INVALIDATED; renovar =

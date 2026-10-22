@@ -52,6 +52,16 @@ export class InsuranceClaims {
   }) // FK → insurance.prior_authorization_requests
   priorAuthorizationRequestId?: string;
 
+  @Property({
+    fieldName: 'inventory_reservation_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → pharmacy_inventory.inventory_reservations
+  inventoryReservationId?: string;
+
+  @Property({ fieldName: 'service_request_id', type: 'uuid', nullable: true }) // FK → clinical.service_requests
+  serviceRequestId?: string;
+
   /**
    * Valor de claim identifier mantenido por la instancia.
    */

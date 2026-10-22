@@ -3,13 +3,13 @@
 # Flujos del módulo `qa_lab`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 13 (13 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 21 (16 con decisiones propias, 5 sin ellas)
 - Inventario de endpoints del módulo: [qa_lab](../endpoints/qa_lab.md)
 
 ## Proceso: Módulo 36 — Laboratorio de Pruebas y Defectos
 
-- **Código:** `qa_lab` · **Agrupación:** MIXTO · **Operaciones:** 13
-- **Actores:** QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · SYSTEM
+- **Código:** `qa_lab` · **Agrupación:** MIXTO · **Operaciones:** 21
+- **Actores:** PLATFORM_ADMIN · QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/qa_lab/README.md`
 
@@ -39,7 +39,7 @@ defecto: firma nueva ──> open        firma repetida ──> occurrences++ (y
               ↘ rejected        ↘ triaged        ↘ in_progress
 ```
 
-_Fuente: `src/modules/qa_lab/README.md:31`_
+_Fuente: `src/modules/qa_lab/README.md:72`_
 
 ### Etapas y operaciones
 
@@ -58,8 +58,16 @@ _Fuente: `src/modules/qa_lab/README.md:31`_
 | `UC-36-11` | Programar ejecución automática | POST /qa/schedules | QA_ADMIN · QA_ENGINEER | MEDIO | 4 |
 | `UC-36-12` | Enlazar evidencia a release | POST /qa/runs/{runId}/link-release | RELEASE_MANAGER · QA_ADMIN | MEDIO | 3 |
 | `ctrl:QaLabInternalController` | Operaciones de QaLabInternalController que el README no asigna a un caso de uso | POST /internal/qa/schedules/run-due | SYSTEM · QA_ADMIN | MEDIO | 7 |
+| `ctrl:QaLabReadController` | Operaciones de QaLabReadController que el README no asigna a un caso de uso | GET /admin/qa/defects | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 1 |
+|  |  | GET /admin/qa/environments | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 1 |
+|  |  | GET /admin/qa/flows | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 5 |
+|  |  | GET /admin/qa/flows/{flowId} | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 5 |
+|  |  | GET /admin/qa/runs | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 1 |
+|  |  | GET /admin/qa/runs/{runId} | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 4 |
+|  |  | GET /admin/qa/suites | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 3 |
+|  |  | GET /admin/qa/suites/{suiteId} | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 3 |
 
-### Diagrama — etapas `UC-36-01`, `UC-36-02`, `UC-36-03`…
+### Diagrama 1 de 2 — etapas `UC-36-01`, `UC-36-02`, `UC-36-03`…
 
 ```mermaid
 flowchart LR
@@ -195,11 +203,71 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
+### Diagrama 2 de 2 — etapas `ctrl:QaLabReadController`
+
+```mermaid
+flowchart LR
+  a2(["QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN"]):::actor
+  t3[("qa_lab.test_defects")]:::tabla
+  t5[("qa_lab.test_environments")]:::tabla
+  t7[("qa_lab.assertion_results")]:::tabla
+  t8[("qa_lab.test_case_results")]:::tabla
+  t9[("qa_lab.test_cases")]:::tabla
+  t10[("qa_lab.test_runs")]:::tabla
+  t11[("qa_lab.test_suites")]:::tabla
+  t17[("qa_lab.test_assertions")]:::tabla
+  subgraph s0["ctrl:QaLabReadController · Operaciones de QaLabReadController que el README no…"]
+    o1["GET /admin/qa/defects"]:::op
+    o4["GET /admin/qa/environments"]:::op
+    o6["GET /admin/qa/flows"]:::op
+    o12["GET /admin/qa/flows/{flowId}"]:::op
+    o13["GET /admin/qa/runs"]:::op
+    o14["GET /admin/qa/runs/{runId}"]:::op
+    o15["GET /admin/qa/suites"]:::op
+    o16["GET /admin/qa/suites/{suiteId}"]:::op
+  end
+  a2 --> o1
+  o1 -->|"LEE"| t3
+  a2 --> o4
+  o4 -->|"LEE"| t5
+  a2 --> o6
+  o6 -->|"LEE"| t7
+  o6 -->|"LEE"| t8
+  o6 -->|"LEE"| t9
+  o6 -->|"LEE"| t10
+  o6 -->|"LEE"| t11
+  a2 --> o12
+  o12 -->|"LEE"| t7
+  o12 -->|"LEE"| t8
+  o12 -->|"LEE"| t9
+  o12 -->|"LEE"| t10
+  o12 -->|"LEE"| t11
+  a2 --> o13
+  o13 -->|"LEE"| t10
+  a2 --> o14
+  o14 -->|"LEE"| t7
+  o14 -->|"LEE"| t8
+  o14 -->|"LEE"| t9
+  o14 -->|"LEE"| t10
+  a2 --> o15
+  o15 -->|"LEE"| t9
+  o15 -->|"LEE"| t10
+  o15 -->|"LEE"| t11
+  a2 --> o16
+  o16 -->|"LEE"| t17
+  o16 -->|"LEE"| t9
+  o16 -->|"LEE"| t11
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
 ## Máquinas de estado
 
 ### Máquina de estados `DEFECT_TRANSITIONS`
 
-Declarada en `src/modules/qa_lab/services/qa-runs.service.ts:78`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+Declarada en `src/modules/qa_lab/services/qa-runs.service.ts:101`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
 
 ```mermaid
 stateDiagram-v2
@@ -228,7 +296,120 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. POST /internal/qa/schedules/run-due
+#### 1. GET /admin/qa/flows/{flowId}
+
+Árbol de decisión de un flujo: pasos, endpoints (declarado o ausente), ramas válidas, límite e inválidas y su último veredicto
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Flujo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a QaFlowsService.detail"]:::llamada
+  n2 --> n3
+  n4{"!flow"}:::decision
+  n3 --> n4
+  n5(["404 NOT_FOUND Flujo no encontrado"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a QaFlowsService.loadState"]:::llamada
+  n4 -->|"no"| n6
+  n7[("LEE qa_lab.test_suites · LEE qa_lab.test_cases · LEE qa_lab.test_runs · LEE qa_lab.test_case_results")]:::efecto
+  n6 --> n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. GET /admin/qa/runs/{runId}
+
+Corrida con resultados por caso y veredicto por aserción (valor observado)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a QaLabReadService.getRun"]:::llamada
+  n2 --> n3
+  n4[("LEE qa_lab.test_runs")]:::efecto
+  n3 --> n4
+  n5{"!run"}:::decision
+  n4 --> n5
+  n6(["404 NOT_FOUND Corrida no encontrada"]):::error
+  n5 -->|"sí"| n6
+  n7[("LEE qa_lab.test_case_results · LEE qa_lab.assertion_results · LEE qa_lab.test_cases")]:::efecto
+  n5 -->|"no"| n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. GET /admin/qa/suites/{suiteId}
+
+Suite con casos y aserciones
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a QaLabReadService.getSuite"]:::llamada
+  n2 --> n3
+  n4[("LEE qa_lab.test_suites")]:::efecto
+  n3 --> n4
+  n5{"!suite"}:::decision
+  n4 --> n5
+  n6(["404 NOT_FOUND Suite no encontrada"]):::error
+  n5 -->|"sí"| n6
+  n7[("LEE qa_lab.test_cases · LEE qa_lab.test_assertions")]:::efecto
+  n5 -->|"no"| n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. POST /internal/qa/schedules/run-due
 
 Evaluar programaciones vencidas y encolar sus corridas
 
@@ -330,7 +511,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. POST /qa/case-results/{resultId}/evaluate
+#### 5. POST /qa/case-results/{resultId}/evaluate
 
 Evaluar las aserciones y fijar el resultado del caso
 
@@ -406,7 +587,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /qa/defects
+#### 6. POST /qa/defects
 
 Registrar un defecto detectado
 
@@ -479,7 +660,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. PATCH /qa/defects/{defectId}
+#### 7. PATCH /qa/defects/{defectId}
 
 Triage y transición de estado del defecto
 
@@ -560,7 +741,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /qa/environments
+#### 8. POST /qa/environments
 
 Registrar un entorno de pruebas gobernado
 
@@ -609,7 +790,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /qa/runs
+#### 9. POST /qa/runs
 
 Disparar una corrida de pruebas
 
@@ -704,7 +885,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /qa/runs/{runId}/artifacts
+#### 10. POST /qa/runs/{runId}/artifacts
 
 Adjuntar un artefacto de evidencia a la corrida
 
@@ -764,7 +945,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /qa/runs/{runId}/cases/{caseId}/execute
+#### 11. POST /qa/runs/{runId}/cases/{caseId}/execute
 
 Registrar la ejecución del caso con sus payloads
 
@@ -851,7 +1032,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /qa/runs/{runId}/finalize
+#### 12. POST /qa/runs/{runId}/finalize
 
 Cerrar la corrida y consolidar totales
 
@@ -902,7 +1083,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /qa/runs/{runId}/link-release
+#### 13. POST /qa/runs/{runId}/link-release
 
 Enlazar la evidencia de la corrida a un release
 
@@ -957,7 +1138,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /qa/schedules
+#### 14. POST /qa/schedules
 
 Programar la ejecución automática de la suite
 
@@ -1027,7 +1208,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /qa/suites/{suiteId}/cases
+#### 15. POST /qa/suites/{suiteId}/cases
 
 Definir un caso de prueba con sus aserciones
 
@@ -1100,7 +1281,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /qa/suites/{suiteId}/publish
+#### 16. POST /qa/suites/{suiteId}/publish
 
 Publicar la suite y activar sus casos
 
@@ -1156,3 +1337,14 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+### Operaciones sin decisiones propias
+
+Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
+
+| Operación | Respuestas posibles | Tablas |
+|---|---|---|
+| GET /admin/qa/defects | 200, 401, 403, 429 | 1 |
+| GET /admin/qa/environments | 200, 401, 403, 429 | 1 |
+| GET /admin/qa/flows | 200, 401, 403, 429 | 5 |
+| GET /admin/qa/runs | 200, 401, 403, 429 | 1 |
+| GET /admin/qa/suites | 200, 401, 403, 429 | 3 |

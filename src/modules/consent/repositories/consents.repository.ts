@@ -92,6 +92,41 @@ export class ConsentsRepository {
     });
   }
 
+  /**
+   * Solicitudes de vínculo (FT-07-R05) que un profesional ya le hizo a un
+   * paciente, de cualquier estado — para el guard de "ya hay una en curso".
+   */
+  findByPatientCreatorCategory(
+    em: EntityManager,
+    patientProfileId: string,
+    createdByUserId: string,
+    categoryConceptId: string,
+  ): Promise<Consents[]> {
+    return em.find(Consents, {
+      patientProfileId,
+      createdByUserId,
+      categoryConceptId,
+    });
+  }
+
+  /** Solicitudes pendientes de decisión de un paciente concreto (FT-07-R05). */
+  findPendingForPatient(
+    em: EntityManager,
+    patientProfileId: string,
+    categoryConceptId: string,
+    pendingStatusConceptId: string,
+  ): Promise<Consents[]> {
+    return em.find(
+      Consents,
+      {
+        patientProfileId,
+        categoryConceptId,
+        statusConceptId: pendingStatusConceptId,
+      },
+      { orderBy: { createdAt: 'DESC' } },
+    );
+  }
+
   /** Consentimientos activos cuyo `valid_to` ya venció (barrido de expiración). */
   findExpirable(
     em: EntityManager,

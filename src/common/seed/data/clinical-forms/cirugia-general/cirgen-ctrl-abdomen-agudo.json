@@ -1,0 +1,193 @@
+{
+  "code": "CIRGEN_CTRL_ABDOMEN_AGUDO",
+  "name": "Abdomen agudo: evaluación quirúrgica",
+  "specialty": { "code": "CIRUGIA_GENERAL", "display": "Cirugía General" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Semiología del dolor, signos peritoneales y escala de Alvarado (publicada)."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "dolor_abdominal",
+      "name": "Dolor abdominal",
+      "dataType": "boolean",
+      "required": true
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "dolor_localizacion",
+      "name": "Dolor — ¿dónde se localiza?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "dolor_inicio",
+      "name": "Dolor — inicio",
+      "dataType": "string",
+      "required": false,
+      "options": ["Súbito", "Progresivo"],
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "dolor_caracter",
+      "name": "Dolor — carácter",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Opresivo",
+        "Punzante",
+        "Urente (ardor)",
+        "Cólico",
+        "Pulsátil",
+        "Sordo",
+        "Lancinante",
+        "Eléctrico o en descarga"
+      ],
+      "allowOther": true,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "dolor_irradiado",
+      "name": "Dolor — ¿se irradia?",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "dolor_irradiacion",
+      "name": "¿Hacia dónde se irradia?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor_irradiado", "equals": true }
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "dolor_intensidad",
+      "name": "Dolor — intensidad (0 a 10, escala numérica)",
+      "dataType": "integer",
+      "required": true,
+      "description": "0 = sin dolor; 10 = el peor dolor imaginable.",
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "dolor_patron",
+      "name": "Dolor — patrón temporal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Continuo",
+        "Intermitente",
+        "Nocturno",
+        "Con el esfuerzo",
+        "Posprandial"
+      ],
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "dolor_agravantes_atenuantes",
+      "name": "Dolor — qué lo agrava y qué lo alivia",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "dolor_abdominal", "equals": true }
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "signos_peritoneales",
+      "name": "Signos peritoneales",
+      "dataType": "json",
+      "required": true,
+      "options": ["Defensa", "Rebote", "Rovsing", "Psoas", "Murphy", "Ninguno"],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "alvarado",
+      "name": "Escala de Alvarado",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Migración del dolor a fosa ilíaca derecha",
+        "Anorexia",
+        "Náuseas o vómitos",
+        "Dolor en fosa ilíaca derecha (2)",
+        "Rebote",
+        "Fiebre > 37,3 °C",
+        "Leucocitosis > 10 000 (2)",
+        "Desviación a la izquierda"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "alvarado_puntaje",
+      "name": "Alvarado — puntaje",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "imagen",
+      "name": "Imagen — hallazgo",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: abdomen agudo",
+      "code": "decision",
+      "name": "Decisión",
+      "dataType": "string",
+      "required": false,
+      "options": ["Cirugía", "Observación", "Alta con signos de alarma"]
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

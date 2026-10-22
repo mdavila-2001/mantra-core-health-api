@@ -1,0 +1,8 @@
+﻿ANTES  total_mock=643 total_api=1438 matched=572 mismatch=0 missing=71
+AHORA  total_mock=643 total_api=1448 matched=581 mismatch=0 missing=62
+
+Rutas del Hito 4 que siguen en Missing in Backend:
+  GET /identity/verification-types  (identity.handlers.ts:127)
+  POST /identity/verification-cases/:id/checks:plan  (identity.handlers.ts:209)
+  POST /insurance/received-claims/:id/invoice/annulment  (insurer-received-claims.handlers.ts:350)
+  POST /insurance/received-claims/:id/invoice  (insurer-received-claims.handlers.ts:369)

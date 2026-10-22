@@ -1,0 +1,148 @@
+{
+  "code": "NUTRI_CTRL_DIABETES",
+  "name": "Plan alimentario en diabetes",
+  "specialty": { "code": "NUTRICION", "display": "Nutrición y Dietética" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "HEARTS-D: diagnóstico y manejo de la diabetes tipo 2",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/who-ucn-ncd-20.1",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Recordatorio, distribución de carbohidratos y glucemias."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de diabetes",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diabetes",
+      "code": "peso_kg",
+      "name": "Peso (kg)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: diabetes",
+      "code": "hba1c",
+      "name": "Última HbA1c (%)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diabetes",
+      "code": "comidas_al_dia",
+      "name": "Comidas al día",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diabetes",
+      "code": "recordatorio_24h",
+      "name": "Recordatorio de 24 horas",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diabetes",
+      "code": "hipoglucemias",
+      "name": "Hipoglucemias",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Conteo de carbohidratos",
+        "Horarios regulares",
+        "Qué hacer en una hipoglucemia"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

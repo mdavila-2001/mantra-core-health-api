@@ -15,7 +15,8 @@
 #     devolvía 500 en la primera escritura. Que el modelo tenga repositorio
 #     propio (B-2, commit 19ef5a17) arregla el versionado, no el despliegue.
 #     `database/` es la copia versionada AQUÍ; se refresca con `yarn db:vendor`
-#     y CI la verifica con `yarn db:vendor:check`.
+#     y CI la verifica con `yarn db:vendor:check`. Desde el punto 7 no se monta:
+#     viaja dentro de las imágenes `*-init`.
 #
 #  2. HAY UN PASO DE MIGRACIÓN EXPLÍCITO (`api-migrate`) ANTES DE LA API.
 #     Medido contra una base recién construida desde `database/SQL` (modelo del
@@ -75,6 +76,27 @@
 #     arranque de cualquier worker si `MOCK_PROVIDER_BASE_URL` trae valor en
 #     producción; la variable se fija vacía explícitamente más abajo.
 #
+#  7. LOS `*-init` NO MONTAN NADA DEL REPOSITORIO: LO HORNEAN.
+#     Coolify clona el repositorio DENTRO de un contenedor auxiliar
+#     (`/artifacts/<uuid>`) y desde ahí lanza `docker compose up` contra el
+#     socket del host. Un `volumes: ./docker/db-init:/init/bin` lo resuelve el
+#     DEMONIO, que corre en el host y donde esa ruta NO existe: Docker crea el
+#     directorio vacío y lo monta igual, sin avisar. El despliegue moría así:
+#
+#         bash: /init/bin/init-postgres.sh: No such file or directory
+#         service "postgres-init" didn't complete successfully: exit 127
+#
+#     —127 es «orden no encontrada», y bash lo devuelve también cuando el
+#     script que se le pasa no existe—. En local NO se reproduce, porque ahí el
+#     demonio ve el mismo disco que el checkout; de ahí que el compose de
+#     desarrollo siga montando el DDL y este NO pueda.
+#
+#     El contexto de build sí viaja del contenedor auxiliar al demonio, que es
+#     como se construyen `api`, `api-migrate` y los workers. Por eso el script
+#     y `database/` van dentro de la imagen: `docker/db-init/Dockerfile`, una
+#     etapa por servicio. `minio-init` no aparece ahí porque su entrypoint es
+#     literal en este archivo y no lee nada del repositorio.
+#
 # -------------------------------------------------------------------------
 # RECURSOS. Con los 22 workers el stack pide del orden de **8 GB de RAM**.
 # Para un VPS de 4 GB, comentar los servicios de la sección «WORKERS
@@ -118,11 +140,19 @@ x-app-env: &app-env
   FILE_STORAGE_ADAPTER: ${FILE_STORAGE_ADAPTER:-local}
   FILE_STORAGE_LOCAL_DIR: ${FILE_STORAGE_LOCAL_DIR:-./storage/uploads}
   FILE_STORAGE_MAX_SIZE_BYTES: ${FILE_STORAGE_MAX_SIZE_BYTES:-10485760}
+  # Escaneo antimalware APAGADO de forma explícita (TX-33): en Coolify no corre
+  # `worker-files` ni clamd, así que ninguna versión pasa a SCAN_CLEAN. Las lecturas
+  # por contexto (resultado del paciente, documento del expediente) no lo exigen;
+  # la URL firmada sí y responde 422 `details.reason = SCAN_PENDING`. Encenderlo
+  # exige sumar `clamav` y `worker-files` (ver docker-compose.yml).
+  MALWARE_SCAN_ENABLED: ${MALWARE_SCAN_ENABLED:-false}
   FILE_STORAGE_S3_BUCKET: ${MINIO_BUCKET:-alovida-files}
   FILE_STORAGE_S3_REGION: ${FILE_STORAGE_S3_REGION:-us-east-1}
   FILE_STORAGE_S3_ENDPOINT: http://minio:9000
   FILE_STORAGE_S3_FORCE_PATH_STYLE: "true"
-  FILE_STORAGE_S3_PREFIX: ${FILE_STORAGE_S3_PREFIX:-audio-assets}
+  # Prefijo propio de los archivos: `audio-assets` es el del módulo de audio y no
+  # se comparte (TX-34).
+  FILE_STORAGE_S3_PREFIX: ${FILE_STORAGE_S3_PREFIX:-uploads}
   FILE_STORAGE_S3_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
   FILE_STORAGE_S3_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
 
@@ -146,6 +176,10 @@ x-app-env: &app-env
   # que cualquiera falsifique su IP con una cabecera `X-Forwarded-For`.
   TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-2}
 
+  # Orígenes del frontend si vive en otro dominio (Hostinger). Vacío = CORS
+  # denegado, que es lo correcto con el nginx del frontend delante.
+  CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
+
   # --- Primer administrador ----------------------------------------------
   # `BOOTSTRAP_ADMIN_ALLOW_PRODUCTION` tiene que ser `true` explícito o el seed
   # se salta en producción y no queda NINGUNA cuenta con SECURITY_ADMIN: sin
@@ -161,7 +195,14 @@ x-app-env: &app-env
   SEED_DEMO_ALLOW_PRODUCTION: ${SEED_DEMO_ALLOW_PRODUCTION:-false}
 
   # --- Postura de seguridad ----------------------------------------------
+  # Cookie httpOnly del refresh (TX-10). Se enciende junto con PUBLIC_REFRESH_COOKIE
+  # del front (docs/progress/DECISIONS.md, D-I): con un solo lado la sesión se pierde.
   AUTH_REFRESH_COOKIE_ENABLED: ${AUTH_REFRESH_COOKIE_ENABLED:-false}
+  AUTH_REFRESH_COOKIE_NAME: ${AUTH_REFRESH_COOKIE_NAME:-redesa_refresh}
+  AUTH_REFRESH_COOKIE_PATH: ${AUTH_REFRESH_COOKIE_PATH:-/iam/auth/token/refresh}
+  AUTH_REFRESH_COOKIE_SAMESITE: ${AUTH_REFRESH_COOKIE_SAMESITE:-strict}
+  # Desafío MFA en el login para cuentas con factor verificado (TX-29). Apagado.
+  AUTH_MFA_CHALLENGE_ENABLED: ${AUTH_MFA_CHALLENGE_ENABLED:-false}
   AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-true}
   RLS_ENFORCE: ${RLS_ENFORCE:-false}
   # El bypass de verificación aborta el arranque si llega en `true` con
@@ -292,6 +333,24 @@ x-worker-healthcheck: &worker-healthcheck
   retries: 3
   start_period: 60s
 
+# Rotación de logs. Sin esto el driver json-file de Docker crece sin techo y,
+# con ~30 contenedores escribiendo, es el disco el que tumba el servidor. 30 MB
+# por contenedor como máximo (3 archivos de 10 MB).
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# Etiqueta que lee `autoheal` (stack de monitoreo, `infra/monitoring/`).
+# Docker NO reinicia un contenedor `unhealthy`: `restart: always` sólo actúa
+# cuando el proceso termina. Un Node colgado con el proceso vivo quedaba
+# colgado para siempre. Sólo la llevan la API y los workers, que no guardan
+# estado: reiniciar Postgres u OpenSearch a mitad de una recuperación larga
+# puede convertir un arranque lento en un bucle, y ésos se vigilan con alertas.
+x-autoheal-labels: &autoheal-labels
+  autoheal: "true"
+
 # Plantilla de los 22 workers: misma imagen que la API, mismo entorno, y lo
 # único que cambia es el `command`. Se fusiona con `<<:` para no repetir
 # veintidós veces catorce líneas idénticas — repetidas, un cambio se aplica a
@@ -305,6 +364,8 @@ x-worker: &worker
       GIT_COMMIT: ${SOURCE_COMMIT:-desconocido}
       APP_VERSION: ${APP_VERSION:-desconocido}
   restart: always
+  logging: *logging
+  labels: *autoheal-labels
   environment:
     <<: *app-env
   deploy:
@@ -327,10 +388,21 @@ services:
   postgres:
     image: timescale/timescaledb-ha:pg18
     restart: always
+    logging: *logging
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Puerto PUBLICADO EN EL HOST para que los testers de datos entren desde
+    # fuera con un cliente SQL. Es la ÚNICA base del stack que se expone: Mongo,
+    # Redis, OpenSearch y MinIO siguen solo en la red interna `alovida`.
+    # Postgres exige contraseña (scram-sha-256) a toda conexión que no sea
+    # local, así que el rol `alovida` NO se comparte: a los testers se les da
+    # el rol de solo lectura de `scripts/postgres/provision-roles.sql`.
+    # Cambiar a `127.0.0.1:5432:5432` para volver a cerrarlo y entrar por
+    # túnel SSH. Ver docs/operations/coolify.md § 7.
+    ports:
+      - "${POSTGRES_PUBLIC_PORT:-5432}:5432"
     volumes:
       # `timescaledb-ha` usa PGDATA=/home/postgres/pgdata/data, NO la ruta de la
       # imagen oficial de postgres. Montado en /var/lib/postgresql/data el
@@ -348,18 +420,21 @@ services:
 
   # One-shot: aplica el DDL canónico versionado en `database/`.
   postgres-init:
-    image: timescale/timescaledb-ha:pg18
+    # El DDL y el script van HORNEADOS, no montados. Ver el punto 7 de la
+    # cabecera y `docker/db-init/Dockerfile`: en Coolify un bind del
+    # repositorio llega vacío y esto moría con `exit 127`.
+    image: ${DB_INIT_PG_IMAGE:-alovida-postgres-init:coolify}
+    build:
+      context: .
+      dockerfile: docker/db-init/Dockerfile
+      target: postgres-init
     restart: "no"
+    logging: *logging
     entrypoint: ["bash", "/init/bin/init-postgres.sh"]
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      # RUTAS DENTRO DEL REPOSITORIO. Ver el punto 1 de la cabecera.
-      - ./database/SQL:/init/SQL:ro
-      - ./database/NoSQL:/init/NoSQL:ro
-      - ./docker/db-init:/init/bin:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -369,6 +444,7 @@ services:
   mongodb:
     image: mongo:8.2.12
     restart: always
+    logging: *logging
     volumes:
       - mongodb_data:/data/db
     healthcheck:
@@ -381,14 +457,17 @@ services:
       - alovida
 
   mongo-init:
-    image: mongo:8.2.12
+    # Horneado, igual que `postgres-init`. Ver el punto 7 de la cabecera.
+    image: ${DB_INIT_MONGO_IMAGE:-alovida-mongo-init:coolify}
+    build:
+      context: .
+      dockerfile: docker/db-init/Dockerfile
+      target: mongo-init
     restart: "no"
+    logging: *logging
     entrypoint: ["bash", "/init/bin/init-mongo.sh"]
     environment:
       MONGO_DB: ${MONGO_DB:-alovida_document_store}
-    volumes:
-      - ./database/NoSQL/55_document_store_mongodb:/init/mongo:ro
-      - ./docker/db-init:/init/bin:ro
     depends_on:
       mongodb:
         condition: service_healthy
@@ -398,6 +477,7 @@ services:
   redis:
     image: redis:8.10-alpine
     restart: always
+    logging: *logging
     # `--save 60 1` conserva el snapshot: Redis guarda el estado del limitador
     # de tasa y de las colas, y perderlo en cada reinicio del contenedor no es
     # gratis.
@@ -415,6 +495,7 @@ services:
   opensearch:
     image: opensearchproject/opensearch:3.8.0
     restart: always
+    logging: *logging
     environment:
       - cluster.name=alovida-cluster
       - node.name=alovida-node1
@@ -441,12 +522,15 @@ services:
       - alovida
 
   opensearch-init:
-    image: curlimages/curl:8.21.0
+    # Horneado, igual que `postgres-init`. Ver el punto 7 de la cabecera.
+    image: ${DB_INIT_OS_IMAGE:-alovida-opensearch-init:coolify}
+    build:
+      context: .
+      dockerfile: docker/db-init/Dockerfile
+      target: opensearch-init
     restart: "no"
+    logging: *logging
     entrypoint: ["/bin/sh", "/init/bin/init-opensearch.sh"]
-    volumes:
-      - ./database/NoSQL/57_search_platform_opensearch:/init/os:ro
-      - ./docker/db-init:/init/bin:ro
     depends_on:
       opensearch:
         condition: service_healthy
@@ -454,8 +538,25 @@ services:
       - alovida
 
   minio:
-    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    # quay.io y Docker Hub ya no sirven `minio/minio` sin autenticación: un
+    # `docker pull` de este tag devuelve 401 (quay.io) o «pull access denied»
+    # (Docker Hub), comprobado el 2026-10-07 desde 62.169.18.132. Coolify corre
+    # `docker compose pull` antes de cada `up`, así que en un host sin la imagen
+    # en caché TODO despliegue fallaba; `pull_policy: missing` solo lo salvaba
+    # donde la imagen ya estaba bajada desde antes del bloqueo.
+    #
+    # `bitnamilegacy/minio:2025.4.22` es el MISMO binario
+    # (RELEASE.2025-04-22T22-12-26Z, commit 0d7408fc), se descarga sin login y
+    # trae `mc` para el healthcheck. Se salta el entrypoint de Bitnami y se corre
+    # como root para conservar el comando y la ruta `/data` de siempre: el
+    # volumen `minio_data` existente sirve tal cual. Es la misma imagen que ya
+    # corre sana en 62.169.18.132 (dev y test) desde el 2026-10-06.
+    image: bitnamilegacy/minio:2025.4.22
+    user: "0:0"
+    entrypoint: ["minio"]
+    pull_policy: missing
     restart: always
+    logging: *logging
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
@@ -475,16 +576,35 @@ services:
   # en `src/`). Contra un MinIO recién levantado, la primera subida de audio o
   # de archivo por S3 muere con `NoSuchBucket` — y el worker lo registra como
   # fallo de proveedor, que manda a buscar el problema donde no está.
+  #
+  # Imagen cambiada de `quay.io/minio/mc` a `amazon/aws-cli` (M1, 2026-09-26):
+  # MinIO retiró el acceso público anónimo a sus imágenes en Quay.io. Se
+  # reprodujo en vivo contra el VPS: `docker pull` de CUALQUIER tag de
+  # `quay.io/minio/mc` (incluidas versiones de 2023) devuelve 401 Unauthorized
+  # del registro, no un error de red — y esto tumbaba TODO despliegue de esta
+  # aplicación desde antes del 2026-09-14 (todas las corridas de
+  # `docker compose pull` fallan atómicamente si un solo servicio no resuelve).
+  # El contenedor `minio-init` sólo necesita un cliente S3 para dos comandos
+  # idempotentes; `amazon/aws-cli` es S3-compatible vía `--endpoint-url`, está
+  # pinneado a una versión exacta (mismo criterio que el resto del compose) y
+  # se verificó que SÍ se puede descargar hoy desde este mismo host.
   minio-init:
-    image: minio/mc:RELEASE.2024-09-16T17-43-14Z
+    image: amazon/aws-cli:2.19.5
     restart: "no"
+    logging: *logging
     entrypoint:
       - /bin/sh
       - -c
       - |
         set -e
-        mc alias set alovida http://minio:9000 "$$MINIO_ACCESS_KEY" "$$MINIO_SECRET_KEY"
-        mc mb --ignore-existing "alovida/$$MINIO_BUCKET"
+        export AWS_ACCESS_KEY_ID="$$MINIO_ACCESS_KEY"
+        export AWS_SECRET_ACCESS_KEY="$$MINIO_SECRET_KEY"
+        export AWS_DEFAULT_REGION=us-east-1
+        if aws --endpoint-url http://minio:9000 s3api head-bucket --bucket "$$MINIO_BUCKET" 2>/dev/null; then
+          echo "=== minio-init: bucket $$MINIO_BUCKET ya existe"
+        else
+          aws --endpoint-url http://minio:9000 s3 mb "s3://$$MINIO_BUCKET"
+        fi
         echo "=== minio-init: bucket $$MINIO_BUCKET listo"
     environment:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
@@ -513,6 +633,7 @@ services:
         GIT_COMMIT: ${SOURCE_COMMIT:-desconocido}
         APP_VERSION: ${APP_VERSION:-desconocido}
     restart: "no"
+    logging: *logging
     command: ["node", "dist/src/seed-cli.js"]
     environment:
       <<: *app-env
@@ -555,9 +676,31 @@ services:
         BUILD_TIME: ${BUILD_TIME:-desconocido}
         APP_VERSION: ${APP_VERSION:-desconocido}
     restart: always
+    logging: *logging
+    labels: *autoheal-labels
     command: ["node", "dist/src/main.js"]
     environment:
       <<: *app-env
+      # El montón de V8 por debajo del techo del contenedor (1536M, abajo).
+      #
+      # V8 puede autoajustar su techo por encima de lo que
+      # `deploy.resources.limits.memory` permite: cuando eso pasa el recolector
+      # nunca llega a actuar y el kernel mata el proceso por OOM en vez de que
+      # Node libere memoria. El contenedor vuelve a arrancar solo, así que desde
+      # fuera no se ve un error: se ve un 502 durante un minuto y después todo
+      # normal. Es el mismo patrón que el compose del frontend ya documenta y
+      # corrige para su renderizador (`NODE_OPTIONS` en
+      # `deploy/docker-compose.coolify.yml` de `mantra-core-health`).
+      #
+      # 1024 sobre 1536 deja ~500M para lo que no es montón: buffers, los
+      # metadatos de las 1 179 entidades de MikroORM y las conexiones.
+      #
+      # OJO: que esto sea la causa del reinicio observado el 26/09/2026 es una
+      # hipótesis, no una medición — el token de la API de Coolify no tiene
+      # permiso para leer los logs del contenedor, así que no se pudo confirmar
+      # que el reinicio fuera un OOM. Acotar el montón es correcto de todos
+      # modos: hoy no hay ningún límite.
+      NODE_OPTIONS: '--max-old-space-size=1024'
     deploy:
       resources: *api-resources
     volumes:
@@ -617,82 +760,32 @@ services:
     command: ["node", "dist/src/worker-read_models.js"]
 
   # =======================================================================
-  # WORKERS OPCIONALES
-  # Comentar este bloque entero en un VPS de 4 GB: la API, el alta de
-  # pacientes y el resto del uso sincrónico funcionan sin ellos. Lo que se
-  # detiene es el procesamiento en segundo plano de cada dominio.
+  # WORKERS OPCIONALES — APAGADOS EN COOLIFY, A PROPÓSITO
+  #
+  # Estaban acá los dieciocho workers de dominio, y salieron por dos razones
+  # que empujan en la misma dirección.
+  #
+  # **Coolify no puede desplegar un compose de este tamaño.** Escribe el
+  # archivo en el servidor mandándolo en base64 dentro de UN argumento de
+  # shell, y Linux corta un argumento en 131 072 bytes (`MAX_ARG_STRLEN`).
+  # Con los veintidós workers, este compose expandido por Coolify pesaba
+  # 217 KB —289 KB en base64—, así que el despliegue moría siempre en el
+  # mismo paso, «Failed to write deployment configurations», antes de clonar
+  # el repositorio. No es un fallo intermitente ni de red: es determinista, y
+  # reintentar no lo arregla. Las aplicaciones de ATLAS, que sí despliegan,
+  # tienen composes de entre 2,6 y 26 KB.
+  #
+  # **Y no entrarían en memoria.** Cada worker reserva 384 MB; dieciocho son
+  # 6,9 GB de reserva sobre un VPS que ya está usando swap al completo.
+  #
+  # Es la salida que este mismo archivo proponía para un VPS chico. Lo que se
+  # detiene es el procesamiento en segundo plano de cada dominio; la API, el
+  # alta de pacientes, el directorio público y el resto del uso sincrónico
+  # funcionan sin ellos. Los cuatro esenciales de arriba siguen en pie.
+  #
+  # Para recuperarlos hay que partir el stack en varias aplicaciones de
+  # Coolify —una por grupo de workers—, no volver a pegarlos acá.
   # =======================================================================
-  worker-identity_assurance:
-    <<: *worker
-    command: ["node", "dist/src/worker-identity_assurance.js"]
-
-  worker-consent:
-    <<: *worker
-    command: ["node", "dist/src/worker-consent.js"]
-
-  worker-health_context:
-    <<: *worker
-    command: ["node", "dist/src/worker-health_context.js"]
-
-  worker-automation:
-    <<: *worker
-    command: ["node", "dist/src/worker-automation.js"]
-
-  worker-billing:
-    <<: *worker
-    command: ["node", "dist/src/worker-billing.js"]
-
-  worker-community:
-    <<: *worker
-    command: ["node", "dist/src/worker-community.js"]
-
-  worker-cross_store_consistency:
-    <<: *worker
-    command: ["node", "dist/src/worker-cross_store_consistency.js"]
-
-  worker-delegated_access:
-    <<: *worker
-    command: ["node", "dist/src/worker-delegated_access.js"]
-
-  worker-integrations:
-    <<: *worker
-    command: ["node", "dist/src/worker-integrations.js"]
-
-  worker-pharmacy_inventory:
-    <<: *worker
-    command: ["node", "dist/src/worker-pharmacy_inventory.js"]
-
-  worker-promotions:
-    <<: *worker
-    command: ["node", "dist/src/worker-promotions.js"]
-
-  worker-qa_lab:
-    <<: *worker
-    command: ["node", "dist/src/worker-qa_lab.js"]
-
-  worker-reporting:
-    <<: *worker
-    command: ["node", "dist/src/worker-reporting.js"]
-
-  worker-tracking:
-    <<: *worker
-    command: ["node", "dist/src/worker-tracking.js"]
-
-  worker-audio-assets:
-    <<: *worker
-    command: ["node", "dist/src/worker-audio-assets.js"]
-
-  worker-vector_rag:
-    <<: *worker
-    command: ["node", "dist/src/worker-vector_rag.js"]
-
-  worker-lakehouse:
-    <<: *worker
-    command: ["node", "dist/src/worker-lakehouse.js"]
-
-  worker-time_series:
-    <<: *worker
-    command: ["node", "dist/src/worker-time_series.js"]
 
 # -------------------------------------------------------------------------
 # Volúmenes. Son lo único del stack que no se puede reconstruir: Coolify

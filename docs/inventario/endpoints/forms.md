@@ -3,8 +3,8 @@
 # Endpoints del módulo `forms`
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
-- **Operaciones:** 21 (21 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 3 · MEDIO 10 · BAJO 8
+- **Operaciones:** 25 (25 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 0 · MEDIO 16 · BAJO 9
 - **Tablas distintas que tocan:** 17
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/forms.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -14,25 +14,29 @@
 |---|---|---|---|---|---|---|
 | 1 | GET | `/forms/assignments` | Listar asignaciones de campo (globales y del tenant) | BAJO | 2 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
 | 2 | POST | `/forms/assignments` | Asignar campos a un target con política de extensión | MEDIO | 5 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
-| 3 | GET | `/forms/assignments/budget` | Presupuesto de extensión del target para el tenant actual | BAJO | 2 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
-| 4 | GET | `/forms/definition-sets` | Listar los sets de definiciones visibles | BAJO | 1 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
-| 5 | POST | `/forms/definition-sets` | Definir un set de campos dinámicos y su versión inicial | MEDIO | 3 | SECURITY_ADMIN |
-| 6 | GET | `/forms/definition-sets/{id}` | Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones | BAJO | 8 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
-| 7 | POST | `/forms/definition-sets/{id}/migrations/{migrationId}/run` | Migrar valores entre versiones de schema | MEDIO | 4 | SECURITY_ADMIN |
-| 8 | POST | `/forms/definition-sets/{id}/versions/{ver}/publish` | Componer miembros del set y publicar la versión | MEDIO | 5 | SECURITY_ADMIN |
-| 9 | POST | `/forms/field-definitions` | Declarar una definición de campo con reglas de validación | ALTO | 3 | sesión (sin roles) |
-| 10 | POST | `/forms/fields/{id}/access-rules` | Definir reglas de acceso y enmascarado por campo | MEDIO | 2 | SECURITY_ADMIN |
-| 11 | POST | `/forms/fields/{id}/dependencies` | Definir dependencias condicionales entre campos | ALTO | 3 | sesión (sin roles) |
-| 12 | PUT | `/forms/fields/{id}/localizations/{lang}` | Localizar (i18n) una definición de campo | ALTO | 4 | sesión (sin roles) |
-| 13 | GET | `/forms/instances` | Listar las instancias de formulario de un encuentro | BAJO | 2 | CLINICIAN, PRACTITIONER |
-| 14 | POST | `/forms/instances` | Abrir una instancia de formulario para un recurso | MEDIO | 3 | CLINICIAN, PRACTITIONER |
-| 15 | GET | `/forms/instances/{id}` | Leer una instancia con sus valores vigentes, por tipo resuelto | BAJO | 5 | CLINICIAN, PRACTITIONER |
-| 16 | POST | `/forms/instances/{id}/close` | Cerrar formulario y proyectar vista de recurso | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 17 | POST | `/forms/instances/{id}/values` | Capturar valores de formulario (value[x] exclusivo) | MEDIO | 3 | CLINICIAN, PRACTITIONER |
-| 18 | GET | `/forms/me/instances` | Ver mis formularios clínicos | BAJO | 2 | sesión (sin roles) |
-| 19 | GET | `/forms/me/instances/{id}` | Leer un formulario propio con sus respuestas | BAJO | 5 | sesión (sin roles) |
-| 20 | PATCH | `/forms/values/{id}` | Corregir valor con supersede y snapshot inmutable | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 21 | POST | `/forms/values/import` | Registrar procedencia de valores importados (batch ETL) | MEDIO | 4 | CLINICIAN, PRACTITIONER |
+| 3 | DELETE | `/forms/assignments/{id}` | Quitar una asignación propia (baja lógica) | MEDIO | 2 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 4 | PATCH | `/forms/assignments/{id}` | Editar una asignación propia | MEDIO | 2 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 5 | GET | `/forms/assignments/budget` | Presupuesto de extensión del target para el tenant actual | BAJO | 2 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 6 | PUT | `/forms/assignments/order` | Reordenar los campos propios de un formulario | BAJO | 1 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 7 | GET | `/forms/definition-sets` | Listar los sets de definiciones visibles | BAJO | 1 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 8 | POST | `/forms/definition-sets` | Definir un set de campos dinámicos y su versión inicial | MEDIO | 3 | SECURITY_ADMIN |
+| 9 | GET | `/forms/definition-sets/{id}` | Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones | BAJO | 8 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 10 | POST | `/forms/definition-sets/{id}/migrations/{migrationId}/run` | Migrar valores entre versiones de schema | MEDIO | 4 | SECURITY_ADMIN |
+| 11 | POST | `/forms/definition-sets/{id}/versions/{ver}/publish` | Componer miembros del set y publicar la versión | MEDIO | 5 | SECURITY_ADMIN |
+| 12 | POST | `/forms/field-definitions` | Declarar una definición de campo con reglas de validación | MEDIO | 3 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 13 | PATCH | `/forms/field-definitions/{id}` | Corregir el nombre o el tipo de un campo propio | MEDIO | 4 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 14 | POST | `/forms/fields/{id}/access-rules` | Definir reglas de acceso y enmascarado por campo | MEDIO | 2 | SECURITY_ADMIN |
+| 15 | POST | `/forms/fields/{id}/dependencies` | Definir dependencias condicionales entre campos | MEDIO | 3 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 16 | PUT | `/forms/fields/{id}/localizations/{lang}` | Localizar (i18n) una definición de campo | MEDIO | 4 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
+| 17 | GET | `/forms/instances` | Listar las instancias de formulario de un encuentro | BAJO | 2 | CLINICIAN, PRACTITIONER |
+| 18 | POST | `/forms/instances` | Abrir una instancia de formulario para un recurso | MEDIO | 3 | CLINICIAN, PRACTITIONER |
+| 19 | GET | `/forms/instances/{id}` | Leer una instancia con sus valores vigentes, por tipo resuelto | BAJO | 5 | CLINICIAN, PRACTITIONER |
+| 20 | POST | `/forms/instances/{id}/close` | Cerrar formulario y proyectar vista de recurso | MEDIO | 4 | CLINICIAN, PRACTITIONER |
+| 21 | POST | `/forms/instances/{id}/values` | Capturar valores de formulario (value[x] exclusivo) | MEDIO | 3 | CLINICIAN, PRACTITIONER |
+| 22 | GET | `/forms/me/instances` | Ver mis formularios clínicos | BAJO | 2 | sesión (sin roles) |
+| 23 | GET | `/forms/me/instances/{id}` | Leer un formulario propio con sus respuestas | BAJO | 5 | sesión (sin roles) |
+| 24 | PATCH | `/forms/values/{id}` | Corregir valor con supersede y snapshot inmutable | MEDIO | 4 | CLINICIAN, PRACTITIONER |
+| 25 | POST | `/forms/values/import` | Registrar procedencia de valores importados (batch ETL) | MEDIO | 4 | CLINICIAN, PRACTITIONER |
 
 ---
 
@@ -43,7 +47,7 @@
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsAssignmentsController.listAssignments` — `src/modules/forms/controllers/forms-assignments.controller.ts:62`
+- **Implementación:** `FormsAssignmentsController.listAssignments` — `src/modules/forms/controllers/forms-assignments.controller.ts:71`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -53,22 +57,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /forms/assignments` la atiende `FormsAssignmentsController.listAssignments` (src/modules/forms/controllers/forms-assignments.controller.ts:62). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Delega en `FormsReadService.listAssignments`. Lee forms.dynamic_field_sections, forms.field_assignments.
+`GET /forms/assignments` la atiende `FormsAssignmentsController.listAssignments` (src/modules/forms/controllers/forms-assignments.controller.ts:71). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Delega en `FormsReadService.listAssignments`. Lee forms.dynamic_field_sections, forms.field_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-assignments.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-assignments.controller.ts:71` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.dynamic_field_sections` | LEE | LEE | DIRECTA | FormsAssignmentsController.listAssignments → FormsReadService.listAssignments → AssignmentsRepository.findSectionsByIds | `src/modules/forms/repositories/assignments.repository.ts:242` |
+| `forms.dynamic_field_sections` | LEE | LEE | DIRECTA | FormsAssignmentsController.listAssignments → FormsReadService.listAssignments → AssignmentsRepository.findSectionsByIds | `src/modules/forms/repositories/assignments.repository.ts:298` |
 | `forms.field_assignments` | LEE | LEE | DIRECTA | FormsAssignmentsController.listAssignments → FormsReadService.listAssignments → AssignmentsRepository.findAssignments | `src/modules/forms/repositories/assignments.repository.ts:214` |
 
 ### Parámetros
@@ -140,28 +144,28 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsAssignmentsController.createAssignment` — `src/modules/forms/controllers/forms-assignments.controller.ts:131`
+- **Implementación:** `FormsAssignmentsController.createAssignment` — `src/modules/forms/controllers/forms-assignments.controller.ts:141`
 
 ### Qué es y para qué sirve (negocio)
 
 Asignar campos a un target con política de extensión. Caso de uso UC-09-06: Asigna campo a target con enforcement de política. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/assignments` la atiende `FormsAssignmentsController.createAssignment` (src/modules/forms/controllers/forms-assignments.controller.ts:131). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `CreateAssignmentDto` (3 campos, 3 obligatorios). Delega en `FormsAssignmentsService.createAssignment`. Crea filas en forms.dynamic_field_sections, forms.field_assignments. Lee forms.dynamic_field_definitions, forms.extension_target_policies, forms.field_assignments.
+`POST /forms/assignments` la atiende `FormsAssignmentsController.createAssignment` (src/modules/forms/controllers/forms-assignments.controller.ts:141). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `FormsCreateAssignmentDto` (10 campos, 2 obligatorios). Delega en `FormsAssignmentsService.createAssignment`. Crea filas en forms.dynamic_field_sections, forms.field_assignments. Lee forms.dynamic_field_definitions, forms.extension_target_policies, forms.field_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-assignments.controller.ts:131` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-assignments.controller.ts:141` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -173,21 +177,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 | `forms.field_assignments` | ESCRIBE | CREA | DIRECTA | FormsAssignmentsController.createAssignment → FormsAssignmentsService.createAssignment → AssignmentsRepository.createAssignment | `src/modules/forms/repositories/assignments.repository.ts:178` |
 | `forms.field_assignments` | LEE | LEE | DIRECTA | FormsAssignmentsController.createAssignment → FormsAssignmentsService.createAssignment → AssignmentsRepository.countActiveAssignments | `src/modules/forms/repositories/assignments.repository.ts:140` |
 
-### Cuerpo — DTO `CreateAssignmentDto` · `application/json`
+### Cuerpo — DTO `FormsCreateAssignmentDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `surveyVersionId` | `string` | Sí | formato uuid | — | Versión publicada que se reparte | sin fuente |
-| `targetType` | `string` | Sí | valores: APPOINTMENT, SERVICE, CARE_TYPE | — | Qué se evalúa: la reserva, el servicio o el tipo de atención | sin fuente |
-| `targetId` | `string` | Sí | formato uuid | — | Identificador de la cosa evaluada, según `targetType` | sin fuente |
+| `fieldId` | `string` | Sí | formato uuid | — | Campo a asignar | sin fuente |
+| `targetResourceConceptId` | `string` | Sí | formato uuid | — | Recurso destino (concept id) | sin fuente |
+| `sectionId` | `string` | No | formato uuid | — | Sección destino; si se omite se aprovisiona una por defecto | sin fuente |
+| `profileTypeConceptId` | `string` | No | formato uuid | — | Perfil objetivo (concept id) | sin fuente |
+| `tenantId` | `string` | No | formato uuid | — | Tenant que crea la asignación | sin fuente |
+| `branchId` | `string` | No | formato uuid | — | Branch destino | sin fuente |
+| `required` | `boolean` | No | — | — | ¿Requerido? | sin fuente |
+| `visible` | `boolean` | No | — | — | ¿Visible? | sin fuente |
+| `editable` | `boolean` | No | — | — | ¿Editable? | sin fuente |
+| `ordinal` | `number` | No | — | — | Orden de presentación | sin fuente |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
 {
-  "surveyVersionId": "00000000-0000-4000-8000-000000000001",
-  "targetType": "APPOINTMENT",
-  "targetId": "00000000-0000-4000-8000-000000000001"
+  "fieldId": "00000000-0000-4000-8000-000000000001",
+  "targetResourceConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -195,9 +205,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 ```json
 {
-  "surveyVersionId": "00000000-0000-4000-8000-000000000001",
-  "targetType": "APPOINTMENT",
-  "targetId": "00000000-0000-4000-8000-000000000001"
+  "fieldId": "00000000-0000-4000-8000-000000000001",
+  "targetResourceConceptId": "00000000-0000-4000-8000-000000000001",
+  "sectionId": "00000000-0000-4000-8000-000000000001",
+  "profileTypeConceptId": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "branchId": "00000000-0000-4000-8000-000000000001",
+  "required": false,
+  "visible": true,
+  "editable": true,
+  "ordinal": 1
 }
 ```
 
@@ -233,14 +250,189 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 3. GET /forms/assignments/budget
+## 3. DELETE /forms/assignments/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Quitar una asignación propia (baja lógica)
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsAssignmentsController.retireAssignment` — `src/modules/forms/controllers/forms-assignments.controller.ts:198`
+
+### Qué es y para qué sirve (negocio)
+
+Quitar una asignación propia (baja lógica). Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /forms/assignments/{id}` la atiende `FormsAssignmentsController.retireAssignment` (src/modules/forms/controllers/forms-assignments.controller.ts:198). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Delega en `FormsAssignmentsService.retireAssignment`. Actualiza forms.field_assignments. Lee forms.field_assignments.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-assignments.controller.ts:198` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-assignments.controller.ts:198` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.field_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsAssignmentsController.retireAssignment → FormsAssignmentsService.retireAssignment | `src/modules/forms/services/forms-assignments.service.ts:239` |
+| `forms.field_assignments` | LEE | LEE | DIRECTA | FormsAssignmentsController.retireAssignment → FormsAssignmentsService.retireAssignment → FormsAssignmentsService.loadOwnedAssignment → AssignmentsRepository.findAssignmentById | `src/modules/forms/repositories/assignments.repository.ts:241` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<OkResultDto>` · DTO `OkResultDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/forms/dto/responses.dto.ts:27` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Los campos del formulario estándar no se editan desde una organización; ForbiddenException: Sólo se pueden editar los campos propios de la organización |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asignación no encontrada |
+| 409 | `CONFLICT` | ConflictException: La asignación ya fue retirada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsAssignmentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 4. PATCH /forms/assignments/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar una asignación propia
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsAssignmentsController.updateAssignment` — `src/modules/forms/controllers/forms-assignments.controller.ts:180`
+
+### Qué es y para qué sirve (negocio)
+
+Editar una asignación propia. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /forms/assignments/{id}` la atiende `FormsAssignmentsController.updateAssignment` (src/modules/forms/controllers/forms-assignments.controller.ts:180). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `UpdateAssignmentDto` (3 campos, 0 obligatorios). Delega en `FormsAssignmentsService.updateAssignment`. Actualiza forms.field_assignments. Lee forms.field_assignments.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-assignments.controller.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-assignments.controller.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.field_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsAssignmentsController.updateAssignment → FormsAssignmentsService.updateAssignment | `src/modules/forms/services/forms-assignments.service.ts:205` |
+| `forms.field_assignments` | LEE | LEE | DIRECTA | FormsAssignmentsController.updateAssignment → FormsAssignmentsService.updateAssignment → FormsAssignmentsService.loadOwnedAssignment → AssignmentsRepository.findAssignmentById | `src/modules/forms/repositories/assignments.repository.ts:241` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdateAssignmentDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `required` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Requerido? | `src/modules/forms/dto/update-assignment.dto.ts:18` |
+| `visible` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Visible? | `src/modules/forms/dto/update-assignment.dto.ts:26` |
+| `editable` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Editable? | `src/modules/forms/dto/update-assignment.dto.ts:34` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "required": true,
+  "visible": true,
+  "editable": true
+}
+```
+
+</details>
+
+### Respuesta — `Promise<OkResultDto>` · DTO `OkResultDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/forms/dto/responses.dto.ts:27` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Los campos del formulario estándar no se editan desde una organización; ForbiddenException: Sólo se pueden editar los campos propios de la organización |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Asignación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsAssignmentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. GET /forms/assignments/budget
 
 - **Origen:** CONTRATO
 - **Nombre:** Presupuesto de extensión del target para el tenant actual
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsAssignmentsController.getBudget` — `src/modules/forms/controllers/forms-assignments.controller.ts:110`
+- **Implementación:** `FormsAssignmentsController.getBudget` — `src/modules/forms/controllers/forms-assignments.controller.ts:120`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -250,17 +442,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /forms/assignments/budget` la atiende `FormsAssignmentsController.getBudget` (src/modules/forms/controllers/forms-assignments.controller.ts:110). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Delega en `FormsReadService.getExtensionBudget`. Lee forms.extension_target_policies, forms.field_assignments.
+`GET /forms/assignments/budget` la atiende `FormsAssignmentsController.getBudget` (src/modules/forms/controllers/forms-assignments.controller.ts:120). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Delega en `FormsReadService.getExtensionBudget`. Lee forms.extension_target_policies, forms.field_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-assignments.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-assignments.controller.ts:120` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | targetResourceConceptId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -311,14 +503,110 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 4. GET /forms/definition-sets
+## 6. PUT /forms/assignments/order
+
+- **Origen:** CONTRATO
+- **Nombre:** Reordenar los campos propios de un formulario
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsAssignmentsController.reorderAssignments` — `src/modules/forms/controllers/forms-assignments.controller.ts:163`
+
+### Qué es y para qué sirve (negocio)
+
+Reordenar los campos propios de un formulario. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`PUT /forms/assignments/order` la atiende `FormsAssignmentsController.reorderAssignments` (src/modules/forms/controllers/forms-assignments.controller.ts:163). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `ReorderAssignmentsDto` (2 campos, 2 obligatorios). Delega en `FormsAssignmentsService.reorderAssignments`. Lee forms.field_assignments.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-assignments.controller.ts:163` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.field_assignments` | LEE | LEE | DIRECTA | FormsAssignmentsController.reorderAssignments → FormsAssignmentsService.reorderAssignments → AssignmentsRepository.findActiveOwnAssignmentsForTarget | `src/modules/forms/repositories/assignments.repository.ts:259` |
+
+### Cuerpo — DTO `ReorderAssignmentsDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `targetResourceConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Recurso destino (concept id) | `src/modules/forms/dto/reorder-assignments.dto.ts:18` |
+| `assignmentIds` | `array<string>` | Sí | formato uuid; mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayUnique()` `@IsUUID('all', { each: true })` | Asignaciones propias en el orden final (sin repetidos) | `src/modules/forms/dto/reorder-assignments.dto.ts:32` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "targetResourceConceptId": "00000000-0000-4000-8000-000000000001",
+  "assignmentIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "targetResourceConceptId": "00000000-0000-4000-8000-000000000001",
+  "assignmentIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<OkResultDto>` · DTO `OkResultDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/forms/dto/responses.dto.ts:27` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Hay asignaciones que no son campos propios y activos de este formulario |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsAssignmentsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. GET /forms/definition-sets
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los sets de definiciones visibles
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsDefinitionSetsController.listDefinitionSets` — `src/modules/forms/controllers/forms-definition-sets.controller.ts:61`
+- **Implementación:** `FormsDefinitionSetsController.listDefinitionSets` — `src/modules/forms/controllers/forms-definition-sets.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -328,16 +616,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /forms/definition-sets` la atiende `FormsDefinitionSetsController.listDefinitionSets` (src/modules/forms/controllers/forms-definition-sets.controller.ts:61). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Delega en `FormsReadService.listDefinitionSets`. Lee forms.field_definition_sets.
+`GET /forms/definition-sets` la atiende `FormsDefinitionSetsController.listDefinitionSets` (src/modules/forms/controllers/forms-definition-sets.controller.ts:62). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Delega en `FormsReadService.listDefinitionSets`. Lee forms.field_definition_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-definition-sets.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-definition-sets.controller.ts:62` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -392,35 +680,35 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 5. POST /forms/definition-sets
+## 8. POST /forms/definition-sets
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir un set de campos dinámicos y su versión inicial
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsDefinitionSetsController.createDefinitionSet` — `src/modules/forms/controllers/forms-definition-sets.controller.ts:92`
+- **Implementación:** `FormsDefinitionSetsController.createDefinitionSet` — `src/modules/forms/controllers/forms-definition-sets.controller.ts:93`
 
 ### Qué es y para qué sirve (negocio)
 
 Definir un set de campos dinámicos y su versión inicial. Caso de uso UC-09-01: Crea set + versión inicial (draft, inmutable). Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/definition-sets` la atiende `FormsDefinitionSetsController.createDefinitionSet` (src/modules/forms/controllers/forms-definition-sets.controller.ts:92). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDefinitionSetDto` (6 campos, 3 obligatorios). Delega en `FormsSchemaService.createDefinitionSet`. Crea filas en forms.field_definition_set_versions, forms.field_definition_sets. Lee forms.field_definition_sets.
+`POST /forms/definition-sets` la atiende `FormsDefinitionSetsController.createDefinitionSet` (src/modules/forms/controllers/forms-definition-sets.controller.ts:93). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDefinitionSetDto` (6 campos, 3 obligatorios). Delega en `FormsSchemaService.createDefinitionSet`. Crea filas en forms.field_definition_set_versions, forms.field_definition_sets. Lee forms.field_definition_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/forms/controllers/forms-definition-sets.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/forms/controllers/forms-definition-sets.controller.ts:93` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -497,14 +785,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 6. GET /forms/definition-sets/{id}
+## 9. GET /forms/definition-sets/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Leer un set con sus versiones, campos (reglas, dependencias, i18n) y secciones
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsDefinitionSetsController.getDefinitionSet` — `src/modules/forms/controllers/forms-definition-sets.controller.ts:79`
+- **Implementación:** `FormsDefinitionSetsController.getDefinitionSet` — `src/modules/forms/controllers/forms-definition-sets.controller.ts:80`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -514,24 +802,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /forms/definition-sets/{id}` la atiende `FormsDefinitionSetsController.getDefinitionSet` (src/modules/forms/controllers/forms-definition-sets.controller.ts:79). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Delega en `FormsReadService.getDefinitionSet`. Lee forms.dynamic_field_definitions, forms.dynamic_field_sections, forms.field_definition_localizations, forms.field_definition_set_versions, forms.field_definition_sets, forms.field_dependencies, forms.field_set_members, forms.field_validation_rules.
+`GET /forms/definition-sets/{id}` la atiende `FormsDefinitionSetsController.getDefinitionSet` (src/modules/forms/controllers/forms-definition-sets.controller.ts:80). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Delega en `FormsReadService.getDefinitionSet`. Lee forms.dynamic_field_definitions, forms.dynamic_field_sections, forms.field_definition_localizations, forms.field_definition_set_versions, forms.field_definition_sets, forms.field_dependencies, forms.field_set_members, forms.field_validation_rules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-definition-sets.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-definition-sets.controller.ts:79` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-definition-sets.controller.ts:80` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-definition-sets.controller.ts:80` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:403` |
-| `forms.dynamic_field_sections` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → AssignmentsRepository.findSectionsByIds | `src/modules/forms/repositories/assignments.repository.ts:242` |
+| `forms.dynamic_field_sections` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → AssignmentsRepository.findSectionsByIds | `src/modules/forms/repositories/assignments.repository.ts:298` |
 | `forms.field_definition_localizations` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → FieldDefinitionsRepository.findLocalizationsByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:456` |
 | `forms.field_definition_set_versions` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → DefinitionSetsRepository.findVersionsBySet | `src/modules/forms/repositories/definition-sets.repository.ts:235` |
 | `forms.field_definition_sets` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → DefinitionSetsRepository.findSetById | `src/modules/forms/repositories/definition-sets.repository.ts:116` |
@@ -635,36 +923,36 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 7. POST /forms/definition-sets/{id}/migrations/{migrationId}/run
+## 10. POST /forms/definition-sets/{id}/migrations/{migrationId}/run
 
 - **Origen:** CONTRATO
 - **Nombre:** Migrar valores entre versiones de schema
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsDefinitionSetsController.runMigration` — `src/modules/forms/controllers/forms-definition-sets.controller.ts:120`
+- **Implementación:** `FormsDefinitionSetsController.runMigration` — `src/modules/forms/controllers/forms-definition-sets.controller.ts:131`
 
 ### Qué es y para qué sirve (negocio)
 
 Migrar valores entre versiones de schema. Caso de uso UC-09-13: Ejecuta migración entre versiones. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/definition-sets/{id}/migrations/{migrationId}/run` la atiende `FormsDefinitionSetsController.runMigration` (src/modules/forms/controllers/forms-definition-sets.controller.ts:120). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RunMigrationDto` (6 campos, 2 obligatorios). Delega en `FormsSchemaService.runMigration`. Crea filas en forms.field_schema_migrations. Lee forms.field_definition_set_versions, forms.field_definition_sets, forms.field_schema_migrations.
+`POST /forms/definition-sets/{id}/migrations/{migrationId}/run` la atiende `FormsDefinitionSetsController.runMigration` (src/modules/forms/controllers/forms-definition-sets.controller.ts:131). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RunMigrationDto` (6 campos, 2 obligatorios). Delega en `FormsSchemaService.runMigration`. Crea filas en forms.field_schema_migrations. Lee forms.field_definition_set_versions, forms.field_definition_sets, forms.field_schema_migrations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/forms/controllers/forms-definition-sets.controller.ts:120` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, migrationId | `src/modules/forms/controllers/forms-definition-sets.controller.ts:120` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/forms/controllers/forms-definition-sets.controller.ts:131` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, migrationId | `src/modules/forms/controllers/forms-definition-sets.controller.ts:131` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -749,36 +1037,36 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 8. POST /forms/definition-sets/{id}/versions/{ver}/publish
+## 11. POST /forms/definition-sets/{id}/versions/{ver}/publish
 
 - **Origen:** CONTRATO
 - **Nombre:** Componer miembros del set y publicar la versión
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsDefinitionSetsController.publishVersion` — `src/modules/forms/controllers/forms-definition-sets.controller.ts:106`
+- **Implementación:** `FormsDefinitionSetsController.publishVersion` — `src/modules/forms/controllers/forms-definition-sets.controller.ts:112`
 
 ### Qué es y para qué sirve (negocio)
 
 Componer miembros del set y publicar la versión. Caso de uso UC-09-03: Compone miembros y publica la versión. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/definition-sets/{id}/versions/{ver}/publish` la atiende `FormsDefinitionSetsController.publishVersion` (src/modules/forms/controllers/forms-definition-sets.controller.ts:106). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `FormsPublishVersionDto` (5 campos, 2 obligatorios). Delega en `FormsSchemaService.publishVersion`. Crea filas en forms.field_set_members. Actualiza forms.field_definition_set_versions, forms.field_definition_sets. Lee forms.field_definition_set_versions, forms.field_definition_sets.
+`POST /forms/definition-sets/{id}/versions/{ver}/publish` la atiende `FormsDefinitionSetsController.publishVersion` (src/modules/forms/controllers/forms-definition-sets.controller.ts:112). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `FormsPublishVersionDto` (5 campos, 2 obligatorios). Delega en `FormsSchemaService.publishVersion`. Crea filas en forms.field_set_members. Actualiza forms.field_definition_set_versions, forms.field_definition_sets. Lee forms.field_definition_set_versions, forms.field_definition_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/forms/controllers/forms-definition-sets.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, ver | `src/modules/forms/controllers/forms-definition-sets.controller.ts:106` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/forms/controllers/forms-definition-sets.controller.ts:112` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, ver | `src/modules/forms/controllers/forms-definition-sets.controller.ts:112` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -866,35 +1154,35 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 9. POST /forms/field-definitions
+## 12. POST /forms/field-definitions
 
 - **Origen:** CONTRATO
 - **Nombre:** Declarar una definición de campo con reglas de validación
 - **Bloque:** Clínico y Diagnóstico
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsFieldsController.createFieldDefinition` — `src/modules/forms/controllers/forms-fields.controller.ts:39`
+- **Implementación:** `FormsFieldsController.createFieldDefinition` — `src/modules/forms/controllers/forms-fields.controller.ts:47`
 
 ### Qué es y para qué sirve (negocio)
 
-Declarar una definición de campo con reglas de validación. Caso de uso UC-09-02: Declara campo con reglas de validación. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+Declarar una definición de campo con reglas de validación. Caso de uso UC-09-02: clínico, practitioner o SECURITY_ADMIN. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/field-definitions` la atiende `FormsFieldsController.createFieldDefinition` (src/modules/forms/controllers/forms-fields.controller.ts:39). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFieldDefinitionDto` (16 campos, 3 obligatorios). Delega en `FormsFieldsService.createFieldDefinition`. Crea filas en forms.dynamic_field_definitions, forms.field_validation_rules. Lee forms.dynamic_field_definitions.
+`POST /forms/field-definitions` la atiende `FormsFieldsController.createFieldDefinition` (src/modules/forms/controllers/forms-fields.controller.ts:47). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `CreateFieldDefinitionDto` (16 campos, 3 obligatorios). Delega en `FormsFieldsService.createFieldDefinition`. Crea filas en forms.dynamic_field_definitions, forms.field_validation_rules. Lee forms.dynamic_field_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/forms/controllers/forms-fields.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-fields.controller.ts:47` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -992,36 +1280,136 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 10. POST /forms/fields/{id}/access-rules
+## 13. PATCH /forms/field-definitions/{id}
 
 - **Origen:** CONTRATO
-- **Nombre:** Definir reglas de acceso y enmascarado por campo
+- **Nombre:** Corregir el nombre o el tipo de un campo propio
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsFieldsController.createAccessRule` — `src/modules/forms/controllers/forms-fields.controller.ts:77`
+- **Implementación:** `FormsFieldsController.updateFieldDefinition` — `src/modules/forms/controllers/forms-fields.controller.ts:71`
 
 ### Qué es y para qué sirve (negocio)
 
-Definir reglas de acceso y enmascarado por campo. Caso de uso UC-09-12: Define regla de acceso / enmascarado por campo. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+Corregir el nombre o el tipo de un campo propio. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/fields/{id}/access-rules` la atiende `FormsFieldsController.createAccessRule` (src/modules/forms/controllers/forms-fields.controller.ts:77). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAccessRuleDto` (7 campos, 1 obligatorio). Delega en `FormsFieldsService.createAccessRule`. Crea filas en forms.field_value_access_rules. Lee forms.dynamic_field_definitions.
+`PATCH /forms/field-definitions/{id}` la atiende `FormsFieldsController.updateFieldDefinition` (src/modules/forms/controllers/forms-fields.controller.ts:71). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `UpdateFieldDefinitionDto` (2 campos, 0 obligatorios). Delega en `FormsFieldsService.updateFieldDefinition`. Actualiza forms.dynamic_field_definitions. Lee forms.dynamic_field_definitions, forms.field_assignments, forms.field_values.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/forms/controllers/forms-fields.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-fields.controller.ts:77` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-fields.controller.ts:71` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-fields.controller.ts:71` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `forms.dynamic_field_definitions` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition | `src/modules/forms/services/forms-fields.service.ts:120` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:237` |
+| `forms.field_assignments` | LEE | LEE | DIRECTA | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition → AssignmentsRepository.findAssignmentsByField | `src/modules/forms/repositories/assignments.repository.ts:282` |
+| `forms.field_values` | LEE | LEE | DIRECTA | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition → FieldValuesRepository.countByField | `src/modules/forms/repositories/field-values.repository.ts:217` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdateFieldDefinitionDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(200)` | Nombre legible del campo | `src/modules/forms/dto/update-field-definition.dto.ts:37` |
+| `dataType` | `string` | No | valores: string, text, integer, decimal, boolean, date, datetime, time, uuid, json, binary, reference, code | `@IsOptional()` `@IsIn(TECHNICAL_DATA_TYPES)` | Tipo de dato técnico; con valores capturados no se cambia (409) | `src/modules/forms/dto/update-field-definition.dto.ts:49` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Nombre de ejemplo",
+  "dataType": "string"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<OkResultDto>` · DTO `OkResultDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/forms/dto/responses.dto.ts:27` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan desde acá |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campo no encontrado |
+| 409 | `CONFLICT` | ConflictException: El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/forms.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Forms (09) — Dynamic Forms & Extensibility Governance — etapa `ctrl:FormsFieldsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 14. POST /forms/fields/{id}/access-rules
+
+- **Origen:** CONTRATO
+- **Nombre:** Definir reglas de acceso y enmascarado por campo
+- **Bloque:** Clínico y Diagnóstico
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `FormsFieldsController.createAccessRule` — `src/modules/forms/controllers/forms-fields.controller.ts:128`
+
+### Qué es y para qué sirve (negocio)
+
+Definir reglas de acceso y enmascarado por campo. Caso de uso UC-09-12: Define regla de acceso / enmascarado por campo. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:68`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+
+### Cómo se atiende (sistema)
+
+`POST /forms/fields/{id}/access-rules` la atiende `FormsFieldsController.createAccessRule` (src/modules/forms/controllers/forms-fields.controller.ts:128). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAccessRuleDto` (7 campos, 1 obligatorio). Delega en `FormsFieldsService.createAccessRule`. Crea filas en forms.field_value_access_rules. Lee forms.dynamic_field_definitions.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/forms/controllers/forms-fields.controller.ts:128` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-fields.controller.ts:128` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1101,36 +1489,36 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 11. POST /forms/fields/{id}/dependencies
+## 15. POST /forms/fields/{id}/dependencies
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir dependencias condicionales entre campos
 - **Bloque:** Clínico y Diagnóstico
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsFieldsController.addDependency` — `src/modules/forms/controllers/forms-fields.controller.ts:52`
+- **Implementación:** `FormsFieldsController.addDependency` — `src/modules/forms/controllers/forms-fields.controller.ts:89`
 
 ### Qué es y para qué sirve (negocio)
 
 Definir dependencias condicionales entre campos. Caso de uso UC-09-04: Define dependencia condicional entre campos. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/fields/{id}/dependencies` la atiende `FormsFieldsController.addDependency` (src/modules/forms/controllers/forms-fields.controller.ts:52). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateFieldDependencyDto` (6 campos, 3 obligatorios). Delega en `FormsFieldsService.addDependency`. Crea filas en forms.field_dependencies. Lee forms.dynamic_field_definitions, forms.field_dependencies.
+`POST /forms/fields/{id}/dependencies` la atiende `FormsFieldsController.addDependency` (src/modules/forms/controllers/forms-fields.controller.ts:89). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `CreateFieldDependencyDto` (6 campos, 3 obligatorios). Delega en `FormsFieldsService.addDependency`. Crea filas en forms.field_dependencies. Lee forms.dynamic_field_definitions, forms.field_dependencies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/forms/controllers/forms-fields.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-fields.controller.ts:52` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-fields.controller.ts:89` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-fields.controller.ts:89` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1213,43 +1601,43 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. PUT /forms/fields/{id}/localizations/{lang}
+## 16. PUT /forms/fields/{id}/localizations/{lang}
 
 - **Origen:** CONTRATO
 - **Nombre:** Localizar (i18n) una definición de campo
 - **Bloque:** Clínico y Diagnóstico
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsFieldsController.upsertLocalization` — `src/modules/forms/controllers/forms-fields.controller.ts:64`
+- **Implementación:** `FormsFieldsController.upsertLocalization` — `src/modules/forms/controllers/forms-fields.controller.ts:108`
 
 ### Qué es y para qué sirve (negocio)
 
 Localizar (i18n) una definición de campo. Caso de uso UC-09-05: Upsert de localización i18n (es/en). Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /forms/fields/{id}/localizations/{lang}` la atiende `FormsFieldsController.upsertLocalization` (src/modules/forms/controllers/forms-fields.controller.ts:64). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpsertLocalizationDto` (4 campos, 0 obligatorios). Delega en `FormsFieldsService.upsertLocalization`. Crea filas en forms.field_definition_localizations. Actualiza forms.field_definition_localizations. Lee forms.dynamic_field_definitions, forms.field_definition_localizations.
+`PUT /forms/fields/{id}/localizations/{lang}` la atiende `FormsFieldsController.upsertLocalization` (src/modules/forms/controllers/forms-fields.controller.ts:108). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `UpsertLocalizationDto` (4 campos, 0 obligatorios). Delega en `FormsFieldsService.upsertLocalization`. Crea filas en forms.field_definition_localizations. Actualiza forms.field_definition_localizations. Lee forms.dynamic_field_definitions, forms.field_definition_localizations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/forms/controllers/forms-fields.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-fields.controller.ts:64` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER, SECURITY_ADMIN | `src/modules/forms/controllers/forms-fields.controller.ts:108` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-fields.controller.ts:108` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:237` |
-| `forms.field_definition_localizations` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization | `src/modules/forms/services/forms-fields.service.ts:214` |
+| `forms.field_definition_localizations` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization | `src/modules/forms/services/forms-fields.service.ts:291` |
 | `forms.field_definition_localizations` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization → FieldDefinitionsRepository.createLocalization | `src/modules/forms/repositories/field-definitions.repository.ts:364` |
 | `forms.field_definition_localizations` | LEE | LEE | DIRECTA | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization → FieldDefinitionsRepository.findLocalization | `src/modules/forms/repositories/field-definitions.repository.ts:346` |
 
@@ -1318,14 +1706,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. GET /forms/instances
+## 17. GET /forms/instances
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las instancias de formulario de un encuentro
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsInstancesController.listInstances` — `src/modules/forms/controllers/forms-instances.controller.ts:68`
+- **Implementación:** `FormsInstancesController.listInstances` — `src/modules/forms/controllers/forms-instances.controller.ts:70`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1335,17 +1723,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /forms/instances` la atiende `FormsInstancesController.listInstances` (src/modules/forms/controllers/forms-instances.controller.ts:68). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsReadService.listInstancesByEncounter`. Lee clinical.encounters, forms.form_instances.
+`GET /forms/instances` la atiende `FormsInstancesController.listInstances` (src/modules/forms/controllers/forms-instances.controller.ts:70). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsReadService.listInstancesByEncounter`. Lee clinical.encounters, forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:70` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | encounter (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1404,41 +1792,41 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. POST /forms/instances
+## 18. POST /forms/instances
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir una instancia de formulario para un recurso
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsInstancesController.openInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:101`
+- **Implementación:** `FormsInstancesController.openInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:105`
 
 ### Qué es y para qué sirve (negocio)
 
 Abrir una instancia de formulario para un recurso. Caso de uso UC-09-07: Abre instancia de formulario para un recurso. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:63`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/instances` la atiende `FormsInstancesController.openInstance` (src/modules/forms/controllers/forms-instances.controller.ts:101). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `OpenInstanceDto` (5 campos, 1 obligatorio). Delega en `FormsInstancesService.openInstance`. Crea filas en forms.form_instances. Lee clinical.encounters, forms.form_instances.
+`POST /forms/instances` la atiende `FormsInstancesController.openInstance` (src/modules/forms/controllers/forms-instances.controller.ts:105). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `OpenInstanceDto` (4 campos, 1 obligatorio). Delega en `FormsInstancesService.openInstance`. Crea filas en forms.form_instances. Lee clinical.encounters, forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:101` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:105` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical.encounters` | LEE | LEE | DIRECTA | FormsInstancesController.openInstance → FormsInstancesService.openInstance → FormsInstancesService.tipoDelRecurso | `src/modules/forms/services/forms-instances.service.ts:61` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | FormsInstancesController.openInstance → FormsInstancesService.openInstance → FormsInstancesService.resourceType | `src/modules/forms/services/forms-instances.service.ts:61` |
 | `forms.form_instances` | ESCRIBE | CREA | DIRECTA | FormsInstancesController.openInstance → FormsInstancesService.openInstance → FormInstancesRepository.create | `src/modules/forms/repositories/form-instances.repository.ts:77` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsInstancesController.openInstance → FormsInstancesService.openInstance → FormInstancesRepository.findByResourceAndVersion | `src/modules/forms/repositories/form-instances.repository.ts:62` |
 
@@ -1449,8 +1837,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 | `resourceId` | `string` | Sí | formato uuid | `@IsUUID()` | Recurso al que se adjunta el formulario | `src/modules/forms/dto/open-instance.dto.ts:14` |
 | `resourceTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de recurso (concept id) | `src/modules/forms/dto/open-instance.dto.ts:25` |
 | `tenantContextId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Contexto de tenant | `src/modules/forms/dto/open-instance.dto.ts:33` |
-| `definitionSetVersionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Versión publicada del set cuyo schema se congela | `src/modules/forms/dto/open-instance.dto.ts:44` |
-| `schemaVersion` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Versión de schema explícita | `src/modules/forms/dto/open-instance.dto.ts:56` |
+| `schemaVersion` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | Versión de schema explícita | `src/modules/forms/dto/open-instance.dto.ts:50` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1467,7 +1854,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
   "resourceId": "00000000-0000-4000-8000-000000000001",
   "resourceTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "tenantContextId": "00000000-0000-4000-8000-000000000001",
-  "definitionSetVersionId": "00000000-0000-4000-8000-000000000001",
   "schemaVersion": 1
 }
 ```
@@ -1505,14 +1891,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. GET /forms/instances/{id}
+## 19. GET /forms/instances/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Leer una instancia con sus valores vigentes, por tipo resuelto
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsInstancesController.getInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:90`
+- **Implementación:** `FormsInstancesController.getInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:93`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1522,17 +1908,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /forms/instances/{id}` la atiende `FormsInstancesController.getInstance` (src/modules/forms/controllers/forms-instances.controller.ts:90). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsReadService.getInstance`. Lee clinical.encounters, forms.dynamic_field_definitions, forms.field_value_access_rules, forms.field_values, forms.form_instances.
+`GET /forms/instances/{id}` la atiende `FormsInstancesController.getInstance` (src/modules/forms/controllers/forms-instances.controller.ts:93). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsReadService.getInstance`. Lee clinical.encounters, forms.dynamic_field_definitions, forms.field_value_access_rules, forms.field_values, forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:90` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:93` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:93` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1541,7 +1927,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounters` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadOwnEncounter | `src/modules/forms/services/forms-read.service.ts:597` |
 | `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:403` |
 | `forms.field_value_access_rules` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findActiveAccessRulesByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:480` |
-| `forms.field_values` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.composeInstanceDetail → FieldValuesRepository.findCurrentByInstance | `src/modules/forms/repositories/field-values.repository.ts:242` |
+| `forms.field_values` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.composeInstanceDetail → FieldValuesRepository.findCurrentByInstance | `src/modules/forms/repositories/field-values.repository.ts:254` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormInstancesRepository.findById | `src/modules/forms/repositories/form-instances.repository.ts:45` |
 
 ### Parámetros
@@ -1594,41 +1980,41 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. POST /forms/instances/{id}/close
+## 20. POST /forms/instances/{id}/close
 
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar formulario y proyectar vista de recurso
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsInstancesController.closeInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:128`
+- **Implementación:** `FormsInstancesController.closeInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:142`
 
 ### Qué es y para qué sirve (negocio)
 
 Cerrar formulario y proyectar vista de recurso. Caso de uso UC-09-11: Cierra formulario y finaliza valores preliminares. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:67`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/instances/{id}/close` la atiende `FormsInstancesController.closeInstance` (src/modules/forms/controllers/forms-instances.controller.ts:128). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsInstancesService.closeInstance`. Actualiza forms.field_values, forms.form_instances. Lee forms.field_values, forms.form_instances.
+`POST /forms/instances/{id}/close` la atiende `FormsInstancesController.closeInstance` (src/modules/forms/controllers/forms-instances.controller.ts:142). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsInstancesService.closeInstance`. Actualiza forms.field_values, forms.form_instances. Lee forms.field_values, forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:128` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:128` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `forms.field_values` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsInstancesController.closeInstance → FormsInstancesService.closeInstance | `src/modules/forms/services/forms-instances.service.ts:151` |
-| `forms.field_values` | LEE | LEE | DIRECTA | FormsInstancesController.closeInstance → FormsInstancesService.closeInstance → FieldValuesRepository.findPreliminaryByInstance | `src/modules/forms/repositories/field-values.repository.ts:221` |
+| `forms.field_values` | LEE | LEE | DIRECTA | FormsInstancesController.closeInstance → FormsInstancesService.closeInstance → FieldValuesRepository.findPreliminaryByInstance | `src/modules/forms/repositories/field-values.repository.ts:233` |
 | `forms.form_instances` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsInstancesController.closeInstance → FormsInstancesService.closeInstance | `src/modules/forms/services/forms-instances.service.ts:155` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsInstancesController.closeInstance → FormsInstancesService.closeInstance → FormInstancesRepository.findById | `src/modules/forms/repositories/form-instances.repository.ts:45` |
 
@@ -1672,43 +2058,43 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 17. POST /forms/instances/{id}/values
+## 21. POST /forms/instances/{id}/values
 
 - **Origen:** CONTRATO
 - **Nombre:** Capturar valores de formulario (value[x] exclusivo)
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsInstancesController.captureValues` — `src/modules/forms/controllers/forms-instances.controller.ts:114`
+- **Implementación:** `FormsInstancesController.captureValues` — `src/modules/forms/controllers/forms-instances.controller.ts:123`
 
 ### Qué es y para qué sirve (negocio)
 
 Capturar valores de formulario (value[x] exclusivo). Caso de uso UC-09-08: Captura valores (value[x] exclusivo). Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:64`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/instances/{id}/values` la atiende `FormsInstancesController.captureValues` (src/modules/forms/controllers/forms-instances.controller.ts:114). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CaptureValuesDto` (7 campos, 4 obligatorios). Delega en `FormsValuesService.captureValues`. Crea filas en forms.field_value_audit, forms.field_values. Lee forms.form_instances.
+`POST /forms/instances/{id}/values` la atiende `FormsInstancesController.captureValues` (src/modules/forms/controllers/forms-instances.controller.ts:123). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CaptureValuesDto` (7 campos, 4 obligatorios). Delega en `FormsValuesService.captureValues`. Crea filas en forms.field_value_audit, forms.field_values. Lee forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:114` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:114` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:123` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:123` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:279` |
-| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:264` |
+| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:291` |
+| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:276` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FormInstancesRepository.findById | `src/modules/forms/repositories/form-instances.repository.ts:45` |
 
 ### Parámetros
@@ -1792,14 +2178,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 18. GET /forms/me/instances
+## 22. GET /forms/me/instances
 
 - **Origen:** CONTRATO
 - **Nombre:** Ver mis formularios clínicos
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsMeController.listMyInstances` — `src/modules/forms/controllers/forms-me.controller.ts:46`
+- **Implementación:** `FormsMeController.listMyInstances` — `src/modules/forms/controllers/forms-me.controller.ts:47`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1809,16 +2195,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /forms/me/instances` la atiende `FormsMeController.listMyInstances` (src/modules/forms/controllers/forms-me.controller.ts:46). Exige sesión; el controlador no declara roles. Delega en `FormsReadService.listMyInstances`. Lee clinical.encounters, forms.form_instances.
+`GET /forms/me/instances` la atiende `FormsMeController.listMyInstances` (src/modules/forms/controllers/forms-me.controller.ts:47). Exige sesión; el controlador no declara roles. Delega en `FormsReadService.listMyInstances`. Lee clinical.encounters, forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/forms/controllers/forms-me.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/forms/controllers/forms-me.controller.ts:47` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1874,14 +2260,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 19. GET /forms/me/instances/{id}
+## 23. GET /forms/me/instances/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Leer un formulario propio con sus respuestas
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsMeController.getMyInstance` — `src/modules/forms/controllers/forms-me.controller.ts:61`
+- **Implementación:** `FormsMeController.getMyInstance` — `src/modules/forms/controllers/forms-me.controller.ts:63`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1891,17 +2277,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /forms/me/instances/{id}` la atiende `FormsMeController.getMyInstance` (src/modules/forms/controllers/forms-me.controller.ts:61). Exige sesión; el controlador no declara roles. Delega en `FormsReadService.getMyInstance`. Lee clinical.encounters, forms.dynamic_field_definitions, forms.field_value_access_rules, forms.field_values, forms.form_instances.
+`GET /forms/me/instances/{id}` la atiende `FormsMeController.getMyInstance` (src/modules/forms/controllers/forms-me.controller.ts:63). Exige sesión; el controlador no declara roles. Delega en `FormsReadService.getMyInstance`. Lee clinical.encounters, forms.dynamic_field_definitions, forms.field_value_access_rules, forms.field_values, forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/forms/controllers/forms-me.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-me.controller.ts:61` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/forms/controllers/forms-me.controller.ts:63` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-me.controller.ts:63` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1910,7 +2296,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.encounters` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance | `src/modules/forms/services/forms-read.service.ts:390` |
 | `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:403` |
 | `forms.field_value_access_rules` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findActiveAccessRulesByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:480` |
-| `forms.field_values` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormsReadService.composeInstanceDetail → FieldValuesRepository.findCurrentByInstance | `src/modules/forms/repositories/field-values.repository.ts:242` |
+| `forms.field_values` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormsReadService.composeInstanceDetail → FieldValuesRepository.findCurrentByInstance | `src/modules/forms/repositories/field-values.repository.ts:254` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormInstancesRepository.findById | `src/modules/forms/repositories/form-instances.repository.ts:45` |
 
 ### Parámetros
@@ -1964,44 +2350,44 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 20. PATCH /forms/values/{id}
+## 24. PATCH /forms/values/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir valor con supersede y snapshot inmutable
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsValuesController.correctValue` — `src/modules/forms/controllers/forms-values.controller.ts:52`
+- **Implementación:** `FormsValuesController.correctValue` — `src/modules/forms/controllers/forms-values.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
 Corregir valor con supersede y snapshot inmutable. Caso de uso UC-09-09: Corrige valor con supersede y snapshot inmutable. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:65`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /forms/values/{id}` la atiende `FormsValuesController.correctValue` (src/modules/forms/controllers/forms-values.controller.ts:52). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CorrectValueDto` (3 campos, 2 obligatorios). Delega en `FormsValuesService.correctValue`. Crea filas en forms.field_value_audit, forms.field_values. Actualiza forms.field_values. Lee forms.field_values.
+`PATCH /forms/values/{id}` la atiende `FormsValuesController.correctValue` (src/modules/forms/controllers/forms-values.controller.ts:62). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CorrectValueDto` (3 campos, 2 obligatorios). Delega en `FormsValuesService.correctValue`. Crea filas en forms.field_value_audit, forms.field_values. Actualiza forms.field_values. Lee forms.field_values.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-values.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-values.controller.ts:52` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-values.controller.ts:62` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-values.controller.ts:62` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:279` |
+| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:291` |
 | `forms.field_values` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsValuesController.correctValue → FormsValuesService.correctValue | `src/modules/forms/services/forms-values.service.ts:150` |
-| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:264` |
+| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:276` |
 | `forms.field_values` | LEE | LEE | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.findById | `src/modules/forms/repositories/field-values.repository.ts:205` |
 
 ### Parámetros
@@ -2069,43 +2455,43 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. POST /forms/values/import
+## 25. POST /forms/values/import
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar procedencia de valores importados (batch ETL)
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsValuesController.importValues` — `src/modules/forms/controllers/forms-values.controller.ts:39`
+- **Implementación:** `FormsValuesController.importValues` — `src/modules/forms/controllers/forms-values.controller.ts:44`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar procedencia de valores importados (batch ETL). Caso de uso UC-09-10: Importa valores externos (batch ETL) con procedencia. Dentro del módulo (descripción del modelo, en inglés): «Lets each organization capture additional, validated information without custom software, adapting to local requirements while keeping data quality and a full change history.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/README.md:66`) · MODELO (`Mantra Core Health Context/modules/diagram_09_forms.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/values/import` la atiende `FormsValuesController.importValues` (src/modules/forms/controllers/forms-values.controller.ts:39). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ImportValuesDto` (10 campos, 6 obligatorios). Delega en `FormsValuesService.importValues`. Crea filas en forms.field_value_audit, forms.field_value_provenance, forms.field_values. Lee forms.form_instances.
+`POST /forms/values/import` la atiende `FormsValuesController.importValues` (src/modules/forms/controllers/forms-values.controller.ts:44). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ImportValuesDto` (10 campos, 6 obligatorios). Delega en `FormsValuesService.importValues`. Crea filas en forms.field_value_audit, forms.field_value_provenance, forms.field_values. Lee forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-values.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-values.controller.ts:44` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:279` |
-| `forms.field_value_provenance` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.createProvenance | `src/modules/forms/repositories/field-values.repository.ts:298` |
-| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:264` |
+| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:291` |
+| `forms.field_value_provenance` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.createProvenance | `src/modules/forms/repositories/field-values.repository.ts:310` |
+| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:276` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FormInstancesRepository.findById | `src/modules/forms/repositories/form-instances.repository.ts:45` |
 
 ### Cuerpo — DTO `ImportValuesDto` · `application/json`

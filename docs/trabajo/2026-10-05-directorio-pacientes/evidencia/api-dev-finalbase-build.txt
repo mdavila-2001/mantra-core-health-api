@@ -1,0 +1,3 @@
+COMMAND: yarn build
+
+EXIT_CODE=0

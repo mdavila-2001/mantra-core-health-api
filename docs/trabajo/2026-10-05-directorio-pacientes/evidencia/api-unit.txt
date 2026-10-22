@@ -1,0 +1,57 @@
+node : (node:9968) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En línea: 2 Carácter: 1
++ node --experimental-vm-modules node_modules/jest-cli/bin/jest.js --ru ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:9968) Exp...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL src/modules/insurance/controllers/insurer-patients.controller.spec.ts (20.39 s)
+  ● InsurerPatientsController contract › uses POST bodies and returns no-store, with no legacy GET search
+
+    expected 200 "OK", got 500 "Internal Server Error"
+
+      50 |       .post('/insurance/patients/search')
+      51 |       .send({ search: 'Sintetico', occupation: 'Docente' })
+    > 52 |       .expect(200)
+         |        ^
+      53 |       .expect('Cache-Control', 'private, no-store');
+      54 |     expect(list).toHaveBeenCalledWith(
+      55 |       expect.objectContaining({ search: 'Sintetico', occupation: 'Docente' }),
+
+      at Object.expect (modules/insurance/controllers/insurer-patients.controller.spec.ts:52:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:309:14)
+      at ../node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:195:23)
+      at localAssert (../node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (../node_modules/supertest/lib/test.js:152:11)
+
+  ● InsurerPatientsController contract › rejects external channels and client-selected community profile ids
+
+    expected 400 "Bad Request", got 500 "Internal Server Error"
+
+      70 |         channel: 'whatsapp',
+      71 |       })
+    > 72 |       .expect(400);
+         |        ^
+      73 |     await request(app.getHttpServer())
+      74 |       .post('/insurance/patients/conversation')
+      75 |       .send({
+
+      at Object.expect (modules/insurance/controllers/insurer-patients.controller.spec.ts:72:8)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:309:14)
+      at ../node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:195:23)
+      at localAssert (../node_modules/supertest/lib/test.js:138:14)
+      at Server.<anonymous> (../node_modules/supertest/lib/test.js:152:11)
+
+
+Test Suites: 1 failed, 3 passed, 4 total
+Tests:       2 failed, 36 passed, 38 total
+Snapshots:   0 total
+Time:        141.778 s
+Ran all test suites matching insurer-patients.

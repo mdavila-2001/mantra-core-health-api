@@ -1,0 +1,3 @@
+EXIT 0
+Test Suites: 117 passed, 117 total
+Tests:       1370 passed, 1370 total

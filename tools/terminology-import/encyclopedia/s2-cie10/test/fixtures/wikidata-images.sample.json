@@ -1,0 +1,132 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "file"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q12192"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Pneumonia%2C%20mixed%20patterns%2C%20lobar%20and%20bronchopneumonia%20%283679096639%29.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q178194"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/ClubbingCF.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1435822"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Neutropenia.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q178194"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/ClubbingCF.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q178194"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/ClubbingCF.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q178194"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/ClubbingCF.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q178194"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/ClubbingCF.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q178194"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/ClubbingCF.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1435822"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Neutropenia.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q28693"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Anembryonic%20gestation.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q500695"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Retinoblastoma.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q500695"
+    },
+    "file": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Retinoblastoma.jpg"
+    }
+   }
+  ]
+ }
+}

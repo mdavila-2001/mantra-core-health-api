@@ -1,6 +1,6 @@
-site_name: REDESA Health API — Documentación técnica
+site_name: ALOVIDA Health API — Documentación técnica
 site_description: >-
-  Documentación técnica completa del backend REDESA Health (Mantra Core Technologies):
+  Documentación técnica completa del backend ALOVIDA Health (Mantra Core Technologies):
   arquitectura, API, datos, eventos, seguridad, operación y gobierno.
 repo_url: https://github.com/mdavila-2001/mantra-core-health-redesa-api
 repo_name: mantra-core-health-redesa-api

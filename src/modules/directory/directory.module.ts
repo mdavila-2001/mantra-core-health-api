@@ -3,22 +3,26 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CommunityModule } from '../community/community.module';
 import { InsuranceModule } from '../insurance/insurance.module';
 import { TerminologyModule } from '../terminology/terminology.module';
+import { CommonModule } from '../common/common.module';
+import { DiagnosticUnitsModule } from '../diagnostic_units/diagnostic_units.module';
+import { DirectoryAuthorizationModule } from './directory-authorization.module';
+import { OrganizationLogoController } from './controllers/organization-logo.controller';
+import { OrganizationLogoService } from './services/organization-logo.service';
 import {
-  TenantAdministrationService,
   TenantTypeProfileService,
-} from './services';
-import * as entities from './entities';
-import { AdminTenantsController, TenantsController } from './controllers';
-import {
+  AffiliationDocumentConceptsService,
+  TenantAffiliationDocumentsService,
+  TenantLegalRepresentativesService,
   DirectoryTenantsService,
   DirectoryBranchesService,
   DirectoryMembershipsService,
   DirectoryReadService,
 } from './services';
+import * as entities from './entities';
+import { AdminTenantsController, TenantsController } from './controllers';
 import {
   TenantsRepository,
   BranchesRepository,
-  TenantMembershipsRepository,
   BranchMembershipsRepository,
   DirectoryTenantLegalRepository,
 } from './repositories';
@@ -37,20 +41,37 @@ import {
   // directorio público, con el mismo puerto de proyección que ya usan las
   // unidades de diagnóstico. No hay ciclo: `community` no depende de
   // `directory`.
+  // DiagnosticUnitsModule (subtarea 1.5): `TenantTypeProfileService`
+  // materializa la unidad diagnóstica de un tenant `DIAGNOSTIC_CENTER`
+  // dentro de la misma transacción del alta. `diagnostic_units` no importa
+  // `directory`, así que la dependencia va en un solo sentido.
+  // CommonModule (subtarea 1.2): `TenantAffiliationDocumentsService` necesita
+  // `AttachableFileService` para reclamar, dentro de la transacción del alta,
+  // los PDF que el autorregistro subió sin sesión. `common` no importa
+  // `directory`, así que tampoco cierra ciclo.
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
     CommunityModule,
     InsuranceModule,
     TerminologyModule,
+    DiagnosticUnitsModule,
+    CommonModule,
+    DirectoryAuthorizationModule,
   ],
-  controllers: [AdminTenantsController, TenantsController],
+  controllers: [
+    AdminTenantsController,
+    TenantsController,
+    OrganizationLogoController,
+  ],
   providers: [
+    OrganizationLogoService,
     TenantTypeProfileService,
-    TenantAdministrationService,
+    AffiliationDocumentConceptsService,
+    TenantAffiliationDocumentsService,
+    TenantLegalRepresentativesService,
     // Repositorios
     TenantsRepository,
     BranchesRepository,
-    TenantMembershipsRepository,
     BranchMembershipsRepository,
     DirectoryTenantLegalRepository,
     // Servicios
@@ -69,12 +90,22 @@ import {
   // `DirectoryMembershipsService` lo necesita `profiles` para que aprobar un
   // vínculo conceda la membresía asistencial (MAC-VINCULO): qué campos lleva una
   // membresía y qué cuenta como duplicada se decide acá, no en cada llamador.
+  // `TenantAffiliationDocumentsService` lo necesita `iam` para el
+  // autorregistro de organización, igual que `TenantTypeProfileService`.
   exports: [
     TenantsRepository,
-    TenantMembershipsRepository,
+    DirectoryAuthorizationModule,
+    BranchesRepository,
     TenantTypeProfileService,
-    TenantAdministrationService,
     DirectoryMembershipsService,
+    TenantAffiliationDocumentsService,
+    // `TenantLegalRepresentativesService` lo necesita `iam` para el
+    // autorregistro de organización (subtarea 1.4), igual que los otros dos.
+    TenantLegalRepresentativesService,
+    // `DirectoryReadService` lo necesita `pharmacy` para servir el
+    // representante y las gerencias de la ficha de la farmacia con la misma
+    // lectura que `GET /tenants/me`.
+    DirectoryReadService,
   ],
 })
 export class DirectoryModule {}

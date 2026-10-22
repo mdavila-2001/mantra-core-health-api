@@ -369,7 +369,7 @@ hallazgos:
   explícito entre creates y `correlationId` derivado. Corregido en 2026-07-30 con
   prueba de integración contra Postgres real.
 - **Aislamiento por tenant**: RLS validado contra base real, guardrail estático
-  `TENANT_SCOPE_MISSING` en `tools/redesa/guardrails.mjs`.
+  `TENANT_SCOPE_MISSING` en `tools/alovida/guardrails.mjs`.
 - **Reclamación de trabajo entre réplicas**: los endpoints `/internal/*` usan
   `SKIP LOCKED` y `lockedBy`, que es exclusión distribuida real. La exclusión que
   añade `runTick` es **por proceso** y complementaria, no la sustituye.

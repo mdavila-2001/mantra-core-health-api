@@ -136,10 +136,10 @@ export class CommunityTimelineReadService {
                 publishedAt: post.publishedAt ?? null,
                 editedAt: post.editedAt ?? null,
                 reactions: (
-                  engagement.get(post.id) ?? CommunityEngagementService.vacio()
+                  engagement.get(post.id) ?? CommunityEngagementService.empty()
                 ).reactions,
                 commentCount: (
-                  engagement.get(post.id) ?? CommunityEngagementService.vacio()
+                  engagement.get(post.id) ?? CommunityEngagementService.empty()
                 ).commentCount,
               }
             : null,

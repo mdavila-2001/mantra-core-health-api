@@ -50,6 +50,13 @@ export class InsuranceClaimLines {
   }) // FK → pharmacy_inventory.medication_dispensation_lines
   medicationDispensationLineId?: string;
 
+  @Property({
+    fieldName: 'inventory_reservation_line_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → pharmacy_inventory.inventory_reservation_lines
+  inventoryReservationLineId?: string;
+
   /**
    * Valor de quantity mantenido por la instancia.
    */

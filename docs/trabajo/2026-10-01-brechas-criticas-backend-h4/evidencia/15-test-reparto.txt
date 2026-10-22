@@ -1,0 +1,13 @@
+﻿node.exe : (node:10792) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En C:\Users\Usuario\AppData\Roaming\npm\corepack.ps1: 24 Carácter: 5
++     & "node$exe"  "$basedir/node_modules/corepack/dist/corepack.js" $ ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:10792) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+Test Suites: 1 passed, 1 total
+Tests:       37 passed, 37 total
+Snapshots:   0 total
+Time:        1.156 s, estimated 2 s
+Ran all test suites matching src/modules/insurance/services/received-claim-settlement.spec.ts.

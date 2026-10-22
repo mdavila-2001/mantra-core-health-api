@@ -1,0 +1,120 @@
+{
+  "code": "MEDGEN_CTRL_EDA",
+  "name": "Enfermedad diarreica aguda en adultos",
+  "specialty": { "code": "MEDICINA_GENERAL", "display": "Medicina General" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Atención Integrada a las Enfermedades Prevalentes de la Infancia (AIEPI)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/teams/maternal-newborn-child-adolescent-health-and-ageing/child-health/integrated-management-of-childhood-illness",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Estado de hidratación y planes A/B/C de la OMS."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diarrea aguda",
+      "code": "eda_deposiciones_24h",
+      "name": "Deposiciones líquidas en las últimas 24 horas",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: diarrea aguda",
+      "code": "eda_sangre_en_heces",
+      "name": "Sangre en las heces (disentería)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diarrea aguda",
+      "code": "eda_vomitos",
+      "name": "Vómitos",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diarrea aguda",
+      "code": "eda_hidratacion",
+      "name": "Estado de hidratación (OMS)",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Sin deshidratación — Plan A",
+        "Algún grado de deshidratación — Plan B",
+        "Deshidratación grave — Plan C"
+      ]
+    },
+    {
+      "section": "Evaluación: diarrea aguda",
+      "code": "eda_fiebre",
+      "name": "Fiebre",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: diarrea aguda",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: diarrea aguda",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sales de rehidratación oral",
+        "Lavado de manos",
+        "Signos de alarma"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

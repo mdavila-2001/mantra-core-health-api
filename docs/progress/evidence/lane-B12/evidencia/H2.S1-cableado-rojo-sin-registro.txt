@@ -1,0 +1,11 @@
+$ corepack yarn test --testPathPatterns="app.module.wiring"
+FAIL MCH-012 · todo módulo de dominio está conectado al arranque ningún módulo de dominio queda fuera del grafo de AppModule
+   Error: expect(received).toEqual(expected) // deep equality
+   
+   - Expected  - 1
+   + Received  + 3
+   
+   - Array []
+Suites: 0 passed, 1 failed, 1 total
+Tests:  1 passed, 1 failed, 0 skipped, 2 total
+exit=1

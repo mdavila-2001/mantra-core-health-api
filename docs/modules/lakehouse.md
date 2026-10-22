@@ -3,12 +3,12 @@
   Fuente real: src/modules/lakehouse/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `lakehouse`
 
-**Fuente:** [`src/modules/lakehouse/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/lakehouse/README.md)
+**Fuente:** [`src/modules/lakehouse/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/lakehouse/README.md)
 · 2 controllers · 3 services · 3 repositories · 18 entidades · 1 DTO
 
 ---
@@ -19,6 +19,42 @@ Zonas del lago, metastores, productos de datos con contrato versionado, datasets
 esquema, corridas de transformación que materializan particiones inmutables con su linaje, control de
 calidad que cuarentena lo que no cumple, y releases de investigación de-identificados **que siempre
 caducan**.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/lakehouse -name '*.controller.ts' | wc -l
+  find src/modules/lakehouse -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/lakehouse -name '*.entity.ts' | wc -l
+  find src/modules/lakehouse -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 13 rutas HTTP, 18 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`MessagingModule`).
+
+Entidades (`tableName`, 18 de 18 archivos `*.entity.ts`): `cohort_definitions`, `data_lake_zones`, `data_product_versions`, `data_products`, `dataset_release_manifests`, `dataset_release_requests`, `lakehouse_catalogs`, `lakehouse_datasets`, `lakehouse_files`, `lakehouse_lineage_edges`, `lakehouse_partitions`, `lakehouse_quality_issues`, `lakehouse_quality_rules`, `lakehouse_quality_runs`, `lakehouse_schema_versions`, `research_projects`, `transformation_definitions`, `transformation_runs`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /lakehouse/zones` | DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `lakehouse` |
+| `POST /lakehouse/catalogs` | DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `lakehouse` |
+| `POST /lakehouse/data-products/:id/versions` | DATA_PRODUCT_OWNER, PLATFORM_ADMIN | `lakehouse` |
+| `POST /lakehouse/datasets` | DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `lakehouse` |
+| `POST /lakehouse/transformations/:defId/runs` | SYSTEM, TRANSFORMATION_WORKER, PLATFORM_ADMIN | `lakehouse` |
+| `POST /lakehouse/ingestion/curated-runs` | SYSTEM, DEIDENTIFICATION_WORKER, PLATFORM_ADMIN | `lakehouse` |
+| `POST /lakehouse/datasets/:id/quality-runs` | DATA_STEWARD, SYSTEM, PLATFORM_ADMIN | `lakehouse` |
+| `POST /research/deidentification-profiles` | RESEARCH_GOVERNANCE,
+    DPO,
+    PRINCIPAL_INVESTIGATOR,
+    PLATFORM_ADMIN, | `research` |
+| `POST /research/projects/:id/cohorts` | PRINCIPAL_INVESTIGATOR, RESEARCH_GOVERNANCE, PLATFORM_ADMIN | `research` |
+| `POST /research/dataset-releases` | PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN | `research` |
+| `POST /research/dataset-releases/:id/approve` | RESEARCH_GOVERNANCE, DPO, PLATFORM_ADMIN | `research` |
+| `GET /research/dataset-releases/expired` | RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN | `research` |
+| `POST /research/dataset-releases/:id/revoke` | RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN | `research` |
 
 ## Casos de uso cubiertos (12)
 
@@ -37,7 +73,7 @@ caducan**.
 | UC-63-11 | `POST /research/dataset-releases/:id/approve` | Aprobar y materializar |
 | UC-63-12 | `POST /research/dataset-releases/:id/revoke` | Expirar o revocar |
 
-11 endpoints para 12 casos de uso: UC-63-06 no tiene endpoint propio — el caso de uso lo declara
+11 endpoints para 12 casos de uso (cifra original del módulo; al 2026-10-08 el código declara 13 rutas, ver «Rutas HTTP y alcance (medido)»): UC-63-06 no tiene endpoint propio — el caso de uso lo declara
 explícitamente como *interno, parte del commit de UC-63-05*, y así se implementa.
 
 ## Estados en `varchar`, en minúsculas
@@ -173,8 +209,22 @@ pacientes. No se loguean valores de partición, contratos ni expresiones de coho
 
 ## Pruebas
 
-`yarn test --testPathPatterns=modules/lakehouse` — 70 pruebas (18 catálogo + 18 transformación +
-23 investigación + 11 de delegación de los dos controladores).
+```bash
+corepack yarn test src/modules/lakehouse --runInBand --silent
+```
+
+Revisión 2026-10-05: 4 suites y 73 pruebas aprobadas. La cobertura actual verifica reglas de
+estado, idempotencia y delegación de controladores; no cubre aislamiento entre tenants ni la
+persistencia real de los payloads mínimos frente al DDL.
+
+## Límites conocidos de la implementación revisada
+
+- Las consultas por UUID de producto, dataset, definición, proyecto y release no reciben el tenant
+  resuelto ni lo filtran. Los roles y el interceptor que compara `tenantId` de entrada no sustituyen
+  esa comprobación; ver [informe de revisión](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-01--crítica--búsquedas-por-uuid-sin-tenant-permiten-cruzar-recursos-y-releases-entre-tenants).
+- Varios DTO permiten omitir campos que las tablas del lakehouse declaran `NOT NULL`; el payload
+  aceptado por validación puede fallar al persistir. Ver [LAKE-02](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-02--alta--contratos-opcionales-contra-columnas-not-null-producen-errores-de-orm).
+- Las respuestas de error usan códigos genéricos sin `reason` estable. Ver [LAKE-03](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/lakehouse.md#lake-03--media--el-módulo-no-expone-reasons-estables-por-fallo-de-negocio).
 
 ## Divergencias con el caso de uso v3.9
 
@@ -202,4 +252,3 @@ pacientes. No se loguean valores de partición, contratos ni expresiones de coho
   da un endpoint de alta. No se ha inventado uno.
 - **`audit.audit_events` y las tablas `*_history`**: el caso de uso las declara en los doce. El
   registro de auditoría es del módulo 06.
-

@@ -2,7 +2,7 @@
 
 # Catálogo del schema `clinical`
 
-- **Tablas:** 22 · **Columnas:** 383 (99 con descripción: 25.8 %) · **Índices:** 237
+- **Tablas:** 22 · **Columnas:** 383 (102 con descripción: 26.6 %) · **Índices:** 237
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,27 +10,27 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [allergy_intolerances](#allergy_intolerances) | Mantiene las alergias e intolerancias conocidas del paciente para que puedan considerarse al decidir y prestar atención clínica. | 15 | 14 | 3 | COINCIDE |
-| [allergy_reactions](#allergy_reactions) | Documenta las manifestaciones asociadas a una alergia o intolerancia para caracterizar el antecedente y orientar su evaluación clínica. | 10 | 5 | 1 | COINCIDE |
-| [appointments](#appointments) | Representa citas asistenciales en el contexto clínico y permite relacionarlas con el encuentro realizado o planificado. | 16 | 13 | 13 | COINCIDE |
+| [allergy_intolerances](#allergy_intolerances) | Mantiene las alergias e intolerancias conocidas del paciente para que puedan considerarse al decidir y prestar atención clínica. | 15 | 14 | 5 | DIVERGE |
+| [allergy_reactions](#allergy_reactions) | Documenta las manifestaciones asociadas a una alergia o intolerancia para caracterizar el antecedente y orientar su evaluación clínica. | 10 | 5 | 2 | COINCIDE |
+| [appointments](#appointments) | Representa citas asistenciales en el contexto clínico y permite relacionarlas con el encuentro realizado o planificado. | 16 | 13 | 18 | COINCIDE |
 | [care_episodes](#care_episodes) | Agrupa encuentros relacionados dentro de un proceso asistencial del paciente para seguir su evolución y responsabilidad clínica. | 13 | 9 | 4 | COINCIDE |
-| [conditions](#conditions) | Registra problemas, diagnósticos y condiciones de salud del paciente con estado, severidad, curso y fechas clínicas relevantes. | 21 | 16 | 9 | COINCIDE |
-| [diagnostic_reports](#diagnostic_reports) | Gestiona el ciclo de vida del informe diagnóstico y lo vincula con su solicitud y encuentro; los resultados estructurados y archivos asociados se mantienen en el dominio de diagnóstico. | 16 | 14 | 12 | COINCIDE |
-| [encounter_locations](#encounter_locations) | Vincula un encuentro con los lugares de prestación para mantener el contexto físico de la atención. | 13 | 7 | 3 | COINCIDE |
-| [encounter_participants](#encounter_participants) | Identifica a las personas que participan en un encuentro y su rol para conservar quién intervino en la atención. | 14 | 7 | 4 | COINCIDE |
-| [encounters](#encounters) | Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, motivo y estado de atención. | 20 | 13 | 20 | DIVERGE |
+| [conditions](#conditions) | Registra problemas, diagnósticos y condiciones de salud del paciente con estado, severidad, curso y fechas clínicas relevantes. | 21 | 16 | 20 | COINCIDE |
+| [diagnostic_reports](#diagnostic_reports) | Gestiona el ciclo de vida del informe diagnóstico y lo vincula con su solicitud y encuentro; los resultados estructurados y archivos asociados se mantienen en el dominio de diagnóstico. | 16 | 14 | 17 | COINCIDE |
+| [encounter_locations](#encounter_locations) | Vincula un encuentro con los lugares de prestación para mantener el contexto físico de la atención. | 13 | 7 | 4 | COINCIDE |
+| [encounter_participants](#encounter_participants) | Identifica a las personas que participan en un encuentro y su rol para conservar quién intervino en la atención. | 14 | 7 | 11 | COINCIDE |
+| [encounters](#encounters) | Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, motivo y estado de atención. | 20 | 13 | 60 | COINCIDE |
 | [family_member_history](#family_member_history) | Conserva antecedentes familiares relevantes para la evaluación de riesgo y la historia de salud del paciente. | 15 | 9 | 0 | COINCIDE |
-| [immunizations](#immunizations) | Registra inmunizaciones administradas o documentadas en la historia de salud para sostener seguimiento y continuidad preventiva. | 15 | 10 | 2 | COINCIDE |
+| [immunizations](#immunizations) | Registra inmunizaciones administradas o documentadas en la historia de salud para sostener seguimiento y continuidad preventiva. | 15 | 10 | 3 | COINCIDE |
 | [medication_records](#medication_records) | Conserva el historial clínico de uso o administración de medicación del paciente; no representa el inventario ni la dispensación de farmacia. | 16 | 12 | 1 | COINCIDE |
-| [medication_requests](#medication_requests) | Registra solicitudes o prescripciones de medicamentos, su indicación y trazabilidad clínica dentro de la atención del paciente. | 31 | 16 | 31 | COINCIDE |
+| [medication_requests](#medication_requests) | Registra solicitudes o prescripciones de medicamentos, su indicación y trazabilidad clínica dentro de la atención del paciente. | 31 | 16 | 42 | DIVERGE |
 | [observation_components](#observation_components) | Desglosa observaciones compuestas en componentes ordenados para preservar cada resultado y su tipo de valor de manera interpretable. | 23 | 10 | 2 | COINCIDE |
 | [observation_notes](#observation_notes) | Guarda notas narrativas complementarias sobre una observación cuando el dato codificado requiere contexto clínico adicional. | 5 | 2 | 2 | COINCIDE |
 | [observation_performers](#observation_performers) | Atribuye quién o qué dispositivo realizó una observación para dar procedencia al resultado clínico. | 8 | 4 | 1 | COINCIDE |
 | [observation_reference_ranges](#observation_reference_ranges) | Asocia rangos de referencia a observaciones o componentes para contextualizar la interpretación de resultados medibles. | 13 | 6 | 1 | COINCIDE |
 | [observations](#observations) | Conserva hallazgos y mediciones clínicas codificados, tipados y vinculables al paciente, encuentro, solicitud y método de obtención. | 44 | 28 | 5 | COINCIDE |
 | [prescription_signature_policies](#prescription_signature_policies) | Define las reglas de firma aplicables a prescripciones para controlar quién puede validarlas y bajo qué requisitos operativos. | 13 | 1 | 5 | COINCIDE |
-| [procedures](#procedures) | Documenta procedimientos asociados a la atención y enlaza su contexto con el encuentro, las solicitudes y, cuando corresponde, otros procedimientos. | 28 | 15 | 6 | COINCIDE |
-| [service_requests](#service_requests) | Representa solicitudes de servicios clínicos —por ejemplo, estudios o procedimientos— y su estado dentro del proceso asistencial. | 18 | 15 | 12 | DIVERGE |
+| [procedures](#procedures) | Documenta procedimientos asociados a la atención y enlaza su contexto con el encuentro, las solicitudes y, cuando corresponde, otros procedimientos. | 28 | 15 | 7 | COINCIDE |
+| [service_requests](#service_requests) | Representa solicitudes de servicios clínicos —por ejemplo, estudios o procedimientos— y su estado dentro del proceso asistencial. | 18 | 15 | 27 | DIVERGE |
 | [social_history](#social_history) | Registra factores y circunstancias sociales o hábitos que aportan contexto a la valoración y continuidad asistencial del paciente. | 16 | 11 | 0 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -255,7 +255,7 @@ Mantiene las alergias e intolerancias conocidas del paciente para que puedan con
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: allergy_intolerances`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `AllergyIntolerances` — `src/modules/clinical/entities/allergy_intolerances.entity.ts`
-- **Resumen:** 15 columnas · 14 índices · 11 FK salientes · 2 entrantes · 3 operaciones
+- **Resumen:** 15 columnas · 14 índices · 11 FK salientes · 2 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -271,11 +271,11 @@ Mantiene las alergias e intolerancias conocidas del paciente para que puedan con
 | 8 | `clinical_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 9 | `verification_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 10 | `recorded_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/allergy_intolerances.entity.ts:84`)_ | coincide |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/allergy_intolerances.entity.ts:90`)_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/allergy_intolerances.entity.ts:95`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/allergy_intolerances.entity.ts:101`)_ | coincide |
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/allergy_intolerances.entity.ts:108`)_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/allergy_intolerances.entity.ts:119`)_ | coincide |
 
 #### Relaciones
 
@@ -320,6 +320,8 @@ Mantiene las alergias e intolerancias conocidas del paciente para que puedan con
 |---|---|---|
 | POST /clinical/allergy-intolerances | CREA | DIRECTA |
 | POST /clinical/allergy-intolerances | LEE | DIRECTA |
+| GET /clinical/allergy-intolerances/{id}/attachments | LEE | DIRECTA |
+| POST /clinical/allergy-intolerances/{id}/attachments | LEE | DIRECTA |
 | GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
 
 #### Gobierno
@@ -345,7 +347,7 @@ Documenta las manifestaciones asociadas a una alergia o intolerancia para caract
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: allergy_reactions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `AllergyReactions` — `src/modules/clinical/entities/allergy_reactions.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 5 FK salientes · 0 entrantes · 1 operaciones
+- **Resumen:** 10 columnas · 5 índices · 5 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -376,7 +378,7 @@ Documenta las manifestaciones asociadas a una alergia o intolerancia para caract
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_allergy_reactions_allergy_id` | no | allergy_id | Soporta la clave foránea fk_allergy_reactions_allergy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_allergy_reactions_allergy_id` | no | allergy_id | Soporta la clave foránea fk_allergy_reactions_allergy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «allergy_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_allergy_reactions_manifestation_concept_id` | no | manifestation_concept_id | Soporta la clave foránea fk_allergy_reactions_manifestation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_allergy_reactions_severity_concept_id` | no | severity_concept_id | Soporta la clave foránea fk_allergy_reactions_severity_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_allergy_reactions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_allergy_reactions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -387,6 +389,7 @@ Documenta las manifestaciones asociadas a una alergia o intolerancia para caract
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /clinical/allergy-intolerances | CREA | DIRECTA |
+| GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -411,7 +414,7 @@ Representa citas asistenciales en el contexto clínico y permite relacionarlas c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: appointments`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `Appointments` — `src/modules/clinical/entities/appointments.entity.ts`
-- **Resumen:** 16 columnas · 13 índices · 9 FK salientes · 4 entrantes · 13 operaciones
+- **Resumen:** 16 columnas · 13 índices · 9 FK salientes · 4 entrantes · 18 operaciones
 
 #### Columnas
 
@@ -482,7 +485,12 @@ Representa citas asistenciales en el contexto clínico y permite relacionarlas c
 |---|---|---|
 | POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
 | GET /accounting/practitioner/paid-consultations | LEE | DIRECTA |
+| POST /clinical/encounters/check-in | LEE | DIRECTA |
+| GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
 | POST /scheduling/appointments/direct | CREA | DIRECTA |
+| POST /scheduling/appointments/walk-in | CREA | DIRECTA |
+| POST /scheduling/appointments/walk-in | ACTUALIZA | POR_TIPO |
+| POST /scheduling/appointments/walk-in | LEE | DIRECTA |
 | GET /scheduling/bookings | LEE | DIRECTA |
 | GET /scheduling/bookings/{id} | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/accept | ACTUALIZA | POR_TIPO |
@@ -597,7 +605,7 @@ Registra problemas, diagnósticos y condiciones de salud del paciente con estado
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: conditions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `Conditions` — `src/modules/clinical/entities/conditions.entity.ts`
-- **Resumen:** 21 columnas · 16 índices · 13 FK salientes · 6 entrantes · 9 operaciones
+- **Resumen:** 21 columnas · 16 índices · 13 FK salientes · 6 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -655,7 +663,7 @@ Registra problemas, diagnósticos y condiciones de salud del paciente con estado
 |---|---|---|---|
 | `ix_conditions_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_conditions_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_conditions_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_conditions_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_conditions_encounter_id` | no | encounter_id | Soporta la clave foránea fk_conditions_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_conditions_encounter_id` | no | encounter_id | Soporta la clave foránea fk_conditions_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_conditions_code_concept_id` | no | code_concept_id | Soporta la clave foránea fk_conditions_code_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_conditions_category_concept_id` | no | category_concept_id | Soporta la clave foránea fk_conditions_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_conditions_clinical_status_concept_id` | no | clinical_status_concept_id | Soporta la clave foránea fk_conditions_clinical_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «clinical_status_concept_id», la primera columna del índice _(CONSULTA)_ |
@@ -674,13 +682,24 @@ Registra problemas, diagnósticos y condiciones de salud del paciente con estado
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
 | POST /clinical/conditions | CREA | DIRECTA |
 | POST /clinical/conditions | LEE | DIRECTA |
+| POST /clinical/conditions/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/conditions/{id}/change-status | ACTUALIZA | POR_TIPO |
 | POST /clinical/conditions/{id}/change-status | LEE | DIRECTA |
+| POST /clinical/conditions/{id}/verification | ACTUALIZA | POR_TIPO |
+| POST /clinical/conditions/{id}/verification | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | POST /clinical/medication-requests | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
 | GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
+| GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
+| GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
+| POST /insurance/portability/export | LEE | POR_SQL |
+| POST /medical-groups | LEE | DIRECTA |
+| GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
 | POST /procedure-cases/{id}/diagnoses | CREA | DIRECTA |
 | POST /procedure-cases/{id}/diagnoses | LEE | DIRECTA |
 
@@ -707,7 +726,7 @@ Gestiona el ciclo de vida del informe diagnóstico y lo vincula con su solicitud
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: diagnostic_reports; REC_DIAGNOSTICS_CLIN`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `DiagnosticReports` — `src/modules/clinical/entities/diagnostic_reports.entity.ts`
-- **Resumen:** 16 columnas · 14 índices · 12 FK salientes · 8 entrantes · 12 operaciones
+- **Resumen:** 16 columnas · 14 índices · 12 FK salientes · 8 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -760,10 +779,10 @@ Gestiona el ciclo de vida del informe diagnóstico y lo vincula con su solicitud
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_diagnostic_reports_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_diagnostic_reports_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_diagnostic_reports_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_diagnostic_reports_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_diagnostic_reports_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_diagnostic_reports_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_reports_service_request_id` | no | service_request_id | Soporta la clave foránea fk_diagnostic_reports_service_request_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «service_request_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_reports_encounter_id` | no | encounter_id | Soporta la clave foránea fk_diagnostic_reports_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_diagnostic_reports_code_concept_id` | no | code_concept_id | Soporta la clave foránea fk_diagnostic_reports_code_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_diagnostic_reports_code_concept_id` | no | code_concept_id | Soporta la clave foránea fk_diagnostic_reports_code_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_diagnostic_reports_category_concept_id` | no | category_concept_id | Soporta la clave foránea fk_diagnostic_reports_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_reports_lifecycle_status_concept_id` | no | lifecycle_status_concept_id | Soporta la clave foránea fk_diagnostic_reports_lifecycle_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_diagnostic_reports_current_version_id` | no | current_version_id | Soporta la clave foránea fk_diagnostic_reports_current_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -778,11 +797,14 @@ Gestiona el ciclo de vida del informe diagnóstico y lo vincula con su solicitud
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/conditions/{id}/verification | LEE | DIRECTA |
 | POST /clinical/diagnostic-reports | CREA | DIRECTA |
-| POST /clinical/diagnostic-reports/{id}/release | ACTUALIZA | POR_TIPO |
 | POST /clinical/diagnostic-reports/{id}/release | LEE | DIRECTA |
+| POST /clinical/service-requests | LEE | DIRECTA |
+| POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
 | GET /diagnostic-results/me | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId} | LEE | DIRECTA |
+| GET /diagnostic-results/me/{reportId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares | LEE | DIRECTA |
 | POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke | LEE | DIRECTA |
@@ -790,6 +812,8 @@ Gestiona el ciclo de vida del informe diagnóstico y lo vincula con su solicitud
 | GET /diagnostics/patients/{patientProfileId}/orders | LEE | DIRECTA |
 | POST /diagnostics/reports/{reportId}/versions/{versionId}/release | ACTUALIZA | POR_TIPO |
 | POST /diagnostics/reports/{reportId}/versions/{versionId}/release | LEE | DIRECTA |
+| GET /insurance-claims/{id} | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -814,7 +838,7 @@ Vincula un encuentro con los lugares de prestación para mantener el contexto f�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: encounter_locations`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `EncounterLocations` — `src/modules/clinical/entities/encounter_locations.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 7 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 13 columnas · 7 índices · 7 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -865,6 +889,7 @@ Vincula un encuentro con los lugares de prestación para mantener el contexto f�
 | POST /clinical/encounters/{id}/close | ACTUALIZA | POR_TIPO |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | POST /clinical/encounters/check-in | CREA | DIRECTA |
+| POST /clinical/encounters/check-in | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -889,7 +914,7 @@ Identifica a las personas que participan en un encuentro y su rol para conservar
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: encounter_participants`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `EncounterParticipants` — `src/modules/clinical/entities/encounter_participants.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 11 operaciones
 
 #### Columnas
 
@@ -926,8 +951,8 @@ Identifica a las personas que participan en un encuentro y su rol para conservar
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_encounter_participants_encounter_id` | no | encounter_id | Soporta la clave foránea fk_encounter_participants_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_encounter_participants_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_encounter_participants_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_encounter_participants_encounter_id` | no | encounter_id | Soporta la clave foránea fk_encounter_participants_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_encounter_participants_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_encounter_participants_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_encounter_participants_participant_role_concept_id` | no | participant_role_concept_id | Soporta la clave foránea fk_encounter_participants_participant_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_encounter_participants_practitioner_role_assignment_id` | no | practitioner_role_assignment_id | Soporta la clave foránea fk_encounter_participants_practitioner_role_assignment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_encounter_participants_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_encounter_participants_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
@@ -941,7 +966,14 @@ Identifica a las personas que participan en un encuentro y su rol para conservar
 | POST /clinical/encounters/{id}/close | ACTUALIZA | POR_TIPO |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | POST /clinical/encounters/check-in | CREA | DIRECTA |
+| POST /clinical/encounters/check-in | LEE | DIRECTA |
+| POST /virtual-encounters | LEE | DIRECTA |
+| PATCH /virtual-encounters/{id}/end | LEE | DIRECTA |
+| PATCH /virtual-encounters/{id}/join | LEE | DIRECTA |
 | POST /community/profiles/{profileId}/reviews | LEE | DIRECTA |
+| PUT /community/ratings | LEE | DIRECTA |
+| POST /patients/me/reviews | LEE | DIRECTA |
+| POST /scheduling/appointments/walk-in | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -966,7 +998,7 @@ Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, m
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: encounters`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `Encounters` — `src/modules/clinical/entities/encounters.entity.ts`
-- **Resumen:** 20 columnas · 13 índices · 11 FK salientes · 30 entrantes · 20 operaciones
+- **Resumen:** 20 columnas · 13 índices · 11 FK salientes · 30 entrantes · 60 operaciones
 
 #### Columnas
 
@@ -985,13 +1017,13 @@ Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, m
 | 11 | `start_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 12 | `end_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 13 | `appointment_id` | `uuid` | Clave foránea → clinical.appointments.id; Opcional | _sin dato_ | coincide |
-| 14 | `content_hash` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 15 | `sealed_at` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/encounters.entity.ts:98`)_ | coincide |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/encounters.entity.ts:104`)_ | coincide |
+| 14 | `content_hash` | `varchar` | Opcional | Sello SHA-256 del contenido del encuentro, calculado al cerrarlo. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/encounters.entity.ts:98`)_ | coincide |
+| 15 | `sealed_at` | `timestamptz` | Opcional | Fecha y hora en que se calculó el sello del encuentro. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/encounters.entity.ts:108`)_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/encounters.entity.ts:118`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/encounters.entity.ts:124`)_ | coincide |
 | 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/encounters.entity.ts:122`)_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/encounters.entity.ts:142`)_ | coincide |
 
 #### Relaciones
 
@@ -1047,11 +1079,11 @@ Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, m
 | `ix_encounters_episode_id` | no | episode_id | Soporta la clave foránea fk_encounters_episode_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_encounters_tenant_id` | no | tenant_id | Soporta la clave foránea fk_encounters_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_encounters_branch_id` | no | branch_id | Soporta la clave foránea fk_encounters_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_encounters_primary_practitioner_id` | no | primary_practitioner_id | Soporta la clave foránea fk_encounters_primary_practitioner_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_encounters_primary_practitioner_id` | no | primary_practitioner_id | Soporta la clave foránea fk_encounters_primary_practitioner_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «primary_practitioner_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_encounters_class_concept_id` | no | class_concept_id | Soporta la clave foránea fk_encounters_class_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_encounters_type_concept_id` | no | type_concept_id | Soporta la clave foránea fk_encounters_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_encounters_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_encounters_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_encounters_appointment_id` | no | appointment_id | Soporta la clave foránea fk_encounters_appointment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «appointment_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_encounters_appointment_id` | no | appointment_id | Soporta la clave foránea fk_encounters_appointment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «appointment_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_encounters_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_encounters_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «created_by_user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_encounters_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_encounters_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_encounters_tenant_id_status_concept_id` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -1063,24 +1095,64 @@ Representa cada contacto asistencial y vincula paciente, equipo, sede, agenda, m
 |---|---|---|
 | POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
 | GET /accounting/practitioner/paid-consultations | LEE | DIRECTA |
+| GET /billing/simulated/charges | LEE | POR_SQL |
+| POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | LEE | POR_SQL |
+| POST /billing/simulated/charges/{chargeId}/invoices | LEE | POR_SQL |
+| POST /billing/simulated/charges/{chargeId}/payment | LEE | POR_SQL |
+| GET /billing/simulated/invoices/{invoiceId} | LEE | POR_SQL |
+| POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
+| POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
+| POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| GET /billing/simulated/my-invoices | LEE | POR_SQL |
+| GET /billing/simulated/my-invoices/{invoiceId} | LEE | POR_SQL |
+| GET /billing/simulated/outbox | LEE | POR_SQL |
+| GET /billing/simulated/status | LEE | POR_SQL |
+| POST /charts/care-plans | LEE | DIRECTA |
+| POST /charts/documents | LEE | DIRECTA |
+| GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
+| POST /clinical/allergy-intolerances | LEE | DIRECTA |
+| POST /clinical/conditions | LEE | DIRECTA |
+| GET /clinical/encounters/{id}/attachments | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/encounters/{id}/close | ACTUALIZA | POR_TIPO |
 | POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | POST /clinical/encounters/check-in | CREA | DIRECTA |
+| POST /clinical/encounters/check-in | LEE | DIRECTA |
 | POST /clinical/observations | LEE | DIRECTA |
 | GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
+| POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| POST /virtual-encounters | LEE | DIRECTA |
+| PATCH /virtual-encounters/{id}/end | LEE | DIRECTA |
+| PATCH /virtual-encounters/{id}/join | LEE | DIRECTA |
 | POST /community/profiles/{profileId}/reviews | LEE | DIRECTA |
+| PUT /community/ratings | LEE | DIRECTA |
+| POST /patients/me/reviews | LEE | DIRECTA |
+| GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
+| POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | GET /forms/instances | LEE | DIRECTA |
 | POST /forms/instances | LEE | DIRECTA |
 | GET /forms/instances/{id} | LEE | DIRECTA |
 | GET /forms/me/instances | LEE | DIRECTA |
 | GET /forms/me/instances/{id} | LEE | DIRECTA |
+| GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
+| GET /insurance/my-claims | LEE | DIRECTA |
+| POST /insurance/portability/export | LEE | POR_SQL |
+| GET /insurance/received-claims | LEE | DIRECTA |
+| POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
+| POST /procedure-cases/{id}/diagnoses | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
 | DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | GET /profiles/practitioners/{profileId}/summary | LEE | DIRECTA |
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | GET /profiles/practitioners/me/summary | LEE | DIRECTA |
+| POST /scheduling/appointments/direct | LEE | DIRECTA |
+| POST /scheduling/appointments/walk-in | CREA | DIRECTA |
+| POST /scheduling/appointments/walk-in | LEE | DIRECTA |
+| GET /scheduling/bookings | LEE | DIRECTA |
+| GET /scheduling/bookings/{id} | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1180,7 +1252,7 @@ Registra inmunizaciones administradas o documentadas en la historia de salud par
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: immunizations`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `Immunizations` — `src/modules/clinical/entities/immunizations.entity.ts`
-- **Resumen:** 15 columnas · 10 índices · 8 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 15 columnas · 10 índices · 8 FK salientes · 0 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -1236,6 +1308,7 @@ Registra inmunizaciones administradas o documentadas en la historia de salud par
 |---|---|---|
 | POST /clinical/immunizations | CREA | DIRECTA |
 | POST /clinical/immunizations | LEE | DIRECTA |
+| GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1346,7 +1419,7 @@ Registra solicitudes o prescripciones de medicamentos, su indicación y trazabil
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: medication_requests`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `MedicationRequests` — `src/modules/clinical/entities/medication_requests.entity.ts`
-- **Resumen:** 31 columnas · 16 índices · 17 FK salientes · 8 entrantes · 31 operaciones
+- **Resumen:** 31 columnas · 16 índices · 17 FK salientes · 8 entrantes · 42 operaciones
 
 #### Columnas
 
@@ -1370,18 +1443,18 @@ Registra solicitudes o prescripciones de medicamentos, su indicación y trazabil
 | 16 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 17 | `patient_instructions_text` | `text` | Opcional | + v4.1.3: indicaciones al paciente que se imprimen en la receta. Separadas de dose_text a propósito: la posología la lee farmacia para dispensar y no debe llevar narrativa ("tomar con las comidas") concatenada. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:334`)_ | coincide |
 | 18 | `indication_condition_id` | `uuid` | Clave foránea → clinical.conditions.id; Opcional | + v4.1.6: el diagnóstico que motiva la prescripción — «para qué es» esta receta. Compartir el encuentro con una condición no dice cuál de las condiciones del paciente se está tratando, y esa respuesta la necesitan tres lectores: el papel impreso, la validación farmacológica (dosis y contraindicación dependen de la indicación) y la renovación, que arrastra el motivo del original. Nullable a propósito: hay prescripciones legítimas sin condición registrada (sintomática, profilaxis, receta cargada antes de codificar el diagnóstico), y obligar aquí bloquearía el acto clínico para completar el dato administrativo. La convención por nombre no resuelve el destino (no existe tabla `indication_conditions`): se declara en la nota del vault `SALUD/FK/FK clinical.medication_requests.indication_condition_id.md`. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:338`)_ | coincide |
-| 19 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/medication_requests.entity.ts:156`)_ | coincide |
-| 20 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/medication_requests.entity.ts:162`)_ | coincide |
+| 19 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/medication_requests.entity.ts:178`)_ | coincide |
+| 20 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/medication_requests.entity.ts:184`)_ | coincide |
 | 21 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 22 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:180`)_ | coincide |
+| 23 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:202`)_ | coincide |
 | 24 | `signed_at` | `timestamptz` | Opcional | + v4.0.8 (ALOVIDA D-05 / CAN-RX): firma de la receta y máquina de estados. Todas NULLABLE: una receta sin firmar tiene signed_at/signed_by en NULL, y la firma solo se exige cuando una prescription_signature_policies vigente lo pide. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:355`)_ | coincide |
-| 25 | `signed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | Usuario que firmó la receta. FK → iam.users _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:192`)_ | coincide |
-| 26 | `issued_at` | `timestamptz` | Opcional | Instante en que la receta se selló (DRAFT → ISSUED); a partir de aquí es inmutable. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:196`)_ | coincide |
-| 27 | `status_reason_text` | `text` | Opcional | Motivo de INVALIDATED/REPLACED (obligatorio al invalidar/reemplazar). _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:204`)_ | coincide |
+| 25 | `signed_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | Usuario que firmó la receta. FK → iam.users _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:214`)_ | coincide |
+| 26 | `issued_at` | `timestamptz` | Opcional | Instante en que la receta se selló (DRAFT → ISSUED); a partir de aquí es inmutable. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:218`)_ | coincide |
+| 27 | `status_reason_text` | `text` | Opcional | Motivo de INVALIDATED/REPLACED (obligatorio al invalidar/reemplazar). _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:226`)_ | coincide |
 | 28 | `replaces_request_id` | `uuid` | Clave foránea → clinical.medication_requests.id; Opcional | Autorreferencias (invalidar / reemplazar / renovar). La convención por nombre no resuelve el autoenlace, así que el destino se declara en la nota del vault `SALUD/FK/FK clinical.medication_requests.<col>.md`. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:362`)_ | coincide |
-| 29 | `replaced_by_request_id` | `uuid` | Clave foránea → clinical.medication_requests.id; Opcional | Receta que sustituye a ESTA (esta quedó REPLACED). FK → medication_requests.id _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:216`)_ | coincide |
-| 30 | `renewed_from_request_id` | `uuid` | Clave foránea → clinical.medication_requests.id; Opcional | Receta de la que ESTA es renovación (copia). FK → medication_requests.id _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:224`)_ | coincide |
+| 29 | `replaced_by_request_id` | `uuid` | Clave foránea → clinical.medication_requests.id; Opcional | Receta que sustituye a ESTA (esta quedó REPLACED). FK → medication_requests.id _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:238`)_ | coincide |
+| 30 | `renewed_from_request_id` | `uuid` | Clave foránea → clinical.medication_requests.id; Opcional | Receta de la que ESTA es renovación (copia). FK → medication_requests.id _(JSDOC_ENTIDAD, `src/modules/clinical/entities/medication_requests.entity.ts:246`)_ | coincide |
 | 31 | `issue_idempotency_key` | `varchar` | Opcional | + v4.0.9 (ALOVIDA CAN §6, MISSING_IDEMPOTENCY): la emisión de una receta no era idempotente y un reintento del cliente podía re-ejecutar el sellado. Con la clave, el reintento devuelve la receta ya emitida en vez de emitir otra. Nullable: las emisiones históricas no la traen, y por eso su índice único es PARCIAL — no se les exige retroactivamente. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:368`)_ | coincide |
 
 #### Relaciones
@@ -1419,8 +1492,8 @@ Registra solicitudes o prescripciones de medicamentos, su indicación y trazabil
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_medication_requests_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_medication_requests_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_medication_requests_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_medication_requests_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_medication_requests_encounter_id` | no | encounter_id | Soporta la clave foránea fk_medication_requests_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_medication_requests_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_medication_requests_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_medication_requests_encounter_id` | no | encounter_id | Soporta la clave foránea fk_medication_requests_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_medication_requests_medication_concept_id` | no | medication_concept_id | Soporta la clave foránea fk_medication_requests_medication_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_medication_requests_substance_atc_concept_id` | no | substance_atc_concept_id | Soporta la clave foránea fk_medication_requests_substance_atc_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_medication_requests_intent_concept_id` | no | intent_concept_id | Soporta la clave foránea fk_medication_requests_intent_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1445,9 +1518,14 @@ Registra solicitudes o prescripciones de medicamentos, su indicación y trazabil
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
+| GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
+| POST /clinical/encounters/{id}/close | LEE | DIRECTA |
 | POST /clinical/medication-records | ACTUALIZA | POR_TIPO |
 | POST /clinical/medication-records | LEE | DIRECTA |
 | POST /clinical/medication-requests | CREA | DIRECTA |
+| GET /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
+| POST /clinical/medication-requests/{id}/attachments | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/edit | ACTUALIZA | POR_TIPO |
 | POST /clinical/medication-requests/{id}/edit | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/invalidate | ACTUALIZA | POR_TIPO |
@@ -1461,15 +1539,21 @@ Registra solicitudes o prescripciones de medicamentos, su indicación y trazabil
 | POST /clinical/medication-requests/{id}/replace | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/sign | ACTUALIZA | POR_TIPO |
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
-| GET /clinical/patients/{patientProfileId}/prescriptions | LEE | DIRECTA |
-| GET /clinical/patients/{patientProfileId}/prescriptions/history.pdf | LEE | DIRECTA |
 | GET /clinical/patients/{patientProfileId}/summary | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
+| GET /public/prescriptions/{id}/verify | LEE | DIRECTA |
 | POST /internal/reservations/expire | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | POST /pharmacy/orders | LEE | DIRECTA |
 | GET /pharmacy/orders/{id} | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/accept-substitutions | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/cancel | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/dispense | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/prefer-original | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/ready | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
 | DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
@@ -2008,7 +2092,7 @@ Documenta procedimientos asociados a la atención y enlaza su contexto con el en
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: procedures`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `Procedures` — `src/modules/clinical/entities/procedures.entity.ts`
-- **Resumen:** 28 columnas · 15 índices · 18 FK salientes · 13 entrantes · 6 operaciones
+- **Resumen:** 28 columnas · 15 índices · 18 FK salientes · 13 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -2105,6 +2189,7 @@ Documenta procedimientos asociados a la atención y enlaza su contexto con el en
 |---|---|---|
 | POST /clinical/procedures | CREA | DIRECTA |
 | POST /clinical/procedures | LEE | DIRECTA |
+| POST /clinical/procedures/{id}/attachments | LEE | DIRECTA |
 | GET /dental-procedures | LEE | DIRECTA |
 | POST /dental-procedures | CREA | DIRECTA |
 | POST /procedure-cases/{id}/operative-reports | CREA | DIRECTA |
@@ -2133,7 +2218,7 @@ Representa solicitudes de servicios clínicos —por ejemplo, estudios o procedi
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_08_clinical.puml: service_requests`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_08_clinical.puml` · **DDL:** `SQL/08_clinical/02_tables.sql`
 - **Entidad del ORM:** `ServiceRequests` — `src/modules/clinical/entities/service_requests.entity.ts`
-- **Resumen:** 18 columnas · 15 índices · 13 FK salientes · 14 entrantes · 12 operaciones
+- **Resumen:** 18 columnas · 15 índices · 13 FK salientes · 14 entrantes · 27 operaciones
 
 #### Columnas
 
@@ -2150,13 +2235,13 @@ Representa solicitudes de servicios clínicos —por ejemplo, estudios o procedi
 | 9 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 10 | `requester_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Opcional | _sin dato_ | coincide |
 | 11 | `performer_tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
-| 12 | `previous_diagnostic_report_id` | `uuid` | Clave foránea → clinical.diagnostic_reports.id; Opcional | + v4.2.17 (subtarea 3.2): antiduplicacion de estudios. El informe liberado o final del MISMO estudio (code_concept_id) que el motor encontro dentro de la ventana al pedir. Con duplicate_override_reason NULL la orden nace SR_SATISFIED_BY_PRIOR (satisfecha por ese informe, no facturable); con texto, el medico insistio y la aseguradora lo lee. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:248`)_ | **AUSENTE_EN_ORM** |
-| 13 | `duplicate_override_reason` | `text` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
-| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/service_requests.entity.ts:78`)_ | coincide |
-| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/service_requests.entity.ts:84`)_ | coincide |
+| 12 | `previous_diagnostic_report_id` | `uuid` | Clave foránea → clinical.diagnostic_reports.id; Opcional | + v4.2.17 (subtarea 3.2): antiduplicacion de estudios. El informe liberado o final del MISMO estudio (code_concept_id) que el motor encontro dentro de la ventana al pedir. Con duplicate_override_reason NULL la orden nace SR_SATISFIED_BY_PRIOR (satisfecha por ese informe, no facturable); con texto, el medico insistio y la aseguradora lo lee. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_08_clinical.puml:248`)_ | coincide |
+| 13 | `duplicate_override_reason` | `text` | Opcional | Justificación clínica del médico para repetir un estudio duplicado (v4.2.17). `null` cuando la orden reutiliza el informe previo (`previous_diagnostic_report_id` sin justificación) o cuando no hubo duplicado. Un CHECK de base impide el estado inverso: justificación sin informe previo enlazado. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/service_requests.entity.ts:102`)_ | coincide |
+| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/service_requests.entity.ts:112`)_ | coincide |
+| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical/entities/service_requests.entity.ts:118`)_ | coincide |
 | 16 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 17 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/service_requests.entity.ts:102`)_ | coincide |
+| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical/entities/service_requests.entity.ts:136`)_ | coincide |
 
 #### Relaciones
 
@@ -2195,7 +2280,7 @@ Representa solicitudes de servicios clínicos —por ejemplo, estudios o procedi
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_service_requests_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_service_requests_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_service_requests_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_service_requests_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_service_requests_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_service_requests_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_requests_encounter_id` | no | encounter_id | Soporta la clave foránea fk_service_requests_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_requests_code_concept_id` | no | code_concept_id | Soporta la clave foránea fk_service_requests_code_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_requests_category_concept_id` | no | category_concept_id | Soporta la clave foránea fk_service_requests_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «category_concept_id», la primera columna del índice _(CONSULTA)_ |
@@ -2220,18 +2305,33 @@ Representa solicitudes de servicios clínicos —por ejemplo, estudios o procedi
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/conditions/{id}/verification | LEE | DIRECTA |
 | POST /clinical/diagnostic-reports | ACTUALIZA | POR_TIPO |
 | POST /clinical/diagnostic-reports | LEE | DIRECTA |
 | POST /clinical/observations | LEE | DIRECTA |
 | POST /clinical/procedures | ACTUALIZA | POR_TIPO |
 | POST /clinical/procedures | LEE | DIRECTA |
 | POST /clinical/service-requests | CREA | DIRECTA |
+| POST /clinical/service-requests | LEE | POR_SQL |
+| POST /clinical/service-requests/duplicate-check | LEE | POR_SQL |
 | POST /order-sets/{id}/apply | CREA | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
 | GET /diagnostics/patients/{patientProfileId}/orders | LEE | DIRECTA |
+| POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
+| POST /insurance-claims | LEE | DIRECTA |
+| GET /insurance-claims/{id} | LEE | DIRECTA |
+| POST /insurance-claims/{id}/adjudications | LEE | DIRECTA |
+| POST /insurance-claims/{id}/eob | LEE | DIRECTA |
+| POST /insurance-claims/{id}/reversals | LEE | DIRECTA |
+| POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
+| POST /prior-authorization-requests | LEE | DIRECTA |
+| POST /prior-authorization-requests/{id}/determinations | LEE | DIRECTA |
+| GET /pharmacy/orders/{id} | LEE | DIRECTA |
+| GET /pharmacy/orders/me | LEE | DIRECTA |
 | POST /procedure-cases/{id}/operative-reports | ACTUALIZA | POR_TIPO |
 | POST /procedure-cases/{id}/operative-reports | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | CREA | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
 
 #### Gobierno
 

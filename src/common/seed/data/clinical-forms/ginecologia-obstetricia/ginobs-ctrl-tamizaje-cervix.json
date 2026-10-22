@@ -1,0 +1,93 @@
+{
+  "code": "GINOBS_CTRL_TAMIZAJE_CERVIX",
+  "name": "Tamizaje de cáncer de cuello uterino",
+  "specialty": {
+    "code": "GINECOLOGIA_OBSTETRICIA",
+    "display": "Ginecología y obstetricia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Directriz de la OMS para el tamizaje y tratamiento de lesiones precancerosas del cuello uterino (2021)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789240030824",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Estrategia de la OMS: prueba de VPH o IVAA, resultado y tratamiento de lesiones."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: tamizaje de cuello uterino",
+      "code": "prueba_tamizaje",
+      "name": "Prueba",
+      "dataType": "string",
+      "required": true,
+      "options": ["VPH", "IVAA", "Citología (Papanicolaou)"]
+    },
+    {
+      "section": "Evaluación: tamizaje de cuello uterino",
+      "code": "resultado_tamizaje",
+      "name": "Resultado",
+      "dataType": "string",
+      "required": true,
+      "options": ["Negativo", "Positivo", "No concluyente"]
+    },
+    {
+      "section": "Evaluación: tamizaje de cuello uterino",
+      "code": "conducta_tamizaje",
+      "name": "Conducta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Tratamiento ablativo (crioterapia o termoablación)",
+        "Escisión (LEEP)",
+        "Colposcopía",
+        "Derivación por sospecha de cáncer"
+      ],
+      "showWhen": { "field": "resultado_tamizaje", "equals": "Positivo" }
+    },
+    {
+      "section": "Evaluación: tamizaje de cuello uterino",
+      "code": "vih_positiva",
+      "name": "Mujer con VIH (tamizaje más frecuente)",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: tamizaje de cuello uterino",
+      "code": "proximo_tamizaje",
+      "name": "Próximo tamizaje",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

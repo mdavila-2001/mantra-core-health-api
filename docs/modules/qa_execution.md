@@ -1,0 +1,100 @@
+<!--
+  ESPEJO AUTOGENERADO — no editar este archivo directamente.
+  Fuente real: src/modules/qa_execution/README.md
+  Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
+  Este README es el contrato por dominio mantenido junto al código
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+-->
+
+# Módulo `qa_execution`
+
+**Fuente:** [`src/modules/qa_execution/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/qa_execution/README.md)
+· 1 controllers · 1 services · 0 repositories · 4 entidades · 1 DTO
+
+---
+
+# Módulo 68 — Plano de ejecución de QA en el servidor
+
+El laboratorio (módulo 36) define suites, casos y aserciones y guarda la evidencia; este módulo
+decide **qué se llama, contra qué destino, con qué límites y con qué aprobación**, y lo ejecuta
+desde el worker `qa_lab`. El navegador pide, aprueba y observa; no ejecuta. Decisiones en
+[ADR-0025](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/adr/ADR-0025-qa-runner-en-servidor.md).
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/qa_execution -name '*.controller.ts' | wc -l
+  find src/modules/qa_execution -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/qa_execution -name '*.entity.ts' | wc -l
+  find src/modules/qa_execution -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **1 controller, 9 rutas HTTP, 4 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`QaLabModule`).
+
+Entidades (`tableName`, 4 de 4 archivos `*.entity.ts`): `execution_plans`, `execution_targets`, `plan_approvals`, `plan_events`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /admin/qa/targets` | ...QA_READ_ROLES | `qa-execution` |
+| `PUT /admin/qa/environments/:environmentId/target` | ...QA_TARGET_ROLES | `qa-execution` |
+| `POST /admin/qa/plans/preflight` | ...QA_PLAN_ROLES | `qa-execution` |
+| `POST /admin/qa/plans` | ...QA_PLAN_ROLES | `qa-execution` |
+| `GET /admin/qa/plans` | ...QA_READ_ROLES | `qa-execution` |
+| `GET /admin/qa/plans/:planId` | ...QA_READ_ROLES | `qa-execution` |
+| `POST /admin/qa/plans/:planId/approvals` | ...QA_APPROVE_ROLES | `qa-execution` |
+| `POST /admin/qa/plans/:planId/cancel` | ...QA_PLAN_ROLES | `qa-execution` |
+| `POST /admin/qa/run-next` | SYSTEM | `qa-execution` |
+
+## Endpoints
+
+| Método y ruta | Rol | Descripción |
+| --- | --- | --- |
+| `GET /admin/qa/targets` | lectura QA | Destinos por entorno (nombre de la variable del secreto, nunca su valor) |
+| `PUT /admin/qa/environments/:id/target` | `QA_ADMIN`, `SECURITY_ADMIN` | Registrar el destino: esquema, host, puerto, prefijos, red privada, mutaciones, topes |
+| `POST /admin/qa/plans/preflight` | `QA_ADMIN`, `QA_ENGINEER` | Dry-run: pasos, URLs, límites recortados, hash, si requiere aprobación. No llama a nada |
+| `POST /admin/qa/plans` | `QA_ADMIN`, `QA_ENGINEER` | 202; queda `QUEUED` o `PENDING_APPROVAL`. `Idempotency-Key` opcional |
+| `POST /admin/qa/plans/:id/approvals` | `QA_ADMIN`, `RELEASE_MANAGER`, `SECURITY_ADMIN` | Aprueba/rechaza **el hash vigente**, con vencimiento; quien pidió no aprueba |
+| `POST /admin/qa/plans/:id/cancel` | `QA_ADMIN`, `QA_ENGINEER` | Cancela ya si está en espera; en marcha lo confirma el runner entre casos |
+| `GET /admin/qa/plans` · `plans/:id` | lectura QA | Plan con pasos, límites, aprobaciones y bitácora ordenada |
+| `POST /internal/qa/plans/run-next` | `SYSTEM` | Lo llama el worker `qa_lab` cada 5 s |
+
+La lectura del laboratorio (`GET /admin/qa/environments|suites|suites/:id|runs|runs/:id|defects`)
+vive en el módulo 36 (`QaLabReadController`).
+
+## Estados del plan
+
+```
+PENDING_APPROVAL ──approve──> QUEUED ──worker──> RUNNING ──> PASSED | FAILED | TIMED_OUT
+        │   └──reject──> REJECTED                  │         CANCELLED | INFRA_ERROR
+        └──cancel──> CANCELLED                     └── aprobación vencida ⇒ PENDING_APPROVAL
+```
+
+`INFRA_ERROR` no es un defecto del producto: destino bloqueado por la guarda, error de
+transporte, `PLAN_DRIFT`, `SECRET_MISSING` o `WORKER_LOST` (un plan interrumpido no se reintenta
+para no duplicar mutaciones).
+
+## Tablas (schema `qa_execution`)
+
+`execution_targets`, `execution_plans` (job + evidencia de lo aprobado), `plan_approvals`
+(append-only), `plan_events` (bitácora, sin cuerpos ni secretos).
+
+## Pruebas
+
+Dominio (`domain/*.spec.ts`: guarda SSRF con IPv4/IPv6/mapeadas/encoding, plan, aprobación),
+cliente HTTP contra un servidor local real, autorización por handler, y
+`test/integration/qa-execution.int-spec.ts` de extremo a extremo.
+
+## Auditoría vigente
+
+La revisión de octubre de 2026 confirmó las barreras de destino, SSRF, límites y
+segregación de aprobación en el alcance estático revisado. El informe con la
+matriz de regresión está en
+[`docs/revision-backend-2026-10-04/modulos/qa_execution.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/qa_execution.md).
+
+```bash
+corepack yarn test src/modules/qa_execution --runInBand --silent
+```

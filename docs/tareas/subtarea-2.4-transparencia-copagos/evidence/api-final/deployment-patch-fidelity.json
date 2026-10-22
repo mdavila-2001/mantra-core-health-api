@@ -1,0 +1,128 @@
+{
+  "status": "PASS_SOURCE_AND_VENDOR_FIDELITY",
+  "upstream": {
+    "repository": "mdavila-2001/mantra-core-health-api",
+    "pullRequest": 397,
+    "commit": "23652ee5"
+  },
+  "modelCommit": "70abc7da90442a75b5567801e79d4ddd9b4d6fed",
+  "apiCommit": "1f8851d1526696c6f26e0e97fb4987d91e122b8c",
+  "changedFiles": {
+    "canonical": 2,
+    "derived": 2,
+    "totalSqlFiles": 4,
+    "perRepositoryInsertions": 16,
+    "perRepositoryDeletions": 3
+  },
+  "effects": {
+    "tenantRls": "Only two ALTER DEFAULT PRIVILEGES statements use current_user instead of the literal mantra role; comments record provenance.",
+    "medicalGroups": "Only upstream comments added; four existing profile_id foreign keys and the module66 reconciliation marker preserved."
+  },
+  "preflight": {
+    "windowsAndWslRealpathsWithinWorkspace": true,
+    "sqlFiles": 349,
+    "nosqlFiles": 19,
+    "extrasToDelete": [],
+    "missingFiles": [],
+    "changedFilesBeforeSync": [
+      "SQL/patches/2026-08-05_tenant_rls.sql",
+      "SQL/patches/2026-09-04_v426_medical_groups.sql"
+    ]
+  },
+  "checks": [
+    {
+      "command": "wsl.exe -d Ubuntu --cd '/mnt/d/Trabajos Secundarios/Mantra Core Technologies/mantra-core-health-api' -- /usr/bin/bash scripts/db/vendor-ddl.sh",
+      "exitCode": 0,
+      "output": [
+        ">>> database/SQL sincronizado desde /mnt/d/Trabajos Secundarios/Mantra Core Technologies/mantra-core-health-model/SQL",
+        ">>> database/NoSQL sincronizado desde /mnt/d/Trabajos Secundarios/Mantra Core Technologies/mantra-core-health-model/NoSQL"
+      ]
+    },
+    {
+      "command": "wsl.exe -d Ubuntu --cd '/mnt/d/Trabajos Secundarios/Mantra Core Technologies/mantra-core-health-api' -- /usr/bin/bash scripts/db/vendor-ddl.sh --check",
+      "exitCode": 0,
+      "output": [
+        "=== database/SQL al día",
+        "=== database/NoSQL al día"
+      ]
+    },
+    {
+      "command": "python -B salud-db/check_ddl_sources.py --quiet",
+      "cwd": "mantra-core-health-model",
+      "exitCode": 0,
+      "output": []
+    },
+    {
+      "command": "git diff --cached --check",
+      "cwd": "mantra-core-health-api",
+      "exitCode": 0,
+      "output": []
+    }
+  ],
+  "files": [
+    {
+      "repository": "model",
+      "path": "SQL/patches/2026-08-05_tenant_rls.sql",
+      "sha256": "d34ee8f08c6c740f802d3b5c7e416863c8a8493beef73672d436b678d7ab91ea"
+    },
+    {
+      "repository": "api",
+      "path": "database/SQL/patches/2026-08-05_tenant_rls.sql",
+      "sha256": "d34ee8f08c6c740f802d3b5c7e416863c8a8493beef73672d436b678d7ab91ea"
+    },
+    {
+      "repository": "model",
+      "path": "SQL/patches/2026-09-04_v426_medical_groups.sql",
+      "sha256": "f3ea8c455d90b9f1b120578b6098abcfc21f66da099172cdbabc2281a759dce6"
+    },
+    {
+      "repository": "api",
+      "path": "database/SQL/patches/2026-09-04_v426_medical_groups.sql",
+      "sha256": "f3ea8c455d90b9f1b120578b6098abcfc21f66da099172cdbabc2281a759dce6"
+    }
+  ],
+  "databaseApplication": "Full patch NOT_RUN. Exact two ALTER DEFAULT PRIVILEGES statements executed in isolated PostgreSQL inside BEGIN/ROLLBACK; no policies or privileges persisted.",
+  "generatorScope": "These files are maintained incremental SQL/patches; generated module66 already references profile_id. No generator, PUML, entity or catalog change required.",
+  "financialWorkflow": "Still pending; this evidence does not approve publication, adjudication or browser integration.",
+  "pullRequests": {
+    "originalModel": {
+      "number": 19,
+      "state": "MERGED",
+      "mergedAt": "2026-09-13T21:14:25Z"
+    },
+    "originalVault": {
+      "number": 73,
+      "state": "MERGED",
+      "mergedAt": "2026-09-13T21:14:03Z"
+    },
+    "modelFollowUp": {
+      "number": 21,
+      "state": "MERGED",
+      "base": "dev",
+      "commitCount": 1,
+      "fileCount": 2,
+      "reviewers": [
+        "Jsaldias39",
+        "PabloArauzCaballero"
+      ],
+      "mergedAt": "2026-09-13T23:42:04Z",
+      "mergeCommit": "bee31e0a68469a273efa9a38c56c9e11788d58d1",
+      "reviewersConfirmedBeforeMerge": [
+        "Jsaldias39",
+        "PabloArauzCaballero"
+      ]
+    },
+    "api": 400,
+    "frontend": 454,
+    "vaultFollowUp": "pending final evidence"
+  },
+  "isolatedStatementVerification": {
+    "status": "PASS_ROLLED_BACK",
+    "evidence": "default-privileges-rollback-verification.json",
+    "exitCode": 0,
+    "tablePrivilegesInside": 4,
+    "sequencePrivilegesInside": 2,
+    "baselineRestored": true,
+    "temporaryRoleRemoved": true
+  }
+}

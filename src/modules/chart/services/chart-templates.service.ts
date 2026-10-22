@@ -15,6 +15,7 @@ import {
   AssignmentResponseDto,
   AssignTemplateDto,
   CHART_TEMPLATE_PROVENANCE_FIELD_CODE,
+  ChartTemplateShowWhenDto,
   ChartTemplateFieldDto,
   ChartTemplateProvenanceDto,
   ChartTemplateResponseDto,
@@ -27,6 +28,8 @@ interface ResolvedSchema {
   fields: ChartTemplateFieldDto[];
   /** De dónde salió la plantilla, si vino del catálogo sembrado. */
   provenance?: ChartTemplateProvenanceDto;
+  /** La clase de ficha del catálogo, si vino del catálogo sembrado. */
+  kind?: ChartTemplateResponseDto['kind'];
 }
 
 /**
@@ -266,6 +269,8 @@ export class ChartTemplatesService {
     const fieldById = new Map(fieldDefinitions.map((f) => [f.id, f]));
 
     let provenance: ChartTemplateProvenanceDto | undefined;
+    let presentation: Presentations = new Map();
+    let kind: ChartTemplateResponseDto['kind'];
     const fields: ChartTemplateFieldDto[] = [];
 
     for (const assignment of assignments) {
@@ -274,10 +279,17 @@ export class ChartTemplatesService {
 
       // El código viene prefijado con el de la plantilla porque
       // `dynamic_field_definitions` es una tabla global; se compara el sufijo.
-      if (esClaveDeCatalogo(field.code)) {
-        provenance = leerProcedencia(field.defaultValueJson);
+      if (isCatalogKey(field.code)) {
+        provenance = readProvenance(field.defaultValueJson);
+        presentation = readPresentation(field.defaultValueJson);
+        kind = readClass(field.defaultValueJson);
         continue;
       }
+
+      // Un campo que una versión nueva del catálogo dejó de preguntar se
+      // retira con `visible = false`: sigue existiendo para leer lo capturado,
+      // pero no se ofrece.
+      if (assignment.visible === false) continue;
 
       fields.push({
         assignmentId: assignment.id,
@@ -294,7 +306,11 @@ export class ChartTemplatesService {
       });
     }
 
-    return { fields, provenance };
+    return {
+      fields: applyPresentation(fields, presentation),
+      provenance,
+      kind,
+    };
   }
 
   /**
@@ -328,6 +344,7 @@ export class ChartTemplatesService {
       fieldTargetConceptId: CHART.TEMPLATE_FIELD_TARGET,
       fields: schema.fields,
       provenance: schema.provenance,
+      kind: schema.kind,
     };
   }
 }
@@ -340,7 +357,7 @@ export class ChartTemplatesService {
  * formularios comparten nombres de campo—, pero se acepta también el código
  * pelado: una plantilla podría traer la clave sin prefijo.
  */
-function esClaveDeCatalogo(code: string): boolean {
+function isCatalogKey(code: string): boolean {
   return (
     code === CHART_TEMPLATE_PROVENANCE_FIELD_CODE ||
     code.endsWith(`.${CHART_TEMPLATE_PROVENANCE_FIELD_CODE}`)
@@ -355,19 +372,19 @@ function esClaveDeCatalogo(code: string): boolean {
  * legible y completable — se pierde el renglón de procedencia, no el
  * formulario.
  */
-function leerProcedencia(
+function readProvenance(
   value: unknown,
 ): ChartTemplateProvenanceDto | undefined {
   if (typeof value !== 'object' || value === null) return undefined;
   const raw = value as Record<string, unknown>;
-  const requeridos = [
+  const required = [
     'sourceTitle',
     'organization',
     'url',
     'license',
     'retrievedAt',
   ] as const;
-  if (requeridos.some((key) => typeof raw[key] !== 'string')) return undefined;
+  if (required.some((key) => typeof raw[key] !== 'string')) return undefined;
 
   return {
     sourceTitle: raw.sourceTitle as string,
@@ -379,4 +396,84 @@ function leerProcedencia(
     retrievedAt: raw.retrievedAt as string,
     note: typeof raw.note === 'string' ? raw.note : undefined,
   };
+}
+
+/** Lo que el catálogo dice de cada campo, por código sin prefijo. */
+type Presentations = ReadonlyMap<string, Record<string, unknown>>;
+
+/** El código de un campo sin el prefijo de su plantilla. */
+function bareCode(code: string): string {
+  const punto = code.indexOf('.');
+  return punto === -1 ? code : code.slice(punto + 1);
+}
+
+/**
+ * Lee `fieldPresentation` del `default_value_json` de la clave de catálogo.
+ * Como con la procedencia, lo malformado se ignora en vez de lanzar: se pierde
+ * la lista o la condición, no el formulario.
+ */
+function readPresentation(value: unknown): Presentations {
+  if (typeof value !== 'object' || value === null) return new Map();
+  const raw = (value as Record<string, unknown>).fieldPresentation;
+  if (typeof raw !== 'object' || raw === null) return new Map();
+  return new Map(
+    Object.entries(raw as Record<string, unknown>).filter(
+      (entry): entry is [string, Record<string, unknown>] =>
+        typeof entry[1] === 'object' && entry[1] !== null,
+    ),
+  );
+}
+
+/**
+ * Pega a cada campo su presentación. La condición se publica con el `fieldId`
+ * del campo del que depende —es lo que el cliente tiene a mano para leer su
+ * valor—; si ese campo no está en la respuesta, la condición se descarta y el
+ * campo queda siempre visible, que es el error menos dañino.
+ */
+function applyPresentation(
+  fields: ChartTemplateFieldDto[],
+  presentation: Presentations,
+): ChartTemplateFieldDto[] {
+  if (presentation.size === 0) return fields;
+  const idByCode = new Map(fields.map((f) => [bareCode(f.code), f.fieldId]));
+
+  return fields.map((field) => {
+    const p = presentation.get(bareCode(field.code));
+    if (p === undefined || field.own) return field;
+
+    const extra: Partial<ChartTemplateFieldDto> = {};
+    if (typeof p.section === 'string') extra.section = p.section;
+    if (
+      Array.isArray(p.options) &&
+      p.options.every((o) => typeof o === 'string')
+    ) {
+      extra.options = p.options;
+      extra.multiple = p.multiple === true;
+    }
+    if (p.allowOther === true) extra.allowOther = true;
+    if (typeof p.description === 'string') extra.description = p.description;
+
+    const condition = p.showWhen as
+      { field?: unknown; equals?: unknown } | undefined;
+    const parent =
+      typeof condition?.field === 'string'
+        ? idByCode.get(condition.field)
+        : undefined;
+    if (parent !== undefined && condition?.equals !== undefined) {
+      extra.showWhen = {
+        fieldId: parent,
+        equals: condition.equals as ChartTemplateShowWhenDto['equals'],
+      };
+    }
+    return { ...field, ...extra };
+  });
+}
+
+/** La clase de ficha del catálogo (`BASE`, `SPECIFIC`, `GENERAL`), si la trae. */
+function readClass(value: unknown): ChartTemplateResponseDto['kind'] {
+  if (typeof value !== 'object' || value === null) return undefined;
+  const kind = (value as Record<string, unknown>).kind;
+  return kind === 'BASE' || kind === 'SPECIFIC' || kind === 'GENERAL'
+    ? kind
+    : undefined;
 }

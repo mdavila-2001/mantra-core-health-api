@@ -1,0 +1,8 @@
+{"baseRefName":"test","headRefName":"marcelo/insurer-patient-directory-test","isDraft":true,"mergeStateStatus":"CLEAN","mergeable":"MERGEABLE","number":568,"reviewDecision":"","url":"https://github.com/mdavila-2001/mantra-core-health-api/pull/568"}
+gh : no checks reported on the 'marcelo/insurer-patient-directory-test' branch
+En línea: 2 Carácter: 654
++ ... geable.txt; gh pr checks 568 --repo mdavila-2001/mantra-core-health-a ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (no checks repor...ry-test' branch:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

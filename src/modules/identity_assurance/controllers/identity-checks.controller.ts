@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { IdentityChecksService } from '../services';
 import {
   RecordAttemptDto,
@@ -30,6 +35,11 @@ export class IdentityChecksController {
   constructor(private readonly checksService: IdentityChecksService) {}
 
   /** UC-27-05. */
+  @Audited({
+    action: 'VERIFICATION_CHECK_ATTEMPT_RECORDED',
+    entity: 'identity_check',
+    entityId: 'param:id',
+  })
   @Post(':id/attempts')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -45,6 +55,11 @@ export class IdentityChecksController {
   }
 
   /** UC-27-06. */
+  @Audited({
+    action: 'VERIFICATION_CHECK_RESULT_RECORDED',
+    entity: 'identity_check',
+    entityId: 'param:id',
+  })
   @Post(':id/results')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

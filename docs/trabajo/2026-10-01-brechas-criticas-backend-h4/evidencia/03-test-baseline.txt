@@ -1,0 +1,61 @@
+﻿node.exe : (node:32032) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En C:\Users\Usuario\AppData\Roaming\npm\corepack.ps1: 24 Carácter: 5
++     & "node$exe"  "$basedir/node_modules/corepack/dist/corepack.js" $ ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:32032) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-facilities.catalog.ts): use `with 
+{ type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+(node:33052) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-facilities.catalog.ts): use `with 
+{ type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-facilities.catalog.ts): use `with 
+{ type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+(node:33404) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:33680) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 25 passed, 25 total
+Tests:       501 passed, 501 total
+Snapshots:   0 total
+Time:        112.95 s
+Ran all test suites matching src/modules/profiles|src/modules/clinical/services/conditions.service.spec.ts|src/modules/
+insurance/services/claims-read.service.spec.ts.

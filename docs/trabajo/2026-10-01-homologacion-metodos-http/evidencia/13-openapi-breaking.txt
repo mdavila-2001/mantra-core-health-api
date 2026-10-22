@@ -1,0 +1,3 @@
+$ node tools/openapi/check-breaking.mjs --base <openapi.json de origin/dev> --head openapi/openapi.json --exceptions tools/openapi/breaking-changes-exceptions.json
+Sin cambios incompatibles no aprobados en el contrato OpenAPI.
+exit=0

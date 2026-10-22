@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
@@ -19,6 +20,7 @@ import {
 } from '../dto';
 import type { VisitRecords } from '../entities';
 import { VisitRecordsService, type RatingAggregate } from '../services';
+import { PharmaLabScopeGuard } from '../guards';
 
 /**
  * Registro, confirmación y calificación de visitas (UC-17-18 a UC-17-20).
@@ -26,6 +28,7 @@ import { VisitRecordsService, type RatingAggregate } from '../services';
  */
 @ApiTags('pharma-lab-visit-records')
 @ApiBearerAuth()
+@UseGuards(PharmaLabScopeGuard)
 @Controller('visit-records')
 export class VisitRecordsController {
   /**

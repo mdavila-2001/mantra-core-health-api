@@ -9,7 +9,11 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityMessagingReadService } from './community-messaging-read.service';
-import { ResourceNotFoundException } from '../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
 import { COMM } from '../community.concepts';
 
 const actor = { id: 'user-1', roles: ['USER'] } as any;
@@ -32,27 +36,287 @@ function build() {
     // en `null`, que es lo que ven las pruebas que no lo ejercitan.
     findConversationById: mockFn().mockResolvedValue(null),
     findMessageById: mockFn().mockResolvedValue(null),
+    findLiveMessagesByAttachmentFileId: mockFn().mockResolvedValue([]),
   };
   // Carril P2: la bandeja nombra al otro lado. Por defecto no hay perfiles
   // que resolver, que es lo que ven las pruebas que no miran los nombres.
-  const profilesRepo = { listByIds: mockFn().mockResolvedValue([]) };
+  const profilesRepo = {
+    listByIds: mockFn().mockResolvedValue([]),
+    searchChatContacts: mockFn().mockResolvedValue([]),
+  };
   const visibility = {
     assertOwnProfile: mockFn().mockResolvedValue(undefined),
     isBlockedBetween: mockFn().mockResolvedValue(false),
   };
+  // F4.2: la presencia se dobla; por defecto nadie está en línea.
+  const presence = {
+    presence: mockFn((ids: string[]) =>
+      Promise.resolve(
+        ids.map((profileId) => ({
+          profileId,
+          online: false,
+          lastSeenAt: null,
+        })),
+      ),
+    ),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const files = {
+    downloadForAuthorizedContext: mockFn().mockResolvedValue({
+      buffer: Buffer.from('adjunto'),
+      mimeType: 'application/pdf',
+      originalName: 'resultado.pdf',
+    }),
+  };
 
   const service = new CommunityMessagingReadService(
     em as any,
     conversationsRepo as any,
     profilesRepo as any,
     visibility as any,
+    presence as any,
+    files as any,
     logger as any,
   );
-  return { service, conversationsRepo, profilesRepo, visibility };
+  return {
+    service,
+    conversationsRepo,
+    profilesRepo,
+    visibility,
+    presence,
+    files,
+  };
+}
+
+/** Una bandeja de tres conversaciones, para las pruebas de F4.3/F4.4. */
+function withThreeConversations(d: ReturnType<typeof build>) {
+  d.conversationsRepo.listActiveParticipationsOf.mockResolvedValue([
+    {
+      conversationId: 'c-1',
+      lastReadMessageId: 'm-1',
+      isFavorite: true,
+      isPinned: false,
+      archivedAt: null,
+    },
+    {
+      conversationId: 'c-2',
+      lastReadMessageId: 'm-2',
+      isFavorite: false,
+      isPinned: true,
+      archivedAt: null,
+    },
+    {
+      conversationId: 'c-3',
+      lastReadMessageId: 'm-3',
+      isFavorite: false,
+      isPinned: false,
+      archivedAt: new Date('2026-09-01T00:00:00Z'),
+    },
+  ]);
+  // Ya ordenadas por último mensaje, como las devuelve el repositorio.
+  d.conversationsRepo.listConversationsByIds.mockResolvedValue([
+    { id: 'c-1', conversationTypeConceptId: COMM.CONVERSATION_DIRECT },
+    { id: 'c-2', conversationTypeConceptId: COMM.CONVERSATION_DIRECT },
+    {
+      id: 'c-3',
+      conversationTypeConceptId: COMM.CONVERSATION_DIRECT,
+      pinnedMessageId: 'm-pin',
+    },
+  ]);
+  d.conversationsRepo.findParticipants.mockImplementation(
+    (_em: unknown, conversationId: string) =>
+      Promise.resolve([
+        { participantProfileId: 'p-1' },
+        {
+          participantProfileId: `peer-${conversationId}`,
+          lastReadMessageId: `m-${conversationId.slice(-1)}`,
+        },
+      ]),
+  );
+  d.profilesRepo.listByIds.mockResolvedValue([
+    { id: 'peer-c-1', displayName: 'Andrea Peña' },
+    { id: 'peer-c-2', displayName: 'Marisol Quispe' },
+    { id: 'peer-c-3', displayName: 'Ender Rosales' },
+  ]);
+  d.conversationsRepo.findLastMessage.mockImplementation(
+    (_em: unknown, conversationId: string) =>
+      Promise.resolve({
+        id: `m-${conversationId.slice(-1)}`,
+        senderProfileId:
+          conversationId === 'c-1' ? 'p-1' : `peer-${conversationId}`,
+        bodyText: conversationId === 'c-2' ? 'receta lista' : 'hola',
+        contentTypeConceptId: 'ct-text',
+      }),
+  );
 }
 
 describe('CommunityMessagingReadService', () => {
+  describe('searchContacts', () => {
+    it('encuentra pacientes y profesionales activos sin devolverse a uno mismo', async () => {
+      const d = build();
+      d.profilesRepo.searchChatContacts.mockResolvedValue([
+        {
+          id: 'p-paciente',
+          displayName: 'María Pérez',
+          headline: 'Paciente',
+          avatarFileId: 'avatar-1',
+        },
+        {
+          id: 'p-medica',
+          displayName: 'Dra. María Quispe',
+          headline: 'Cardióloga',
+        },
+      ]);
+
+      const result = await d.service.searchContacts(
+        'p-propio',
+        actor,
+        '  María  ',
+        10,
+      );
+
+      expect(d.visibility.assertOwnProfile).toHaveBeenCalledWith(
+        expect.anything(),
+        'p-propio',
+        actor,
+      );
+      expect(d.profilesRepo.searchChatContacts).toHaveBeenCalledWith(
+        expect.anything(),
+        { ownProfileId: 'p-propio', q: 'María', limit: 10 },
+      );
+      expect(result).toEqual({
+        items: [
+          {
+            profileId: 'p-paciente',
+            displayName: 'María Pérez',
+            headline: 'Paciente',
+            avatarUrl: '/public/media/avatar-1',
+          },
+          {
+            profileId: 'p-medica',
+            displayName: 'Dra. María Quispe',
+            headline: 'Cardióloga',
+            avatarUrl: null,
+          },
+        ],
+      });
+    });
+
+    it('rechaza un perfil ajeno antes de buscar contactos', async () => {
+      const d = build();
+      d.visibility.assertOwnProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+
+      await expect(
+        d.service.searchContacts('p-ajeno', actor, 'Contacto', 10),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+
+      expect(d.profilesRepo.searchChatContacts).not.toHaveBeenCalled();
+    });
+
+    it('una consulta vacía no enumera perfiles', async () => {
+      const d = build();
+
+      await expect(
+        d.service.searchContacts('p-propio', actor, '   ', 10),
+      ).resolves.toEqual({ items: [] });
+
+      expect(d.profilesRepo.searchChatContacts).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getAttachmentContent (5.1 · FT-32)', () => {
+    it('permite al receptor participante aunque no sea quien subió', async () => {
+      const d = build();
+      d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue([
+        { conversationId: 'c-1', attachmentFileId: 'f-1' },
+      ]);
+
+      const content = await d.service.getAttachmentContent(
+        'c-1',
+        'f-1',
+        'p-receptor',
+        actor,
+      );
+
+      expect(content.buffer).toEqual(Buffer.from('adjunto'));
+      expect(d.files.downloadForAuthorizedContext).toHaveBeenCalledWith(
+        'f-1',
+        'community.conversation.attachment',
+      );
+    });
+
+    it('rechaza actor externo antes de tocar archivo o storage', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue(null);
+
+      await expect(
+        d.service.getAttachmentContent('c-1', 'f-1', 'p-externo', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(
+        d.conversationsRepo.findLiveMessagesByAttachmentFileId,
+      ).not.toHaveBeenCalled();
+      expect(d.files.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('no acepta un archivo que sólo está asociado a otra conversación', async () => {
+      const d = build();
+      d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue([
+        { conversationId: 'c-otra', attachmentFileId: 'f-1' },
+      ]);
+
+      await expect(
+        d.service.getAttachmentContent('c-1', 'f-1', 'p-1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.files.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it('mismo tenant no sustituye perfil propio ni membresía', async () => {
+      const d = build();
+      d.visibility.assertOwnProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+
+      await expect(
+        d.service.getAttachmentContent('c-1', 'f-1', 'p-ajeno', {
+          ...actor,
+          tenantIds: ['tenant-compartido'],
+        }),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.files.downloadForAuthorizedContext).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['inexistente', []],
+      ['huérfano', []],
+      ['mensaje removido', []],
+    ])('uniforma el 404 para %s', async (_case, messages) => {
+      const d = build();
+      d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue(
+        messages,
+      );
+
+      await expect(
+        d.service.getAttachmentContent('c-1', 'f-1', 'p-1', actor),
+      ).rejects.toMatchObject({ message: 'Archivo adjunto no encontrado' });
+    });
+
+    it('uniforma como 404 un archivo removido después de asociarse', async () => {
+      const d = build();
+      d.conversationsRepo.findLiveMessagesByAttachmentFileId.mockResolvedValue([
+        { conversationId: 'c-1', attachmentFileId: 'f-1' },
+      ]);
+      d.files.downloadForAuthorizedContext.mockRejectedValue(
+        new PreconditionFailedException('borrado', {}),
+      );
+
+      await expect(
+        d.service.getAttachmentContent('c-1', 'f-1', 'p-1', actor),
+      ).rejects.toMatchObject({ message: 'Archivo adjunto no encontrado' });
+    });
+  });
+
   describe('listConversations', () => {
     it('arma la bandeja con vista previa y no leídos', async () => {
       const d = build();
@@ -69,7 +333,9 @@ describe('CommunityMessagingReadService', () => {
       });
       d.conversationsRepo.countUnread.mockResolvedValue(3);
 
-      const res = await d.service.listConversations('p-1', actor, 20);
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
 
       expect(res.items[0].lastMessage?.bodyText).toBe('hola');
       expect(res.items[0].unreadCount).toBe(3);
@@ -91,7 +357,9 @@ describe('CommunityMessagingReadService', () => {
         { id: 'p-2', displayName: 'Andrea Peña', avatarFileId: 'file-9' },
       ]);
 
-      const res = await d.service.listConversations('p-1', actor, 20);
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
 
       expect(res.items[0].peers).toEqual([
         {
@@ -118,7 +386,9 @@ describe('CommunityMessagingReadService', () => {
         { id: 'p-2', displayName: 'Andrea Peña' },
       ]);
 
-      const res = await d.service.listConversations('p-1', actor, 20);
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
 
       expect(res.items[0].peers[0].avatarUrl).toBeNull();
     });
@@ -137,7 +407,7 @@ describe('CommunityMessagingReadService', () => {
         { id: 'c-1', conversationTypeConceptId: 'ct' },
       ]);
 
-      await d.service.listConversations('p-1', actor, 20);
+      await d.service.listConversations('p-1', actor, { limit: 20 });
 
       expect(d.conversationsRepo.countUnread).toHaveBeenCalledWith(
         expect.anything(),
@@ -151,8 +421,185 @@ describe('CommunityMessagingReadService', () => {
       const d = build();
       d.visibility.assertOwnProfile.mockRejectedValue(new Error('prohibido'));
       await expect(
-        d.service.listConversations('p-ajeno', actor, 20),
+        d.service.listConversations('p-ajeno', actor, { limit: 20 }),
       ).rejects.toThrow('prohibido');
+    });
+
+    /* --- F4.3 / F4.4 -------------------------------------------------------- */
+
+    it('las fijadas van primero y cada fila trae lo que el actor marcó', async () => {
+      const d = build();
+      withThreeConversations(d);
+
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
+
+      expect(res.items.map((item) => item.id)).toEqual(['c-2', 'c-1', 'c-3']);
+      expect(res.items[1]).toMatchObject({
+        id: 'c-1',
+        isFavorite: true,
+        isPinned: false,
+        archivedAt: null,
+      });
+      // La archivada viaja igual, con su fecha: el cliente la separa.
+      expect(res.items[2].archivedAt).toEqual(new Date('2026-09-01T00:00:00Z'));
+      expect(res.items[2].pinnedMessageId).toBe('m-pin');
+      expect(res.nextCursor).toBeNull();
+    });
+
+    it('la vista previa dice de qué tipo era el último mensaje', async () => {
+      const d = build();
+      withThreeConversations(d);
+      d.conversationsRepo.findLastMessage.mockResolvedValue({
+        id: 'm-9',
+        senderProfileId: 'peer-c-1',
+        bodyText: null,
+        contentTypeConceptId: 'ct-media',
+        attachmentFileId: 'file-1',
+      });
+
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
+
+      expect(res.items[0].lastMessage).toMatchObject({
+        contentTypeConceptId: 'ct-media',
+        attachmentFileId: 'file-1',
+      });
+    });
+
+    it('dice si el otro leyó el último mensaje sólo cuando es propio y directo', async () => {
+      const d = build();
+      withThreeConversations(d);
+
+      const res = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+      });
+      const byId = new Map(res.items.map((item) => [item.id, item]));
+
+      // c-1: último propio y el peer tiene lastReadMessageId = m-1 → leído.
+      expect(byId.get('c-1')?.lastMessageReadByPeer).toBe(true);
+      // c-2: último ajeno → no aplica.
+      expect(byId.get('c-2')?.lastMessageReadByPeer).toBeNull();
+    });
+
+    it('recorta por nombre del otro lado o por texto del último mensaje, sin acentos', async () => {
+      const d = build();
+      withThreeConversations(d);
+
+      const byName = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+        q: 'PENA',
+      });
+      expect(byName.items.map((item) => item.id)).toEqual(['c-1']);
+
+      const byText = await d.service.listConversations('p-1', actor, {
+        limit: 20,
+        q: 'receta',
+      });
+      expect(byText.items.map((item) => item.id)).toEqual(['c-2']);
+    });
+
+    it('pagina con cursor dentro del mismo recorte', async () => {
+      const d = build();
+      withThreeConversations(d);
+
+      const first = await d.service.listConversations('p-1', actor, {
+        limit: 2,
+      });
+      expect(first.items.map((item) => item.id)).toEqual(['c-2', 'c-1']);
+      expect(first.nextCursor).not.toBeNull();
+
+      const second = await d.service.listConversations('p-1', actor, {
+        limit: 2,
+        cursor: first.nextCursor!,
+      });
+      expect(second.items.map((item) => item.id)).toEqual(['c-3']);
+      expect(second.nextCursor).toBeNull();
+    });
+  });
+
+  describe('conversationPresence (F4.2)', () => {
+    it('pregunta la presencia de los otros, nunca la propia', async () => {
+      const d = build();
+      d.conversationsRepo.findParticipants.mockResolvedValue([
+        { participantProfileId: 'p-1' },
+        { participantProfileId: 'p-2' },
+      ]);
+      d.presence.presence.mockResolvedValue([
+        { profileId: 'p-2', online: true, lastSeenAt: null },
+      ]);
+
+      const res = await d.service.conversationPresence('c-1', 'p-1', actor);
+
+      expect(d.presence.presence).toHaveBeenCalledWith(['p-2']);
+      expect(res.peers[0].online).toBe(true);
+    });
+
+    it('404 si no participa', async () => {
+      const d = build();
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue(null);
+      await expect(
+        d.service.conversationPresence('c-1', 'p-1', actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('mensajes eliminados y fijado (F4.5 / F4.6)', () => {
+    it('un mensaje eliminado viaja sin cuerpo ni adjunto, con deletedAt', async () => {
+      const d = build();
+      d.conversationsRepo.listMessagesPage.mockResolvedValue([
+        {
+          id: 'm-1',
+          conversationId: 'c-1',
+          senderProfileId: 'p-2',
+          contentTypeConceptId: 'ct',
+          bodyText: 'esto no debería verse',
+          attachmentFileId: 'file-1',
+          deletedAt: new Date('2026-09-09T10:00:00Z'),
+          sentAt: new Date('2026-09-09T09:00:00Z'),
+        },
+      ]);
+
+      const res = await d.service.listMessages('c-1', 'p-1', actor, {
+        limit: 10,
+      });
+
+      expect(res.items[0]).toMatchObject({
+        id: 'm-1',
+        bodyText: null,
+        attachmentFileId: null,
+        deletedAt: new Date('2026-09-09T10:00:00Z'),
+      });
+    });
+
+    it('la primera página trae el mensaje fijado completo; las siguientes no', async () => {
+      const d = build();
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'c-1',
+        conversationTypeConceptId: 'ct-group',
+        pinnedMessageId: 'm-pin',
+      });
+      d.conversationsRepo.findMessageById.mockResolvedValue({
+        id: 'm-pin',
+        conversationId: 'c-1',
+        senderProfileId: 'p-2',
+        contentTypeConceptId: 'ct',
+        bodyText: 'Turno: martes 10:00',
+      });
+
+      const first = await d.service.listMessages('c-1', 'p-1', actor, {
+        limit: 10,
+      });
+      expect(first.pinnedMessage?.bodyText).toBe('Turno: martes 10:00');
+
+      const next = await d.service.listMessages('c-1', 'p-1', actor, {
+        limit: 10,
+        cursor:
+          'eyJzZW50QXQiOiIyMDI2LTA5LTA5VDA5OjAwOjAwLjAwMFoiLCJpZCI6Im0tMSJ9',
+      });
+      expect(next.pinnedMessage).toBeUndefined();
     });
   });
 
@@ -221,17 +668,17 @@ describe('CommunityMessagingReadService', () => {
         { participantProfileId: 'p-1' },
         { participantProfileId: 'p-2', lastReadMessageId: 'm-5' },
       ]);
-      const leidoHasta = new Date('2026-08-01T12:00:00Z');
+      const readUntil = new Date('2026-08-01T12:00:00Z');
       d.conversationsRepo.findMessageById.mockResolvedValue({
         id: 'm-5',
-        sentAt: leidoHasta,
+        sentAt: readUntil,
       });
 
       const res = await d.service.listMessages('c-1', 'p-1', actor, {
         limit: 10,
       });
 
-      expect(res.peerReadUpTo).toEqual(leidoHasta);
+      expect(res.peerReadUpTo).toEqual(readUntil);
     });
 
     it('peerReadUpTo es null en un grupo (no hay "el otro lado")', async () => {

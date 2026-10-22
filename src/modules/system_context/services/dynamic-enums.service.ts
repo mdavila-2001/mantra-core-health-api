@@ -124,6 +124,10 @@ export class DynamicEnumsService {
     const options = (
       await this.contextRepo.findEnumOptions(em, version.id)
     ).filter((option) => option.enabled);
+    const nombresEs = await this.contextRepo.findSpanishDisplays(
+      em,
+      options.map((option) => option.conceptId),
+    );
 
     return {
       code: definition.code,
@@ -144,6 +148,7 @@ export class DynamicEnumsService {
         conceptId: option.conceptId,
         code: option.code,
         display: option.display,
+        displayEs: nombresEs.get(option.conceptId),
         ordinal: option.ordinal,
         isDefault: option.isDefault ?? false,
       })),

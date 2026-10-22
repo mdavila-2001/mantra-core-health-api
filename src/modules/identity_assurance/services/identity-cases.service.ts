@@ -34,6 +34,7 @@ import {
   AssertionResponseDto,
   ExpireSweepResponseDto,
   CaseQueueResponseDto,
+  VerificationCaseDetailDto,
 } from '../dto';
 import { IdentityVerificationEffectsService } from './identity-verification-effects.service';
 
@@ -143,6 +144,40 @@ export class IdentityCasesService {
     };
   }
 
+  /** Expediente de revisión, con metadatos de evidencia y sin contenido binario. */
+  async getCaseDetail(id: string): Promise<VerificationCaseDetailDto> {
+    const em = this.em.fork();
+    const kase = await this.casesRepo.findById(em, id);
+    if (!kase) {
+      throw new ResourceNotFoundException(
+        'Caso de verificación no encontrado',
+        {
+          caseId: id,
+        },
+      );
+    }
+    const records = await this.evidenceRepo.findByCase(em, id);
+    return {
+      id: kase.id,
+      status: kase.statusConceptId,
+      subjectTypeConceptId: kase.subjectTypeConceptId,
+      subjectEntityId: kase.subjectEntityId,
+      identityVerificationPolicyId: kase.identityVerificationPolicyId,
+      ...(kase.riskScore ? { riskScore: kase.riskScore } : {}),
+      ...(kase.openedAt ? { openedAt: kase.openedAt } : {}),
+      ...(kase.expiresAt ? { expiresAt: kase.expiresAt } : {}),
+      evidence: records.map((record, index) => ({
+        id: record.id,
+        evidenceTypeConceptId: record.evidenceTypeConceptId,
+        ...(record.evidenceFileId
+          ? { evidenceFileId: record.evidenceFileId }
+          : {}),
+        createdAt: record.createdAt,
+        sequence: index + 1,
+      })),
+    };
+  }
+
   /** UC-27-02: abre un caso aplicando el nivel de aseguramiento de la política. */
   async openCase(
     dto: OpenCaseDto,
@@ -218,7 +253,7 @@ export class IdentityCasesService {
         );
       }
 
-      const evidence = this.evidenceRepo.create(tx, {
+      const evidence = await this.evidenceRepo.create(tx, {
         identityVerificationCaseId: kase.id,
         evidenceTypeConceptId: dto.evidenceTypeConceptId,
         issuerAuthorityId: dto.issuerAuthorityId,

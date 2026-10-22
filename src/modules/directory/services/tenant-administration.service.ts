@@ -60,15 +60,23 @@ export class TenantAdministrationService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (this.isPlatform(actor)) return;
-
-    const membership = await this.activeMembershipOf(em, tenantId, actor);
-    if (membership && ADMIN_TENANT_ROLES.has(membership.tenantRoleConceptId)) {
-      return;
-    }
+    if (await this.canAdminister(em, tenantId, actor)) return;
 
     throw new ForbiddenException(
       'Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma',
+    );
+  }
+
+  /** Devuelve si el actor puede administrar, sin convertir la consulta en error. */
+  async canAdminister(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
+    if (this.isPlatform(actor)) return true;
+    const membership = await this.activeMembershipOf(em, tenantId, actor);
+    return Boolean(
+      membership && ADMIN_TENANT_ROLES.has(membership.tenantRoleConceptId),
     );
   }
 
@@ -151,14 +159,14 @@ export class TenantAdministrationService {
     em: EntityManager,
     tenantId: string,
   ): Promise<boolean> {
-    for (const rol of ADMIN_TENANT_ROLES) {
-      const cuantos = await this.membershipsRepo.countActiveByTenantRole(
+    for (const role of ADMIN_TENANT_ROLES) {
+      const howMany = await this.membershipsRepo.countActiveByTenantRole(
         em,
         tenantId,
-        rol,
+        role,
         DIR.MEMBERSHIP_ACTIVE,
       );
-      if (cuantos > 0) return true;
+      if (howMany > 0) return true;
     }
     return false;
   }

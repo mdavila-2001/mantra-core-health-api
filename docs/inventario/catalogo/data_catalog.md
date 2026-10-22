@@ -11,13 +11,13 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [catalog_annotation_revisions](#catalog_annotation_revisions) | Conserva versiones de las anotaciones del catálogo de datos de salud, de modo que puedan revisarse los cambios en definiciones y contexto de los activos catalogados. | 10 | 1 | 3 | COINCIDE |
-| [catalog_annotations](#catalog_annotations) | Documenta definiciones y contexto funcional asociados a objetos o columnas del catálogo de datos de salud para mejorar su interpretación y gobernanza. | 34 | 3 | 12 | COINCIDE |
+| [catalog_annotations](#catalog_annotations) | Documenta definiciones y contexto funcional asociados a objetos o columnas del catálogo de datos de salud para mejorar su interpretación y gobernanza. | 34 | 3 | 13 | COINCIDE |
 | [catalog_change_events](#catalog_change_events) | Registra cambios detectados en objetos y columnas entre escaneos del catálogo, lo que permite seguir la evolución de los activos de datos de salud. | 8 | 2 | 2 | COINCIDE |
 | [catalog_columns](#catalog_columns) | Describe las columnas encontradas en los objetos de datos de salud durante un escaneo, con metadatos para su búsqueda, interpretación y gobernanza. | 24 | 1 | 6 | COINCIDE |
 | [catalog_evidence_items](#catalog_evidence_items) | Asocia evidencia a objetos y columnas del catálogo para respaldar la revisión de su significado, procedencia y uso en datos de salud. | 9 | 2 | 4 | COINCIDE |
-| [catalog_objects](#catalog_objects) | Identifica objetos de datos relevados por el catálogo y el escaneo que los observó, facilitando localizar y gobernar los activos que sostienen la plataforma de salud. | 22 | 2 | 14 | COINCIDE |
+| [catalog_objects](#catalog_objects) | Identifica objetos de datos relevados por el catálogo y el escaneo que los observó, facilitando localizar y gobernar los activos que sostienen la plataforma de salud. | 22 | 2 | 15 | COINCIDE |
 | [catalog_review_decisions](#catalog_review_decisions) | Mantiene decisiones de revisión sobre anotaciones del catálogo, dejando trazabilidad de la validación de definiciones de activos de datos de salud. | 7 | 1 | 2 | COINCIDE |
-| [catalog_scan_runs](#catalog_scan_runs) | Registra cada ejecución de relevamiento del catálogo para identificar cuándo se descubrieron objetos y columnas de datos de salud y comparar cambios entre escaneos. | 34 | 3 | 15 | COINCIDE |
+| [catalog_scan_runs](#catalog_scan_runs) | Registra cada ejecución de relevamiento del catálogo para identificar cuándo se descubrieron objetos y columnas de datos de salud y comparar cambios entre escaneos. | 34 | 3 | 16 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -172,7 +172,7 @@ Documenta definiciones y contexto funcional asociados a objetos o columnas del c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_67_data_catalog.puml:143: entity catalog_annotations {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
 - **Entidad del ORM:** `CatalogAnnotations` — `src/modules/data_catalog/entities/catalog_annotations.entity.ts`
-- **Resumen:** 34 columnas · 3 índices · 5 FK salientes · 2 entrantes · 12 operaciones
+- **Resumen:** 34 columnas · 3 índices · 5 FK salientes · 2 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -256,6 +256,7 @@ Documenta definiciones y contexto funcional asociados a objetos o columnas del c
 | GET /admin/catalog/objects/{id}/history | LEE | POR_SQL |
 | GET /admin/catalog/objects/{id}/impact | LEE | POR_SQL |
 | GET /admin/catalog/schemas | LEE | POR_SQL |
+| GET /admin/ops/readiness | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -493,7 +494,7 @@ Identifica objetos de datos relevados por el catálogo y el escaneo que los obse
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_67_data_catalog.puml:60: entity catalog_objects {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
 - **Entidad del ORM:** `CatalogObjects` — `src/modules/data_catalog/entities/catalog_objects.entity.ts`
-- **Resumen:** 22 columnas · 2 índices · 4 FK salientes · 4 entrantes · 14 operaciones
+- **Resumen:** 22 columnas · 2 índices · 4 FK salientes · 4 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -566,6 +567,7 @@ Identifica objetos de datos relevados por el catálogo y el escaneo que los obse
 | POST /admin/catalog/scans | ACTUALIZA | POR_SQL |
 | POST /admin/catalog/scans | LEE | POR_SQL |
 | GET /admin/catalog/schemas | LEE | POR_SQL |
+| GET /admin/ops/readiness | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -647,7 +649,7 @@ Registra cada ejecución de relevamiento del catálogo para identificar cuándo 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_67_data_catalog.puml:15: entity catalog_scan_runs {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
 - **Entidad del ORM:** `CatalogScanRuns` — `src/modules/data_catalog/entities/catalog_scan_runs.entity.ts`
-- **Resumen:** 34 columnas · 3 índices · 3 FK salientes · 5 entrantes · 15 operaciones
+- **Resumen:** 34 columnas · 3 índices · 3 FK salientes · 5 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -735,6 +737,7 @@ Registra cada ejecución de relevamiento del catálogo para identificar cuándo 
 | POST /admin/catalog/scans | CREA | POR_SQL |
 | POST /admin/catalog/scans | LEE | POR_SQL |
 | GET /admin/catalog/scans/{id} | LEE | POR_SQL |
+| GET /admin/ops/readiness | LEE | POR_SQL |
 
 #### Gobierno
 

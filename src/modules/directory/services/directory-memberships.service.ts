@@ -137,7 +137,7 @@ export class DirectoryMembershipsService {
    * @param params - Usuario que encarna al profesional, organización y actor que aprueba.
    * @returns La membresía vigente y si hubo que crearla.
    */
-  async ensureMembresiaAsistencial(
+  async ensureCareMembership(
     tx: EntityManager,
     params: {
       readonly userId: string;

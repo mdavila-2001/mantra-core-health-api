@@ -1,0 +1,19 @@
+# yarn test:cov · rama marcelo/feat-insurance-preventive-campaigns-api (con cambios)
+All files |   73.56 |    67.67 |   58.62 |   74.47 |                                                                                                                                                                     
+Jest: Coverage for statements (73.56%) does not meet "global" threshold (74%)
+Jest: Coverage for branches (67.67%) does not meet "global" threshold (69%)
+Jest: Coverage for lines (74.47%) does not meet "global" threshold (75%)
+Jest: Coverage for functions (58.62%) does not meet "global" threshold (59%)
+Test Suites: 1 skipped, 718 passed, 718 of 719 total
+Tests:       1 skipped, 8767 passed, 8768 total
+TESTCOV_EXIT=1
+
+# yarn test:cov · origin/dev limpio (f78b241a), worktree descartable
+All files |   73.53 |    67.64 |   58.57 |   74.45 |                                                                                                                                                                     
+Jest: Coverage for statements (73.53%) does not meet "global" threshold (74%)
+Jest: Coverage for branches (67.64%) does not meet "global" threshold (69%)
+Jest: Coverage for lines (74.45%) does not meet "global" threshold (75%)
+Jest: Coverage for functions (58.57%) does not meet "global" threshold (59%)
+Test Suites: 1 skipped, 717 passed, 717 of 718 total
+Tests:       1 skipped, 8730 passed, 8731 total
+TESTCOV_EXIT=1

@@ -1,0 +1,190 @@
+{
+  "code": "NNAC25_TI_05_COAGULACION_INTRAVASCULAR_DISE",
+  "name": "Coagulación intravascular diseminada (NNAC 2025)",
+  "specialty": {
+    "code": "MEDICINA_INTENSIVA",
+    "display": "Medicina Intensiva"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Terapia Intensiva (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/964-norma-nacional-de-atencion-clinica-de-terapia-intensiva?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 5, pág. 57; niveles de atención II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Sistema de escore para el diagnóstico de coagulación intravascular diseminada",
+        "Recuento de plaquetas (>100 × 10 9 /l = 0, <100 × 10 9 /l = 1, <50 × 10 9 /l = 2)",
+        "Marcador de fibrina elevado (p. ej., dímero D, productos de degradación de fibrina) (sin aumento = 0, aumento moderado = 2, aumento fuerte = 3)",
+        "TP prolongado (<3 s = 0, >3 pero <6 s = 1, >6 s = 2)",
+        "El diagnóstico de CID debe abarcar información tanto clínica como de laboratorio (Grado C, Nivel I Vl)",
+        "Taquipnea",
+        "Estertores pulmonares",
+        "Taquicardia",
+        "Disnea progresiva",
+        "Palidez",
+        "Ansiedad",
+        "Cefalea",
+        "Hipoactividad",
+        "Náuseas",
+        "Vómitos",
+        "Cianosis",
+        "Reforzamiento del II ruido cardiaco",
+        "Desaturación asociada a disnea, taquipnea y/o taquicardia"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 57. Es un síndrome clínico caracterizado por actividad excesiva de procoagulantes en la sangre que superan los mecanismos anticoagulantes naturales, seguido de hiperfibrinólisis (la característica principal es el depósito de fibrina, en los vasos de mediano y pequeño calibre)."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Recuento basal plaquetario: < 100 000/mm3",
+        "Tiempo de protrombina: > 3 segundos, prolongado",
+        "TTPA: Prolongado",
+        "D-dímero: Aumentado",
+        "Antitrombina III: Disminuida",
+        "PDF (producto de degradación del fibrinógeno): Aumentado",
+        "Frotis de sangre periférica (eritrocitos fragmentados o esquistocitos)",
+        "Hipofibrinogenemia",
+        "D-dímeros de fibrina aumentados (según disponibilidad)",
+        "Tiempo de coagulación: TP, TTPA prolongados",
+        "Anemia microangiopática",
+        "Hemoglobina inferior a valores normales",
+        "Trombocitopenia, fluctuante entre 5000/mm3 hasta más de 100.000/mm3",
+        "Monómeros de fibrina, se encuentran elevados en 85 al 100% (las pruebas de degradación de la fibrina y la trombina interfieren en su polimerización)",
+        "Concentración de antitrombina III disminuida",
+        "Degradación por la plasmina de los factores V, VIII, IX y X",
+        "Fragmentos de protrombina",
+        "Gasometría arterial y venosa central",
+        "Radiografía PA o AP de tórax",
+        "Tomografía computada simple de tórax"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "D65: Coagulación intravascular diseminada [síndrome de desfibrinación]"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Cuando requiera soporte vital",
+        "Criterio médico",
+        "Hipoxemia",
+        "Falla multirorgánica",
+        "Muerte (13)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 5, pág. 57); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

@@ -1,0 +1,17 @@
+# eslint --max-warnings=0 sobre los archivos tocados
+src/modules/insurance/controllers/index.ts
+src/modules/insurance/controllers/insurance-controllers.spec.ts
+src/modules/insurance/dto/index.ts
+src/modules/insurance/entities/index.ts
+src/modules/insurance/insurance.concepts.ts
+src/modules/insurance/insurance.module.ts
+src/modules/insurance/repositories/index.ts
+src/modules/insurance/services/index.ts
+src/modules/insurance/controllers/insurance-campaigns.controller.ts
+src/modules/insurance/dto/insurance-campaigns.dto.ts
+src/modules/insurance/entities/insurance_campaign_partners.entity.ts
+src/modules/insurance/entities/insurance_campaigns.entity.ts
+src/modules/insurance/repositories/insurance-campaigns.repository.ts
+src/modules/insurance/services/insurance-campaigns.service.spec.ts
+src/modules/insurance/services/insurance-campaigns.service.ts
+exit=0

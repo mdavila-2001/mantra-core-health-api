@@ -6,184 +6,141 @@
 - **Operaciones:** 16 (15 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [crm](../endpoints/crm.md)
 
-## Proceso: Módulo 49 — CRM
+## Proceso: CRM
 
-- **Código:** `crm` · **Agrupación:** CASO_DE_USO_README · **Operaciones:** 16
+- **Código:** `crm` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 16
 - **Actores:** CRM_ADMIN · CRM_AGENT
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/crm/README.md`
 
 ### Para qué sirve
 
-Gestión comercial y de servicio: cuentas y equipo, contactos con consentimiento de canal, leads, oportunidades sobre pipeline, actividades polimórficas, alianzas y casos de soporte.
+Gestiona cuentas, contactos, equipos, leads, oportunidades, actividades, alianzas, casos y preferencias de contacto mediante `CrmController` bajo `/crm`.
 
 _Fuente: `src/modules/crm/README.md:3`_
-
-### Flujo general declarado en el README
-
-```text
-lead (new) ── qualify ──> qualified ── convert ──> oportunidad (open)
-                       └─ disqualified            ├─ advance-stage (histórico por movimiento)
-                                                  ├─ win  -> won  (wonAt)
-                                                  └─ lose -> lost (motivo)
-
-cuenta ── team-members ── actividades (task | note | event | email | call)
-      └─ casos (open -> in_progress -> resolved/closed, con historial)
-      └─ 360: actividades + casos recientes
-
-contacto ── canales ── opt-in/opt-out -> do_not_contact
-```
-
-_Fuente: `src/modules/crm/README.md:33`_
 
 ### Etapas y operaciones
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-49-01` | Crear cuenta con contacto principal | POST /crm/accounts | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
-| `UC-49-02` | Asignar equipo de cuenta | POST /crm/accounts/{id}/team-members | CRM_ADMIN | MEDIO | 3 |
-| `UC-49-03` | Capturar y calificar lead | POST /crm/leads | CRM_ADMIN · CRM_AGENT | MEDIO | 1 |
-|  |  | PATCH /crm/leads/{id}/qualify | CRM_ADMIN · CRM_AGENT | MEDIO | 2 |
-| `UC-49-04` | Convertir lead en oportunidad | POST /crm/leads/{id}/convert | CRM_ADMIN · CRM_AGENT | MEDIO | 4 |
-| `UC-49-05` | Actividad polimórfica | POST /crm/activities | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
-| `UC-49-07` | Avanzar etapa del pipeline | POST /crm/opportunities/{id}/advance-stage | CRM_ADMIN · CRM_AGENT | MEDIO | 4 |
-| `UC-49-08` | Ganar oportunidad | POST /crm/opportunities/{id}/win | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
-| `UC-49-09` | Perder con motivo | POST /crm/opportunities/{id}/lose | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
-| `UC-49-10` | Alianza + acuerdo marco | POST /crm/partnerships | CRM_ADMIN | MEDIO | 2 |
-| `UC-49-11` | Abrir caso de servicio | POST /crm/cases | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
-| `UC-49-12` | Comentar y transicionar | POST /crm/cases/{id}/comments | CRM_ADMIN · CRM_AGENT | MEDIO | 2 |
+| `ctrl:CrmController` | Operaciones de CrmController que el README no asigna a un caso de uso | POST /crm/accounts | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
+|  |  | GET /crm/accounts/{id}/360 | CRM_ADMIN · CRM_AGENT | BAJO | 3 |
+|  |  | POST /crm/accounts/{id}/team-members | CRM_ADMIN | MEDIO | 3 |
+|  |  | POST /crm/activities | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
+|  |  | POST /crm/cases | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
+|  |  | POST /crm/cases/{id}/comments | CRM_ADMIN · CRM_AGENT | MEDIO | 2 |
+|  |  | POST /crm/cases/{id}/resolve | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
 |  |  | PATCH /crm/cases/{id}/status | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
-| `UC-49-13` | Resolver caso | POST /crm/cases/{id}/resolve | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
-| `UC-49-14` | Vista 360 de la cuenta | GET /crm/accounts/{id}/360 | CRM_ADMIN · CRM_AGENT | BAJO | 3 |
-| `UC-49-15` | Consentimiento de canal | PATCH /crm/contacts/{id}/channels/{cid}/opt-in | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
+|  |  | PATCH /crm/contacts/{id}/channels/{cid}/opt-in | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
+|  |  | POST /crm/leads | CRM_ADMIN · CRM_AGENT | MEDIO | 1 |
+|  |  | POST /crm/leads/{id}/convert | CRM_ADMIN · CRM_AGENT | MEDIO | 4 |
+|  |  | PATCH /crm/leads/{id}/qualify | CRM_ADMIN · CRM_AGENT | MEDIO | 2 |
+|  |  | POST /crm/opportunities/{id}/advance-stage | CRM_ADMIN · CRM_AGENT | MEDIO | 4 |
+|  |  | POST /crm/opportunities/{id}/lose | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
+|  |  | POST /crm/opportunities/{id}/win | CRM_ADMIN · CRM_AGENT | MEDIO | 3 |
+|  |  | POST /crm/partnerships | CRM_ADMIN | MEDIO | 2 |
 
-### Diagrama — etapas `UC-49-01`, `UC-49-02`, `UC-49-03`…
+### Diagrama — etapas `ctrl:CrmController`
 
 ```mermaid
 flowchart LR
   a2(["CRM_ADMIN · CRM_AGENT"]):::actor
-  a7(["CRM_ADMIN"]):::actor
+  a10(["CRM_ADMIN"]):::actor
   t3[("crm.account_team_members")]:::tabla
   t4[("crm.contacts")]:::tabla
   t5[("crm.crm_accounts")]:::tabla
-  t9[("crm.leads")]:::tabla
-  t12[("crm.opportunities")]:::tabla
-  t13[("crm.opportunity_stage_history")]:::tabla
-  t15[("crm.crm_activities")]:::tabla
-  t16[("crm.crm_notes")]:::tabla
-  t17[("crm.crm_tasks")]:::tabla
-  t19[("crm.pipeline_stages")]:::tabla
-  t23[("crm.partnership_agreements")]:::tabla
-  t24[("crm.partnerships")]:::tabla
-  t26[("crm.crm_case_status_history")]:::tabla
-  t27[("crm.crm_cases")]:::tabla
-  t29[("crm.crm_case_comments")]:::tabla
-  t34[("crm.contact_channel_endpoints")]:::tabla
-  subgraph s0["UC-49-01 · Crear cuenta con contacto principal"]
+  t7[("crm.crm_activities")]:::tabla
+  t8[("crm.crm_cases")]:::tabla
+  t12[("crm.crm_notes")]:::tabla
+  t13[("crm.crm_tasks")]:::tabla
+  t15[("crm.crm_case_status_history")]:::tabla
+  t17[("crm.crm_case_comments")]:::tabla
+  t21[("crm.contact_channel_endpoints")]:::tabla
+  t23[("crm.leads")]:::tabla
+  t25[("crm.opportunities")]:::tabla
+  t26[("crm.opportunity_stage_history")]:::tabla
+  t29[("crm.pipeline_stages")]:::tabla
+  t33[("crm.partnership_agreements")]:::tabla
+  t34[("crm.partnerships")]:::tabla
+  subgraph s0["ctrl:CrmController · Operaciones de CrmController que el README no asigna a un…"]
     o1["POST /crm/accounts"]:::op
-  end
-  subgraph s1["UC-49-02 · Asignar equipo de cuenta"]
-    o6["POST /crm/accounts/{id}/team-members"]:::op
-  end
-  subgraph s2["UC-49-03 · Capturar y calificar lead"]
-    o8["POST /crm/leads"]:::op
-    o10["PATCH /crm/leads/{id}/qualify"]:::op
-  end
-  subgraph s3["UC-49-04 · Convertir lead en oportunidad"]
-    o11["POST /crm/leads/{id}/convert"]:::op
-  end
-  subgraph s4["UC-49-05 · Actividad polimórfica"]
-    o14["POST /crm/activities"]:::op
-  end
-  subgraph s5["UC-49-07 · Avanzar etapa del pipeline"]
-    o18["POST /crm/opportunities/{id}/advance-stage"]:::op
-  end
-  subgraph s6["UC-49-08 · Ganar oportunidad"]
-    o20["POST /crm/opportunities/{id}/win"]:::op
-  end
-  subgraph s7["UC-49-09 · Perder con motivo"]
-    o21["POST /crm/opportunities/{id}/lose"]:::op
-  end
-  subgraph s8["UC-49-10 · Alianza + acuerdo marco"]
-    o22["POST /crm/partnerships"]:::op
-  end
-  subgraph s9["UC-49-11 · Abrir caso de servicio"]
-    o25["POST /crm/cases"]:::op
-  end
-  subgraph s10["UC-49-12 · Comentar y transicionar"]
-    o28["POST /crm/cases/{id}/comments"]:::op
-    o30["PATCH /crm/cases/{id}/status"]:::op
-  end
-  subgraph s11["UC-49-13 · Resolver caso"]
-    o31["POST /crm/cases/{id}/resolve"]:::op
-  end
-  subgraph s12["UC-49-14 · Vista 360 de la cuenta"]
-    o32["GET /crm/accounts/{id}/360"]:::op
-  end
-  subgraph s13["UC-49-15 · Consentimiento de canal"]
-    o33["PATCH /crm/contacts/{id}/channels/{cid}/opt-in"]:::op
+    o6["GET /crm/accounts/{id}/360"]:::op
+    o9["POST /crm/accounts/{id}/team-members"]:::op
+    o11["POST /crm/activities"]:::op
+    o14["POST /crm/cases"]:::op
+    o16["POST /crm/cases/{id}/comments"]:::op
+    o18["POST /crm/cases/{id}/resolve"]:::op
+    o19["PATCH /crm/cases/{id}/status"]:::op
+    o20["PATCH /crm/contacts/{id}/channels/{cid}/opt-in"]:::op
+    o22["POST /crm/leads"]:::op
+    o24["POST /crm/leads/{id}/convert"]:::op
+    o27["PATCH /crm/leads/{id}/qualify"]:::op
+    o28["POST /crm/opportunities/{id}/advance-stage"]:::op
+    o30["POST /crm/opportunities/{id}/lose"]:::op
+    o31["POST /crm/opportunities/{id}/win"]:::op
+    o32["POST /crm/partnerships"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
   o1 -->|"CREA"| t4
   o1 -->|"CREA"| t5
-  a7 --> o6
-  o6 -->|"CREA"| t3
-  o6 -->|"LEE"| t3
+  a2 --> o6
   o6 -->|"LEE"| t5
-  a2 --> o8
-  o8 -->|"CREA"| t9
-  a2 --> o10
-  o10 -->|"ACTUALIZA"| t9
-  o10 -->|"LEE"| t9
+  o6 -->|"LEE"| t7
+  o6 -->|"LEE"| t8
+  a10 --> o9
+  o9 -->|"CREA"| t3
+  o9 -->|"LEE"| t3
+  o9 -->|"LEE"| t5
   a2 --> o11
-  o11 -->|"ACTUALIZA"| t9
-  o11 -->|"LEE"| t9
+  o11 -->|"CREA"| t7
   o11 -->|"CREA"| t12
   o11 -->|"CREA"| t13
   a2 --> o14
   o14 -->|"CREA"| t15
-  o14 -->|"CREA"| t16
-  o14 -->|"CREA"| t17
+  o14 -->|"CREA"| t8
+  o14 -->|"LEE"| t8
+  a2 --> o16
+  o16 -->|"CREA"| t17
+  o16 -->|"LEE"| t8
   a2 --> o18
-  o18 -->|"ACTUALIZA"| t12
-  o18 -->|"LEE"| t12
-  o18 -->|"CREA"| t13
-  o18 -->|"LEE"| t19
+  o18 -->|"CREA"| t15
+  o18 -->|"ACTUALIZA"| t8
+  o18 -->|"LEE"| t8
+  a2 --> o19
+  o19 -->|"CREA"| t15
+  o19 -->|"ACTUALIZA"| t8
+  o19 -->|"LEE"| t8
   a2 --> o20
-  o20 -->|"ACTUALIZA"| t12
-  o20 -->|"LEE"| t12
-  o20 -->|"CREA"| t13
-  a2 --> o21
-  o21 -->|"ACTUALIZA"| t12
-  o21 -->|"LEE"| t12
-  o21 -->|"CREA"| t13
-  a7 --> o22
+  o20 -->|"ACTUALIZA"| t21
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t4
+  a2 --> o22
   o22 -->|"CREA"| t23
-  o22 -->|"CREA"| t24
-  a2 --> o25
-  o25 -->|"CREA"| t26
-  o25 -->|"CREA"| t27
-  o25 -->|"LEE"| t27
+  a2 --> o24
+  o24 -->|"ACTUALIZA"| t23
+  o24 -->|"LEE"| t23
+  o24 -->|"CREA"| t25
+  o24 -->|"CREA"| t26
+  a2 --> o27
+  o27 -->|"ACTUALIZA"| t23
+  o27 -->|"LEE"| t23
   a2 --> o28
-  o28 -->|"CREA"| t29
-  o28 -->|"LEE"| t27
+  o28 -->|"ACTUALIZA"| t25
+  o28 -->|"LEE"| t25
+  o28 -->|"CREA"| t26
+  o28 -->|"LEE"| t29
   a2 --> o30
+  o30 -->|"ACTUALIZA"| t25
+  o30 -->|"LEE"| t25
   o30 -->|"CREA"| t26
-  o30 -->|"ACTUALIZA"| t27
-  o30 -->|"LEE"| t27
   a2 --> o31
+  o31 -->|"ACTUALIZA"| t25
+  o31 -->|"LEE"| t25
   o31 -->|"CREA"| t26
-  o31 -->|"ACTUALIZA"| t27
-  o31 -->|"LEE"| t27
-  a2 --> o32
-  o32 -->|"LEE"| t5
-  o32 -->|"LEE"| t15
-  o32 -->|"LEE"| t27
-  a2 --> o33
-  o33 -->|"ACTUALIZA"| t34
-  o33 -->|"LEE"| t34
-  o33 -->|"LEE"| t4
+  a10 --> o32
+  o32 -->|"CREA"| t33
+  o32 -->|"CREA"| t34
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3

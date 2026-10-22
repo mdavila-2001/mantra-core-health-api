@@ -12,9 +12,16 @@
 import 'reflect-metadata';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { NestFactory } from '@nestjs/core';
+import { ModulesContainer, NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { dump } from 'js-yaml';
+
+import {
+  closeRequestBodies,
+  collectBodyClasses,
+  disambiguateHomonymSchemas,
+  modulesOf,
+} from './request-body-contract.mjs';
 
 process.env.ORM_SCHEMA_SYNC = 'off';
 process.env.RATE_LIMIT_DISABLED = 'true';
@@ -106,6 +113,31 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['get', '/f/{slug}'],
   ['get', '/l/{slug}'],
   ['get', '/s/{slug}'],
+  // Entraron con `@Public()` y sin sumarse acá: `docs` venía fallando en `dev`
+  // con estos `security-defined` (verificado contra el decorador el 16/09).
+  // Pre-carga del PDF para alta de organización o profesional (`iam-auth.controller.ts`).
+  ['post', '/iam/auth/upload-registration-document'],
+  // Lecturas sociales y ficha pública (`community-public.controller.ts`).
+  ['get', '/public/posts'],
+  ['get', '/public/posts/{postId}/reactions'],
+  ['get', '/public/posts/{postId}/comments'],
+  ['get', '/public/comments/{commentId}/replies'],
+  ['get', '/public/profiles/{prefijo}/{slug}'],
+  ['get', '/public/profiles/{prefijo}/{slug}/reviews'],
+  ['get', '/public/media/{id}'],
+  // Catálogo del registro de pacientes (`insurance-catalog.controller.ts`).
+  ['get', '/insurance-carrier-catalog'],
+  // Vitrina pública de medicamentos (`pharmacy-public.controller.ts`).
+  ['get', '/public/medications'],
+  ['get', '/public/medications/{conceptId}/availability'],
+  // Verificación pública de una receta por su sello
+  // (`clinical-prescriptions-public.controller.ts`, `@Public()`): entró sin
+  // sumarse acá y el lint de Redocly lo daba como `security-defined` (18/09).
+  ['get', '/public/prescriptions/{id}/verify'],
+  // Verificación pública de un certificado de portabilidad de seguros por su
+  // sello SHA-256 (`insurance-portability-public.controller.ts`, `@Public()`
+  // — subtarea 3.3, 2026-09-18).
+  ['get', '/public/portability/verify/{manifestHash}'],
 ];
 
 function markPublicOperations(document) {
@@ -312,9 +344,9 @@ async function main() {
   const pkg = await import('../../package.json', { with: { type: 'json' } });
 
   const config = new DocumentBuilder()
-    .setTitle('REDESA Health API')
+    .setTitle('ALOVIDA Health API')
     .setDescription(
-      'API del ecosistema de salud REDESA (Mantra Core Technologies). ' +
+      'API del ecosistema de salud ALOVIDA (Mantra Core Technologies). ' +
         'Contrato generado automáticamente desde los decoradores `@nestjs/swagger` ' +
         'reales de los controllers y DTO del backend — no es un documento mantenido a mano. ' +
         'Regenerar con `yarn docs:openapi:generate` tras cualquier cambio de contrato.',
@@ -334,7 +366,21 @@ async function main() {
     )
     .build();
 
+  // Antes de generar: dos DTO homónimos en módulos distintos comparten un solo
+  // esquema y una de las rutas queda documentada con el cuerpo ajeno. Ver
+  // `request-body-contract.mjs`.
+  const bodyClasses = collectBodyClasses(modulesOf(app.get(ModulesContainer)));
+  const renamed = disambiguateHomonymSchemas(bodyClasses);
+
   const document = SwaggerModule.createDocument(app, config);
+  // `forbidNonWhitelisted`, dicho en el contrato: una clave que el DTO no
+  // declara es un 400, así que el esquema del cuerpo es cerrado.
+  const closedBodies = closeRequestBodies(document, bodyClasses);
+  console.log(
+    `  ${bodyClasses.size} DTO de cuerpo · ${renamed.length} esquemas homónimos renombrados ` +
+      `(${[...new Set(renamed.map((r) => r.from))].join(', ') || 'ninguno'}) · ` +
+      `${closedBodies} esquemas con additionalProperties: false.`,
+  );
   const dupCount = dedupeOperationIds(document);
   if (dupCount > 0) {
     console.log(

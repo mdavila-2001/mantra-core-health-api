@@ -1,0 +1,261 @@
+{
+  "code": "NNAC_U14_03_ESTRENIMIENTO_CRONICO",
+  "name": "Estreñimiento crónico (NNAC)",
+  "specialty": { "code": "GASTROENTEROLOGIA", "display": "Gastroenterología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Normas Nacionales de Atención Clínica (Serie Documentos Técnico-Normativos)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://platform.who.int/docs/default-source/mca-documents/policy-documents/operational-guidance/BOL-AD-17-01-OPERATIONAL-GUIDANCE-2012-esp-Normas-Nacionales-de-Atencion-Clinica.pdf",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2012, norma N.º 3 de la unidad 14, pág. 776; CIE-10 K59.0; niveles de resolución I – II – III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Disminución en la frecuencia de evacuaciones",
+        "Pujo excesivo y dolor durante la defecación",
+        "Tenesmo y evacuación incompleta",
+        "Heces de aspecto duro y seco",
+        "Distensión abdominal",
+        "Abdomen timpánico y doloroso",
+        "En ampolla rectal vacía sospechar de alteración anatómica, ej. enfermedad de Hirschsprung",
+        "Impactación fecal",
+        "Anormalidades en el examen rectal (masas, hemorroides, fisuras, fístulas, prolapso, tumores)",
+        "Presencia de sangre",
+        "Dos o menos defecaciones por semana",
+        "Por lo menos un episodio por semana de incontinencia después de adquirir hábito de uso del sanitario",
+        "Historia de excesiva retención de heces",
+        "Historia de deposiciones dolorosas y duras",
+        "Presencia de gran masa fecal en el recto",
+        "Historia de heces de diámetro grueso que pueden obstruir el sanitario",
+        "Dos o menos defecaciones en sanitario por semana",
+        "Menos de tres deposiciones por semana",
+        "Defecación dura en más del 25% de las deposiciones, sensación de evacuación incompleta en más del 25% de las deposiciones",
+        "Esfuerzo excesivo en más del 25% de las deposiciones",
+        "Necesidad de manipulación digital para facilitar la evacuación",
+        "Historia de postura retentiva o excesiva retención de volumen fecal",
+        "Historia de dolor o defecaciones duras",
+        "Defecaciones dolorosas y/o con mucho esfuerzo",
+        "Presencia de heces de tipo caprinas o parecidas a guijarros"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 776. Es la alteración del patrón normal de defecación manifestado por su emisión de frecuencia menor a dos veces por semana, con presencia de heces aumentadas de calibre y consistencia, de difícil expulsión, a menudo con esfuerzo excesivo o sensación de evacuación incompleta."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Fenobarbital",
+        "Sulfato ferroso",
+        "Sucralfato y otros antiácidos",
+        "Malformaciones anatómicas: estenosis anal, ano anterior, otras",
+        "Alteraciones de pared abdominal: abdomen en ciruela pasa, hipotonía, gastrosquisis, otras",
+        "Condiciones neurogénicas: anomalías del tubo neural, parálisis cerebral infantil, otras",
+        "Trastornos neuromusculares intestinales: Hirschsprung, displasia neuronal intestinal, etc",
+        "Trastornos endocrino-metabólicos y gastrointestinales: hipotiroidismo, diabetes mellitus, enfermedad celíaca, etc",
+        "Alergia alimentaria",
+        "Maltrato infantil",
+        "Estreñimiento con tránsito lento (inercia colónica e intestinal)",
+        "Estreñimiento crónico idiopático"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Mayores de 55 años",
+        "Cirugía reciente abdominal o perianal, cirugía pélvica",
+        "Embarazo",
+        "Dieta inadecuada (poca ingesta de líquidos y fibras)",
+        "Automedicación",
+        "Movilidad limitada",
+        "Abuso de laxantes",
+        "Comorbilidad conocida",
+        "Pacientes terminales",
+        "Viajes",
+        "Historia de estreñimiento crónico",
+        "Sedentarismo",
+        "Uso de fórmula láctea",
+        "Alimentación complementaria inadecuada",
+        "Bajo consumo de agua y fibras",
+        "Inadecuado uso de sanitario",
+        "Abuso sexual",
+        "Familiar estreñido",
+        "Entrenamiento precoz del uso del sanitario (antes de los dos años)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pruebas de función tiroidea",
+        "Serología para Chagas",
+        "Radiografía simple de abdomen",
+        "Colon por enema con doble contraste",
+        "Tránsito colónico: valoración indirecta de la motilidad y otras lesiones, si hay disponibilidad",
+        "Rectosigmoidoscopia y colonoscopia (si se sospechan lesiones orgánicas)",
+        "Manometría ano rectal, si hay disponibilidad",
+        "Electromiografía, si hay disponibilidad; defecografía, si hay disponibilidad",
+        "Valoración psiquiátrica y neurológica",
+        "Hormonas tiroideas",
+        "Radiografía de abdomen",
+        "Para niños muy pequeños, colon por enema sin preparación",
+        "Rectosigmoidoscopia y colonoscopia",
+        "Electromiografía, si hay disponibilidad",
+        "Defecografía, si hay disponibilidad",
+        "Biopsia de la mucosa rectal",
+        "Reactivo con acetilcolinesterasa para excluir enfermedad de Hirschsprung (si hay disponibilidad)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "description": "La NNAC asocia a esta norma: K59.0."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Vólvulo",
+        "Fecaloma",
+        "Impactación fecal",
+        "Falta de apetito y talla baja"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 3, pág. 776); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_alta",
+      "name": "Criterios de alta que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Resolución adecuada de las complicaciones mediante tratamiento médico o quirúrgico",
+        "Control ambulatorio",
+        "Seguimiento dietético y hábitos en el control ambulatorio",
+        "Reservar el tiempo necesario para el habito intestinal o uso del sanitario, en lo posible a la misma hora todos los días",
+        "Beber suficiente líquido, todos los días",
+        "Hacer ejercicio regularmente",
+        "Estimular la actividad física, evitar horas excesivas de televisión, video juegos, etc",
+        "No ignorar ni postergar el deseo de defecar",
+        "En pocas ocasiones el tratamiento es quirúrgico",
+        "En general el pronóstico es bueno con tratamiento médico, cambio de estilo de vida, medidas higiénico dietéticas y farmacológicas",
+        "Concientizar a la población que el estreñimiento es una enfermedad, que tratada oportunamente tiene curación"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

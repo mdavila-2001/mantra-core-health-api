@@ -1,0 +1,12 @@
+COMMAND: yarn lint
+
+C:\Alovida\mantra-core-health-api\src\modules\terminology\services\concepts.service.ts
+  949:44  error  Replace `undefined,·undefined,·limit,·undefined,` with `⏎······undefined,⏎······undefined,⏎······limit,⏎······undefined,⏎·····`  prettier/prettier
+  950:1   error  Insert `··`                                                                                                                      prettier/prettier
+  951:7   error  Insert `··`                                                                                                                      prettier/prettier
+  952:5   error  Replace `}` with `··},⏎····`                                                                                                     prettier/prettier
+
+✖ 4 problems (4 errors, 0 warnings)
+  4 errors and 0 warnings potentially fixable with the `--fix` option.
+
+EXIT_CODE=1

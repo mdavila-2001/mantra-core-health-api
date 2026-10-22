@@ -1,0 +1,27 @@
+# Node 24.21.0 · PostgreSQL 16.13 local (base desechable mantra_copays_test, DDL de database/SQL con v4.2.31)
+# COPAYS_ISOLATED_TEST=true · jest --config (jest-integration.json + moduleNameMapper .js→.ts)
+[copays setup] 2026-09-26T18:49:26.323Z +0ms isolation:start
+[copays setup] 2026-09-26T18:49:26.323Z +0ms isolation:complete
+[copays setup] 2026-09-26T18:49:26.323Z +0ms harness-import:start
+[copays setup] 2026-09-26T18:49:30.991Z +4668ms harness-import:complete
+[copays setup] 2026-09-26T18:49:30.991Z +4668ms application-bootstrap:start
+[copays setup] 2026-09-26T18:50:05.678Z +39355ms application-bootstrap:complete
+[copays setup] 2026-09-26T18:50:05.678Z +39355ms patients:start
+[copays setup] 2026-09-26T18:50:06.120Z +39797ms patients:complete
+[copays setup] 2026-09-26T18:50:06.120Z +39797ms insurers:start
+[copays setup] 2026-09-26T18:50:06.427Z +40104ms insurers:complete
+[copays setup] 2026-09-26T18:50:06.427Z +40104ms providers:start
+[copays setup] 2026-09-26T18:50:06.707Z +40384ms providers:complete
+[copays setup] 2026-09-26T18:50:06.707Z +40384ms insurance-product:start
+[copays setup] 2026-09-26T18:50:06.715Z +40392ms insurance-product:complete
+[copays setup] 2026-09-26T18:50:06.715Z +40392ms insurance-plan:start
+[copays setup] 2026-09-26T18:50:06.724Z +40401ms insurance-plan:complete
+[copays setup] 2026-09-26T18:50:06.724Z +40401ms insurance-benefit:start
+[copays setup] 2026-09-26T18:50:06.737Z +40414ms insurance-benefit:complete
+[copays setup] 2026-09-26T18:50:06.737Z +40414ms patient-coverage:start
+[copays setup] 2026-09-26T18:50:06.747Z +40424ms patient-coverage:complete
+[copays setup] 2026-09-26T18:50:06.748Z +40425ms diagnostic-offering:start
+[copays setup] 2026-09-26T18:50:06.759Z +40436ms diagnostic-offering:complete
+[copays setup] 2026-09-26T18:50:06.759Z +40436ms setup:complete
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total

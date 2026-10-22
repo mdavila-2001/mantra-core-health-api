@@ -41,6 +41,100 @@ export class PayerOrganizationProfileDto {
    */
   @ApiProperty({ description: 'Dirección de la aseguradora' })
   address!: string;
+
+  /**
+   * Latitud de la casa matriz, si se registró (subtarea 1.3).
+   *
+   * Sale de `common.addresses` (dueño el tenant, uso `ADDR_USE_WORK`), no de
+   * una columna propia de `insurance_carriers`; ver
+   * `TenantTypeProfileService.materializePayerHeadquarters`.
+   */
+  @ApiPropertyOptional({ description: 'Latitud de la casa matriz (-90 a 90)' })
+  latitude?: number;
+
+  /** Longitud de la casa matriz, si se registró. Ver {@link PayerOrganizationProfileDto.latitude}. */
+  @ApiPropertyOptional({
+    description: 'Longitud de la casa matriz (-180 a 180)',
+  })
+  longitude?: number;
+}
+
+/**
+ * Una persona que la organización declara como contacto: su representante
+ * legal o una de sus gerencias (subtarea 1.4).
+ *
+ * Sale de `directory.tenant_legal_representatives` + `profiles.persons`, con
+ * el correo y el teléfono de `common.contact_points` y el documento de
+ * `common.identifiers`. No es una cuenta de la plataforma: es a quién llamar.
+ */
+export class OrganizationContactPersonDto {
+  /**
+   * El cargo, en su código canónico (`LEGAL_REPRESENTATIVE`,
+   * `GENERAL_MANAGER`, `COMMERCIAL_MANAGER`, `MARKETING_MANAGER`).
+   *
+   * Viaja resuelto y no como `representativeRoleConceptId` por lo mismo que
+   * `isVerified`: el rol es un uuid del catálogo, y para saber cuál significa
+   * «gerente comercial» la pantalla tendría que atarse a un id sembrado.
+   */
+  @ApiProperty({
+    description: 'Rol canónico del contacto dentro de la organización',
+    example: 'MARKETING_MANAGER',
+  })
+  role!: string;
+
+  /**
+   * Nombre completo, tal como lo declaró el alta.
+   *
+   * Sigue siendo `profiles.persons.display_name`: si el alta mandó las
+   * partes, la API lo compuso; si mandó la forma anterior (`fullName`), es
+   * ese valor tal cual. Nunca falta.
+   */
+  @ApiProperty({ description: 'Nombre completo del contacto' })
+  fullName!: string;
+
+  /**
+   * Nombre de pila, si el alta lo declaró en partes.
+   *
+   * Ausente en los contactos que se registraron antes de esta subtarea, o
+   * cuando el cliente mandó `fullName` en vez de las partes: esos sólo
+   * tienen `display_name`, y no hay forma de partirlo sin adivinar.
+   */
+  @ApiPropertyOptional({
+    description: 'Nombre de pila, si se declaró en partes',
+  })
+  name?: string;
+
+  /** Segundo nombre, si se declaró. */
+  @ApiPropertyOptional({ description: 'Segundo nombre, si se declaró' })
+  middleName?: string;
+
+  /** Apellido paterno, si se declaró en partes. */
+  @ApiPropertyOptional({
+    description: 'Apellido paterno, si se declaró en partes',
+  })
+  lastName?: string;
+
+  /** Apellido materno, si se declaró. */
+  @ApiPropertyOptional({ description: 'Apellido materno, si se declaró' })
+  motherLastName?: string;
+
+  /**
+   * Correo de contacto, si lo tiene vigente.
+   */
+  @ApiPropertyOptional({ description: 'Correo de contacto', format: 'email' })
+  email?: string;
+
+  /**
+   * Celular o teléfono de contacto, si lo tiene vigente.
+   */
+  @ApiPropertyOptional({ description: 'Celular o teléfono de contacto' })
+  phone?: string;
+
+  /**
+   * Documento de identidad, si se declaró (sólo el representante legal).
+   */
+  @ApiPropertyOptional({ description: 'Documento de identidad declarado' })
+  idNumber?: string;
 }
 
 /**
@@ -96,6 +190,29 @@ export class MyOrganizationDto extends TenantDetailResponseDto {
   @ValidateNested()
   @Type(() => PayerOrganizationProfileDto)
   payer?: PayerOrganizationProfileDto;
+
+  /**
+   * Quién representa legalmente a la organización (subtarea 1.4).
+   *
+   * Va al nivel de la organización y no dentro de `payer` porque no es un dato
+   * de aseguradora: el registro de procesos pide el mismo bloque para
+   * farmacia, laboratorio e imagenología.
+   */
+  @ApiPropertyOptional({ type: OrganizationContactPersonDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => OrganizationContactPersonDto)
+  legalRepresentative?: OrganizationContactPersonDto;
+
+  /**
+   * Las gerencias de contacto declaradas, en orden canónico (general,
+   * comercial, marketing).
+   */
+  @ApiPropertyOptional({ type: [OrganizationContactPersonDto] })
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => OrganizationContactPersonDto)
+  executives?: OrganizationContactPersonDto[];
 }
 
 /**

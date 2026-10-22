@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import {
+  StorageWorkerPublicationService,
+  type RemotePublicationProof,
+} from '../../../common/storage/storage-worker-publication.service';
+import { loadStorageEnv } from '../../../common/storage/storage.env';
+import { StorageLifecycleDenied } from '../../../common/storage/storage-lifecycle.protocol';
 import { ResourceNotFoundException } from '../../../common';
 import { loadAudioEnv } from '../audio.env';
 import { AudioValueCipherService } from '../infrastructure/audio-value-cipher.service';
@@ -29,6 +35,7 @@ export class AudioGenerationUseCase {
     private readonly repository: AudioAssetsRepository,
     private readonly budget: AudioBudgetPolicy,
     private readonly cipher: AudioValueCipherService,
+    @Optional() private readonly publication?: StorageWorkerPublicationService,
   ) {}
 
   async prepare(assetId: string): Promise<PrepareAudioGenerationResult> {
@@ -93,6 +100,7 @@ export class AudioGenerationUseCase {
   }
 
   async generated(input: {
+    publication?: RemotePublicationProof;
     assetId: string;
     storageUri: string;
     checksumSha256: string;
@@ -100,14 +108,33 @@ export class AudioGenerationUseCase {
     durationMs?: number;
     credits?: number;
   }): Promise<void> {
-    const asset = await this.repository.markReady({
+    const readyInput = {
+      physicalIdentity: input.publication?.physicalIdentity,
       assetId: input.assetId,
       storageUri: input.storageUri,
       checksum: input.checksumSha256,
       bytes: input.bytes,
       durationMs: input.durationMs,
       consumedCredits: input.credits,
-    });
+    };
+    const coordinated = loadStorageEnv().lifecycleBinding !== undefined;
+    if (coordinated && (!this.publication || !input.publication))
+      throw new StorageLifecycleDenied('PUBLICATION_PROOF_REQUIRED');
+    const completion = coordinated
+      ? await this.publication!.finalizeAudio(
+          input.assetId,
+          {
+            storageUri: input.storageUri,
+            contentHash: input.checksumSha256,
+            sizeBytes: input.bytes,
+          },
+          input.publication!,
+          (tx) => this.repository.markReady(readyInput, tx),
+        )
+      : undefined;
+    if (completion?.duplicate) return;
+    const asset =
+      completion?.result ?? (await this.repository.markReady(readyInput));
     await this.repository.appendEvent({
       assetKey: asset.assetKey,
       eventType: 'GENERATION_SUCCEEDED',

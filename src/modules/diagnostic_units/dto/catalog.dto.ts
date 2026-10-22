@@ -149,6 +149,26 @@ export class DiagnosticUnitSearchItemDto extends DiagnosticUnitDirectoryItemDto 
   /** Menor importe publicado en su tarifa pública, o `null` si no publica una. */
   @ApiPropertyOptional({ nullable: true })
   minAmount!: number | null;
+
+  /**
+   * Moneda de {@link minAmount} (código del concepto, p. ej. `USD`), o `null`
+   * si el centro no publica una tarifa. El buscador antes devolvía el importe
+   * sin moneda y la pantalla lo mostraba literal (CL-45, CL-51).
+   */
+  @ApiPropertyOptional({ nullable: true })
+  minAmountCurrency!: string | null;
+
+  /**
+   * Ciudades donde el centro tiene una sede activa, sin duplicados.
+   *
+   * Sale de `common.addresses.city` a través de la sede de `practice`, no de
+   * un texto propio del directorio: es la misma dirección que ya resuelve la
+   * ficha del centro. Una sede sin dirección o sin ciudad cargada no aporta
+   * ninguna entrada — no es que el centro no tenga ciudad, es que no se
+   * conoce, y la lista no inventa una para no dejarla vacía.
+   */
+  @ApiProperty({ type: [String] })
+  cities!: string[];
 }
 
 /** Página del buscador de centros. */

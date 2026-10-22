@@ -1,0 +1,29 @@
+Raw complete log preserved in ignored node_modules/.cache/directory-qa/integration-timeout-raw.txt. Below are literal failure lines; unrelated seed/query output omitted.
+FAIL test/integration/insurer-patients.int-spec.ts (272.224 s)
+  ● insurer-patients directory integration › pages in SQL with an exact total and no foreign patient or excess payload
+
+    thrown: "Exceeded timeout of 180000 ms for a hook.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See 
+https://jestjs.io/docs/api#testname-fn-timeout."
+
+      37 |   });
+      38 |
+    > 39 |   beforeAll(async () => {
+         |   ^
+      40 |     ctx = await bootstrapTestApp();
+      41 |     for (const label of ['A', 'B']) {
+      42 |       const email = `directory-${label}-${suffix}@example.test`;
+
+      at beforeAll (test/integration/insurer-patients.int-spec.ts:39:3)
+      at describe (test/integration/insurer-patients.int-spec.ts:20:1)
+
+  ● insurer-patients directory integration › cannot expand scope by selecting a different carrier or no insurance
+
+    thrown: "Exceeded timeout of 180000 ms for a hook.
+Test Suites: 1 failed, 1 total
+Tests:       9 failed, 9 total
+Snapshots:   0 total
+Time:        272.419 s
+Ran all test suites matching insurer-patients.
+Jest did not exit one second after the test run has completed.
+EXIT_CODE=-1 (identified Jest child stopped after timeout; bootstrap left open handles)

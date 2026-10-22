@@ -2,14 +2,23 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import { PharmacyTenantScopeGuard } from './pharmacy-tenant-scope.guard';
 import {
   PharmaciesService,
   PharmacySitesService,
@@ -17,6 +26,7 @@ import {
   PharmacyPricingService,
   PharmacyIntegrationService,
   PharmacyCatalogService,
+  PharmacyStaffReadService,
 } from '../services';
 import {
   CatalogProjectionDto,
@@ -29,24 +39,30 @@ import {
   CreateProductDto,
   CreateSiteDto,
   MappingResponseDto,
+  PharmacyCategoryListDto,
+  PharmacyProductReadDto,
   PharmacyResponseDto,
   PriceListResponseDto,
   PriceResponseDto,
   ProductResponseDto,
   SiteResponseDto,
   StatusResultDto,
+  UpdateProductDto,
   VerifyLicenseDto,
 } from '../dto';
 
 /**
  * Endpoints del módulo Pharmacy (identidad, sedes, catálogo, precios,
  * integración y proyección). Capa fina: valida parámetros y delega en el servicio
- * de dominio. Todas las operaciones exigen rol `SECURITY_ADMIN` (guard global).
+ * de dominio. Exigen `SECURITY_ADMIN` o `PHARMACY_STAFF` acotado a su propia
+ * farmacia (`PharmacyTenantScopeGuard`); el alta de la farmacia y la verificación
+ * de licencias siguen siendo sólo de `SECURITY_ADMIN`.
  */
 @ApiTags('pharmacy')
 @ApiBearerAuth()
 @Controller('pharmacies')
-@Roles('SECURITY_ADMIN')
+@Roles('SECURITY_ADMIN', 'PHARMACY_STAFF')
+@UseGuards(PharmacyTenantScopeGuard)
 export class PharmacyController {
   /**
    * Inicializa la instancia y sus dependencias.
@@ -65,10 +81,23 @@ export class PharmacyController {
     private readonly pricingService: PharmacyPricingService,
     private readonly integrationService: PharmacyIntegrationService,
     private readonly catalogService: PharmacyCatalogService,
+    private readonly staffReadService: PharmacyStaffReadService,
   ) {}
+
+  /** P47: categorías de la farmacia (el modelo todavía no las guarda: lista vacía). */
+  @Get(':pharmacyId/categories')
+  @ApiOperation({ summary: 'Categorías de la farmacia (sólo su personal)' })
+  @ApiOkResponse({ type: PharmacyCategoryListDto })
+  listCategories(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyCategoryListDto> {
+    return this.staffReadService.listCategories(pharmacyId, actor);
+  }
 
   /** UC-24-01. */
   @Post()
+  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Alta de farmacia con licencia inicial' })
   createPharmacy(
@@ -80,6 +109,7 @@ export class PharmacyController {
 
   /** UC-24-03. */
   @Post(':pharmacyId/licenses/:licenseId/verify')
+  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verificar licencia y aprobar farmacia' })
   verifyLicense(
@@ -120,6 +150,29 @@ export class PharmacyController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ProductResponseDto> {
     return this.productsService.publishProduct(pharmacyId, dto, actor);
+  }
+
+  /** P47 §2. */
+  @Patch(':pharmacyId/products/:productId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Editar los datos descriptivos de un producto del catálogo',
+    description:
+      'Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría, descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto retirado responde 422.',
+  })
+  @ApiOkResponse({ type: PharmacyProductReadDto })
+  updateProduct(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('productId', ParseUUIDPipe) productId: string,
+    @Body() dto: UpdateProductDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyProductReadDto> {
+    return this.productsService.updateProduct(
+      pharmacyId,
+      productId,
+      dto,
+      actor,
+    );
   }
 
   /** UC-24-09. */

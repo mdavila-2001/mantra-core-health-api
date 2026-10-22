@@ -1,0 +1,43 @@
+{
+  "status": "PASS_ROLLED_BACK",
+  "scope": "Exact two canonical ALTER DEFAULT PRIVILEGES EXECUTE statements, schema insurance, current_user copays_test. Full patch and RLS policies not applied.",
+  "command": "docker exec -i mantra-copays-pg psql -X -A -t -v ON_ERROR_STOP=1 -U copays_test -d mantra_copays_test",
+  "input": "BEGIN; isolated-context guard; create missing local mantra_app NOLOGIN role; execute the two statements below; inspect grants; ROLLBACK;",
+  "statements": [
+    "EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA %I GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO mantra_app', current_user, s);",
+    "EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA %I GRANT USAGE, SELECT ON SEQUENCES TO mantra_app', current_user, s);"
+  ],
+  "scriptSha256": "5dea83af537516342c86085b27c693c99e6afee0711b8c4b76fe55f3aa521549",
+  "transactionExitCode": 0,
+  "output": [
+    "BEGIN",
+    "DO",
+    "DO",
+    "INSIDE|{\"targetRoleExists\" : true, \"grantedTablePrivileges\" : 4, \"grantedSequencePrivileges\" : 2}",
+    "ROLLBACK"
+  ],
+  "before": {
+    "database": "mantra_copays_test",
+    "role": "copays_test",
+    "schemaExists": true,
+    "targetRoleExists": false,
+    "defaultPrivileges": []
+  },
+  "insideTransaction": {
+    "targetRoleExists": true,
+    "grantedTablePrivileges": 4,
+    "grantedSequencePrivileges": 2
+  },
+  "afterRollback": {
+    "database": "mantra_copays_test",
+    "role": "copays_test",
+    "schemaExists": true,
+    "targetRoleExists": false,
+    "defaultPrivileges": []
+  },
+  "baselineRestored": true,
+  "temporaryRoleRemoved": true,
+  "newDefaultPrivilegesPersisted": false,
+  "policiesChanged": false,
+  "remoteDatabaseTouched": false
+}

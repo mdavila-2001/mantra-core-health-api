@@ -43,7 +43,7 @@ export const DIAGNOSTIC_UNITS_SMOKE: SmokeCase[] = [
     body: (c) => ({
       tenantId: c.tenantId,
       code: `DU-${c.u}`,
-      name: 'Laboratorio Redesa',
+      name: 'Laboratorio Alovida',
       sites: [
         { practiceSiteId: c.vars.pracSiteId, sampleCollectionAvailable: true },
       ],

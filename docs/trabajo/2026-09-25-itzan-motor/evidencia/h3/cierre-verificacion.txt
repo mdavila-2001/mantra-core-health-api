@@ -1,0 +1,19 @@
+=== comprobacion de tipos
+2026-09-25T11:19:30-04:00
+typecheck exit=0
+
+=== linter de lo tocado
+lint exit=0
+
+=== pruebas del modulo
+(node:42096) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:13032) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 23 passed, 23 total
+Tests:       252 passed, 252 total
+Snapshots:   0 total
+Time:        81.598 s
+Ran all test suites matching src/modules/terminology.
+exit=0

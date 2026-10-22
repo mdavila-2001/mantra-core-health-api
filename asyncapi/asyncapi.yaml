@@ -1,9 +1,9 @@
 asyncapi: 3.1.0
 info:
-  title: REDESA Health API — Eventos de dominio y colas
+  title: ALOVIDA Health API — Eventos de dominio y colas
   version: "0.0.1"
   description: >
-    Catálogo de eventos de dominio y colas de trabajo del backend REDESA Health.
+    Catálogo de eventos de dominio y colas de trabajo del backend ALOVIDA Health.
     El mecanismo real es un outbox transaccional propio sobre PostgreSQL
     (módulo `messaging`, ver docs/events/overview.md), no un broker de mensajería
     dedicado (Kafka/RabbitMQ) — ver ADR-0007 y ADR-0019. Los "canales" HTTP

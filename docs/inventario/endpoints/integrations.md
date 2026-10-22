@@ -12,7 +12,7 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/integrations/connections/{id}:pause` | Pausar una conexión en fallo (circuit breaker) | MEDIO | 3 | SECURITY_ADMIN |
+| 1 | POST | `/integrations/connections/{id}:pause` | Pausar una conexión en fallo (circuit breaker) | MEDIO | 4 | SECURITY_ADMIN |
 | 2 | POST | `/integrations/connections/{id}/credentials:rotate` | Rotar/expirar la credencial de una conexión | MEDIO | 5 | SECURITY_ADMIN |
 | 3 | POST | `/integrations/messages:outbound` | Encolar un mensaje saliente (idempotente) | ALTO | 3 | sesión (sin roles) |
 | 4 | POST | `/integrations/messages/{id}:correlate` | Procesar callback/respuesta asíncrona del proveedor | MEDIO | 5 | SYSTEM, SECURITY_ADMIN |
@@ -47,7 +47,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /integrations/connections/{id}:pause` la atiende `IntegrationsConnectionsController.pauseConnection` (src/modules/integrations/controllers/integrations-connections.controller.ts:52). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IntegrationsConnectionsService.pauseConnection`. Actualiza integrations.outbound_messages, integrations.provider_connections. Lee integrations.provider_connections.
+`POST /integrations/connections/{id}:pause` la atiende `IntegrationsConnectionsController.pauseConnection` (src/modules/integrations/controllers/integrations-connections.controller.ts:52). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `IntegrationsConnectionsService.pauseConnection`. Actualiza integrations.outbound_messages, integrations.provider_connections. Lee integrations.outbound_messages, integrations.provider_connections.
 
 ### Requerimientos
 
@@ -55,15 +55,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-connections.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-connections.controller.ts:52` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `integrations.outbound_messages` | ESCRIBE | ACTUALIZA | DIRECTA | IntegrationsConnectionsController.pauseConnection → IntegrationsConnectionsService.pauseConnection → OutboundMessagesRepository.holdQueuedForConnection | `src/modules/integrations/repositories/outbound-messages.repository.ts:145` |
+| `integrations.outbound_messages` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationsConnectionsController.pauseConnection → IntegrationsConnectionsService.pauseConnection → OutboundMessagesRepository.holdQueuedForConnection | `src/modules/integrations/repositories/outbound-messages.repository.ts:155` |
+| `integrations.outbound_messages` | LEE | LEE | DIRECTA | IntegrationsConnectionsController.pauseConnection → IntegrationsConnectionsService.pauseConnection → OutboundMessagesRepository.holdQueuedForConnection | `src/modules/integrations/repositories/outbound-messages.repository.ts:150` |
 | `integrations.provider_connections` | ESCRIBE | ACTUALIZA | POR_TIPO | IntegrationsConnectionsController.pauseConnection → IntegrationsConnectionsService.pauseConnection | `src/modules/integrations/services/integrations-connections.service.ts:219` |
 | `integrations.provider_connections` | LEE | LEE | DIRECTA | IntegrationsConnectionsController.pauseConnection → IntegrationsConnectionsService.pauseConnection → ProviderConnectionsRepository.findById | `src/modules/integrations/repositories/provider-connections.repository.ts:54` |
 
@@ -107,7 +108,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsConnectionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsConnectionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -136,11 +137,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-connections.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-connections.controller.ts:39` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -216,7 +217,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsConnectionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsConnectionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -245,10 +246,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/integrations/controllers/integrations-messages.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -329,7 +330,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -358,9 +359,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:145` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:145` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -412,7 +413,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -441,9 +442,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:118` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -494,7 +495,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -523,11 +524,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:77` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -574,7 +575,7 @@ _El DTO no declara campos documentables, o no se pudo leer._
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Mensaje no encontrado; ResourceNotFoundException: Conexión no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mensaje no está en cola; PreconditionFailedException: El proveedor no tiene base_url configurada para el despacho |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mensaje no está en cola; PreconditionFailedException: El proveedor no tiene base_url configurada para el despacho; PreconditionFailedException: El cuerpo del despacho excede el tamaño permitido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/integrations.md).
@@ -587,7 +588,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -616,9 +617,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-messages.controller.ts:106` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -670,7 +671,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -699,9 +700,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:133` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -746,7 +747,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -775,15 +776,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `integrations.outbound_messages` | LEE | LEE | DIRECTA | IntegrationsMessagesController.listPendingDispatch → IntegrationsMessagingService.listQueuedForDispatch → OutboundMessagesRepository.findQueuedForDispatch | `src/modules/integrations/repositories/outbound-messages.repository.ts:166` |
+| `integrations.outbound_messages` | LEE | LEE | DIRECTA | IntegrationsMessagesController.listPendingDispatch → IntegrationsMessagingService.listQueuedForDispatch → OutboundMessagesRepository.findQueuedForDispatch | `src/modules/integrations/repositories/outbound-messages.repository.ts:176` |
 
 ### Parámetros
 
@@ -822,7 +823,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -851,16 +852,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-messages.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `integrations.message_retries` | LEE | LEE | DIRECTA | IntegrationsMessagesController.listPendingRetry → IntegrationsMessagingService.listFailedForRetry → MessageRetriesRepository.maxAttempt | `src/modules/integrations/repositories/message-retries.repository.ts:57` |
-| `integrations.outbound_messages` | LEE | LEE | DIRECTA | IntegrationsMessagesController.listPendingRetry → IntegrationsMessagingService.listFailedForRetry → OutboundMessagesRepository.findFailed | `src/modules/integrations/repositories/outbound-messages.repository.ts:186` |
+| `integrations.outbound_messages` | LEE | LEE | DIRECTA | IntegrationsMessagesController.listPendingRetry → IntegrationsMessagingService.listFailedForRetry → OutboundMessagesRepository.findFailed | `src/modules/integrations/repositories/outbound-messages.repository.ts:196` |
 
 ### Parámetros
 
@@ -901,7 +902,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsMessagesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -930,10 +931,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-providers.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1009,7 +1010,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1038,11 +1039,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-providers.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-providers.controller.ts:60` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1126,7 +1127,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1155,11 +1156,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-providers.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-providers.controller.ts:75` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1265,7 +1266,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1294,11 +1295,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/integrations/controllers/integrations-providers.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/integrations/controllers/integrations-providers.controller.ts:90` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1378,7 +1379,7 @@ El árbol de decisión completo está en [flujos](../flujos/integrations.md).
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsProvidersController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1406,9 +1407,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/integrations/controllers/integrations-webhooks.controller.ts:23` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1477,7 +1478,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- src / modules / integrations — etapa `ctrl:IntegrationsWebhooksController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Integraciones externas — etapa `ctrl:IntegrationsWebhooksController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

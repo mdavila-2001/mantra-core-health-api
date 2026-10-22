@@ -20,6 +20,21 @@ const HEADERS = {
     Buffer.from([0x24, 0x00, 0x00, 0x00]),
     Buffer.from('WAVEfmt '),
   ]),
+  /** Un `.docx` real es un ZIP con `word/document.xml` adentro. */
+  docx: Buffer.concat([
+    Buffer.from([0x50, 0x4b, 0x03, 0x04]),
+    Buffer.from('word/document.xml'),
+  ]),
+  /** Un `.xlsx` real es un ZIP con `xl/workbook.xml` adentro. */
+  xlsx: Buffer.concat([
+    Buffer.from([0x50, 0x4b, 0x03, 0x04]),
+    Buffer.from('xl/workbook.xml'),
+  ]),
+  /** Un ZIP genérico, sin marca de Word ni de Excel adentro. */
+  zip: Buffer.concat([
+    Buffer.from([0x50, 0x4b, 0x03, 0x04]),
+    Buffer.from('cualquier-otra-cosa.bin'),
+  ]),
 };
 
 describe('sniffMimeType', () => {
@@ -29,6 +44,16 @@ describe('sniffMimeType', () => {
     ['gif', HEADERS.gif, 'image/gif'],
     ['pdf', HEADERS.pdf, 'application/pdf'],
     ['webp', HEADERS.webp, 'image/webp'],
+    [
+      'docx',
+      HEADERS.docx,
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ],
+    [
+      'xlsx',
+      HEADERS.xlsx,
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ],
   ])('reconoce %s por su firma', (_name, buffer, expected) => {
     expect(sniffMimeType(buffer as Buffer)).toBe(expected);
   });
@@ -37,11 +62,29 @@ describe('sniffMimeType', () => {
     expect(sniffMimeType(HEADERS.wav)).toBeUndefined();
   });
 
-  it('no reconoce texto plano ni HTML', () => {
-    expect(sniffMimeType(Buffer.from('<html><body>hola</body></html>'))).toBe(
-      undefined,
+  it('no confunde un ZIP cualquiera con un .docx o .xlsx', () => {
+    expect(sniffMimeType(HEADERS.zip)).toBeUndefined();
+  });
+
+  it('reconoce texto plano y CSV, pero siempre como text/plain', () => {
+    expect(sniffMimeType(Buffer.from('nombre,apellido\nAna,Pérez'))).toBe(
+      'text/plain',
     );
-    expect(sniffMimeType(Buffer.from('no soy una imagen'))).toBeUndefined();
+    expect(sniffMimeType(Buffer.from('notas de la consulta'))).toBe(
+      'text/plain',
+    );
+  });
+
+  it('el HTML se reconoce como texto, nunca como text/html', () => {
+    expect(sniffMimeType(Buffer.from('<html><body>hola</body></html>'))).toBe(
+      'text/plain',
+    );
+  });
+
+  it('rechaza contenido binario que no calza con ningún formato reconocido', () => {
+    expect(
+      sniffMimeType(Buffer.from([0x00, 0x01, 0x02, 0x7f, 0xff])),
+    ).toBeUndefined();
   });
 
   it('no desborda con un contenido más corto que la firma', () => {
@@ -67,5 +110,25 @@ describe('isMimeTypeAllowedForCategory', () => {
       true,
     );
     expect(isMimeTypeAllowedForCategory('DOCUMENT', 'image/jpeg')).toBe(true);
+  });
+
+  it('acepta en DOCUMENT los formatos de oficina', () => {
+    expect(
+      isMimeTypeAllowedForCategory(
+        'DOCUMENT',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ),
+    ).toBe(true);
+    expect(
+      isMimeTypeAllowedForCategory(
+        'DOCUMENT',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ),
+    ).toBe(true);
+    expect(isMimeTypeAllowedForCategory('DOCUMENT', 'text/plain')).toBe(true);
+  });
+
+  it('rechaza los formatos de oficina en IMAGE', () => {
+    expect(isMimeTypeAllowedForCategory('IMAGE', 'text/plain')).toBe(false);
   });
 });

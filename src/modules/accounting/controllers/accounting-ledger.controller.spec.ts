@@ -31,12 +31,12 @@ function build() {
   };
   const controller = new AccountingLedgerController(
     ledgerService as any,
-    ledgerReadDoble as never,
+    ledgerReadDouble as never,
   );
   return { controller, ledgerService };
 }
 
-const ledgerReadDoble = {
+const ledgerReadDouble = {
   chartOfAccounts: (() =>
     Promise.resolve({ items: [], count: 0, limit: 100 })) as never,
   listJournal: (() =>
@@ -60,7 +60,7 @@ describe('AccountingLedgerController', () => {
     expect(d.ledgerService.postJournal).toHaveBeenCalledWith(dto, actor);
   });
 
-  it('delega el flujo de estados (REDESA C-17)', async () => {
+  it('delega el flujo de estados (ALOVIDA C-17)', async () => {
     const d = build();
     await d.controller.createDraft(
       { practiceId: 'p', lines: [] } as any,

@@ -1,0 +1,56 @@
+=== HALL-01 · aplicacion de los 48 patches versionados, en orden ===
+Mecanismo sancionado: archivos del repo, idempotentes por diseño.
+Se aplica uno por uno, con ON_ERROR_STOP por archivo, y se continua ante fallo
+para poder listar TODOS los que fallan en vez de parar en el primero.
+
+[OK]   2026-07-24_v402-v407_alter_columns.sql
+[OK]   2026-07-25_v407_nullable_embedding_model_versions.sql
+[OK]   2026-08-05_tenant_rls.sql
+[OK]   2026-08-05_v409_promocion_iam_tokens.sql
+[OK]   2026-08-06_v4010_rename_long_identifiers.sql
+[OK]   2026-08-10_v4011_person_name_components.sql
+[OK]   2026-08-12_v4011_persons_photo_file_id.sql
+[OK]   2026-08-17_v410_profiles_practitioner_affiliations.sql
+[OK]   2026-08-18_v4011_surveys_promocion_modulo_65.sql
+[OK]   2026-08-20_v412_conditions_clinical_course.sql
+[OK]   2026-08-20_v413_clinical_notes_and_expected_resolution.sql
+[OK]   2026-08-20_v414_identifiers_issuing_administrative_area.sql
+[OK]   2026-08-21_v415_common_issuer_area_rename_and_municipality.sql
+[OK]   2026-08-21_v416_medication_requests_indication_condition.sql
+[OK]   2026-08-21_v417_prescription_favorites.sql
+[OK]   2026-08-22_v418_persons_occupation_and_carrier_sigla.sql
+[OK]   2026-08-23_v418_diagnostic_units_unicidad_tenant_codigo.sql
+[OK]   2026-08-25_v419_practitioner_affiliations_declared_link.sql
+[OK]   2026-08-26_v420_backfill_membresias_asistenciales.sql
+[OK]   2026-08-27_v421_pharmacy_patient_orders.sql
+[OK]   2026-08-27_v422_agenda_gap_y_codigo_por_sede.sql
+[OK]   2026-08-29_v422_identifiers_holder_name.sql
+[OK]   2026-09-02_t07_identifiers_search_index.sql
+[OK]   2026-09-02_v423_appointments_exclude_doble_reserva.sql
+[OK]   2026-09-02_v424_appointment_payment_states.sql
+[OK]   2026-09-04_t01_comment_media.sql
+[OK]   2026-09-04_v425_service_catalog_description_image.sql
+[OK]   2026-09-04_v426_medical_groups.sql
+[OK]   2026-09-05_t26_assets_liabilities_automation.sql
+[OK]   2026-09-05_v426_practitioner_affiliations_role_title_nullable.sql
+[OK]   2026-09-06_v427_persons_work_employer.sql
+[OK]   2026-09-08_v428_billing_quotations.sql
+[OK]   2026-09-09_v427_chat_participant_prefs_and_pin.sql
+[OK]   2026-09-11_v429_chat_auto_replies.sql
+[OK]   2026-09-12_v429_claim_line_adjudications_policy_clause.sql
+[OK]   2026-09-13_v4210_insurance_carriers_contact_channels.sql
+[OK]   2026-09-13_v4211_patient_order_claim_settlement.sql
+[OK]   2026-09-13_v4212_jurisdiction_authorizations_file_id.sql
+[OK]   2026-09-14_v4213_pharmacy_price_version_scope.sql
+[OK]   2026-09-14_v4214_insurance_plans_monthly_premium.sql
+[OK]   2026-09-15_v4215_practice_sites_bank_qr_file_id.sql
+[OK]   2026-09-16_v4216_encounters_content_hash.sql
+[OK]   2026-09-17_v4217_service_requests_duplicate_study.sql
+[OK]   2026-09-18_v4218_quotations_flexible_payment_plan.sql
+[OK]   2026-09-18_v4219_health_export_manifests_content_hash_index.sql
+[OK]   2026-09-19_v4219_custodian_tenant_rls.sql
+[OK]   2026-09-19_v4220_restore_test_runs_objective_status.sql
+[FAIL] 2026-09-19_v4221_aseguradoras_codigo_unico.sql
+         ERROR:  v4.2.21: se esperaban 17 aseguradoras canónicas y hay 0
+
+TOTAL: 47 aplicados sin error · 1 con error

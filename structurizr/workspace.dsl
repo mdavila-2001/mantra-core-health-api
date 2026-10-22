@@ -1,4 +1,4 @@
-workspace "REDESA Health API" "Backend del ecosistema de salud REDESA (Mantra Core Technologies). Fuente de arquitectura oficial — debe coincidir con docs/architecture/*.md (Fase 10 del plan de documentación)." {
+workspace "ALOVIDA Health API" "Backend del ecosistema de salud ALOVIDA (Mantra Core Technologies). Fuente de arquitectura oficial — debe coincidir con docs/architecture/*.md (Fase 10 del plan de documentación)." {
 
     model {
         patient = person "Paciente" "Consume la API para su propia información de salud y agenda."
@@ -6,7 +6,7 @@ workspace "REDESA Health API" "Backend del ecosistema de salud REDESA (Mantra Co
         adminStaff = person "Personal administrativo/financiero" "Operación de práctica, facturación, contabilidad."
         externalSystem = softwareSystem "Sistema externo" "Proveedor de pago, laboratorio, aseguradora u otro tercero." "External"
 
-        redesa = softwareSystem "REDESA Health API" "Monolito modular NestJS: 60 módulos de dominio, 841 operaciones HTTP." {
+        alovida = softwareSystem "ALOVIDA Health API" "Monolito modular NestJS: 60 módulos de dominio, 841 operaciones HTTP." {
 
             api = container "api" "NestJS 11 / Node 24 / TypeScript. Único punto de entrada HTTP. 191 controllers, 60 módulos." "NestJS/Express"
 
@@ -52,12 +52,12 @@ workspace "REDESA Health API" "Backend del ecosistema de salud REDESA (Mantra Co
     }
 
     views {
-        systemContext redesa "SystemContext" "C4 nivel 1 — docs/architecture/system-context.md" {
+        systemContext alovida "SystemContext" "C4 nivel 1 — docs/architecture/system-context.md" {
             include *
             autoLayout
         }
 
-        container redesa "Containers" "C4 nivel 2 — docs/architecture/containers.md" {
+        container alovida "Containers" "C4 nivel 2 — docs/architecture/containers.md" {
             include *
             autoLayout
         }

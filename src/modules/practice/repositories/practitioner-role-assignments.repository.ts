@@ -25,6 +25,8 @@ export interface CreateRoleAssignmentData {
    * Identificador asociado a practice site.
    */
   practiceSiteId?: string;
+  /** Teléfono del profesional en esta sede. */
+  contactPhone?: string;
   /**
    * Identificador asociado a clinical unit.
    */
@@ -180,6 +182,70 @@ export class PractitionerRoleAssignmentsRepository {
   }
 
   /**
+   * La asignación vigente de un profesional sobre una sede puntual.
+   *
+   * ALV-005: es lo que `DELETE /practitioners/me/sites/:siteId` necesita para
+   * confirmar que la sede es realmente del profesional antes de cerrarla —
+   * cerrar la vinculación de otro por adivinar un `siteId` sería IDOR.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practitionerProfileId - Profesional consultado.
+   * @param practiceSiteId - Sede consultada.
+   * @returns La asignación vigente (`valid_to IS NULL`), o `null`.
+   */
+  findCurrentBySite(
+    em: EntityManager,
+    practitionerProfileId: string,
+    practiceSiteId: string,
+    activeStatusConceptId?: string,
+  ): Promise<PractitionerRoleAssignments | null> {
+    return em.findOne(
+      PractitionerRoleAssignments,
+      {
+        practitionerProfileId,
+        practiceSiteId,
+        validTo: null,
+        ...(activeStatusConceptId
+          ? { statusConceptId: activeStatusConceptId }
+          : {}),
+      },
+      { orderBy: { isPrimary: 'DESC' } },
+    );
+  }
+
+  /**
+   * Página de vinculaciones de una práctica, ordenada por `id` (keyset estable).
+   *
+   * CV-14: hasta ahora la organización no podía enumerar sus vinculaciones
+   * pendientes — sólo aprobarlas u observarlas de a una, si alguien le pasaba
+   * el uuid por otro canal. `practiceId` acota siempre; `statusConceptId` es
+   * opcional porque el administrador también quiere ver el historial completo,
+   * no sólo lo pendiente.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica cuyas vinculaciones se listan.
+   * @param statusConceptId - Filtra por estado; sin filtro, trae cualquiera.
+   * @param afterId - Cursor keyset: sólo filas con `id` mayor a éste.
+   * @param limit - Tope de filas de la página.
+   * @returns Vinculaciones de la práctica, de menor a mayor `id`.
+   */
+  findByPracticePage(
+    em: EntityManager,
+    practiceId: string,
+    statusConceptId: string | undefined,
+    afterId: string | undefined,
+    limit: number,
+  ): Promise<PractitionerRoleAssignments[]> {
+    const where: Record<string, unknown> = { practiceId };
+    if (statusConceptId !== undefined) where.statusConceptId = statusConceptId;
+    if (afterId !== undefined) where.id = { $gt: afterId };
+    return em.find(PractitionerRoleAssignments, where, {
+      orderBy: { id: 'ASC' },
+      limit,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.
@@ -196,6 +262,7 @@ export class PractitionerRoleAssignmentsRepository {
         practitionerProfileId: data.practitionerProfileId,
         practiceId: data.practiceId,
         practiceSiteId: data.practiceSiteId,
+        contactPhone: data.contactPhone,
         clinicalUnitId: data.clinicalUnitId,
         healthcareServiceId: data.healthcareServiceId,
         roleConceptId: data.roleConceptId,

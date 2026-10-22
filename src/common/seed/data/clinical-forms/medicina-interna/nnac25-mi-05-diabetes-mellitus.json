@@ -1,0 +1,234 @@
+{
+  "code": "NNAC25_MI_05_DIABETES_MELLITUS",
+  "name": "Diabetes mellitus (NNAC 2025)",
+  "specialty": { "code": "MEDICINA_INTERNA", "display": "Medicina interna" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Medicina Interna (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/963-norma-nacional-de-atencion-clinica-de-medicina-interna?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 5, pág. 60; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pacientes delgados",
+        "Poliuria",
+        "Polifagia",
+        "Polidipsia",
+        "Pérdida inexplicable de peso",
+        "Infecciones mucocutáneas y/o genitourinarias",
+        "Disminución de la agudeza visual, visión borrosa",
+        "Enuresis nocturna",
+        "Puede ser asintomática",
+        "Se presenta con mayor frecuencia en mayores de 50 años y obesos",
+        "Poliuria, polidipsia, pérdida de peso",
+        "Vaginitis por cándida albicans en mujeres como primera manifestación clínica",
+        "Alteración de la agudeza visual, visión borrosa"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 60. La diabetes mellitus es un trastorno metabólico crónico caracterizado por hiperglucemia: que tiene como consecuencia alteraciones del metabolismo de los carbohidratos, proteínas y lípidos, se asocia con deterioro relativo o absoluto de la secreción de insulina y diversos grados de resistencia periférica a la acción de la insulina."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "clasificacion_nnac",
+      "name": "Clasificación o causas que describe la NNAC",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Diabetes tipo 1: Debido a la destrucción de células beta pancreáticas",
+        "Diabetes tipo 2: Debido a la pérdida progresiva de la secreción de insulina y al desarrollo de resistencia a la insulina",
+        "Diabetes Gestacional: Diabetes diagnosticada en el segundo o tercer trimestre del embarazo, que no fue diagnosticada antes de la gestación",
+        "Deficiencia genética de célula beta",
+        "Defecto genético en la acción de la insulina",
+        "Enfermedades pancreáticas",
+        "Endocrinopatías",
+        "Inducción por drogas o químicos",
+        "Infecciones",
+        "Formas poco comunes de diabetes mediada inmunológicamente",
+        "Otros síndromes genéticos algunas veces asociados con diabetes"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Índice de masa corporal (IMC) mayor a 25 Kg/m2",
+        "Perímetro de la cintura > 80 cm en mujeres y > 90 cm en hombres",
+        "Antecedente de diabetes familiar, en primer y segundo grado",
+        "Antecedente obstétrico de diabetes gestacional",
+        "Hipertensión arterial sistémica",
+        "Sedentarismo",
+        "Síndrome de ovario poliquístico",
+        "Ser afroamericana, hispana/latina, indoamericana"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "examenes_solicitados",
+      "name": "Exámenes solicitados (según la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Glucemia basal*",
+        "Glucemia al azar*",
+        "Curva de tolerancia a la glucosa (con 75 gramos de glucosa anhidra: primera toma minuto “cero” y segunda toma luego de ingerir la glucosa minuto “120”)*",
+        "Hemoglobina glicosilada A1c*",
+        "Hemograma completo, Creatinina, UREA, electrolitos*",
+        "Examen general de orina*",
+        "Colesterol total, HDL, LDL, triglicéridos*",
+        "Relación albúmina – creatinina *",
+        "Anticuerpos antiislotes, antidescarboxilasa del ácido glutámico, anti GAD, anticuerpo antiinsulina. (Diabetes tipo 1)*",
+        "Proteinuria en orina de 24 horas*. *Según disponibilidad de laboratorios",
+        "Electrocardiograma",
+        "Fondo de ojo",
+        "Rayos X PA de tórax. (No, en paciente gestante)",
+        "Ecografía abdominal",
+        "Eco Doppler: carotídeo, de las 4 extremidades y renal",
+        "Ecocardiograma"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "E10: Diabetes mellitus insulinodependiente",
+        "E11: Diabetes mellitus no insulinodependiente",
+        "E12: Diabetes mellitus asociada con desnutrición",
+        "E13: Otras diabetes mellitus especificadas",
+        "E14: Diabetes mellitus, no especificada"
+      ],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "complicaciones",
+      "name": "Complicaciones presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Pérdida de los signos de alarma de hipoglucemias (afectación del sistema nervioso simpático)",
+        "Diarrea inexplicable, que ocurre en particular por la noche (neuropatía autonómica)",
+        "Dificultades del vaciado vesical (neuropatía autonómica)"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 5, pág. 60); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_hospitalizacion",
+      "name": "Criterios de hospitalización que se cumplen",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Complicaciones agudas",
+        "Enfermedades agudas intercurrentes"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

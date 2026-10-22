@@ -1,0 +1,25 @@
+import { Module } from '@nestjs/common';
+import {
+  PatientProfilesRepository,
+  PersonAccountLinksRepository,
+} from '../profiles/infrastructure/repositories';
+import { InsurancePatientAccountRepository } from './infrastructure/repositories/insurance-patient-account.repository';
+import { LinkedOrderDataRepository } from './infrastructure/repositories/linked-order-data.repository';
+import { PatientSettlementRepository } from './infrastructure/repositories/patient-settlement.repository';
+import { LinkedClaimOrderService } from './application/services/linked-claim-order.service';
+import { PatientSettlementService } from './application/services/patient-settlement.service';
+
+/** Puerto de lectura sin dependencias circulares con los módulos operativos. */
+@Module({
+  providers: [
+    PatientSettlementRepository,
+    LinkedOrderDataRepository,
+    InsurancePatientAccountRepository,
+    LinkedClaimOrderService,
+    PatientSettlementService,
+    PatientProfilesRepository,
+    PersonAccountLinksRepository,
+  ],
+  exports: [PatientSettlementService],
+})
+export class InsurancePatientSettlementModule {}

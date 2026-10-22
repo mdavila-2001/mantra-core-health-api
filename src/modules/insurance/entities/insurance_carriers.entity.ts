@@ -33,14 +33,56 @@ export class InsuranceCarriers {
   /**
    * Valor de sigla mantenido por la instancia.
    */
-  @Property({ fieldName: 'sigla', columnType: 'varchar', nullable: true })
+  @Property({ columnType: 'varchar', nullable: true })
   sigla?: string;
 
   /**
    * Valor de address mantenido por la instancia.
    */
-  @Property({ fieldName: 'address', columnType: 'varchar', nullable: true })
+  @Property({ columnType: 'varchar', nullable: true })
   address?: string;
+
+  /**
+   * Numero de WhatsApp con el que la aseguradora atiende reclamos y dudas de
+   * cobertura (subtarea 2.3, v4.2.10). Formato internacional E.164 con
+   * el signo '+' (lo exige y normaliza el DTO de escritura): sin el codigo de
+   * pais, el enlace `wa.me` no sabria a que numero abrir el chat. `undefined`
+   * significa que la aseguradora todavia no publico este canal.
+   */
+  @Property({
+    fieldName: 'whatsapp_number',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  whatsappNumber?: string;
+
+  /**
+   * Telefono de call center / linea gratuita para reclamos y dudas de
+   * cobertura (subtarea 2.3, v4.2.10). Se persiste tal como la propia
+   * aseguradora lo publica -- las lineas gratuitas bolivianas son del tipo
+   * "800-10-xxxx" y no son E.164 -- por eso no comparte el patron de
+   * `whatsappNumber`.
+   */
+  @Property({
+    fieldName: 'call_center_phone',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  callCenterPhone?: string;
+
+  /**
+   * Correo del area de siniestros o atencion al cliente de la aseguradora
+   * (subtarea 2.3, v4.2.10). Ninguno de los tres canales reemplaza al motivo
+   * TIPIFICADO del rechazo (`claim_line_adjudications.reason_concept_id`) ni
+   * a la cita de la clausula contractual (`policy_clause_reference`,
+   * v4.2.9): son el como comunicarse, no el porque de un rechazo.
+   */
+  @Property({
+    fieldName: 'support_email',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  supportEmail?: string;
 
   /**
    * Valor de regulator identifier mantenido por la instancia.

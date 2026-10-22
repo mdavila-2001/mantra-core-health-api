@@ -35,6 +35,7 @@ import type {
  * `accounting` y `community`, y este servicio se limita a lo que la spec pide
  * *además* de eso para el giro farmacéutico.
  */
+
 @Injectable()
 export class PharmaLabOrganizationService {
   /**
@@ -72,6 +73,7 @@ export class PharmaLabOrganizationService {
     actor: AuthenticatedUser,
   ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
+      this.access.assertAdministers(actor, dto.tenantId);
       const tenant = await tx.findOne(Tenants, { id: dto.tenantId });
       if (!tenant) {
         throw new ResourceNotFoundException('Organización no encontrada', {
@@ -129,7 +131,11 @@ export class PharmaLabOrganizationService {
     actor: AuthenticatedUser,
   ): Promise<TransitionResultDto> {
     return this.em.transactional(async (tx) => {
-      const lab = await this.access.requireLab(tx, pharmaLabId);
+      const lab = await this.access.requireAdministeredLab(
+        tx,
+        pharmaLabId,
+        actor,
+      );
       if (dto.tradeName !== undefined) lab.tradeName = dto.tradeName;
       if (dto.taxId !== undefined) lab.taxId = dto.taxId;
       if (dto.description !== undefined) lab.description = dto.description;
@@ -159,17 +165,38 @@ export class PharmaLabOrganizationService {
    * @returns El laboratorio.
    * @throws ResourceNotFoundException si no existe.
    */
-  async getLab(pharmaLabId: string): Promise<PharmaLabs> {
-    return this.access.requireLab(this.em, pharmaLabId);
+  async getLab(
+    pharmaLabId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmaLabs> {
+    return this.access.requireAdministeredLab(this.em, pharmaLabId, actor);
   }
 
   /**
-   * Lista los laboratorios registrados.
+   * Lista los laboratorios registrados que el actor puede ver.
    *
+   * Fuera de quien administra la red con alcance global (`SUPERADMIN`, y
+   * `PLATFORM_ADMIN`/`BUSINESS_ADMIN` sin ámbito de tenant, igual que en
+   * `RolesGuard`), cada uno ve sólo los laboratorios de sus organizaciones y
+   * aquellos donde es personal activo. El listado abierto mostraba la razón
+   * social, el identificador fiscal y el estado de todos los de la red.
+   *
+   * @param actor - Usuario autenticado que consulta.
    * @returns Laboratorios ordenados por razón social.
    */
-  listLabs(): Promise<PharmaLabs[]> {
-    return this.repo.listLabs(this.em);
+  async listLabs(actor: AuthenticatedUser): Promise<PharmaLabs[]> {
+    if (this.access.administersAllLabs(actor)) {
+      return this.repo.listLabs(this.em, null);
+    }
+    const labIds = await this.repo.findLabIdsWhereStaff(
+      this.em,
+      actor.id,
+      PHL.LINK_ACTIVE,
+    );
+    return this.repo.listLabs(this.em, {
+      tenantIds: actor.tenantIds ?? [],
+      labIds,
+    });
   }
 
   /**
@@ -187,7 +214,12 @@ export class PharmaLabOrganizationService {
     actor: AuthenticatedUser,
   ): Promise<CreatedResourceDto> {
     return this.em.transactional(async (tx) => {
-      const lab = await this.access.requireActiveLab(tx, pharmaLabId);
+      const lab = await this.access.requireAdministeredLab(
+        tx,
+        pharmaLabId,
+        actor,
+        { active: true },
+      );
       const existing = await this.repo.findStaffByUser(
         tx,
         pharmaLabId,
@@ -254,7 +286,11 @@ export class PharmaLabOrganizationService {
     actor: AuthenticatedUser,
   ): Promise<TransitionResultDto> {
     return this.em.transactional(async (tx) => {
-      const lab = await this.access.requireLab(tx, pharmaLabId);
+      const lab = await this.access.requireAdministeredLab(
+        tx,
+        pharmaLabId,
+        actor,
+      );
       const staff = await this.requireStaff(tx, pharmaLabId, staffId);
       const previous = staff.permissions ?? [];
 
@@ -304,7 +340,11 @@ export class PharmaLabOrganizationService {
     actor: AuthenticatedUser,
   ): Promise<TransitionResultDto> {
     return this.em.transactional(async (tx) => {
-      const lab = await this.access.requireLab(tx, pharmaLabId);
+      const lab = await this.access.requireAdministeredLab(
+        tx,
+        pharmaLabId,
+        actor,
+      );
       const staff = await this.requireStaff(tx, pharmaLabId, staffId);
 
       staff.statusConceptId = PHL.LINK_TERMINATED;
@@ -340,8 +380,11 @@ export class PharmaLabOrganizationService {
    * @param pharmaLabId - Laboratorio.
    * @returns Personal ordenado por fecha de ingreso descendente.
    */
-  async listStaff(pharmaLabId: string): Promise<PharmaLabStaff[]> {
-    await this.access.requireLab(this.em, pharmaLabId);
+  async listStaff(
+    pharmaLabId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmaLabStaff[]> {
+    await this.access.requireAdministeredLab(this.em, pharmaLabId, actor);
     return this.repo.listStaff(this.em, pharmaLabId);
   }
 
@@ -351,8 +394,11 @@ export class PharmaLabOrganizationService {
    * @param pharmaLabId - Laboratorio.
    * @returns Eventos del más reciente al más antiguo.
    */
-  async listLinkEvents(pharmaLabId: string): Promise<PharmaLabLinkEvents[]> {
-    await this.access.requireLab(this.em, pharmaLabId);
+  async listLinkEvents(
+    pharmaLabId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmaLabLinkEvents[]> {
+    await this.access.requireAdministeredLab(this.em, pharmaLabId, actor);
     return this.repo.listLinkEvents(this.em, pharmaLabId);
   }
 

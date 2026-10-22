@@ -10,19 +10,19 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [assertion_results](#assertion_results) | Conserva resultados por verificación para localizar discrepancias específicas de comportamiento. | 8 | 4 | 2 | COINCIDE |
-| [request_payloads](#request_payloads) | Almacena cuerpos de solicitudes de prueba para reproducir contratos y escenarios de API. | 13 | 5 | 1 | COINCIDE |
-| [response_payloads](#response_payloads) | Conserva respuestas de pruebas para inspeccionar datos devueltos por servicios. | 12 | 4 | 1 | COINCIDE |
+| [assertion_results](#assertion_results) | Conserva resultados por verificación para localizar discrepancias específicas de comportamiento. | 8 | 4 | 7 | COINCIDE |
+| [request_payloads](#request_payloads) | Almacena cuerpos de solicitudes de prueba para reproducir contratos y escenarios de API. | 13 | 5 | 2 | COINCIDE |
+| [response_payloads](#response_payloads) | Conserva respuestas de pruebas para inspeccionar datos devueltos por servicios. | 12 | 4 | 2 | COINCIDE |
 | [run_artifacts](#run_artifacts) | Relaciona artefactos producidos por pruebas, como logs o evidencia, con su ejecución. | 11 | 6 | 2 | COINCIDE |
-| [test_assertions](#test_assertions) | Especifica verificaciones esperadas dentro de casos para comprobar respuestas y efectos observables. | 13 | 5 | 2 | COINCIDE |
-| [test_case_results](#test_case_results) | Guarda resultados por caso ejecutado para identificar qué escenarios pasaron o fallaron. | 18 | 6 | 6 | COINCIDE |
-| [test_cases](#test_cases) | Define casos de prueba individuales y sus condiciones de ejecución. | 19 | 7 | 8 | COINCIDE |
-| [test_defects](#test_defects) | Registra defectos identificados durante validaciones para seguir su análisis y resolución. | 23 | 12 | 5 | COINCIDE |
-| [test_environments](#test_environments) | Cataloga entornos controlados para ejecutar verificaciones del sistema médico sin confundirlos con producción. | 14 | 7 | 6 | COINCIDE |
+| [test_assertions](#test_assertions) | Especifica verificaciones esperadas dentro de casos para comprobar respuestas y efectos observables. | 13 | 5 | 4 | COINCIDE |
+| [test_case_results](#test_case_results) | Guarda resultados por caso ejecutado para identificar qué escenarios pasaron o fallaron. | 18 | 6 | 12 | COINCIDE |
+| [test_cases](#test_cases) | Define casos de prueba individuales y sus condiciones de ejecución. | 19 | 7 | 16 | COINCIDE |
+| [test_defects](#test_defects) | Registra defectos identificados durante validaciones para seguir su análisis y resolución. | 23 | 12 | 7 | COINCIDE |
+| [test_environments](#test_environments) | Cataloga entornos controlados para ejecutar verificaciones del sistema médico sin confundirlos con producción. | 14 | 7 | 11 | COINCIDE |
 | [test_fixtures](#test_fixtures) | Conserva datos controlados usados para preparar escenarios repetibles de prueba. | 13 | 6 | 0 | COINCIDE |
-| [test_runs](#test_runs) | Registra ejecuciones de suites o casos para mantener resultados y contexto de validación. | 21 | 10 | 11 | COINCIDE |
+| [test_runs](#test_runs) | Registra ejecuciones de suites o casos para mantener resultados y contexto de validación. | 21 | 10 | 20 | COINCIDE |
 | [test_schedules](#test_schedules) | Programa ejecuciones recurrentes de pruebas para vigilar calidad a lo largo del tiempo. | 21 | 12 | 4 | COINCIDE |
-| [test_suites](#test_suites) | Agrupa pruebas funcionales para validar flujos y contratos del sistema. | 15 | 8 | 6 | COINCIDE |
+| [test_suites](#test_suites) | Agrupa pruebas funcionales para validar flujos y contratos del sistema. | 15 | 8 | 14 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -176,7 +176,7 @@ Conserva resultados por verificación para localizar discrepancias específicas 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_36_qa_lab.puml: assertion_results`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_36_qa_lab.puml` · **DDL:** `SQL/36_qa_lab/02_tables.sql`
 - **Entidad del ORM:** `AssertionResults` — `src/modules/qa_lab/entities/assertion_results.entity.ts`
-- **Resumen:** 8 columnas · 4 índices · 3 FK salientes · 0 entrantes · 2 operaciones
+- **Resumen:** 8 columnas · 4 índices · 3 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -203,7 +203,7 @@ Conserva resultados por verificación para localizar discrepancias específicas 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_assertion_results_test_case_result_id` | no | test_case_result_id | Soporta la clave foránea fk_assertion_results_test_case_result_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «test_case_result_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_assertion_results_test_case_result_id` | no | test_case_result_id | Soporta la clave foránea fk_assertion_results_test_case_result_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «test_case_result_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_assertion_results_test_assertion_id` | no | test_assertion_id | Soporta la clave foránea fk_assertion_results_test_assertion_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_assertion_results_recorded_by_user_id` | no | recorded_by_user_id | Soporta la clave foránea fk_assertion_results_recorded_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `brin_assertion_results_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
@@ -212,6 +212,11 @@ Conserva resultados por verificación para localizar discrepancias específicas 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/qa/plans/run-next | CREA | DIRECTA |
+| POST /internal/qa/plans/run-next | LEE | DIRECTA |
+| GET /admin/qa/flows | LEE | DIRECTA |
+| GET /admin/qa/flows/{flowId} | LEE | DIRECTA |
+| GET /admin/qa/runs/{runId} | LEE | DIRECTA |
 | POST /qa/case-results/{resultId}/evaluate | CREA | DIRECTA |
 | POST /qa/case-results/{resultId}/evaluate | LEE | DIRECTA |
 
@@ -238,7 +243,7 @@ Almacena cuerpos de solicitudes de prueba para reproducir contratos y escenarios
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_36_qa_lab.puml: request_payloads`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_36_qa_lab.puml` · **DDL:** `SQL/36_qa_lab/02_tables.sql`
 - **Entidad del ORM:** `RequestPayloads` — `src/modules/qa_lab/entities/request_payloads.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 1 entrantes · 1 operaciones
+- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 1 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -282,6 +287,7 @@ Almacena cuerpos de solicitudes de prueba para reproducir contratos y escenarios
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/qa/plans/run-next | CREA | DIRECTA |
 | POST /qa/runs/{runId}/cases/{caseId}/execute | CREA | DIRECTA |
 
 #### Gobierno
@@ -307,7 +313,7 @@ Conserva respuestas de pruebas para inspeccionar datos devueltos por servicios.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_36_qa_lab.puml: response_payloads`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_36_qa_lab.puml` · **DDL:** `SQL/36_qa_lab/02_tables.sql`
 - **Entidad del ORM:** `ResponsePayloads` — `src/modules/qa_lab/entities/response_payloads.entity.ts`
-- **Resumen:** 12 columnas · 4 índices · 3 FK salientes · 0 entrantes · 1 operaciones
+- **Resumen:** 12 columnas · 4 índices · 3 FK salientes · 0 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -347,6 +353,7 @@ Conserva respuestas de pruebas para inspeccionar datos devueltos por servicios.
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/qa/plans/run-next | CREA | DIRECTA |
 | POST /qa/runs/{runId}/cases/{caseId}/execute | CREA | DIRECTA |
 
 #### Gobierno
@@ -442,7 +449,7 @@ Especifica verificaciones esperadas dentro de casos para comprobar respuestas y 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_36_qa_lab.puml: test_assertions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_36_qa_lab.puml` · **DDL:** `SQL/36_qa_lab/02_tables.sql`
 - **Entidad del ORM:** `TestAssertions` — `src/modules/qa_lab/entities/test_assertions.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 5 FK salientes · 1 entrantes · 2 operaciones
+- **Resumen:** 13 columnas · 5 índices · 5 FK salientes · 1 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -477,8 +484,8 @@ Especifica verificaciones esperadas dentro de casos para comprobar respuestas y 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_test_assertions_test_case_id` | no | test_case_id | Soporta la clave foránea fk_test_assertions_test_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «test_case_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_test_assertions_assertion_type_concept_id` | no | assertion_type_concept_id | Soporta la clave foránea fk_test_assertions_assertion_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_test_assertions_test_case_id` | no | test_case_id | Soporta la clave foránea fk_test_assertions_test_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «test_case_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_test_assertions_assertion_type_concept_id` | no | assertion_type_concept_id | Soporta la clave foránea fk_test_assertions_assertion_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «assertion_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_test_assertions_operator_concept_id` | no | operator_concept_id | Soporta la clave foránea fk_test_assertions_operator_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_test_assertions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_test_assertions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_test_assertions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_test_assertions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -487,6 +494,8 @@ Especifica verificaciones esperadas dentro de casos para comprobar respuestas y 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/qa/plans/run-next | LEE | DIRECTA |
+| GET /admin/qa/suites/{suiteId} | LEE | DIRECTA |
 | POST /qa/case-results/{resultId}/evaluate | LEE | DIRECTA |
 | POST /qa/suites/{suiteId}/cases | CREA | DIRECTA |
 
@@ -513,7 +522,7 @@ Guarda resultados por caso ejecutado para identificar qué escenarios pasaron o 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_36_qa_lab.puml: test_case_results`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_36_qa_lab.puml` · **DDL:** `SQL/36_qa_lab/02_tables.sql`
 - **Entidad del ORM:** `TestCaseResults` — `src/modules/qa_lab/entities/test_case_results.entity.ts`
-- **Resumen:** 18 columnas · 6 índices · 6 FK salientes · 5 entrantes · 6 operaciones
+- **Resumen:** 18 columnas · 6 índices · 6 FK salientes · 5 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -558,7 +567,7 @@ Guarda resultados por caso ejecutado para identificar qué escenarios pasaron o 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_test_case_results_test_run_id` | no | test_run_id | Soporta la clave foránea fk_test_case_results_test_run_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «test_run_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_test_case_results_test_run_id` | no | test_run_id | Soporta la clave foránea fk_test_case_results_test_run_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «test_run_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_test_case_results_test_case_id` | no | test_case_id | Soporta la clave foránea fk_test_case_results_test_case_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «test_case_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_test_case_results_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_test_case_results_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_test_case_results_error_type_concept_id` | no | error_type_concept_id | Soporta la clave foránea fk_test_case_results_error_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -569,6 +578,12 @@ Guarda resultados por caso ejecutado para identificar qué escenarios pasaron o 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /internal/qa/plans/run-next | CREA | DIRECTA |
+| POST /internal/qa/plans/run-next | ACTUALIZA | POR_TIPO |
+| POST /internal/qa/plans/run-next | LEE | DIRECTA |
+| GET /admin/qa/flows | LEE | DIRECTA |
+| GET /admin/qa/flows/{flowId} | LEE | DIRECTA |
+| GET /admin/qa/runs/{runId} | LEE | DIRECTA |
 | POST /qa/case-results/{resultId}/evaluate | ACTUALIZA | POR_TIPO |
 | POST /qa/case-results/{resultId}/evaluate | LEE | DIRECTA |
 | POST /qa/runs/{runId}/artifacts | LEE | DIRECTA |
@@ -599,7 +614,7 @@ Define casos de prueba individuales y sus condiciones de ejecución.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_36_qa_lab.puml: test_cases`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_36_qa_lab.puml` · **DDL:** `SQL/36_qa_lab/02_tables.sql`
 - **Entidad del ORM:** `TestCases` — `src/modules/qa_lab/entities/test_cases.entity.ts`
-- **Resumen:** 19 columnas · 7 índices · 7 FK salientes · 6 entrantes · 8 operaciones
+- **Resumen:** 19 columnas · 7 índices · 7 FK salientes · 6 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -647,11 +662,11 @@ Define casos de prueba individuales y sus condiciones de ejecución.
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_test_cases_suite_id` | no | suite_id | Soporta la clave foránea fk_test_cases_suite_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «suite_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_test_cases_suite_id` | no | suite_id | Soporta la clave foránea fk_test_cases_suite_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «suite_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_test_cases_case_type_concept_id` | no | case_type_concept_id | Soporta la clave foránea fk_test_cases_case_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_test_cases_endpoint_id` | no | endpoint_id | Soporta la clave foránea fk_test_cases_endpoint_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_test_cases_http_method_concept_id` | no | http_method_concept_id | Soporta la clave foránea fk_test_cases_http_method_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_test_cases_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_test_cases_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_test_cases_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_test_cases_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_test_cases_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_test_cases_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_test_cases_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_test_cases_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -659,6 +674,14 @@ Define casos de prueba individuales y sus condiciones de ejecución.
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /admin/qa/plans | LEE | DIRECTA |
+| POST /admin/qa/plans/preflight | LEE | DIRECTA |
+| POST /internal/qa/plans/run-next | LEE | DIRECTA |
+| GET /admin/qa/flows | LEE | DIRECTA |
+| GET /admin/qa/flows/{flowId} | LEE | DIRECTA |
+| GET /admin/qa/runs/{runId} | LEE | DIRECTA |
+| GET /admin/qa/suites | LEE | DIRECTA |
+| GET /admin/qa/suites/{suiteId} | LEE | DIRECTA |
 | POST /internal/qa/schedules/run-due | LEE | DIRECTA |
 | POST /qa/defects | LEE | DIRECTA |
 | POST /qa/runs | LEE | DIRECTA |
@@ -691,7 +714,7 @@ Registra defectos identificados durante validaciones para seguir su análisis y 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_36_qa_lab.puml: test_defects`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_36_qa_lab.puml` · **DDL:** `SQL/36_qa_lab/02_tables.sql`
 - **Entidad del ORM:** `TestDefects` — `src/modules/qa_lab/entities/test_defects.entity.ts`
-- **Resumen:** 23 columnas · 12 índices · 10 FK salientes · 0 entrantes · 5 operaciones
+- **Resumen:** 23 columnas · 12 índices · 10 FK salientes · 0 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -763,6 +786,8 @@ Registra defectos identificados durante validaciones para seguir su análisis y 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/readiness | LEE | POR_SQL |
+| GET /admin/qa/defects | LEE | DIRECTA |
 | POST /qa/defects | ACTUALIZA | POR_TIPO |
 | POST /qa/defects | CREA | DIRECTA |
 | POST /qa/defects | LEE | DIRECTA |
@@ -792,7 +817,7 @@ Cataloga entornos controlados para ejecutar verificaciones del sistema médico s
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_36_qa_lab.puml: test_environments`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_36_qa_lab.puml` · **DDL:** `SQL/36_qa_lab/02_tables.sql`
 - **Entidad del ORM:** `TestEnvironments` — `src/modules/qa_lab/entities/test_environments.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 5 FK salientes · 4 entrantes · 6 operaciones
+- **Resumen:** 14 columnas · 7 índices · 5 FK salientes · 4 entrantes · 11 operaciones
 
 #### Columnas
 
@@ -831,7 +856,7 @@ Cataloga entornos controlados para ejecutar verificaciones del sistema médico s
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_test_environments_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `uq_test_environments_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_test_environments_environment_concept_id` | no | environment_concept_id | Soporta la clave foránea fk_test_environments_environment_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_test_environments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_test_environments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_test_environments_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_test_environments_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -849,6 +874,11 @@ Cataloga entornos controlados para ejecutar verificaciones del sistema médico s
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| PUT /admin/qa/environments/{environmentId}/target | LEE | DIRECTA |
+| POST /admin/qa/plans | LEE | DIRECTA |
+| POST /admin/qa/plans/preflight | LEE | DIRECTA |
+| POST /internal/qa/plans/run-next | LEE | DIRECTA |
+| GET /admin/qa/environments | LEE | DIRECTA |
 | POST /internal/qa/schedules/run-due | LEE | DIRECTA |
 | POST /qa/environments | CREA | DIRECTA |
 | POST /qa/environments | LEE | DIRECTA |
@@ -948,7 +978,7 @@ Registra ejecuciones de suites o casos para mantener resultados y contexto de va
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_36_qa_lab.puml: test_runs`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_36_qa_lab.puml` · **DDL:** `SQL/36_qa_lab/02_tables.sql`
 - **Entidad del ORM:** `TestRuns` — `src/modules/qa_lab/entities/test_runs.entity.ts`
-- **Resumen:** 21 columnas · 10 índices · 8 FK salientes · 4 entrantes · 11 operaciones
+- **Resumen:** 21 columnas · 10 índices · 8 FK salientes · 4 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -1018,6 +1048,15 @@ Registra ejecuciones de suites o casos para mantener resultados y contexto de va
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /admin/qa/plans | CREA | DIRECTA |
+| POST /admin/qa/plans | LEE | DIRECTA |
+| POST /internal/qa/plans/run-next | ACTUALIZA | POR_TIPO |
+| POST /internal/qa/plans/run-next | LEE | DIRECTA |
+| GET /admin/qa/flows | LEE | POR_SQL |
+| GET /admin/qa/flows/{flowId} | LEE | POR_SQL |
+| GET /admin/qa/runs | LEE | DIRECTA |
+| GET /admin/qa/runs/{runId} | LEE | DIRECTA |
+| GET /admin/qa/suites | LEE | POR_SQL |
 | POST /internal/qa/schedules/run-due | CREA | DIRECTA |
 | POST /internal/qa/schedules/run-due | LEE | DIRECTA |
 | POST /qa/runs | CREA | DIRECTA |
@@ -1151,7 +1190,7 @@ Agrupa pruebas funcionales para validar flujos y contratos del sistema.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_36_qa_lab.puml: test_suites`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_36_qa_lab.puml` · **DDL:** `SQL/36_qa_lab/02_tables.sql`
 - **Entidad del ORM:** `TestSuites` — `src/modules/qa_lab/entities/test_suites.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 6 FK salientes · 6 entrantes · 6 operaciones
+- **Resumen:** 15 columnas · 8 índices · 6 FK salientes · 6 entrantes · 14 operaciones
 
 #### Columnas
 
@@ -1194,7 +1233,7 @@ Agrupa pruebas funcionales para validar flujos y contratos del sistema.
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_test_suites_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_ |
+| `uq_test_suites_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_test_suites_tenant_id` | no | tenant_id | Soporta la clave foránea fk_test_suites_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_test_suites_target_system_concept_id` | no | target_system_concept_id | Soporta la clave foránea fk_test_suites_target_system_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_test_suites_suite_type_concept_id` | no | suite_type_concept_id | Soporta la clave foránea fk_test_suites_suite_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1213,6 +1252,14 @@ Agrupa pruebas funcionales para validar flujos y contratos del sistema.
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/readiness | LEE | POR_SQL |
+| POST /admin/qa/plans | LEE | DIRECTA |
+| POST /admin/qa/plans/preflight | LEE | DIRECTA |
+| POST /internal/qa/plans/run-next | LEE | DIRECTA |
+| GET /admin/qa/flows | LEE | DIRECTA |
+| GET /admin/qa/flows/{flowId} | LEE | DIRECTA |
+| GET /admin/qa/suites | LEE | DIRECTA |
+| GET /admin/qa/suites/{suiteId} | LEE | DIRECTA |
 | POST /internal/qa/schedules/run-due | LEE | DIRECTA |
 | POST /qa/runs | LEE | DIRECTA |
 | POST /qa/schedules | LEE | DIRECTA |

@@ -3,19 +3,19 @@
 # Flujos del módulo `telemetry`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 13 (12 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 22 (19 con decisiones propias, 3 sin ellas)
 - Inventario de endpoints del módulo: [telemetry](../endpoints/telemetry.md)
 
-## Proceso: src / modules / telemetry
+## Proceso: Módulo Telemetry (28)
 
-- **Código:** `telemetry` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 13
-- **Actores:** Cualquier sesión válida · SECURITY_ADMIN
+- **Código:** `telemetry` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 22
+- **Actores:** Cualquier sesión válida · DATA_PLATFORM_ADMIN · DPO · MARKETING_MANAGER · PLATFORM_ADMIN · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/telemetry/README.md`
 
 ### Para qué sirve
 
-Agrupa los componentes relacionados con **telemetry** y mantiene cohesionada esta responsabilidad del sistema.
+Telemetría de producto: consentimiento de tracking, esquemas de eventos, actividad, contexto de cliente, Core Web Vitals, journeys, conversiones y analítica administrativa. Persiste en el esquema PostgreSQL `telemetry`. Puede reenviar, después del commit y por mejor esfuerzo, eventos minimizados a un proveedor externo.
 
 _Fuente: `src/modules/telemetry/README.md:3`_
 
@@ -23,10 +23,19 @@ _Fuente: `src/modules/telemetry/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
+| `ctrl:TelemetryAnalyticsController` | Operaciones de TelemetryAnalyticsController que el README no asigna a un caso de uso | GET /admin/analytics/funnels | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 3 |
+|  |  | GET /admin/analytics/funnels/{funnelId}/report | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 5 |
+|  |  | GET /admin/analytics/overview | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 1 |
+|  |  | GET /admin/analytics/pipeline-health | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 2 |
+|  |  | GET /admin/analytics/sessions | PLATFORM_ADMIN · SECURITY_ADMIN · DPO | BAJO | 1 |
+|  |  | GET /admin/analytics/sessions/{id} | PLATFORM_ADMIN · SECURITY_ADMIN · DPO | BAJO | 3 |
+|  |  | GET /admin/analytics/timeseries | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 1 |
+|  |  | GET /admin/analytics/web-vitals | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 1 |
 | `ctrl:TelemetryConsentController` | Operaciones de TelemetryConsentController que el README no asigna a un caso de uso | POST /telemetry/analytics-subjects | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | POST /telemetry/disclosure-acceptances | Cualquier sesión válida | ALTO | 3 |
 |  |  | POST /telemetry/tracking-consents | Cualquier sesión válida | ALTO | 2 |
 |  |  | POST /telemetry/tracking-consents/{id}/withdraw | Cualquier sesión válida | ALTO | 4 |
+|  |  | GET /telemetry/tracking-consents/me | Cualquier sesión válida | BAJO | 1 |
 | `ctrl:TelemetryEventsController` | Operaciones de TelemetryEventsController que el README no asigna a un caso de uso | POST /telemetry/activity-events | Cualquier sesión válida | ALTO | 8 |
 |  |  | POST /telemetry/client-contexts | Cualquier sesión válida | ALTO | 4 |
 |  |  | POST /telemetry/conversion-events | Cualquier sesión válida | ALTO | 6 |
@@ -37,103 +46,144 @@ _Fuente: `src/modules/telemetry/README.md:3`_
 |  |  | POST /telemetry/funnels | SECURITY_ADMIN | MEDIO | 5 |
 |  |  | POST /telemetry/tracking-purposes | SECURITY_ADMIN | MEDIO | 2 |
 
-### Diagrama — etapas `ctrl:TelemetryConsentController`, `ctrl:TelemetryEventsController`, `ctrl:TelemetryGovernanceController`
+### Diagrama — etapas `ctrl:TelemetryAnalyticsController`, `ctrl:TelemetryConsentController`, `ctrl:TelemetryEventsController`…
 
 ```mermaid
 flowchart LR
-  a2(["SECURITY_ADMIN"]):::actor
-  a5(["Cualquier sesión válida"]):::actor
-  t3[("telemetry.analytics_subjects")]:::tabla
-  t6[("telemetry.tracking_disclosure_acceptances")]:::tabla
-  t7[("telemetry.tracking_disclosure_versions")]:::tabla
-  t9[("telemetry.tracking_consents")]:::tabla
-  t10[("telemetry.tracking_purpose_definitions")]:::tabla
-  t13[("telemetry.activity_event_schema_definitions")]:::tabla
+  a2(["PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MAR…"]):::actor
+  a13(["PLATFORM_ADMIN · SECURITY_ADMIN · DPO"]):::actor
+  a21(["SECURITY_ADMIN"]):::actor
+  a24(["Cualquier sesión válida"]):::actor
+  t3[("telemetry.activity_event_schema_definitions")]:::tabla
+  t4[("telemetry.funnel_definitions")]:::tabla
+  t5[("telemetry.funnel_steps")]:::tabla
+  t7[("telemetry.conversion_events")]:::tabla
+  t8[("telemetry.user_activity_events")]:::tabla
+  t11[("telemetry.client_contexts")]:::tabla
   t14[("telemetry.session_journeys")]:::tabla
-  t15[("telemetry.user_activity_event_properties")]:::tabla
-  t18[("telemetry.client_contexts")]:::tabla
-  t20[("telemetry.conversion_events")]:::tabla
-  t21[("telemetry.funnel_definitions")]:::tabla
-  t24[("telemetry.web_vitals")]:::tabla
-  t28[("telemetry.funnel_steps")]:::tabla
-  subgraph s0["ctrl:TelemetryConsentController · Operaciones de TelemetryConsentController que…"]
-    o1["POST /telemetry/analytics-subjects"]:::op
-    o4["POST /telemetry/disclosure-acceptances"]:::op
-    o8["POST /telemetry/tracking-consents"]:::op
-    o11["POST /telemetry/tracking-consents/{id}/withdraw"]:::op
+  t16[("telemetry.user_activity_event_properties")]:::tabla
+  t19[("telemetry.web_vitals")]:::tabla
+  t22[("telemetry.analytics_subjects")]:::tabla
+  t25[("telemetry.tracking_disclosure_acceptances")]:::tabla
+  t26[("telemetry.tracking_disclosure_versions")]:::tabla
+  t28[("telemetry.tracking_consents")]:::tabla
+  t29[("telemetry.tracking_purpose_definitions")]:::tabla
+  subgraph s0["ctrl:TelemetryAnalyticsController · Operaciones de TelemetryAnalyticsController…"]
+    o1["GET /admin/analytics/funnels"]:::op
+    o6["GET /admin/analytics/funnels/{funnelId}/report"]:::op
+    o9["GET /admin/analytics/overview"]:::op
+    o10["GET /admin/analytics/pipeline-health"]:::op
+    o12["GET /admin/analytics/sessions"]:::op
+    o15["GET /admin/analytics/sessions/{id}"]:::op
+    o17["GET /admin/analytics/timeseries"]:::op
+    o18["GET /admin/analytics/web-vitals"]:::op
   end
-  t16[("+2 tablas más")]
-  subgraph s1["ctrl:TelemetryEventsController · Operaciones de TelemetryEventsController que e…"]
-    o12["POST /telemetry/activity-events"]:::op
-    o17["POST /telemetry/client-contexts"]:::op
-    o19["POST /telemetry/conversion-events"]:::op
-    o22["POST /telemetry/session-journeys/{id}/close"]:::op
-    o23["POST /telemetry/web-vitals"]:::op
+  subgraph s1["ctrl:TelemetryConsentController · Operaciones de TelemetryConsentController que…"]
+    o20["POST /telemetry/analytics-subjects"]:::op
+    o23["POST /telemetry/disclosure-acceptances"]:::op
+    o27["POST /telemetry/tracking-consents"]:::op
+    o30["POST /telemetry/tracking-consents/{id}/withdraw"]:::op
+    o31["GET /telemetry/tracking-consents/me"]:::op
   end
-  subgraph s2["ctrl:TelemetryGovernanceController · Operaciones de TelemetryGovernanceControll…"]
-    o25["POST /telemetry/disclosure-versions"]:::op
-    o26["POST /telemetry/event-schemas"]:::op
-    o27["POST /telemetry/funnels"]:::op
-    o29["POST /telemetry/tracking-purposes"]:::op
+  t33[("+2 tablas más")]
+  subgraph s2["ctrl:TelemetryEventsController · Operaciones de TelemetryEventsController que e…"]
+    o32["POST /telemetry/activity-events"]:::op
+    o34["POST /telemetry/client-contexts"]:::op
+    o35["POST /telemetry/conversion-events"]:::op
+    o36["POST /telemetry/session-journeys/{id}/close"]:::op
+    o37["POST /telemetry/web-vitals"]:::op
+  end
+  subgraph s3["ctrl:TelemetryGovernanceController · Operaciones de TelemetryGovernanceControll…"]
+    o38["POST /telemetry/disclosure-versions"]:::op
+    o39["POST /telemetry/event-schemas"]:::op
+    o40["POST /telemetry/funnels"]:::op
+    o41["POST /telemetry/tracking-purposes"]:::op
   end
   a2 --> o1
-  o1 -->|"CREA"| t3
   o1 -->|"LEE"| t3
-  a5 --> o4
-  o4 -->|"CREA"| t6
-  o4 -->|"LEE"| t6
-  o4 -->|"LEE"| t7
-  a5 --> o8
-  o8 -->|"CREA"| t9
-  o8 -->|"LEE"| t10
-  a5 --> o11
-  o11 -->|"ACTUALIZA"| t3
-  o11 -->|"LEE"| t3
-  o11 -->|"CREA"| t9
-  o11 -->|"LEE"| t9
-  a5 --> o12
-  o12 -->|"LEE"| t13
-  o12 -->|"ACTUALIZA"| t14
-  o12 -->|"CREA"| t14
+  o1 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  a2 --> o6
+  o6 -->|"LEE"| t3
+  o6 -->|"LEE"| t7
+  o6 -->|"LEE"| t4
+  o6 -->|"LEE"| t5
+  o6 -->|"LEE"| t8
+  a2 --> o9
+  o9 -->|"LEE"| t8
+  a2 --> o10
+  o10 -->|"LEE"| t11
+  o10 -->|"LEE"| t8
+  a13 --> o12
   o12 -->|"LEE"| t14
-  o12 -->|"LEE"| t9
-  o12 -->|"CREA"| t15
-  o12 -.-> t16
-  a5 --> o17
-  o17 -->|"CREA"| t18
-  o17 -->|"ACTUALIZA"| t14
-  o17 -->|"CREA"| t14
-  o17 -->|"LEE"| t14
-  a5 --> o19
-  o19 -->|"LEE"| t3
-  o19 -->|"CREA"| t20
-  o19 -->|"LEE"| t20
-  o19 -->|"LEE"| t21
-  o19 -->|"ACTUALIZA"| t14
-  o19 -->|"LEE"| t14
-  a5 --> o22
-  o22 -->|"ACTUALIZA"| t14
-  o22 -->|"LEE"| t14
-  a5 --> o23
-  o23 -->|"LEE"| t14
-  o23 -->|"CREA"| t24
-  a2 --> o25
-  o25 -->|"ACTUALIZA"| t7
-  o25 -->|"CREA"| t7
-  o25 -->|"LEE"| t7
-  a2 --> o26
-  o26 -->|"CREA"| t13
-  o26 -->|"LEE"| t13
-  o26 -->|"LEE"| t10
-  a2 --> o27
-  o27 -->|"LEE"| t13
-  o27 -->|"CREA"| t21
-  o27 -->|"LEE"| t21
+  a13 --> o15
+  o15 -->|"LEE"| t14
+  o15 -->|"LEE"| t16
+  o15 -->|"LEE"| t8
+  a2 --> o17
+  o17 -->|"LEE"| t8
+  a2 --> o18
+  o18 -->|"LEE"| t19
+  a21 --> o20
+  o20 -->|"CREA"| t22
+  o20 -->|"LEE"| t22
+  a24 --> o23
+  o23 -->|"CREA"| t25
+  o23 -->|"LEE"| t25
+  o23 -->|"LEE"| t26
+  a24 --> o27
   o27 -->|"CREA"| t28
-  o27 -->|"LEE"| t10
-  a2 --> o29
-  o29 -->|"CREA"| t10
-  o29 -->|"LEE"| t10
+  o27 -->|"LEE"| t29
+  a24 --> o30
+  o30 -->|"ACTUALIZA"| t22
+  o30 -->|"LEE"| t22
+  o30 -->|"CREA"| t28
+  o30 -->|"LEE"| t28
+  a24 --> o31
+  o31 -->|"LEE"| t28
+  a24 --> o32
+  o32 -->|"LEE"| t3
+  o32 -->|"ACTUALIZA"| t14
+  o32 -->|"CREA"| t14
+  o32 -->|"LEE"| t14
+  o32 -->|"LEE"| t28
+  o32 -->|"CREA"| t16
+  o32 -.-> t33
+  a24 --> o34
+  o34 -->|"CREA"| t11
+  o34 -->|"ACTUALIZA"| t14
+  o34 -->|"CREA"| t14
+  o34 -->|"LEE"| t14
+  a24 --> o35
+  o35 -->|"LEE"| t22
+  o35 -->|"CREA"| t7
+  o35 -->|"LEE"| t7
+  o35 -->|"LEE"| t4
+  o35 -->|"ACTUALIZA"| t14
+  o35 -->|"LEE"| t14
+  a24 --> o36
+  o36 -->|"ACTUALIZA"| t14
+  o36 -->|"LEE"| t14
+  a24 --> o37
+  o37 -->|"LEE"| t14
+  o37 -->|"CREA"| t19
+  a21 --> o38
+  o38 -->|"ACTUALIZA"| t26
+  o38 -->|"CREA"| t26
+  o38 -->|"LEE"| t26
+  a21 --> o39
+  o39 -->|"CREA"| t3
+  o39 -->|"LEE"| t3
+  o39 -->|"LEE"| t29
+  a21 --> o40
+  o40 -->|"LEE"| t3
+  o40 -->|"CREA"| t4
+  o40 -->|"LEE"| t4
+  o40 -->|"CREA"| t5
+  o40 -->|"LEE"| t29
+  a21 --> o41
+  o41 -->|"CREA"| t29
+  o41 -->|"LEE"| t29
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -146,7 +196,335 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. POST /telemetry/activity-events
+#### 1. GET /admin/analytics/funnels/{funnelId}/report
+
+Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Embudo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TelemetryAnalyticsService.funnelReport"]:::llamada
+  n2 --> n3
+  n4["Llama a TelemetryAnalyticsService.scope"]:::llamada
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 --> n5
+  n6{"error instanceof WindowError"}:::decision
+  n5 -->|"si falla"| n6
+  n7(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n6 -->|"sí"| n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"no"| n8
+  n9["Llama a TelemetryAnalyticsService.listFunnels"]:::llamada
+  n5 --> n9
+  n10["Llama a TelemetryAnalyticsRepository.listFunnels"]:::llamada
+  n9 --> n10
+  n11[("LEE telemetry.funnel_steps · LEE telemetry.activity_event_schema_definitions · LEE telemetry.funnel_definitio…")]:::efecto
+  n10 --> n11
+  n12{"!funnel"}:::decision
+  n11 --> n12
+  n13(["404 NOT_FOUND Embudo no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a TelemetryAnalyticsRepository.funnelReach"]:::llamada
+  n12 -->|"no"| n14
+  n15["Repite: forEach(…)"]:::bucle
+  n14 --> n15
+  n16{"index === 0"}:::decision
+  n15 -->|"cada elemento"| n16
+  n17[("LEE telemetry.user_activity_events")]:::efecto
+  n16 -->|"sí"| n17
+  n18[("LEE telemetry.user_activity_events")]:::efecto
+  n16 -->|"no"| n18
+  n19["Llama a TelemetryAnalyticsRepository.serverConversions"]:::llamada
+  n17 --> n19
+  n18 --> n19
+  n15 -->|"al terminar"| n19
+  n20[("LEE telemetry.conversion_events")]:::efecto
+  n19 --> n20
+  n21(("200 Responde con éxito")):::ok
+  n20 --> n21
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. GET /admin/analytics/overview
+
+Totales, rutas y eventos principales de la ventana
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TelemetryAnalyticsService.overview"]:::llamada
+  n2 --> n3
+  n4["Llama a TelemetryAnalyticsService.scope"]:::llamada
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 --> n5
+  n6{"error instanceof WindowError"}:::decision
+  n5 -->|"si falla"| n6
+  n7(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n6 -->|"sí"| n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"no"| n8
+  n9["Llama a TelemetryAnalyticsRepository.overview"]:::llamada
+  n5 --> n9
+  n10[("LEE telemetry.user_activity_events · LEE telemetry.user_activity_events · LEE telemetry.user_activity_events")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. GET /admin/analytics/pipeline-health
+
+Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TelemetryAnalyticsService.pipelineHealth"]:::llamada
+  n2 --> n3
+  n4["Llama a TelemetryAnalyticsService.scope"]:::llamada
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 --> n5
+  n6{"error instanceof WindowError"}:::decision
+  n5 -->|"si falla"| n6
+  n7(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n6 -->|"sí"| n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"no"| n8
+  n9["Llama a TelemetryAnalyticsRepository.pipelineHealth"]:::llamada
+  n5 --> n9
+  n10[("LEE telemetry.user_activity_events · LEE telemetry.client_contexts")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. GET /admin/analytics/sessions
+
+Sesiones de la ventana (sin identificadores de sesión ni sujeto)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TelemetryAnalyticsService.listSessions"]:::llamada
+  n2 --> n3
+  n4["Llama a TelemetryAnalyticsService.scope"]:::llamada
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 --> n5
+  n6{"error instanceof WindowError"}:::decision
+  n5 -->|"si falla"| n6
+  n7(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n6 -->|"sí"| n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"no"| n8
+  n9["Llama a TelemetryAnalyticsRepository.listSessions"]:::llamada
+  n5 --> n9
+  n10[("LEE telemetry.session_journeys")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. GET /admin/analytics/sessions/{id}
+
+Timeline de una sesión: eventos y nombres de propiedad, sin valores
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TelemetryAnalyticsService.getSession"]:::llamada
+  n2 --> n3
+  n4["Llama a TelemetryAnalyticsRepository.findSession"]:::llamada
+  n3 --> n4
+  n5[("LEE telemetry.session_journeys")]:::efecto
+  n4 --> n5
+  n6{"!session"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Sesión no encontrada"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a TelemetryAnalyticsRepository.sessionTimeline"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE telemetry.user_activity_event_properties · LEE telemetry.user_activity_events")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. GET /admin/analytics/timeseries
+
+Eventos y sesiones por hora o día (UTC), cubos vacíos en 0
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TelemetryAnalyticsService.timeseries"]:::llamada
+  n2 --> n3
+  n4["Llama a TelemetryAnalyticsService.scope"]:::llamada
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 --> n5
+  n6{"error instanceof WindowError"}:::decision
+  n5 -->|"si falla"| n6
+  n7(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n6 -->|"sí"| n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"no"| n8
+  n9["Llama a TelemetryAnalyticsRepository.timeseries"]:::llamada
+  n5 --> n9
+  n10[("LEE telemetry.user_activity_events")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. GET /admin/analytics/web-vitals
+
+p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a TelemetryAnalyticsService.webVitals"]:::llamada
+  n2 --> n3
+  n4["Llama a TelemetryAnalyticsService.scope"]:::llamada
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 --> n5
+  n6{"error instanceof WindowError"}:::decision
+  n5 -->|"si falla"| n6
+  n7(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n6 -->|"sí"| n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"no"| n8
+  n9["Llama a TelemetryAnalyticsRepository.webVitals"]:::llamada
+  n5 --> n9
+  n10[("LEE telemetry.web_vitals · LEE telemetry.web_vitals")]:::efecto
+  n9 --> n10
+  n11["Llama a TelemetryAnalyticsRepository.webVitalsByRoute"]:::llamada
+  n10 --> n11
+  n12[("LEE telemetry.web_vitals")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. POST /telemetry/activity-events
 
 Capturar evento(s) de actividad consent-aware (batch)
 
@@ -249,7 +627,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. POST /telemetry/client-contexts
+#### 9. POST /telemetry/client-contexts
 
 Registrar contexto de cliente/dispositivo + journey
 
@@ -321,7 +699,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /telemetry/conversion-events
+#### 10. POST /telemetry/conversion-events
 
 Registrar evento de conversión con atribución
 
@@ -389,7 +767,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /telemetry/disclosure-acceptances
+#### 11. POST /telemetry/disclosure-acceptances
 
 Registrar aceptación de disclosure por usuario/sesión
 
@@ -437,7 +815,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /telemetry/disclosure-versions
+#### 12. POST /telemetry/disclosure-versions
 
 Publicar versión de disclosure de tracking
 
@@ -490,7 +868,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /telemetry/event-schemas
+#### 13. POST /telemetry/event-schemas
 
 Registrar esquema de evento de actividad (versionado)
 
@@ -548,7 +926,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /telemetry/funnels
+#### 14. POST /telemetry/funnels
 
 Definir funnel y sus pasos
 
@@ -620,7 +998,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /telemetry/session-journeys/{id}/close
+#### 15. POST /telemetry/session-journeys/{id}/close
 
 Cerrar journey de sesión y consolidar métricas
 
@@ -681,7 +1059,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /telemetry/tracking-consents
+#### 16. POST /telemetry/tracking-consents
 
 Otorgar consentimiento de tracking por propósito
 
@@ -730,7 +1108,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /telemetry/tracking-consents/{id}/withdraw
+#### 17. POST /telemetry/tracking-consents/{id}/withdraw
 
 Retirar consentimiento y desactivar sujeto (cascada)
 
@@ -792,7 +1170,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /telemetry/tracking-purposes
+#### 18. POST /telemetry/tracking-purposes
 
 Definir propósito de tracking y base legal
 
@@ -836,7 +1214,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /telemetry/web-vitals
+#### 19. POST /telemetry/web-vitals
 
 Registrar métricas Core Web Vitals por ruta (batch)
 
@@ -892,4 +1270,6 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
+| GET /admin/analytics/funnels | 200, 401, 403, 429 | 3 |
 | POST /telemetry/analytics-subjects | 201, 400, 401, 403, 429 | 2 |
+| GET /telemetry/tracking-consents/me | 200, 400, 401, 403, 429 | 1 |

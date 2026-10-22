@@ -6,12 +6,14 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   type AuthenticatedUser,
+  CONCEPTS,
 } from '../../../common';
+import { FilesRepository } from '../../common/repositories';
 import {
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
   PersonAccountLinksRepository,
-} from '../../profiles/repositories';
+} from '../../profiles/infrastructure/repositories';
 import { TenantMembershipsRepository } from '../../directory/repositories';
 import { DIR } from '../../directory/directory.concepts';
 import { IDA } from '../identity_assurance.concepts';
@@ -23,16 +25,43 @@ import {
   type IdentityVerificationVertical,
 } from '../identity_assurance.seed';
 import {
+  IdentityCheckResultsRepository,
   IdentityChecksRepository,
   IdentityEvidenceRecordsRepository,
+  IdentityManualReviewCasesRepository,
   IdentityVerificationCasesRepository,
 } from '../repositories';
+import type { IdentityVerificationCases } from '../entities';
 import type {
+  CaseCheckDto,
   RequestLicenseVerificationDto,
   RequestVerificationDto,
   VerificationRequestResponseDto,
   VerificationStatusResponseDto,
+  VerificationTypeDto,
+  VerificationTypesResponseDto,
+  VerificationEvidenceDto,
 } from '../dto';
+
+/**
+ * Código de tipo de solicitud (catálogo de autoservicio) por sujeto del caso.
+ * Es lo que distingue en la lista/detalle una verificación de identidad
+ * profesional de una de matrícula — ambas comparten check y hasta política en
+ * el caso de identidad, y sólo el `subjectTypeConceptId` las separa.
+ */
+const TYPE_CODE_BY_SUBJECT: Readonly<Record<string, string>> = {
+  [IDA.SUBJECT_PRACTITIONER_IDENTITY]: 'PRACTITIONER_IDENTITY',
+  [IDA.SUBJECT_PRACTITIONER_LICENSE]: 'PRACTITIONER_LICENSE',
+  [IDA.SUBJECT_PATIENT_IDENTITY]: 'PATIENT_IDENTITY',
+  [IDA.SUBJECT_TENANT_IDENTITY]: 'TENANT_VERIFICATION',
+};
+
+const UNKNOWN_TYPE_CODE = 'UNKNOWN';
+
+/** El código de tipo de solicitud a partir del sujeto del caso. */
+function typeCodeForSubject(subjectTypeConceptId: string): string {
+  return TYPE_CODE_BY_SUBJECT[subjectTypeConceptId] ?? UNKNOWN_TYPE_CODE;
+}
 
 /** Vigencia de un caso de verificación abierto por autoservicio (72 h). */
 const CASE_TTL_HOURS = 72;
@@ -73,6 +102,8 @@ export class IdentitySelfServiceService {
    * @param practitionersRepo - Valor de practitioners repo requerido por la operación.
    * @param authorizationsRepo - Valor de authorizations repo requerido por la operación.
    * @param membershipsRepo - Valor de memberships repo requerido por la operación.
+   * @param manualReviewRepo - De dónde sale el motivo cuando el caso escaló a revisión manual.
+   * @param checkResultsRepo - Resultados de los checks, para el trace de la ficha.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -84,6 +115,9 @@ export class IdentitySelfServiceService {
     private readonly practitionersRepo: HealthPractitionerProfilesRepository,
     private readonly authorizationsRepo: JurisdictionAuthorizationsRepository,
     private readonly membershipsRepo: TenantMembershipsRepository,
+    private readonly manualReviewRepo: IdentityManualReviewCasesRepository,
+    private readonly checkResultsRepo: IdentityCheckResultsRepository,
+    private readonly filesRepo: FilesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentitySelfServiceService.name);
@@ -100,7 +134,7 @@ export class IdentitySelfServiceService {
         tx,
         IDENTITY_CARD_VERTICAL,
         personId,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -118,7 +152,7 @@ export class IdentitySelfServiceService {
         tx,
         PRACTITIONER_IDENTITY_VERTICAL,
         personId,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -164,7 +198,7 @@ export class IdentitySelfServiceService {
         tx,
         MEDICAL_LICENSE_VERTICAL,
         authorization.id,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -204,7 +238,7 @@ export class IdentitySelfServiceService {
         tx,
         INSTITUTION_DOCUMENT_VERTICAL,
         tenantId,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -235,12 +269,7 @@ export class IdentitySelfServiceService {
       throw new ResourceNotFoundException('Caso no encontrado', { caseId });
     }
 
-    return {
-      id: kase.id,
-      status: kase.statusConceptId,
-      openedAt: kase.openedAt,
-      completedAt: kase.completedAt,
-    };
+    return this.toStatusResponse(em, kase, /* detailed */ true);
   }
 
   /**
@@ -276,12 +305,148 @@ export class IdentitySelfServiceService {
     ];
 
     const cases = await this.casesRepo.findBySubjects(em, subjects);
-    return cases.map((kase) => ({
+    // Sin `checks`/`reasonText`: la lista es la tabla de FT-32-R01..R04, no la
+    // ficha de detalle. Traerlos acá pagaría un N+1 (evidencia + revisión +
+    // checks + resultado por check) por cada fila que nadie va a abrir.
+    return Promise.all(
+      cases.map((kase) =>
+        this.toStatusResponse(em, kase, /* detailed */ false),
+      ),
+    );
+  }
+
+  /**
+   * Los tipos de solicitud de verificación que el titular puede iniciar, con
+   * si cada uno ya tiene una solicitud viva (FT-32-R09/R11).
+   *
+   * Acotado a lo que compete al módulo Doctor: identidad profesional y cada
+   * matrícula propia. `hasPendingRequest` es sólo lo que deja a la pantalla no
+   * ofrecer un envío que el backend va a rechazar de todas formas —el rechazo
+   * real sigue viviendo en `openVerification`, que es lo único que un bypass
+   * directo a la API no puede saltear.
+   *
+   * @param actor - Titular autenticado.
+   * @returns El catálogo de tipos disponibles para su cuenta.
+   */
+  async listAvailableTypes(
+    actor: AuthenticatedUser,
+  ): Promise<VerificationTypesResponseDto> {
+    const em = this.em.fork();
+    const link = await this.accountLinksRepo.findActiveByUser(em, actor.id);
+    if (!link) return { types: [] };
+
+    const practitioner = await this.practitionersRepo.findById(
+      em,
+      link.personId,
+    );
+    if (!practitioner) return { types: [] };
+
+    const types: VerificationTypeDto[] = [];
+
+    const identityLive = await this.casesRepo.countLiveForSubject(
+      em,
+      PRACTITIONER_IDENTITY_VERTICAL.subjectTypeConceptId,
+      link.personId,
+      LIVE_CASE_STATES,
+    );
+    types.push({
+      code: 'PRACTITIONER_IDENTITY',
+      label: 'Verificación de identidad profesional',
+      hasPendingRequest: identityLive > 0,
+    });
+
+    const authorizations = await this.authorizationsRepo.findByPractitioner(
+      em,
+      link.personId,
+    );
+    for (const authorization of authorizations) {
+      const licenseLive = await this.casesRepo.countLiveForSubject(
+        em,
+        MEDICAL_LICENSE_VERTICAL.subjectTypeConceptId,
+        authorization.id,
+        LIVE_CASE_STATES,
+      );
+      types.push({
+        code: 'PRACTITIONER_LICENSE',
+        label:
+          authorizations.length > 1
+            ? `Verificación de matrícula (${authorization.licenseNumber})`
+            : 'Verificación de matrícula profesional',
+        jurisdictionAuthorizationId: authorization.id,
+        hasPendingRequest: licenseLive > 0,
+      });
+    }
+
+    return { types };
+  }
+
+  /**
+   * Arma la respuesta de estado de un caso propio.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param kase - Caso ya resuelto y comprobado como propio.
+   * @param detailed - `true` para la ficha (agrega motivo y trace de checks).
+   * @returns El caso en el contrato `VerificationStatusResponseDto`.
+   */
+  private async toStatusResponse(
+    em: EntityManager,
+    kase: IdentityVerificationCases,
+    detailed: boolean,
+  ): Promise<VerificationStatusResponseDto> {
+    const records = await this.evidenceRepo.findByCase(em, kase.id);
+    const evidence: VerificationEvidenceDto[] = records.map(
+      (record, index) => ({
+        id: record.id,
+        evidenceTypeConceptId: record.evidenceTypeConceptId,
+        ...(record.evidenceFileId
+          ? { evidenceFileId: record.evidenceFileId }
+          : {}),
+        createdAt: record.createdAt,
+        sequence: index + 1,
+      }),
+    );
+
+    const base: VerificationStatusResponseDto = {
       id: kase.id,
       status: kase.statusConceptId,
-      openedAt: kase.openedAt,
-      completedAt: kase.completedAt,
-    }));
+      type: typeCodeForSubject(kase.subjectTypeConceptId),
+      ...(kase.openedAt ? { openedAt: kase.openedAt } : {}),
+      ...(kase.completedAt ? { completedAt: kase.completedAt } : {}),
+      ...(evidence.length ? { evidence } : {}),
+      ...(evidence.at(-1)?.evidenceFileId
+        ? { evidenceFileId: evidence.at(-1)!.evidenceFileId }
+        : {}),
+    };
+    if (!detailed) return base;
+
+    const review = await this.manualReviewRepo.findLatestDecidedByCase(
+      em,
+      kase.id,
+    );
+    const checks = await this.checksRepo.findRequiredByCase(em, kase.id);
+    const checkDtos: CaseCheckDto[] = [];
+    for (const check of checks) {
+      const result = await this.checkResultsRepo.findLatestByCheck(
+        em,
+        check.id,
+      );
+      checkDtos.push({
+        checkTypeConceptId: check.checkTypeConceptId,
+        status: check.statusConceptId,
+        ...(result
+          ? {
+              resultConceptId: result.resultConceptId,
+              checkedAt: result.checkedAt,
+            }
+          : {}),
+      });
+    }
+
+    return {
+      ...base,
+      ...(review?.decisionReason ? { reasonText: review.decisionReason } : {}),
+      checks: checkDtos,
+    };
   }
 
   // --- Apoyo ---
@@ -301,9 +466,28 @@ export class IdentitySelfServiceService {
     tx: EntityManager,
     vertical: IdentityVerificationVertical,
     subjectEntityId: string,
-    evidenceFileId: string,
+    dto: RequestVerificationDto,
     actor: AuthenticatedUser,
   ): Promise<VerificationRequestResponseDto> {
+    const evidence = this.resolveEvidence(dto, vertical.evidenceTypeConceptId);
+    if (!evidence.length) {
+      throw new PreconditionFailedException(
+        'Adjunta el frente, el reverso y las tres capturas de prueba de vida',
+      );
+    }
+    for (const item of evidence) {
+      const file = await this.filesRepo.findById(tx, item.fileId);
+      if (
+        !file ||
+        file.createdByUserId !== actor.id ||
+        file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI ||
+        file.deletedAt
+      ) {
+        throw new PreconditionFailedException(
+          'Una evidencia no existe, no pertenece a esta cuenta o no está protegida',
+        );
+      }
+    }
     const live = await this.casesRepo.countLiveForSubject(
       tx,
       vertical.subjectTypeConceptId,
@@ -332,13 +516,15 @@ export class IdentitySelfServiceService {
     // Las FK son columnas uuid planas: persistir el caso antes de sus hijos.
     await tx.flush();
 
-    this.evidenceRepo.create(tx, {
-      identityVerificationCaseId: kase.id,
-      evidenceTypeConceptId: vertical.evidenceTypeConceptId,
-      evidenceFileId,
-      verificationStatusConceptId: IDA.EVIDENCE_PENDING,
-      actorUserId: actor.id,
-    });
+    for (const item of evidence) {
+      await this.evidenceRepo.create(tx, {
+        identityVerificationCaseId: kase.id,
+        evidenceTypeConceptId: item.typeId,
+        evidenceFileId: item.fileId,
+        verificationStatusConceptId: IDA.EVIDENCE_PENDING,
+        actorUserId: actor.id,
+      });
+    }
 
     const check = this.checksRepo.create(tx, {
       identityVerificationCaseId: kase.id,
@@ -444,5 +630,41 @@ export class IdentitySelfServiceService {
       DIR.MEMBERSHIP_ACTIVE,
     );
     return membership !== null;
+  }
+
+  /** Convierte el contrato nuevo de cinco evidencias o el contrato histórico. */
+  private resolveEvidence(
+    dto: RequestVerificationDto,
+    legacyTypeId: string,
+  ): Array<{ fileId: string; typeId: string }> {
+    const values = [
+      dto.documentFrontFileId,
+      dto.documentBackFileId,
+      dto.livenessCenterFileId,
+      dto.livenessTurnLeftFileId,
+      dto.livenessTurnRightFileId,
+    ];
+    const supplied = values.filter((value): value is string => Boolean(value));
+    if (dto.evidenceFileId && supplied.length) {
+      throw new PreconditionFailedException(
+        'Envía el archivo histórico o las cinco evidencias nuevas, no ambos',
+      );
+    }
+    if (dto.evidenceFileId) {
+      return [{ fileId: dto.evidenceFileId, typeId: legacyTypeId }];
+    }
+    if (supplied.length === 0) return [];
+    if (supplied.length !== values.length) {
+      throw new PreconditionFailedException(
+        'La verificación requiere las cinco evidencias en el orden solicitado',
+      );
+    }
+    return [
+      { fileId: values[0]!, typeId: IDA.EVIDENCE_TYPE_IDENTITY_DOCUMENT_FRONT },
+      { fileId: values[1]!, typeId: IDA.EVIDENCE_TYPE_IDENTITY_DOCUMENT_BACK },
+      { fileId: values[2]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_CENTER },
+      { fileId: values[3]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_TURN_LEFT },
+      { fileId: values[4]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_TURN_RIGHT },
+    ];
   }
 }

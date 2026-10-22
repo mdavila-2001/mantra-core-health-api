@@ -172,6 +172,13 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
+    ALTER TABLE "scheduling"."schedule_rules"
+        ADD CONSTRAINT "fk_schedule_rules_booking_mode_concept_id" FOREIGN KEY ("booking_mode_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
     ALTER TABLE "scheduling"."availability_exceptions"
         ADD CONSTRAINT "fk_availability_exceptions_exception_type_concept_id" FOREIGN KEY ("exception_type_concept_id")
         REFERENCES "terminology"."catalog_concepts" ("id");
@@ -624,3 +631,38 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_calendar_absences_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: directory.tenants (requiere schema directory)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."appointment_payment_states"
+        ADD CONSTRAINT "fk_appointment_payment_states_tenant_id" FOREIGN KEY ("tenant_id")
+        REFERENCES "directory"."tenants" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: terminology.catalog_concepts (requiere schema terminology)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."appointment_payment_states"
+        ADD CONSTRAINT "fk_appointment_payment_states_status_concept_id" FOREIGN KEY ("status_concept_id")
+        REFERENCES "terminology"."catalog_concepts" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."appointment_payment_states"
+        ADD CONSTRAINT "fk_appointment_payment_states_marked_by_user_id" FOREIGN KEY ("marked_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."appointment_payment_states"
+        ADD CONSTRAINT "fk_appointment_payment_states_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "scheduling"."appointment_payment_states"
+        ADD CONSTRAINT "fk_appointment_payment_states_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)

@@ -1,0 +1,22 @@
+✔ deterministicId replica exacta de src/common/constants/concepts.ts (0.9508ms)
+✔ md5uuid equivale a md5(key)::uuid de Postgres (0.1867ms)
+✔ slugify y htmlToText (0.771ms)
+✔ CIE-10-ES diagnósticos: jerarquía, marcadores y categoría desde el capítulo (2.6755ms)
+✔ CIE-10-ES procedimientos: categoría por sección ICD-10-PCS (1.172ms)
+✔ taxonomías: ATC, capítulos y grupos MedlinePlus (0.4016ms)
+✔ CIMA: un término por VTM, ficha técnica verbatim con cita, fotos y ATC (14.4337ms)
+✔ MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del tema inglés (4.3267ms)
+✔ MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab (5.5814ms)
+✔ Wikidata/Commons: atribución y licencia; unión sólo por código idéntico (1.001ms)
+✔ LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si faltan columnas (1.0382ms)
+✔ plan de carga: membresías a los value sets del glosario con los ids del backend (1.0279ms)
+✔ Anatomía Wikidata: verificación de dominio y de ids de propiedad (2.7001ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 151.3327
+exit=0

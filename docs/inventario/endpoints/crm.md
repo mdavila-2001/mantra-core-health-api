@@ -42,9 +42,9 @@
 
 ### Qué es y para qué sirve (negocio)
 
-Crear una cuenta con su contacto principal. Caso de uso UC-49-01: Crear cuenta con contacto principal. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Crear una cuenta con su contacto principal. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:10`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -56,10 +56,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:59` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -138,7 +138,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-01`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -153,9 +153,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Vista 360 de la cuenta. Caso de uso UC-49-14: Vista 360 de la cuenta. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Vista 360 de la cuenta. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -167,9 +167,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:84` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -219,7 +219,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-14`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -234,9 +234,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Sumar un usuario al equipo de la cuenta. Caso de uso UC-49-02: Asignar equipo de cuenta. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Sumar un usuario al equipo de la cuenta. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -248,11 +248,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN | `src/modules/crm/controllers/crm.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:71` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -328,7 +328,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-02`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -343,9 +343,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Registrar una actividad y su subtipo. Caso de uso UC-49-05: Actividad polimórfica. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Registrar una actividad y su subtipo. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -357,10 +357,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -445,7 +445,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-05`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -460,9 +460,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Abrir un caso de servicio. Caso de uso UC-49-11: Abrir caso de servicio. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Abrir un caso de servicio. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -474,10 +474,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:202` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -558,7 +558,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-11`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -573,9 +573,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Comentar el caso. Caso de uso UC-49-12: Comentar y transicionar. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Comentar el caso. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -587,11 +587,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:214` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:214` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -656,7 +656,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-12`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -671,9 +671,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Resolver el caso. Caso de uso UC-49-13: Resolver caso. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Resolver el caso. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -685,9 +685,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:248` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:248` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -738,7 +738,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-13`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -753,9 +753,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Transicionar el estado del caso. Caso de uso UC-49-12: Comentar y transicionar. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Transicionar el estado del caso. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -767,11 +767,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:235` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:235` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -842,7 +842,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-12`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -857,9 +857,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Registrar el consentimiento del canal de contacto. Caso de uso UC-49-15: Consentimiento de canal. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Registrar el consentimiento del canal de contacto. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -871,11 +871,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:264` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, cid | `src/modules/crm/controllers/crm.controller.ts:264` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -945,7 +945,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-15`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -960,9 +960,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Capturar un lead. Caso de uso UC-49-03: Capturar y calificar lead. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Capturar un lead. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -974,10 +974,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1046,7 +1046,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-03`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1061,9 +1061,9 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Convertir el lead en oportunidad. Caso de uso UC-49-04: Convertir lead en oportunidad. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Convertir el lead en oportunidad. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1075,11 +1075,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:124` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:124` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1162,7 +1162,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-04`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1177,9 +1177,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Calificar o descartar el lead. Caso de uso UC-49-03: Capturar y calificar lead. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Calificar o descartar el lead. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1191,11 +1191,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:111` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1267,7 +1267,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-03`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1282,9 +1282,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Avanzar la oportunidad de etapa. Caso de uso UC-49-07: Avanzar etapa del pipeline. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Avanzar la oportunidad de etapa. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1296,11 +1296,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:152` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:152` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1371,7 +1371,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-07`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1386,9 +1386,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Marcar la oportunidad como perdida con su motivo. Caso de uso UC-49-09: Perder con motivo. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Marcar la oportunidad como perdida con su motivo. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1400,11 +1400,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:177` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:177` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1474,7 +1474,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-09`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1489,9 +1489,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Marcar la oportunidad como ganada. Caso de uso UC-49-08: Ganar oportunidad. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Marcar la oportunidad como ganada. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1503,9 +1503,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN, CRM_AGENT | `src/modules/crm/controllers/crm.controller.ts:165` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/crm/controllers/crm.controller.ts:165` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1555,7 +1555,7 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-08`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1570,9 +1570,9 @@ El árbol de decisión completo está en [flujos](../flujos/crm.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Registrar una alianza y su acuerdo marco. Caso de uso UC-49-10: Alianza + acuerdo marco. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
+Registrar una alianza y su acuerdo marco. Dentro del módulo (descripción del modelo, en inglés): «The internal CRM the clients asked for: a first-class contact and company (account) database, lead capture and qualification, sales/partnership pipelines with stages and opportunities, a logged activity timeline (calls, emails, meetings…» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_49_crm.puml:17`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1584,10 +1584,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/crm/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CRM_ADMIN | `src/modules/crm/controllers/crm.controller.ts:190` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1662,7 +1662,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Flujos
 
-- Módulo 49 — CRM — etapa `UC-49-10`
+- CRM — etapa `ctrl:CrmController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

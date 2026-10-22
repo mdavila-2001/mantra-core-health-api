@@ -1,0 +1,8 @@
+$ git rev-parse HEAD
+f4fea3e63e7292d1ea311e1f55db61c1746c7435
+$ git branch --show-current
+marcelo/fix-homologacion-metodos-http
+$ git rev-parse origin/dev
+f4fea3e63e7292d1ea311e1f55db61c1746c7435
+$ git rev-parse --abbrev-ref --symbolic-full-name @{u}
+fatal: no upstream configured for branch 'marcelo/fix-homologacion-metodos-http'

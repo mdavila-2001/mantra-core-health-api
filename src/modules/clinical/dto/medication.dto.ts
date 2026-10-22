@@ -6,7 +6,18 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
 } from 'class-validator';
+
+/** Tope del motivo escrito a mano de una receta (P24, `indication_text`). */
+export const INDICATION_TEXT_MAX_LENGTH = 200;
+
+/** Cuerpo de `POST /clinical/medication-requests/:id/attachments` (P25). */
+export class AttachFileToMedicationRequestDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  fileId!: string;
+}
 
 /** Cuerpo de `POST /clinical/medication-requests` (UC-08-10). */
 export class CreateMedicationRequestDto {
@@ -37,6 +48,20 @@ export class CreateMedicationRequestDto {
   @IsOptional()
   @IsUUID()
   encounterId?: string;
+
+  /**
+   * P43: instancia del formulario médico (cerrada) de la que sale el registro.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Instancia CERRADA del formulario médico (forms.form_instances) de la que ' +
+      'sale la receta. Opcional: desde la historia se emite sin formulario. Si viaja, ' +
+      'debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  formInstanceId?: string;
 
   /**
    * Identificador asociado a medication concept.
@@ -152,6 +177,24 @@ export class CreateMedicationRequestDto {
   @IsOptional()
   @IsUUID()
   indicationConditionId?: string;
+
+  /**
+   * Motivo escrito a mano cuando no hay diagnóstico codificado (P24 / CL-03).
+   *
+   * Excluyente con `indicationConditionId`: si llegan los dos, gana el
+   * concepto y el texto se descarta — mismo criterio que `occupation_free_text`
+   * en `persons`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Motivo de la receta escrito a mano («Otro motivo»). Excluyente con ' +
+      'indicationConditionId: si viajan los dos, gana la condición (P24)',
+    maxLength: INDICATION_TEXT_MAX_LENGTH,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(INDICATION_TEXT_MAX_LENGTH)
+  indicationText?: string;
 }
 
 /** Cuerpo de `POST /clinical/medication-records` (UC-08-11). */
@@ -354,6 +397,20 @@ export class EditMedicationRequestDraftDto {
   indicationConditionId?: string;
 
   /**
+   * Motivo escrito a mano (P24). Excluyente con `indicationConditionId`; gana
+   * el concepto.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Motivo de la receta escrito a mano. Excluyente con indicationConditionId (P24)',
+    maxLength: INDICATION_TEXT_MAX_LENGTH,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(INDICATION_TEXT_MAX_LENGTH)
+  indicationText?: string;
+
+  /**
    * Valor de patient instructions text mantenido por la instancia.
    */
   @ApiPropertyOptional({
@@ -538,6 +595,17 @@ export class MedicationRequestResponseDto {
    */
   @ApiProperty({ format: 'uuid' })
   patientProfileId!: string;
+
+  /**
+   * P43: instancia de formulario de origen (nula si no salió de un formulario).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Instancia del formulario médico de la que salió la receta (nulo = sin formulario)',
+    format: 'uuid',
+    nullable: true,
+  })
+  formInstanceId?: string | null;
 
   /**
    * Valor de status mantenido por la instancia.

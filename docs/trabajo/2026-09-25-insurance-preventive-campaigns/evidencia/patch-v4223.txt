@@ -1,0 +1,17 @@
+# Parche v4223 sobre Postgres 16 desechable (esquemas mínimos iam, terminology, insurance)
+--- pasada 1
+--- pasada 2 (idempotencia)
+avisos already exists: 14
+pasada 2: OK
+--- conteos
+tablas=2
+indices=14
+fk=12
+check=2
+--- fechas invertidas (debe fallar)
+ERROR:  new row for relation "insurance_campaigns" violates check constraint "ck_insurance_campaigns_valid_period"
+--- 101 por ciento (debe fallar)
+ERROR:  new row for relation "insurance_campaigns" violates check constraint "ck_insurance_campaigns_copay_bonus_range"
+--- valida (debe pasar)
+--- codigo duplicado en la misma aseguradora (debe fallar)
+ERROR:  duplicate key value violates unique constraint "uq_insurance_campaigns_carrier_code"

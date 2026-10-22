@@ -1,0 +1,86 @@
+{
+  "_nota": "Canales de contacto directo (WhatsApp, call center, correo de siniestros) de las aseguradoras bolivianas reales que ofrecen seguro de salud (subtarea 2.3). A diferencia de insurance-carriers.dataset.json, este archivo NO se regenera desde el listado del stakeholder: es curado a mano, un valor por vez, sólo con lo que cada compañía publica en su propio dominio oficial (regla 70 — sin publicación confirmada, null; nunca un número inventado). Para actualizar un canal: verificar el dominio oficial de la compañía, anotar sourceUrl y la fecha de obtención, y editar la fila correspondiente. `code` coincide con el `code` de insurance-carriers.dataset.json.",
+  "datos": [
+    {
+      "code": "BO_ASEG_ALIANZA_VIDA_S_A",
+      "whatsapp": null,
+      "callCenter": null,
+      "supportEmail": null,
+      "sourceUrl": null,
+      "obtenido": null,
+      "nota": "No se pudo confirmar un canal propio en el dominio oficial: alianza.com.bo resuelve a la aseguradora de generales del mismo grupo, no a la de vida/salud."
+    },
+    {
+      "code": "BO_ASEG_BISA_SEGUROS_Y_REASEGUROS_S_A",
+      "whatsapp": "+59171545112",
+      "callCenter": "800-10-6060",
+      "supportEmail": null,
+      "sourceUrl": "https://ayuda.bisaseguros.com",
+      "obtenido": "2026-09-13",
+      "nota": "WhatsApp de la línea de Salud; el Contact Center es de atención general 24h."
+    },
+    {
+      "code": "BO_ASEG_FORTALEZA_SEGUROS_Y_REASEGUROS_S_A",
+      "whatsapp": "+59169200004",
+      "callCenter": "800-12-9992",
+      "supportEmail": null,
+      "sourceUrl": "https://aseguradorafortaleza.com.bo/contactenos",
+      "obtenido": "2026-09-13",
+      "nota": null
+    },
+    {
+      "code": "BO_ASEG_CREDISEGURO_S_A_SEGUROS_PERSONALES",
+      "whatsapp": "+59178889096",
+      "callCenter": null,
+      "supportEmail": null,
+      "sourceUrl": "https://www.crediseguro.com.bo",
+      "obtenido": "2026-09-13",
+      "nota": "Sin línea gratuita ni correo publicados."
+    },
+    {
+      "code": "BO_ASEG_LA_BOLIVIANA_CIACRUZ_SEGUROS_PERSONALES_S_A",
+      "whatsapp": "+59171548278",
+      "callCenter": "800-10-2727",
+      "supportEmail": null,
+      "sourceUrl": "https://www.lbc.bo/contactanos",
+      "obtenido": "2026-09-13",
+      "nota": null
+    },
+    {
+      "code": "BO_ASEG_LA_VITALICIA_SEGUROS_Y_REASEGUROS_DE_VIDA_S_",
+      "whatsapp": "+59177775677",
+      "callCenter": "800-10-4142",
+      "supportEmail": null,
+      "sourceUrl": "https://lavitalicia.bo/contacto/",
+      "obtenido": "2026-09-13",
+      "nota": null
+    },
+    {
+      "code": "BO_ASEG_NACIONAL_SEGUROS_VIDA_Y_SALUD_S_A",
+      "whatsapp": null,
+      "callCenter": null,
+      "supportEmail": null,
+      "sourceUrl": null,
+      "obtenido": null,
+      "nota": "nacionalseguros.com.bo devolvió 403 al intentar leerlo; no se pudo confirmar en el dominio oficial."
+    },
+    {
+      "code": "BO_ASEG_UNIVIDA_S_A",
+      "whatsapp": null,
+      "callCenter": "800-10-9119",
+      "supportEmail": null,
+      "sourceUrl": "https://www.univida.bo",
+      "obtenido": "2026-09-13",
+      "nota": "El único WhatsApp que la compañía difunde es de venta de SOAT, no de reclamos de salud: se descarta a propósito."
+    },
+    {
+      "code": "BO_ASEG_SANTA_CRUZ_VIDA_Y_SALUD_S_A",
+      "whatsapp": "+59172124747",
+      "callCenter": "800-12-4747",
+      "supportEmail": "consultasSCVS@santacruzfg.com",
+      "sourceUrl": "https://www.santacruzvidaysalud.com.bo/contacto/",
+      "obtenido": "2026-09-13",
+      "nota": null
+    }
+  ]
+}

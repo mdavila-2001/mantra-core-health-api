@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `surveys`
 
-Referencia exhaustiva de 12 operación(es) del módulo `surveys`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 17 operación(es) del módulo `surveys`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `surveys-assignments`, `surveys-patient`, `surveys-templates`
 - **Controladores:** `SurveysAssignmentsController`, `SurveysPatientController`, `SurveysTemplatesController`
@@ -19,10 +19,15 @@ Referencia exhaustiva de 12 operación(es) del módulo `surveys`, derivada del c
 6. [GET /surveys/templates](#6-get-surveys-templates) — Listar mis encuestas
 7. [POST /surveys/templates](#7-post-surveys-templates) — Crear una encuesta para pacientes
 8. [GET /surveys/templates/{id}](#8-get-surveys-templates-id) — Ver una encuesta y su cuestionario
-9. [POST /surveys/templates/{id}/deactivate](#9-post-surveys-templates-id-deactivate) — Desactivar la encuesta
-10. [POST /surveys/templates/{id}/questions](#10-post-surveys-templates-id-questions) — Configurar una pregunta y su tipo de respuesta
-11. [GET /surveys/templates/{id}/responses](#11-get-surveys-templates-id-responses) — Revisar las respuestas de los pacientes
-12. [POST /surveys/templates/{id}/versions/{versionNumber}/publish](#12-post-surveys-templates-id-versions-versionnumber-publish) — Publicar la encuesta y configurar su vigencia
+9. [PATCH /surveys/templates/{id}](#9-patch-surveys-templates-id) — Corregir título, consigna y plazo del borrador
+10. [POST /surveys/templates/{id}/deactivate](#10-post-surveys-templates-id-deactivate) — Desactivar la encuesta
+11. [POST /surveys/templates/{id}/questions](#11-post-surveys-templates-id-questions) — Configurar una pregunta y su tipo de respuesta
+12. [DELETE /surveys/templates/{id}/questions/{questionId}](#12-delete-surveys-templates-id-questions-questionid) — Quitar una pregunta del borrador
+13. [PATCH /surveys/templates/{id}/questions/{questionId}](#13-patch-surveys-templates-id-questions-questionid) — Corregir una pregunta del borrador
+14. [PUT /surveys/templates/{id}/questions/order](#14-put-surveys-templates-id-questions-order) — Reordenar el cuestionario del borrador
+15. [GET /surveys/templates/{id}/responses](#15-get-surveys-templates-id-responses) — Revisar las respuestas de los pacientes
+16. [POST /surveys/templates/{id}/versions](#16-post-surveys-templates-id-versions) — Abrir una versión nueva del cuestionario
+17. [POST /surveys/templates/{id}/versions/{versionNumber}/publish](#17-post-surveys-templates-id-versions-versionnumber-publish) — Publicar la encuesta y configurar su vigencia
 
 ---
 
@@ -43,7 +48,7 @@ Contexto declarado en el controlador: Asocia una versión publicada a una consul
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /surveys/assignments` en `SurveysAssignmentsController_createAssignment`. El controlador delega en `SurveysAssignmentsService.createAssignment`. Valida el body como `CreateAssignmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<IdResponseDto>`.
+NestJS resuelve `POST /surveys/assignments` en `SurveysAssignmentsController_createAssignment`. El controlador delega en `SurveysAssignmentsService.createAssignment`. Valida el body como `SurveysCreateAssignmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<IdResponseDto>`.
 
 ### Parámetros
 
@@ -51,7 +56,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateAssignmentDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `SurveysCreateAssignmentDto`; los campos opcionales se omiten.
 
 ```http
 POST /surveys/assignments HTTP/1.1
@@ -1057,7 +1062,137 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /surveys/templates/{id}/deactivate
+## 9. PATCH /surveys/templates/{id}
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-templates`
+- **Nombre:** Corregir título, consigna y plazo del borrador
+- **Operation ID:** `SurveysTemplatesController_updateTemplate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysTemplatesController.updateTemplate](../../src/modules/surveys/controllers/surveys-templates.controller.ts)
+
+### Descripción de negocio
+
+Corregir título, consigna y plazo del borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CL-72: corrige título, consigna y plazo de la versión en borrador.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /surveys/templates/{id}` en `SurveysTemplatesController_updateTemplate`. El controlador delega en `SurveysTemplatesService.updateTemplate`. Valida el body como `UpdateTemplateDto` y consume `application/json`. El tipo de retorno estático es `Promise<OkResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateTemplateDto`; los campos opcionales se omiten.
+
+```http
+PATCH /surveys/templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `title` | No | `string` | longitud mínima 1; longitud máxima 200 | Título del instrumento | `valor-ejemplo` |
+| `description` | No | `string` | longitud máxima 2000 | Consigna que ve el paciente; vacío la borra | `Texto descriptivo de ejemplo` |
+| `responseWindowDays` | No | `number` | mínimo 1; máximo 365 | Días para responder (de la versión en borrador) | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /surveys/templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "title": "valor-ejemplo",
+  "description": "Texto descriptivo de ejemplo",
+  "responseWindowDays": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 404 | `NOT_FOUND` | La plantilla no tiene versiones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión ya está publicada: cree una versión nueva para modificar el cuestionario | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/templates/{id}"
+}
+```
+
+---
+
+## 10. POST /surveys/templates/{id}/deactivate
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1169,7 +1304,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /surveys/templates/{id}/questions
+## 11. POST /surveys/templates/{id}/questions
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1305,15 +1440,15 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | La plantilla no tiene versiones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 404 | `NOT_FOUND` | La plantilla no tiene versiones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La versión ya está publicada: cree una versión nueva para modificar el cuestionario | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 422 | `PRECONDITION_FAILED` | Las preguntas de elección requieren al menos dos opciones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 422 | `PRECONDITION_FAILED` | Este tipo de pregunta no admite opciones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 422 | `PRECONDITION_FAILED` | Las opciones no pueden repetirse | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 422 | `PRECONDITION_FAILED` | El máximo de la escala debe ser mayor que el mínimo | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión ya está publicada: cree una versión nueva para modificar el cuestionario | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1331,7 +1466,400 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /surveys/templates/{id}/responses
+## 12. DELETE /surveys/templates/{id}/questions/{questionId}
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-templates`
+- **Nombre:** Quitar una pregunta del borrador
+- **Operation ID:** `SurveysTemplatesController_deleteQuestion`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysTemplatesController.deleteQuestion](../../src/modules/surveys/controllers/surveys-templates.controller.ts)
+
+### Descripción de negocio
+
+Quitar una pregunta del borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CL-60: quita una pregunta del borrador y renumera las que quedan.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /surveys/templates/{id}/questions/{questionId}` en `SurveysTemplatesController_deleteQuestion`. El controlador delega en `SurveysTemplatesService.deleteQuestion`. No recibe body. El tipo de retorno estático es `Promise<OkResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `questionId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /surveys/templates/00000000-0000-4000-8000-000000000001/questions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`, `questionId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /surveys/templates/00000000-0000-4000-8000-000000000001/questions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 404 | `NOT_FOUND` | La plantilla no tiene versiones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 404 | `NOT_FOUND` | Pregunta no encontrada | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión ya está publicada: cree una versión nueva para modificar el cuestionario | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/templates/{id}/questions/{questionId}"
+}
+```
+
+---
+
+## 13. PATCH /surveys/templates/{id}/questions/{questionId}
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-templates`
+- **Nombre:** Corregir una pregunta del borrador
+- **Operation ID:** `SurveysTemplatesController_updateQuestion`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysTemplatesController.updateQuestion](../../src/modules/surveys/controllers/surveys-templates.controller.ts)
+
+### Descripción de negocio
+
+Corregir una pregunta del borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CL-60: corrige una pregunta del borrador (opciones y escala enteras).
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /surveys/templates/{id}/questions/{questionId}` en `SurveysTemplatesController_updateQuestion`. El controlador delega en `SurveysTemplatesService.updateQuestion`. Valida el body como `UpdateQuestionDto` y consume `application/json`. El tipo de retorno estático es `Promise<OkResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `questionId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateQuestionDto`; los campos opcionales se omiten.
+
+```http
+PATCH /surveys/templates/00000000-0000-4000-8000-000000000001/questions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`, `questionId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `questionText` | No | `string` | longitud mínima 1; longitud máxima 500 | Enunciado de la pregunta | `valor-ejemplo` |
+| `answerType` | No | `string` | valores: `TEXT`, `SCALE`, `BOOLEAN`, `SINGLE_CHOICE`, `MULTIPLE_CHOICE` | Tipo de respuesta esperado | `TEXT` |
+| `required` | No | `boolean` | Sin restricción adicional declarada | Si responderla es obligatorio | `true` |
+| `options` | No | `array<string>` | longitud máxima 200; mínimo 2 elemento(s); máximo 20 elemento(s) | Opciones, enteras. Reemplazan a las anteriores. | `["valor-ejemplo","valor-ejemplo"]` |
+| `scaleMin` | No | `number` | mínimo 0; máximo 100 | Mínimo de la escala. Solo para SCALE. | `1` |
+| `scaleMax` | No | `number` | mínimo 1; máximo 100 | Máximo de la escala. Solo para SCALE. | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /surveys/templates/00000000-0000-4000-8000-000000000001/questions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "questionText": "valor-ejemplo",
+  "answerType": "TEXT",
+  "required": true,
+  "options": [
+    "valor-ejemplo",
+    "valor-ejemplo"
+  ],
+  "scaleMin": 1,
+  "scaleMax": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 404 | `NOT_FOUND` | La plantilla no tiene versiones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 404 | `NOT_FOUND` | Pregunta no encontrada | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión ya está publicada: cree una versión nueva para modificar el cuestionario | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las preguntas de elección requieren al menos dos opciones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | Este tipo de pregunta no admite opciones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las opciones no pueden repetirse | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | El máximo de la escala debe ser mayor que el mínimo | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/templates/{id}/questions/{questionId}"
+}
+```
+
+---
+
+## 14. PUT /surveys/templates/{id}/questions/order
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-templates`
+- **Nombre:** Reordenar el cuestionario del borrador
+- **Operation ID:** `SurveysTemplatesController_reorderQuestions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysTemplatesController.reorderQuestions](../../src/modules/surveys/controllers/surveys-templates.controller.ts)
+
+### Descripción de negocio
+
+Reordenar el cuestionario del borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: CL-60: reordena el cuestionario entero. **Declarada antes** que las rutas con `:questionId` para que `order` nunca se lea como un identificador.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /surveys/templates/{id}/questions/order` en `SurveysTemplatesController_reorderQuestions`. El controlador delega en `SurveysTemplatesService.reorderQuestions`. Valida el body como `ReorderQuestionsDto` y consume `application/json`. El tipo de retorno estático es `Promise<OkResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReorderQuestionsDto`; los campos opcionales se omiten.
+
+```http
+PUT /surveys/templates/00000000-0000-4000-8000-000000000001/questions/order HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "questionIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `questionIds` | Sí | `array<string>` | formato `uuid`; mínimo 1 elemento(s) | Preguntas en el orden final (sin repetidos) | `["00000000-0000-4000-8000-000000000001"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /surveys/templates/00000000-0000-4000-8000-000000000001/questions/order HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "questionIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OkResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OkResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | true si la operación se aplicó | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 404 | `NOT_FOUND` | La plantilla no tiene versiones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Hay preguntas que no pertenecen a la versión en borrador | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | La versión ya está publicada: cree una versión nueva para modificar el cuestionario | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/templates/{id}/questions/order"
+}
+```
+
+---
+
+## 15. GET /surveys/templates/{id}/responses
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`
@@ -1405,7 +1933,6 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   {
     "id": "00000000-0000-4000-8000-000000000001",
     "invitationId": "00000000-0000-4000-8000-000000000001",
-    "patientProfileId": "00000000-0000-4000-8000-000000000001",
     "appointmentBookingId": "00000000-0000-4000-8000-000000000001",
     "submittedAt": "2026-07-31T12:00:00.000Z",
     "answers": [
@@ -1456,7 +1983,124 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /surveys/templates/{id}/versions/{versionNumber}/publish
+## 16. POST /surveys/templates/{id}/versions
+
+- **Módulo:** `surveys`
+- **Etiqueta OpenAPI:** `surveys-templates`
+- **Nombre:** Abrir una versión nueva del cuestionario
+- **Operation ID:** `SurveysTemplatesController_createNextVersion`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SurveysTemplatesController.createNextVersion](../../src/modules/surveys/controllers/surveys-templates.controller.ts)
+
+### Descripción de negocio
+
+Abrir una versión nueva del cuestionario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Abre una versión nueva en borrador, para corregir una plantilla ya publicada (FT-31).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /surveys/templates/{id}/versions` en `SurveysTemplatesController_createNextVersion`. El controlador delega en `SurveysTemplatesService.createNextVersion`. No recibe body. El tipo de retorno estático es `Promise<TemplateCreatedDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /surveys/templates/00000000-0000-4000-8000-000000000001/versions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /surveys/templates/00000000-0000-4000-8000-000000000001/versions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<TemplateCreatedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<TemplateCreatedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TemplateCreatedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "versionId": "00000000-0000-4000-8000-000000000001",
+  "versionNumber": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `versionId` | Sí | `string` | formato `uuid` | Versión 1 (borrador) creada | `00000000-0000-4000-8000-000000000001` |
+| `versionNumber` | Sí | `number` | Sin restricción adicional declarada | Número de la versión creada | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | La plantilla no tiene versiones | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 409 | `CONFLICT` | Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | La sesión no tiene perfil profesional asociado | Excepción explícita en src/modules/surveys/services/surveys-templates.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/surveys/templates/{id}/versions"
+}
+```
+
+---
+
+## 17. POST /surveys/templates/{id}/versions/{versionNumber}/publish
 
 - **Módulo:** `surveys`
 - **Etiqueta OpenAPI:** `surveys-templates`

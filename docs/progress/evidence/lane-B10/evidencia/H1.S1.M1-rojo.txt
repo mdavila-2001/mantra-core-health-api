@@ -1,0 +1,59 @@
+FAIL src/modules/scheduling/services/scheduling-bookings.service.spec.ts (11.122 s)
+  ● SchedulingBookingsService › reschedule (UC-41-08) › solapamiento en cupos distintos (M4 · H1.S1) › rechaza mover la cita a un cupo cuyo rango se pisa con otra cita comprometida de la misma médica
+
+    expect(received).rejects.toBeInstanceOf()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"bookingId": "booking-1", "fromSlotId": "11111111-1111-1111-1111-111111111111", "toSlotId": "44444444-4444-4444-4444-444444444444"}
+
+    [0m [90m 793 |[39m         )[33m;[39m
+     [90m 794 |[39m
+    [31m[1m>[22m[39m[90m 795 |[39m         [36mawait[39m expect(
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 796 |[39m           d[33m.[39mservice[33m.[39mreschedule(
+     [90m 797 |[39m             [32m'booking-1'[39m[33m,[39m
+     [90m 798 |[39m             { toSlotId[33m:[39m [33mTARGET_ID[39m[33m,[39m reasonText[33m:[39m [33mMOTIVO[39m }[33m,[39m[0m
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at Object.expect (modules/scheduling/services/scheduling-bookings.service.spec.ts:795:15)
+
+  ● SchedulingBookingsService › reschedule (UC-41-08) › solapamiento en cupos distintos (M4 · H1.S1) › rechaza mover la cita encima de otro turno confirmado del mismo paciente
+
+    expect(received).rejects.toBeInstanceOf()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"bookingId": "booking-1", "fromSlotId": "11111111-1111-1111-1111-111111111111", "toSlotId": "44444444-4444-4444-4444-444444444444"}
+
+    [0m [90m 828 |[39m         ])[33m;[39m
+     [90m 829 |[39m
+    [31m[1m>[22m[39m[90m 830 |[39m         [36mawait[39m expect(
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 831 |[39m           d[33m.[39mservice[33m.[39mreschedule(
+     [90m 832 |[39m             [32m'booking-1'[39m[33m,[39m
+     [90m 833 |[39m             { toSlotId[33m:[39m [33mTARGET_ID[39m[33m,[39m reasonText[33m:[39m [33mMOTIVO[39m }[33m,[39m[0m
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at Object.expect (modules/scheduling/services/scheduling-bookings.service.spec.ts:830:15)
+
+  ● SchedulingBookingsService › reschedule (UC-41-08) › solapamiento en cupos distintos (M4 · H1.S1) › con el rango libre, mueve la cita y la deja atribuida al recurso del cupo destino
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "res-2"
+    Received: "res-1"
+
+    [0m [90m 862 |[39m         [90m// Sin esto la regla madre seguía atribuyendo la cita movida al[39m
+     [90m 863 |[39m         [90m// recurso viejo (su consulta une por el recurso de la cita).[39m
+    [31m[1m>[22m[39m[90m 864 |[39m         expect(booking[33m.[39mresourceId)[33m.[39mtoBe([32m'res-2'[39m)[33m;[39m
+     [90m     |[39m                                    [31m[1m^[22m[39m
+     [90m 865 |[39m         expect(booking[33m.[39mbookableSlotId)[33m.[39mtoBe([33mTARGET_ID[39m)[33m;[39m
+     [90m 866 |[39m       })[33m;[39m
+     [90m 867 |[39m[0m
+
+      at Object.toBe (modules/scheduling/services/scheduling-bookings.service.spec.ts:864:36)
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 155 skipped, 2 passed, 160 total
+Snapshots:   0 total
+Time:        11.554 s
+Ran all test suites matching scheduling-bookings.service with tests matching "M4".

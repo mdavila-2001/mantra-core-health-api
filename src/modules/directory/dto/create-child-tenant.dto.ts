@@ -10,6 +10,10 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { TENANT_TYPE_CODES, type TenantTypeCode } from '../directory.concepts';
+import {
+  LEGAL_ENTITY_TYPE_CODES,
+  type LegalEntityTypeCode,
+} from '../legal-entity-types';
 import { BrokerProfileDto, PayerProfileDto } from './tenant-type-profile.dto';
 
 /** Cuerpo de `POST /tenants/{tenantId}/child-tenants` (UC-04-03). */
@@ -59,8 +63,10 @@ export class CreateChildTenantDto {
       'Tipo de organización. Obligatorio: cada tipo exige sus propios datos ' +
       '(PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, ' +
       'UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, ' +
-      'HEALTH_BUSINESS— país y ' +
-      'jurisdicción).',
+      'HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y ' +
+      'jurisdicción). Esta puerta administrativa no acepta todavía el bloque ' +
+      '`diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se ' +
+      'materializa con sus valores por defecto.',
     enum: TENANT_TYPE_CODES,
   })
   @IsIn(TENANT_TYPE_CODES)
@@ -79,7 +85,23 @@ export class CreateChildTenantDto {
   tenantTypeConceptId?: string;
 
   /**
-   * Identificador asociado a legal entity type concept.
+   * Tipo societario, del diccionario internacional (subtarea 1.1). Si viene,
+   * manda sobre `legalEntityTypeConceptId`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Si ' +
+      'viene, se ignora `legalEntityTypeConceptId`.',
+    enum: LEGAL_ENTITY_TYPE_CODES,
+    example: 'SRL',
+  })
+  @IsOptional()
+  @IsIn(LEGAL_ENTITY_TYPE_CODES)
+  legalEntityType?: LegalEntityTypeCode;
+
+  /**
+   * Identificador asociado a legal entity type concept. Escotilla: si viene
+   * `legalEntityType`, éste manda y este campo se ignora.
    */
   @ApiPropertyOptional({
     description: 'Concept id del tipo de entidad legal',

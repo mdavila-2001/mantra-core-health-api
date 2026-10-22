@@ -18,6 +18,8 @@ CREATE INDEX IF NOT EXISTS "ix_persons_preferred_language_concept_id" ON "profil
 
 CREATE INDEX IF NOT EXISTS "ix_persons_occupation_concept_id" ON "profiles"."persons" ("occupation_concept_id");
 
+CREATE INDEX IF NOT EXISTS "ix_persons_work_employer_concept_id" ON "profiles"."persons" ("work_employer_concept_id");
+
 CREATE INDEX IF NOT EXISTS "ix_persons_merge_survivor_person_id" ON "profiles"."persons" ("merge_survivor_person_id");
 
 CREATE INDEX IF NOT EXISTS "ix_persons_photo_file_id" ON "profiles"."persons" ("photo_file_id");
@@ -177,6 +179,8 @@ CREATE INDEX IF NOT EXISTS "ix_jurisdiction_authorizations_jurisdiction_concept_
 CREATE INDEX IF NOT EXISTS "ix_jurisdiction_authorizations_practice_scope_concept_id" ON "profiles"."jurisdiction_authorizations" ("practice_scope_concept_id");
 
 CREATE INDEX IF NOT EXISTS "ix_jurisdiction_authorizations_state_concept_id" ON "profiles"."jurisdiction_authorizations" ("state_concept_id");
+
+CREATE INDEX IF NOT EXISTS "ix_jurisdiction_authorizations_file_id" ON "profiles"."jurisdiction_authorizations" ("file_id");
 
 CREATE INDEX IF NOT EXISTS "ix_jurisdiction_authorizations_created_by_user_id" ON "profiles"."jurisdiction_authorizations" ("created_by_user_id");
 

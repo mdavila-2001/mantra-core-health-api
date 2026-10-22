@@ -146,53 +146,22 @@ export class BoGeographySeedService {
     };
 
     // --- Nivel 1: el conjunto de valores ---
-    const valueSetIdentifier = boDepartmentValueSetId();
-    const existingValueSets = await this.existingIds(em, ValueSets, [
-      valueSetIdentifier,
-    ]);
-    if (!existingValueSets.has(valueSetIdentifier)) {
-      em.create(
-        ValueSets,
-        {
-          id: valueSetIdentifier,
-          internalCode: BO_DEPARTMENT_VALUE_SET,
-          name: BO_DEPARTMENT_VALUE_SET_NAME,
-          canonicalUrl: boDepartmentCanonicalUrl(),
-          stateConceptId: CONCEPTS.TERM_ACTIVE,
-          createdAt: now,
-          updatedAt: now,
-        },
-        { partial: true },
-      );
-      counters.valueSets += 1;
-    }
+    const valueSetIdentifier = await this.resolveValueSetId(em, now, {
+      identifier: boDepartmentValueSetId(),
+      internalCode: BO_DEPARTMENT_VALUE_SET,
+      name: BO_DEPARTMENT_VALUE_SET_NAME,
+      canonicalUrl: boDepartmentCanonicalUrl(),
+      counters,
+    });
     await em.flush();
 
     // --- Nivel 2: su versión única, marcada vigente ---
-    const versionIdentifier = boDepartmentVersionId();
-    const existingVersions = await this.existingIds(em, ValueSetVersions, [
-      versionIdentifier,
-    ]);
-    if (!existingVersions.has(versionIdentifier)) {
-      em.create(
-        ValueSetVersions,
-        {
-          id: versionIdentifier,
-          valueSetId: valueSetIdentifier,
-          version: BO_DEPARTMENT_VERSION,
-          validFrom: now,
-          // `readExpansion` sin `valueSetVersionId` lee la vigente: sin esta
-          // marca, la lectura del desplegable devolvería 404 aunque el
-          // conjunto y sus miembros existan.
-          isDefault: true,
-          stateConceptId: CONCEPTS.TERM_ACTIVE,
-          createdAt: now,
-          updatedAt: now,
-        },
-        { partial: true },
-      );
-      counters.versions += 1;
-    }
+    const versionIdentifier = await this.resolveValueSetVersionId(em, now, {
+      identifier: boDepartmentVersionId(),
+      valueSetId: valueSetIdentifier,
+      version: BO_DEPARTMENT_VERSION,
+      counters,
+    });
     await em.flush();
 
     // --- Nivel 3: los nueve conceptos ---
@@ -235,19 +204,23 @@ export class BoGeographySeedService {
     counters.properties += await this.seedIsoProperties(em, now);
 
     // --- Nivel 6: la expansión, en el orden oficial ---
-    counters.memberships += await this.seedMemberships(em, now);
+    counters.memberships += await this.seedMemberships(
+      em,
+      now,
+      versionIdentifier,
+    );
 
     // --- Los municipios, que cuelgan de los conceptos recién sembrados ---
-    const municipios = await this.runMunicipalities(em, now);
-    counters.valueSets += municipios.valueSets;
-    counters.versions += municipios.versions;
-    counters.municipalities += municipios.municipalities;
-    counters.designations += municipios.designations;
-    counters.properties += municipios.properties;
-    counters.memberships += municipios.memberships;
+    const municipalities = await this.runMunicipalities(em, now);
+    counters.valueSets += municipalities.valueSets;
+    counters.versions += municipalities.versions;
+    counters.municipalities += municipalities.municipalities;
+    counters.designations += municipalities.designations;
+    counters.properties += municipalities.properties;
+    counters.memberships += municipalities.memberships;
 
     const total = Object.values(counters).reduce(
-      (suma, valor) => suma + valor,
+      (sum, value) => sum + value,
       0,
     );
     if (total > 0) {
@@ -268,30 +241,32 @@ export class BoGeographySeedService {
    * glosario.
    */
   private assertUniqueCodes(): void {
-    const vistas = new Set<string>();
+    const views = new Set<string>();
     for (const department of BO_DEPARTMENTS) {
-      if (vistas.has(department.code)) {
+      if (views.has(department.code)) {
         throw new Error(
           `El catálogo geográfico declara la sigla "${department.code}" más de una vez`,
         );
       }
-      vistas.add(department.code);
+      views.add(department.code);
     }
 
-    const siglas = new Set(BO_DEPARTMENTS.map((department) => department.code));
-    const codigos = new Set<string>();
+    const acronyms = new Set(
+      BO_DEPARTMENTS.map((department) => department.code),
+    );
+    const codes = new Set<string>();
     for (const municipality of BO_MUNICIPALITIES) {
-      if (codigos.has(municipality.ine)) {
+      if (codes.has(municipality.ine)) {
         throw new Error(
           `El catálogo geográfico declara el código INE "${municipality.ine}" más de una vez`,
         );
       }
-      codigos.add(municipality.ine);
+      codes.add(municipality.ine);
 
       // Un municipio cuyo departamento no está en el catálogo dejaría una FK
       // apuntando a un concepto que nadie siembra: la fila entra y la lectura
       // revienta después, lejos de acá. Mejor no arrancar.
-      if (!siglas.has(municipality.department)) {
+      if (!acronyms.has(municipality.department)) {
         throw new Error(
           `El municipio "${municipality.name}" (${municipality.ine}) cuelga del ` +
             `departamento "${municipality.department}", que no está en el catálogo`,
@@ -301,14 +276,14 @@ export class BoGeographySeedService {
       // El prefijo del código del INE ES el departamento: si los dos no
       // coinciden, el árbol que arma el cliente —que sólo mira el prefijo—
       // pondría el municipio bajo otro departamento.
-      const porPrefijo = BO_DEPARTMENT_BY_INE_PREFIX.get(
+      const byPrefix = BO_DEPARTMENT_BY_INE_PREFIX.get(
         municipality.ine.slice(0, 2),
       );
-      if (porPrefijo !== municipality.department) {
+      if (byPrefix !== municipality.department) {
         throw new Error(
           `El municipio "${municipality.name}" declara el departamento ` +
             `"${municipality.department}" pero su código INE ${municipality.ine} ` +
-            `corresponde a "${porPrefijo ?? 'ninguno'}"`,
+            `corresponde a "${byPrefix ?? 'ninguno'}"`,
         );
       }
     }
@@ -345,49 +320,21 @@ export class BoGeographySeedService {
       memberships: 0,
     };
 
-    const valueSetIdentifier = boMunicipalityValueSetId();
-    const existingValueSets = await this.existingIds(em, ValueSets, [
-      valueSetIdentifier,
-    ]);
-    if (!existingValueSets.has(valueSetIdentifier)) {
-      em.create(
-        ValueSets,
-        {
-          id: valueSetIdentifier,
-          internalCode: BO_MUNICIPALITY_VALUE_SET,
-          name: BO_MUNICIPALITY_VALUE_SET_NAME,
-          canonicalUrl: boMunicipalityCanonicalUrl(),
-          stateConceptId: CONCEPTS.TERM_ACTIVE,
-          createdAt: now,
-          updatedAt: now,
-        },
-        { partial: true },
-      );
-      counters.valueSets += 1;
-    }
+    const valueSetIdentifier = await this.resolveValueSetId(em, now, {
+      identifier: boMunicipalityValueSetId(),
+      internalCode: BO_MUNICIPALITY_VALUE_SET,
+      name: BO_MUNICIPALITY_VALUE_SET_NAME,
+      canonicalUrl: boMunicipalityCanonicalUrl(),
+      counters,
+    });
     await em.flush();
 
-    const versionIdentifier = boMunicipalityVersionId();
-    const existingVersions = await this.existingIds(em, ValueSetVersions, [
-      versionIdentifier,
-    ]);
-    if (!existingVersions.has(versionIdentifier)) {
-      em.create(
-        ValueSetVersions,
-        {
-          id: versionIdentifier,
-          valueSetId: valueSetIdentifier,
-          version: BO_MUNICIPALITY_VERSION,
-          validFrom: now,
-          isDefault: true,
-          stateConceptId: CONCEPTS.TERM_ACTIVE,
-          createdAt: now,
-          updatedAt: now,
-        },
-        { partial: true },
-      );
-      counters.versions += 1;
-    }
+    const versionIdentifier = await this.resolveValueSetVersionId(em, now, {
+      identifier: boMunicipalityVersionId(),
+      valueSetId: valueSetIdentifier,
+      version: BO_MUNICIPALITY_VERSION,
+      counters,
+    });
     await em.flush();
 
     const existingConcepts = await this.existingIds(
@@ -424,7 +371,11 @@ export class BoGeographySeedService {
 
     counters.designations += await this.seedMunicipalityDesignations(em, now);
     counters.properties += await this.seedMunicipalityProperties(em, now);
-    counters.memberships += await this.seedMunicipalityMemberships(em, now);
+    counters.memberships += await this.seedMunicipalityMemberships(
+      em,
+      now,
+      versionIdentifier,
+    );
 
     return counters;
   }
@@ -442,7 +393,7 @@ export class BoGeographySeedService {
       ),
     );
 
-    let creadas = 0;
+    let created = 0;
     for (const municipality of BO_MUNICIPALITIES) {
       const id = boMunicipalityDesignationId(municipality.ine);
       if (existing.has(id)) continue;
@@ -460,10 +411,10 @@ export class BoGeographySeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /**
@@ -485,7 +436,7 @@ export class BoGeographySeedService {
     ]);
     const existing = await this.existingIds(em, ConceptProperties, ids);
 
-    let creadas = 0;
+    let created = 0;
     for (const municipality of BO_MUNICIPALITIES) {
       const conceptId = boMunicipalityConceptId(municipality.ine);
 
@@ -504,7 +455,7 @@ export class BoGeographySeedService {
           },
           { partial: true },
         );
-        creadas += 1;
+        created += 1;
       }
 
       const parentId = boMunicipalityParentPropertyId(municipality.ine);
@@ -522,17 +473,18 @@ export class BoGeographySeedService {
           },
           { partial: true },
         );
-        creadas += 1;
+        created += 1;
       }
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** La expansión de municipios, en el orden del INE. */
   private async seedMunicipalityMemberships(
     em: ReturnType<MikroORM['em']['fork']>,
     now: Date,
+    versionIdentifier: string,
   ): Promise<number> {
     const existing = await this.existingIds(
       em,
@@ -542,8 +494,7 @@ export class BoGeographySeedService {
       ),
     );
 
-    let creadas = 0;
-    const versionIdentifier = boMunicipalityVersionId();
+    let created = 0;
     BO_MUNICIPALITIES.forEach((municipality, ordinal) => {
       const id = boMunicipalityMemberId(municipality.ine);
       if (existing.has(id)) return;
@@ -560,10 +511,10 @@ export class BoGeographySeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     });
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** Designación preferida (ES) de cada departamento. */
@@ -579,7 +530,7 @@ export class BoGeographySeedService {
       ),
     );
 
-    let creadas = 0;
+    let created = 0;
     for (const department of BO_DEPARTMENTS) {
       const id = boDepartmentDesignationId(department.code);
       if (existing.has(id)) continue;
@@ -597,10 +548,10 @@ export class BoGeographySeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /**
@@ -622,7 +573,7 @@ export class BoGeographySeedService {
       ),
     );
 
-    let creadas = 0;
+    let created = 0;
     for (const department of BO_DEPARTMENTS) {
       const id = boDepartmentIsoPropertyId(department.code);
       if (existing.has(id)) continue;
@@ -639,16 +590,17 @@ export class BoGeographySeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     }
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** La expansión: los nueve miembros, con el ordinal del orden oficial. */
   private async seedMemberships(
     em: ReturnType<MikroORM['em']['fork']>,
     now: Date,
+    versionIdentifier: string,
   ): Promise<number> {
     const existing = await this.existingIds(
       em,
@@ -656,8 +608,7 @@ export class BoGeographySeedService {
       BO_DEPARTMENTS.map((department) => boDepartmentMemberId(department.code)),
     );
 
-    let creadas = 0;
-    const versionIdentifier = boDepartmentVersionId();
+    let created = 0;
     BO_DEPARTMENTS.forEach((department, ordinal) => {
       const id = boDepartmentMemberId(department.code);
       if (existing.has(id)) return;
@@ -674,13 +625,108 @@ export class BoGeographySeedService {
         },
         { partial: true },
       );
-      creadas += 1;
+      created += 1;
     });
     await em.flush();
-    return creadas;
+    return created;
   }
 
   /** Los ids que ya están en la base, de entre los que se van a sembrar. */
+  /**
+   * Devuelve el id con el que el conjunto de valores **está** en la base.
+   *
+   * Comprobar la existencia por id era el defecto: `value_sets.internal_code`
+   * tiene único (`uq_value_sets_internal_code`), y el conjunto puede haber
+   * llegado antes desde el paquete de seeds del modelo con OTRO id. Entonces la
+   * comprobación por id decía «no está», el insert chocaba con el único y el
+   * paso entero quedaba omitido — que es lo que venía pasando con
+   * `VS_BO_MUNICIPALITY` en cada arranque.
+   *
+   * Se resuelve por la clave natural, como hace `VademecumSeedService`: si la
+   * fila ya está, se devuelve **su** id para que la versión cuelgue de ella y no
+   * de uno que no existe.
+   */
+  private async resolveValueSetId(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+    spec: {
+      identifier: string;
+      internalCode: string;
+      name: string;
+      canonicalUrl: string;
+      counters: { valueSets: number };
+    },
+  ): Promise<string> {
+    const present = await em.findOne(ValueSets, {
+      internalCode: spec.internalCode,
+    });
+    if (present) return present.id;
+
+    em.create(
+      ValueSets,
+      {
+        id: spec.identifier,
+        internalCode: spec.internalCode,
+        name: spec.name,
+        canonicalUrl: spec.canonicalUrl,
+        stateConceptId: CONCEPTS.TERM_ACTIVE,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+    spec.counters.valueSets += 1;
+    return spec.identifier;
+  }
+
+  /**
+   * Devuelve el id con el que la versión del conjunto **está** en la base.
+   *
+   * Mismo defecto que `resolveValueSetId`, un nivel más abajo y con su propio
+   * único: `uq_value_set_versions_value_set_id_version`. Al resolver el
+   * conjunto por su clave natural podíamos terminar apuntando a uno que ya
+   * traía su versión «1.0.0» con otro id, y el insert volvía a chocar.
+   *
+   * La clave natural acá es el par `(value_set_id, version)`, que es
+   * exactamente lo que declara ese único.
+   */
+  private async resolveValueSetVersionId(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+    spec: {
+      identifier: string;
+      valueSetId: string;
+      version: string;
+      counters: { versions: number };
+    },
+  ): Promise<string> {
+    const present = await em.findOne(ValueSetVersions, {
+      valueSetId: spec.valueSetId,
+      version: spec.version,
+    });
+    if (present) return present.id;
+
+    em.create(
+      ValueSetVersions,
+      {
+        id: spec.identifier,
+        valueSetId: spec.valueSetId,
+        version: spec.version,
+        validFrom: now,
+        // `readExpansion` sin `valueSetVersionId` lee la vigente: sin esta
+        // marca, la lectura del desplegable devolvería 404 aunque el conjunto
+        // y sus miembros existan.
+        isDefault: true,
+        stateConceptId: CONCEPTS.TERM_ACTIVE,
+        createdAt: now,
+        updatedAt: now,
+      },
+      { partial: true },
+    );
+    spec.counters.versions += 1;
+    return spec.identifier;
+  }
+
   private async existingIds<T extends object>(
     em: ReturnType<MikroORM['em']['fork']>,
     entity: new () => T,

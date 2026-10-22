@@ -1,15 +1,21 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
-import { PromotionsDiscountsService } from '../services';
+import { PromotionsDiscountsService, PromotionsReadService } from '../services';
 import {
   CreatePromotionDto,
   PromotionResponseDto,
@@ -23,6 +29,7 @@ import {
   ApplyDiscountResponseDto,
   ReverseRedemptionDto,
   ReverseRedemptionResponseDto,
+  MyPromotionsResponseDto,
 } from '../dto';
 
 /** Endpoints de promociones, cupones y redenciones (UC-51-07 … 11). */
@@ -34,8 +41,32 @@ export class PromotionsController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param discountsService - Valor de discounts service requerido por la operación.
+   * @param readService - Lectura del paciente (`GET /promotions/me`).
    */
-  constructor(private readonly discountsService: PromotionsDiscountsService) {}
+  constructor(
+    private readonly discountsService: PromotionsDiscountsService,
+    private readonly readService: PromotionsReadService,
+  ) {}
+
+  /**
+   * B-REAL-13: las promociones vigentes para el paciente autenticado.
+   *
+   * Sin parámetros a propósito: el titular sale del token y el tenant del
+   * contexto, así que la URL no lleva ningún dato de la persona.
+   */
+  @Get('promotions/me')
+  @Roles('PATIENT')
+  @ApiOperation({
+    summary: 'Mis promociones vigentes',
+    description:
+      'Promociones automáticas vigentes del tenant, más las de cupón para las que el titular tiene un cupón personal activo (con su código). El titular sale del token.',
+  })
+  @ApiOkResponse({ type: MyPromotionsResponseDto })
+  listMine(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyPromotionsResponseDto> {
+    return this.readService.listMine(actor);
+  }
 
   /** UC-51-07. */
   @Post('promotions')

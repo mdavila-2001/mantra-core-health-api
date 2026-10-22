@@ -76,6 +76,29 @@ export class PatientStatementsRepository {
   }
 
   /**
+   * Página de estados de cuenta de una práctica, ordenada por `id` (keyset
+   * estable) — CV-12.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param practiceId - Práctica cuyos estados de cuenta se listan.
+   * @param afterId - Cursor keyset: sólo filas con `id` mayor a éste.
+   * @param limit - Tope de filas de la página.
+   */
+  findByPracticePage(
+    em: EntityManager,
+    practiceId: string,
+    afterId: string | undefined,
+    limit: number,
+  ): Promise<PatientStatements[]> {
+    const where: Record<string, unknown> = { practiceId };
+    if (afterId !== undefined) where.id = { $gt: afterId };
+    return em.find(PatientStatements, where, {
+      orderBy: { id: 'ASC' },
+      limit,
+    });
+  }
+
+  /**
    * Crea create.
    *
    * @param em - Contexto de persistencia o transacción activa.

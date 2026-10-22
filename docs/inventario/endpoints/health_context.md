@@ -39,9 +39,9 @@
 
 ### Qué es y para qué sirve (negocio)
 
-Registrar un agente recolector gobernado. Caso de uso UC-44-01: Registrar agente recolector. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Registrar un agente recolector gobernado. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -53,10 +53,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SOURCE_ADMIN, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -130,7 +130,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-01`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -145,9 +145,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Disparar una corrida de recolección. Caso de uso UC-44-05: Disparar corrida idempotente. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Disparar una corrida de recolección. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -159,10 +159,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -239,7 +239,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-05`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -254,9 +254,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Cerrar la corrida conciliando sus contadores. Caso de uso UC-44-10: Cerrar corrida conciliando contadores. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Cerrar la corrida conciliando sus contadores. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -268,11 +268,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:217` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:217` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -352,7 +352,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-10`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -367,9 +367,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Registrar una observación inmutable de fuente. Caso de uso UC-44-06: Observación inmutable de fuente. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Registrar una observación inmutable de fuente. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -381,11 +381,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:153` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:153` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -475,7 +475,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-06`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -490,9 +490,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Crear el contexto de salud de un país. Caso de uso UC-44-04: Crear contexto de país (raíz). Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Crear el contexto de salud de un país. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -504,10 +504,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:122` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -580,7 +580,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-04`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -595,9 +595,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Materializar una versión borrador con hechos y evidencia. Caso de uso UC-44-07: Versión borrador + hechos + evidencia. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Materializar una versión borrador con hechos y evidencia. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -609,11 +609,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:170` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:170` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -749,7 +749,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-07`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -764,9 +764,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Resolver el contexto vigente para consumo. Caso de uso UC-44-12: Resolver contexto vigente para consumo. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Resolver el contexto vigente para consumo. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -778,11 +778,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CONTEXT_CONSUMER, CONTEXT_CURATOR, SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:250` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | country (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | domain (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | key (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -848,7 +848,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-12`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -869,7 +869,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /health-context/internal/schedules/run-due` la atiende `HealthContextController.runDueSchedules` (src/modules/health_context/controllers/health-context.controller.ts:107). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `RunDueSchedulesDto` (1 campo, 0 obligatorios). Delega en `ContextCollectionService.runDueSchedules`. Crea filas en health_context.context_collection_runs. Actualiza health_context.country_context_schedules. Lee health_context.context_agents, health_context.context_collection_runs, health_context.country_context_schedules.
+`POST /health-context/internal/schedules/run-due` la atiende `HealthContextController.runDueSchedules` (src/modules/health_context/controllers/health-context.controller.ts:107). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `HealthContextRunDueSchedulesDto` (1 campo, 0 obligatorios). Delega en `ContextCollectionService.runDueSchedules`. Crea filas en health_context.context_collection_runs. Actualiza health_context.country_context_schedules. Lee health_context.context_agents, health_context.context_collection_runs, health_context.country_context_schedules.
 
 ### Requerimientos
 
@@ -877,10 +877,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/health_context/controllers/health-context.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -892,11 +892,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `health_context.country_context_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | HealthContextController.runDueSchedules → ContextCollectionService.runDueSchedules → ContextCollectionService.runDueSchedule | `src/modules/health_context/services/context-collection.service.ts:308` |
 | `health_context.country_context_schedules` | LEE | LEE | DIRECTA | HealthContextController.runDueSchedules → ContextCollectionService.runDueSchedules → HealthContextRepository.claimDueSchedules | `src/modules/health_context/repositories/health-context.repository.ts:352` |
 
-### Cuerpo — DTO `RunDueSchedulesDto` · `application/json`
+### Cuerpo — DTO `HealthContextRunDueSchedulesDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `limit` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(100)` | Tamaño máximo del lote de programaciones a evaluar | `src/modules/health_context/dto/health-context.dto.ts:354` |
+| `limit` | `number` | No | mínimo 1; máximo 100 | — | Tamaño máximo del lote de programaciones a evaluar | sin fuente |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -948,7 +948,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -963,9 +963,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Programar la recolección de contexto de un país. Caso de uso UC-44-03: Programar recolección de país. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Programar la recolección de contexto de un país. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -977,10 +977,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1058,7 +1058,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-03`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1073,9 +1073,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Registrar una fuente de contexto de salud. Caso de uso UC-44-02: Registrar fuente de contexto. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Registrar una fuente de contexto de salud. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -1087,10 +1087,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SOURCE_ADMIN, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:76` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1169,7 +1169,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-02`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1184,9 +1184,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Publicar la versión aprobada y avanzar el contexto. Caso de uso UC-44-09: Publicar y avanzar la versión vigente. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Publicar la versión aprobada y avanzar el contexto. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -1198,9 +1198,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:202` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:202` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1251,7 +1251,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-09`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1266,9 +1266,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Revisar la calidad de la versión. Caso de uso UC-44-08: Revisar calidad de la versión. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Revisar la calidad de la versión. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -1280,11 +1280,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QUALITY_REVIEWER, SYSTEM, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:186` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:186` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1363,7 +1363,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-08`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -1378,9 +1378,9 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Retirar la versión vigente, con reemplazo o por caducidad. Caso de uso UC-44-11: Sustituir o expirar la versión vigente. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
+Retirar la versión vigente, con reemplazo o por caducidad. Dentro del módulo (descripción del modelo, en inglés): «Stores country-level health-environment context collected periodically by governed agents.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_context/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_44_health_context.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -1392,11 +1392,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CONTEXT_CURATOR, PLATFORM_ADMIN | `src/modules/health_context/controllers/health-context.controller.ts:234` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_context/controllers/health-context.controller.ts:234` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1473,7 +1473,7 @@ El árbol de decisión completo está en [flujos](../flujos/health_context.md).
 
 ### Flujos
 
-- Módulo 44 — Contexto de Salud por País — etapa `UC-44-11`
+- Contexto de salud por país — etapa `ctrl:HealthContextController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

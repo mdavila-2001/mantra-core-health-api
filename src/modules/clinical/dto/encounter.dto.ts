@@ -188,6 +188,13 @@ export class CheckInEncounterDto {
 }
 
 /** Cuerpo de `POST /clinical/encounters/{id}/close` (UC-08-14). */
+/** Cuerpo de `POST /clinical/encounters/:id/attachments` (P25). */
+export class AttachFileToEncounterDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  fileId!: string;
+}
+
 export class CloseEncounterDto {
   /**
    * Valor de expected row version mantenido por la instancia.
@@ -259,4 +266,17 @@ export class EncounterResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+
+  /**
+   * Sello SHA-256 del contenido del encuentro, calculado al cerrarlo.
+   * `null` mientras el encuentro sigue en curso.
+   */
+  @ApiProperty({ type: String, nullable: true })
+  contentHash!: string | null;
+
+  /**
+   * Fecha y hora en que se calculó el sello del encuentro.
+   */
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  sealedAt!: Date | null;
 }

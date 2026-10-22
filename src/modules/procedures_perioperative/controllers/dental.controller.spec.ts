@@ -79,8 +79,8 @@ describe('DentalController', () => {
   it('sirve el catálogo', () => {
     const d = build();
 
-    const catalogo = d.controller.catalog();
+    const catalog = d.controller.catalog();
 
-    expect(catalogo).toEqual({ procedureCodes: [], teeth: [], quadrants: [] });
+    expect(catalog).toEqual({ procedureCodes: [], teeth: [], quadrants: [] });
   });
 });

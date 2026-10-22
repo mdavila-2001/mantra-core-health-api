@@ -1,0 +1,85 @@
+# Prometheus del VPS. Las alertas viven en rules/ y las despacha Alertmanager.
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  external_labels:
+    server: contabo-vps
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: node
+    static_configs:
+      - targets: ["host.docker.internal:9100"]
+
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]
+    metric_relabel_configs:
+      # Las series del cgroup raíz y de los slices de systemd no son contenedores.
+      - source_labels: [name]
+        regex: ""
+        action: drop
+
+  - job_name: docker-state
+    static_configs:
+      - targets: ["telegram-bot:9200"]
+
+  - job_name: alertmanager
+    static_configs:
+      - targets: ["alertmanager:9093"]
+
+  - job_name: grafana
+    static_configs:
+      - targets: ["grafana:3000"]
+
+  # Traefik de Coolify: lo que entra a cada sitio (pedidos, latencia, códigos).
+  # El router lleva el uuid de Coolify; el bot lo traduce al dominio con las
+  # etiquetas `Host(...)` de Docker. Se descartan las métricas de Go/proceso.
+  - job_name: traefik
+    static_configs:
+      - targets: ["coolify-proxy:8082"]
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: "traefik_(router|service|entrypoint)_.*|traefik_config_.*|traefik_tls_certs_not_after"
+        action: keep
+
+  # Endpoints de la API, desde sus trazas (OpenTelemetry → spanmetrics).
+  - job_name: otel-collector
+    static_configs:
+      - targets: ["otel-collector:8889"]
+
+  # Sondas desde adentro del VPS hacia los sitios públicos. Si el VPS entero se
+  # cae, estas sondas caen con él: de eso se encarga el latido a Healthchecks.io.
+  - job_name: blackbox-http
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          # Servidor 62.169.18.132 (desde 2026-10-08; el 173.249.39.237 quedó fuera
+          # de servicio el 2026-10-05). app.alovidasalud.com y demo.* se suman cuando
+          # su DNS apunte a este servidor: hoy no responden desde afuera.
+          - https://test.62.169.18.132.sslip.io/
+          - https://dev.62.169.18.132.sslip.io/
+          - https://mockup.62.169.18.132.sslip.io/
+          - http://62.169.18.132:8000/api/health
+          # Visor de docker logs (infra/log-viewer). /healthcheck no pide login ni expone datos.
+          - https://logs.62.169.18.132.sslip.io/healthcheck
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115

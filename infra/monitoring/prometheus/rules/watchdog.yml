@@ -1,0 +1,12 @@
+# Latido. Esta alerta está SIEMPRE activa a propósito: Alertmanager la manda a
+# Healthchecks.io cada 5 min. Si el latido deja de llegar —el VPS se cayó, o
+# Prometheus o Alertmanager murieron—, Healthchecks.io avisa por Telegram desde
+# afuera. Es la única alerta que sobrevive a que se caiga el propio servidor.
+groups:
+  - name: watchdog
+    rules:
+      - alert: Watchdog
+        expr: vector(1)
+        labels: { severity: none }
+        annotations:
+          summary: "Latido del monitoreo (siempre activo, no es un problema)"

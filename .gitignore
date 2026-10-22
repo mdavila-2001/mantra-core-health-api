@@ -2,7 +2,8 @@
 /dist
 /node_modules
 /build
-/.claude
+/.claude/*
+.eslintcache
 
 # Logs
 logs
@@ -47,6 +48,7 @@ lerna-debug.log*
 # ignorarlo a él y no a su copia deja la puerta abierta por el costado; apareció
 # uno suelto en `git status` el 24/08/2026.
 .env.bak*
+.env.backup
 # El entorno del seed E2E lleva contraseñas de cuentas reales de la máquina que
 # lo corre: se versiona el ejemplo (`.env.e2e.example`), nunca el archivo.
 .env.e2e
@@ -59,7 +61,7 @@ tools/e2e/seed-manifest.json
 # La caché de `faker-worker.mjs`: los correos de la última tanda generada
 # contra cada target. Se regenera sola; versionarla prometería una cuenta que
 # en otra máquina, o contra otra base, no existe.
-tools/redesa/.faker-cache/
+tools/alovida/.faker-cache/
 
 # temp directory
 .temp
@@ -79,9 +81,10 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /graphify-out/
 src/graphify-out/
 
-# Claude Code — configuración y skills locales por usuario. Cada desarrollador usa
-# las suyas; no se versionan para no chocar con las de otros devs.
-.claude/
+# Claude Code — configuración local por usuario: cada dev usa la suya.
+# Excepción: settings.json sí se versiona — declara los plugins/skills del equipo.
+.claude/*
+!.claude/settings.json
 CLAUDE.md
 
 # Caché de metadata de MikroORM (valor por defecto: <cwd>/temp)
@@ -89,10 +92,11 @@ CLAUDE.md
 
 # database/ de la RAÍZ — modelo canónico (.puml), DDL y mappings NoSQL. SÍ se
 # versiona: `docker-compose.yml` monta `./database/SQL` en `postgres-init` y
-# `./database/NoSQL` en `mongo-init`, así que un clon sin esta carpeta levanta
-# los contenedores de inicialización sin nada que aplicar. Mientras vivió solo
-# en local, cualquiera que clonara el repo se quedaba sin el esquema y sin los
-# índices de búsqueda, que es exactamente el bloqueo que reportó el equipo.
+# `./database/NoSQL` en `postgres-init`, `mongo-init` y `opensearch-init`, así
+# que un clon sin esta carpeta levanta los contenedores de inicialización sin
+# nada que aplicar. Mientras vivió solo en local, cualquiera que clonara el
+# repo se quedaba sin el esquema y sin los índices de búsqueda, que es
+# exactamente el bloqueo que reportó el equipo.
 # (Son 6,6 MB de texto: DDL, mappings y modelo. Sin dumps ni datos de paciente.)
 
 # docs/ SÍ se versiona: es el portal de documentación técnica que construye
@@ -142,3 +146,22 @@ docs/endpoints/
 
 # Salida del sembrador E2E: es del entorno de cada máquina, no del repo.
 seed-manifest.json
+
+# Paquete de datos y generadores que viven FUERA de git (espejo v4.0.11 del
+# 2026-08-19). `seedsGenerales/` (24 MB, 64 seeds de módulo), `seedsProd/`
+# (~500 MB, corpus MeSH), `salud-db/` (generadores y runners), el DDL generado
+# `SQL/` + `NoSQL/` y el modelo canónico están en la RAÍZ del workspace, no en
+# este repositorio, y se distribuyen por su propio ZIP. Estas reglas son la red
+# de seguridad para la copia que alguien deje dentro del repo: son artefactos
+# generados, no fuente de este proyecto, y no deben llegar a GitHub.
+seedsGenerales/
+seedsProd/
+salud-db/
+/SQL/
+/NoSQL/
+Mantra Core Health Context/
+
+# Salida del ensayo local de restauración (scripts/recovery/drill-postgres.sh).
+# Cada corrida genera su volcado e informe con fecha: son evidencia de esa
+# máquina y ese momento, no fuente. Lo que se conserva del ensayo va al runbook.
+.drill/

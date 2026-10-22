@@ -13,22 +13,18 @@ import { CodeSystemsReadService } from './code-systems-read.service';
  * importador (`ConceptFileImportService`: sólo borrador o sin estado), no una
  * lista de estados escrita a mano que puede quedar desfasada.
  *
- * @param versiones - Las filas que devuelve la base.
+ * @param versions - Las filas que devuelve la base.
  */
-function armar(versiones: readonly Record<string, unknown>[]) {
+function build(versions: readonly Record<string, unknown>[]) {
   const fork = {
     // Tipado con sus tres argumentos y no como `() => …`: sin ellos
     // `toHaveBeenCalledWith(entidad, filtro, opciones)` es un error de tipos que
     // jest no ve —transpila sin chequear— y aparece recién en `yarn typecheck`.
     find: jest
       .fn<
-        (
-          entidad: unknown,
-          filtro: unknown,
-          opciones: unknown,
-        ) => Promise<unknown>
+        (entity: unknown, filter: unknown, options: unknown) => Promise<unknown>
       >()
-      .mockResolvedValue(versiones),
+      .mockResolvedValue(versions),
   };
   const em = { fork: jest.fn(() => fork) };
   const logger = { setContext: jest.fn(), warn: jest.fn(), info: jest.fn() };
@@ -56,23 +52,23 @@ describe('CodeSystemsReadService', () => {
   it('un borrador y una versión sin estado admiten conceptos', async () => {
     // El `null` es el hueco que dejan los ETL de `tools/terminology-import/`:
     // no fijan estado, y son ~450 000 conceptos ya cargados.
-    const { service } = armar([version(CONCEPTS.TERM_DRAFT), version(null)]);
+    const { service } = build([version(CONCEPTS.TERM_DRAFT), version(null)]);
 
-    const [borrador, sinEstado] = await service.listVersions('cs-1');
+    const [draft, withoutStatus] = await service.listVersions('cs-1');
 
-    expect(borrador.state).toBe('DRAFT');
-    expect(borrador.acceptsConcepts).toBe(true);
-    expect(sinEstado.state).toBe('UNKNOWN');
-    expect(sinEstado.acceptsConcepts).toBe(true);
+    expect(draft.state).toBe('DRAFT');
+    expect(draft.acceptsConcepts).toBe(true);
+    expect(withoutStatus.state).toBe('UNKNOWN');
+    expect(withoutStatus.acceptsConcepts).toBe(true);
   });
 
   it('una versión publicada no admite conceptos', async () => {
-    const { service } = armar([version(CONCEPTS.TERM_ACTIVE)]);
+    const { service } = build([version(CONCEPTS.TERM_ACTIVE)]);
 
-    const [publicada] = await service.listVersions('cs-1');
+    const [published] = await service.listVersions('cs-1');
 
-    expect(publicada.state).toBe('ACTIVE');
-    expect(publicada.acceptsConcepts).toBe(false);
+    expect(published.state).toBe('ACTIVE');
+    expect(published.acceptsConcepts).toBe(false);
   });
 
   it('una versión retirada u obsoleta tampoco los admite, y se nombra', async () => {
@@ -80,23 +76,23 @@ describe('CodeSystemsReadService', () => {
     // desplegable las ofrecía y el 422 llegaba recién al enviar el archivo.
     // Además caían en `UNKNOWN`, que acá significa «sin estado» —el caso que sí
     // los admite—, así que la etiqueta reforzaba el engaño.
-    const { service } = armar([
+    const { service } = build([
       version(CONCEPTS.TERM_RETIRED),
       version(CONCEPTS.TERM_DEPRECATED),
     ]);
 
-    const [retirada, obsoleta] = await service.listVersions('cs-1');
+    const [withdrawn, obsolete] = await service.listVersions('cs-1');
 
-    expect(retirada.state).toBe('RETIRED');
-    expect(retirada.acceptsConcepts).toBe(false);
-    expect(obsoleta.state).toBe('DEPRECATED');
-    expect(obsoleta.acceptsConcepts).toBe(false);
+    expect(withdrawn.state).toBe('RETIRED');
+    expect(withdrawn.acceptsConcepts).toBe(false);
+    expect(obsolete.state).toBe('DEPRECATED');
+    expect(obsolete.acceptsConcepts).toBe(false);
   });
   it('ordena por fecha de alta y no alfabéticamente por versión', async () => {
     // `version` es texto libre: ordenarlo alfabéticamente pone «10» antes que
     // «9», así que en un sistema que numera en vez de fechar la versión más
     // nueva no quedaba arriba.
-    const { service, fork } = armar([]);
+    const { service, fork } = build([]);
 
     await service.listVersions('cs-1');
 
@@ -112,7 +108,7 @@ describe('CodeSystemsReadService', () => {
   it('avisa cuando el listado llega al tope en vez de recortar callado', async () => {
     // Recortar en silencio es la forma en que una lista de administración
     // empieza a mentir por omisión.
-    const { service, logger } = armar(
+    const { service, logger } = build(
       Array.from({ length: 200 }, () => version(CONCEPTS.TERM_DRAFT)),
     );
 

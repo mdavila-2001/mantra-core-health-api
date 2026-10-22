@@ -42,7 +42,7 @@
 
 Comprimir los chunks más antiguos que el umbral. Caso de uso UC-58-05: Comprimir chunks antiguos. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -54,10 +54,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -154,7 +154,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Convertir una serie en hypertable y declarar su particionado. Caso de uso UC-58-04: Hypertable y chunks. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -166,10 +166,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -250,7 +250,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ajustar la anchura temporal del chunk. Caso de uso UC-58-04: Hypertable y chunks. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -262,10 +262,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -346,7 +346,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Aplicar la retención descartando chunks fuera de ventana. Caso de uso UC-58-06: Descartar chunks fuera de ventana. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -358,10 +358,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:95` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -456,7 +456,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Materializar la ventana de un agregado continuo. Caso de uso UC-58-07: Materializar agregado continuo. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -470,10 +470,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:134` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -574,7 +574,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Refrescar el rollup de conteos diarios de auditoría. Caso de uso UC-58-08: Rollup de conteos de auditoría. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -588,10 +588,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:114` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -686,7 +686,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ingerir eventos de entrega de publicidad. Caso de uso UC-58-10: Eventos de publicidad con dedupe. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -698,10 +698,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:136` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -827,7 +827,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ingerir lecturas de un dispositivo médico. Caso de uso UC-58-02: Lectura de dispositivo médico. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -839,11 +839,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGEST_GATEWAY, DEVICE, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: deviceId | `src/modules/time_series/controllers/series.controller.ts:103` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -969,11 +969,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Ingerir pings de ubicación. Caso de uso UC-58-13: Pings de ubicación con consentimiento. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/location/pings/batch-ingest` la atiende `SeriesController.batchIngestLocationPings` (src/modules/time_series/controllers/series.controller.ts:177). Exige sesión con alguno de los roles INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `BatchIngestLocationDto` (15 campos, 6 obligatorios). Delega en `SeriesIngestService.batchIngestLocationPings`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series, time_series.location_ping_series. Lee messaging.outbox_messages. Publica LocationPingsIngested.
+`POST /ts/location/pings/batch-ingest` la atiende `SeriesController.batchIngestLocationPings` (src/modules/time_series/controllers/series.controller.ts:177). Exige sesión con alguno de los roles INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `BatchIngestLocationDto` (14 campos, 9 obligatorios). Delega en `SeriesIngestService.batchIngestLocationPings`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series, time_series.location_ping_series. Lee messaging.outbox_messages. Publica LocationPingsIngested.
 
 ### Requerimientos
 
@@ -981,10 +981,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:177` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1010,17 +1010,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | `ingestionId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/time_series/dto/time-series.dto.ts:1190` |
 | `seriesId` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/time_series/dto/time-series.dto.ts:1199` |
 | `consentId` | `string` | Sí | formato uuid | `@IsUUID()` | Consentimiento vigente que ampara el registro de ubicación del sujeto | `src/modules/time_series/dto/time-series.dto.ts:1210` |
-| `pings` | `array<LocationPingDto>` | Sí | mínimo 1 elemento(s); máximo 5000 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(MAX_BATCH_ROWS)` `@ValidateNested({ each: true })` `@Type(() => LocationPingDto)` | — | `src/modules/time_series/dto/time-series.dto.ts:1221` |
-| `pings[].latitude` | `number` | Sí | — | `@IsNumber()` `@Min(-90)` `@Max(90)` | Latitud en grados decimales | `src/modules/time_series/dto/time-series.dto.ts:1129` |
-| `pings[].longitude` | `number` | Sí | — | `@IsNumber()` `@Min(-180)` `@Max(180)` | Longitud en grados decimales | `src/modules/time_series/dto/time-series.dto.ts:1138` |
-| `pings[].accuracyM` | `number` | No | — | `@IsOptional()` `@IsNumber()` `@Min(0)` | Precisión horizontal (m) | `src/modules/time_series/dto/time-series.dto.ts:1155` |
-| `pings[].altitudeM` | `number` | No | — | `@IsOptional()` `@IsNumber()` | Altitud (m) | `src/modules/time_series/dto/time-series.dto.ts:1146` |
-| `pings[].speedMps` | `number` | No | — | `@IsOptional()` `@IsNumber()` `@Min(0)` | Velocidad (m/s) | `src/modules/time_series/dto/time-series.dto.ts:1164` |
-| `pings[].headingDeg` | `number` | No | — | — | Rumbo (grados) | sin fuente |
-| `pings[].batteryPct` | `number` | No | mínimo 0; máximo 100 | — | Batería (%) | sin fuente |
-| `pings[].network` | `string` | No | valores: CELLULAR, WIFI | — | Red de captura | sin fuente |
-| `pings[].deviceId` | `string` | No | formato uuid | — | Dispositivo que capturó el ping | sin fuente |
-| `pings[].capturedAt` | `string` | No | formato date-time | — | Instante de captura en el dispositivo | sin fuente |
+| `pings` | `array<TimeSeriesLocationPingDto>` | Sí | mínimo 1 elemento(s); máximo 5000 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(MAX_BATCH_ROWS)` `@ValidateNested({ each: true })` `@Type(() => LocationPingDto)` | — | `src/modules/time_series/dto/time-series.dto.ts:1221` |
+| `pings[].time` | `string` | Sí | formato date-time | — | — | sin fuente |
+| `pings[].subjectType` | `string` | Sí | longitud máxima 50 | — | — | sin fuente |
+| `pings[].subjectId` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `pings[].latitude` | `number` | Sí | mínimo -90; máximo 90 | — | — | sin fuente |
+| `pings[].longitude` | `number` | Sí | mínimo -180; máximo 180 | — | — | sin fuente |
+| `pings[].altitudeM` | `number` | No | — | — | — | sin fuente |
+| `pings[].accuracyM` | `number` | No | mínimo 0 | — | — | sin fuente |
+| `pings[].speedMps` | `number` | No | mínimo 0 | — | — | sin fuente |
+| `pings[].geohash` | `string` | No | longitud máxima 20 | — | — | sin fuente |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1031,8 +1030,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
   "consentId": "00000000-0000-4000-8000-000000000001",
   "pings": [
     {
-      "latitude": -12.0464,
-      "longitude": -77.0428
+      "time": "2026-07-31T12:00:00.000Z",
+      "subjectType": "valor-ejemplo",
+      "subjectId": "00000000-0000-4000-8000-000000000001",
+      "latitude": 1,
+      "longitude": 1
     }
   ]
 }
@@ -1048,16 +1050,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
   "consentId": "00000000-0000-4000-8000-000000000001",
   "pings": [
     {
-      "latitude": -12.0464,
-      "longitude": -77.0428,
-      "accuracyM": 1,
+      "time": "2026-07-31T12:00:00.000Z",
+      "subjectType": "valor-ejemplo",
+      "subjectId": "00000000-0000-4000-8000-000000000001",
+      "latitude": 1,
+      "longitude": 1,
       "altitudeM": 1,
+      "accuracyM": 1,
       "speedMps": 1,
-      "headingDeg": 1,
-      "batteryPct": 1,
-      "network": "CELLULAR",
-      "deviceId": "00000000-0000-4000-8000-000000000001",
-      "capturedAt": "2026-07-31T12:00:00.000Z"
+      "geohash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     }
   ]
 }
@@ -1109,7 +1110,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ingerir métricas de runtime de IA, pipeline o SLI. Caso de uso UC-58-11: Métricas de runtime y pipeline. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1121,10 +1122,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:151` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1235,7 +1236,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Normalizar una lectura cruda y promoverla al registro clínico. Caso de uso UC-58-03: Normalizar y promover a clinical.observations. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1247,10 +1248,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:120` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1367,7 +1368,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Backfill gobernado de una serie. Caso de uso UC-58-12: Corrección append-only gobernada. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1379,10 +1380,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1503,7 +1504,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ingerir un lote de puntos en una serie. Caso de uso UC-58-01: Lote append-only de puntos. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1515,10 +1516,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1632,7 +1633,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Consultar un rango con downsampling. Caso de uso UC-58-09: Rango con downsampling. Dentro del módulo (descripción del modelo, en inglés): «Stores high-frequency readings and operational events that would overload transactional tables.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_series/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_58_time_series.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1644,13 +1645,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ANALYST, DATA_PLATFORM_ADMIN, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:55` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | dataset (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | bucket (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

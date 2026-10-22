@@ -33,9 +33,10 @@ también vive en `SQL/patches/`, fechado y aplicado a mano.
 
 > [!warning] No crear una carpeta de migraciones en este repositorio
 > `database/SQL/99_migrations` existió y se eliminó dos veces (v4.0.8 y v4.0.9). Nadie
-> la aplicaba: el compose monta `../SQL`, así que su DDL solo corría a mano contra bases
-> de desarrollo y cada arranque limpio producía un esquema distinto del que el código
-> daba por hecho. `yarn ddl:sources` falla si reaparece.
+> la aplicaba: el compose aplica `database/SQL` (o el modelo, si se exportan las
+> variables), así que su DDL solo corría a mano contra bases de desarrollo y cada
+> arranque limpio producía un esquema distinto del que el código daba por hecho.
+> `yarn ddl:sources` falla si reaparece.
 
 ## `ORM_SCHEMA_SYNC` — lo que MikroORM sí controla en el arranque
 

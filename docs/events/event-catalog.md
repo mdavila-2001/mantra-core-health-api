@@ -51,6 +51,16 @@ inspeccionar cada call site individualmente, fuera de alcance de esta fase. Ver 
 | `WorkflowRunCompleted` | `automation-execution.service.ts` |
 | `WorkflowRunStarted` | `automation-execution.service.ts` |
 
+### `clinical` (1 evento)
+
+| Evento | Servicio productor |
+|---|---|
+| `ServiceRequestPlaced` | `service-requests.service.ts` |
+
+Payload: sólo `serviceRequestId` y `statusConceptId` — ni paciente ni estudio viajan en el outbox
+(MCH-027). El aviso al paciente no sale de este evento: se escribe en la misma transacción, bajo un
+savepoint, desde `ClinicalNotificationsService.serviceRequestPlaced`.
+
 ### `cross_store_consistency` (8 eventos)
 
 | Evento | Servicio productor |

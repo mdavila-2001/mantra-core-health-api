@@ -37,11 +37,13 @@ const recortar = ({ value }: { value: unknown }): unknown =>
   typeof value === 'string' ? value.trim() : value;
 
 export class ObjectIdParamDto {
+  @ApiProperty({ format: 'uuid' })
   @IsUUID()
   id!: string;
 }
 
 export class AnnotationIdParamDto {
+  @ApiProperty({ format: 'uuid' })
   @IsUUID()
   id!: string;
 }

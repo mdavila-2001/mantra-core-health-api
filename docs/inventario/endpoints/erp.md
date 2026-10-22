@@ -45,7 +45,7 @@
 
 Conciliar la factura contra orden y recepción (three-way match). Caso de uso UC-38-13: Three-way match. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -57,11 +57,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, ACCOUNTS_PAYABLE | `src/modules/erp/controllers/erp.controller.ts:254` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: billId | `src/modules/erp/controllers/erp.controller.ts:254` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -156,7 +156,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Alta de socio de negocio con su cuenta bancaria. Caso de uso UC-38-01: Alta de socio con cuenta bancaria. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:10`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -168,10 +168,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN | `src/modules/erp/controllers/erp.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -247,6 +247,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:253` |
 | CONTROLADOR | `src/modules/erp/controllers/erp.controller.spec.ts:59` |
 
 ### Flujos
@@ -268,7 +269,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Verificar la cuenta bancaria del socio. Caso de uso UC-38-02: Verificar cuenta bancaria. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -280,9 +281,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN | `src/modules/erp/controllers/erp.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, accId | `src/modules/erp/controllers/erp.controller.ts:75` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -350,7 +351,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Crear un contrato en borrador. Caso de uso UC-38-03: Crear contrato en borrador. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -362,10 +363,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, CONTRACT_MANAGER | `src/modules/erp/controllers/erp.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -470,7 +471,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Enmendar el contrato. Caso de uso UC-38-05: Enmendar contrato. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -482,11 +483,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, CONTRACT_MANAGER | `src/modules/erp/controllers/erp.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/erp/controllers/erp.controller.ts:119` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -579,7 +580,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Solicitar o resolver la aprobación del contrato. Caso de uso UC-38-04: Solicitar/resolver aprobación. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -591,11 +592,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, CONTRACT_MANAGER | `src/modules/erp/controllers/erp.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/erp/controllers/erp.controller.ts:103` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -683,7 +684,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Generar el cronograma de cuotas del contrato. Caso de uso UC-38-16: Cronograma de cuotas. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:25`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -695,11 +696,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, SYSTEM_WORKER | `src/modules/erp/controllers/erp.controller.ts:161` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/erp/controllers/erp.controller.ts:161` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -793,7 +794,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Renovar el contrato extendiendo su vigencia. Caso de uso UC-38-06: Renovar contrato. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -805,11 +806,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, CONTRACT_MANAGER | `src/modules/erp/controllers/erp.controller.ts:135` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/erp/controllers/erp.controller.ts:135` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -900,7 +901,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Terminar el contrato y liquidarlo. Caso de uso UC-38-07: Terminar y liquidar. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -912,11 +913,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, CONTRACT_MANAGER | `src/modules/erp/controllers/erp.controller.ts:148` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/erp/controllers/erp.controller.ts:148` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1010,7 +1011,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Solicitar una ausencia. Caso de uso UC-38-09: Solicitar y resolver ausencia. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1022,11 +1023,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, HR_ADMIN, EMPLOYEE | `src/modules/erp/controllers/erp.controller.ts:189` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/erp/controllers/erp.controller.ts:189` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1131,11 +1132,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, HR_ADMIN | `src/modules/erp/controllers/erp.controller.ts:202` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, reqId | `src/modules/erp/controllers/erp.controller.ts:202` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1221,7 +1222,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Alta de empleado. Caso de uso UC-38-08: Alta de empleado. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1233,10 +1234,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, HR_ADMIN | `src/modules/erp/controllers/erp.controller.ts:177` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1320,7 +1321,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar la valoración IFRS 16 del arrendamiento. Caso de uso UC-38-15: Valoración IFRS 16. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1332,11 +1333,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, ACCOUNTANT | `src/modules/erp/controllers/erp.controller.ts:283` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/erp/controllers/erp.controller.ts:283` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1427,7 +1428,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Emitir una orden de compra desde la requisición. Caso de uso UC-38-10: Emitir orden de compra. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1439,10 +1440,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, BUYER | `src/modules/erp/controllers/erp.controller.ts:216` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1554,7 +1555,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Registrar la recepción de mercancía. Caso de uso UC-38-11: Recepción de mercancía. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1566,11 +1567,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, BUYER, WAREHOUSE | `src/modules/erp/controllers/erp.controller.ts:228` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/erp/controllers/erp.controller.ts:228` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1681,7 +1682,7 @@ El árbol de decisión completo está en [flujos](../flujos/erp.md).
 
 Registrar la hoja de servicios prestados. Caso de uso UC-38-12: Hoja de servicios. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1693,11 +1694,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, BUYER | `src/modules/erp/controllers/erp.controller.ts:241` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/erp/controllers/erp.controller.ts:241` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1787,7 +1788,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Crear una orden de venta. Caso de uso UC-38-14: Orden de venta. Dentro del módulo (descripción del modelo, en inglés): «Tenant-level enterprise resource management that complements the per-practice accounting subledgers (module 16/16B).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_38_erp.puml:47`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1799,10 +1800,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/erp/REA
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ERP_ADMIN, SALES | `src/modules/erp/controllers/erp.controller.ts:271` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 

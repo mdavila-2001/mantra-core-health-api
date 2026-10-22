@@ -3,19 +3,19 @@
 # Flujos del módulo `clinical_ext`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 26 (22 con decisiones propias, 4 sin ellas)
+- **Operaciones:** 27 (22 con decisiones propias, 5 sin ellas)
 - Inventario de endpoints del módulo: [clinical_ext](../endpoints/clinical_ext.md)
 
-## Proceso: Módulo Clinical-Ext (18) — Care Coordination, Alerts & Decision Support
+## Proceso: `clinical_ext` — coordinación y soporte clínico
 
-- **Código:** `clinical_ext` · **Agrupación:** MIXTO · **Operaciones:** 26
-- **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER · SECURITY_ADMIN
+- **Código:** `clinical_ext` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 27
+- **Actores:** CLINICIAN · Cualquier sesión válida · PATIENT · PRACTITIONER · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/clinical_ext/README.md`
 
 ### Para qué sirve
 
-Coordinación de cuidado, decisión clínica (CDS), alertas, interacciones medicamentosas, plantillas de órdenes, referencias, brechas de cuidado / inmunizaciones y telesalud. Sigue la forma de los módulos de referencia (`iam`, `common`, `terminology`): servicios que poseen la transacción (`em.transactional`), repositorios stateless (reciben el `EntityManager`), FKs como columnas uuid planas (flush del padre antes de los hijos), auditoría con `createdBy`/`touch`, y `*_concept_id` tomados de `clinical_ext.concepts.ts`.
+El módulo implementa equipos de cuidado, reglas CDS, alertas, interacciones, plantillas de órdenes, referencias, brechas de cuidado, calendario de inmunización, encuentros virtuales y favoritos de prescripción. Tiene ocho controladores y **27 endpoints**. La [revisión del módulo](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/clinical_ext.md) documenta los hallazgos y las pruebas pendientes; este README describe el código de la rama actual.
 
 _Fuente: `src/modules/clinical_ext/README.md:3`_
 
@@ -23,222 +23,205 @@ _Fuente: `src/modules/clinical_ext/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-18-01` | Crear equipo de cuidado con miembros | POST /care-teams | CLINICIAN · PRACTITIONER | MEDIO | 2 |
-| `UC-18-02` | Transferir liderazgo | PATCH /care-teams/{id}/members/{memberId}/set-responsible | CLINICIAN · PRACTITIONER | MEDIO | 3 |
-| `UC-18-03` | Evaluar reglas CDS y generar alertas | POST /cds/evaluate | Cualquier sesión válida | ALTO | 2 |
-| `UC-18-04` | Detectar interacciones medicamentosas | POST /cds/check-interactions | Cualquier sesión válida | ALTO | 2 |
-| `UC-18-05` | Reconocer / override de alerta | PATCH /clinical-alerts/{id}/acknowledge | CLINICIAN · PRACTITIONER | BAJO | 1 |
-| `UC-18-06` | Aplicar order set (fan-out) | POST /order-sets/{id}/apply | Cualquier sesión válida | ALTO | 3 |
-| `UC-18-07` | Emitir referencia | POST /referrals | CLINICIAN · PRACTITIONER | MEDIO | 2 |
-| `UC-18-08` | Aceptar / rechazar referencia inter-tenant | PATCH /referrals/{id}/respond | CLINICIAN · PRACTITIONER | MEDIO | 2 |
-| `UC-18-09` | Detectar y abrir brechas de cuidado | POST /care-gaps/recompute | Cualquier sesión válida | ALTO | 2 |
-| `UC-18-10` | Cerrar brecha por evento clínico | PATCH /care-gaps/{id}/close | Cualquier sesión válida | ALTO | 2 |
-| `UC-18-11` | Proyectar plan de inmunización y abrir brechas | POST /patients/{id}/immunization-plan/project | Cualquier sesión válida | ALTO | 3 |
-| `UC-18-12` | Telesalud: iniciar / unirse / finalizar | POST /virtual-encounters | CLINICIAN · PRACTITIONER | MEDIO | 2 |
-| `UC-18-13` | Publicar versión de regla CDS con rollback | POST /cds-rules/{id}/versions/publish | SECURITY_ADMIN | MEDIO | 2 |
-| `ctrl:CareGapsController` | Operaciones de CareGapsController que el README no asigna a un caso de uso | POST /immunization-schedules | SECURITY_ADMIN | MEDIO | 1 |
+| `ctrl:CareGapsController` | Operaciones de CareGapsController que el README no asigna a un caso de uso | PATCH /care-gaps/{id}/close | Cualquier sesión válida | ALTO | 2 |
+|  |  | POST /care-gaps/recompute | Cualquier sesión válida | ALTO | 2 |
+|  |  | POST /immunization-schedules | SECURITY_ADMIN | MEDIO | 1 |
+|  |  | POST /patients/{id}/immunization-plan/project | Cualquier sesión válida | ALTO | 3 |
 | `ctrl:CareTeamsController` | Operaciones de CareTeamsController que el README no asigna a un caso de uso | GET /care-teams | CLINICIAN · PRACTITIONER | BAJO | 1 |
+|  |  | POST /care-teams | CLINICIAN · PRACTITIONER | MEDIO | 2 |
+|  |  | PATCH /care-teams/{id}/members/{memberId}/set-responsible | CLINICIAN · PRACTITIONER | MEDIO | 3 |
 | `ctrl:CdsController` | Operaciones de CdsController que el README no asigna a un caso de uso | POST /cds-rules | SECURITY_ADMIN | MEDIO | 2 |
+|  |  | POST /cds-rules/{id}/versions/publish | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | POST /cds-rules/{id}/versions/rollback | SECURITY_ADMIN | MEDIO | 2 |
+|  |  | POST /cds/check-interactions | CLINICIAN · PRACTITIONER | BAJO | 1 |
+|  |  | POST /cds/evaluate | CLINICIAN · PRACTITIONER | MEDIO | 2 |
 |  |  | POST /drug-interactions | SECURITY_ADMIN | MEDIO | 1 |
-| `ctrl:ClinicalAlertsController` | Operaciones de ClinicalAlertsController que el README no asigna a un caso de uso | PATCH /clinical-alerts/{id}/override | CLINICIAN · PRACTITIONER | BAJO | 1 |
+| `ctrl:ClinicalAlertsController` | Operaciones de ClinicalAlertsController que el README no asigna a un caso de uso | PATCH /clinical-alerts/{id}/acknowledge | CLINICIAN · PRACTITIONER | BAJO | 1 |
+|  |  | PATCH /clinical-alerts/{id}/override | CLINICIAN · PRACTITIONER | BAJO | 1 |
 | `ctrl:OrderSetsController` | Operaciones de OrderSetsController que el README no asigna a un caso de uso | POST /order-sets | SECURITY_ADMIN | MEDIO | 3 |
+|  |  | POST /order-sets/{id}/apply | Cualquier sesión válida | ALTO | 3 |
 | `ctrl:PrescriptionFavoritesController` | Operaciones de PrescriptionFavoritesController que el README no asigna a un caso de uso | GET /prescription-favorites | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /prescription-favorites | Cualquier sesión válida | ALTO | 4 |
 |  |  | DELETE /prescription-favorites/{id} | Cualquier sesión válida | ALTO | 4 |
 | `ctrl:ReferralsController` | Operaciones de ReferralsController que el README no asigna a un caso de uso | GET /referrals | CLINICIAN · PRACTITIONER | BAJO | 1 |
-| `ctrl:VirtualEncountersController` | Operaciones de VirtualEncountersController que el README no asigna a un caso de uso | PATCH /virtual-encounters/{id}/end | CLINICIAN · PRACTITIONER | MEDIO | 2 |
-|  |  | PATCH /virtual-encounters/{id}/join | CLINICIAN · PRACTITIONER | MEDIO | 2 |
+|  |  | POST /referrals | CLINICIAN · PRACTITIONER | MEDIO | 2 |
+|  |  | PATCH /referrals/{id}/respond | CLINICIAN · PRACTITIONER | MEDIO | 2 |
+|  |  | GET /referrals/me | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 3 |
+| `ctrl:VirtualEncountersController` | Operaciones de VirtualEncountersController que el README no asigna a un caso de uso | POST /virtual-encounters | CLINICIAN · PRACTITIONER | MEDIO | 4 |
+|  |  | PATCH /virtual-encounters/{id}/end | CLINICIAN · PRACTITIONER | MEDIO | 4 |
+|  |  | PATCH /virtual-encounters/{id}/join | CLINICIAN · PRACTITIONER · PATIENT | MEDIO | 4 |
 
-### Diagrama 1 de 2 — etapas `UC-18-01`, `UC-18-02`, `UC-18-03`…
+### Diagrama 1 de 2 — etapas `ctrl:CareGapsController`, `ctrl:CareTeamsController`, `ctrl:CdsController`…
 
 ```mermaid
 flowchart LR
-  a2(["CLINICIAN · PRACTITIONER"]):::actor
-  a7(["Cualquier sesión válida"]):::actor
-  a28(["SECURITY_ADMIN"]):::actor
-  t3[("clinical_ext.care_team_members")]:::tabla
-  t4[("clinical_ext.care_teams")]:::tabla
-  t8[("clinical_ext.cds_rules")]:::tabla
-  t9[("clinical_ext.clinical_alerts")]:::tabla
-  t11[("clinical_ext.drug_interactions")]:::tabla
-  t14[("clinical_ext.order_set_items")]:::tabla
-  t15[("clinical_ext.order_sets")]:::tabla
-  t16[("clinical.service_requests")]:::tabla
-  t18[("clinical_ext.referrals")]:::tabla
-  t21[("clinical_ext.care_gaps")]:::tabla
-  t24[("clinical_ext.immunization_schedules")]:::tabla
-  t26[("clinical_ext.virtual_encounters")]:::tabla
-  subgraph s0["UC-18-01 · Crear equipo de cuidado con miembros"]
-    o1["POST /care-teams"]:::op
+  a2(["Cualquier sesión válida"]):::actor
+  a6(["SECURITY_ADMIN"]):::actor
+  a10(["CLINICIAN · PRACTITIONER"]):::actor
+  a42(["CLINICIAN · PRACTITIONER · PATIENT"]):::actor
+  t3[("clinical_ext.care_gaps")]:::tabla
+  t7[("clinical_ext.immunization_schedules")]:::tabla
+  t11[("clinical_ext.care_teams")]:::tabla
+  t13[("clinical_ext.care_team_members")]:::tabla
+  t16[("clinical_ext.cds_rules")]:::tabla
+  t20[("clinical_ext.drug_interactions")]:::tabla
+  t22[("clinical_ext.clinical_alerts")]:::tabla
+  t27[("clinical_ext.order_set_items")]:::tabla
+  t28[("clinical_ext.order_sets")]:::tabla
+  t30[("clinical.service_requests")]:::tabla
+  t32[("clinical_ext.prescription_favorites")]:::tabla
+  t33[("profiles.health_practitioner_profiles")]:::tabla
+  t34[("profiles.person_account_links")]:::tabla
+  t38[("clinical_ext.referrals")]:::tabla
+  t43[("profiles.patient_profiles")]:::tabla
+  subgraph s0["ctrl:CareGapsController · Operaciones de CareGapsController que el README no as…"]
+    o1["PATCH /care-gaps/{id}/close"]:::op
+    o4["POST /care-gaps/recompute"]:::op
+    o5["POST /immunization-schedules"]:::op
+    o8["POST /patients/{id}/immunization-plan/project"]:::op
   end
-  subgraph s1["UC-18-02 · Transferir liderazgo"]
-    o5["PATCH /care-teams/{id}/members/{memberId}/set-responsible"]:::op
+  subgraph s1["ctrl:CareTeamsController · Operaciones de CareTeamsController que el README no…"]
+    o9["GET /care-teams"]:::op
+    o12["POST /care-teams"]:::op
+    o14["PATCH /care-teams/{id}/members/{memberId}/set-responsible"]:::op
   end
-  subgraph s2["UC-18-03 · Evaluar reglas CDS y generar alertas"]
-    o6["POST /cds/evaluate"]:::op
+  subgraph s2["ctrl:CdsController · Operaciones de CdsController que el README no asigna a un…"]
+    o15["POST /cds-rules"]:::op
+    o17["POST /cds-rules/{id}/versions/publish"]:::op
+    o18["POST /cds-rules/{id}/versions/rollback"]:::op
+    o19["POST /cds/check-interactions"]:::op
+    o21["POST /cds/evaluate"]:::op
+    o23["POST /drug-interactions"]:::op
   end
-  subgraph s3["UC-18-04 · Detectar interacciones medicamentosas"]
-    o10["POST /cds/check-interactions"]:::op
+  subgraph s3["ctrl:ClinicalAlertsController · Operaciones de ClinicalAlertsController que el…"]
+    o24["PATCH /clinical-alerts/{id}/acknowledge"]:::op
+    o25["PATCH /clinical-alerts/{id}/override"]:::op
   end
-  subgraph s4["UC-18-05 · Reconocer / override de alerta"]
-    o12["PATCH /clinical-alerts/{id}/acknowledge"]:::op
+  subgraph s4["ctrl:OrderSetsController · Operaciones de OrderSetsController que el README no…"]
+    o26["POST /order-sets"]:::op
+    o29["POST /order-sets/{id}/apply"]:::op
   end
-  subgraph s5["UC-18-06 · Aplicar order set (fan-out)"]
-    o13["POST /order-sets/{id}/apply"]:::op
+  subgraph s5["ctrl:PrescriptionFavoritesController · Operaciones de PrescriptionFavoritesCont…"]
+    o31["GET /prescription-favorites"]:::op
+    o35["POST /prescription-favorites"]:::op
+    o36["DELETE /prescription-favorites/{id}"]:::op
   end
-  subgraph s6["UC-18-07 · Emitir referencia"]
-    o17["POST /referrals"]:::op
-  end
-  subgraph s7["UC-18-08 · Aceptar / rechazar referencia inter-tenant"]
-    o19["PATCH /referrals/{id}/respond"]:::op
-  end
-  subgraph s8["UC-18-09 · Detectar y abrir brechas de cuidado"]
-    o20["POST /care-gaps/recompute"]:::op
-  end
-  subgraph s9["UC-18-10 · Cerrar brecha por evento clínico"]
-    o22["PATCH /care-gaps/{id}/close"]:::op
-  end
-  subgraph s10["UC-18-11 · Proyectar plan de inmunización y abrir brechas"]
-    o23["POST /patients/{id}/immunization-plan/project"]:::op
-  end
-  subgraph s11["UC-18-12 · Telesalud: iniciar / unirse / finalizar"]
-    o25["POST /virtual-encounters"]:::op
-  end
-  subgraph s12["UC-18-13 · Publicar versión de regla CDS con rollback"]
-    o27["POST /cds-rules/{id}/versions/publish"]:::op
-  end
-  subgraph s13["ctrl:CareGapsController · Operaciones de CareGapsController que el README no as…"]
-    o29["POST /immunization-schedules"]:::op
-  end
-  subgraph s14["ctrl:CareTeamsController · Operaciones de CareTeamsController que el README no…"]
-    o30["GET /care-teams"]:::op
-  end
-  subgraph s15["ctrl:CdsController · Operaciones de CdsController que el README no asigna a un…"]
-    o31["POST /cds-rules"]:::op
-    o32["POST /cds-rules/{id}/versions/rollback"]:::op
-    o33["POST /drug-interactions"]:::op
+  subgraph s6["ctrl:ReferralsController · Operaciones de ReferralsController que el README no…"]
+    o37["GET /referrals"]:::op
+    o39["POST /referrals"]:::op
+    o40["PATCH /referrals/{id}/respond"]:::op
+    o41["GET /referrals/me"]:::op
   end
   a2 --> o1
-  o1 -->|"CREA"| t3
-  o1 -->|"CREA"| t4
-  a2 --> o5
-  o5 -->|"ACTUALIZA"| t3
-  o5 -->|"LEE"| t3
-  o5 -->|"LEE"| t4
-  a7 --> o6
-  o6 -->|"LEE"| t8
-  o6 -->|"CREA"| t9
-  a7 --> o10
-  o10 -->|"CREA"| t9
-  o10 -->|"LEE"| t11
-  a2 --> o12
-  o12 -->|"LEE"| t9
-  a7 --> o13
-  o13 -->|"LEE"| t14
-  o13 -->|"LEE"| t15
-  o13 -->|"CREA"| t16
-  a2 --> o17
-  o17 -->|"CREA"| t18
-  o17 -->|"LEE"| t18
-  a2 --> o19
-  o19 -->|"ACTUALIZA"| t18
-  o19 -->|"LEE"| t18
-  a7 --> o20
-  o20 -->|"CREA"| t21
-  o20 -->|"LEE"| t21
-  a7 --> o22
-  o22 -->|"ACTUALIZA"| t21
-  o22 -->|"LEE"| t21
-  a7 --> o23
-  o23 -->|"CREA"| t21
-  o23 -->|"LEE"| t21
-  o23 -->|"LEE"| t24
-  a2 --> o25
-  o25 -->|"CREA"| t26
-  o25 -->|"LEE"| t26
-  a28 --> o27
-  o27 -->|"ACTUALIZA"| t8
-  o27 -->|"LEE"| t8
-  a28 --> o29
-  o29 -->|"CREA"| t24
-  a2 --> o30
-  o30 -->|"LEE"| t4
-  a28 --> o31
-  o31 -->|"CREA"| t8
-  o31 -->|"LEE"| t8
-  a28 --> o32
-  o32 -->|"ACTUALIZA"| t8
-  o32 -->|"LEE"| t8
-  a28 --> o33
-  o33 -->|"CREA"| t11
+  o1 -->|"ACTUALIZA"| t3
+  o1 -->|"LEE"| t3
+  a2 --> o4
+  o4 -->|"CREA"| t3
+  o4 -->|"LEE"| t3
+  a6 --> o5
+  o5 -->|"CREA"| t7
+  a2 --> o8
+  o8 -->|"CREA"| t3
+  o8 -->|"LEE"| t3
+  o8 -->|"LEE"| t7
+  a10 --> o9
+  o9 -->|"LEE"| t11
+  a10 --> o12
+  o12 -->|"CREA"| t13
+  o12 -->|"CREA"| t11
+  a10 --> o14
+  o14 -->|"ACTUALIZA"| t13
+  o14 -->|"LEE"| t13
+  o14 -->|"LEE"| t11
+  a6 --> o15
+  o15 -->|"CREA"| t16
+  o15 -->|"LEE"| t16
+  a6 --> o17
+  o17 -->|"ACTUALIZA"| t16
+  o17 -->|"LEE"| t16
+  a6 --> o18
+  o18 -->|"ACTUALIZA"| t16
+  o18 -->|"LEE"| t16
+  a10 --> o19
+  o19 -->|"LEE"| t20
+  a10 --> o21
+  o21 -->|"LEE"| t16
+  o21 -->|"CREA"| t22
+  a6 --> o23
+  o23 -->|"CREA"| t20
+  a10 --> o24
+  o24 -->|"LEE"| t22
+  a10 --> o25
+  o25 -->|"LEE"| t22
+  a6 --> o26
+  o26 -->|"CREA"| t27
+  o26 -->|"CREA"| t28
+  o26 -->|"LEE"| t28
+  a2 --> o29
+  o29 -->|"LEE"| t27
+  o29 -->|"LEE"| t28
+  o29 -->|"CREA"| t30
+  a2 --> o31
+  o31 -->|"LEE"| t32
+  o31 -->|"LEE"| t33
+  o31 -->|"LEE"| t34
+  a2 --> o35
+  o35 -->|"CREA"| t32
+  o35 -->|"LEE"| t32
+  o35 -->|"LEE"| t33
+  o35 -->|"LEE"| t34
+  a2 --> o36
+  o36 -->|"BORRA"| t32
+  o36 -->|"LEE"| t32
+  o36 -->|"LEE"| t33
+  o36 -->|"LEE"| t34
+  a10 --> o37
+  o37 -->|"LEE"| t38
+  a10 --> o39
+  o39 -->|"CREA"| t38
+  o39 -->|"LEE"| t38
+  a10 --> o40
+  o40 -->|"ACTUALIZA"| t38
+  o40 -->|"LEE"| t38
+  a42 --> o41
+  o41 -->|"LEE"| t38
+  o41 -->|"LEE"| t43
+  o41 -->|"LEE"| t34
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:ClinicalAlertsController`, `ctrl:OrderSetsController`, `ctrl:PrescriptionFavoritesController`…
+### Diagrama 2 de 2 — etapas `ctrl:VirtualEncountersController`
 
 ```mermaid
 flowchart LR
   a2(["CLINICIAN · PRACTITIONER"]):::actor
-  a5(["SECURITY_ADMIN"]):::actor
-  a9(["Cualquier sesión válida"]):::actor
-  t3[("clinical_ext.clinical_alerts")]:::tabla
-  t6[("clinical_ext.order_set_items")]:::tabla
-  t7[("clinical_ext.order_sets")]:::tabla
-  t10[("clinical_ext.prescription_favorites")]:::tabla
-  t11[("profiles.health_practitioner_profiles")]:::tabla
-  t12[("profiles.person_account_links")]:::tabla
-  t16[("clinical_ext.referrals")]:::tabla
-  t18[("clinical_ext.virtual_encounters")]:::tabla
-  subgraph s0["ctrl:ClinicalAlertsController · Operaciones de ClinicalAlertsController que el…"]
-    o1["PATCH /clinical-alerts/{id}/override"]:::op
-  end
-  subgraph s1["ctrl:OrderSetsController · Operaciones de OrderSetsController que el README no…"]
-    o4["POST /order-sets"]:::op
-  end
-  subgraph s2["ctrl:PrescriptionFavoritesController · Operaciones de PrescriptionFavoritesCont…"]
-    o8["GET /prescription-favorites"]:::op
-    o13["POST /prescription-favorites"]:::op
-    o14["DELETE /prescription-favorites/{id}"]:::op
-  end
-  subgraph s3["ctrl:ReferralsController · Operaciones de ReferralsController que el README no…"]
-    o15["GET /referrals"]:::op
-  end
-  subgraph s4["ctrl:VirtualEncountersController · Operaciones de VirtualEncountersController q…"]
-    o17["PATCH /virtual-encounters/{id}/end"]:::op
-    o19["PATCH /virtual-encounters/{id}/join"]:::op
+  a8(["CLINICIAN · PRACTITIONER · PATIENT"]):::actor
+  t3[("clinical_ext.virtual_encounters")]:::tabla
+  t4[("clinical.encounter_participants")]:::tabla
+  t5[("clinical.encounters")]:::tabla
+  subgraph s0["ctrl:VirtualEncountersController · Operaciones de VirtualEncountersController q…"]
+    o1["POST /virtual-encounters"]:::op
+    o6["PATCH /virtual-encounters/{id}/end"]:::op
+    o7["PATCH /virtual-encounters/{id}/join"]:::op
   end
   a2 --> o1
+  o1 -->|"CREA"| t3
   o1 -->|"LEE"| t3
-  a5 --> o4
-  o4 -->|"CREA"| t6
-  o4 -->|"CREA"| t7
-  o4 -->|"LEE"| t7
-  a9 --> o8
-  o8 -->|"LEE"| t10
-  o8 -->|"LEE"| t11
-  o8 -->|"LEE"| t12
-  a9 --> o13
-  o13 -->|"CREA"| t10
-  o13 -->|"LEE"| t10
-  o13 -->|"LEE"| t11
-  o13 -->|"LEE"| t12
-  a9 --> o14
-  o14 -->|"BORRA"| t10
-  o14 -->|"LEE"| t10
-  o14 -->|"LEE"| t11
-  o14 -->|"LEE"| t12
-  a2 --> o15
-  o15 -->|"LEE"| t16
-  a2 --> o17
-  o17 -->|"ACTUALIZA"| t18
-  o17 -->|"LEE"| t18
-  a2 --> o19
-  o19 -->|"ACTUALIZA"| t18
-  o19 -->|"LEE"| t18
+  o1 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  a2 --> o6
+  o6 -->|"ACTUALIZA"| t3
+  o6 -->|"LEE"| t3
+  o6 -->|"LEE"| t4
+  o6 -->|"LEE"| t5
+  a8 --> o7
+  o7 -->|"ACTUALIZA"| t3
+  o7 -->|"LEE"| t3
+  o7 -->|"LEE"| t4
+  o7 -->|"LEE"| t5
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -463,7 +446,9 @@ Crear una regla CDS en borrador
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: El código de regla ya existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lógica de la regla no se puede interpretar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | UnparseableCdsRuleError: logic_json no es un objeto; UnparseableCdsRuleError: op 'in' exige un array en value; UnparseableCdsRuleError: op '{op}' exige un número en value; UnparseableCdsRuleError: operador no soportado: {op}; UnparseableCdsRuleError: nodo de lógica no reconocido |
 
 ```mermaid
 flowchart TD
@@ -472,22 +457,95 @@ flowchart TD
   n1 --> n2
   n3["Llama a CdsService.createRule"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a CdsService.assertLogicReadable"]:::llamada
   n3 --> n4
-  n5["Llama a CdsRulesRepository.findByCode"]:::llamada
+  n5["Intenta"]:::intento
   n4 --> n5
-  n6[("LEE clinical_ext.cds_rules")]:::efecto
+  n6["Llama a CdsService.walkLogic"]:::llamada
   n5 --> n6
-  n7{"clash"}:::decision
+  n7{"logic === null || typeof logic !== 'object'"}:::decision
   n6 --> n7
-  n8(["409 CONFLICT El código de regla ya existe"]):::error
+  n8(["500 INTERNAL logic_json no es un objeto"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a CdsRulesRepository.create"]:::llamada
+  n9{"typeof node.field === 'string' && typeof node.op === 'string'"}:::decision
   n7 -->|"no"| n9
-  n10[("CREA clinical_ext.cds_rules")]:::efecto
-  n9 --> n10
-  n11(("201 Responde con éxito")):::ok
+  n10["Llama a CdsService.evaluateLeaf"]:::llamada
+  n9 -->|"sí"| n10
+  n11{"según op"}:::decision
   n10 --> n11
+  n12{"!Array.isArray(value)"}:::decision
+  n11 -->|"'in'"| n12
+  n13(["500 INTERNAL op 'in' exige un array en value"]):::error
+  n12 -->|"sí"| n13
+  n14{"typeof value !== 'number'"}:::decision
+  n11 -->|"'lte'"| n14
+  n15(["500 INTERNAL op '{op}' exige un número en value"]):::error
+  n14 -->|"sí"| n15
+  n16(["500 INTERNAL operador no soportado: {op}"]):::error
+  n11 -->|"por defecto"| n16
+  n17(["500 INTERNAL nodo de lógica no reconocido"]):::error
+  n12 -->|"no"| n17
+  n14 -->|"no"| n17
+  n9 -->|"no"| n17
+  n18{"!(err instanceof UnparseableCdsRuleError)"}:::decision
+  n5 -->|"si falla"| n18
+  n19(["↩ (relanza el error capturado)"]):::error
+  n18 -->|"sí"| n19
+  n20(["422 PRECONDITION_FAILED La lógica de la regla no se puede interpretar"]):::error
+  n18 -->|"no"| n20
+  n21{"dto.logicJson !== undefined"}:::decision
+  n22["Llama a CdsService.assertLogicReadable"]:::llamada
+  n21 -->|"sí"| n22
+  n23["Intenta"]:::intento
+  n22 --> n23
+  n24["Llama a CdsService.walkLogic"]:::llamada
+  n23 --> n24
+  n25{"logic === null || typeof logic !== 'object'"}:::decision
+  n24 --> n25
+  n26(["500 INTERNAL logic_json no es un objeto"]):::error
+  n25 -->|"sí"| n26
+  n27{"typeof node.field === 'string' && typeof node.op === 'string'"}:::decision
+  n25 -->|"no"| n27
+  n28["Llama a CdsService.evaluateLeaf"]:::llamada
+  n27 -->|"sí"| n28
+  n29{"según op"}:::decision
+  n28 --> n29
+  n30{"!Array.isArray(value)"}:::decision
+  n29 -->|"'in'"| n30
+  n31(["500 INTERNAL op 'in' exige un array en value"]):::error
+  n30 -->|"sí"| n31
+  n32{"typeof value !== 'number'"}:::decision
+  n29 -->|"'lte'"| n32
+  n33(["500 INTERNAL op '{op}' exige un número en value"]):::error
+  n32 -->|"sí"| n33
+  n34(["500 INTERNAL operador no soportado: {op}"]):::error
+  n29 -->|"por defecto"| n34
+  n35(["500 INTERNAL nodo de lógica no reconocido"]):::error
+  n30 -->|"no"| n35
+  n32 -->|"no"| n35
+  n27 -->|"no"| n35
+  n36{"!(err instanceof UnparseableCdsRuleError)"}:::decision
+  n23 -->|"si falla"| n36
+  n37(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"sí"| n37
+  n38(["422 PRECONDITION_FAILED La lógica de la regla no se puede interpretar"]):::error
+  n36 -->|"no"| n38
+  n39["Transacción: transactional(…)"]:::transaccion
+  n21 -->|"no"| n39
+  n40["Llama a CdsRulesRepository.findByCode"]:::llamada
+  n39 --> n40
+  n41[("LEE clinical_ext.cds_rules")]:::efecto
+  n40 --> n41
+  n42{"clash"}:::decision
+  n41 --> n42
+  n43(["409 CONFLICT El código de regla ya existe"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a CdsRulesRepository.create"]:::llamada
+  n42 -->|"no"| n44
+  n45[("CREA clinical_ext.cds_rules")]:::efecto
+  n44 --> n45
+  n46(("201 Responde con éxito")):::ok
+  n45 --> n46
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -507,7 +565,9 @@ Publicar una versión de la regla CDS
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Regla CDS no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lógica de la regla no se puede interpretar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | UnparseableCdsRuleError: logic_json no es un objeto; UnparseableCdsRuleError: op 'in' exige un array en value; UnparseableCdsRuleError: op '{op}' exige un número en value; UnparseableCdsRuleError: operador no soportado: {op}; UnparseableCdsRuleError: nodo de lógica no reconocido |
 
 ```mermaid
 flowchart TD
@@ -542,11 +602,46 @@ flowchart TD
   n12 -->|"no"| n14
   n15[("ACTUALIZA clinical_ext.cds_rules")]:::efecto
   n14 -->|"sí"| n15
-  n16[("ACTUALIZA clinical_ext.cds_rules · ACTUALIZA clinical_ext.cds_rules")]:::efecto
+  n16["Llama a CdsService.assertLogicReadable"]:::llamada
   n15 --> n16
   n14 -->|"no"| n16
-  n17(("200 Responde con éxito")):::ok
+  n17["Intenta"]:::intento
   n16 --> n17
+  n18["Llama a CdsService.walkLogic"]:::llamada
+  n17 --> n18
+  n19{"logic === null || typeof logic !== 'object'"}:::decision
+  n18 --> n19
+  n20(["500 INTERNAL logic_json no es un objeto"]):::error
+  n19 -->|"sí"| n20
+  n21{"typeof node.field === 'string' && typeof node.op === 'string'"}:::decision
+  n19 -->|"no"| n21
+  n22["Llama a CdsService.evaluateLeaf"]:::llamada
+  n21 -->|"sí"| n22
+  n23{"según op"}:::decision
+  n22 --> n23
+  n24{"!Array.isArray(value)"}:::decision
+  n23 -->|"'in'"| n24
+  n25(["500 INTERNAL op 'in' exige un array en value"]):::error
+  n24 -->|"sí"| n25
+  n26{"typeof value !== 'number'"}:::decision
+  n23 -->|"'lte'"| n26
+  n27(["500 INTERNAL op '{op}' exige un número en value"]):::error
+  n26 -->|"sí"| n27
+  n28(["500 INTERNAL operador no soportado: {op}"]):::error
+  n23 -->|"por defecto"| n28
+  n29(["500 INTERNAL nodo de lógica no reconocido"]):::error
+  n24 -->|"no"| n29
+  n26 -->|"no"| n29
+  n21 -->|"no"| n29
+  n30{"!(err instanceof UnparseableCdsRuleError)"}:::decision
+  n17 -->|"si falla"| n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32(["422 PRECONDITION_FAILED La lógica de la regla no se puede interpretar"]):::error
+  n30 -->|"no"| n32
+  n33[("ACTUALIZA clinical_ext.cds_rules · ACTUALIZA clinical_ext.cds_rules")]:::efecto
+  n34(("200 Responde con éxito")):::ok
+  n33 --> n34
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -621,24 +716,18 @@ flowchart TD
   n1 --> n2
   n3["Llama a CdsService.checkInteractions"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Repite: ciclo for"]:::bucle
   n3 --> n4
   n5["Repite: ciclo for"]:::bucle
-  n4 --> n5
-  n6["Repite: ciclo for"]:::bucle
+  n4 -->|"cada elemento"| n5
+  n6["Llama a DrugInteractionsRepository.findByPair"]:::llamada
   n5 -->|"cada elemento"| n6
-  n7["Llama a DrugInteractionsRepository.findByPair"]:::llamada
-  n6 -->|"cada elemento"| n7
-  n8[("LEE clinical_ext.drug_interactions")]:::efecto
+  n7[("LEE clinical_ext.drug_interactions")]:::efecto
+  n6 --> n7
+  n8(("201 Responde con éxito")):::ok
   n7 --> n8
-  n9["Llama a ClinicalAlertsRepository.create"]:::llamada
-  n8 --> n9
-  n10[("CREA clinical_ext.clinical_alerts")]:::efecto
-  n9 --> n10
-  n11(("201 Responde con éxito")):::ok
-  n10 --> n11
-  n6 -->|"al terminar"| n11
-  n5 -->|"al terminar"| n11
+  n5 -->|"al terminar"| n8
+  n4 -->|"al terminar"| n8
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -703,11 +792,16 @@ flowchart TD
   n15 -->|"no"| n20
   n17 -->|"no"| n20
   n12 -->|"no"| n20
-  n21["Llama a ClinicalAlertsRepository.create"]:::llamada
-  n22[("CREA clinical_ext.clinical_alerts")]:::efecto
-  n21 --> n22
-  n23(("201 Responde con éxito")):::ok
-  n22 --> n23
+  n21{"!(err instanceof UnparseableCdsRuleError)"}:::decision
+  n8 -->|"si falla"| n21
+  n22(["↩ (relanza el error capturado)"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a ClinicalAlertsRepository.create"]:::llamada
+  n21 -->|"no"| n23
+  n24[("CREA clinical_ext.clinical_alerts")]:::efecto
+  n23 --> n24
+  n25(("201 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1030,8 +1124,8 @@ Guardar un favorito de prescripción
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cuenta no tiene un perfil profesional asociado |
-| 409 | `CONFLICT` | ConflictException: Ya tenés un favorito con ese nombre |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lista de favoritos llegó a su máximo; borrá alguno antes de guardar otro |
+| 409 | `CONFLICT` | ConflictException: Ya tiene un favorito con ese nombre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La lista de favoritos llegó a su máximo; borre alguno antes de guardar otro |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1063,17 +1157,17 @@ flowchart TD
   n13["Llama a PrescriptionFavoritesRepository.countByPractitioner"]:::llamada
   n14[("LEE clinical_ext.prescription_favorites")]:::efecto
   n13 --> n14
-  n15{"cuantos ›= MAX_FAVORITES_PER_PRACTITIONER"}:::decision
+  n15{"howMany ›= MAX_FAVORITES_PER_PRACTITIONER"}:::decision
   n14 --> n15
-  n16(["422 PRECONDITION_FAILED La lista de favoritos llegó a su máximo; borrá alguno antes de guardar otro"]):::error
+  n16(["422 PRECONDITION_FAILED La lista de favoritos llegó a su máximo; borre alguno antes de guardar otro"]):::error
   n15 -->|"sí"| n16
   n17["Llama a PrescriptionFavoritesRepository.findByPractitioner"]:::llamada
   n15 -->|"no"| n17
   n18[("LEE clinical_ext.prescription_favorites")]:::efecto
   n17 --> n18
-  n19{"existentes.some((favorite) =› favorite.name === dto.name)"}:::decision
+  n19{"existing.some((favorite) =› favorite.name === dto.name)"}:::decision
   n18 --> n19
-  n20(["409 CONFLICT Ya tenés un favorito con ese nombre"]):::error
+  n20(["409 CONFLICT Ya tiene un favorito con ese nombre"]):::error
   n19 -->|"sí"| n20
   n21["Llama a PrescriptionFavoritesRepository.create"]:::llamada
   n19 -->|"no"| n21
@@ -1250,7 +1344,8 @@ Iniciar una sesión de telesalud
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La sesión virtual pertenece a otra organización.; ForbiddenException: No participa de este encuentro clínico. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro clínico no encontrado |
 | 409 | `CONFLICT` | ConflictException: El encuentro ya tiene una sesión virtual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1263,20 +1358,43 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a VirtualEncountersRepository.findByEncounter"]:::llamada
+  n5["Llama a VirtualEncountersService.requireEncounterParticipant"]:::llamada
   n4 --> n5
-  n6[("LEE clinical_ext.virtual_encounters")]:::efecto
+  n6["Llama a EncountersRepository.findById"]:::llamada
   n5 --> n6
-  n7{"existing"}:::decision
+  n7[("LEE clinical.encounters")]:::efecto
   n6 --> n7
-  n8(["409 CONFLICT El encuentro ya tiene una sesión virtual"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a VirtualEncountersRepository.create"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA clinical_ext.virtual_encounters")]:::efecto
-  n9 --> n10
-  n11(("201 Responde con éxito")):::ok
-  n10 --> n11
+  n8{"!encounter"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Encuentro clínico no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"!belongsToTenant"}:::decision
+  n8 -->|"no"| n10
+  n11(["403 FORBIDDEN La sesión virtual pertenece a otra organización."]):::error
+  n10 -->|"sí"| n11
+  n12{"!practitionerProfileId"}:::decision
+  n10 -->|"no"| n12
+  n13(["403 FORBIDDEN No participa de este encuentro clínico."]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a EncountersRepository.findActiveParticipants"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE clinical.encounter_participants")]:::efecto
+  n14 --> n15
+  n16(["403 FORBIDDEN No participa de este encuentro clínico."]):::error
+  n15 --> n16
+  n17["Llama a VirtualEncountersRepository.findByEncounter"]:::llamada
+  n18[("LEE clinical_ext.virtual_encounters")]:::efecto
+  n17 --> n18
+  n19{"existing"}:::decision
+  n18 --> n19
+  n20(["409 CONFLICT El encuentro ya tiene una sesión virtual"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a VirtualEncountersRepository.create"]:::llamada
+  n19 -->|"no"| n21
+  n22[("CREA clinical_ext.virtual_encounters")]:::efecto
+  n21 --> n22
+  n23(("201 Responde con éxito")):::ok
+  n22 --> n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1294,8 +1412,8 @@ Finalizar una sesión de telesalud
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión virtual no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La sesión virtual pertenece a otra organización.; ForbiddenException: No participa de este encuentro clínico. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión virtual no encontrada; ResourceNotFoundException: Encuentro clínico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no está en progreso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1312,18 +1430,41 @@ flowchart TD
   n4 --> n5
   n6[("LEE clinical_ext.virtual_encounters")]:::efecto
   n5 --> n6
-  n7{"!venc"}:::decision
+  n7{"!due"}:::decision
   n6 --> n7
   n8(["404 NOT_FOUND Sesión virtual no encontrada"]):::error
   n7 -->|"sí"| n8
-  n9{"venc.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS"}:::decision
+  n9["Llama a VirtualEncountersService.requireEncounterParticipant"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La sesión no está en progreso"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA clinical_ext.virtual_encounters · ACTUALIZA clinical_ext.virtual_encounters · ACTUALIZA clinical_ex…")]:::efecto
-  n9 -->|"no"| n11
-  n12(("200 Responde con éxito")):::ok
+  n10["Llama a EncountersRepository.findById"]:::llamada
+  n9 --> n10
+  n11[("LEE clinical.encounters")]:::efecto
+  n10 --> n11
+  n12{"!encounter"}:::decision
   n11 --> n12
+  n13(["404 NOT_FOUND Encuentro clínico no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14{"!belongsToTenant"}:::decision
+  n12 -->|"no"| n14
+  n15(["403 FORBIDDEN La sesión virtual pertenece a otra organización."]):::error
+  n14 -->|"sí"| n15
+  n16{"!practitionerProfileId"}:::decision
+  n14 -->|"no"| n16
+  n17(["403 FORBIDDEN No participa de este encuentro clínico."]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a EncountersRepository.findActiveParticipants"]:::llamada
+  n16 -->|"no"| n18
+  n19[("LEE clinical.encounter_participants")]:::efecto
+  n18 --> n19
+  n20(["403 FORBIDDEN No participa de este encuentro clínico."]):::error
+  n19 --> n20
+  n21{"due.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_IN_PROGRESS"}:::decision
+  n22(["422 PRECONDITION_FAILED La sesión no está en progreso"]):::error
+  n21 -->|"sí"| n22
+  n23[("ACTUALIZA clinical_ext.virtual_encounters · ACTUALIZA clinical_ext.virtual_encounters · ACTUALIZA clinical_ex…")]:::efecto
+  n21 -->|"no"| n23
+  n24(("200 Responde con éxito")):::ok
+  n23 --> n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1341,8 +1482,8 @@ Unirse a una sesión de telesalud
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión virtual no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La sesión virtual pertenece a otra organización.; ForbiddenException: No participa de este encuentro clínico. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión virtual no encontrada; ResourceNotFoundException: Encuentro clínico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no está agendada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1359,18 +1500,41 @@ flowchart TD
   n4 --> n5
   n6[("LEE clinical_ext.virtual_encounters")]:::efecto
   n5 --> n6
-  n7{"!venc"}:::decision
+  n7{"!due"}:::decision
   n6 --> n7
   n8(["404 NOT_FOUND Sesión virtual no encontrada"]):::error
   n7 -->|"sí"| n8
-  n9{"venc.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_SCHEDULED"}:::decision
+  n9["Llama a VirtualEncountersService.requireEncounterParticipant"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La sesión no está agendada"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA clinical_ext.virtual_encounters · ACTUALIZA clinical_ext.virtual_encounters")]:::efecto
-  n9 -->|"no"| n11
-  n12(("200 Responde con éxito")):::ok
+  n10["Llama a EncountersRepository.findById"]:::llamada
+  n9 --> n10
+  n11[("LEE clinical.encounters")]:::efecto
+  n10 --> n11
+  n12{"!encounter"}:::decision
   n11 --> n12
+  n13(["404 NOT_FOUND Encuentro clínico no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14{"!belongsToTenant"}:::decision
+  n12 -->|"no"| n14
+  n15(["403 FORBIDDEN La sesión virtual pertenece a otra organización."]):::error
+  n14 -->|"sí"| n15
+  n16{"!practitionerProfileId"}:::decision
+  n14 -->|"no"| n16
+  n17(["403 FORBIDDEN No participa de este encuentro clínico."]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a EncountersRepository.findActiveParticipants"]:::llamada
+  n16 -->|"no"| n18
+  n19[("LEE clinical.encounter_participants")]:::efecto
+  n18 --> n19
+  n20(["403 FORBIDDEN No participa de este encuentro clínico."]):::error
+  n19 --> n20
+  n21{"due.statusConceptId !== CEXT.VIRTUAL_ENCOUNTER_SCHEDULED"}:::decision
+  n22(["422 PRECONDITION_FAILED La sesión no está agendada"]):::error
+  n21 -->|"sí"| n22
+  n23[("ACTUALIZA clinical_ext.virtual_encounters · ACTUALIZA clinical_ext.virtual_encounters")]:::efecto
+  n21 -->|"no"| n23
+  n24(("200 Responde con éxito")):::ok
+  n23 --> n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1389,3 +1553,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | POST /drug-interactions | 201, 400, 401, 403, 429 | 1 |
 | POST /immunization-schedules | 201, 400, 401, 403, 429 | 1 |
 | GET /referrals | 200, 400, 401, 403, 429 | 1 |
+| GET /referrals/me | 200, 401, 403, 429 | 3 |

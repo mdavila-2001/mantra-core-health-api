@@ -1,0 +1,7 @@
+COMMAND: git diff --exit-code origin/dev -- src/modules/terminology/services/concepts.service.ts
+STDOUT: (empty); EXIT_CODE=0
+COMMAND: structural equality of three failing OpenAPI operations against origin/dev
+BASELINE_IDENTICAL /iam/auth/upload-registration-signature-image
+BASELINE_IDENTICAL /public/profiles/o/{slug}/services
+BASELINE_IDENTICAL /public/profiles/f/{slug}/products
+EXIT_CODE=0

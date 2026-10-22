@@ -1,0 +1,193 @@
+{
+  "code": "EMERG_DOLOR_TORACICO",
+  "name": "Dolor torácico agudo en emergencia",
+  "specialty": {
+    "code": "MEDICINA_EMERGENCIA",
+    "display": "Medicina de Emergencia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "ECG en menos de 10 minutos, troponina y estratificación con el puntaje HEART (publicado, de uso libre)."
+  },
+  "fields": [
+    {
+      "section": "Evaluación inicial",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de evaluación",
+      "dataType": "string",
+      "required": true,
+      "options": ["Evaluación inicial", "Reevaluación"]
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "inicio_de_sintomas",
+      "name": "Inicio de los síntomas (fecha u hora)",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación inicial",
+      "code": "tratamiento_previo",
+      "name": "Tratamiento recibido antes de esta consulta",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "dolor_actual",
+      "name": "Dolor en este momento",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "dolor_inicio",
+      "name": "Dolor — inicio",
+      "dataType": "string",
+      "required": false,
+      "options": ["Súbito", "Progresivo"],
+      "showWhen": { "field": "dolor_actual", "equals": true }
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "dolor_caracter",
+      "name": "Dolor — carácter",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Opresivo",
+        "Punzante",
+        "Urente (ardor)",
+        "Cólico",
+        "Pulsátil",
+        "Sordo",
+        "Lancinante",
+        "Eléctrico o en descarga"
+      ],
+      "allowOther": true,
+      "showWhen": { "field": "dolor_actual", "equals": true }
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "dolor_irradiado",
+      "name": "Dolor — ¿se irradia?",
+      "dataType": "boolean",
+      "required": false,
+      "showWhen": { "field": "dolor_actual", "equals": true }
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "dolor_irradiacion",
+      "name": "¿Hacia dónde se irradia?",
+      "dataType": "string",
+      "required": true,
+      "showWhen": { "field": "dolor_irradiado", "equals": true }
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "dolor_intensidad",
+      "name": "Dolor — intensidad (0 a 10, escala numérica)",
+      "dataType": "integer",
+      "required": true,
+      "description": "0 = sin dolor; 10 = el peor dolor imaginable.",
+      "showWhen": { "field": "dolor_actual", "equals": true }
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "dolor_patron",
+      "name": "Dolor — patrón temporal",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Continuo",
+        "Intermitente",
+        "Nocturno",
+        "Con el esfuerzo",
+        "Posprandial"
+      ],
+      "showWhen": { "field": "dolor_actual", "equals": true }
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "dolor_agravantes_atenuantes",
+      "name": "Dolor — qué lo agrava y qué lo alivia",
+      "dataType": "text",
+      "required": false,
+      "showWhen": { "field": "dolor_actual", "equals": true }
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "hora_ecg",
+      "name": "Hora del ECG",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "ecg_hallazgo",
+      "name": "ECG — hallazgo",
+      "dataType": "string",
+      "required": true
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "ecg_st",
+      "name": "Segmento ST",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Elevación (SCACEST: reperfusión ya)",
+        "Depresión o T invertida",
+        "Normal"
+      ]
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "troponina",
+      "name": "Troponina y hora",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "heart_score",
+      "name": "Puntaje HEART (0–10)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: dolor torácico",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

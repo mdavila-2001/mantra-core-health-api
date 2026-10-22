@@ -3,6 +3,7 @@ import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { MessageQueues, QueuedJobs, DeadLetterJobs } from '../entities';
 import { createdBy } from '../../../common';
+import { STORAGE_JOB_TYPES } from '../../../common/storage/storage-lifecycle.protocol';
 
 /**
  * Describe el contrato estructural de create job data.
@@ -56,6 +57,10 @@ export interface CreateJobData {
  */
 @Injectable()
 export class QueuesRepository {
+  /** Global security scan, intentionally independent of tenant/delivery/TTL. */
+  findStorageIntents(em: EntityManager): Promise<QueuedJobs[]> {
+    return em.find(QueuedJobs, { jobType: { $in: [...STORAGE_JOB_TYPES] } });
+  }
   // --- Colas (UC-35-05, 06) ---
 
   /**
@@ -173,6 +178,7 @@ export class QueuesRepository {
       {
         queueId,
         statusConceptId: readyStatusConceptId,
+        jobType: { $nin: [...STORAGE_JOB_TYPES] },
         availableAt: { $lte: now },
         $or: [{ lockExpiresAt: null }, { lockExpiresAt: { $lte: now } }],
       },

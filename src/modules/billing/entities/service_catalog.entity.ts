@@ -31,6 +31,22 @@ export class ServiceCatalog {
   name!: string;
 
   /**
+   * Valor de description text mantenido por la instancia.
+   */
+  @Property({
+    fieldName: 'description_text',
+    columnType: 'text',
+    nullable: true,
+  })
+  descriptionText?: string;
+
+  /**
+   * Identificador asociado a image file.
+   */
+  @Property({ fieldName: 'image_file_id', type: 'uuid', nullable: true }) // FK → common.files
+  imageFileId?: string;
+
+  /**
    * Identificador asociado a service concept.
    */
   @Property({ fieldName: 'service_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts

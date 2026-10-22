@@ -16,9 +16,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
+  AccessLogged,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -66,6 +68,7 @@ export class FormsInstancesController {
 
   /** Fase 1 de lecturas: los formularios de un encuentro. */
   @Get()
+  @AccessLogged({ resourceType: 'FORM_INSTANCES' })
   @ApiOperation({
     summary: 'Listar las instancias de formulario de un encuentro',
   })
@@ -88,6 +91,7 @@ export class FormsInstancesController {
 
   /** Fase 1 de lecturas: la instancia con sus valores vigentes. */
   @Get(':id')
+  @AccessLogged({ resourceType: 'FORM_INSTANCE', resourceId: 'param:id' })
   @ApiOperation({
     summary: 'Leer una instancia con sus valores vigentes, por tipo resuelto',
   })
@@ -98,6 +102,11 @@ export class FormsInstancesController {
   }
 
   /** UC-09-07. */
+  @Audited({
+    action: 'FORM_INSTANCE_OPENED',
+    entity: 'form_instance',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -111,6 +120,11 @@ export class FormsInstancesController {
   }
 
   /** UC-09-08. */
+  @Audited({
+    action: 'FORM_VALUES_CAPTURED',
+    entity: 'form_instance',
+    entityId: 'param:id',
+  })
   @Post(':id/values')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -125,6 +139,11 @@ export class FormsInstancesController {
   }
 
   /** UC-09-11. */
+  @Audited({
+    action: 'FORM_INSTANCE_CLOSED',
+    entity: 'form_instance',
+    entityId: 'param:id',
+  })
   @Post(':id/close')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar formulario y proyectar vista de recurso' })

@@ -2,32 +2,802 @@
 
 # Endpoints del módulo `telemetry`
 
-Referencia exhaustiva de 13 operación(es) del módulo `telemetry`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 21 operación(es) del módulo `telemetry`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `telemetry-consent`, `telemetry-events`, `telemetry-governance`
-- **Controladores:** `TelemetryConsentController`, `TelemetryEventsController`, `TelemetryGovernanceController`
+- **Etiquetas OpenAPI:** `telemetry-analytics`, `telemetry-consent`, `telemetry-events`, `telemetry-governance`
+- **Controladores:** `TelemetryAnalyticsController`, `TelemetryConsentController`, `TelemetryEventsController`, `TelemetryGovernanceController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
-1. [POST /telemetry/activity-events](#1-post-telemetry-activity-events) — Capturar evento(s) de actividad consent-aware (batch)
-2. [POST /telemetry/analytics-subjects](#2-post-telemetry-analytics-subjects) — Provisionar sujeto de analítica pseudónimo
-3. [POST /telemetry/client-contexts](#3-post-telemetry-client-contexts) — Registrar contexto de cliente/dispositivo + journey
-4. [POST /telemetry/conversion-events](#4-post-telemetry-conversion-events) — Registrar evento de conversión con atribución
-5. [POST /telemetry/disclosure-acceptances](#5-post-telemetry-disclosure-acceptances) — Registrar aceptación de disclosure por usuario/sesión
-6. [POST /telemetry/disclosure-versions](#6-post-telemetry-disclosure-versions) — Publicar versión de disclosure de tracking
-7. [POST /telemetry/event-schemas](#7-post-telemetry-event-schemas) — Registrar esquema de evento de actividad (versionado)
-8. [POST /telemetry/funnels](#8-post-telemetry-funnels) — Definir funnel y sus pasos
-9. [POST /telemetry/session-journeys/{id}/close](#9-post-telemetry-session-journeys-id-close) — Cerrar journey de sesión y consolidar métricas
-10. [POST /telemetry/tracking-consents](#10-post-telemetry-tracking-consents) — Otorgar consentimiento de tracking por propósito
-11. [POST /telemetry/tracking-consents/{id}/withdraw](#11-post-telemetry-tracking-consents-id-withdraw) — Retirar consentimiento y desactivar sujeto (cascada)
-12. [POST /telemetry/tracking-purposes](#12-post-telemetry-tracking-purposes) — Definir propósito de tracking y base legal
-13. [POST /telemetry/web-vitals](#13-post-telemetry-web-vitals) — Registrar métricas Core Web Vitals por ruta (batch)
+1. [GET /admin/analytics/funnels](#1-get-admin-analytics-funnels) — Embudos definidos con sus pasos
+2. [GET /admin/analytics/funnels/{funnelId}/report](#2-get-admin-analytics-funnels-funnelid-report) — Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor
+3. [GET /admin/analytics/overview](#3-get-admin-analytics-overview) — Totales, rutas y eventos principales de la ventana
+4. [GET /admin/analytics/pipeline-health](#4-get-admin-analytics-pipeline-health) — Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara
+5. [GET /admin/analytics/sessions](#5-get-admin-analytics-sessions) — Sesiones de la ventana (sin identificadores de sesión ni sujeto)
+6. [GET /admin/analytics/sessions/{id}](#6-get-admin-analytics-sessions-id) — Timeline de una sesión: eventos y nombres de propiedad, sin valores
+7. [GET /admin/analytics/timeseries](#7-get-admin-analytics-timeseries) — Eventos y sesiones por hora o día (UTC), cubos vacíos en 0
+8. [GET /admin/analytics/web-vitals](#8-get-admin-analytics-web-vitals) — p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra
+9. [POST /telemetry/activity-events](#9-post-telemetry-activity-events) — Capturar evento(s) de actividad consent-aware (batch)
+10. [POST /telemetry/analytics-subjects](#10-post-telemetry-analytics-subjects) — Provisionar sujeto de analítica pseudónimo
+11. [POST /telemetry/client-contexts](#11-post-telemetry-client-contexts) — Registrar contexto de cliente/dispositivo + journey
+12. [POST /telemetry/conversion-events](#12-post-telemetry-conversion-events) — Registrar evento de conversión con atribución
+13. [POST /telemetry/disclosure-acceptances](#13-post-telemetry-disclosure-acceptances) — Registrar aceptación de disclosure por usuario/sesión
+14. [POST /telemetry/disclosure-versions](#14-post-telemetry-disclosure-versions) — Publicar versión de disclosure de tracking
+15. [POST /telemetry/event-schemas](#15-post-telemetry-event-schemas) — Registrar esquema de evento de actividad (versionado)
+16. [POST /telemetry/funnels](#16-post-telemetry-funnels) — Definir funnel y sus pasos
+17. [POST /telemetry/session-journeys/{id}/close](#17-post-telemetry-session-journeys-id-close) — Cerrar journey de sesión y consolidar métricas
+18. [POST /telemetry/tracking-consents](#18-post-telemetry-tracking-consents) — Otorgar consentimiento de tracking por propósito
+19. [POST /telemetry/tracking-consents/{id}/withdraw](#19-post-telemetry-tracking-consents-id-withdraw) — Retirar consentimiento y desactivar sujeto (cascada)
+20. [POST /telemetry/tracking-purposes](#20-post-telemetry-tracking-purposes) — Definir propósito de tracking y base legal
+21. [POST /telemetry/web-vitals](#21-post-telemetry-web-vitals) — Registrar métricas Core Web Vitals por ruta (batch)
 
 ---
 
-## 1. POST /telemetry/activity-events
+## 1. GET /admin/analytics/funnels
+
+- **Módulo:** `telemetry`
+- **Etiqueta OpenAPI:** `telemetry-analytics`
+- **Nombre:** Embudos definidos con sus pasos
+- **Operation ID:** `TelemetryAnalyticsController_listFunnels`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TelemetryAnalyticsController.listFunnels](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+
+### Descripción de negocio
+
+Embudos definidos con sus pasos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/analytics/funnels` en `TelemetryAnalyticsController_listFunnels`. El controlador delega en `TelemetryAnalyticsService.listFunnels`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/analytics/funnels HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...ANALYTICS_READ_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/analytics/funnels HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...ANALYTICS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/analytics/funnels"
+}
+```
+
+---
+
+## 2. GET /admin/analytics/funnels/{funnelId}/report
+
+- **Módulo:** `telemetry`
+- **Etiqueta OpenAPI:** `telemetry-analytics`
+- **Nombre:** Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor
+- **Operation ID:** `TelemetryAnalyticsController_funnelReport`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TelemetryAnalyticsController.funnelReport](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+
+### Descripción de negocio
+
+Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/analytics/funnels/{funnelId}/report` en `TelemetryAnalyticsController_funnelReport`. El controlador delega en `TelemetryAnalyticsService.funnelReport`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `funnelId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | No | `string` | formato `date-time` | Por defecto: to − 7 días | `2026-07-31T12:00:00.000Z` |
+| `to` | query | No | `string` | formato `date-time` | Por defecto: ahora | `2026-07-31T12:00:00.000Z` |
+| `interval` | query | No | `string` | valores: `hour`, `day` | Sin descripción específica en OpenAPI. | `hour` |
+| `portal` | query | No | `string` | valores: `WEB`, `MOBILE` | Sin descripción específica en OpenAPI. | `WEB` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/analytics/funnels/00000000-0000-4000-8000-000000000001/report HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...ANALYTICS_READ_ROLES`.
+- Deben ser UUID válidos: `funnelId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/analytics/funnels/00000000-0000-4000-8000-000000000001/report?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z&interval=hour&portal=WEB HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...ANALYTICS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Embudo no encontrado | Excepción explícita en src/modules/telemetry/services/telemetry-analytics.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/analytics/funnels/{funnelId}/report"
+}
+```
+
+---
+
+## 3. GET /admin/analytics/overview
+
+- **Módulo:** `telemetry`
+- **Etiqueta OpenAPI:** `telemetry-analytics`
+- **Nombre:** Totales, rutas y eventos principales de la ventana
+- **Operation ID:** `TelemetryAnalyticsController_overview`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TelemetryAnalyticsController.overview](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+
+### Descripción de negocio
+
+Totales, rutas y eventos principales de la ventana. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/analytics/overview` en `TelemetryAnalyticsController_overview`. El controlador delega en `TelemetryAnalyticsService.overview`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | formato `date-time` | Por defecto: to − 7 días | `2026-07-31T12:00:00.000Z` |
+| `to` | query | No | `string` | formato `date-time` | Por defecto: ahora | `2026-07-31T12:00:00.000Z` |
+| `interval` | query | No | `string` | valores: `hour`, `day` | Sin descripción específica en OpenAPI. | `hour` |
+| `portal` | query | No | `string` | valores: `WEB`, `MOBILE` | Sin descripción específica en OpenAPI. | `WEB` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/analytics/overview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...ANALYTICS_READ_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/analytics/overview?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z&interval=hour&portal=WEB HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...ANALYTICS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/analytics/overview"
+}
+```
+
+---
+
+## 4. GET /admin/analytics/pipeline-health
+
+- **Módulo:** `telemetry`
+- **Etiqueta OpenAPI:** `telemetry-analytics`
+- **Nombre:** Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara
+- **Operation ID:** `TelemetryAnalyticsController_pipelineHealth`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TelemetryAnalyticsController.pipelineHealth](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+
+### Descripción de negocio
+
+Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/analytics/pipeline-health` en `TelemetryAnalyticsController_pipelineHealth`. El controlador delega en `TelemetryAnalyticsService.pipelineHealth`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | formato `date-time` | Por defecto: to − 7 días | `2026-07-31T12:00:00.000Z` |
+| `to` | query | No | `string` | formato `date-time` | Por defecto: ahora | `2026-07-31T12:00:00.000Z` |
+| `interval` | query | No | `string` | valores: `hour`, `day` | Sin descripción específica en OpenAPI. | `hour` |
+| `portal` | query | No | `string` | valores: `WEB`, `MOBILE` | Sin descripción específica en OpenAPI. | `WEB` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/analytics/pipeline-health HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...ANALYTICS_READ_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/analytics/pipeline-health?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z&interval=hour&portal=WEB HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...ANALYTICS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/analytics/pipeline-health"
+}
+```
+
+---
+
+## 5. GET /admin/analytics/sessions
+
+- **Módulo:** `telemetry`
+- **Etiqueta OpenAPI:** `telemetry-analytics`
+- **Nombre:** Sesiones de la ventana (sin identificadores de sesión ni sujeto)
+- **Operation ID:** `TelemetryAnalyticsController_listSessions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TelemetryAnalyticsController.listSessions](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+
+### Descripción de negocio
+
+Sesiones de la ventana (sin identificadores de sesión ni sujeto). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/analytics/sessions` en `TelemetryAnalyticsController_listSessions`. El controlador delega en `TelemetryAnalyticsService.listSessions`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | formato `date-time` | Por defecto: to − 7 días | `2026-07-31T12:00:00.000Z` |
+| `to` | query | No | `string` | formato `date-time` | Por defecto: ahora | `2026-07-31T12:00:00.000Z` |
+| `interval` | query | No | `string` | valores: `hour`, `day` | Sin descripción específica en OpenAPI. | `hour` |
+| `portal` | query | No | `string` | valores: `WEB`, `MOBILE` | Sin descripción específica en OpenAPI. | `WEB` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `50` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/analytics/sessions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...ANALYTICS_RAW_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/analytics/sessions?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z&interval=hour&portal=WEB&cursor=valor-ejemplo&limit=50 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...ANALYTICS_RAW_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/analytics/sessions"
+}
+```
+
+---
+
+## 6. GET /admin/analytics/sessions/{id}
+
+- **Módulo:** `telemetry`
+- **Etiqueta OpenAPI:** `telemetry-analytics`
+- **Nombre:** Timeline de una sesión: eventos y nombres de propiedad, sin valores
+- **Operation ID:** `TelemetryAnalyticsController_getSession`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TelemetryAnalyticsController.getSession](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+
+### Descripción de negocio
+
+Timeline de una sesión: eventos y nombres de propiedad, sin valores. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/analytics/sessions/{id}` en `TelemetryAnalyticsController_getSession`. El controlador delega en `TelemetryAnalyticsService.getSession`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/analytics/sessions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...ANALYTICS_RAW_ROLES`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/analytics/sessions/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 404 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...ANALYTICS_RAW_ROLES. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Sesión no encontrada | Excepción explícita en src/modules/telemetry/services/telemetry-analytics.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/analytics/sessions/{id}"
+}
+```
+
+---
+
+## 7. GET /admin/analytics/timeseries
+
+- **Módulo:** `telemetry`
+- **Etiqueta OpenAPI:** `telemetry-analytics`
+- **Nombre:** Eventos y sesiones por hora o día (UTC), cubos vacíos en 0
+- **Operation ID:** `TelemetryAnalyticsController_timeseries`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TelemetryAnalyticsController.timeseries](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+
+### Descripción de negocio
+
+Eventos y sesiones por hora o día (UTC), cubos vacíos en 0. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/analytics/timeseries` en `TelemetryAnalyticsController_timeseries`. El controlador delega en `TelemetryAnalyticsService.timeseries`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | formato `date-time` | Por defecto: to − 7 días | `2026-07-31T12:00:00.000Z` |
+| `to` | query | No | `string` | formato `date-time` | Por defecto: ahora | `2026-07-31T12:00:00.000Z` |
+| `interval` | query | No | `string` | valores: `hour`, `day` | Sin descripción específica en OpenAPI. | `hour` |
+| `portal` | query | No | `string` | valores: `WEB`, `MOBILE` | Sin descripción específica en OpenAPI. | `WEB` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/analytics/timeseries HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...ANALYTICS_READ_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/analytics/timeseries?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z&interval=hour&portal=WEB HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...ANALYTICS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/analytics/timeseries"
+}
+```
+
+---
+
+## 8. GET /admin/analytics/web-vitals
+
+- **Módulo:** `telemetry`
+- **Etiqueta OpenAPI:** `telemetry-analytics`
+- **Nombre:** p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra
+- **Operation ID:** `TelemetryAnalyticsController_webVitals`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TelemetryAnalyticsController.webVitals](../../src/modules/telemetry/controllers/telemetry-analytics.controller.ts)
+
+### Descripción de negocio
+
+p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/analytics/web-vitals` en `TelemetryAnalyticsController_webVitals`. El controlador delega en `TelemetryAnalyticsService.webVitals`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | formato `date-time` | Por defecto: to − 7 días | `2026-07-31T12:00:00.000Z` |
+| `to` | query | No | `string` | formato `date-time` | Por defecto: ahora | `2026-07-31T12:00:00.000Z` |
+| `interval` | query | No | `string` | valores: `hour`, `day` | Sin descripción específica en OpenAPI. | `hour` |
+| `portal` | query | No | `string` | valores: `WEB`, `MOBILE` | Sin descripción específica en OpenAPI. | `WEB` |
+| `route` | query | No | `string` | longitud máxima 300 | Plantilla de ruta, p. ej. /patients/:id | `valor-ejemplo` |
+| `metric` | query | No | `string` | valores: `LCP`, `INP`, `CLS`, `FCP`, `TTFB`, `FID` | Desglose p75 por ruta de esta métrica | `LCP` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/analytics/web-vitals HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `...ANALYTICS_READ_ROLES`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/analytics/web-vitals?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z&interval=hour&portal=WEB&route=valor-ejemplo&metric=LCP HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...ANALYTICS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/analytics/web-vitals"
+}
+```
+
+---
+
+## 9. POST /telemetry/activity-events
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-events`
@@ -203,7 +973,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /telemetry/analytics-subjects
+## 10. POST /telemetry/analytics-subjects
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-consent`
@@ -337,7 +1107,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /telemetry/client-contexts
+## 11. POST /telemetry/client-contexts
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-events`
@@ -492,7 +1262,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /telemetry/conversion-events
+## 12. POST /telemetry/conversion-events
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-events`
@@ -627,7 +1397,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /telemetry/disclosure-acceptances
+## 13. POST /telemetry/disclosure-acceptances
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-consent`
@@ -760,7 +1530,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /telemetry/disclosure-versions
+## 14. POST /telemetry/disclosure-versions
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-governance`
@@ -896,7 +1666,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /telemetry/event-schemas
+## 15. POST /telemetry/event-schemas
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-governance`
@@ -1043,7 +1813,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /telemetry/funnels
+## 16. POST /telemetry/funnels
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-governance`
@@ -1201,7 +1971,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /telemetry/session-journeys/{id}/close
+## 17. POST /telemetry/session-journeys/{id}/close
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-events`
@@ -1331,7 +2101,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /telemetry/tracking-consents
+## 18. POST /telemetry/tracking-consents
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-consent`
@@ -1469,7 +2239,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /telemetry/tracking-consents/{id}/withdraw
+## 19. POST /telemetry/tracking-consents/{id}/withdraw
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-consent`
@@ -1588,7 +2358,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /telemetry/tracking-purposes
+## 20. POST /telemetry/tracking-purposes
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-governance`
@@ -1733,7 +2503,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /telemetry/web-vitals
+## 21. POST /telemetry/web-vitals
 
 - **Módulo:** `telemetry`
 - **Etiqueta OpenAPI:** `telemetry-events`

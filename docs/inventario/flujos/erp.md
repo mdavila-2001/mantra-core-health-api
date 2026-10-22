@@ -35,7 +35,7 @@ orden de compra (open) ── goods-receipt ──> received (aceptado vs rechaz
 factura ── invoice-match-run ──> matched | variance
 ```
 
-_Fuente: `src/modules/erp/README.md:35`_
+_Fuente: `src/modules/erp/README.md:72`_
 
 ### Etapas y operaciones
 

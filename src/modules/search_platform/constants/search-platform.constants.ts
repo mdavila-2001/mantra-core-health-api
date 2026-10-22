@@ -104,14 +104,14 @@ export const SPANISH_ANALYSIS_SETTINGS: Record<string, unknown> = {
 };
 
 /** Texto analizado en español, con subcampo exacto para orden alfabético. */
-const esText = {
+const isText = {
   type: 'text',
   analyzer: 'es_text',
   search_analyzer: 'es_text',
 } as const;
 
 /** `keyword` normalizado: filtra sin distinguir tildes ni mayúsculas. */
-const esKeyword = { type: 'keyword', normalizer: 'es_keyword' } as const;
+const isKeyword = { type: 'keyword', normalizer: 'es_keyword' } as const;
 
 /**
  * Índice del directorio público (P10).
@@ -143,7 +143,7 @@ const COMMUNITY_PUBLIC_PROFILES: SearchIndexDefinition = {
       kind: { type: 'keyword' },
       slug: { type: 'keyword' },
       displayName: {
-        ...esText,
+        ...isText,
         fields: {
           // `search_as_you_type` para el autocompletado de la caja de búsqueda
           // y `raw` para el desempate alfabético estable del cursor.
@@ -151,17 +151,17 @@ const COMMUNITY_PUBLIC_PROFILES: SearchIndexDefinition = {
           raw: { type: 'keyword' },
         },
       },
-      headline: esText,
-      biography: esText,
-      specialties: esKeyword,
-      city: esKeyword,
+      headline: isText,
+      biography: isText,
+      specialties: isKeyword,
+      city: isKeyword,
       avatarUrl: { type: 'keyword', index: false },
       // La portada no se busca ni se filtra: se pinta. `index: false` la deja
       // en el documento sin pagar un índice invertido que nadie consulta.
       coverUrl: { type: 'keyword', index: false },
       // La calle SÍ se busca: «Av. Arce» es una consulta corriente en un
       // directorio de centros de salud, y hasta ahora no encontraba nada.
-      address: esText,
+      address: isText,
       verified: { type: 'boolean' },
       // El sello viaja plano y no como objeto anidado: nadie filtra por su
       // interior y `nested` costaría un documento aparte por sello.

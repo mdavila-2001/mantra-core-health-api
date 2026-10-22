@@ -1,0 +1,642 @@
+﻿node.exe : (node:12216) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En C:\Users\Usuario\AppData\Roaming\npm\corepack.ps1: 24 Carácter: 5
++     & "node$exe"  "$basedir/node_modules/corepack/dist/corepack.js" $ ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:12216) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:22044) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\provider-networks.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\directory-networks-seed.service.ts): use 
+`with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-facilities.catalog.ts): use `with 
+{ type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\provider-networks.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\directory-networks-seed.service.spec.ts): 
+use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\provider-networks.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\directory-networks-seed.service.ts): use 
+`with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+transversal\anamnesis-historia-clinica-general.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\transversal\examen-fisico-general.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\transversal\consentimiento-informado.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\transversal\epicrisis-resumen-de-egreso.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\cardiologia\ficha-cardiologica-base.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\cardiologia\riesgo-cardiovascular-oms.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\pediatria\control-de-nino-sano.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\pediatria\curvas-de-crecimiento-oms.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+ginecologia-obstetricia\control-prenatal-hcp.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+traumatologia\evaluacion-musculoesqueletica.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\oftalmologia\examen-oftalmologico-basico.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\odontologia\odontograma-oms.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\psiquiatria\evaluacion-de-salud-mental.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\dermatologia\examen-dermatologico.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-interna\evaluacion-de-medicina-interna.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-general\consulta-de-medicina-general.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-familiar\consulta-de-medicina-familiar.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\neurologia\evaluacion-neurologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+endocrinologia\evaluacion-endocrinologica.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+gastroenterologia\evaluacion-gastroenterologica.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\neumologia\evaluacion-neumologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\nefrologia\evaluacion-nefrologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\reumatologia\evaluacion-reumatologica.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\infectologia\evaluacion-infectologica.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\geriatria\valoracion-geriatrica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\oncologia\evaluacion-oncologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\hematologia\evaluacion-hematologica.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-intensiva\evaluacion-en-medicina-intensiva.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-emergencia\atencion-en-emergencia.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+cirugia-general\evaluacion-de-cirugia-general.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\urologia\evaluacion-urologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+otorrinolaringologia\evaluacion-otorrinolaringologica.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\anestesiologia\valoracion-preanestesica.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+radiologia\informe-de-estudio-por-imagenes.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\patologia-clinica\informe-de-patologia.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+bioquimica-clinica\informe-de-laboratorio.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-deportiva\evaluacion-de-medicina-deportiva.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+psicologia-clinica\evaluacion-psicologica.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\nutricion\evaluacion-nutricional.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\fisioterapia\evaluacion-kinesiologica.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\enfermeria\valoracion-de-enfermeria.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\obstetricia\control-obstetrico.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\odontologia\anamnesis-odontologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-facilities.catalog.ts): use `with 
+{ type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\vademecum\vademecum.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\vademecum-seed.service.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\fee-schedule.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-fee-schedule.catalog.ts): use 
+`with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-facilities.catalog.ts): use `with 
+{ type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:33100) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:34260) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:8452) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+transversal\anamnesis-historia-clinica-general.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\transversal\examen-fisico-general.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\transversal\consentimiento-informado.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\transversal\epicrisis-resumen-de-egreso.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\cardiologia\ficha-cardiologica-base.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\cardiologia\riesgo-cardiovascular-oms.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\pediatria\control-de-nino-sano.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\pediatria\curvas-de-crecimiento-oms.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+ginecologia-obstetricia\control-prenatal-hcp.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+traumatologia\evaluacion-musculoesqueletica.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\oftalmologia\examen-oftalmologico-basico.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\odontologia\odontograma-oms.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\psiquiatria\evaluacion-de-salud-mental.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\dermatologia\examen-dermatologico.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-interna\evaluacion-de-medicina-interna.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-general\consulta-de-medicina-general.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-familiar\consulta-de-medicina-familiar.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\neurologia\evaluacion-neurologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+endocrinologia\evaluacion-endocrinologica.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+gastroenterologia\evaluacion-gastroenterologica.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\neumologia\evaluacion-neumologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\nefrologia\evaluacion-nefrologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\reumatologia\evaluacion-reumatologica.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\infectologia\evaluacion-infectologica.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\geriatria\valoracion-geriatrica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\oncologia\evaluacion-oncologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\hematologia\evaluacion-hematologica.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-intensiva\evaluacion-en-medicina-intensiva.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-emergencia\atencion-en-emergencia.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+cirugia-general\evaluacion-de-cirugia-general.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\urologia\evaluacion-urologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+otorrinolaringologia\evaluacion-otorrinolaringologica.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\anestesiologia\valoracion-preanestesica.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+radiologia\informe-de-estudio-por-imagenes.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\patologia-clinica\informe-de-patologia.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+bioquimica-clinica\informe-de-laboratorio.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+medicina-deportiva\evaluacion-de-medicina-deportiva.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\
+psicologia-clinica\evaluacion-psicologica.json" (from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\nutricion\evaluacion-nutricional.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\fisioterapia\evaluacion-kinesiologica.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\enfermeria\valoracion-de-enfermeria.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\obstetricia\control-obstetrico.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\odontologia\anamnesis-odontologica.json" (from 
+D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\clinical-forms\catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+(node:21888) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:12692) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:12520) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\vademecum\vademecum.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\vademecum-seed.service.spec.ts): use `with 
+{ type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\vademecum\vademecum.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\vademecum-seed.service.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { 
+type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" 
+(from D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for 
+static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the 
+import of "D:\Trabajos Secundarios\Mantra Core 
+Technologies\mantra-core-health-api\src\common\seed\data\bolivia\health-facilities.dataset.json" (from D:\Trabajos 
+Secundarios\Mantra Core Technologies\mantra-core-health-api\src\common\seed\bolivia-facilities.catalog.spec.ts): use 
+`with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic 
+`import()`.
+
+Test Suites: 75 passed, 75 total
+Tests:       708 passed, 708 total
+Snapshots:   0 total
+Time:        192.607 s
+Ran all test suites matching src/modules/clinical|src/common/seed.

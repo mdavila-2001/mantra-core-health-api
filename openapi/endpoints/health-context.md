@@ -1092,7 +1092,7 @@ Contexto declarado en el controlador: Fase 2 del plan de corrección de workers:
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /health-context/internal/schedules/run-due` en `HealthContextController_runDueSchedules`. El controlador delega en `ContextCollectionService.runDueSchedules`. Valida el body como `RunDueSchedulesDto` y consume `application/json`. El tipo de retorno estático es `Promise<RunDueSchedulesResponseDto>`.
+NestJS resuelve `POST /health-context/internal/schedules/run-due` en `HealthContextController_runDueSchedules`. El controlador delega en `ContextCollectionService.runDueSchedules`. Valida el body como `HealthContextRunDueSchedulesDto` y consume `application/json`. El tipo de retorno estático es `Promise<RunDueSchedulesResponseDto>`.
 
 ### Parámetros
 
@@ -1100,7 +1100,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `RunDueSchedulesDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `HealthContextRunDueSchedulesDto`; los campos opcionales se omiten.
 
 ```http
 POST /health-context/internal/schedules/run-due HTTP/1.1

@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { StorageLifecycleModule } from '../../common/storage/storage-lifecycle.module';
+import { InternalStorageLifecycleController } from './controllers/internal-storage-lifecycle.controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import {
@@ -32,8 +34,12 @@ import {
  * archivos con versionado, derivados, vínculos, escaneo y borrado lógico).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    StorageLifecycleModule,
+  ],
   controllers: [
+    InternalStorageLifecycleController,
     CommonIdentifiersController,
     CommonContactPointsController,
     CommonAddressesController,
@@ -75,6 +81,10 @@ import {
     // necesita `downloadPublicMedia` —que autoriza por lo que el archivo es, no
     // por quién lo pide—.
     FileUploadService,
+    // `clinical` liga un archivo ya subido a un diagnóstico puntual
+    // (ALV-033/reemplazo de ALV-032): reusa el `createLink` genérico en vez de
+    // reimplementar el vínculo polimórfico dentro de su propio módulo.
+    FilesService,
   ],
 })
 export class CommonModule {}

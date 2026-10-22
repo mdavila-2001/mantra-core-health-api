@@ -9,7 +9,7 @@ import {
   InsurancePlans,
   InsuranceProducts,
 } from '../../modules/insurance/entities';
-import { INS } from '../../modules/insurance/insurance.concepts';
+import { INS } from '../../modules/insurance/domain/insurance.concepts';
 import { CONCEPTS, deterministicId } from '../constants/concepts';
 import {
   BOLIVIA_CARRIERS,
@@ -18,6 +18,7 @@ import {
   carrierId,
   carrierPlanId,
   carrierProductId,
+  contactChannelsOf,
 } from './bolivia-insurance.catalog';
 
 /**
@@ -136,14 +137,14 @@ export class BoliviaInsuranceSeedService {
    * Mismo criterio que el catálogo geográfico.
    */
   private assertUniqueCodes(): void {
-    const vistos = new Set<string>();
+    const seen = new Set<string>();
     for (const code of this.allCarriers().map((c) => c.code)) {
-      if (vistos.has(code)) {
+      if (seen.has(code)) {
         throw new Error(
           `El catálogo de aseguradoras declara el código "${code}" más de una vez`,
         );
       }
-      vistos.add(code);
+      seen.add(code);
     }
   }
 
@@ -193,16 +194,16 @@ export class BoliviaInsuranceSeedService {
    */
   private async seedTenants(em: EntityManager, now: Date): Promise<number> {
     const todas = this.allCarriers();
-    const existentes = await this.existingIds(
+    const existing = await this.existingIds(
       em,
       Tenants,
       todas.map((c) => carrierTenantId(c.code)),
     );
 
-    let creados = 0;
+    let created = 0;
     for (const carrier of todas) {
       const id = carrierTenantId(carrier.code);
-      if (existentes.has(id)) continue;
+      if (existing.has(id)) continue;
       em.create(
         Tenants,
         {
@@ -224,25 +225,31 @@ export class BoliviaInsuranceSeedService {
         },
         { partial: true },
       );
-      creados += 1;
+      created += 1;
     }
     await em.flush();
-    return creados;
+    return created;
   }
 
   /** Las aseguradoras. */
   private async seedCarriers(em: EntityManager, now: Date): Promise<number> {
     const todas = this.allCarriers();
-    const existentes = await this.existingIds(
+    const existing = await this.existingIds(
       em,
       InsuranceCarriers,
       todas.map((c) => carrierId(c.code)),
     );
 
-    let creados = 0;
+    let created = 0;
     for (const carrier of todas) {
       const id = carrierId(carrier.code);
-      if (existentes.has(id)) continue;
+      if (existing.has(id)) continue;
+      // Canales de contacto (subtarea 2.3): con fuente pública, curados a
+      // mano en un dataset aparte (`contactChannelsOf`); `null` para la
+      // compañía sin canal confirmado en su dominio oficial. Este seed es
+      // ADD-only: no reescribe las 9 filas que ya existan en una base viva
+      // — el backfill sourced de esas filas va en el patch v4.2.10.
+      const channels = contactChannelsOf(carrier.code);
       em.create(
         InsuranceCarriers,
         {
@@ -252,6 +259,9 @@ export class BoliviaInsuranceSeedService {
           legalName: carrier.legalName,
           sigla: carrier.sigla,
           address: carrier.address,
+          whatsappNumber: channels.whatsapp ?? undefined,
+          callCenterPhone: channels.callCenter ?? undefined,
+          supportEmail: channels.supportEmail ?? undefined,
           // El NIT es el identificador con el que el regulador y la facturación
           // la reconocen; las cajas públicas no lo traen en el listado y quedan
           // sin él en vez de con uno inventado.
@@ -265,25 +275,25 @@ export class BoliviaInsuranceSeedService {
         },
         { partial: true },
       );
-      creados += 1;
+      created += 1;
     }
     await em.flush();
-    return creados;
+    return created;
   }
 
   /** Un producto de salud por aseguradora: es el envase que exige el plan. */
   private async seedProducts(em: EntityManager, now: Date): Promise<number> {
     const todas = this.allCarriers();
-    const existentes = await this.existingIds(
+    const existing = await this.existingIds(
       em,
       InsuranceProducts,
       todas.map((c) => carrierProductId(c.code)),
     );
 
-    let creados = 0;
+    let created = 0;
     for (const carrier of todas) {
       const id = carrierProductId(carrier.code);
-      if (existentes.has(id)) continue;
+      if (existing.has(id)) continue;
       em.create(
         InsuranceProducts,
         {
@@ -298,10 +308,10 @@ export class BoliviaInsuranceSeedService {
         },
         { partial: true },
       );
-      creados += 1;
+      created += 1;
     }
     await em.flush();
-    return creados;
+    return created;
   }
 
   /** Los planes: los que la red nombra, y uno base para todas. */
@@ -310,7 +320,7 @@ export class BoliviaInsuranceSeedService {
     // publican planes con nombre: es la opción «no sé cuál tengo» del alta.
     // Quien está afiliado a BISA pero no recuerda si es Advance o Red Max
     // igual puede declarar su cobertura en vez de quedarse sin declararla.
-    const declarados = [
+    const declared = [
       ...BOLIVIA_HEALTH_PLANS,
       ...this.allCarriers().map((c) => ({
         carrierCode: c.code,
@@ -319,16 +329,16 @@ export class BoliviaInsuranceSeedService {
       })),
     ];
 
-    const existentes = await this.existingIds(
+    const existing = await this.existingIds(
       em,
       InsurancePlans,
-      declarados.map((p) => carrierPlanId(p.carrierCode, p.code)),
+      declared.map((p) => carrierPlanId(p.carrierCode, p.code)),
     );
 
-    let creados = 0;
-    for (const plan of declarados) {
+    let created = 0;
+    for (const plan of declared) {
       const id = carrierPlanId(plan.carrierCode, plan.code);
-      if (existentes.has(id)) continue;
+      if (existing.has(id)) continue;
       em.create(
         InsurancePlans,
         {
@@ -342,10 +352,10 @@ export class BoliviaInsuranceSeedService {
         },
         { partial: true },
       );
-      creados += 1;
+      created += 1;
     }
     await em.flush();
-    return creados;
+    return created;
   }
 
   /**
@@ -356,15 +366,15 @@ export class BoliviaInsuranceSeedService {
    */
   private async existingIds<T extends object>(
     em: EntityManager,
-    entidad: new () => T,
+    entity: new () => T,
     ids: string[],
   ): Promise<Set<string>> {
     if (ids.length === 0) return new Set();
-    const filas = await em.find(
-      entidad,
+    const rows = await em.find(
+      entity,
       { id: { $in: ids } },
       { fields: ['id'] as never },
     );
-    return new Set(filas.map((fila) => (fila as { id: string }).id));
+    return new Set(rows.map((row) => (row as { id: string }).id));
   }
 }

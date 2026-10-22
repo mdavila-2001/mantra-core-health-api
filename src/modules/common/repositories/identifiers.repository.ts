@@ -85,6 +85,47 @@ export class IdentifiersRepository {
     });
   }
 
+  /**
+   * Los identificadores de un conjunto de ids, por id.
+   *
+   * Lectura en lote: la ficha de una organización nombra hasta cuatro personas
+   * y pedir sus documentos de a uno sería N+1 sobre la tabla que ya resuelve
+   * el login.
+   *
+   * @param em - Contexto de persistencia.
+   * @param ids - Los identificadores a traer; lista vacía devuelve un mapa vacío.
+   * @returns Mapa `id -> identificador` con los que existan.
+   */
+  async findByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<Map<string, Identifiers>> {
+    if (ids.length === 0) return new Map();
+    const rows = await em.find(Identifiers, { id: { $in: [...ids] } });
+    return new Map(rows.map((row) => [row.id, row]));
+  }
+
+  /**
+   * Los identificadores vigentes (`valid_to IS NULL`) de un dueño.
+   *
+   * Mismo `em.find` que ya hacía `ProfilesPatientsService.leerIdentificadores`
+   * inline — se sube al repositorio porque el PDF oficial de receta
+   * (`clinical`, subtarea B.3) también lo necesita, para el documento de
+   * identidad y su departamento emisor. Sin filtrar por tipo: quien llama
+   * ya sabe qué `typeConceptId` busca entre los resultados (documento,
+   * identificador fiscal…), igual que hacía el código original.
+   *
+   * @param em - Contexto de persistencia.
+   * @param ownerId - El dueño de los identificadores (persona o tenant).
+   * @returns Sus identificadores vigentes, sin orden garantizado.
+   */
+  findCurrentByOwner(
+    em: EntityManager,
+    ownerId: string,
+  ): Promise<Identifiers[]> {
+    return em.find(Identifiers, { ownerId, validTo: null });
+  }
+
   /** Construye la entidad en la unidad de trabajo (sin flush). */
   create(em: EntityManager, data: CreateIdentifierData): Identifiers {
     return em.create(

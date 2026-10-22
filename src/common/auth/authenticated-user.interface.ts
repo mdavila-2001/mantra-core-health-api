@@ -16,6 +16,15 @@ export interface AuthenticatedUser {
    */
   readonly roles: string[];
   /**
+   * Códigos de rol de negocio con ámbito de tenant, indexados por el tenant en
+   * el que fueron concedidos (MCH-001). Un código presente aquí sólo autoriza
+   * dentro del tenant que lo indexa; si un código de `roles` no aparece en
+   * ningún tenant de este mapa, es una excepción global documentada (rol de
+   * plataforma o asignación sin tenant declarado) y sigue autorizando en
+   * cualquiera, como siempre.
+   */
+  readonly scopedRoles?: Record<string, string[]>;
+  /**
    * Tenants de los que el sujeto es miembro activo (de `directory.tenant_memberships`
    * al emitir el token). El `TenantContextGuard` exige que el `X-Tenant-Id` del
    * request pertenezca a esta lista (salvo `SUPERADMIN`).
@@ -50,5 +59,10 @@ export interface AuthenticatedUser {
 /** Request de Express después de que `JwtAuthGuard` adjunta el sujeto validado. */
 export type AuthenticatedRequest = Omit<Request, 'user'> & {
   readonly user?: AuthenticatedUser;
+  /**
+   * Tenant activo del request, resuelto por `TenantScopeGuard` antes de que
+   * `RolesGuard` autorice (MCH-001). `undefined` en un barrido de sistema.
+   */
+  resolvedTenantId?: string;
 };
 import type { Request } from 'express';

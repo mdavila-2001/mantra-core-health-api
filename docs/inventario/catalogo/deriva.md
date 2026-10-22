@@ -7,19 +7,20 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Concepto | Cantidad |
 |---|---|
 | Tablas en el DDL del modelo | 1230 |
-| Entidades del ORM | 1248 |
-| Tablas del DDL con entidad | 1216 |
-| Tablas del DDL **sin** entidad | 14 |
-| Entidades del ORM **sin** tabla en el DDL | 32 |
-| Columnas del DDL ausentes en su entidad | 42 |
-| Columnas con nulabilidad divergente | 25 |
+| Entidades del ORM | 1263 |
+| Tablas del DDL con entidad | 1230 |
+| Tablas del DDL **sin** entidad | 0 |
+| Entidades del ORM **sin** tabla en el DDL | 33 |
+| Columnas del DDL ausentes en su entidad | 1 |
+| Columnas con nulabilidad divergente | 24 |
 | Columnas con tipo divergente | 0 |
-| Columnas de la entidad que el DDL no tiene | 0 |
+| Columnas de la entidad que el DDL no tiene | 9 |
 
 ## Entidades del ORM sin tabla en el DDL
 
 | Tabla que declara | Clase | Dónde la declara el modelo |
 |---|---|---|
+| `clinical.patient_reported_health_statements` | PatientReportedHealthStatements | **en ninguna fuente de DDL del modelo** |
 | `organization_extensions.data_use_agreements` | DataUseAgreements | **en ninguna fuente de DDL del modelo** |
 | `payments.cash_registers` | CashRegisters | **en ninguna fuente de DDL del modelo** |
 | `pharmacy_inventory.purchase_quotations` | PurchaseQuotations | sólo en un parche: `SQL/patches/2026-09-08_v428_billing_quotations.sql` |
@@ -55,69 +56,13 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 
 ## Tablas del DDL sin entidad en el ORM
 
-| Tabla | Diagrama |
-|---|---|
-| `billing.quotation_installments` | `Mantra Core Health Context/modules/diagram_17_billing.puml` |
-| `billing.quotations` | `Mantra Core Health Context/modules/diagram_17_billing.puml` |
-| `community.chat_auto_replies` | `Mantra Core Health Context/modules/diagram_19_community.puml` |
-| `community.comment_media` | `Mantra Core Health Context/modules/diagram_19_community.puml` |
-| `community.party_ratings` | `Mantra Core Health Context/modules/diagram_19_community.puml` |
-| `insurance.insurance_campaign_partners` | `Mantra Core Health Context/modules/diagram_26_insurance.puml` |
-| `insurance.insurance_campaigns` | `Mantra Core Health Context/modules/diagram_26_insurance.puml` |
-| `medical_groups.group_members` | `Mantra Core Health Context/modules/diagram_66_medical_groups.puml` |
-| `medical_groups.groups` | `Mantra Core Health Context/modules/diagram_66_medical_groups.puml` |
-| `qa_execution.execution_plans` | `Mantra Core Health Context/modules/diagram_68_qa_execution.puml` |
-| `qa_execution.execution_targets` | `Mantra Core Health Context/modules/diagram_68_qa_execution.puml` |
-| `qa_execution.plan_approvals` | `Mantra Core Health Context/modules/diagram_68_qa_execution.puml` |
-| `qa_execution.plan_events` | `Mantra Core Health Context/modules/diagram_68_qa_execution.puml` |
-| `scheduling.practitioner_service_offerings` | `Mantra Core Health Context/modules/diagram_41_scheduling.puml` |
+_Ninguna._
 
 ## Columnas del DDL ausentes en la entidad
 
 | Columna | Tipo | En el modelo |
 |---|---|---|
-| accounting.assets.automated | boolean | obligatoria |
-| accounting.liabilities.automated | boolean | obligatoria |
 | authz.resource_scope_grants.reason_text | text | opcional |
-| billing.service_catalog.description_text | text | opcional |
-| billing.service_catalog.image_file_id | uuid | opcional |
-| clinical.encounters.content_hash | varchar | opcional |
-| clinical.encounters.sealed_at | timestamptz | opcional |
-| clinical.service_requests.previous_diagnostic_report_id | uuid | opcional |
-| clinical.service_requests.duplicate_override_reason | text | opcional |
-| community.conversation_participants.last_auto_reply_at | timestamptz | opcional |
-| community.conversation_participants.is_favorite | boolean | obligatoria |
-| community.conversation_participants.is_pinned | boolean | obligatoria |
-| community.conversation_participants.archived_at | timestamptz | opcional |
-| community.conversations.pinned_message_id | uuid | opcional |
-| insurance.claim_line_adjudications.policy_clause_reference | varchar | opcional |
-| insurance.claim_line_adjudications.denial_rationale | text | opcional |
-| insurance.insurance_carriers.whatsapp_number | varchar | opcional |
-| insurance.insurance_carriers.call_center_phone | varchar | opcional |
-| insurance.insurance_carriers.support_email | varchar | opcional |
-| insurance.insurance_claim_lines.inventory_reservation_line_id | uuid | opcional |
-| insurance.insurance_claims.inventory_reservation_id | uuid | opcional |
-| insurance.insurance_claims.service_request_id | uuid | opcional |
-| insurance.insurance_plans.monthly_premium_amount | numeric | opcional |
-| insurance.prior_authorization_determinations.policy_clause_reference | varchar | opcional |
-| insurance.prior_authorization_determinations.denial_rationale | text | opcional |
-| insurance.prior_authorization_requests.inventory_reservation_id | uuid | opcional |
-| pharmacy.pharmacy_products.catalog_product_concept_id | uuid | opcional |
-| pharmacy.pharmacy_products.catalog_presentation_code | varchar | opcional |
-| practice.practice_sites.bank_qr_file_id | uuid | opcional |
-| practice.practitioner_role_assignments.contact_phone | varchar | opcional |
-| profiles.health_practitioner_profiles.signature_file_id | uuid | opcional |
-| profiles.health_practitioner_profiles.seal_file_id | uuid | opcional |
-| profiles.jurisdiction_authorizations.file_id | uuid | opcional |
-| profiles.professional_credentials.issuing_city_text | varchar | opcional |
-| profiles.professional_credentials.issuing_country_text | varchar | opcional |
-| profiles.professional_credentials.profession_concept_id | uuid | opcional |
-| profiles.professional_credentials.title_text | varchar | opcional |
-| scheduling.appointment_bookings.practitioner_service_offering_id | uuid | opcional |
-| scheduling.appointment_bookings.service_snapshot | jsonb | opcional |
-| scheduling.bookable_slots.practitioner_service_offering_id | uuid | opcional |
-| scheduling.schedule_rules.booking_mode_concept_id | uuid | opcional |
-| system_ops.restore_test_runs.objective_status | varchar | obligatoria |
 
 ## Nulabilidad divergente
 
@@ -147,7 +92,6 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | polyglot_storage.residency_policies.allowed_region_codes | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.residency_policies.cross_border_transfer_basis | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.storage_capabilities.verified_at | el modelo dice obligatoria y la entidad opcional |
-| profiles.practitioner_affiliations.role_title | el modelo dice opcional y la entidad obligatoria |
 
 ## Base desplegada
 
@@ -170,7 +114,7 @@ Se construyó una base descartable con SQL/apply_all.sql + SQL/apply_deferred.sq
 
 El arranque de la API crea el esquema desde `src/orm/catalog/schemas.catalog.ts`: un schema que no figura ahí no se crea al arrancar contra una base vacía.
 
-`data_catalog` · `medical_groups` · `qa_execution`
+_Ninguno._
 
 ## Schemas del DDL sin dominio en el modelo
 

@@ -70,7 +70,7 @@ export const CONTENT_PACKS: readonly ContentPackDefinition[] = [
     code: 'GLOSARIO',
     name: 'Glosario médico',
     description:
-      'Taxonomía y catálogo curado de términos médicos: 11 categorías, 15 etiquetas y 64 ' +
+      'Taxonomía y catálogo curado de términos médicos: 12 categorías, 16 etiquetas y 69 ' +
       'términos con sus designaciones y relaciones.',
     approxRows: 500,
   },
@@ -126,6 +126,6 @@ export const CONTENT_PACKS: readonly ContentPackDefinition[] = [
 ];
 
 /** El paquete con ese código, o `undefined` si no existe. */
-export function buscarPaquete(code: string): ContentPackDefinition | undefined {
-  return CONTENT_PACKS.find((paquete) => paquete.code === code);
+export function searchPackage(code: string): ContentPackDefinition | undefined {
+  return CONTENT_PACKS.find((pkg) => pkg.code === code);
 }

@@ -5,4 +5,6 @@ export * from './pharmacy-pricing.service';
 export * from './pharmacy-integration.service';
 export * from './pharmacy-catalog.service';
 export * from './pharmacy-read.service';
+export * from './pharmacy-staff-read.service';
 export * from './pharmacy-marketplace.service';
+export * from './medicine-catalog-search.service';

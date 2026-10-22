@@ -37,6 +37,7 @@ export class AppReadinessService {
       this.probe('mongodb', () => this.documents.ping()),
       this.probe('redis', () => this.redis.ping()),
       this.probe('opensearch', () => this.search.ping()),
+      this.probe('rls', () => this.checkRls()),
     ]);
     const checks = Object.fromEntries(entries);
     const timestamp = new Date().toISOString();
@@ -54,6 +55,41 @@ export class AppReadinessService {
       });
     }
     return { status: 'ok', checks, timestamp };
+  }
+
+  /**
+   * MCH-013 · la readiness no puede anunciar aislamiento por tenant que en
+   * realidad no rige.
+   *
+   * Sin `RLS_ENFORCE=true` esta sonda no consulta nada: el modo no está
+   * activado en ningún despliegue actual y agregar una consulta para un
+   * control apagado no cambiaría nada salvo el costo. Con el modo activado, el
+   * operador está afirmando que las políticas de PostgreSQL aíslan por
+   * tenant — y eso es falso si el rol de runtime tiene `BYPASSRLS` o es
+   * superusuario, porque esos roles ignoran toda política sin excepción. En
+   * ese caso la sonda falla: es preferible un despliegue que no arranca a uno
+   * que arranca creyéndose aislado.
+   *
+   * No decide *qué* rol usar (eso es `DB_APP_USER`, en `orm.config.ts`); sólo
+   * se niega a certificar como seguro un rol que no puede serlo.
+   */
+  private async checkRls(): Promise<void> {
+    if (process.env.RLS_ENFORCE !== 'true') return;
+
+    const [role] = await this.orm.em
+      .getConnection()
+      .execute<{ rolbypassrls: boolean; rolsuper: boolean }[]>(
+        'select rolbypassrls, rolsuper from pg_roles where rolname = current_user',
+      );
+    if (!role || role.rolbypassrls || role.rolsuper) {
+      throw new Error(
+        role
+          ? `RLS_ENFORCE=true pero el rol de runtime "${
+              role.rolsuper ? 'es superusuario' : 'tiene BYPASSRLS'
+            }": las políticas no aíslan nada`
+          : 'RLS_ENFORCE=true pero no se pudo resolver el rol de runtime en pg_roles',
+      );
+    }
   }
 
   private async probe(

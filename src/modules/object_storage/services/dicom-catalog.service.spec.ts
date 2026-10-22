@@ -37,6 +37,9 @@ function build() {
     findInstanceByUid: mockFn(() => Promise.resolve(null)),
     countInstancesBySeries: mockFn(() => Promise.resolve(1)),
     createAccessLog: mockFn(() => ({ id: 'access-1' })),
+    // MCH-020: el catálogo no la usa, pero el doble tiene que cubrir el
+    // contrato del repositorio para que el tipo siga siendo el real.
+    findDicomCoordinates: mockFn(() => Promise.resolve(null)),
   };
   const storageRepo = {
     findManifestById: mockFn(() => Promise.resolve({ id: MANIFEST })),

@@ -6,4 +6,5 @@ export * from './practice-workforce.service';
 export * from './practice-inventory.service';
 export * from './practice-tenant-lookup.service';
 export * from './practitioner-sites.service';
+export * from './own-site-provisioning.service';
 export * from './practice-organization-read.service';

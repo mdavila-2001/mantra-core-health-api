@@ -476,6 +476,19 @@ describe('QaRunsService', () => {
       });
     });
 
+    it('does not pass a run where nothing was executed', async () => {
+      const d = build();
+      wire(d, [], 3);
+
+      const res = await d.service.finalizeRun(RUN, actor);
+
+      expect(res).toMatchObject({
+        statusConceptId: CONCEPTS.RUN_FAILED_STATUS,
+        totalPassed: 0,
+        totalSkipped: 3,
+      });
+    });
+
     it('rejects closing a run twice', async () => {
       const d = build();
       d.runsRepo.findRunForUpdate.mockResolvedValue({

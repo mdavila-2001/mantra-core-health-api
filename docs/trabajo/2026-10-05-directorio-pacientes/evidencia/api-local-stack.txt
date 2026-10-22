@@ -1,0 +1,37 @@
+docker :  Image mongo:8.2.12 Pulling 
+En lÃ­nea: 2 CarÃ¡cter: 1
++ docker compose --env-file docs/trabajo/2026-10-05-directorio-paciente ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ( Image mongo:8.2.12 Pulling :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ Image timescale/timescaledb-ha:pg18 Pulling 
+ Image redis:8.10-alpine Pulling 
+ Image timescale/timescaledb-ha:pg18 Pulling 
+ Image opensearchproject/opensearch:3.8.0 Pulling 
+ 994bcc26d4c3 Pulling fs layer 0B
+ 543459b03c0f Pulling fs layer 0B
+ 928c56ab3fc1 Pulling fs layer 0B
+ 5fc318392bef Pulling fs layer 0B
+[... 9969 progress lines omitted; raw local cache untracked ...]
+ Container alovida-directory-20261005-postgres-1 Creating 
+ Container alovida-directory-20261005-mongo-1 Creating 
+ Container alovida-directory-20261005-mongo-1 Created 
+ Container alovida-directory-20261005-postgres-1 Created 
+ Container alovida-directory-20261005-postgres-init-1 Creating 
+ Container alovida-directory-20261005-opensearch-1 Created 
+ Container alovida-directory-20261005-redis-1 Created 
+ Container alovida-directory-20261005-postgres-init-1 Created 
+ Container alovida-directory-20261005-postgres-1 Starting 
+ Container alovida-directory-20261005-redis-1 Starting 
+ Container alovida-directory-20261005-mongo-1 Starting 
+ Container alovida-directory-20261005-opensearch-1 Starting 
+ Container alovida-directory-20261005-postgres-1 Started 
+ Container alovida-directory-20261005-postgres-1 Waiting 
+ Container alovida-directory-20261005-redis-1 Started 
+ Container alovida-directory-20261005-mongo-1 Started 
+ Container alovida-directory-20261005-opensearch-1 Started 
+ Container alovida-directory-20261005-postgres-1 Healthy 
+ Container alovida-directory-20261005-postgres-init-1 Starting 
+ Container alovida-directory-20261005-postgres-init-1 Started 
+EXIT_CODE=0

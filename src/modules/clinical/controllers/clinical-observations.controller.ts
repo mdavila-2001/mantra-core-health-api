@@ -7,9 +7,16 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
+import { ClinicalRecordAccessGuard } from '../guards';
 import { ObservationsService } from '../services';
 import {
   AmendObservationDto,
@@ -17,7 +24,13 @@ import {
   ObservationResponseDto,
 } from '../dto';
 
-/** Endpoints de observaciones clínicas (registro y enmienda). */
+/**
+ * Endpoints de observaciones clínicas (registro y enmienda).
+ *
+ * SEC-01: el alta lleva el guard del expediente —su `patientProfileId` viaja en
+ * el cuerpo—; la enmienda no, porque su paciente sale de la observación ya
+ * cargada: la autoriza el servicio (MCH-007).
+ */
 @ApiTags('clinical-observations')
 @ApiBearerAuth()
 @Roles('CLINICIAN', 'PRACTITIONER')
@@ -31,7 +44,13 @@ export class ClinicalObservationsController {
   constructor(private readonly observationsService: ObservationsService) {}
 
   /** UC-08-03. */
+  @Audited({
+    action: 'OBSERVATION_RECORDED',
+    entity: 'observation',
+    entityId: 'result.id',
+  })
   @Post()
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registrar una observación con componentes y ejecutantes',
@@ -44,6 +63,11 @@ export class ClinicalObservationsController {
   }
 
   /** UC-08-04. */
+  @Audited({
+    action: 'OBSERVATION_AMENDED',
+    entity: 'observation',
+    entityId: 'param:id',
+  })
   @Patch(':id/amend')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

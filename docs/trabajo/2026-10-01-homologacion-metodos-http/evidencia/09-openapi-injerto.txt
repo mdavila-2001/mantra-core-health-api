@@ -1,0 +1,11 @@
+$ node merge_openapi.mjs
+0 · formateo del generador: JSON y YAML versionados se reproducen exactos
+3 · 11 referencias de la operación nueva resuelven (p. ej. PharmacyUpdateProductDto, PharmacyProductReadDto, BadRequest, Unauthorized)
+4 · operaciones nuevas: patch /pharmacies/{pharmacyId}/products/{productId} · esquemas nuevos: 1 (PharmacyUpdateProductDto, tras PharmacyCreateProductDto)
+escritos openapi/openapi.json y openapi/openapi.yaml
+exit=0
+
+$ git diff --stat -- openapi/
+ openapi/openapi.json | 118 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ openapi/openapi.yaml |  84 ++++++++++++++++++++++++++++++++++++
+ 2 files changed, 202 insertions(+)

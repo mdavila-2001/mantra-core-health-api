@@ -1,0 +1,38 @@
+{
+  "source": "nlm-medlineplus-es",
+  "retrievedAt": "2026-09-30T15:38:39.949Z",
+  "topicsXml": {
+    "url": "https://medlineplus.gov/xml/mplus_topics_2026-09-30.xml",
+    "sha256": "eabb4a37a155becd2067603be2f54ce082cd9630a6b1c4b5f60cf8f190b6cb1c",
+    "topicsInXml": 2033,
+    "spanishTopics": 1016,
+    "byCategory": {
+      "other": 126,
+      "disease": 770,
+      "signs-symptoms": 38,
+      "treatment": 28,
+      "diagnostic-test": 18,
+      "procedure": 36
+    },
+    "withDefinition": 1016
+  },
+  "labGuides": {
+    "indexUrl": "https://medlineplus.gov/spanish/pruebas-de-laboratorio/",
+    "linksInIndex": 302,
+    "rows": 302,
+    "skippedWithoutStructure": [],
+    "byCategory": {
+      "lab": 162,
+      "diagnostic-test": 134,
+      "other": 6
+    }
+  },
+  "http": {
+    "requests": 1,
+    "retries": 0,
+    "cacheHits": 304,
+    "failures": 0,
+    "bytes": 27785
+  },
+  "segundos": 2
+}

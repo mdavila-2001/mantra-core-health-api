@@ -23,7 +23,7 @@ import { createHash } from 'node:crypto';
  * cambiarlo reescribiría todos los identificadores derivados y rompería las FK
  * ya persistidas, así que se trata como una constante inmutable del proyecto.
  */
-export const SALUD_UUID_NAMESPACE = '3f2b6c14-9d5e-5a41-b7c2-0a1e9f4d8b60';
+export const HEALTH_UUID_NAMESPACE = '3f2b6c14-9d5e-5a41-b7c2-0a1e9f4d8b60';
 
 /**
  * Implementación local de UUID versión 5 (nombre + namespace, SHA-1). Se prefiere
@@ -33,7 +33,7 @@ export const SALUD_UUID_NAMESPACE = '3f2b6c14-9d5e-5a41-b7c2-0a1e9f4d8b60';
  */
 export function deterministicId(key: string): string {
   const namespaceBytes = Buffer.from(
-    SALUD_UUID_NAMESPACE.replace(/-/g, ''),
+    HEALTH_UUID_NAMESPACE.replace(/-/g, ''),
     'hex',
   );
   const hash = createHash('sha1')
@@ -82,6 +82,47 @@ export const SEED = {
   processingPurposeId: deterministicId('seed:processing-purpose:default'),
   processingPurposeCode: 'GENERAL_CARE',
   /**
+   * Alcance por defecto de un apoderamiento de portal. Existe porque
+   * `profiles.patient_portal_proxies.scope_value_set_id` es una FK NOT NULL a
+   * `terminology.value_sets` y nadie sembraba ninguno: hasta B.1 el único
+   * escritor de apoderamientos era una ruta de `SECURITY_ADMIN` a la que el
+   * identificador se lo pasaba el cliente, así que en la práctica no se podía
+   * usar. El conjunto no tiene miembros a propósito — qué puede hacer un
+   * apoderado todavía no está acotado, y sembrar unos pocos permisos daría por
+   * decidido algo que nadie decidió.
+   */
+  patientPortalProxyScopeValueSetId: deterministicId(
+    'seed:value-set:VS_PATIENT_PORTAL_PROXY_SCOPE',
+  ),
+  patientPortalProxyScopeVersionId: deterministicId(
+    'seed:value-set-version:VS_PATIENT_PORTAL_PROXY_SCOPE:1',
+  ),
+  patientPortalProxyScopeCode: 'VS_PATIENT_PORTAL_PROXY_SCOPE',
+  /**
+   * Base legal del apoderamiento que un tutor ejerce sobre su dependiente.
+   * Existe por lo mismo que la anterior: `legal_basis_record_id` es FK NOT NULL
+   * a `consent.processing_legal_bases`, y el módulo consent sólo crea bases
+   * legales por una ruta de administración que nadie llama al registrar a un
+   * hijo.
+   */
+  guardianProxyLegalBasisId: deterministicId(
+    'seed:processing-legal-basis:guardian-portal-proxy',
+  ),
+  /**
+   * Propósito de tracking de los mapas de calor del portal y el esquema de
+   * evento con el que el navegador manda sus interacciones
+   * (`POST /telemetry/activity-events`). Deterministas para que el frontend los
+   * conozca sin que un `SECURITY_ADMIN` tenga que registrarlos a mano y copiar
+   * el id al entorno. Los siembra `TelemetryUxHeatmapSeedService`.
+   */
+  uxHeatmapPurposeId: deterministicId(
+    'seed:telemetry:purpose:PORTAL_UX_HEATMAP',
+  ),
+  uxHeatmapPurposeCode: 'PORTAL_UX_HEATMAP',
+  uxHeatmapEventSchemaId: deterministicId(
+    'seed:telemetry:event-schema:ux_interaccion:1',
+  ),
+  /**
    * Cuenta de servicio de los 17 procesos worker (`src/worker-<dominio>.ts`,
    * `src/worker/bootstrap.ts`). No tiene
    * credencial de login: el worker firma su propio access token con
@@ -92,6 +133,16 @@ export const SEED = {
    */
   systemWorkerUserId: deterministicId('seed:user:system-worker'),
   systemWorkerDisplayName: 'System Worker',
+  /**
+   * `SupportAdmin`: la cuenta con la que la empresa escribe en el chat de
+   * agenda (TAREA-15, P-15-1). Mismo patrón que `systemWorkerUserId` — fila
+   * real en `iam.users` porque es quien firma (`created_by_user_id`) la
+   * conversación y el mensaje —, y sin credencial de login: nadie inicia
+   * sesión como la empresa.
+   */
+  supportAdminUserId: deterministicId('seed:user:support-admin'),
+  supportAdminDisplayName: 'AloVida · Soporte',
+  supportAdminProfileSlug: 'soporte-alovida',
 };
 
 /**
@@ -305,6 +356,11 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // --- Common: sistemas de identificador y tipos de contacto ---
   CONTACT_EMAIL: def('common:contact-system:email', 'EMAIL', 'Email'),
   CONTACT_PHONE: def('common:contact-system:phone', 'PHONE', 'Phone'),
+  // El fijo y el celular son dos cosas distintas para quien atiende: el registro
+  // del médico pide «celular de trabajo» y «fijo de trabajo» por separado, y con
+  // un único PHONE no había forma de distinguirlos. `CONTACT_PHONE` queda como
+  // el fijo (es lo que significa en HL7 `phone`) y éste marca el móvil.
+  CONTACT_MOBILE: def('common:contact-system:mobile', 'MOBILE', 'Mobile phone'),
   CONTACT_UNVERIFIED: def(
     'common:contact-state:unverified',
     'CP_UNVERIFIED',
@@ -347,6 +403,40 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // paciente declara en su alta. Reutilizar OWNER_PATIENT para ella envenenaría
   // toda consulta futura que asuma "OWNER_PATIENT ⇒ titular con perfil".
   OWNER_PERSON: def('common:owner-type:person', 'OWNER_PERSON', 'Person'),
+  // Un archivo ligado a UN diagnóstico puntual (`clinical.conditions`), no al
+  // paciente en general: reemplaza al «Adjuntos» genérico del expediente
+  // (ALV-032), que no decía a qué diagnóstico correspondía cada archivo.
+  OWNER_CONDITION: def(
+    'common:owner-type:condition',
+    'OWNER_CONDITION',
+    'Condition',
+  ),
+  // Un archivo ligado a UN procedimiento puntual (`clinical.procedures`) —
+  // incluye lo odontológico, que es un procedimiento con categoría dental
+  // (ver `PeriopDentalService`). Mismo criterio que OWNER_CONDITION.
+  OWNER_PROCEDURE: def(
+    'common:owner-type:procedure',
+    'OWNER_PROCEDURE',
+    'Procedure',
+  ),
+  // P25 (BR-11): adjuntos de receta, alergia y encuentro. Mismo criterio que
+  // OWNER_CONDITION: el archivo se liga al recurso clínico puntual, y el
+  // listado del genérico los rechaza (ver `CLINICAL_RECORD_OWNER_TYPES`).
+  OWNER_MEDICATION_REQUEST: def(
+    'common:owner-type:medication-request',
+    'OWNER_MEDICATION_REQUEST',
+    'Medication request',
+  ),
+  OWNER_ALLERGY_INTOLERANCE: def(
+    'common:owner-type:allergy-intolerance',
+    'OWNER_ALLERGY_INTOLERANCE',
+    'Allergy intolerance',
+  ),
+  OWNER_ENCOUNTER: def(
+    'common:owner-type:encounter',
+    'OWNER_ENCOUNTER',
+    'Encounter',
+  ),
 
   // --- Common: identificadores oficiales ---
   ID_TYPE_NATIONAL: def(
@@ -377,6 +467,14 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // INE): `addresses.service.ts` usaba PE como único país sembrado, lo que
   // dejaba cada dirección creada apuntando al país equivocado.
   COUNTRY_BO: def('common:country:bo', 'BO', 'Bolivia'),
+
+  // Países de las formas societarias extranjeras (subtarea 1.1). Sin
+  // jurisdicción propia sembrada todavía: alcanza con el país para derivar
+  // `countryConceptId` en el autoalta cuando el cliente no lo declara.
+  COUNTRY_BR: def('common:country:br', 'BR', 'Brazil'),
+  COUNTRY_US: def('common:country:us', 'US', 'United States'),
+  COUNTRY_AR: def('common:country:ar', 'AR', 'Argentina'),
+  COUNTRY_MX: def('common:country:mx', 'MX', 'Mexico'),
 
   // --- Common: archivos ---
   FILE_CATEGORY_DOCUMENT: def(
@@ -521,6 +619,17 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'HEALTH_BUSINESS',
     'Health business',
   ),
+  // Centro de diagnóstico por imágenes o laboratorio clínico (subtarea 1.5,
+  // PR #404 del front). No cabe en `HEALTH_OTHER` —el cajón de las
+  // instituciones asistenciales que no encajan arriba— porque, a diferencia
+  // de esas, un DIAGNOSTIC_CENTER SÍ tiene fila propia: materializa una
+  // `diagnostic_units.diagnostic_units` en el alta, igual que `PAYER`
+  // materializa su `insurance_carriers`.
+  TENANT_TYPE_DIAGNOSTIC_CENTER: def(
+    'directory:tenant-type:diagnostic-center',
+    'DIAGNOSTIC_CENTER',
+    'Diagnostic center',
+  ),
   LEGAL_ENTITY_COMPANY: def(
     'directory:legal-entity:company',
     'COMPANY',
@@ -576,6 +685,82 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'directory:legal-entity:foreign-branch',
     'SUCURSAL_EXTRANJERA',
     'Branch of a foreign company',
+  ),
+
+  /* Formas societarias de otras jurisdicciones (subtarea 1.1, prompt del
+     diccionario internacional). Los 8 conceptos de arriba son de Bolivia y NO
+     se renombran: son los que ya persisten filas reales. Cada figura nueva
+     lleva su código de país como propiedad (`legal-entity-country`) y su
+     categoría canónica (`legal-entity-canonical-category`), sembradas por
+     `LegalEntityTypesSeedService` — ver `legal-entity-types.ts`. Fuentes:
+     Código Civil brasileño (Lei 10.406/2002) + Lei das S.A. (6.404/1976) para
+     BR; derecho societario estatal de EE. UU. (LLC/Corporation genéricas,
+     sin estado específico) para US; Ley 27.349 de Sociedades por Acciones
+     Simplificadas para AR; Ley General de Sociedades Mercantiles para MX. */
+  LEGAL_ENTITY_BR_LTDA: def(
+    'directory:legal-entity:br-ltda',
+    'BR_LTDA',
+    'Sociedade Limitada (Brazil)',
+  ),
+  LEGAL_ENTITY_BR_SA: def(
+    'directory:legal-entity:br-sa',
+    'BR_SA',
+    'Sociedade Anônima (Brazil)',
+  ),
+  LEGAL_ENTITY_BR_MEI: def(
+    'directory:legal-entity:br-mei',
+    'BR_MEI',
+    'Microempreendedor Individual (Brazil)',
+  ),
+  LEGAL_ENTITY_BR_EI: def(
+    'directory:legal-entity:br-ei',
+    'BR_EI',
+    'Empresário Individual (Brazil)',
+  ),
+  LEGAL_ENTITY_BR_SLU: def(
+    'directory:legal-entity:br-slu',
+    'BR_SLU',
+    'Sociedade Limitada Unipessoal (Brazil)',
+  ),
+  LEGAL_ENTITY_BR_FILIAL_EST: def(
+    'directory:legal-entity:br-filial-est',
+    'BR_FILIAL_EST',
+    'Foreign company branch (Brazil)',
+  ),
+  LEGAL_ENTITY_US_LLC: def(
+    'directory:legal-entity:us-llc',
+    'US_LLC',
+    'Limited Liability Company (US)',
+  ),
+  LEGAL_ENTITY_US_CORP: def(
+    'directory:legal-entity:us-corp',
+    'US_CORP',
+    'Corporation (US)',
+  ),
+  LEGAL_ENTITY_US_SOLE_PROP: def(
+    'directory:legal-entity:us-sole-prop',
+    'US_SOLE_PROP',
+    'Sole Proprietorship (US)',
+  ),
+  LEGAL_ENTITY_US_LLP: def(
+    'directory:legal-entity:us-llp',
+    'US_LLP',
+    'Limited Liability Partnership (US)',
+  ),
+  LEGAL_ENTITY_US_BRANCH: def(
+    'directory:legal-entity:us-branch',
+    'US_BRANCH',
+    'Foreign company branch (US)',
+  ),
+  LEGAL_ENTITY_AR_SAS: def(
+    'directory:legal-entity:ar-sas',
+    'AR_SAS',
+    'Sociedad por Acciones Simplificada (Argentina)',
+  ),
+  LEGAL_ENTITY_MX_S_RL: def(
+    'directory:legal-entity:mx-s-rl',
+    'MX_S_RL',
+    'Sociedad de Responsabilidad Limitada (Mexico)',
   ),
   TENANT_ACTIVE: def(
     'directory:tenant-status:active',
@@ -673,6 +858,21 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'terminology:relationship:diagnostic-test',
     'REL_DIAGNOSTIC_TEST',
     'Associated diagnostic test',
+  ),
+  // 2026-10-01: las relaciones que Wikidata declara para cada enfermedad
+  // (P780 síntomas, P1995 especialidad). Sin ellas «la tos se asocia al asma»
+  // sólo podía decirse con RELATED_TERM, que no dice qué es cada extremo.
+  //  - SYMPTOM: el origen (enfermedad) presenta el síntoma o signo destino.
+  //  - SPECIALTY: el origen (enfermedad) lo atiende la especialidad destino.
+  REL_SYMPTOM: def(
+    'terminology:relationship:symptom',
+    'REL_SYMPTOM',
+    'Associated symptom or sign',
+  ),
+  REL_SPECIALTY: def(
+    'terminology:relationship:specialty',
+    'REL_SPECIALTY',
+    'Associated health specialty',
   ),
   VS_OP_IN: def('terminology:vs-operator:in', 'IN', 'In'),
   VS_OP_IS_A: def(
@@ -1135,6 +1335,9 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   ),
   CHANNEL_DESK: def('scheduling:channel:desk', 'CH_DESK', 'Front desk'),
   CHANNEL_PHONE: def('scheduling:channel:phone', 'CH_PHONE', 'Phone'),
+  // El turno de mostrador atómico (walk-in): el paciente se atiende en el
+  // momento, distinto de una reserva de mostrador para más adelante (CH_DESK).
+  CHANNEL_WALK_IN: def('scheduling:channel:walk-in', 'CH_WALK_IN', 'Walk-in'),
 
   // --- Scheduling: motivos de cancelación ---
   CANCEL_BY_PATIENT: def(
@@ -5571,6 +5774,19 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'health-data:export-status:failed',
     'EXPORT_FAILED',
     'Export failed',
+  ),
+  /**
+   * Tipo de exportación de `health_export_jobs.export_type_concept_id` para un
+   * certificado de portabilidad de póliza y siniestralidad (subtarea 3.3): el
+   * paciente titular pide su historial de seguros para llevarlo a otra
+   * aseguradora. Ningún otro tipo de exportación existía en el código; se
+   * declara acá, junto a los estados de exportación, y no en `insurance`,
+   * porque la columna es de `health_data`.
+   */
+  EXPORT_TYPE_INSURANCE_PORTABILITY: def(
+    'health-data:export-type:insurance-portability',
+    'EXPORT_TYPE_INSURANCE_PORTABILITY',
+    'Insurance portability export',
   ),
 
   // --- Mensajería: outbox y eventos de dominio (35) ---

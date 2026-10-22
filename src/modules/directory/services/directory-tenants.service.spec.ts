@@ -144,6 +144,39 @@ describe('DirectoryTenantsService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.tenantsRepo.create).not.toHaveBeenCalled();
     });
+
+    it('resuelve legalEntityType por código (subtarea 1.1)', async () => {
+      const d = build();
+      d.tenantsRepo.findByCode.mockResolvedValue(null);
+      d.tenantsRepo.create.mockReturnValue({
+        id: 't1',
+        code: 'ACME',
+        legalName: 'Acme',
+        statusConceptId: DIR.TENANT_PENDING,
+        verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
+        createdAt: new Date('2026-01-01'),
+      });
+
+      await d.service.provision(
+        {
+          tenantType: 'PROVIDER' as const,
+          legalEntityType: 'SRL',
+          countryConceptId: 'c1',
+          jurisdictionConceptId: 'j1',
+          code: 'ACME',
+          legalName: 'Acme',
+          ownerUserId: 'u1',
+        } as any,
+        actor,
+      );
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_SRL,
+        }),
+      );
+    });
   });
 
   describe('verify (UC-04-02)', () => {
@@ -300,7 +333,7 @@ describe('DirectoryTenantsService', () => {
     const actor = { id: 'user-org', roles: ['USER'] } as any;
 
     /** La organización que existe, para no repetirla en cada prueba. */
-    function conOrganizacion(d: ReturnType<typeof build>): any {
+    function withOrganization(d: ReturnType<typeof build>): any {
       const tenant = {
         id: 'ten-1',
         code: 'CLIN-1',
@@ -319,7 +352,7 @@ describe('DirectoryTenantsService', () => {
 
     it('cambia sólo los campos que vienen', async () => {
       const d = build();
-      const tenant = conOrganizacion(d);
+      const tenant = withOrganization(d);
 
       await d.service.updateTenant(
         'ten-1',
@@ -335,7 +368,7 @@ describe('DirectoryTenantsService', () => {
 
     it('exige poder administrar ESA organización', async () => {
       const d = build();
-      conOrganizacion(d);
+      withOrganization(d);
 
       await d.service.updateTenant('ten-1', { tradeName: 'X' } as any, actor);
 
@@ -366,7 +399,7 @@ describe('DirectoryTenantsService', () => {
      */
     it('con bloque `payer` y carrier existente, actualiza sólo lo que viene', async () => {
       const d = build();
-      conOrganizacion(d);
+      withOrganization(d);
       const carrier = {
         sigla: 'OLD',
         address: 'Dirección vieja',
@@ -388,7 +421,7 @@ describe('DirectoryTenantsService', () => {
 
     it('con bloque `payer` pero sin carrier asociado, no rompe el resto del update', async () => {
       const d = build();
-      const tenant = conOrganizacion(d);
+      const tenant = withOrganization(d);
       d.catalogRepo.findCarrierByTenantId.mockResolvedValue(null);
 
       await expect(
@@ -406,7 +439,7 @@ describe('DirectoryTenantsService', () => {
 
     it('sin bloque `payer`, no consulta el catálogo de aseguradoras', async () => {
       const d = build();
-      conOrganizacion(d);
+      withOrganization(d);
 
       await d.service.updateTenant('ten-1', { tradeName: 'X' } as any, actor);
 

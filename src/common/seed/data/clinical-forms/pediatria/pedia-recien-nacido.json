@@ -1,0 +1,133 @@
+{
+  "code": "PEDIA_RECIEN_NACIDO",
+  "name": "Atención del recién nacido",
+  "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Recomendaciones de la OMS sobre la atención materna y neonatal para una experiencia posnatal positiva (2022)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789240045989",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Apgar, antropometría, tamizajes y signos de peligro del recién nacido."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_1",
+      "name": "Apgar al minuto",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "apgar_5",
+      "name": "Apgar a los 5 minutos",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "edad_gestacional",
+      "name": "Edad gestacional (semanas)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "peso_g",
+      "name": "Peso al nacer (g)",
+      "dataType": "decimal",
+      "required": true
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "talla_cm",
+      "name": "Talla (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "perimetro_cefalico_cm",
+      "name": "Perímetro cefálico (cm)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "lactancia_primera_hora",
+      "name": "Lactancia en la primera hora",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "tamizajes_rn",
+      "name": "Tamizajes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Metabólico",
+        "Auditivo",
+        "Cardiopatía (oximetría)",
+        "Reflejo rojo"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "signos_peligro_rn",
+      "name": "Signos de peligro",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "No se alimenta bien",
+        "Convulsiones",
+        "Respiración rápida (≥ 60)",
+        "Tiraje",
+        "Fiebre o hipotermia",
+        "Ictericia en las primeras 24 h",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: recién nacido",
+      "code": "vacunas_rn",
+      "name": "BCG y hepatitis B aplicadas",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

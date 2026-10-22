@@ -251,9 +251,9 @@ export class PeriopDentalService {
    */
   catalog(): DentalCatalogDto {
     return {
-      procedureCodes: DENTAL_PROCEDURE_CODE_KEYS.map(entradaDelCatalogo),
-      teeth: DENTAL_TOOTH_KEYS.map(entradaDelCatalogo),
-      quadrants: DENTAL_QUADRANT_KEYS.map(entradaDelCatalogo),
+      procedureCodes: DENTAL_PROCEDURE_CODE_KEYS.map(catalogEntry),
+      teeth: DENTAL_TOOTH_KEYS.map(catalogEntry),
+      quadrants: DENTAL_QUADRANT_KEYS.map(catalogEntry),
     };
   }
 }
@@ -270,7 +270,7 @@ const SEED_BY_KEY = new Map(
 );
 
 /** Una entrada del catálogo a partir de su clave lógica. */
-function entradaDelCatalogo(key: keyof typeof PERIOP): DentalCatalogEntryDto {
+function catalogEntry(key: keyof typeof PERIOP): DentalCatalogEntryDto {
   const seed = SEED_BY_KEY.get(`procedures_perioperative:${String(key)}`);
   return {
     conceptId: PERIOP[key],

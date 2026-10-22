@@ -54,7 +54,7 @@ const AUDIO_TEMPLATES: readonly AudioTemplateSeed[] = [
     version: 1,
     strategy: 'STATIC',
     language: 'es-419',
-    textTemplate: 'En esta pantalla encontrarás todos tus pacientes.',
+    textTemplate: 'En esta pantalla encontrará todos sus pacientes.',
     voiceProfile: 'brand_es_latam_v1',
     dynamicFieldsJson: [],
   },

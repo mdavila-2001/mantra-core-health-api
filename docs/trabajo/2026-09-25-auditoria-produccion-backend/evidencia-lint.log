@@ -1,0 +1,28 @@
+
+C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mantra-core-health-api\src\modules\terminology\import\xlsx-parser.spec.ts
+   44:20  error    Replace `'%s.xlsx·produce·el·mismo·resultado·que·%s.csv',` with `⏎····'%s.xlsx·produce·el·mismo·resultado·que·%s.csv',⏎···`                                                        prettier/prettier
+   45:1   error    Insert `··`                                                                                                                                                                        prettier/prettier
+   46:5   error    Insert `··`                                                                                                                                                                        prettier/prettier
+   47:5   error    Insert `··`                                                                                                                                                                        prettier/prettier
+   48:3   error    Replace `}` with `··},⏎··`                                                                                                                                                         prettier/prettier
+   72:43  error    Replace `['code',·'display',·'definition'],·['ZZ-999',·'No·debería·leerse',·'']` with `⏎······['code',·'display',·'definition'],⏎······['ZZ-999',·'No·debería·leerse',·''],⏎····`  prettier/prettier
+   73:48  error    Replace `['code',·'display',·'definition'],·['ZZ-001',·'Sí·debería·leerse',·'']` with `⏎······['code',·'display',·'definition'],⏎······['ZZ-001',·'Sí·debería·leerse',·''],⏎····`  prettier/prettier
+   76:36  error    Replace `·type:·'buffer',·bookType:·'xlsx'` with `⏎······type:·'buffer',⏎······bookType:·'xlsx',⏎···`                                                                              prettier/prettier
+   94:5   warning  Unused eslint-disable directive (no problems were reported from 'no-console')
+  101:62  error    Replace ``ZZ-${i}`,·'x',·''` with `⏎······`ZZ-${i}`,⏎······'x',⏎······'',⏎····`                                                                                                    prettier/prettier
+  103:41  error    Replace `['code',·'display',·'definition'],·...filas` with `⏎······['code',·'display',·'definition'],⏎······...filas,⏎····`                                                        prettier/prettier
+  105:36  error    Replace `·type:·'buffer',·bookType:·'xlsx'` with `⏎······type:·'buffer',⏎······bookType:·'xlsx',⏎···`                                                                              prettier/prettier
+
+C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mantra-core-health-api\src\modules\terminology\import\xlsx-parser.ts
+   71:17  error  Insert `⏎·····`                                                                                                                                                                                prettier/prettier
+   77:12  error  Replace `·fila:·FILA_DEL_ENCABEZADO,·motivo:·'el·archivo·no·tiene·encabezado'` with `⏎············fila:·FILA_DEL_ENCABEZADO,⏎············motivo:·'el·archivo·no·tiene·encabezado',⏎·········`  prettier/prettier
+  108:33  error  Replace `registro,·hoja,·indiceRegistro,·problemasDeCelda` with `⏎········registro,⏎········hoja,⏎········indiceRegistro,⏎········problemasDeCelda,⏎······`                                    prettier/prettier
+  116:12  error  Replace `·fila:·FILA_DEL_ENCABEZADO,·motivo:·'el·archivo·no·tiene·encabezado'` with `⏎············fila:·FILA_DEL_ENCABEZADO,⏎············motivo:·'el·archivo·no·tiene·encabezado',⏎·········`  prettier/prettier
+  122:47  error  Replace `·resolverColumna(perfil,·String(celda))` with `⏎······resolverColumna(perfil,·String(celda)),⏎····`                                                                                   prettier/prettier
+  225:20  error  Replace `hoja:·WorkSheet,·fila:·number,·columna:·number` with `⏎··hoja:·WorkSheet,⏎··fila:·number,⏎··columna:·number,⏎`                                                                        prettier/prettier
+  249:27  error  Replace `·?·valor.toISOString().slice(0,·10)` with `⏎······?·valor.toISOString().slice(0,·10)⏎·····`                                                                                           prettier/prettier
+  254:17  error  'valor' will use Object's default stringification format ('[object Object]') when stringified                                                                                                  @typescript-eslint/no-base-to-string
+
+✖ 20 problems (19 errors, 1 warning)
+  18 errors and 1 warning potentially fixable with the `--fix` option.
+

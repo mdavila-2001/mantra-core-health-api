@@ -1,0 +1,73 @@
+{
+  "status": "CATALOG_TESTS_LINT_COMPILE_HTTP_PROFILE_VISUAL_PASS",
+  "command": "docker exec mantra-copays-pg psql -U copays_test -d mantra_copays_test -Atc \"select code, display from terminology.catalog_concepts where code in ('BOB', 'USD', 'pharmacy:CURRENCY_USD', 'pharmacy_inventory:CURRENCY_USD', 'diagnostic_units:CURRENCY_BOB') order by code\"",
+  "exitCode": 0,
+  "source": "Read-only isolated PostgreSQL query executed and reported by coordination.",
+  "output": [
+    "BOB|Boliviano",
+    "USD|US Dollar",
+    "diagnostic_units:CURRENCY_BOB|Boliviano",
+    "pharmacy:CURRENCY_USD|US Dollar",
+    "pharmacy_inventory:CURRENCY_USD|US Dollar"
+  ],
+  "rows": [
+    {
+      "code": "BOB",
+      "display": "Boliviano"
+    },
+    {
+      "code": "USD",
+      "display": "US Dollar"
+    },
+    {
+      "code": "diagnostic_units:CURRENCY_BOB",
+      "display": "Boliviano"
+    },
+    {
+      "code": "pharmacy:CURRENCY_USD",
+      "display": "US Dollar"
+    },
+    {
+      "code": "pharmacy_inventory:CURRENCY_USD",
+      "display": "US Dollar"
+    }
+  ],
+  "helperStatus": "Targeted 148-test batch, seven-file lint, incremental compilation, final HTTP checks for two synthetic patients and real profile browser checks with both screenshot inspections passed.",
+  "scope": "Presentation mapping from canonical concept identifiers; no eligibility rule or currency-equality comparison change authorized by this fix.",
+  "targetedTests": {
+    "command": "yarn.cmd test --runInBand --runTestsByPath src/modules/profiles/services/profiles-patients.service.spec.ts src/modules/profiles/patient-coverage-validity.spec.ts src/modules/insurance/services/patient-settlement-projection.spec.ts",
+    "exitCode": 0,
+    "passedSuites": 3,
+    "passedTests": 148,
+    "profileAndValidityTests": 115,
+    "projectionTests": 33,
+    "durationSeconds": 13.162,
+    "log": "profile-currency-final-tests.log",
+    "overlapsEarlierBatches": true
+  },
+  "finalLint": {
+    "exitCode": 0,
+    "files": 7,
+    "source": "Completed process confirmed by coordination."
+  },
+  "finalCompilation": {
+    "command": "yarn.cmd exec tsc -p tsconfig.build.json",
+    "exitCode": 0,
+    "session": 60606,
+    "source": "Completed process confirmed by coordination."
+  },
+  "finalHttp": {
+    "exitCode": 0,
+    "evidence": "profile-real-http-final.json",
+    "patients": 2,
+    "coverageAndBenefitValidity": "CURRENT",
+    "secondPatientIsolated": true
+  },
+  "finalProfileBrowser": {
+    "passedTests": 2,
+    "totalTests": 2,
+    "durationSeconds": 26.6,
+    "inspectedScreenshots": 2,
+    "financialSettlementFlow": "NOT_VERIFIED"
+  }
+}

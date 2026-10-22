@@ -1,0 +1,20 @@
+(node:32308) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:25712) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30888) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:16188) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" (from C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" (from C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\data\bolivia\insurance-carriers.dataset.json" (from C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+Jest: importing JSON without an import attribute is deprecated and will be a hard error in the next major. Update the import of "C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\data\bolivia\insurance-carrier-contact-channels.dataset.json" (from C:\Users\Usuario\Downloads\Entrypoint-GitHUb\alovida\mch-legion-api\src\common\seed\bolivia-insurance.catalog.ts): use `with { type: 'json' }` for static imports, or pass `{ with: { type: 'json' } }` as the second argument to dynamic `import()`.
+
+Test Suites: 64 passed, 64 total
+Tests:       572 passed, 572 total
+Snapshots:   0 total
+Time:        24.977 s
+Ran all test suites matching src/modules/clinical|src/modules/chart|src/modules/clinical_ext.

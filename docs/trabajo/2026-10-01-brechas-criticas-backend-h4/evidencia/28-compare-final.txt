@@ -1,0 +1,6 @@
+﻿Total mock routes extracted: 643
+Total API routes extracted from controllers: 1448
+Matched: 581
+Method Mismatch: 0
+Missing in Backend: 62
+Saved results to D:\Trabajos Secundarios\Mantra Core Technologies\mock_vs_test_api_comparison.json

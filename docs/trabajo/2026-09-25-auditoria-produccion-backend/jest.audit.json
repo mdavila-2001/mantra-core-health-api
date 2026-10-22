@@ -1,0 +1,10 @@
+{
+  "rootDir": "../../..",
+  "testMatch": ["<rootDir>/docs/trabajo/2026-09-25-auditoria-produccion-backend/reproducciones.spec.ts"],
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "extensionsToTreatAsEsm": [".ts"],
+  "transform": {"^.+\\.(t|j)s$": "@swc/jest"},
+  "testEnvironment": "node",
+  "testTimeout": 15000,
+  "maxWorkers": 1
+}

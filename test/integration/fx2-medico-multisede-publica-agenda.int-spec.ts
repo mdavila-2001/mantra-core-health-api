@@ -1,6 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { bootstrapTestApp, bearer, type TestContext } from './harness';
+import {
+  bootstrapTestApp,
+  bearer,
+  type TestContext,
+  identidadProfesional,
+} from './harness';
 import { CONCEPTS } from '../../src/common';
 import { PROF } from '../../src/modules/profiles/profiles.concepts';
 import { DIR } from '../../src/modules/directory/directory.concepts';
@@ -146,6 +151,7 @@ describe('FX-2 · aprobar el vínculo habilita la agenda multi-sede', () => {
     const alta = await http()
       .post('/iam/auth/register-practitioner')
       .send({
+        ...identidadProfesional(medico.email),
         email: medico.email,
         password,
         name: 'Oliver',
@@ -157,9 +163,7 @@ describe('FX-2 · aprobar el vínculo habilita la agenda multi-sede', () => {
     medico.hpid = alta.body.practitionerProfileId;
     medico.token = await login(medico.email);
     medico.tokenAntesDeAprobar = medico.token;
-    medico.consultorioPropio = (
-      claims(medico.token)['tenants'] as string[]
-    )[0];
+    medico.consultorioPropio = (claims(medico.token)['tenants'] as string[])[0];
   });
 
   afterAll(async () => {

@@ -26,12 +26,21 @@ import {
   CONCEPTS,
 } from '../../../common';
 import { COMM } from '../community.concepts';
-import { MedicalSpecialtyCatalogService } from '../../profiles/services/medical-specialty-catalog.service';
+import { MedicalSpecialtyCatalogService } from '../../profiles/application/services/medical-specialty-catalog.service';
+import { PublicTerritoryFilterService } from './public-territory-filter.service';
 
 /** Un concepto de `VS_MEDICAL_SPECIALTY`, el que el catálogo doble declara. */
-const ESPECIALIDAD_CARDIOLOGIA = '11111111-1111-4111-8111-111111111111';
+const CARDIOLOGY_SPECIALTY = '11111111-1111-4111-8111-111111111111';
 /** Un concepto del catálogo que **no** es una especialidad médica. */
-const CONCEPTO_AJENO = '22222222-2222-4222-8222-222222222222';
+const FOREIGN_CONCEPT = '22222222-2222-4222-8222-222222222222';
+/** Departamentos y municipios del catálogo territorial doble. */
+const DEPARTMENT_LP = '33333333-3333-4333-8333-333333333301';
+const DEPARTMENT_SC = '33333333-3333-4333-8333-333333333302';
+const MUNI_EL_ALTO = '44444444-4444-4444-8444-444444444401';
+const MUNI_SANTA_CRUZ = '44444444-4444-4444-8444-444444444402';
+/** Chuquisaca y Sucre con código del INE, como en la base de desarrollo. */
+const DEPARTMENT_CH = '33333333-3333-4333-8333-333333333303';
+const MUNI_SUCRE_INE = '44444444-4444-4444-8444-444444444403';
 
 /**
  * Un perfil tal como sale de la base: **con** todos los campos internos.
@@ -40,7 +49,7 @@ const CONCEPTO_AJENO = '22222222-2222-4222-8222-222222222222';
  * contra un doble que ya viniera limpio: lo que tiene que demostrar es que el
  * servicio deja afuera lo que la entidad sí trae.
  */
-const perfilCompleto = {
+const completeProfile = {
   id: 'pp-1',
   tenantId: 't-secreto',
   targetTypeConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
@@ -67,7 +76,7 @@ const perfilCompleto = {
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
-function build(opciones?: {
+function build(options?: {
   /** Aciertos que devuelve el índice; sin esto, el índice «no responde». */
   hits?: unknown[];
 }) {
@@ -77,9 +86,10 @@ function build(opciones?: {
     findPublicBySlug: mockFn().mockResolvedValue(null),
     ratingsByProfile: mockFn().mockResolvedValue(new Map()),
     listPublicPosts: mockFn().mockResolvedValue([]),
-    listFeedPublico: mockFn().mockResolvedValue([]),
+    listFeedPublic: mockFn().mockResolvedValue([]),
     engagementByPost: mockFn().mockResolvedValue(new Map()),
     isPublicPostMedia: mockFn().mockResolvedValue(false),
+    isPublicCommentMedia: mockFn().mockResolvedValue(false),
     countPublishedReviews: mockFn().mockResolvedValue(0),
     nearbyProfiles: mockFn().mockResolvedValue([]),
     badgesByProfiles: mockFn().mockResolvedValue(new Map()),
@@ -87,6 +97,7 @@ function build(opciones?: {
     locationsByOwner: mockFn().mockResolvedValue(new Map()),
     specialtiesByPractitioner: mockFn().mockResolvedValue(new Map()),
     affiliationsByPractitioner: mockFn().mockResolvedValue(new Map()),
+    practiceSitesByPractitioner: mockFn().mockResolvedValue(new Map()),
     practitionerIdsBySpecialty: mockFn().mockResolvedValue([]),
     isPostPublic: mockFn().mockResolvedValue(true),
     listPostReactors: mockFn().mockResolvedValue([]),
@@ -99,10 +110,10 @@ function build(opciones?: {
   // que degrada— sin montar un OpenSearch, y el que sirve el índice se prueba
   // pasándole aciertos explícitos.
   const searchIndex = {
-    search: opciones?.hits
+    search: options?.hits
       ? mockFn().mockResolvedValue({
-          total: opciones.hits.length,
-          hits: opciones.hits,
+          total: options.hits.length,
+          hits: options.hits,
           facets: {},
         })
       : mockFn().mockRejectedValue(new Error('OpenSearch no responde')),
@@ -135,13 +146,43 @@ function build(opciones?: {
   const valueSets = {
     findByInternalCode: mockFn().mockResolvedValue({ id: 'vs-especialidades' }),
     findIncludedConceptIdsByValueSet: mockFn().mockResolvedValue([
-      ESPECIALIDAD_CARDIOLOGIA,
+      CARDIOLOGY_SPECIALTY,
     ]),
   };
   const specialtyCatalog = new MedicalSpecialtyCatalogService(valueSets as any);
   const concepts = {
     findById: mockFn().mockResolvedValue({ display: 'Cardiología' }),
   };
+  // El filtro territorial también es real; sólo los catálogos son dobles: dos
+  // departamentos (LP, SC) y un municipio de cada uno.
+  const territoryValueSets = {
+    findByInternalCode: mockFn(async (_em: unknown, code: string) => ({
+      id: code,
+    })),
+    findIncludedConceptIdsByValueSet: mockFn(
+      async (_em: unknown, id: string) =>
+        id === 'VS_BO_DEPARTMENT'
+          ? [DEPARTMENT_LP, DEPARTMENT_SC, DEPARTMENT_CH]
+          : [MUNI_EL_ALTO, MUNI_SANTA_CRUZ, MUNI_SUCRE_INE],
+    ),
+  };
+  const territoryConcepts = {
+    findById: mockFn(
+      async (_em: unknown, id: string) =>
+        ({
+          [DEPARTMENT_LP]: { code: 'geo:bo:department:LP' },
+          [DEPARTMENT_SC]: { code: 'geo:bo:department:SC' },
+          [MUNI_EL_ALTO]: { code: 'LP-EL_ALTO' },
+          [MUNI_SANTA_CRUZ]: { code: 'SC-SANTA_CRUZ_DE_LA_SIERRA' },
+          [MUNI_SUCRE_INE]: { code: 'geo:bo:municipality:010101' },
+          [DEPARTMENT_CH]: { code: 'geo:bo:department:CH' },
+        })[id] ?? null,
+    ),
+  };
+  const territory = new PublicTerritoryFilterService(
+    territoryValueSets as any,
+    territoryConcepts as any,
+  );
   const service = new CommunityPublicService(
     em as any,
     repo as any,
@@ -153,6 +194,7 @@ function build(opciones?: {
     specialtyCatalog,
     concepts as any,
     logger as any,
+    territory,
   );
   return {
     service,
@@ -169,10 +211,53 @@ function build(opciones?: {
 }
 
 describe('CommunityPublicService', () => {
+  describe('getPublicMedia — qué archivo se sirve a un anónimo', () => {
+    it('sirve el avatar/portada de un perfil (primera de las tres clases)', async () => {
+      const d = build();
+      d.profiles.isPublicMedia.mockResolvedValue(true);
+
+      await d.service.getPublicMedia('f-avatar');
+
+      expect(d.files.downloadPublicMedia).toHaveBeenCalledWith('f-avatar');
+    });
+
+    it('sirve una foto del cuerpo de un post público (segunda clase)', async () => {
+      const d = build();
+      d.repo.isPublicPostMedia.mockResolvedValue(true);
+
+      await d.service.getPublicMedia('f-post');
+
+      expect(d.files.downloadPublicMedia).toHaveBeenCalledWith('f-post');
+    });
+
+    // REQ-01-011: la tercera clase — un adjunto de comentario.
+    it('sirve un adjunto de comentario público (tercera clase)', async () => {
+      const d = build();
+      d.repo.isPublicCommentMedia.mockResolvedValue(true);
+
+      await d.service.getPublicMedia('f-comentario');
+
+      expect(d.repo.isPublicCommentMedia).toHaveBeenCalledWith(
+        expect.anything(),
+        'f-comentario',
+      );
+      expect(d.files.downloadPublicMedia).toHaveBeenCalledWith('f-comentario');
+    });
+
+    it('ninguna de las tres clases lo reclama: 404, no se sirve nada', async () => {
+      const d = build();
+
+      await expect(d.service.getPublicMedia('f-ajeno')).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.files.downloadPublicMedia).not.toHaveBeenCalled();
+    });
+  });
+
   describe('la proyección no filtra campos internos', () => {
     it('la fila del buscador tiene exactamente las claves permitidas', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([completeProfile]);
 
       const res = await d.service.search({});
 
@@ -183,7 +268,7 @@ describe('CommunityPublicService', () => {
 
     it('la ficha pública tiene exactamente las claves permitidas', async () => {
       const d = build();
-      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
 
       const res = await d.service.getBySlug('dra-quispe');
 
@@ -192,7 +277,7 @@ describe('CommunityPublicService', () => {
 
     it('un profesional sirve su trayectoria laboral', async () => {
       const d = build();
-      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
       d.repo.affiliationsByPractitioner.mockResolvedValue(
         new Map([
           [
@@ -230,7 +315,7 @@ describe('CommunityPublicService', () => {
     it('quien no es profesional no pide ni sirve trayectoria', async () => {
       const d = build();
       d.repo.findPublicBySlug.mockResolvedValue({
-        ...perfilCompleto,
+        ...completeProfile,
         targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
       });
 
@@ -238,6 +323,160 @@ describe('CommunityPublicService', () => {
 
       expect(res.trajectory).toEqual([]);
       expect(d.repo.affiliationsByPractitioner).not.toHaveBeenCalled();
+    });
+
+    // 2.1 — dónde atiende. Qué asignación cuenta y qué sede es propia se prueba
+    // contra la regla en `public-search.repository.spec.ts`; acá, que la ficha
+    // la sirva sólo para un profesional, con sus cinco campos y sin tocar el
+    // resto de la respuesta.
+    const OWN_SITE = {
+      id: 'sede-propia',
+      name: 'Consultorio Dra. Quispe',
+      addressText: 'Calle Sucre 45, La Paz',
+      location: { lat: -16.5, lng: -68.13 },
+      isOwn: true,
+    };
+    const CLINICAL_SITE = {
+      id: 'sede-clinica',
+      name: 'Clínica Los Olivos',
+      addressText: null,
+      location: null,
+      isOwn: false,
+    };
+    const LOCATION = {
+      address: 'Av. Arce 2345',
+      city: 'La Paz',
+      lat: -16.5,
+      lng: -68.1,
+    };
+
+    it('un profesional sirve sus sedes en el orden de la lectura, pedidas sólo para él', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
+      d.repo.practiceSitesByPractitioner.mockResolvedValue(
+        new Map([['sujeto-interno', [OWN_SITE, CLINICAL_SITE]]]),
+      );
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(res.practiceSites).toEqual([OWN_SITE, CLINICAL_SITE]);
+      expect(d.repo.practiceSitesByPractitioner).toHaveBeenCalledTimes(1);
+      expect(d.repo.practiceSitesByPractitioner).toHaveBeenCalledWith(
+        expect.anything(),
+        ['sujeto-interno'],
+      );
+    });
+
+    it('A · sin sedes sirve [] y deja intactos address, city y location', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
+      d.repo.locationsByOwner.mockResolvedValue(
+        new Map([['sujeto-interno', LOCATION]]),
+      );
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(res.practiceSites).toEqual([]);
+      expect(res.address).toBe('Av. Arce 2345');
+      expect(res.city).toBe('La Paz');
+      expect(res.location).toEqual({ lat: -16.5, lng: -68.1 });
+    });
+
+    it('con sedes, address, city y location siguen siendo el respaldo de siempre', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
+      d.repo.locationsByOwner.mockResolvedValue(
+        new Map([['sujeto-interno', LOCATION]]),
+      );
+      d.repo.practiceSitesByPractitioner.mockResolvedValue(
+        new Map([['sujeto-interno', [CLINICAL_SITE]]]),
+      );
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(res.address).toBe('Av. Arce 2345');
+      expect(res.city).toBe('La Paz');
+      expect(res.location).toEqual({ lat: -16.5, lng: -68.1 });
+    });
+
+    it('I · quien no es profesional no pide sedes y sirve []', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue({
+        ...completeProfile,
+        targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+      });
+
+      const res = await d.service.getBySlug('clinica-del-sur');
+
+      expect(res.practiceSites).toEqual([]);
+      expect(d.repo.practiceSitesByPractitioner).not.toHaveBeenCalled();
+    });
+
+    it('J · la lista blanca de la ficha sumó practiceSites y ninguna otra clave', () => {
+      // Literal a propósito: comparar la salida contra `PUBLIC_PROFILE_KEYS`
+      // prueba que coinciden, no qué contienen. Abrir otra clave obliga a
+      // editar esta lista, que es el momento de pensarlo.
+      expect([...PUBLIC_PROFILE_KEYS].sort()).toEqual(
+        [
+          'kind',
+          'slug',
+          'displayName',
+          'headline',
+          'biography',
+          'avatarUrl',
+          'coverUrl',
+          'verified',
+          'city',
+          'address',
+          'location',
+          'specialties',
+          'trajectory',
+          'practiceSites',
+          'ratingAverage',
+          'ratingCount',
+          'acceptsReviews',
+          'verifiedBadge',
+          'hasPublishedAgenda',
+          'nextAvailableDate',
+          'posts',
+          'updatedAt',
+        ].sort(),
+      );
+    });
+
+    it('J · cada sede sale con sus cinco campos aunque la lectura traiga más', async () => {
+      const d = build();
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
+      d.repo.practiceSitesByPractitioner.mockResolvedValue(
+        new Map([
+          [
+            'sujeto-interno',
+            [
+              {
+                ...OWN_SITE,
+                practiceId: 'practica-interna',
+                tenantId: 't-secreto',
+                adminUserId: 'user-interno',
+                location: { lat: -16.5, lng: -68.13, precision: 'interna' },
+              },
+            ],
+          ],
+        ]),
+      );
+
+      const res = await d.service.getBySlug('dra-quispe');
+
+      expect(Object.keys(res.practiceSites[0]).sort()).toEqual([
+        'addressText',
+        'id',
+        'isOwn',
+        'location',
+        'name',
+      ]);
+      expect(Object.keys(res.practiceSites[0].location!).sort()).toEqual([
+        'lat',
+        'lng',
+      ]);
     });
 
     // Enumerados uno por uno y no con un `not.toContain` genérico: si mañana se
@@ -255,13 +494,13 @@ describe('CommunityPublicService', () => {
       'createdByUserId',
       'updatedByUserId',
       'rowVersion',
-    ])('la ficha pública no expone %s', async (clave) => {
+    ])('la ficha pública no expone %s', async (key) => {
       const d = build();
-      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
 
       const res = await d.service.getBySlug('dra-quispe');
 
-      expect(res).not.toHaveProperty(clave);
+      expect(res).not.toHaveProperty(key);
     });
 
     // El identificador aparece *dentro* de la URL, y eso está bien: así se
@@ -269,7 +508,7 @@ describe('CommunityPublicService', () => {
     // que es la forma en que un cliente lo tomaría por un handle interno.
     it('el avatar sale como URL y no como identificador suelto', async () => {
       const d = build();
-      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
 
       const res = await d.service.getBySlug('dra-quispe');
 
@@ -291,7 +530,7 @@ describe('CommunityPublicService', () => {
 
     it('un slug del tipo equivocado da el mismo 404, no una redirección', async () => {
       const d = build();
-      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
 
       // El perfil es de profesional; se pide bajo el prefijo de farmacia.
       await expect(
@@ -305,7 +544,7 @@ describe('CommunityPublicService', () => {
       const d = build();
       d.repo.searchProfiles.mockResolvedValue([
         {
-          ...perfilCompleto,
+          ...completeProfile,
           verificationStatusConceptId: CONCEPTS.STATE_PENDING,
         },
       ]);
@@ -335,13 +574,16 @@ describe('CommunityPublicService', () => {
     // en «Dra.» y saltaba a un lugar equivocado del listado.
     it('el cursor sobrevive a un nombre con espacios', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto, perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([
+        completeProfile,
+        completeProfile,
+      ]);
 
-      const primera = await d.service.search({ limit: 1 });
-      expect(primera.nextCursor).not.toBeNull();
+      const first = await d.service.search({ limit: 1 });
+      expect(first.nextCursor).not.toBeNull();
 
       await d.service.search({
-        cursor: primera.nextCursor as string,
+        cursor: first.nextCursor as string,
         limit: 1,
       });
 
@@ -375,13 +617,13 @@ describe('CommunityPublicService', () => {
       // El repositorio devolvería el directorio entero si lo llamaran: es
       // exactamente el fallo que se está cubriendo, así que el doble tiene que
       // poder cometerlo.
-      repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      repo.searchProfiles.mockResolvedValue([completeProfile]);
 
-      const pagina = await service.search({ kind: 'MEDICATION' });
+      const page = await service.search({ kind: 'MEDICATION' });
 
-      expect(pagina.items).toEqual([]);
-      expect(pagina.nextCursor).toBeNull();
-      expect(pagina.totalHint).toBe(0);
+      expect(page.items).toEqual([]);
+      expect(page.nextCursor).toBeNull();
+      expect(page.totalHint).toBe(0);
     });
 
     it('no llega a consultar el directorio', async () => {
@@ -414,8 +656,8 @@ describe('CommunityPublicService', () => {
       await service.search({});
 
       expect(repo.searchProfiles).toHaveBeenCalled();
-      const filtros = repo.searchProfiles.mock.calls[0][1];
-      expect(filtros.targetTypeConceptId).toBeUndefined();
+      const filters = repo.searchProfiles.mock.calls[0][1];
+      expect(filters.targetTypeConceptId).toBeUndefined();
     });
   });
 
@@ -425,7 +667,7 @@ describe('CommunityPublicService', () => {
       ['latitud fuera de rango', { lat: 91, lng: 0 }],
       ['longitud fuera de rango', { lat: 0, lng: 181 }],
       ['sólo latitud', { lat: -17.8 }],
-    ])('da 400 %s', async (_caso, params) => {
+    ])('da 400 %s', async (_case, params) => {
       const d = build();
       await expect(d.service.nearby(params)).rejects.toBeInstanceOf(
         BadRequestException,
@@ -471,7 +713,7 @@ describe('CommunityPublicService', () => {
  */
 describe('CommunityPublicService · P10', () => {
   /** Un acierto del índice con la forma que devuelve OpenSearch. */
-  const acierto = {
+  const hit = {
     id: 'perfil-1',
     score: 3.2,
     sort: [1, 'Dra. Marisol Quispe Ticona'],
@@ -492,7 +734,7 @@ describe('CommunityPublicService · P10', () => {
 
   describe('cuando el índice responde', () => {
     it('sirve desde el índice y no toca el SQL', async () => {
-      const d = build({ hits: [acierto] });
+      const d = build({ hits: [hit] });
 
       const res = await d.service.search({ q: 'cardiologo' });
 
@@ -503,7 +745,7 @@ describe('CommunityPublicService · P10', () => {
     });
 
     it('la fila del índice tiene exactamente las claves permitidas', async () => {
-      const d = build({ hits: [acierto] });
+      const d = build({ hits: [hit] });
 
       const res = await d.service.search({ q: 'cardiologo' });
 
@@ -515,7 +757,7 @@ describe('CommunityPublicService · P10', () => {
     });
 
     it('los verificados van primero: D7 se resuelve rankeando, no excluyendo', async () => {
-      const d = build({ hits: [acierto] });
+      const d = build({ hits: [hit] });
 
       await d.service.search({ q: 'cardiologo' });
 
@@ -524,7 +766,7 @@ describe('CommunityPublicService · P10', () => {
     });
 
     it('el vertical se traduce a filtro del índice', async () => {
-      const d = build({ hits: [acierto] });
+      const d = build({ hits: [hit] });
 
       await d.service.search({ kind: 'PRACTITIONER' });
 
@@ -539,7 +781,7 @@ describe('CommunityPublicService · P10', () => {
   describe('cuando el índice no responde', () => {
     it('degrada a SQL en vez de fallar', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([completeProfile]);
 
       const res = await d.service.search({ q: 'cardiologo' });
 
@@ -558,7 +800,7 @@ describe('CommunityPublicService · P10', () => {
 
   describe('«más cercana» de verdad', () => {
     it('pide `geo_distance` con el radio y el orden por distancia', async () => {
-      const d = build({ hits: [{ ...acierto, distanceKm: 1.2 }] });
+      const d = build({ hits: [{ ...hit, distanceKm: 1.2 }] });
 
       const res = await d.service.nearby({
         lat: -16.5,
@@ -566,8 +808,8 @@ describe('CommunityPublicService · P10', () => {
         radiusKm: 3,
       });
 
-      const [[indice, params]] = d.searchIndex.search.mock.calls;
-      expect(indice).toBe('community_public_profiles');
+      const [[index, params]] = d.searchIndex.search.mock.calls;
+      expect(index).toBe('community_public_profiles');
       expect(params.geo).toEqual({
         field: 'location',
         lat: -16.5,
@@ -583,9 +825,9 @@ describe('CommunityPublicService · P10', () => {
       const d = build({
         hits: [
           {
-            ...acierto,
+            ...hit,
             distanceKm: 1.2,
-            source: { ...acierto.source, location: null },
+            source: { ...hit.source, location: null },
           },
         ],
       });
@@ -613,13 +855,13 @@ describe('CommunityPublicService · P10', () => {
  * servir el mismo perfil —índice y SQL— y exigen que coincidan.
  */
 describe('CommunityPublicService · sello y agenda (P13)', () => {
-  const AYER = new Date(Date.now() - 24 * 3_600_000);
+  const YESTERDAY = new Date(Date.now() - 24 * 3_600_000);
 
   /** Un sello con los campos que la lectura mira. */
-  function sello(over: Record<string, unknown> = {}): any {
+  function stamp(over: Record<string, unknown> = {}): any {
     return {
       id: 'badge-1',
-      subjectRefId: perfilCompleto.id,
+      subjectRefId: completeProfile.id,
       badgeTypeConceptId: COMM.BADGE_TYPE_LICENSE_VERIFIED,
       verificationMethodConceptId: COMM.BADGE_METHOD_AUTHORITY_CHECK,
       statusConceptId: CONCEPTS.STATE_ACTIVE,
@@ -632,7 +874,7 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
   describe('camino SQL', () => {
     it('sin sello, el perfil no se muestra verificado aunque la columna lo diga', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([completeProfile]);
       d.repo.badgesByProfiles.mockResolvedValue(new Map());
 
       const res = await d.service.search({});
@@ -645,9 +887,9 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('con sello vigente sale VERIFIED y con su procedencia', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([completeProfile]);
       d.repo.badgesByProfiles.mockResolvedValue(
-        new Map([[perfilCompleto.id, [sello()]]]),
+        new Map([[completeProfile.id, [stamp()]]]),
       );
 
       const res = await d.service.search({});
@@ -661,9 +903,9 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('con sello vencido sale EXPIRED, que no es lo mismo que NONE', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([completeProfile]);
       d.repo.badgesByProfiles.mockResolvedValue(
-        new Map([[perfilCompleto.id, [sello({ validTo: AYER })]]]),
+        new Map([[completeProfile.id, [stamp({ validTo: YESTERDAY })]]]),
       );
 
       const res = await d.service.search({});
@@ -676,7 +918,7 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
   describe('«Pedir turno» sólo cuando es verdad (PAC-CITA-001)', () => {
     it('sin agenda publicada, `hasPublishedAgenda` es false', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([completeProfile]);
 
       const res = await d.service.search({});
 
@@ -686,11 +928,11 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('con agenda y hueco, el resultado lo dice y trae el día', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([completeProfile]);
       d.repo.agendaByPractitioner.mockResolvedValue(
         new Map([
           [
-            perfilCompleto.targetId,
+            completeProfile.targetId,
             { hasAgenda: true, nextAvailableDate: '2026-08-20' },
           ],
         ]),
@@ -706,11 +948,11 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('el día viene del repositorio y se sirve tal cual, sin recortarlo dos veces', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([completeProfile]);
       d.repo.agendaByPractitioner.mockResolvedValue(
         new Map([
           [
-            perfilCompleto.targetId,
+            completeProfile.targetId,
             { hasAgenda: true, nextAvailableDate: '2026-08-21' },
           ],
         ]),
@@ -723,11 +965,11 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('con agenda pero sin huecos, se ofrece la agenda y no una fecha inventada', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([completeProfile]);
       d.repo.agendaByPractitioner.mockResolvedValue(
         new Map([
           [
-            perfilCompleto.targetId,
+            completeProfile.targetId,
             { hasAgenda: true, nextAvailableDate: null },
           ],
         ]),
@@ -825,19 +1067,19 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
   describe('estadísticas del perfil (ORG-PUB-005)', () => {
     it('abrir la ficha cuenta una visita', async () => {
       const d = build();
-      d.repo.findPublicBySlug.mockResolvedValue(perfilCompleto);
+      d.repo.findPublicBySlug.mockResolvedValue(completeProfile);
 
       await d.service.getBySlug('dra-demo');
 
       expect(d.stats.recordView).toHaveBeenCalledWith(
-        perfilCompleto.tenantId,
-        perfilCompleto.id,
+        completeProfile.tenantId,
+        completeProfile.id,
       );
     });
 
     it('aparecer en resultados cuenta como aparición, no como visita', async () => {
       const d = build();
-      d.repo.searchProfiles.mockResolvedValue([perfilCompleto]);
+      d.repo.searchProfiles.mockResolvedValue([completeProfile]);
 
       await d.service.search({});
 
@@ -848,7 +1090,7 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
   describe('feed público de la portada', () => {
     /** Una fila del feed tal como la devuelve el repositorio. */
-    const fila = (id: string, iso: string, slug = 'dra-demo') => ({
+    const row = (id: string, iso: string, slug = 'dra-demo') => ({
       id,
       bodyText: `Cuerpo de ${id}`,
       publishedAt: new Date(iso),
@@ -861,11 +1103,11 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('cada tarjeta trae a su autor: en un feed mezclado es lo que las distingue', async () => {
       const d = build();
-      d.repo.listFeedPublico.mockResolvedValue([
-        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      d.repo.listFeedPublic.mockResolvedValue([
+        row('post-1', '2026-08-27T10:00:00.000Z'),
       ]);
 
-      const res = await d.service.feedPublico({});
+      const res = await d.service.feedPublic({});
 
       expect(res.items).toHaveLength(1);
       expect(res.items[0]).toMatchObject({
@@ -879,25 +1121,25 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('un concepto de vertical que no se reconoce cae a PRACTITIONER y no rompe la página', async () => {
       const d = build();
-      d.repo.listFeedPublico.mockResolvedValue([
-        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      d.repo.listFeedPublic.mockResolvedValue([
+        row('post-1', '2026-08-27T10:00:00.000Z'),
       ]);
 
-      const res = await d.service.feedPublico({});
+      const res = await d.service.feedPublic({});
 
       expect(res.items[0].authorKind).toBe('PRACTITIONER');
     });
 
     it('pide una de más que el tope, y no la devuelve: es cómo sabe que hay más', async () => {
       const d = build();
-      d.repo.listFeedPublico.mockResolvedValue([
-        fila('post-1', '2026-08-27T10:00:00.000Z'),
-        fila('post-2', '2026-08-27T09:00:00.000Z'),
+      d.repo.listFeedPublic.mockResolvedValue([
+        row('post-1', '2026-08-27T10:00:00.000Z'),
+        row('post-2', '2026-08-27T09:00:00.000Z'),
       ]);
 
-      const res = await d.service.feedPublico({ limit: 1 });
+      const res = await d.service.feedPublic({ limit: 1 });
 
-      expect(d.repo.listFeedPublico).toHaveBeenCalledWith(
+      expect(d.repo.listFeedPublic).toHaveBeenCalledWith(
         expect.anything(),
         2,
         undefined,
@@ -908,26 +1150,26 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('sin página siguiente el cursor es null, no una cadena vacía', async () => {
       const d = build();
-      d.repo.listFeedPublico.mockResolvedValue([
-        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      d.repo.listFeedPublic.mockResolvedValue([
+        row('post-1', '2026-08-27T10:00:00.000Z'),
       ]);
 
-      const res = await d.service.feedPublico({ limit: 5 });
+      const res = await d.service.feedPublic({ limit: 5 });
 
       expect(res.nextCursor).toBeNull();
     });
 
     it('el cursor que emite es el que vuelve a entender, en la fila donde cortó', async () => {
       const d = build();
-      d.repo.listFeedPublico.mockResolvedValue([
-        fila('post-1', '2026-08-27T10:00:00.000Z'),
-        fila('post-2', '2026-08-27T09:00:00.000Z'),
+      d.repo.listFeedPublic.mockResolvedValue([
+        row('post-1', '2026-08-27T10:00:00.000Z'),
+        row('post-2', '2026-08-27T09:00:00.000Z'),
       ]);
 
-      const primera = await d.service.feedPublico({ limit: 1 });
-      await d.service.feedPublico({ limit: 1, cursor: primera.nextCursor! });
+      const first = await d.service.feedPublic({ limit: 1 });
+      await d.service.feedPublic({ limit: 1, cursor: first.nextCursor! });
 
-      expect(d.repo.listFeedPublico).toHaveBeenLastCalledWith(
+      expect(d.repo.listFeedPublic).toHaveBeenLastCalledWith(
         expect.anything(),
         2,
         { publishedAt: new Date('2026-08-27T10:00:00.000Z'), id: 'post-1' },
@@ -936,13 +1178,13 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('un cursor corrupto se ignora y sirve la primera página, no un 500', async () => {
       const d = build();
-      d.repo.listFeedPublico.mockResolvedValue([]);
+      d.repo.listFeedPublic.mockResolvedValue([]);
 
       await expect(
-        d.service.feedPublico({ cursor: 'no-es-base64-de-json' }),
+        d.service.feedPublic({ cursor: 'no-es-base64-de-json' }),
       ).resolves.toMatchObject({ items: [] });
 
-      expect(d.repo.listFeedPublico).toHaveBeenCalledWith(
+      expect(d.repo.listFeedPublic).toHaveBeenCalledWith(
         expect.anything(),
         expect.any(Number),
         undefined,
@@ -951,8 +1193,8 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('las imágenes y los contadores salen del mismo lote, sin un viaje por post', async () => {
       const d = build();
-      d.repo.listFeedPublico.mockResolvedValue([
-        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      d.repo.listFeedPublic.mockResolvedValue([
+        row('post-1', '2026-08-27T10:00:00.000Z'),
       ]);
       d.repo.engagementByPost.mockResolvedValue(
         new Map([
@@ -963,7 +1205,7 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
         ]),
       );
 
-      const res = await d.service.feedPublico({});
+      const res = await d.service.feedPublic({});
 
       expect(d.repo.engagementByPost).toHaveBeenCalledTimes(1);
       expect(res.items[0]).toMatchObject({
@@ -975,11 +1217,11 @@ describe('CommunityPublicService · sello y agenda (P13)', () => {
 
     it('un post sin interacción no inventa contadores: van en cero y sin imágenes', async () => {
       const d = build();
-      d.repo.listFeedPublico.mockResolvedValue([
-        fila('post-1', '2026-08-27T10:00:00.000Z'),
+      d.repo.listFeedPublic.mockResolvedValue([
+        row('post-1', '2026-08-27T10:00:00.000Z'),
       ]);
 
-      const res = await d.service.feedPublico({});
+      const res = await d.service.feedPublic({});
 
       expect(res.items[0]).toMatchObject({
         mediaUrls: [],
@@ -996,13 +1238,13 @@ describe('CommunityPublicService · filtro por especialidad (AC-02-7, AC-02-8)',
 
     await d.service.search({
       kind: 'PRACTITIONER',
-      specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA,
+      specialtyConceptId: CARDIOLOGY_SPECIALTY,
     });
 
     expect(d.repo.searchProfiles).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA,
+        specialtyConceptId: CARDIOLOGY_SPECIALTY,
       }),
       expect.any(Number),
     );
@@ -1014,7 +1256,7 @@ describe('CommunityPublicService · filtro por especialidad (AC-02-7, AC-02-8)',
     await expect(
       d.service.search({
         kind: 'PRACTITIONER',
-        specialtyConceptId: CONCEPTO_AJENO,
+        specialtyConceptId: FOREIGN_CONCEPT,
       }),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
 
@@ -1028,7 +1270,7 @@ describe('CommunityPublicService · filtro por especialidad (AC-02-7, AC-02-8)',
     const d = build();
 
     await d.service
-      .search({ specialtyConceptId: CONCEPTO_AJENO })
+      .search({ specialtyConceptId: FOREIGN_CONCEPT })
       .catch((error: PreconditionFailedException) => {
         expect(error.getStatus()).toBe(422);
       });
@@ -1040,7 +1282,7 @@ describe('CommunityPublicService · filtro por especialidad (AC-02-7, AC-02-8)',
     d.valueSets.findByInternalCode.mockResolvedValue(null);
 
     await expect(
-      d.service.search({ specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA }),
+      d.service.search({ specialtyConceptId: CARDIOLOGY_SPECIALTY }),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 
@@ -1062,7 +1304,7 @@ describe('CommunityPublicService · filtro por especialidad (AC-02-7, AC-02-8)',
 
     await d.service.search({
       kind: 'PRACTITIONER',
-      specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA,
+      specialtyConceptId: CARDIOLOGY_SPECIALTY,
     });
 
     expect(d.searchIndex.search).toHaveBeenCalledWith(
@@ -1081,23 +1323,159 @@ describe('CommunityPublicService · filtro por especialidad (AC-02-7, AC-02-8)',
 
     await d.service.search({
       kind: 'PRACTITIONER',
-      specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA,
+      specialtyConceptId: CARDIOLOGY_SPECIALTY,
     });
 
     expect(d.searchIndex.search).not.toHaveBeenCalled();
     expect(d.repo.searchProfiles).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        specialtyConceptId: ESPECIALIDAD_CARDIOLOGIA,
+        specialtyConceptId: CARDIOLOGY_SPECIALTY,
       }),
       expect.any(Number),
     );
   });
 });
 
+describe('CommunityPublicService · filtro territorial en dos pasos (subtarea 2.3)', () => {
+  it('un departamento del catálogo acota por SQL con su sigla', async () => {
+    const d = build({ hits: [] });
+
+    await d.service.search({
+      kind: 'ORGANIZATION',
+      departmentConceptId: DEPARTMENT_LP,
+    });
+
+    // El índice no guarda el lugar: con filtro territorial no se le pregunta.
+    expect(d.searchIndex.search).not.toHaveBeenCalled();
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        // Las dos formas de código sembradas: la del generador del modelo y la
+        // del INE (La Paz es el 02).
+        territory: {
+          departmentConceptId: DEPARTMENT_LP,
+          municipalityCodePrefixes: ['LP-', 'geo:bo:municipality:02'],
+        },
+      }),
+      expect.any(Number),
+    );
+  });
+
+  it('departamento y municipio coherentes acotan por el municipio', async () => {
+    const d = build();
+
+    await d.service.search({
+      kind: 'PRACTITIONER',
+      departmentConceptId: DEPARTMENT_LP,
+      municipalityConceptId: MUNI_EL_ALTO,
+    });
+
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        territory: { municipalityConceptId: MUNI_EL_ALTO },
+      }),
+      expect.any(Number),
+    );
+  });
+
+  it('un municipio solo alcanza: ya implica su departamento', async () => {
+    const d = build();
+
+    await d.service.search({
+      kind: 'ORGANIZATION',
+      municipalityConceptId: MUNI_SANTA_CRUZ,
+    });
+
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        territory: { municipalityConceptId: MUNI_SANTA_CRUZ },
+      }),
+      expect.any(Number),
+    );
+  });
+
+  it('un municipio de otro departamento da 422 y no busca', async () => {
+    const d = build();
+
+    await expect(
+      d.service.search({
+        kind: 'ORGANIZATION',
+        departmentConceptId: DEPARTMENT_LP,
+        municipalityConceptId: MUNI_SANTA_CRUZ,
+      }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.repo.searchProfiles).not.toHaveBeenCalled();
+  });
+
+  it('un departamento ajeno al catálogo da 422 y no devuelve el directorio entero', async () => {
+    const d = build();
+
+    const error = await d.service
+      .search({ kind: 'ORGANIZATION', departmentConceptId: FOREIGN_CONCEPT })
+      .catch((e: PreconditionFailedException) => e);
+
+    expect(error).toBeInstanceOf(PreconditionFailedException);
+    expect((error as PreconditionFailedException).getStatus()).toBe(422);
+    expect(d.repo.searchProfiles).not.toHaveBeenCalled();
+  });
+
+  it('un municipio con código del INE se reconoce en su departamento', async () => {
+    const d = build();
+
+    await d.service.search({
+      kind: 'ORGANIZATION',
+      departmentConceptId: DEPARTMENT_CH,
+      municipalityConceptId: MUNI_SUCRE_INE,
+    });
+
+    expect(d.repo.searchProfiles).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        territory: { municipalityConceptId: MUNI_SUCRE_INE },
+      }),
+      expect.any(Number),
+    );
+  });
+
+  it('un municipio con código del INE de otro departamento da 422', async () => {
+    const d = build();
+
+    await expect(
+      d.service.search({
+        kind: 'ORGANIZATION',
+        departmentConceptId: DEPARTMENT_LP,
+        municipalityConceptId: MUNI_SUCRE_INE,
+      }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  it('un municipio ajeno al catálogo da 422', async () => {
+    const d = build();
+
+    await expect(
+      d.service.search({
+        kind: 'PRACTITIONER',
+        municipalityConceptId: DEPARTMENT_LP,
+      }),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.repo.searchProfiles).not.toHaveBeenCalled();
+  });
+
+  it('sin lugar pedido el índice sigue sirviendo y no hay filtro territorial', async () => {
+    const d = build({ hits: [] });
+
+    await d.service.search({ kind: 'ORGANIZATION' });
+
+    expect(d.searchIndex.search).toHaveBeenCalled();
+  });
+});
+
 describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)', () => {
   /** Una reacción tal como la devuelve el repositorio, con su autor. */
-  const reaccion = (
+  const reaction = (
     id: string,
     iso: string,
     conceptId = COMM.REACTION_LIKE,
@@ -1113,7 +1491,7 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
   });
 
   /** Un comentario tal como lo devuelve el repositorio, con su autor. */
-  const comentario = (id: string, iso: string, replyCount = 0) => ({
+  const comment = (id: string, iso: string, replyCount = 0) => ({
     id,
     bodyText: `Cuerpo de ${id}`,
     createdAt: new Date(iso),
@@ -1123,13 +1501,16 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
     authorHeadline: null,
     authorAvatarFileId: null,
     authorKindConceptId: COMM.PROFILE_TARGET_PRACTITIONER,
+    // REQ-01-011: el repositorio real siempre trae el arreglo (vacío si no
+    // hay adjuntos), nunca `undefined` — ver `listPublicComments`.
+    media: [],
   });
 
   describe('quién reaccionó (AC-01-9)', () => {
     it('la fila tiene exactamente las claves permitidas: ni perfil ni concepto', async () => {
       const d = build();
       d.repo.listPostReactors.mockResolvedValue([
-        reaccion('r-1', '2026-08-27T10:00:00.000Z'),
+        reaction('r-1', '2026-08-27T10:00:00.000Z'),
       ]);
 
       const res = await d.service.postReactions('post-1', {});
@@ -1142,7 +1523,7 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
     it('sirve la misma proyección de persona que el autor del feed', async () => {
       const d = build();
       d.repo.listPostReactors.mockResolvedValue([
-        reaccion('r-1', '2026-08-27T10:00:00.000Z'),
+        reaction('r-1', '2026-08-27T10:00:00.000Z'),
       ]);
 
       const res = await d.service.postReactions('post-1', {});
@@ -1170,7 +1551,7 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
     it('un tipo de reacción que el módulo no nombra viaja como null, no rompe la página', async () => {
       const d = build();
       d.repo.listPostReactors.mockResolvedValue([
-        reaccion('r-1', '2026-08-27T10:00:00.000Z', 'concepto-desconocido'),
+        reaction('r-1', '2026-08-27T10:00:00.000Z', 'concepto-desconocido'),
       ]);
 
       const res = await d.service.postReactions('post-1', {});
@@ -1181,8 +1562,8 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
     it('pide una de más que el tope, y no la devuelve: es cómo sabe que hay más', async () => {
       const d = build();
       d.repo.listPostReactors.mockResolvedValue([
-        reaccion('r-1', '2026-08-27T10:00:00.000Z'),
-        reaccion('r-2', '2026-08-27T09:00:00.000Z'),
+        reaction('r-1', '2026-08-27T10:00:00.000Z'),
+        reaction('r-2', '2026-08-27T09:00:00.000Z'),
       ]);
 
       const res = await d.service.postReactions('post-1', { limit: 1 });
@@ -1200,14 +1581,14 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
     it('el cursor que emite es el que vuelve a entender, en la fila donde cortó', async () => {
       const d = build();
       d.repo.listPostReactors.mockResolvedValue([
-        reaccion('r-1', '2026-08-27T10:00:00.000Z'),
-        reaccion('r-2', '2026-08-27T09:00:00.000Z'),
+        reaction('r-1', '2026-08-27T10:00:00.000Z'),
+        reaction('r-2', '2026-08-27T09:00:00.000Z'),
       ]);
 
-      const primera = await d.service.postReactions('post-1', { limit: 1 });
+      const first = await d.service.postReactions('post-1', { limit: 1 });
       await d.service.postReactions('post-1', {
         limit: 1,
-        cursor: primera.nextCursor!,
+        cursor: first.nextCursor!,
       });
 
       expect(d.repo.listPostReactors).toHaveBeenLastCalledWith(
@@ -1250,7 +1631,7 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
     it('el comentario tiene exactamente las claves permitidas, y su autor también', async () => {
       const d = build();
       d.repo.listPublicRootComments.mockResolvedValue([
-        comentario('c-1', '2026-08-27T10:00:00.000Z', 3),
+        comment('c-1', '2026-08-27T10:00:00.000Z', 3),
       ]);
 
       const res = await d.service.postComments('post-1', {});
@@ -1266,7 +1647,7 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
     it('trae el recuento de respuestas para que «Ver N respuestas» sepa qué decir', async () => {
       const d = build();
       d.repo.listPublicRootComments.mockResolvedValue([
-        comentario('c-1', '2026-08-27T10:00:00.000Z', 3),
+        comment('c-1', '2026-08-27T10:00:00.000Z', 3),
       ]);
 
       const res = await d.service.postComments('post-1', {});
@@ -1292,14 +1673,14 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
     it('pagina por cursor y devuelve el que entiende', async () => {
       const d = build();
       d.repo.listPublicRootComments.mockResolvedValue([
-        comentario('c-1', '2026-08-27T10:00:00.000Z'),
-        comentario('c-2', '2026-08-27T11:00:00.000Z'),
+        comment('c-1', '2026-08-27T10:00:00.000Z'),
+        comment('c-2', '2026-08-27T11:00:00.000Z'),
       ]);
 
-      const primera = await d.service.postComments('post-1', { limit: 1 });
+      const first = await d.service.postComments('post-1', { limit: 1 });
       await d.service.postComments('post-1', {
         limit: 1,
-        cursor: primera.nextCursor!,
+        cursor: first.nextCursor!,
       });
 
       expect(d.repo.listPublicRootComments).toHaveBeenLastCalledWith(
@@ -1316,7 +1697,7 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
       const d = build();
       d.repo.findPostOfPublicComment.mockResolvedValue('post-9');
       d.repo.listPublicCommentReplies.mockResolvedValue([
-        comentario('c-2', '2026-08-27T12:00:00.000Z'),
+        comment('c-2', '2026-08-27T12:00:00.000Z'),
       ]);
 
       await d.service.commentReplies('c-1', {});
@@ -1351,7 +1732,7 @@ describe('CommunityPublicService · lecturas sociales públicas (TAREA 01 §5.1)
     it('sirve la misma forma de comentario que el hilo raíz', async () => {
       const d = build();
       d.repo.listPublicCommentReplies.mockResolvedValue([
-        comentario('c-2', '2026-08-27T12:00:00.000Z'),
+        comment('c-2', '2026-08-27T12:00:00.000Z'),
       ]);
 
       const res = await d.service.commentReplies('c-1', {});

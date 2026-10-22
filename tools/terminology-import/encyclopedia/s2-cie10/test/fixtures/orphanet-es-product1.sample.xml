@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JDBOR date="2026-06-23 07:58:18" version="1.3.42 / 4.1.8 [2025-03-03]" copyright="Orphanet (c) 2026" dbserver="jdbc:sybase:Tds:canard.orpha.net:2020">
+  <Availability> 
+    <Licence>
+      <FullName lang="en">Creative Commons Attribution 4.0 International</FullName>
+      <ShortIdentifier>CC-BY-4.0</ShortIdentifier>
+      <LegalCode>https://creativecommons.org/licenses/by/4.0/legalcode</LegalCode>
+    </Licence>
+  </Availability>
+  <DisorderList count="4">
+    <Disorder id="49">
+      <OrphaCode>586</OrphaCode>
+      <ExpertLink lang="es">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=es&amp;Expert=586</ExpertLink>
+      <Name lang="es">Fibrosis quística</Name>
+      <DisorderFlagList count="1">
+        <DisorderFlag id="475">
+          <Value>1</Value>
+          <Label></Label>
+        </DisorderFlag>
+      </DisorderFlagList>
+      <SynonymList count="2">
+        <Synonym lang="es">FQ</Synonym>
+        <Synonym lang="es">Mucoviscidosis</Synonym>
+      </SynonymList>
+      <DisorderType id="21394">
+        <Name lang="es">Enfermedad</Name>
+      </DisorderType>
+      <DisorderGroup id="36547">
+        <Name lang="es">Trastorno</Name>
+      </DisorderGroup>
+      <ExternalReferenceList count="11">
+        <ExternalReference id="240565">
+          <Source>GARD</Source>
+          <Reference>6233</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="265541">
+          <Source>ICD-10</Source>
+          <Reference>E84</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21583">
+            <Name lang="es">Código específico (CIE-10/CIE-11: el código ORPHA tiene su propio código en la terminología de destino)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104719">
+          <Source>ICD-10</Source>
+          <Reference>E84.0</Reference>
+          <DisorderMappingRelation id="21541">
+            <Name lang="es">BTNT (el código ORPHA es más amplio que el código de destino utilizado para representarlo)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21583">
+            <Name lang="es">Código específico (CIE-10/CIE-11: el código ORPHA tiene su propio código en la terminología de destino)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104720">
+          <Source>ICD-10</Source>
+          <Reference>E84.1</Reference>
+          <DisorderMappingRelation id="21541">
+            <Name lang="es">BTNT (el código ORPHA es más amplio que el código de destino utilizado para representarlo)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21583">
+            <Name lang="es">Código específico (CIE-10/CIE-11: el código ORPHA tiene su propio código en la terminología de destino)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104721">
+          <Source>ICD-10</Source>
+          <Reference>E84.8</Reference>
+          <DisorderMappingRelation id="21541">
+            <Name lang="es">BTNT (el código ORPHA es más amplio que el código de destino utilizado para representarlo)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21583">
+            <Name lang="es">Código específico (CIE-10/CIE-11: el código ORPHA tiene su propio código en la terminología de destino)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="206819">
+          <Source>ICD-11</Source>
+          <Reference>CA25</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21583">
+            <Name lang="es">Código específico (CIE-10/CIE-11: el código ORPHA tiene su propio código en la terminología de destino)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl>https://icd.who.int/browse/latest-release/mms/en#514403112</DisorderMappingICDRefUrl>
+          <DisorderMappingICDRefUri>514403112</DisorderMappingICDRefUri>
+        </ExternalReference>
+        <ExternalReference id="256181">
+          <Source>MONDO</Source>
+          <Reference>0009061</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104715">
+          <Source>MeSH</Source>
+          <Reference>D003550</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104717">
+          <Source>MedDRA</Source>
+          <Reference>10011762</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="3746">
+          <Source>OMIM</Source>
+          <Reference>219700</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104716">
+          <Source>UMLS</Source>
+          <Reference>C0010674</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+      </ExternalReferenceList>
+      <DisorderDisorderAssociationList count="1">
+        <DisorderDisorderAssociation>
+          <TargetDisorder id="49" cycle="true"/>
+          <RootDisorder id="13131">
+            <OrphaCode>98113</OrphaCode>
+            <Name lang="es">OBSOLETO: Canalopatía 'non-pore-loop' por una anomalía del canal de Cl- epitelial CFTR</Name>
+          </RootDisorder>
+          <DisorderDisorderAssociationType id="27341">
+            <Name lang="es">Referido a</Name>
+          </DisorderDisorderAssociationType>
+        </DisorderDisorderAssociation>
+      </DisorderDisorderAssociationList>
+      <SummaryInformationList count="1">
+        <SummaryInformation id="104142" lang="es">
+          <TextSectionList count="1">
+            <TextSection id="126630" lang="es">
+              <TextSectionType id="16907">
+                <Name lang="es">Definición</Name>
+              </TextSectionType>
+              <Contents>Es un trastorno pulmonar de origen genético poco frecuente, caracterizado por sudoración salada y secreciones mucosas espesas que resultan en enfermedad multisistémica, infecciones pulmonares crónicas, diarrea voluminosa y talla baja.</Contents>
+            </TextSection>
+          </TextSectionList>
+        </SummaryInformation>
+      </SummaryInformationList>
+    </Disorder>
+    <Disorder id="396">
+      <OrphaCode>924</OrphaCode>
+      <ExpertLink lang="es">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=es&amp;Expert=924</ExpertLink>
+      <Name lang="es">NO ES ENFERMEDAD RARA EN EUROPA: Acantosis nigricans</Name>
+      <DisorderFlagList count="3">
+        <DisorderFlag id="495">
+          <Value>8192</Value>
+          <Label>Inactive</Label>
+        </DisorderFlag>
+        <DisorderFlag id="475">
+          <Value>1</Value>
+          <Label></Label>
+        </DisorderFlag>
+        <DisorderFlag id="456">
+          <Value>32</Value>
+          <Label>Non-rare disease in Europe</Label>
+        </DisorderFlag>
+      </DisorderFlagList>
+      <SynonymList count="0">
+      </SynonymList>
+      <DisorderType id="21394">
+        <Name lang="es">Enfermedad</Name>
+      </DisorderType>
+      <DisorderGroup id="36547">
+        <Name lang="es">Trastorno</Name>
+      </DisorderGroup>
+      <ExternalReferenceList count="1">
+        <ExternalReference id="206883">
+          <Source>ICD-10</Source>
+          <Reference>L83</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21583">
+            <Name lang="es">Código específico (CIE-10/CIE-11: el código ORPHA tiene su propio código en la terminología de destino)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+      </ExternalReferenceList>
+      <DisorderDisorderAssociationList count="0">
+      </DisorderDisorderAssociationList>
+      <SummaryInformationList count="1">
+        <SummaryInformation id="-1" lang="es">
+          <TextSectionList count="0">
+          </TextSectionList>
+          <TextAuto>
+            <Info lang="es">Esta enfermedad no es rara en Europa. No pertenece a la nomenclatura de enfermedades raras de Orphanet.</Info>
+          </TextAuto>
+        </SummaryInformation>
+      </SummaryInformationList>
+    </Disorder>
+    <Disorder id="17601">
+      <OrphaCode>166024</OrphaCode>
+      <ExpertLink lang="es">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=es&amp;Expert=166024</ExpertLink>
+      <Name lang="es">Síndrome de displasia epifisaria múltiple-macrocefalia-dismorfia facial</Name>
+      <DisorderFlagList count="1">
+        <DisorderFlag id="475">
+          <Value>1</Value>
+          <Label></Label>
+        </DisorderFlag>
+      </DisorderFlagList>
+      <SynonymList count="1">
+        <Synonym lang="es">Displasia epifisaria múltiple tipo Al-Gazali</Synonym>
+      </SynonymList>
+      <DisorderType id="21394">
+        <Name lang="es">Enfermedad</Name>
+      </DisorderType>
+      <DisorderGroup id="36547">
+        <Name lang="es">Trastorno</Name>
+      </DisorderGroup>
+      <ExternalReferenceList count="5">
+        <ExternalReference id="120419">
+          <Source>ICD-10</Source>
+          <Reference>Q77.3</Reference>
+          <DisorderMappingRelation id="21534">
+            <Name lang="es">NTBT (el código ORPHA es más específico que el código de destino utilizado para representarlo)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21604">
+            <Name lang="es">Código atribuido (CIE-10/CIE-11: Orphanet asigna el código de destino)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="212360">
+          <Source>ICD-11</Source>
+          <Reference>LD24.61</Reference>
+          <DisorderMappingRelation id="21534">
+            <Name lang="es">NTBT (el código ORPHA es más específico que el código de destino utilizado para representarlo)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21597">
+            <Name lang="es">Término indexado (CIE-10: entidad de Orphanet incluida en el índice de la CIE-10. CIE-11: entidad de Orphanet incluida en la Fundación de la CIE-11)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl>https://icd.who.int/browse/latest-release/mms/en#2009123831</DisorderMappingICDRefUrl>
+          <DisorderMappingICDRefUri>1359939784</DisorderMappingICDRefUri>
+        </ExternalReference>
+        <ExternalReference id="256970">
+          <Source>MONDO</Source>
+          <Reference>0011778</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="38949">
+          <Source>OMIM</Source>
+          <Reference>607131</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="219782">
+          <Source>UMLS</Source>
+          <Reference>C4304500</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+      </ExternalReferenceList>
+      <DisorderDisorderAssociationList count="0">
+      </DisorderDisorderAssociationList>
+      <SummaryInformationList count="1">
+        <SummaryInformation id="65961" lang="es">
+          <TextSectionList count="1">
+            <TextSection id="48489" lang="es">
+              <TextSectionType id="16907">
+                <Name lang="es">Definición</Name>
+              </TextSectionType>
+              <Contents>Es una displasia ósea primaria poco frecuente caracterizada por displasia epifisaria múltiple asociada a macrocefalia y a rasgos faciales dismórficos (como frente prominente, hipertelorismo, aplanamiento de la región malar, orejas de implantación baja y cuello corto). Los pacientes alcanzan una talla adulta normal y se presentan con inflamación articular y &lt;i&gt;genu valgum&lt;/i&gt;. Otras manifestaciones descritas son clinodactilia, dedos ahusados y &lt;i&gt;pectus excavatum&lt;/i&gt;.</Contents>
+            </TextSection>
+          </TextSectionList>
+        </SummaryInformation>
+      </SummaryInformationList>
+    </Disorder>
+    <Disorder id="122">
+      <OrphaCode>790</OrphaCode>
+      <ExpertLink lang="es">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=es&amp;Expert=790</ExpertLink>
+      <Name lang="es">Retinoblastoma</Name>
+      <DisorderFlagList count="1">
+        <DisorderFlag id="475">
+          <Value>1</Value>
+          <Label></Label>
+        </DisorderFlag>
+      </DisorderFlagList>
+      <SynonymList count="0">
+      </SynonymList>
+      <DisorderType id="21394">
+        <Name lang="es">Enfermedad</Name>
+      </DisorderType>
+      <DisorderGroup id="36547">
+        <Name lang="es">Trastorno</Name>
+      </DisorderGroup>
+      <ExternalReferenceList count="8">
+        <ExternalReference id="240596">
+          <Source>GARD</Source>
+          <Reference>7563</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104926">
+          <Source>ICD-10</Source>
+          <Reference>C69.2</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21583">
+            <Name lang="es">Código específico (CIE-10/CIE-11: el código ORPHA tiene su propio código en la terminología de destino)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="205833">
+          <Source>ICD-11</Source>
+          <Reference>2D02.2</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation id="21583">
+            <Name lang="es">Código específico (CIE-10/CIE-11: el código ORPHA tiene su propio código en la terminología de destino)</Name>
+          </DisorderMappingICDRelation>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl>https://icd.who.int/browse/latest-release/mms/en#1855353671</DisorderMappingICDRefUrl>
+          <DisorderMappingICDRefUri>1855353671</DisorderMappingICDRefUri>
+        </ExternalReference>
+        <ExternalReference id="255933">
+          <Source>MONDO</Source>
+          <Reference>0008380</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104921">
+          <Source>MeSH</Source>
+          <Reference>D012175</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104923">
+          <Source>MedDRA</Source>
+          <Reference>10038916</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="3886">
+          <Source>OMIM</Source>
+          <Reference>180200</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+        <ExternalReference id="104922">
+          <Source>UMLS</Source>
+          <Reference>C0035335</Reference>
+          <DisorderMappingRelation id="21527">
+            <Name lang="es">correspondencia exacta (los términos y los conceptos son equivalentes)</Name>
+          </DisorderMappingRelation>
+          <DisorderMappingICDRelation/>
+          <DisorderMappingValidationStatus id="21611">
+            <Name lang="es">Validado</Name>
+          </DisorderMappingValidationStatus>
+          <DisorderMappingICDRefUrl/>
+          <DisorderMappingICDRefUri/>
+        </ExternalReference>
+      </ExternalReferenceList>
+      <DisorderDisorderAssociationList count="0">
+      </DisorderDisorderAssociationList>
+      <SummaryInformationList count="1">
+        <SummaryInformation id="109245" lang="es">
+          <TextSectionList count="1">
+            <TextSection id="138199" lang="es">
+              <TextSectionType id="16907">
+                <Name lang="es">Definición</Name>
+              </TextSectionType>
+              <Contents>Es una enfermedad tumoral ocular poco frecuente que representa la neoplasia intraocular más habitual en niños. Es una neoplasia de amenaza para la vida pero potencialmente curable, pudiendo ser hereditaria o adquirida, uni- o bilateral.</Contents>
+            </TextSection>
+          </TextSectionList>
+        </SummaryInformation>
+      </SummaryInformationList>
+    </Disorder>
+  </DisorderList>
+</JDBOR>

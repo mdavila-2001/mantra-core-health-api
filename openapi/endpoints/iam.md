@@ -2,45 +2,50 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 30 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 35 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `iam-auth`, `iam-users`
-- **Controladores:** `IamAuthController`, `IamUsersController`
+- **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamUsersController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /iam/auth/activate](#1-post-iam-auth-activate) — Activar la cuenta con el token de un solo uso y fijar la contraseña
-2. [POST /iam/auth/forgot-password](#2-post-iam-auth-forgot-password) — Solicitar el restablecimiento de la contraseña
-3. [POST /iam/auth/login](#3-post-iam-auth-login) — Iniciar sesión con email o documento de identidad y contraseña
-4. [POST /iam/auth/logout](#4-post-iam-auth-logout) — Cerrar la sesión actual del usuario
-5. [POST /iam/auth/logout-all](#5-post-iam-auth-logout-all) — Cerrar todas las sesiones del usuario actual
-6. [POST /iam/auth/register-organization](#6-post-iam-auth-register-organization) — Registrar una organización con su cuenta owner
-7. [POST /iam/auth/register-patient](#7-post-iam-auth-register-patient) — Registrarse como paciente con documento de identidad
-8. [POST /iam/auth/register-practitioner](#8-post-iam-auth-register-practitioner) — Registrarse como profesional de salud con su matrícula
-9. [POST /iam/auth/resend-verification](#9-post-iam-auth-resend-verification) — Reenviar el enlace de verificación del correo
-10. [POST /iam/auth/reset-password](#10-post-iam-auth-reset-password) — Fijar una contraseña nueva con el token recibido por correo
-11. [POST /iam/auth/sessions/purge](#11-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
-12. [POST /iam/auth/token/refresh](#12-post-iam-auth-token-refresh) — Rotar el refresh token
-13. [POST /iam/auth/verify-email](#13-post-iam-auth-verify-email) — Verificar el correo con el token recibido
-14. [GET /iam/users](#14-get-iam-users) — Listado paginado de usuarios
-15. [POST /iam/users](#15-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
-16. [GET /iam/users/{id}](#16-get-iam-users-id) — Ficha de un usuario
-17. [POST /iam/users/{id}/anonymize](#17-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
-18. [GET /iam/users/{id}/credentials](#18-get-iam-users-id-credentials) — Credenciales del usuario
-19. [POST /iam/users/{id}/credentials/{cid}/revoke](#19-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
-20. [POST /iam/users/{id}/credentials/federated](#20-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
-21. [GET /iam/users/{id}/devices](#21-get-iam-users-id-devices) — Dispositivos del usuario
-22. [POST /iam/users/{id}/devices](#22-post-iam-users-id-devices) — Registrar un dispositivo del usuario
-23. [GET /iam/users/{id}/global-roles](#23-get-iam-users-id-global-roles) — Roles globales del usuario
-24. [POST /iam/users/{id}/global-roles](#24-post-iam-users-id-global-roles) — Conceder o revocar un rol global
-25. [POST /iam/users/{id}/lock](#25-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
-26. [GET /iam/users/{id}/mfa-factors](#26-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
-27. [POST /iam/users/{id}/mfa-factors](#27-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
-28. [GET /iam/users/{id}/sessions](#28-get-iam-users-id-sessions) — Sesiones del usuario
-29. [POST /iam/users/assisted-practitioner-registration](#29-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
-30. [POST /iam/users/assisted-registration](#30-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+2. [POST /iam/auth/change-password](#2-post-iam-auth-change-password) — Cambiar la contraseña de la propia cuenta
+3. [POST /iam/auth/forgot-password](#3-post-iam-auth-forgot-password) — Solicitar el restablecimiento de la contraseña
+4. [POST /iam/auth/login](#4-post-iam-auth-login) — Iniciar sesión con email o documento de identidad y contraseña
+5. [POST /iam/auth/logout](#5-post-iam-auth-logout) — Cerrar la sesión actual del usuario
+6. [POST /iam/auth/logout-all](#6-post-iam-auth-logout-all) — Cerrar todas las sesiones del usuario actual
+7. [POST /iam/auth/register-organization](#7-post-iam-auth-register-organization) — Registrar una organización con su cuenta owner
+8. [POST /iam/auth/register-patient](#8-post-iam-auth-register-patient) — Registrarse como paciente con documento de identidad
+9. [POST /iam/auth/register-practitioner](#9-post-iam-auth-register-practitioner) — Registrarse como profesional de salud con su matrícula
+10. [POST /iam/auth/resend-verification](#10-post-iam-auth-resend-verification) — Reenviar el enlace de verificación del correo
+11. [POST /iam/auth/reset-password](#11-post-iam-auth-reset-password) — Fijar una contraseña nueva con el token recibido por correo
+12. [POST /iam/auth/sessions/purge](#12-post-iam-auth-sessions-purge) — Expirar sesiones y tokens vencidos
+13. [POST /iam/auth/token/refresh](#13-post-iam-auth-token-refresh) — Rotar el refresh token
+14. [POST /iam/auth/upload-registration-document](#14-post-iam-auth-upload-registration-document) — Pre-cargar un PDF para un registro de organización o profesional
+15. [POST /iam/auth/upload-registration-signature-image](#15-post-iam-auth-upload-registration-signature-image) — Pre-cargar una imagen de firma o sello para el registro
+16. [POST /iam/auth/verify-email](#16-post-iam-auth-verify-email) — Verificar el correo con el token recibido
+17. [GET /iam/me/sessions](#17-get-iam-me-sessions) — Listar mis sesiones abiertas
+18. [POST /iam/me/sessions/{id}/revoke](#18-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
+19. [GET /iam/users](#19-get-iam-users) — Listado paginado de usuarios
+20. [POST /iam/users](#20-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
+21. [GET /iam/users/{id}](#21-get-iam-users-id) — Ficha de un usuario
+22. [POST /iam/users/{id}/anonymize](#22-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
+23. [GET /iam/users/{id}/credentials](#23-get-iam-users-id-credentials) — Credenciales del usuario
+24. [POST /iam/users/{id}/credentials/{cid}/revoke](#24-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
+25. [POST /iam/users/{id}/credentials/federated](#25-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
+26. [GET /iam/users/{id}/devices](#26-get-iam-users-id-devices) — Dispositivos del usuario
+27. [POST /iam/users/{id}/devices](#27-post-iam-users-id-devices) — Registrar un dispositivo del usuario
+28. [GET /iam/users/{id}/global-roles](#28-get-iam-users-id-global-roles) — Roles globales del usuario
+29. [POST /iam/users/{id}/global-roles](#29-post-iam-users-id-global-roles) — Conceder o revocar un rol global
+30. [POST /iam/users/{id}/lock](#30-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
+31. [GET /iam/users/{id}/mfa-factors](#31-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
+32. [POST /iam/users/{id}/mfa-factors](#32-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
+33. [GET /iam/users/{id}/sessions](#33-get-iam-users-id-sessions) — Sesiones del usuario
+34. [POST /iam/users/assisted-practitioner-registration](#34-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
+35. [POST /iam/users/assisted-registration](#35-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
 
 ---
 
@@ -167,7 +172,132 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /iam/auth/forgot-password
+## 2. POST /iam/auth/change-password
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Cambiar la contraseña de la propia cuenta
+- **Operation ID:** `IamAccountSecurityController_changePassword`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.changePassword](../../src/modules/iam/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Cambiar la contraseña de la propia cuenta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cambia la contraseña y cierra las otras sesiones.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/auth/change-password` en `IamAccountSecurityController_changePassword`. El controlador delega en `IamAccountSecurityService.changePassword`. Valida el body como `ChangePasswordDto` y consume `application/json`. El tipo de retorno estático es `Promise<ChangePasswordResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ChangePasswordDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/auth/change-password HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "currentPassword": "ClaveSegura2026!",
+  "newPassword": "ClaveSegura2026!"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `currentPassword` | Sí | `string` | longitud máxima 200 | Contraseña actual | `ClaveSegura2026!` |
+| `newPassword` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Contraseña nueva | `ClaveSegura2026!` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/auth/change-password HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "currentPassword": "ClaveSegura2026!",
+  "newPassword": "ClaveSegura2026!"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChangePasswordResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "revokedSessions": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `revokedSessions` | Sí | `number` | Sin restricción adicional declarada | Nº de las otras sesiones que se revocaron | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una contraseña que cambiar | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña actual no coincide | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña nueva tiene que ser distinta de la actual | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/auth/change-password"
+}
+```
+
+---
+
+## 3. POST /iam/auth/forgot-password
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -286,7 +416,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /iam/auth/login
+## 4. POST /iam/auth/login
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -391,6 +521,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | Credenciales inválidas | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | {         message: 'Se requiere el código de verificación en dos pasos',         details: { reason: 'MFA_REQUIRED' },       } | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | {       message: 'El código de verificación no es válido',       details: { reason: 'MFA_INVALID' },     } | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -409,7 +541,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /iam/auth/logout
+## 5. POST /iam/auth/logout
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -512,7 +644,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /iam/auth/logout-all
+## 6. POST /iam/auth/logout-all
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -614,7 +746,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /iam/auth/register-organization
+## 7. POST /iam/auth/register-organization
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -668,15 +800,59 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz"}` |
+| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","pharmacy":{"latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}}` |
 | `organization.code` | Sí | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Código único global de la organización | `CLINICA_SAN_RAFAEL` |
 | `organization.legalName` | Sí | `string` | longitud mínima 1; longitud máxima 300 | Razón social / nombre legal | `Nombre de ejemplo` |
 | `organization.tradeName` | No | `string` | longitud máxima 300 | Nombre comercial | `Nombre de ejemplo` |
-| `organization.tenantType` | Sí | `string` | valores: `PROVIDER`, `PAYER`, `BROKER`, `UNIVERSITY`, `PHARMACY`, `HOSPITAL`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`, `HEALTH_BUSINESS` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan. | `HOSPITAL` |
-| `organization.payer` | No | `PayerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"}` |
+| `organization.tenantType` | Sí | `string` | valores: `PROVIDER`, `PAYER`, `BROKER`, `UNIVERSITY`, `PHARMACY`, `HOSPITAL`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`, `HEALTH_BUSINESS`, `DIAGNOSTIC_CENTER` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan. | `HOSPITAL` |
+| `organization.legalEntityType` | No | `string` | valores: `UNIPERSONAL`, `SRL`, `LTDA`, `SA`, `SOCIEDAD_COLECTIVA`, `COMANDITA_SIMPLE`, `COMANDITA_ACCIONES`, `SUCURSAL_EXTRANJERA`, `BR_LTDA`, `BR_SA`, `BR_MEI`, `BR_EI`, `BR_SLU`, `BR_FILIAL_EST`, `US_LLC`, `US_CORP`, `US_SOLE_PROP`, `US_LLP`, `US_BRANCH`, `AR_SAS`, `MX_S_RL` | Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Sin él, la organización nace con la forma legada `COMPANY`. | `SRL` |
+| `organization.legalDocuments` | No | `RegisterOrganizationLegalDocumentsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"}` |
+| `organization.legalDocuments.constitutionFileId` | No | `string` | formato `uuid` | Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante | `00000000-0000-4000-8000-000000000001` |
+| `organization.legalDocuments.taxIdentifierFileId` | No | `string` | formato `uuid` | Identificación tributaria (NIT en Bolivia) | `00000000-0000-4000-8000-000000000001` |
+| `organization.legalDocuments.commerceRegistryFileId` | No | `string` | formato `uuid` | Registro mercantil (matrícula SEPREC en Bolivia) | `00000000-0000-4000-8000-000000000001` |
+| `organization.legalDocuments.operatingLicenseFileId` | No | `string` | formato `uuid` | Licencia de funcionamiento | `00000000-0000-4000-8000-000000000001` |
+| `organization.legalDocuments.healthAuthorityCertificateFileId` | No | `string` | formato `uuid` | Certificado de la autoridad sanitaria (SEDES en Bolivia) | `00000000-0000-4000-8000-000000000001` |
+| `organization.legalRepresentative` | No | `RegisterOrganizationLegalRepresentativeDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"}` |
+| `organization.legalRepresentative.name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Mariana` |
+| `organization.legalRepresentative.middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Elena` |
+| `organization.legalRepresentative.lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Siles` |
+| `organization.legalRepresentative.motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Justiniano` |
+| `organization.legalRepresentative.fullName` | No | `string` | longitud mínima 3; longitud máxima 200 | Nombre completo del representante legal (forma anterior; preferí name/lastName) | `Mariana Siles Justiniano` |
+| `organization.legalRepresentative.idNumber` | No | `string` | longitud mínima 4; longitud máxima 50 | Cédula de identidad o documento legal equivalente | `4872190 SC` |
+| `organization.legalRepresentative.email` | No | `string` | formato `email`; longitud máxima 320 | Correo oficial para notificaciones legales | `legal@aseguradora.com` |
+| `organization.legalRepresentative.phone` | No | `string` | longitud mínima 7; longitud máxima 30 | Teléfono de contacto del representante | `+591 70012345` |
+| `organization.legalRepresentative.powerOfAttorneyFileId` | No | `string` | formato `uuid` | Id del archivo del poder notariado (PDF ya pre-cargado). Obligatorio salvo para UNIPERSONAL, donde el titular actúa por sí; el servicio responde 422 si falta | `00000000-0000-4000-8000-000000000001` |
+| `organization.executives` | No | `RegisterOrganizationExecutivesDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}}` |
+| `organization.executives.generalManager` | No | `RegisterOrganizationExecutiveContactDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}` |
+| `organization.executives.generalManager.name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Carlos` |
+| `organization.executives.generalManager.middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Eduardo` |
+| `organization.executives.generalManager.lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Mendoza` |
+| `organization.executives.generalManager.motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Rivero` |
+| `organization.executives.generalManager.fullName` | No | `string` | longitud mínima 3; longitud máxima 200 | Nombre completo del ejecutivo (forma anterior; preferí name/lastName) | `Carlos Mendoza Rivero` |
+| `organization.executives.generalManager.phone` | No | `string` | longitud mínima 7; longitud máxima 30 | Teléfono celular de contacto | `+591 70012345` |
+| `organization.executives.generalManager.email` | No | `string` | formato `email`; longitud máxima 320 | Correo electrónico corporativo | `cmendoza@aseguradora.com` |
+| `organization.executives.commercialManager` | No | `RegisterOrganizationExecutiveContactDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}` |
+| `organization.executives.commercialManager.name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Carlos` |
+| `organization.executives.commercialManager.middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Eduardo` |
+| `organization.executives.commercialManager.lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Mendoza` |
+| `organization.executives.commercialManager.motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Rivero` |
+| `organization.executives.commercialManager.fullName` | No | `string` | longitud mínima 3; longitud máxima 200 | Nombre completo del ejecutivo (forma anterior; preferí name/lastName) | `Carlos Mendoza Rivero` |
+| `organization.executives.commercialManager.phone` | No | `string` | longitud mínima 7; longitud máxima 30 | Teléfono celular de contacto | `+591 70012345` |
+| `organization.executives.commercialManager.email` | No | `string` | formato `email`; longitud máxima 320 | Correo electrónico corporativo | `cmendoza@aseguradora.com` |
+| `organization.executives.marketingManager` | No | `RegisterOrganizationExecutiveContactDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}` |
+| `organization.executives.marketingManager.name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Carlos` |
+| `organization.executives.marketingManager.middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Eduardo` |
+| `organization.executives.marketingManager.lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Mendoza` |
+| `organization.executives.marketingManager.motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Rivero` |
+| `organization.executives.marketingManager.fullName` | No | `string` | longitud mínima 3; longitud máxima 200 | Nombre completo del ejecutivo (forma anterior; preferí name/lastName) | `Carlos Mendoza Rivero` |
+| `organization.executives.marketingManager.phone` | No | `string` | longitud mínima 7; longitud máxima 30 | Teléfono celular de contacto | `+591 70012345` |
+| `organization.executives.marketingManager.email` | No | `string` | formato `email`; longitud máxima 320 | Correo electrónico corporativo | `cmendoza@aseguradora.com` |
+| `organization.payer` | No | `PayerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"}` |
 | `organization.payer.carrierCode` | No | `string` | longitud mínima 1; longitud máxima 60 | Código de la aseguradora | `CODIGO_EJEMPLO` |
 | `organization.payer.sigla` | No | `string` | longitud mínima 1; longitud máxima 20 | Sigla de la aseguradora | `BUPA` |
 | `organization.payer.address` | No | `string` | longitud mínima 1; longitud máxima 300 | Dirección de la aseguradora | `valor-ejemplo` |
+| `organization.payer.latitude` | No | `number` | mínimo -90; máximo 90 | Latitud de la casa matriz (-90 a 90); va junto con longitude o no va | `-17.7833` |
+| `organization.payer.longitude` | No | `number` | mínimo -180; máximo 180 | Longitud de la casa matriz (-180 a 180); va junto con latitude o no va | `-63.1821` |
 | `organization.payer.regulatorIdentifier` | No | `string` | longitud mínima 1; longitud máxima 100 | Identificador ante el regulador de seguros | `valor-ejemplo` |
 | `organization.payer.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.broker` | No | `BrokerProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"}` |
@@ -712,9 +888,35 @@ Content-Type: application/json
 | `organization.broker.agreements[].current` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `organization.broker.agreements[].contractFileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.broker.publicProfileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.diagnosticUnit` | No | `DiagnosticUnitProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}}` |
+| `organization.diagnosticUnit.code` | No | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Sin descripción específica en el contrato OpenAPI. | `CENTRO_IMAGEN_CENTRAL` |
+| `organization.diagnosticUnit.name` | No | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Centro de Diagnóstico por Imágenes` |
+| `organization.diagnosticUnit.diagnosticUnitTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.diagnosticUnit.modalityConceptIds` | No | `array<string>` | formato `uuid`; máximo 20 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `organization.diagnosticUnit.walkInAvailable` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `organization.diagnosticUnit.homeCollectionAvailable` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `organization.diagnosticUnit.primarySite` | No | `DiagnosticUnitPrimarySiteDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}` |
+| `organization.diagnosticUnit.primarySite.name` | No | `string` | longitud mínima 2; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Sede central` |
+| `organization.diagnosticUnit.primarySite.timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `organization.diagnosticUnit.primarySite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `organization.diagnosticUnit.primarySite.address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
+| `organization.diagnosticUnit.primarySite.address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `organization.diagnosticUnit.primarySite.address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.diagnosticUnit.primarySite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.diagnosticUnit.primarySite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `organization.diagnosticUnit.primarySite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `organization.countryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA | `America/La_Paz` |
+| `organization.pharmacy` | No | `RegisterPharmacyBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}` |
+| `organization.pharmacy.latitude` | No | `number` | Sin restricción adicional declarada | Latitud de la casa central | `1` |
+| `organization.pharmacy.longitude` | No | `number` | Sin restricción adicional declarada | Longitud de la casa central | `1` |
+| `organization.pharmacy.branches` | No | `array<RegisterPharmacyBranchDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]` |
+| `organization.pharmacy.branches[].name` | No | `string` | longitud mínima 1; longitud máxima 300 | Nombre de la sucursal | `Nombre de ejemplo` |
+| `organization.pharmacy.branches[].latitude` | No | `number` | Sin restricción adicional declarada | Latitud | `-17.769` |
+| `organization.pharmacy.branches[].longitude` | No | `number` | Sin restricción adicional declarada | Longitud | `-63.196` |
+| `organization.pharmacy.branches[].description` | No | `string` | longitud máxima 1000 | Descripción | `Texto descriptivo de ejemplo` |
+| `organization.pharmacy.branches[].locationUrl` | No | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Enlace de ubicación (http/https) | `valor-ejemplo` |
 | `owner` | Sí | `RegisterOrganizationOwnerDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"email":"usuario@example.com","password":"ClaveSegura2026!","name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","displayName":"Nombre de ejemplo","timeZone":"America/La_Paz"}` |
 | `owner.email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo con el que el owner iniciará sesión | `usuario@example.com` |
 | `owner.password` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
@@ -740,10 +942,60 @@ Content-Type: application/json
     "legalName": "Nombre de ejemplo",
     "tradeName": "Nombre de ejemplo",
     "tenantType": "HOSPITAL",
+    "legalEntityType": "SRL",
+    "legalDocuments": {
+      "constitutionFileId": "00000000-0000-4000-8000-000000000001",
+      "taxIdentifierFileId": "00000000-0000-4000-8000-000000000001",
+      "commerceRegistryFileId": "00000000-0000-4000-8000-000000000001",
+      "operatingLicenseFileId": "00000000-0000-4000-8000-000000000001",
+      "healthAuthorityCertificateFileId": "00000000-0000-4000-8000-000000000001"
+    },
+    "legalRepresentative": {
+      "name": "Mariana",
+      "middleName": "Elena",
+      "lastName": "Siles",
+      "motherLastName": "Justiniano",
+      "fullName": "Mariana Siles Justiniano",
+      "idNumber": "4872190 SC",
+      "email": "legal@aseguradora.com",
+      "phone": "+591 70012345",
+      "powerOfAttorneyFileId": "00000000-0000-4000-8000-000000000001"
+    },
+    "executives": {
+      "generalManager": {
+        "name": "Carlos",
+        "middleName": "Eduardo",
+        "lastName": "Mendoza",
+        "motherLastName": "Rivero",
+        "fullName": "Carlos Mendoza Rivero",
+        "phone": "+591 70012345",
+        "email": "cmendoza@aseguradora.com"
+      },
+      "commercialManager": {
+        "name": "Carlos",
+        "middleName": "Eduardo",
+        "lastName": "Mendoza",
+        "motherLastName": "Rivero",
+        "fullName": "Carlos Mendoza Rivero",
+        "phone": "+591 70012345",
+        "email": "cmendoza@aseguradora.com"
+      },
+      "marketingManager": {
+        "name": "Carlos",
+        "middleName": "Eduardo",
+        "lastName": "Mendoza",
+        "motherLastName": "Rivero",
+        "fullName": "Carlos Mendoza Rivero",
+        "phone": "+591 70012345",
+        "email": "cmendoza@aseguradora.com"
+      }
+    },
     "payer": {
       "carrierCode": "CODIGO_EJEMPLO",
       "sigla": "BUPA",
       "address": "valor-ejemplo",
+      "latitude": -17.7833,
+      "longitude": -63.1821,
       "regulatorIdentifier": "valor-ejemplo",
       "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001"
     },
@@ -789,9 +1041,46 @@ Content-Type: application/json
       ],
       "publicProfileId": "00000000-0000-4000-8000-000000000001"
     },
+    "diagnosticUnit": {
+      "code": "CENTRO_IMAGEN_CENTRAL",
+      "name": "Centro de Diagnóstico por Imágenes",
+      "diagnosticUnitTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "modalityConceptIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "walkInAvailable": true,
+      "homeCollectionAvailable": false,
+      "primarySite": {
+        "name": "Sede central",
+        "timeZone": "America/La_Paz",
+        "address": {
+          "lines": [
+            "valor-ejemplo"
+          ],
+          "city": "valor-ejemplo",
+          "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+          "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+          "latitude": 1,
+          "longitude": 1
+        }
+      }
+    },
     "countryConceptId": "00000000-0000-4000-8000-000000000001",
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
-    "timeZone": "America/La_Paz"
+    "timeZone": "America/La_Paz",
+    "pharmacy": {
+      "latitude": 1,
+      "longitude": 1,
+      "branches": [
+        {
+          "name": "Nombre de ejemplo",
+          "latitude": -17.769,
+          "longitude": -63.196,
+          "description": "Texto descriptivo de ejemplo",
+          "locationUrl": "valor-ejemplo"
+        }
+      ]
+    }
   },
   "owner": {
     "email": "usuario@example.com",
@@ -827,7 +1116,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "ownerUserId": "00000000-0000-4000-8000-000000000001",
   "membershipId": "00000000-0000-4000-8000-000000000001",
   "status": "00000000-0000-4000-8000-000000000001",
-  "emailVerificationSent": true
+  "emailVerificationSent": true,
+  "diagnosticUnitId": "00000000-0000-4000-8000-000000000001",
+  "legalDocumentsRegistered": 1,
+  "representativesRegistered": 1
 }
 ```
 
@@ -841,6 +1133,9 @@ Campos de la respuesta:
 | `membershipId` | Sí | `string` | formato `uuid` | Identificador de la membresía OWNER que vincula cuenta y organización. | `00000000-0000-4000-8000-000000000001` |
 | `status` | Sí | `string` | formato `uuid` | Concepto de estado del tenant (pendiente de verificación) | `00000000-0000-4000-8000-000000000001` |
 | `emailVerificationSent` | Sí | `boolean` | Sin restricción adicional declarada | Si se pudo encolar el correo de verificación | `true` |
+| `diagnosticUnitId` | No | `string` | formato `uuid` | Id de la unidad diagnóstica creada (sólo DIAGNOSTIC_CENTER) | `00000000-0000-4000-8000-000000000001` |
+| `legalDocumentsRegistered` | No | `number` | Sin restricción adicional declarada | Cuántos documentos legales quedaron registrados pendientes de | `1` |
+| `representativesRegistered` | No | `number` | Sin restricción adicional declarada | Vínculos de representación registrados (representante legal + gerencias) | `1` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -861,9 +1156,23 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Un tenant de tipo PAYER exige el bloque `payer` | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un tenant de tipo BROKER exige el bloque `broker` | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un tenant de tipo ${tenantType} exige país y jurisdicción | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
+| 422 | `PRECONDITION_FAILED` | El tipo societario pertenece al derecho de ${entry!.countryIso} y no coincide con el país declarado | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | El bloque `payer` sólo corresponde a un tenant de tipo PAYER | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | El bloque `broker` sólo corresponde a un tenant de tipo BROKER | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
+| 422 | `PRECONDITION_FAILED` | El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo ' +           'DIAGNOSTIC_CENTER | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
+| 422 | `PRECONDITION_FAILED` | El tipo de unidad diagnóstica declarado no es válido | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
+| 422 | `PRECONDITION_FAILED` | Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
 | 422 | `PRECONDITION_FAILED` | Los conceptos declarados no existen en el catálogo de terminología | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un mismo archivo no puede respaldar dos documentos distintos | Excepción explícita en src/modules/directory/services/tenant-affiliation-documents.service.ts |
+| 422 | `PRECONDITION_FAILED` | El documento ${label} ya está vinculado a una organización | Excepción explícita en src/modules/directory/services/tenant-affiliation-documents.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code.toUpperCase()} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -881,7 +1190,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /iam/auth/register-patient
+## 8. POST /iam/auth/register-patient
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -915,7 +1224,13 @@ Content-Type: application/json
 
 {
   "nationalId": "00000000-0000-4000-8000-000000000001",
-  "password": "ClaveSegura2026!"
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "password": "ClaveSegura2026!",
+  "email": "usuario@example.com",
+  "birthDate": "2026-07-31",
+  "phone": "+59170000000",
+  "sexAtBirth": "MALE"
 }
 ```
 
@@ -929,24 +1244,40 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `nationalId` | Sí | `string` | longitud mínima 4; longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Documento de identidad con el que se iniciará sesión | `00000000-0000-4000-8000-000000000001` |
-| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
-| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | Sí | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `residenceMunicipalityConceptId` | Sí | `string` | formato `uuid` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `password` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
 | `name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
 | `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Andrea` |
 | `lastName` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Mamani` |
 | `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Quispe` |
 | `displayName` | No | `string` | longitud mínima 1; longitud máxima 200 | Forma anterior de declarar el nombre. Preferí name/lastName. | `Nombre de ejemplo` |
-| `email` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
-| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
-| `phone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres | `+59170000000` |
+| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `birthDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `phone` | Sí | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres | `+59170000000` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
 | `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
 | `gender` | No | `string` | valores: `MALE`, `FEMALE`, `OTHER`, `UNKNOWN` | Género administrativo (HL7 AdministrativeGender) | `MALE` |
-| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
+| `sexAtBirth` | Sí | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
 | `administrativeGenderConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `sexAtBirthConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `homeAddressLines` | No | `string` | longitud mínima 1; longitud máxima 500 | Calle y número del domicilio | `valor-ejemplo` |
+| `homeLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `homeLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `workMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio del trabajo (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddressLines` | No | `string` | longitud mínima 1; longitud máxima 500 | Calle y número del lugar de trabajo | `valor-ejemplo` |
+| `workLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `workLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `guardianName` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre del tutor o persona autorizada | `Nombre de ejemplo` |
+| `guardianPhone` | No | `string` | longitud máxima 40; patrón runtime `/^[+]?[0-9 ()-]{6,}$/` | Teléfono del tutor, en formato E.164 o nacional | `+59170000000` |
+| `guardianRelationshipConceptId` | No | `string` | formato `uuid` | Parentesco del contacto de emergencia (conjunto related-person-relationship) | `00000000-0000-4000-8000-000000000001` |
+| `privateInsurancePlanId` | No | `string` | formato `uuid` | Plan de la aseguradora privada declarada | `00000000-0000-4000-8000-000000000001` |
+| `publicInsurancePlanId` | No | `string` | formato `uuid` | Plan del seguro público declarado | `00000000-0000-4000-8000-000000000001` |
+| `billingTaxId` | No | `string` | longitud máxima 20; patrón runtime `/^[0-9]{4,20}$/` | NIT para facturación (sólo el número) | `00000000-0000-4000-8000-000000000001` |
+| `billingLegalName` | No | `string` | longitud máxima 200 | Nombre o Razón Social para facturación | `Nombre de ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -972,11 +1303,27 @@ Content-Type: application/json
   "phone": "+59170000000",
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
   "gender": "MALE",
   "sexAtBirth": "MALE",
   "administrativeGenderConceptId": "00000000-0000-4000-8000-000000000001",
   "sexAtBirthConceptId": "00000000-0000-4000-8000-000000000001",
-  "timeZone": "America/La_Paz"
+  "timeZone": "America/La_Paz",
+  "homeAddressLines": "valor-ejemplo",
+  "homeLatitude": 1,
+  "homeLongitude": 1,
+  "workMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "workAddressLines": "valor-ejemplo",
+  "workLatitude": 1,
+  "workLongitude": 1,
+  "guardianName": "Nombre de ejemplo",
+  "guardianPhone": "+59170000000",
+  "guardianRelationshipConceptId": "00000000-0000-4000-8000-000000000001",
+  "privateInsurancePlanId": "00000000-0000-4000-8000-000000000001",
+  "publicInsurancePlanId": "00000000-0000-4000-8000-000000000001",
+  "billingTaxId": "00000000-0000-4000-8000-000000000001",
+  "billingLegalName": "Nombre de ejemplo"
 }
 ```
 
@@ -1029,6 +1376,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1046,7 +1395,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /iam/auth/register-practitioner
+## 9. POST /iam/auth/register-practitioner
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1082,7 +1431,8 @@ Content-Type: application/json
   "email": "usuario@example.com",
   "password": "ClaveSegura2026!",
   "licenseNumber": "valor-ejemplo",
-  "credentialNumber": "valor-ejemplo"
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1095,7 +1445,9 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo que actúa como identidad de login | `usuario@example.com` |
+| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo de acceso del profesional | `usuario@example.com` |
+| `personalEmail` | No | `string` | formato `email`; longitud máxima 320 | Correo personal; no sirve para iniciar sesión | `usuario@example.com` |
+| `workEmail` | No | `string` | formato `email`; longitud máxima 320 | Correo de trabajo, distinto del correo de acceso | `usuario@example.com` |
 | `password` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
 | `name` | No | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Ana` |
 | `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
@@ -1103,14 +1455,25 @@ Content-Type: application/json
 | `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Paz` |
 | `displayName` | No | `string` | longitud mínima 1; longitud máxima 200 | Forma anterior de declarar el nombre. Preferí name/lastName. | `Nombre de ejemplo` |
 | `licenseNumber` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Número de licencia o matrícula profesional | `valor-ejemplo` |
-| `credentialNumber` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Número del título profesional que respalda la licencia | `valor-ejemplo` |
+| `credentialNumber` | No | `string` | longitud mínima 1; longitud máxima 100 | Número del título profesional que respalda la licencia | `valor-ejemplo` |
+| `sedesLicenseNumber` | No | `string` | longitud mínima 1; longitud máxima 100 | Número de registro del SEDES departamental | `T.I. 538/14` |
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
 | `licenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción de la matrícula (ISO) | `2026-07-31` |
 | `professionalTitle` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `nationalId` | No | `string` | longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Documento de identidad (se guarda como identificador oficial) | `00000000-0000-4000-8000-000000000001` |
-| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptIds` | No | `array<string>` | formato `uuid`; máximo 4 elemento(s) | Especialidades declaradas (una principal y hasta tres adicionales). | `["00000000-0000-4000-8000-000000000001"]` |
+| `nationalId` | Sí | `string` | longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Documento de identidad obligatorio; se guarda como identificador oficial | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | Sí | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `phone` | No | `string` | longitud máxima 40; patrón runtime `/^[+]?[0-9 ()-]{6,}$/` | Teléfono de contacto en formato E.164 o nacional | `+59170000000` |
+| `homeAddressLines` | No | `string` | longitud mínima 1; longitud máxima 500 | Calle y número del domicilio particular | `valor-ejemplo` |
+| `homeLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `homeLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `workAddressLines` | No | `string` | longitud mínima 1; longitud máxima 500 | Calle y número de la dirección laboral | `valor-ejemplo` |
+| `workLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `workLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `phone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone. | `+59170000000` |
+| `mobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Celular personal en formato E.164 o nacional | `+59170000000` |
+| `workMobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Celular de trabajo en formato E.164 o nacional | `+59170000000` |
+| `workLandline` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Teléfono fijo del lugar de trabajo | `valor-ejemplo` |
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `gender` | No | `string` | valores: `MALE`, `FEMALE`, `OTHER`, `UNKNOWN` | Género administrativo (HL7 AdministrativeGender) | `MALE` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
@@ -1119,7 +1482,33 @@ Content-Type: application/json
 | `credentialTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languageConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `acceptsNewPatients` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `profilePhotoBase64` | No | `string` | Sin restricción adicional declarada | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
+| `signatureFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `sealFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}` |
+| `ownSite.name` | No | `string` | longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
+| `ownSite.timeZone` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `ownSite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `ownSite.address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
+| `ownSite.address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `ownSite.address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001"}]` |
+| `credentials[].credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].number` | No | `string` | longitud máxima 100; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Concept id de VS_BO_PROFESSION (COB-2023) | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -1132,6 +1521,8 @@ Content-Type: application/json
 
 {
   "email": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "workEmail": "usuario@example.com",
   "password": "ClaveSegura2026!",
   "name": "Ana",
   "middleName": "Lucía",
@@ -1140,13 +1531,26 @@ Content-Type: application/json
   "displayName": "Nombre de ejemplo",
   "licenseNumber": "valor-ejemplo",
   "credentialNumber": "valor-ejemplo",
+  "sedesLicenseNumber": "T.I. 538/14",
   "regulatoryAuthority": "valor-ejemplo",
   "licenseIssueDate": "2026-07-31",
   "professionalTitle": "valor-ejemplo",
+  "specialtyConceptIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
   "nationalId": "00000000-0000-4000-8000-000000000001",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeAddressLines": "valor-ejemplo",
+  "homeLatitude": 1,
+  "homeLongitude": 1,
+  "workAddressLines": "valor-ejemplo",
+  "workLatitude": 1,
+  "workLongitude": 1,
   "phone": "+59170000000",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
   "birthDate": "2026-07-31",
   "gender": "MALE",
   "sexAtBirth": "MALE",
@@ -1155,7 +1559,40 @@ Content-Type: application/json
   "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "languageConceptId": "00000000-0000-4000-8000-000000000001",
   "acceptsNewPatients": false,
-  "timeZone": "America/La_Paz"
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
+  "timeZone": "America/La_Paz",
+  "profilePhotoBase64": "valor-ejemplo",
+  "signatureFileId": "00000000-0000-4000-8000-000000000001",
+  "sealFileId": "00000000-0000-4000-8000-000000000001",
+  "ownSite": {
+    "name": "Nombre de ejemplo",
+    "timeZone": "America/La_Paz",
+    "address": {
+      "lines": [
+        "valor-ejemplo"
+      ],
+      "city": "valor-ejemplo",
+      "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+      "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+      "latitude": 1,
+      "longitude": 1
+    }
+  },
+  "credentials": [
+    {
+      "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "number": "valor-ejemplo",
+      "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
+      "fileId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
 }
 ```
 
@@ -1181,8 +1618,13 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "practitionerCode": "CODIGO_EJEMPLO",
   "licenseId": "00000000-0000-4000-8000-000000000001",
   "credentialId": "00000000-0000-4000-8000-000000000001",
+  "sedesLicenseId": "00000000-0000-4000-8000-000000000001",
   "verificationStatus": "PENDING",
-  "emailVerificationSent": true
+  "emailVerificationSent": true,
+  "photoFileId": "00000000-0000-4000-8000-000000000001",
+  "profilePhotoStored": true,
+  "ownPracticeId": "00000000-0000-4000-8000-000000000001",
+  "ownSiteId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1195,9 +1637,14 @@ Campos de la respuesta:
 | `practitionerProfileId` | Sí | `string` | formato `uuid` | Perfil profesional (comparte id con la persona). | `00000000-0000-4000-8000-000000000001` |
 | `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Código interno asignado al profesional. | `CODIGO_EJEMPLO` |
 | `licenseId` | Sí | `string` | formato `uuid` | Licencia registrada, pendiente de verificación por la plataforma. | `00000000-0000-4000-8000-000000000001` |
-| `credentialId` | Sí | `string` | formato `uuid` | Credencial profesional creada, pendiente de verificación. Se devuelve porque `POST /profiles/credentials/{credentialId}/verify` —el acto que habilita al profesional a ejercer— la exige por id, y no había ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no expone ningún listado de credenciales. La verificación quedaba fuera de alcance salvo consultando la base de datos a mano. | `00000000-0000-4000-8000-000000000001` |
+| `credentialId` | No | `string` | formato `uuid` | Credencial profesional creada, pendiente de verificación. Se devuelve porque `POST /profiles/credentials/{credentialId}/verify` —el acto que habilita al profesional a ejercer— la exige por id, y no había ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no expone ningún listado de credenciales. La verificación quedaba fuera de alcance salvo consultando la base de datos a mano. Ausente cuando el alta no declara `credentialNumber`, que dejó de ser obligatorio: sin credencial no hay id que devolver. | `00000000-0000-4000-8000-000000000001` |
+| `sedesLicenseId` | No | `string` | formato `uuid` | Autorización del SEDES creada, pendiente de verificación. El equivalente de para la habilitación departamental: se devuelve para poder verificarla por id sin consultar la base. Ausente cuando el alta no declara `sedesLicenseNumber`. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatus` | Sí | `string` | Sin restricción adicional declarada | Estado de verificación del perfil al terminar el alta. Siempre PENDING: registrarse no habilita a ejercer. | `PENDING` |
 | `emailVerificationSent` | Sí | `boolean` | Sin restricción adicional declarada | Si se pudo encolar el correo de verificación. | `true` |
+| `photoFileId` | No | `string` | formato `uuid` | Identificador del archivo de foto de perfil (FK → common.files), si se subió. | `00000000-0000-4000-8000-000000000001` |
+| `profilePhotoStored` | No | `boolean` | Sin restricción adicional declarada | Presente sólo si el alta trajo foto: `false` cuando el almacenamiento no pudo guardarla y la cuenta se creó igual, sin foto. | `true` |
+| `ownPracticeId` | No | `string` | formato `uuid` | Práctica personal creada o reutilizada para el consultorio propio. Ausente cuando el alta no declaró `ownSite`. Se devuelve por el mismo motivo que : poder referenciarla por id sin consultar la base. | `00000000-0000-4000-8000-000000000001` |
+| `ownSiteId` | No | `string` | formato `uuid` | Consultorio propio creado a partir de `ownSite`. Ausente cuando el alta no lo declaró. Es el mismo id que devuelve `POST /practitioners/me/sites` y que acepta `GET /practitioners/:id/sites`. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1211,11 +1658,30 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La firma y el sello requieren una imagen privada de hasta 2 MB | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1233,7 +1699,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /iam/auth/resend-verification
+## 10. POST /iam/auth/resend-verification
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1352,7 +1818,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /iam/auth/reset-password
+## 11. POST /iam/auth/reset-password
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1473,7 +1939,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /iam/auth/sessions/purge
+## 12. POST /iam/auth/sessions/purge
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1578,7 +2044,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /iam/auth/token/refresh
+## 13. POST /iam/auth/token/refresh
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1674,10 +2140,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 401 | `UNAUTHENTICATED` | Refresh token inválido | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | Sesión no activa | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
 | 401 | `UNAUTHENTICATED` | Reuso de refresh token detectado | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
 | 401 | `UNAUTHENTICATED` | Refresh token expirado | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
-| 401 | `UNAUTHENTICATED` | Sesión no activa | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | Refresh token inválido | Excepción explícita en src/modules/iam/services/iam-auth.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 20, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1696,7 +2162,254 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /iam/auth/verify-email
+## 14. POST /iam/auth/upload-registration-document
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Pre-cargar un PDF para un registro de organización o profesional
+- **Operation ID:** `IamAuthController_uploadRegistrationDocument`
+- **Autenticación:** Pública
+- **Implementación:** [IamAuthController.uploadRegistrationDocument](../../src/modules/iam/controllers/iam-auth.controller.ts)
+
+### Descripción de negocio
+
+Pre-cargar un PDF para un registro de organización o profesional. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Pre-carga pública de un PDF para un registro que todavía no tiene sesión: documento legal de organización o respaldo de credencial profesional. El archivo nace sin dueño (`common.files.created_by_user_id` NULL) y queda inutilizable hasta que el alta correspondiente lo reclama por su `fileId` en la misma transacción que crea la organización o al profesional. Límite de 30/min y no el estándar de 10: un alta legítima puede subir varios PDF y reintentar alguno, y sigue diez veces por debajo del backstop global (300/min, `app.module.ts`). Deuda conocida, declarada y no resuelta acá: nada purga las subidas anónimas que nunca se reclaman (abandono del formulario, rechazo del alta). Quedan en `common.files` con el tenant DEFAULT y sin dueño.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/auth/upload-registration-document` en `IamAuthController_uploadRegistrationDocument`. El controlador delega en `IamRegistrationDocumentUploadService.upload`. Valida el body como `object` y consume `multipart/form-data`. El tipo de retorno estático es `Promise<RegistrationDocumentUploadResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `object`; los campos opcionales se omiten.
+
+```http
+POST /iam/auth/upload-registration-document HTTP/1.1
+Host: localhost:3000
+Content-Type: multipart/form-data
+
+{
+  "file": "<contenido-binario>"
+}
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 30, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `file` | Sí | `string` | formato `binary` | Sin descripción específica en el contrato OpenAPI. | `<contenido-binario>` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/auth/upload-registration-document HTTP/1.1
+Host: localhost:3000
+Content-Type: multipart/form-data
+
+{
+  "file": "<contenido-binario>"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegistrationDocumentUploadResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "fileId": "00000000-0000-4000-8000-000000000001",
+  "originalName": "escritura-de-constitucion.pdf",
+  "sizeBytes": 1,
+  "mimeType": "application/pdf"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fileId` | Sí | `string` | formato `uuid` | Identificador del archivo, sin dueño hasta que un alta lo reclame. | `00000000-0000-4000-8000-000000000001` |
+| `originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre original del PDF, tal como lo envió el cliente. | `escritura-de-constitucion.pdf` |
+| `sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Tamaño real del archivo almacenado, en bytes. | `1` |
+| `mimeType` | Sí | `string` | Sin restricción adicional declarada | Tipo MIME detectado por firma binaria (siempre `application/pdf`). | `application/pdf` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 30, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/auth/upload-registration-document"
+}
+```
+
+---
+
+## 15. POST /iam/auth/upload-registration-signature-image
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Pre-cargar una imagen de firma o sello para el registro
+- **Operation ID:** `IamAuthController_uploadRegistrationSignatureImage`
+- **Autenticación:** Pública
+- **Implementación:** [IamAuthController.uploadRegistrationSignatureImage](../../src/modules/iam/controllers/iam-auth.controller.ts)
+
+### Descripción de negocio
+
+Pre-cargar una imagen de firma o sello para el registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Precarga de firma o sello: máximo 2 MB y sin lectura pública.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/auth/upload-registration-signature-image` en `IamAuthController_uploadRegistrationSignatureImage`. El controlador delega en `IamRegistrationDocumentUploadService.uploadSignatureImage`. Valida el body como `object` y consume `multipart/form-data`. El tipo de retorno estático es `Promise<RegistrationDocumentUploadResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `object`; los campos opcionales se omiten.
+
+```http
+POST /iam/auth/upload-registration-signature-image HTTP/1.1
+Host: localhost:3000
+Content-Type: multipart/form-data
+
+{
+  "file": "<contenido-binario>"
+}
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 10, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `file` | Sí | `string` | formato `binary` | Sin descripción específica en el contrato OpenAPI. | `<contenido-binario>` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/auth/upload-registration-signature-image HTTP/1.1
+Host: localhost:3000
+Content-Type: multipart/form-data
+
+{
+  "file": "<contenido-binario>"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegistrationDocumentUploadResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "fileId": "00000000-0000-4000-8000-000000000001",
+  "originalName": "escritura-de-constitucion.pdf",
+  "sizeBytes": 1,
+  "mimeType": "application/pdf"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fileId` | Sí | `string` | formato `uuid` | Identificador del archivo, sin dueño hasta que un alta lo reclame. | `00000000-0000-4000-8000-000000000001` |
+| `originalName` | Sí | `string` | Sin restricción adicional declarada | Nombre original del PDF, tal como lo envió el cliente. | `escritura-de-constitucion.pdf` |
+| `sizeBytes` | Sí | `number` | Sin restricción adicional declarada | Tamaño real del archivo almacenado, en bytes. | `1` |
+| `mimeType` | Sí | `string` | Sin restricción adicional declarada | Tipo MIME detectado por firma binaria (siempre `application/pdf`). | `application/pdf` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La imagen supera el límite de 2 MB | Excepción explícita en src/modules/iam/services/iam-registration-document-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/auth/upload-registration-signature-image"
+}
+```
+
+---
+
+## 16. POST /iam/auth/verify-email
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -1813,7 +2526,221 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /iam/users
+## 17. GET /iam/me/sessions
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Listar mis sesiones abiertas
+- **Operation ID:** `IamAccountSecurityController_listSessions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.listSessions](../../src/modules/iam/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Listar mis sesiones abiertas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Sesiones abiertas de la propia cuenta.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/me/sessions` en `IamAccountSecurityController_listSessions`. El controlador delega en `IamAccountSecurityService.listSessions`. No recibe body. El tipo de retorno estático es `Promise<MySessionDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/me/sessions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/me/sessions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MySessionDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "createdAt": "2026-07-31T12:00:00.000Z",
+    "expiresAt": "2026-07-31T12:00:00.000Z",
+    "ip": "valor-ejemplo",
+    "current": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/sessions"
+}
+```
+
+---
+
+## 18. POST /iam/me/sessions/{id}/revoke
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Cerrar una de mis sesiones
+- **Operation ID:** `IamAccountSecurityController_revokeSession`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.revokeSession](../../src/modules/iam/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Cerrar una de mis sesiones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cierra una sesión propia.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/sessions/{id}/revoke` en `IamAccountSecurityController_revokeSession`. El controlador delega en `IamAccountSecurityService.revokeSession`. No recibe body. El tipo de retorno estático es `Promise<RevokeMySessionResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /iam/me/sessions/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /iam/me/sessions/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RevokeMySessionResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "revoked": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `revoked` | Sí | `boolean` | Sin restricción adicional declarada | `false` si la sesión ya no estaba activa (no es un error). | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Sesión no encontrada | Excepción explícita en src/modules/iam/services/iam-account-security.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/sessions/{id}/revoke"
+}
+```
+
+---
+
+## 19. GET /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -1946,7 +2873,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. POST /iam/users
+## 20. POST /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2084,7 +3011,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /iam/users/{id}
+## 21. GET /iam/users/{id}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2210,7 +3137,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /iam/users/{id}/anonymize
+## 22. POST /iam/users/{id}/anonymize
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2319,7 +3246,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /iam/users/{id}/credentials
+## 23. GET /iam/users/{id}/credentials
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2448,7 +3375,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /iam/users/{id}/credentials/{cid}/revoke
+## 24. POST /iam/users/{id}/credentials/{cid}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2558,7 +3485,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /iam/users/{id}/credentials/federated
+## 25. POST /iam/users/{id}/credentials/federated
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2692,7 +3619,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /iam/users/{id}/devices
+## 26. GET /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2817,7 +3744,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /iam/users/{id}/devices
+## 27. POST /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2950,7 +3877,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /iam/users/{id}/global-roles
+## 28. GET /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3071,7 +3998,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /iam/users/{id}/global-roles
+## 29. POST /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3200,7 +4127,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /iam/users/{id}/lock
+## 30. POST /iam/users/{id}/lock
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3322,7 +4249,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /iam/users/{id}/mfa-factors
+## 31. GET /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3445,7 +4372,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /iam/users/{id}/mfa-factors
+## 32. POST /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3565,6 +4492,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No tiene acceso a los factores MFA de esta cuenta | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
 | 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
 | 404 | `NOT_FOUND` | Factor MFA no encontrado | Excepción explícita en src/modules/iam/services/iam-mfa.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -3590,7 +4518,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /iam/users/{id}/sessions
+## 33. GET /iam/users/{id}/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3715,7 +4643,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /iam/users/assisted-practitioner-registration
+## 34. POST /iam/users/assisted-practitioner-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3751,7 +4679,8 @@ Content-Type: application/json
 {
   "email": "usuario@example.com",
   "licenseNumber": "valor-ejemplo",
-  "credentialNumber": "valor-ejemplo",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "reason": "Texto descriptivo de ejemplo"
 }
 ```
@@ -3766,21 +4695,34 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo que actúa como identidad de login | `usuario@example.com` |
+| `email` | Sí | `string` | formato `email`; longitud máxima 320 | Correo de acceso del profesional | `usuario@example.com` |
+| `personalEmail` | No | `string` | formato `email`; longitud máxima 320 | Correo personal; no sirve para iniciar sesión | `usuario@example.com` |
+| `workEmail` | No | `string` | formato `email`; longitud máxima 320 | Correo de trabajo, distinto del correo de acceso | `usuario@example.com` |
 | `name` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Ana` |
 | `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Lucía` |
 | `lastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Rojas` |
 | `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Paz` |
 | `displayName` | No | `string` | longitud máxima 200 | Forma anterior de declarar el nombre. Preferí name/lastName. | `Nombre de ejemplo` |
 | `licenseNumber` | Sí | `string` | longitud máxima 100 | Número de licencia o matrícula profesional | `valor-ejemplo` |
-| `credentialNumber` | Sí | `string` | longitud máxima 100 | Número del título profesional que respalda la licencia | `valor-ejemplo` |
+| `credentialNumber` | No | `string` | longitud máxima 100 | Número del título profesional que respalda la licencia | `valor-ejemplo` |
+| `sedesLicenseNumber` | No | `string` | longitud máxima 100 | Número de registro del SEDES departamental | `T.I. 538/14` |
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
 | `licenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción de la matrícula (ISO) | `2026-07-31` |
 | `professionalTitle` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `nationalId` | No | `string` | longitud máxima 40 | Documento de identidad (se guarda como identificador oficial) | `00000000-0000-4000-8000-000000000001` |
-| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `specialtyConceptIds` | No | `array<string>` | máximo 4 elemento(s) | Especialidades declaradas (una principal y hasta tres adicionales). | `["00000000-0000-4000-8000-000000000001"]` |
+| `nationalId` | Sí | `string` | longitud máxima 40 | Documento de identidad obligatorio; se guarda como identificador oficial | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | Sí | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `phone` | No | `string` | longitud máxima 40 | Teléfono de contacto en formato E.164 o nacional | `+59170000000` |
+| `homeAddressLines` | No | `string` | longitud máxima 500 | Calle y número del domicilio particular | `valor-ejemplo` |
+| `homeLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `homeLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `workAddressLines` | No | `string` | longitud máxima 500 | Calle y número de la dirección laboral | `valor-ejemplo` |
+| `workLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `workLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `phone` | No | `string` | longitud máxima 40 | Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone. | `+59170000000` |
+| `mobilePhone` | No | `string` | longitud máxima 40 | Celular personal en formato E.164 o nacional | `+59170000000` |
+| `workMobilePhone` | No | `string` | longitud máxima 40 | Celular de trabajo en formato E.164 o nacional | `+59170000000` |
+| `workLandline` | No | `string` | longitud máxima 40 | Teléfono fijo del lugar de trabajo | `valor-ejemplo` |
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `gender` | No | `string` | valores: `MALE`, `FEMALE`, `OTHER`, `UNKNOWN` | Género administrativo (HL7 AdministrativeGender) | `MALE` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
@@ -3789,7 +4731,33 @@ Content-Type: application/json
 | `credentialTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `languageConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `acceptsNewPatients` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `profilePhotoBase64` | No | `string` | Sin restricción adicional declarada | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
+| `signatureFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `sealFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}` |
+| `ownSite.name` | No | `string` | longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
+| `ownSite.timeZone` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `ownSite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `ownSite.address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
+| `ownSite.address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `ownSite.address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `credentials` | No | `array<RegisterPractitionerCredentialDto>` | Sin restricción adicional declarada | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `[{"credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001"}]` |
+| `credentials[].credentialTypeConceptId` | No | `string` | formato `uuid` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].number` | No | `string` | longitud máxima 100; patrón runtime `/\S/` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingInstitutionText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Concept id de VS_BO_PROFESSION (COB-2023) | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
 | `reason` | Sí | `string` | longitud máxima 500 | Motivo del alta administrativa (trazabilidad C-18) | `Texto descriptivo de ejemplo` |
 | `clinicalRoles` | No | `array<string>` | longitud máxima 100; máximo 10 elemento(s) | Roles asistenciales a conceder (códigos de `GET /authz/roles`) | `["CLINICIAN","SURGEON"]` |
 
@@ -3805,6 +4773,8 @@ Content-Type: application/json
 
 {
   "email": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "workEmail": "usuario@example.com",
   "name": "Ana",
   "middleName": "Lucía",
   "lastName": "Rojas",
@@ -3812,13 +4782,26 @@ Content-Type: application/json
   "displayName": "Nombre de ejemplo",
   "licenseNumber": "valor-ejemplo",
   "credentialNumber": "valor-ejemplo",
+  "sedesLicenseNumber": "T.I. 538/14",
   "regulatoryAuthority": "valor-ejemplo",
   "licenseIssueDate": "2026-07-31",
   "professionalTitle": "valor-ejemplo",
+  "specialtyConceptIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
   "nationalId": "00000000-0000-4000-8000-000000000001",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeAddressLines": "valor-ejemplo",
+  "homeLatitude": 1,
+  "homeLongitude": 1,
+  "workAddressLines": "valor-ejemplo",
+  "workLatitude": 1,
+  "workLongitude": 1,
   "phone": "+59170000000",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
   "birthDate": "2026-07-31",
   "gender": "MALE",
   "sexAtBirth": "MALE",
@@ -3827,7 +4810,40 @@ Content-Type: application/json
   "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "languageConceptId": "00000000-0000-4000-8000-000000000001",
   "acceptsNewPatients": false,
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
   "timeZone": "America/La_Paz",
+  "profilePhotoBase64": "valor-ejemplo",
+  "signatureFileId": "00000000-0000-4000-8000-000000000001",
+  "sealFileId": "00000000-0000-4000-8000-000000000001",
+  "ownSite": {
+    "name": "Nombre de ejemplo",
+    "timeZone": "America/La_Paz",
+    "address": {
+      "lines": [
+        "valor-ejemplo"
+      ],
+      "city": "valor-ejemplo",
+      "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+      "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+      "latitude": 1,
+      "longitude": 1
+    }
+  },
+  "credentials": [
+    {
+      "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "number": "valor-ejemplo",
+      "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
+      "fileId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
   "reason": "Texto descriptivo de ejemplo",
   "clinicalRoles": [
     "CLINICIAN",
@@ -3884,11 +4900,30 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La firma y el sello requieren una imagen privada de hasta 2 MB | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3906,7 +4941,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /iam/users/assisted-registration
+## 35. POST /iam/users/assisted-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`

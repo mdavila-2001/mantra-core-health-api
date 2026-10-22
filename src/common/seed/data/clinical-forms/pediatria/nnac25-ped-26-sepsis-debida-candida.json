@@ -1,0 +1,172 @@
+{
+  "code": "NNAC25_PED_26_SEPSIS_DEBIDA_CANDIDA",
+  "name": "Sepsis debida a cándida (NNAC 2025)",
+  "specialty": { "code": "PEDIATRIA", "display": "Pediatría" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Nacional de Atención Clínica de Pediatría (2025)",
+    "organization": "Ministerio de Salud y Deportes del Estado Plurinacional de Bolivia",
+    "url": "https://www.minsalud.gob.bo/component/jdownloads/send/67-nnac/968-norma-nacional-de-atencion-clinica-de-pediatria?Itemid=465",
+    "license": "Documento técnico-normativo estatal de acceso público",
+    "retrievedAt": "2026-10-05",
+    "note": "NNAC 2025 (RM 0456, 30/09/2025), capítulo 26, pág. 122; niveles de atención I - II - III. Las listas de hallazgos, clasificación, factores de riesgo, exámenes, complicaciones, hospitalización y criterios de referencia o alta son viñetas de la norma, transcritas sin agregados y sin dosis; el tratamiento se registra como texto. Revisión clínica pendiente."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_consulta",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera evaluación", "Control", "Consulta de urgencia"]
+    },
+    {
+      "section": "Consulta",
+      "code": "motivo_consulta",
+      "name": "Motivo de consulta y tiempo de evolución",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "criterios_clinicos",
+      "name": "Hallazgos presentes (criterios diagnósticos de la NNAC)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Prematurez",
+        "Uso prolongado de antibióticos",
+        "Nutrición parenteral prolongada (lípidos)",
+        "Uso prolongado de catéteres",
+        "Procedimientos invasivos",
+        "Ventilación asistida",
+        "Proceso infeccioso sistémico sin identificación de microorganismo bacteriano",
+        "Hemograma completo",
+        "Examen de orina, buscar hifas y levaduras",
+        "Hemocultivo de muestra arterial para microorganismos",
+        "Urocultivo",
+        "Examen citoquímico, tinción Gram y cultivo de LCR",
+        "Examen fondo de ojo, buscar colecciones",
+        "Ecografía renal y abdominal, buscar colecciones",
+        "Ecocardiograma, buscar colecciones",
+        "Otros exámenes complementarios que se juzgue pertinentes, según disponibilidad"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "description": "Según la NNAC, pág. 122. Es la infección sistémica por cándida albicans."
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "factores_de_riesgo",
+      "name": "Factores de riesgo presentes",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Inmunodeprimidos",
+        "Desnutrición",
+        "Estancia prolongada en UTIP",
+        "Pacientes en quimioterapia",
+        "Pacientes con inmunosupresores",
+        "Paciente con uso prolongado de corticoides",
+        "Pacientes sometidos a procedimientos invasivos"
+      ],
+      "multiple": true,
+      "allowOther": true
+    },
+    {
+      "section": "Criterios de la norma",
+      "code": "examen_fisico",
+      "name": "Examen físico y otros hallazgos",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Exámenes complementarios",
+      "code": "resultados_de_examenes",
+      "name": "Resultados de los exámenes",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "codigo_cie10",
+      "name": "Código CIE-10",
+      "dataType": "string",
+      "required": false,
+      "options": ["B37.7: Septicemia debida a cándida"],
+      "allowOther": true,
+      "description": "Los códigos y nombres son los que declara la NNAC."
+    },
+    {
+      "section": "Diagnóstico",
+      "code": "diagnostico",
+      "name": "Diagnóstico",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conducta",
+      "code": "nivel_de_atencion",
+      "name": "Nivel de atención que resuelve el caso",
+      "dataType": "string",
+      "required": false,
+      "options": ["Nivel I", "Nivel II", "Nivel III"]
+    },
+    {
+      "section": "Conducta",
+      "code": "tratamiento",
+      "name": "Tratamiento indicado",
+      "dataType": "text",
+      "required": false,
+      "description": "La NNAC define el tratamiento por nivel de atención (norma 26, pág. 122); se registra aquí lo indicado, con dosis y duración."
+    },
+    {
+      "section": "Conducta",
+      "code": "se_refiere",
+      "name": "¿Se refiere al paciente a otro establecimiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "criterios_de_referencia",
+      "name": "Criterios de la NNAC que se cumplen (referencia o alta)",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Control prenatal adecuado y atención institucional del parto",
+        "Detección oportuna de embarazo de alto riesgo",
+        "Verificar un esquema completo de inmunización y suplementación",
+        "En niños inmunocomprometidos tener cuidado en el uso prolongado de corticoides",
+        "Evitar el uso indiscriminado de antibióticos",
+        "Cumplimiento del BANDERS de mantenimiento de catéter venoso central"
+      ],
+      "multiple": true,
+      "allowOther": true,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "establecimiento_de_referencia",
+      "name": "Establecimiento de destino",
+      "dataType": "string",
+      "required": false,
+      "showWhen": { "field": "se_refiere", "equals": true }
+    },
+    {
+      "section": "Conducta",
+      "code": "observaciones",
+      "name": "Observaciones",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conducta",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

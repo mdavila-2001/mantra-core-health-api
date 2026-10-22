@@ -1,0 +1,2159 @@
+{
+ "P780": {
+  "head": {
+   "vars": [
+    "d",
+    "dIcd",
+    "dIcdCm",
+    "dMesh",
+    "dEs",
+    "x",
+    "xEs",
+    "xDesc",
+    "xEn",
+    "xIcd",
+    "xIcdCm",
+    "xAtc",
+    "xMesh"
+   ]
+  },
+  "results": {
+   "bindings": [
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q517104"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "wheeze"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "ruido inspiratorio o espiratorio agudo que aparece en el árbol bronquial como consecuencia de una estenosis"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "sibilancia"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q517104"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "wheeze"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "ruido inspiratorio o espiratorio agudo que aparece en el árbol bronquial como consecuencia de una estenosis"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "sibilancia"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q517104"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "wheeze"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "ruido inspiratorio o espiratorio agudo que aparece en el árbol bronquial como consecuencia de una estenosis"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "sibilancia"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q517104"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "wheeze"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "ruido inspiratorio o espiratorio agudo que aparece en el árbol bronquial como consecuencia de una estenosis"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "sibilancia"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q101991"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "inflammation"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "mecanismo de inmunidad innata"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "inflamación"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D007249"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q101991"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "inflammation"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "mecanismo de inmunidad innata"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "inflamación"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D007249"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q101991"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "inflammation"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "mecanismo de inmunidad innata"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "inflamación"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D007249"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q101991"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "inflammation"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "mecanismo de inmunidad innata"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "inflamación"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D007249"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q693058"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "chest pain"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "malestar u dolor en el pecho como síntoma médico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "dolor torácico"
+     },
+     "xIcd": {
+      "type": "literal",
+      "value": "R07.4"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D002637"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q693058"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "chest pain"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "malestar u dolor en el pecho como síntoma médico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "dolor torácico"
+     },
+     "xIcd": {
+      "type": "literal",
+      "value": "R07.4"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D002637"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q693058"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "chest pain"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "malestar u dolor en el pecho como síntoma médico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "dolor torácico"
+     },
+     "xIcd": {
+      "type": "literal",
+      "value": "R07.4"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D002637"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q693058"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "chest pain"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "malestar u dolor en el pecho como síntoma médico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "dolor torácico"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     },
+     "xIcd": {
+      "type": "literal",
+      "value": "R07.4"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D002637"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35805"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "cough"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "contracción espasmódica repentina y a veces repetitiva de  las vías respiratorias"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "tos"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D003371"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35805"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "cough"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "contracción espasmódica repentina y a veces repetitiva de  las vías respiratorias"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "tos"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D003371"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35805"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "cough"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "contracción espasmódica repentina y a veces repetitiva de  las vías respiratorias"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "tos"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D003371"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35805"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "cough"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "contracción espasmódica repentina y a veces repetitiva de  las vías respiratorias"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "tos"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D003371"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     }
+    }
+   ]
+  }
+ },
+ "P1995": {
+  "head": {
+   "vars": [
+    "d",
+    "dIcd",
+    "dIcdCm",
+    "dMesh",
+    "dEs",
+    "x",
+    "xEs",
+    "xDesc",
+    "xEn",
+    "xIcd",
+    "xIcdCm",
+    "xAtc",
+    "xMesh"
+   ]
+  },
+  "results": {
+   "bindings": [
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q101929"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "immunology"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "rama de la biología que estudia el sistema inmunitario"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "inmunología"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000486"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q101929"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "immunology"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "rama de la biología que estudia el sistema inmunitario"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "inmunología"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000486"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q101929"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "immunology"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "rama de la biología que estudia el sistema inmunitario"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "inmunología"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000486"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q101929"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "immunology"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "rama de la biología que estudia el sistema inmunitario"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "inmunología"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000486"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q203337"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "pulmonology"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "especialidad médica centrada en el diagnóstico, tratamiento y manejo de enfermedades y afecciones que afectan al sistema respiratorio"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "neumología"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D015272"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q203337"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "pulmonology"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "especialidad médica centrada en el diagnóstico, tratamiento y manejo de enfermedades y afecciones que afectan al sistema respiratorio"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "neumología"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D015272"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q203337"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "pulmonology"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "especialidad médica centrada en el diagnóstico, tratamiento y manejo de enfermedades y afecciones que afectan al sistema respiratorio"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "neumología"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D015272"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q203337"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "pulmonology"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "especialidad médica centrada en el diagnóstico, tratamiento y manejo de enfermedades y afecciones que afectan al sistema respiratorio"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "neumología"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D015272"
+     }
+    }
+   ]
+  }
+ },
+ "P2176": {
+  "head": {
+   "vars": [
+    "d",
+    "dIcd",
+    "dIcdCm",
+    "dMesh",
+    "dEs",
+    "x",
+    "xEs",
+    "xDesc",
+    "xEn",
+    "xIcd",
+    "xIcdCm",
+    "xAtc",
+    "xMesh"
+   ]
+  },
+  "results": {
+   "bindings": [
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q410358"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "rac-salbutamol"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "salbutamol"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03AC02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000420"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q410358"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "rac-salbutamol"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "salbutamol"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03AC02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000420"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q410358"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "rac-salbutamol"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "salbutamol"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03AC02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000420"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q410358"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "rac-salbutamol"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "salbutamol"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03AC02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000420"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q410358"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "rac-salbutamol"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "salbutamol"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03CC02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000420"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q410358"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "rac-salbutamol"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "salbutamol"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03CC02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000420"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q410358"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "rac-salbutamol"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "salbutamol"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03CC02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000420"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q410358"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "rac-salbutamol"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "salbutamol"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03CC02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000420"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "A07EA06"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "A07EA06"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "A07EA06"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "A07EA06"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "D07AC09"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "D07AC09"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "D07AC09"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "D07AC09"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R01AD05"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R01AD05"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R01AD05"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R01AD05"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03BA02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03BA02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03BA02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q422212"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "budesonide"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "grupo de estereoisómeros"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "budesonida"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03BA02"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D019819"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q471763"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "aminophylline"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "Aminofilinaaminofilina"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03DA05"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000628"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.90"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q471763"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "aminophylline"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "Aminofilinaaminofilina"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03DA05"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000628"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45.909"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q471763"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "aminophylline"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "Aminofilinaaminofilina"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03DA05"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000628"
+     },
+     "dIcdCm": {
+      "type": "literal",
+      "value": "J45"
+     }
+    },
+    {
+     "x": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q471763"
+     },
+     "xEn": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "aminophylline"
+     },
+     "xDesc": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "compuesto químico"
+     },
+     "d": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q35869"
+     },
+     "dEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "asma"
+     },
+     "xEs": {
+      "xml:lang": "es",
+      "type": "literal",
+      "value": "Aminofilinaaminofilina"
+     },
+     "xAtc": {
+      "type": "literal",
+      "value": "R03DA05"
+     },
+     "xMesh": {
+      "type": "literal",
+      "value": "D000628"
+     },
+     "dMesh": {
+      "type": "literal",
+      "value": "D001249"
+     }
+    }
+   ]
+  }
+ }
+}

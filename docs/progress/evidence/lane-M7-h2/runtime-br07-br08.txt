@@ -1,0 +1,32 @@
+PASS alta con personalEmail===email responde 201 status=201
+PASS un solo contacto de correo (HOME), sin WORK inventado filas=1|h2-50ffab-a@example.test
+PASS summary 200 status=200
+PASS matrícula pendiente en el summary 
+PASS PATCH matrícula pendiente = 204 status=204
+     SELECT antes=LIC-50ffab-a|1 despues=MP-9|2
+PASS la relectura muestra MP-9 
+PASS clave extra (stateConceptId) = 400 status=400
+PASS matrícula ajena = 404 status=404
+PASS DELETE de matrícula ajena = 404 status=404
+PASS matrícula activa = 422 status=422
+PASS DELETE matrícula activa = 422 status=422
+PASS matrícula con historial de auditoría = 422 (sin 23503) status=422
+PASS DELETE matrícula pendiente = 204 status=204
+PASS la fila ya no existe 
+PASS PATCH con isPrimary = 400 status=400
+PASS PATCH especialidad pendiente = 204 status=204
+     SELECT: t|t
+PASS cambiar a una ya vigente = 409 status=409
+PASS un concepto que no es especialidad = 422 status=422
+PASS especialidad ajena = 404 status=404
+PASS DELETE de la principal = 204 status=204
+PASS queda sin principal (no promueve otra) 
+PASS especialidad no pendiente = 422 status=422
+PASS PATCH me sexAtBirth + departamento = 200 status=200
+PASS la relectura devuelve sexAtBirth FEMALE y el departamento nuevo sexAtBirth=FEMALE
+PASS departamento fuera de VS_BO_DEPARTMENT = 422 status=422
+PASS alta de vínculo del padrón = 201 status=201
+     SELECT: t
+PASS mismo establecimiento, cargo e inicio = 409 status=409
+PASS concepto fuera del padrón = 422 status=422
+TODO PASS

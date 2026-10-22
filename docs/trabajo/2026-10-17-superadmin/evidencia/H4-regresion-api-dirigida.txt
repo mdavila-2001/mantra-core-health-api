@@ -1,0 +1,11 @@
+FAIL src/common/audit-trail/audit-trail-coverage.spec.ts (9.985 s)
+  ● bitácora: toda ruta que muta declara qué sella › ninguna ruta sin @Audited ni @NotAudited fuera del baseline
+FAIL src/common/seed/glossary-articles.catalog.spec.ts
+  ● Artículos enciclopédicos de autoría propia del glosario › cada artículo llega al piso de 2.000 palabras
+FAIL common/audit-trail/audit-trail-coverage.spec.ts (9.985 s)
+  ● bitácora: toda ruta que muta declara qué sella › ninguna ruta sin @Audited ni @NotAudited fuera del baseline
+FAIL common/seed/glossary-articles.catalog.spec.ts
+  ● Artículos enciclopédicos de autoría propia del glosario › cada artículo llega al piso de 2.000 palabras
+Test Suites: 2 failed, 111 passed, 113 total
+Tests:       2 failed, 1239 passed, 1241 total
+Time:        44.859 s

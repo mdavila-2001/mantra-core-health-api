@@ -1,0 +1,29 @@
+src/modules/insurance/services/claims-read.service.spec.ts | prettier/prettier | Replace `CLAIM` with `⏎··········CLAIM,⏎········`
+src/modules/insurance/services/claims-read.service.spec.ts | prettier/prettier | Replace `{}` with `⏎··········{},⏎········`
+src/modules/insurance/services/claims-read.service.ts | prettier/prettier | Replace `⏎············em,⏎············[],⏎············id,⏎············[],⏎············scope.carrierId,⏎··········` with `em,·[],·id,·[],·scope.carrierId`
+src/modules/terminology/import/xlsx-parser.spec.ts | parse | Unused eslint-disable directive (no problems were reported from 'no-console').
+src/modules/terminology/import/xlsx-parser.spec.ts | prettier/prettier | Insert `··`
+src/modules/terminology/import/xlsx-parser.spec.ts | prettier/prettier | Replace `'%s.xlsx·produce·el·mismo·resultado·que·%s.csv',` with `⏎····'%s.xlsx·produce·el·mismo·resultado·que·%s.csv',⏎···`
+src/modules/terminology/import/xlsx-parser.spec.ts | prettier/prettier | Replace `['code',·'display',·'definition'],·...filas` with `⏎······['code',·'display',·'definition'],⏎······...filas,⏎····`
+src/modules/terminology/import/xlsx-parser.spec.ts | prettier/prettier | Replace `['code',·'display',·'definition'],·['ZZ-001',·'Sí·debería·leerse',·'']` with `⏎······['code',·'display',·'definition'],⏎······['ZZ-001',·'Sí·debería·leerse',·''],⏎····`
+src/modules/terminology/import/xlsx-parser.spec.ts | prettier/prettier | Replace `['code',·'display',·'definition'],·['ZZ-999',·'No·debería·leerse',·'']` with `⏎······['code',·'display',·'definition'],⏎······['ZZ-999',·'No·debería·leerse',·''],⏎····`
+src/modules/terminology/import/xlsx-parser.spec.ts | prettier/prettier | Replace ``ZZ-${i}`,·'x',·''` with `⏎······`ZZ-${i}`,⏎······'x',⏎······'',⏎····`
+src/modules/terminology/import/xlsx-parser.spec.ts | prettier/prettier | Replace `}` with `··},⏎··`
+src/modules/terminology/import/xlsx-parser.spec.ts | prettier/prettier | Replace `·type:·'buffer',·bookType:·'xlsx'` with `⏎······type:·'buffer',⏎······bookType:·'xlsx',⏎···`
+src/modules/terminology/import/xlsx-parser.ts | @typescript-eslint/no-base-to-string | 'valor' will use Object's default stringification format ('[object Object]') when stringified.
+src/modules/terminology/import/xlsx-parser.ts | prettier/prettier | Insert `⏎·····`
+src/modules/terminology/import/xlsx-parser.ts | prettier/prettier | Replace `hoja:·WorkSheet,·fila:·number,·columna:·number` with `⏎··hoja:·WorkSheet,⏎··fila:·number,⏎··columna:·number,⏎`
+src/modules/terminology/import/xlsx-parser.ts | prettier/prettier | Replace `registro,·hoja,·indiceRegistro,·problemasDeCelda` with `⏎········registro,⏎········hoja,⏎········indiceRegistro,⏎········problemasDeCelda,⏎······`
+src/modules/terminology/import/xlsx-parser.ts | prettier/prettier | Replace `·?·valor.toISOString().slice(0,·10)` with `⏎······?·valor.toISOString().slice(0,·10)⏎·····`
+src/modules/terminology/import/xlsx-parser.ts | prettier/prettier | Replace `·fila:·FILA_DEL_ENCABEZADO,·motivo:·'el·archivo·no·tiene·encabezado'` with `⏎············fila:·FILA_DEL_ENCABEZADO,⏎············motivo:·'el·archivo·no·tiene·encabezado',⏎·········`
+src/modules/terminology/import/xlsx-parser.ts | prettier/prettier | Replace `·resolverColumna(perfil,·String(celda))` with `⏎······resolverColumna(perfil,·String(celda)),⏎····`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Delete `]`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Delete `··>(⏎`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Insert `··`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `.getConnection().execute<⏎······Array<{·action:·string;·entity_id:·string;·tenant_id:·string·}>` with `⏎······.getConnection()⏎······.execute<Array<{·action:·string;·entity_id:·string;·tenant_id:·string·}>>(`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `.getConnection()` with `⏎······.getConnection()⏎······`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `list.body.items.map((item:·{·code:·string·})·=>·item.code)).not.toContain(⏎······`CMP-${suffix}`,⏎····` with `⏎······list.body.items.map((item:·{·code:·string·})·=>·item.code),⏎····).not.toContain(`CMP-${suffix}``
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `tenantId` with `[tenantId]`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `userId,·`session-${label}`,·[...globalRoles],·[` with `⏎··········userId,⏎··········`session-${label}`,⏎··········[...globalRoles],`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `······` with `········`
+test/integration/insurance-campaigns.int-spec.ts | prettier/prettier | Replace `⏎······.get('/insurance/campaigns/active')⏎······` with `.get('/insurance/campaigns/active')`

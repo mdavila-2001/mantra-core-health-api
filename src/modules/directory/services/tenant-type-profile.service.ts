@@ -1,14 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { PreconditionFailedException } from '../../../common';
-import { CatalogRepository } from '../../insurance/repositories';
-import { INS } from '../../insurance/insurance.concepts';
+import { CONCEPTS, PreconditionFailedException } from '../../../common';
+import { AddressesRepository } from '../../common/repositories';
+import { CatalogRepository } from '../../insurance/infrastructure/repositories';
+import { INS } from '../../insurance/domain/insurance.concepts';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
+import { DiagnosticUnitProvisioningService } from '../../diagnostic_units/services';
+import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
+import { isDiagnosticUnitModality } from '../../diagnostic_units/diagnostic-unit-modalities';
 import {
   TERRITORIAL_TENANT_TYPES,
   type TenantTypeCode,
 } from '../directory.concepts';
-import type { BrokerProfileDto, PayerProfileDto } from '../dto';
+import {
+  LEGAL_ENTITY_TYPE_BY_CODE,
+  LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO,
+} from '../legal-entity-types';
+import type {
+  BrokerProfileDto,
+  DiagnosticUnitProfileDto,
+  PayerProfileDto,
+} from '../dto';
+
+/** Los dos tipos de unidad diagnóstica que este alta puede declarar. */
+const DIAGNOSTIC_UNIT_TYPE_CONCEPTS: ReadonlySet<string> = new Set([
+  DUNIT.UNIT_TYPE_IMAGING,
+  DUNIT.UNIT_TYPE_LABORATORY,
+]);
 
 /** Datos por tipo que acompañan al alta de un tenant. */
 export interface TenantTypeProfileInput {
@@ -36,6 +54,21 @@ export interface TenantTypeProfileInput {
    * Datos de corredor; obligatorios para `BROKER`.
    */
   broker?: BrokerProfileDto;
+  /**
+   * Código del tenant; base del código de la unidad diagnóstica si
+   * `diagnosticUnit.code` no viene.
+   */
+  code?: string;
+  /**
+   * Tipo societario del diccionario internacional (subtarea 1.1); opcional.
+   */
+  legalEntityType?: string;
+  /**
+   * Datos del centro de diagnóstico; opcionales para `DIAGNOSTIC_CENTER`
+   * (a diferencia de `payer`/`broker`, declarar el tipo sin este bloque es
+   * válido: el alta puede completar la unidad después desde el módulo 23).
+   */
+  diagnosticUnit?: DiagnosticUnitProfileDto;
 }
 
 /**
@@ -61,10 +94,13 @@ export class TenantTypeProfileService {
    *
    * @param catalogRepo - Repositorio del catálogo de seguros (carriers/brokers).
    * @param conceptsRepo - Catálogo de terminología, para validar los `*ConceptId` declarados.
+   * @param addressesRepo - Repositorio de `common.addresses`, para la casa matriz del PAYER.
    */
   constructor(
     private readonly catalogRepo: CatalogRepository,
     private readonly conceptsRepo: CatalogConceptsRepository,
+    private readonly diagnosticUnitProvisioning: DiagnosticUnitProvisioningService,
+    private readonly addressesRepo: AddressesRepository,
   ) {}
 
   /**
@@ -109,6 +145,28 @@ export class TenantTypeProfileService {
       }
     }
 
+    // Si el tipo societario declara un país y también viene `countryConceptId`,
+    // los dos deben coincidir: una S.R.L. boliviana no puede constituirse bajo
+    // jurisdicción peruana. Sin uno de los dos no hay nada que contrastar.
+    if (input.legalEntityType && input.countryConceptId) {
+      const entry = LEGAL_ENTITY_TYPE_BY_CODE.get(input.legalEntityType);
+      const expectedCountryConceptId = entry
+        ? LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO[entry.countryIso]
+        : undefined;
+      if (
+        expectedCountryConceptId &&
+        expectedCountryConceptId !== input.countryConceptId
+      ) {
+        throw new PreconditionFailedException(
+          `El tipo societario pertenece al derecho de ${entry!.countryIso} y no coincide con el país declarado`,
+          {
+            legalEntityType: input.legalEntityType,
+            countryConceptId: input.countryConceptId,
+          },
+        );
+      }
+    }
+
     if (tenantType !== 'PAYER' && input.payer) {
       throw new PreconditionFailedException(
         'El bloque `payer` sólo corresponde a un tenant de tipo PAYER',
@@ -120,6 +178,37 @@ export class TenantTypeProfileService {
         'El bloque `broker` sólo corresponde a un tenant de tipo BROKER',
         { tenantType },
       );
+    }
+    if (tenantType !== 'DIAGNOSTIC_CENTER' && input.diagnosticUnit) {
+      throw new PreconditionFailedException(
+        'El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo ' +
+          'DIAGNOSTIC_CENTER',
+        { tenantType },
+      );
+    }
+
+    if (input.diagnosticUnit) {
+      const unitTypeConceptId =
+        input.diagnosticUnit.diagnosticUnitTypeConceptId;
+      if (
+        unitTypeConceptId !== undefined &&
+        !DIAGNOSTIC_UNIT_TYPE_CONCEPTS.has(unitTypeConceptId)
+      ) {
+        throw new PreconditionFailedException(
+          'El tipo de unidad diagnóstica declarado no es válido',
+          { diagnosticUnitTypeConceptId: unitTypeConceptId },
+        );
+      }
+
+      const invalidModalities = (
+        input.diagnosticUnit.modalityConceptIds ?? []
+      ).filter((conceptId) => !isDiagnosticUnitModality(conceptId));
+      if (invalidModalities.length > 0) {
+        throw new PreconditionFailedException(
+          'Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas',
+          { invalidModalities },
+        );
+      }
     }
   }
 
@@ -201,15 +290,21 @@ export class TenantTypeProfileService {
    * @param tx - Transacción activa del alta del tenant.
    * @param tenantId - Tenant recién creado.
    * @param input - Tipo declarado y datos que lo acompañan.
-   * @param actorUserId - Actor al que se imputa la escritura.
+   * @param actorUserId - Actor al que se imputa la escritura (auditoría).
+   * @param practiceAdminUserId - Quién queda como administrador de la
+   *   práctica que provisiona un `DIAGNOSTIC_CENTER`. Por defecto,
+   *   `actorUserId` (el autorregistro es su propio actor); las puertas
+   *   administrativas pasan el dueño real, no el operador de plataforma que
+   *   invoca el alta.
    * @returns Id de la fila creada, o `undefined` si el tipo no tiene tabla propia.
    */
-  materializeProfile(
+  async materializeProfile(
     tx: EntityManager,
     tenantId: string,
     input: TenantTypeProfileInput,
     actorUserId: string,
-  ): string | undefined {
+    practiceAdminUserId: string = actorUserId,
+  ): Promise<string | undefined> {
     if (input.tenantType === 'PAYER' && input.payer) {
       const carrier = this.catalogRepo.createCarrier(tx, {
         tenantId,
@@ -223,6 +318,7 @@ export class TenantTypeProfileService {
         statusConceptId: INS.CARRIER_ACTIVE,
         actorUserId,
       });
+      this.materializePayerHeadquarters(tx, tenantId, input.payer, actorUserId);
       return carrier.id;
     }
 
@@ -240,8 +336,72 @@ export class TenantTypeProfileService {
       return broker.id;
     }
 
+    // DIAGNOSTIC_CENTER: igual que payer/broker, sólo materializa si el
+    // cliente declaró el bloque — a diferencia de esos dos, no es
+    // obligatorio (`assertProfileMatchesType` no lo exige), así que un
+    // DIAGNOSTIC_CENTER sin `diagnosticUnit` no crea nada acá y puede
+    // completar la unidad después desde el módulo 23.
+    if (input.tenantType === 'DIAGNOSTIC_CENTER' && input.diagnosticUnit) {
+      const provisioned = await this.diagnosticUnitProvisioning.provision(
+        tx,
+        {
+          tenantId,
+          tenantCode: input.code,
+          legalName: input.legalName,
+          ownerUserId: practiceAdminUserId,
+        },
+        input.diagnosticUnit,
+        actorUserId,
+      );
+      return provisioned.unitId;
+    }
+
     // PROVIDER no tiene fila propia: su realidad operativa son las sedes y los
     // servicios de salud, que se crean después con su propio caso de uso.
     return undefined;
+  }
+
+  /**
+   * Registra la ubicación de la casa matriz de un `PAYER`, si la declaró.
+   *
+   * Va en `common.addresses` (dueño `OWNER_TENANT`, uso `ADDR_USE_WORK`) y no
+   * en una columna de `insurance_carriers`: es el mismo lugar donde ya viven
+   * las coordenadas del consultorio propio y del centro de diagnóstico
+   * (`OwnSiteProvisioningService`, `DiagnosticUnitProvisioningService`), y
+   * evita inventar un segundo esquema de coordenadas por tabla. Tampoco es
+   * una fila de `directory.branches`: esa tabla es para sucursales
+   * (`DIR_BRANCH_TYPE_CLINIC`/`OFFICE`), y la casa matriz no es una sucursal.
+   *
+   * `COUNTRY_BO` fijo porque `PAYER` no es un tipo territorial —no declara su
+   * propio país— y Bolivia es, hoy, el único país con municipios sembrados
+   * para completar una dirección real.
+   *
+   * @param tx - Transacción activa del alta del tenant.
+   * @param tenantId - Tenant recién creado, dueño de la dirección.
+   * @param payer - Bloque de aseguradora del alta.
+   * @param actorUserId - Actor al que se imputa la escritura (auditoría).
+   */
+  private materializePayerHeadquarters(
+    tx: EntityManager,
+    tenantId: string,
+    payer: PayerProfileDto,
+    actorUserId: string,
+  ): void {
+    // `!== undefined`, no truthiness: 0 es una coordenada válida (el
+    // ecuador o el meridiano de Greenwich). El DTO ya garantiza "ambos o
+    // ninguno" (`@ValidateIf`), así que comprobar una alcanza.
+    if (payer.latitude === undefined || payer.longitude === undefined) return;
+
+    this.addressesRepo.create(tx, {
+      ownerTypeConceptId: CONCEPTS.OWNER_TENANT,
+      ownerId: tenantId,
+      lines: payer.address,
+      countryConceptId: CONCEPTS.COUNTRY_BO,
+      useConceptId: CONCEPTS.ADDR_USE_WORK,
+      typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
+      latitude: String(payer.latitude),
+      longitude: String(payer.longitude),
+      actorUserId,
+    });
   }
 }

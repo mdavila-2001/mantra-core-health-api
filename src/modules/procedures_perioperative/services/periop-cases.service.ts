@@ -14,7 +14,7 @@ import {
   PeriopPreopRepository,
   PeriopIntraopRepository,
 } from '../repositories';
-import { ProfessionalCredentialsRepository } from '../../profiles/repositories';
+import { ProfessionalCredentialsRepository } from '../../profiles/infrastructure/repositories';
 import { AuditTrailService } from '../../audit/services';
 import { OutboxService } from '../../messaging/services';
 // La historia clínica sigue siendo de `clinical`: el caso quirúrgico pide que
@@ -122,7 +122,7 @@ const CANCELLABLE_CASE_STATES: readonly string[] = [
 
 /**
  * C-13 (CAN-INT-001): estado "borrador" del caso. Es el único en el que el
- * modelo REDESA todavía permite corregir el paciente de la intervención. El
+ * modelo ALOVIDA todavía permite corregir el paciente de la intervención. El
  * sistema no tiene un estado DRAFT propio: el caso nace ya `CASE_SCHEDULED`, que
  * es su estado editable inicial (antes de que verificación de órdenes /
  * confirmación lo fijen). `CASE_READY_FOR_SURGERY` equivale a
@@ -902,7 +902,7 @@ export class PeriopCasesService {
     tenantId: string,
     query: ListCasesQueryDto,
   ): Promise<CaseListResponseDto> {
-    const filtros = {
+    const filters = {
       patientProfileId: query.patientProfileId,
       operatingRoomId: query.operatingRoomId,
       primarySurgeonProfileId: query.primarySurgeonProfileId,
@@ -912,11 +912,11 @@ export class PeriopCasesService {
     };
     const [cases, total] = await Promise.all([
       this.casesRepo.findCases(this.em, tenantId, {
-        ...filtros,
+        ...filters,
         limit: query.limit ?? 50,
         offset: query.offset ?? 0,
       }),
-      this.casesRepo.countCasesMatching(this.em, tenantId, filtros),
+      this.casesRepo.countCasesMatching(this.em, tenantId, filters),
     ]);
     return { items: cases.map((c) => this.toSummary(c)), total };
   }
@@ -1181,11 +1181,11 @@ export class PeriopCasesService {
         );
       }
 
-      const esAdministracion =
+      const isAdministration =
         actor.roles.includes('PERIOP_ADMIN') ||
         actor.roles.includes('SUPERADMIN');
       if (
-        !esAdministracion &&
+        !isAdministration &&
         actor.practitionerProfileId !== member.practitionerProfileId
       ) {
         throw new PreconditionFailedException(
@@ -1205,12 +1205,12 @@ export class PeriopCasesService {
       }
 
       // Fail-closed: no se declara aceptado a quien no puede ejercer.
-      const credencialVigente = await this.credentialsRepo.hasCurrentCredential(
+      const currentCredential = await this.credentialsRepo.hasCurrentCredential(
         tx,
         member.practitionerProfileId,
         new Date(),
       );
-      if (!credencialVigente) {
+      if (!currentCredential) {
         throw new PreconditionFailedException(
           'CAN-INT-002: el integrante no tiene credencial profesional vigente',
           { caseId, memberId },
@@ -1298,11 +1298,11 @@ export class PeriopCasesService {
       // Spec 168: responder por otro es exactamente lo que la regla impide. La
       // excepción administrativa es la misma que admite `acceptTeamMember`
       // —autorización institucional expresa— y no se amplía aquí.
-      const esAdministracion =
+      const isAdministration =
         actor.roles.includes('PERIOP_ADMIN') ||
         actor.roles.includes('SUPERADMIN');
       if (
-        !esAdministracion &&
+        !isAdministration &&
         actor.practitionerProfileId !== member.practitionerProfileId
       ) {
         throw new PreconditionFailedException(

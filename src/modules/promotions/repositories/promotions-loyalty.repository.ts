@@ -586,6 +586,66 @@ export class PromotionsLoyaltyRepository {
     return em.findOne(PointsLedgerEntries, { idempotencyKey });
   }
 
+  /**
+   * Las membresías de un miembro entre varios programas.
+   *
+   * Es el mismo criterio que {@link findMembershipByMember} —la UNIQUE es
+   * `(programa, tipo, miembro)`— pero sin exigir saber en qué programa está
+   * inscrito: el portal del paciente no conoce ids de programa, sólo su tenant.
+   */
+  findMembershipsByMemberRef(
+    em: EntityManager,
+    loyaltyProgramIds: readonly string[],
+    memberTypeConceptId: string,
+    memberRefId: string,
+  ): Promise<LoyaltyMemberships[]> {
+    if (loyaltyProgramIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      LoyaltyMemberships,
+      {
+        loyaltyProgramId: { $in: [...loyaltyProgramIds] },
+        memberTypeConceptId,
+        memberRefId,
+      },
+      { orderBy: { enrolledAt: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
+   * Una página del ledger de la membresía, más nuevos primero.
+   *
+   * Paginada por **keyset** sobre `(recorded_at, id)` y no por `offset`: el
+   * ledger crece por arriba, así que un offset repetiría o saltearía filas
+   * entre páginas. El `id` desempata dos entradas del mismo instante, que es lo
+   * que hace estable el orden.
+   *
+   * @param after Última fila entregada; la página siguiente arranca debajo.
+   */
+  findLedgerPageByMembership(
+    em: EntityManager,
+    loyaltyMembershipId: string,
+    limit: number,
+    after?: { recordedAt: Date; id: string },
+  ): Promise<PointsLedgerEntries[]> {
+    return em.find(
+      PointsLedgerEntries,
+      {
+        loyaltyMembershipId,
+        ...(after
+          ? {
+              $or: [
+                { recordedAt: { $lt: after.recordedAt } },
+                { recordedAt: after.recordedAt, id: { $lt: after.id } },
+              ],
+            }
+          : {}),
+      },
+      { orderBy: { recordedAt: 'DESC', id: 'DESC' }, limit },
+    );
+  }
+
   /** Ledger completo de la membresía: es la fuente de verdad del saldo (REC 3.3). */
   findLedgerByMembership(
     em: EntityManager,

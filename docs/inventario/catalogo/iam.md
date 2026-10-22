@@ -14,16 +14,16 @@
 | [account_lockouts](#account_lockouts) | Registra bloqueos de cuentas para aplicar controles ante intentos de acceso fallidos o riesgos de seguridad. | 16 | 3 | 4 | COINCIDE |
 | [api_key_scopes](#api_key_scopes) | Delimita permisos y ámbitos de claves API para restringir integraciones a operaciones autorizadas. | 7 | 2 | 0 | COINCIDE |
 | [api_keys](#api_keys) | Administra credenciales de integración por API para autenticar sistemas que intercambian datos con la plataforma médica. | 21 | 5 | 0 | COINCIDE |
-| [authentication_credentials](#authentication_credentials) | Almacena referencias y estados de credenciales usados para autenticar usuarios sin mezclar identidad personal y acceso. | 16 | 7 | 39 | COINCIDE |
+| [authentication_credentials](#authentication_credentials) | Almacena referencias y estados de credenciales usados para autenticar usuarios sin mezclar identidad personal y acceso. | 16 | 7 | 41 | COINCIDE |
 | [devices](#devices) | Identifica dispositivos asociados a usuarios para gestionar sesiones y controles de acceso. | 13 | 5 | 2 | COINCIDE |
 | [email_verifications](#email_verifications) | Registra verificaciones de correo asociadas a cuentas para confirmar canales de identidad y comunicación. | 12 | 2 | 20 | COINCIDE |
-| [mfa_factors](#mfa_factors) | Registra factores de autenticación adicional para reforzar la protección de cuentas que acceden a datos médicos. | 12 | 5 | 4 | COINCIDE |
+| [mfa_factors](#mfa_factors) | Registra factores de autenticación adicional para reforzar la protección de cuentas que acceden a datos médicos. | 12 | 5 | 5 | COINCIDE |
 | [password_resets](#password_resets) | Gestiona solicitudes de restablecimiento de credenciales para recuperar acceso de forma controlada. | 13 | 2 | 4 | COINCIDE |
-| [refresh_tokens](#refresh_tokens) | Gestiona tokens de renovación de sesión para mantener autenticación continua con trazabilidad y revocación. | 11 | 7 | 12 | COINCIDE |
-| [security_events](#security_events) | Conserva eventos de seguridad de identidad para investigar autenticaciones y cambios relevantes de cuenta. | 8 | 5 | 23 | COINCIDE |
-| [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 19 | COINCIDE |
+| [refresh_tokens](#refresh_tokens) | Gestiona tokens de renovación de sesión para mantener autenticación continua con trazabilidad y revocación. | 11 | 7 | 15 | COINCIDE |
+| [security_events](#security_events) | Conserva eventos de seguridad de identidad para investigar autenticaciones y cambios relevantes de cuenta. | 8 | 5 | 25 | COINCIDE |
+| [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 119 | COINCIDE |
 | [user_global_roles](#user_global_roles) | Asocia roles de alcance global a usuarios para resolver privilegios transversales de la plataforma. | 9 | 5 | 14 | COINCIDE |
-| [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 37 | COINCIDE |
+| [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 53 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -502,7 +502,7 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: authentication_credentials`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `AuthenticationCredentials` — `src/modules/iam/entities/authentication_credentials.entity.ts`
-- **Resumen:** 16 columnas · 7 índices · 6 FK salientes · 0 entrantes · 39 operaciones
+- **Resumen:** 16 columnas · 7 índices · 6 FK salientes · 0 entrantes · 41 operaciones
 
 #### Columnas
 
@@ -540,10 +540,10 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_authentication_credentials_user_id` | no | user_id | Soporta la clave foránea fk_authentication_credentials_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_authentication_credentials_method_concept_id` | no | method_concept_id | Soporta la clave foránea fk_authentication_credentials_method_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «method_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_authentication_credentials_user_id` | no | user_id | Soporta la clave foránea fk_authentication_credentials_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 8 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_authentication_credentials_method_concept_id` | no | method_concept_id | Soporta la clave foránea fk_authentication_credentials_method_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «method_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_authentication_credentials_hash_algorithm_concept_id` | no | hash_algorithm_concept_id | Soporta la clave foránea fk_authentication_credentials_hash_algorithm_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_authentication_credentials_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_authentication_credentials_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_authentication_credentials_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_authentication_credentials_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_authentication_credentials_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_authentication_credentials_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_authentication_credentials_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_authentication_credentials_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ux_authentication_credentials_live_password_subject` | sí | ("external_subject") WHERE method_concept_id = '37da1281-cc62-5032-b598-1eb39dc46060' AND external_subject IS NOT NULL AND state_concept_id IN ('38a1d301-f40d-5b17-a695-5e6d605f8b19'), ('2e38dae4-c0c2-52ff-b1c9-a954ff880a38') | Garantiza que no se repita la combinación ("external_subject") WHERE method_concept_id = '37da1281-cc62-5032-b598-1eb39dc46060' AND external_subject IS NOT NULL AND state_concept_id IN ('38a1d301-f40d-5b17-a695-5e6d605f8b19', '2e38dae4-c0c2-52ff-b1c9-a954ff880a38') _(DOCUMENTO)_ |
@@ -562,6 +562,8 @@ Almacena referencias y estados de credenciales usados para autenticar usuarios s
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | POST /iam/auth/activate | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/activate | LEE | DIRECTA |
+| POST /iam/auth/change-password | ACTUALIZA | POR_TIPO |
+| POST /iam/auth/change-password | LEE | DIRECTA |
 | POST /iam/auth/forgot-password | LEE | DIRECTA |
 | POST /iam/auth/login | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
@@ -798,7 +800,7 @@ Registra factores de autenticación adicional para reforzar la protección de cu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: mfa_factors`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `MfaFactors` — `src/modules/iam/entities/mfa_factors.entity.ts`
-- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -831,9 +833,9 @@ Registra factores de autenticación adicional para reforzar la protección de cu
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_mfa_factors_user_id` | no | user_id | Soporta la clave foránea fk_mfa_factors_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_mfa_factors_user_id` | no | user_id | Soporta la clave foránea fk_mfa_factors_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_mfa_factors_factor_type_concept_id` | no | factor_type_concept_id | Soporta la clave foránea fk_mfa_factors_factor_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_mfa_factors_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_mfa_factors_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_mfa_factors_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_mfa_factors_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_mfa_factors_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_mfa_factors_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_mfa_factors_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_mfa_factors_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -841,6 +843,7 @@ Registra factores de autenticación adicional para reforzar la protección de cu
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /iam/auth/login | LEE | DIRECTA |
 | GET /iam/users/{id}/mfa-factors | LEE | DIRECTA |
 | POST /iam/users/{id}/mfa-factors | ACTUALIZA | POR_TIPO |
 | POST /iam/users/{id}/mfa-factors | CREA | DIRECTA |
@@ -943,7 +946,7 @@ Gestiona tokens de renovación de sesión para mantener autenticación continua 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: refresh_tokens`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `RefreshTokens` — `src/modules/iam/entities/refresh_tokens.entity.ts`
-- **Resumen:** 11 columnas · 7 índices · 5 FK salientes · 1 entrantes · 12 operaciones
+- **Resumen:** 11 columnas · 7 índices · 5 FK salientes · 1 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -976,7 +979,7 @@ Gestiona tokens de renovación de sesión para mantener autenticación continua 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_refresh_tokens_token_hash` | sí | token_hash | Garantiza que no se repita la combinación (token_hash) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «token_hash», la primera columna del índice _(CONSULTA)_ |
+| `uq_refresh_tokens_token_hash` | sí | token_hash | Garantiza que no se repita la combinación (token_hash) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «token_hash», la primera columna del índice _(CONSULTA)_ |
 | `ix_refresh_tokens_session_id` | no | session_id | Soporta la clave foránea fk_refresh_tokens_session_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «session_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_refresh_tokens_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_refresh_tokens_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_refresh_tokens_replaced_by_id` | no | replaced_by_id | Soporta la clave foránea fk_refresh_tokens_replaced_by_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -994,6 +997,7 @@ Gestiona tokens de renovación de sesión para mantener autenticación continua 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /iam/auth/change-password | ACTUALIZA | DIRECTA |
 | POST /iam/auth/login | ACTUALIZA | DIRECTA |
 | POST /iam/auth/login | CREA | DIRECTA |
 | POST /iam/auth/logout | ACTUALIZA | DIRECTA |
@@ -1003,7 +1007,9 @@ Gestiona tokens de renovación de sesión para mantener autenticación continua 
 | POST /iam/auth/token/refresh | ACTUALIZA | DIRECTA |
 | POST /iam/auth/token/refresh | CREA | DIRECTA |
 | POST /iam/auth/token/refresh | LEE | DIRECTA |
+| POST /iam/me/sessions/{id}/revoke | ACTUALIZA | DIRECTA |
 | POST /iam/users/{id}/anonymize | ACTUALIZA | DIRECTA |
+| POST /iam/users/{id}/global-roles | ACTUALIZA | DIRECTA |
 | POST /iam/users/{id}/lock | ACTUALIZA | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | ACTUALIZA | DIRECTA |
 
@@ -1030,7 +1036,7 @@ Conserva eventos de seguridad de identidad para investigar autenticaciones y cam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: security_events`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `SecurityEvents` — `src/modules/iam/entities/security_events.entity.ts`
-- **Resumen:** 8 columnas · 5 índices · 4 FK salientes · 1 entrantes · 23 operaciones
+- **Resumen:** 8 columnas · 5 índices · 4 FK salientes · 1 entrantes · 25 operaciones
 
 #### Columnas
 
@@ -1071,6 +1077,7 @@ Conserva eventos de seguridad de identidad para investigar autenticaciones y cam
 |---|---|---|
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /iam/auth/activate | CREA | DIRECTA |
+| POST /iam/auth/change-password | CREA | DIRECTA |
 | POST /iam/auth/forgot-password | CREA | DIRECTA |
 | POST /iam/auth/login | CREA | DIRECTA |
 | POST /iam/auth/login | LEE | DIRECTA |
@@ -1082,6 +1089,7 @@ Conserva eventos de seguridad de identidad para investigar autenticaciones y cam
 | POST /iam/auth/reset-password | CREA | DIRECTA |
 | POST /iam/auth/sessions/purge | CREA | DIRECTA |
 | POST /iam/auth/token/refresh | CREA | DIRECTA |
+| POST /iam/me/sessions/{id}/revoke | CREA | DIRECTA |
 | POST /iam/users | CREA | DIRECTA |
 | POST /iam/users/{id}/anonymize | CREA | DIRECTA |
 | POST /iam/users/{id}/credentials/{cid}/revoke | CREA | DIRECTA |
@@ -1116,7 +1124,7 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: sessions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Sessions` — `src/modules/iam/entities/sessions.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 5 entrantes · 19 operaciones
+- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 5 entrantes · 119 operaciones
 
 #### Columnas
 
@@ -1156,12 +1164,12 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_sessions_token_id` | sí | token_id | Garantiza que no se repita la combinación (token_id) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «token_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_sessions_user_id` | no | user_id | Soporta la clave foránea fk_sessions_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_sessions_user_id` | no | user_id | Soporta la clave foránea fk_sessions_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_sessions_device_id` | no | device_id | Soporta la clave foránea fk_sessions_device_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_sessions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_sessions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_sessions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_sessions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_sessions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_sessions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_sessions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_sessions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_sessions_user_state_expiry` | no | user_id, state_concept_id, expires_at | Soporta la clave foránea fk_sessions_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_sessions_user_state_expiry` | no | user_id, state_concept_id, expires_at | Soporta la clave foránea fk_sessions_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -1173,6 +1181,43 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /accounting/journal-transactions | LEE | POR_SQL |
+| POST /accounting/journal-transactions/{id}/classify | LEE | POR_SQL |
+| POST /accounting/journal-transactions/{id}/post | LEE | POR_SQL |
+| POST /accounting/journal-transactions/{id}/reverse | LEE | POR_SQL |
+| PATCH /accounting/practitioner/assets/{id}/automation | LEE | POR_SQL |
+| PATCH /accounting/practitioner/liabilities/{id}/automation | LEE | POR_SQL |
+| POST /audit/anomaly/scan | LEE | POR_SQL |
+| POST /audit/data-access | LEE | POR_SQL |
+| POST /audit/events | LEE | POR_SQL |
+| GET /audit/history/{entity}/{id} | LEE | POR_SQL |
+| POST /audit/integrity/verify | LEE | POR_SQL |
+| POST /audit/retention/apply | LEE | POR_SQL |
+| POST /audit/third-party-access | LEE | POR_SQL |
+| POST /compliance/audit-export | LEE | POR_SQL |
+| POST /moderation/decisions | LEE | POR_SQL |
+| POST /privacy/dsar | LEE | POR_SQL |
+| PATCH /privacy/dsar/{id} | LEE | POR_SQL |
+| POST /authz/care-relationships/{id}/respond | LEE | POR_SQL |
+| POST /authz/care-relationships/request | LEE | POR_SQL |
+| DELETE /authz/clinical-access-grants/{grantId} | LEE | POR_SQL |
+| POST /authz/me/clinical-access-grants/{grantId}/revoke | LEE | POR_SQL |
+| POST /authz/patients/{patientProfileId}/break-the-glass | LEE | POR_SQL |
+| POST /authz/patients/{patientProfileId}/clinical-access-grants | LEE | POR_SQL |
+| POST /clinical/conditions | LEE | POR_SQL |
+| POST /clinical/conditions/{id}/change-status | LEE | POR_SQL |
+| POST /clinical/conditions/{id}/verification | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/invalidate | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/issue | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/renew | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/replace | LEE | POR_SQL |
+| POST /clinical/medication-requests/{id}/sign | LEE | POR_SQL |
+| POST /consent/consents/{id}/withdraw | LEE | POR_SQL |
+| POST /consent/me/consents/{id}/withdraw | LEE | POR_SQL |
+| POST /consent/practitioner-access-requests | LEE | POR_SQL |
+| POST /consent/practitioner-access-requests/{id}/decision | LEE | POR_SQL |
+| POST /iam/auth/change-password | ACTUALIZA | DIRECTA |
+| POST /iam/auth/change-password | LEE | DIRECTA |
 | POST /iam/auth/login | ACTUALIZA | DIRECTA |
 | POST /iam/auth/login | CREA | DIRECTA |
 | POST /iam/auth/login | LEE | DIRECTA |
@@ -1185,13 +1230,76 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 | POST /iam/auth/sessions/purge | ACTUALIZA | DIRECTA |
 | POST /iam/auth/token/refresh | ACTUALIZA | DIRECTA |
 | POST /iam/auth/token/refresh | LEE | DIRECTA |
+| GET /iam/me/sessions | LEE | DIRECTA |
+| POST /iam/me/sessions/{id}/revoke | ACTUALIZA | DIRECTA |
+| POST /iam/me/sessions/{id}/revoke | LEE | DIRECTA |
 | POST /iam/users/{id}/anonymize | ACTUALIZA | DIRECTA |
 | POST /iam/users/{id}/anonymize | LEE | DIRECTA |
+| POST /iam/users/{id}/global-roles | ACTUALIZA | DIRECTA |
+| POST /iam/users/{id}/global-roles | LEE | DIRECTA |
 | POST /iam/users/{id}/lock | ACTUALIZA | DIRECTA |
 | POST /iam/users/{id}/lock | LEE | DIRECTA |
 | GET /iam/users/{id}/sessions | LEE | DIRECTA |
+| GET /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
+| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
+| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | LEE | POR_SQL |
+| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | LEE | POR_SQL |
+| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | LEE | POR_SQL |
+| GET /insurance/portability/certificates/{certificateId}/json | LEE | POR_SQL |
+| GET /insurance/portability/certificates/{certificateId}/pdf | LEE | POR_SQL |
+| POST /insurance/portability/export | LEE | POR_SQL |
+| GET /object-storage/versions/{versionId}/content/{token} | LEE | POR_SQL |
+| POST /object-storage/versions/{versionId}/signed-url | LEE | POR_SQL |
+| GET /admin/ops/traffic | LEE | POR_SQL |
+| POST /pharma-labs | LEE | POR_SQL |
+| PATCH /pharma-labs/{pharmaLabId} | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/cost-allocations | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/materials | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/materials/{materialId}/decision | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/materials/{materialId}/submit | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors | LEE | POR_SQL |
+| PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/products | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | LEE | POR_SQL |
+| PUT /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/specialties | LEE | POR_SQL |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | ACTUALIZA | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
+| POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/verifications | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/products | LEE | POR_SQL |
+| PATCH /pharma-labs/{pharmaLabId}/products/{productId} | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/products/{productId}/status | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/invalidate | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/regulatory-documents/{documentId}/versions/{versionId}/download | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/staff | LEE | POR_SQL |
+| PATCH /pharma-labs/{pharmaLabId}/staff/{staffId}/permissions | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/staff/{staffId}/unlink | LEE | POR_SQL |
+| POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | LEE | POR_SQL |
+| POST /pharma-labs/visitor-posts | LEE | POR_SQL |
+| POST /visit-agenda/blocks | LEE | POR_SQL |
+| POST /visit-agenda/blocks/{blockId}/lift | LEE | POR_SQL |
+| PUT /visit-agenda/me | LEE | POR_SQL |
+| POST /visit-records | LEE | POR_SQL |
+| POST /visit-records/{visitRecordId}/confirm | LEE | POR_SQL |
+| POST /visit-records/{visitRecordId}/rating | LEE | POR_SQL |
+| POST /visit-requests | LEE | POR_SQL |
+| POST /visit-requests/{visitRequestId}/accept | LEE | POR_SQL |
+| POST /visit-requests/{visitRequestId}/cancel | LEE | POR_SQL |
+| POST /visit-requests/{visitRequestId}/propose-time | LEE | POR_SQL |
+| POST /visit-requests/{visitRequestId}/reject | LEE | POR_SQL |
+| POST /visit-requests/{visitRequestId}/request-info | LEE | POR_SQL |
+| POST /visit-requests/{visitRequestId}/reschedule | LEE | POR_SQL |
+| POST /visit-surveys/labs/{pharmaLabId} | LEE | POR_SQL |
+| POST /visit-surveys/labs/{pharmaLabId}/{surveyId}/close | LEE | POR_SQL |
+| POST /visit-surveys/responses/{responseId} | LEE | POR_SQL |
+| POST /dental-procedures | LEE | POR_SQL |
+| POST /procedure-cases/{id}/confirm | LEE | POR_SQL |
+| POST /procedure-cases/{id}/diagnoses | LEE | POR_SQL |
+| POST /procedure-cases/{id}/team-members/{memberId}/respond | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -1294,7 +1402,7 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: users`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Users` — `src/modules/iam/entities/users.entity.ts`
-- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 1928 entrantes · 37 operaciones
+- **Resumen:** 21 columnas · 8 índices · 8 FK salientes · 1928 entrantes · 53 operaciones
 
 #### Columnas
 
@@ -3312,11 +3420,27 @@ Representa cuentas de usuario autenticadas que operan en la plataforma médica.
 | GET /iam/users/{id}/sessions | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-registration | CREA | DIRECTA |
+| GET /insurance/my-claims | LEE | DIRECTA |
+| POST /insurance/patients/conversation | LEE | POR_SQL |
+| POST /insurance/patients/search | LEE | POR_SQL |
+| GET /insurance/received-claims | LEE | DIRECTA |
+| POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | ACTUALIZA | POR_TIPO |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | ACTUALIZA | POR_TIPO |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
+| POST /scheduling/appointments/direct | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reject | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
+| POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
+| POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
+| POST /scheduling/internal/promote-waitlist/{slotId} | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 
 #### Gobierno
 

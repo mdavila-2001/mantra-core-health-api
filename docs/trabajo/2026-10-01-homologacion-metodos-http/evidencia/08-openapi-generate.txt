@@ -1,0 +1,7 @@
+$ [copia temporal del generador con preview:true; variables del CI a localhost; 2.ª pasada tras declarar minLength]
+$ node tools/openapi/generate-openapi.preview.tmp.mjs
+  44/44 rutas públicas marcadas, 240 tags globales, 998 descripciones y 11039 respuestas de error añadidas.
+OpenAPI generado: 1314 paths, 1442 operaciones, 1276 esquemas.
+  → D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\openapi\openapi.json
+  → D:\Trabajos Secundarios\Mantra Core Technologies\mantra-core-health-api\openapi\openapi.yaml
+exit=0

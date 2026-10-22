@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `practice`
 
-Referencia exhaustiva de 24 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 29 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `practice`
 - **Controladores:** `AccreditationsController`, `InventoryItemsController`, `PracticesController`, `PractitionerSitesController`, `RoleAssignmentsController`, `SitesController`
@@ -19,22 +19,27 @@ Referencia exhaustiva de 24 operación(es) del módulo `practice`, derivada del 
 6. [POST /practices/{practiceId}/healthcare-services](#6-post-practices-practiceid-healthcare-services) — Publicar un servicio de salud
 7. [POST /practices/{practiceId}/inventory-items](#7-post-practices-practiceid-inventory-items) — Dar de alta un insumo de inventario de práctica
 8. [GET /practices/{practiceId}/organization](#8-get-practices-practiceid-organization) — Consola de organización médica: estructura, plantilla y legajo
-9. [POST /practices/{practiceId}/role-assignments](#9-post-practices-practiceid-role-assignments) — Asignar un rol de profesional a sitio/unidad/servicio
-10. [POST /practices/{practiceId}/role-assignments/self-request](#10-post-practices-practiceid-role-assignments-self-request) — Solicitar la propia vinculación a una organización
-11. [PUT /practices/{practiceId}/settings/{settingKey}](#11-put-practices-practiceid-settings-settingkey) — Configurar un ajuste de práctica (upsert)
-12. [GET /practices/{practiceId}/sites](#12-get-practices-practiceid-sites) — Listar las sedes de una práctica
-13. [POST /practices/{practiceId}/sites](#13-post-practices-practiceid-sites) — Dar de alta un sitio de práctica
-14. [DELETE /practices/{practiceId}/sites/{siteId}](#14-delete-practices-practiceid-sites-siteid) — Desmantelar un sitio en cascada (soft-delete)
-15. [GET /practitioners/{profileId}/sites](#15-get-practitioners-profileid-sites) — Consultorios donde atiende el profesional
-16. [GET /practitioners/me/role-assignments](#16-get-practitioners-me-role-assignments) — Mis vinculaciones con organizaciones
-17. [POST /role-assignments/{roleId}/approve](#17-post-role-assignments-roleid-approve) — Aprobar una vinculación pendiente
-18. [POST /role-assignments/{roleId}/end](#18-post-role-assignments-roleid-end) — Finalizar una vinculación
-19. [POST /role-assignments/{roleId}/reject](#19-post-role-assignments-roleid-reject) — Rechazar una vinculación pendiente
-20. [POST /role-assignments/{roleId}/support-assignments](#20-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
-21. [POST /role-assignments/{roleId}/suspend](#21-post-role-assignments-roleid-suspend) — Suspender una vinculación activa
-22. [GET /sites/{siteId}/care-spaces](#22-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
-23. [POST /sites/{siteId}/care-spaces](#23-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
-24. [POST /sites/{siteId}/clinical-units](#24-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
+9. [GET /practices/{practiceId}/role-assignments](#9-get-practices-practiceid-role-assignments) — Listar las vinculaciones profesional-organización de la práctica
+10. [POST /practices/{practiceId}/role-assignments](#10-post-practices-practiceid-role-assignments) — Asignar un rol de profesional a sitio/unidad/servicio
+11. [POST /practices/{practiceId}/role-assignments/self-request](#11-post-practices-practiceid-role-assignments-self-request) — Solicitar la propia vinculación a una organización
+12. [PUT /practices/{practiceId}/settings/{settingKey}](#12-put-practices-practiceid-settings-settingkey) — Configurar un ajuste de práctica (upsert)
+13. [GET /practices/{practiceId}/sites](#13-get-practices-practiceid-sites) — Listar las sedes de una práctica
+14. [POST /practices/{practiceId}/sites](#14-post-practices-practiceid-sites) — Dar de alta un sitio de práctica
+15. [DELETE /practices/{practiceId}/sites/{siteId}](#15-delete-practices-practiceid-sites-siteid) — Desmantelar un sitio en cascada (soft-delete)
+16. [GET /practitioners/{profileId}/sites](#16-get-practitioners-profileid-sites) — Consultorios donde atiende el profesional
+17. [GET /practitioners/me/role-assignments](#17-get-practitioners-me-role-assignments) — Mis vinculaciones con organizaciones
+18. [POST /practitioners/me/sites](#18-post-practitioners-me-sites) — Registrar un consultorio propio
+19. [DELETE /practitioners/me/sites/{siteId}](#19-delete-practitioners-me-sites-siteid) — Retirar un consultorio propio
+20. [PATCH /practitioners/me/sites/{siteId}](#20-patch-practitioners-me-sites-siteid) — Corregir un consultorio propio
+21. [PUT /practitioners/me/sites/{siteId}/bank-qr](#21-put-practitioners-me-sites-siteid-bank-qr) — Fijar o quitar el QR bancario de una sede
+22. [POST /role-assignments/{roleId}/approve](#22-post-role-assignments-roleid-approve) — Aprobar una vinculación pendiente
+23. [POST /role-assignments/{roleId}/end](#23-post-role-assignments-roleid-end) — Finalizar una vinculación
+24. [POST /role-assignments/{roleId}/reject](#24-post-role-assignments-roleid-reject) — Rechazar una vinculación pendiente
+25. [POST /role-assignments/{roleId}/support-assignments](#25-post-role-assignments-roleid-support-assignments) — Adjuntar personal de apoyo a un rol de profesional
+26. [POST /role-assignments/{roleId}/suspend](#26-post-role-assignments-roleid-suspend) — Suspender una vinculación activa
+27. [GET /sites/{siteId}/care-spaces](#27-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
+28. [POST /sites/{siteId}/care-spaces](#28-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
+29. [POST /sites/{siteId}/clinical-units](#29-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
 
 ---
 
@@ -1399,7 +1404,137 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /practices/{practiceId}/role-assignments
+## 9. GET /practices/{practiceId}/role-assignments
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Listar las vinculaciones profesional-organización de la práctica
+- **Operation ID:** `PracticesController_listRoleAssignments`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PracticesController.listRoleAssignments](../../src/modules/practice/controllers/practices.controller.ts)
+
+### Descripción de negocio
+
+Listar las vinculaciones profesional-organización de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Vinculaciones profesional-organización de la práctica, paginadas por cursor (CV-14). Antes de esto, `POST …/role-assignments/:roleId/approve` existía sin ninguna forma de ver qué había pendiente: el administrador tenía que conseguir el uuid por otro canal.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /practices/{practiceId}/role-assignments` en `PracticesController_listRoleAssignments`. El controlador delega en `PracticeWorkforceService.listPracticeAssignments`. No recibe body. El tipo de retorno estático es `Promise<ListPracticeRoleAssignmentsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practiceId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | query | No | `string` | Sin restricción adicional declarada | Concepto de estado (p. ej. la vinculación pendiente) | `ok` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Vinculaciones por página | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /practices/00000000-0000-4000-8000-000000000001/role-assignments HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `practiceId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /practices/00000000-0000-4000-8000-000000000001/role-assignments?status=ok&cursor=valor-ejemplo&limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListPracticeRoleAssignmentsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPracticeRoleAssignmentsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practiceId": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "status": "ok",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<RoleAssignmentResponseDto>` | Sin restricción adicional declarada | Vinculaciones de esta página, ordenadas por `id`. | `[{"id":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","status":"ok","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | Sin restricción adicional declarada | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practiceId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerProfileId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practitioner profile. | `00000000-0000-4000-8000-000000000001` |
+| `items[].status` | Sí | `string` | Sin restricción adicional declarada | Valor de status mantenido por la instancia. | `ok` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/practice-workforce.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practices/{practiceId}/role-assignments"
+}
+```
+
+---
+
+## 10. POST /practices/{practiceId}/role-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1553,7 +1688,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /practices/{practiceId}/role-assignments/self-request
+## 11. POST /practices/{practiceId}/role-assignments/self-request
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1695,7 +1830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. PUT /practices/{practiceId}/settings/{settingKey}
+## 12. PUT /practices/{practiceId}/settings/{settingKey}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1828,7 +1963,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /practices/{practiceId}/sites
+## 13. GET /practices/{practiceId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -1940,7 +2075,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /practices/{practiceId}/sites
+## 14. POST /practices/{practiceId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2091,7 +2226,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. DELETE /practices/{practiceId}/sites/{siteId}
+## 15. DELETE /practices/{practiceId}/sites/{siteId}
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2202,7 +2337,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /practitioners/{profileId}/sites
+## 16. GET /practitioners/{profileId}/sites
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2280,6 +2415,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "name": "Nombre de ejemplo",
       "timeZone": "America/La_Paz",
       "addressText": "Av. Brasil 1234, La Paz",
+      "latitude": 1,
+      "longitude": 1,
+      "isOwnSite": true,
+      "bankQrFileId": "00000000-0000-4000-8000-000000000001",
       "status": "00000000-0000-4000-8000-000000000001"
     }
   ],
@@ -2291,13 +2430,17 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<PractitionerSiteDto>` | Sin restricción adicional declarada | Las sedes donde atiende, la principal primero. | `[{"id":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","timeZone":"America/La_Paz","addressText":"Av. Brasil 1234, La Paz","status":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<PractitionerSiteDto>` | Sin restricción adicional declarada | Las sedes donde atiende, la principal primero. | `[{"id":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","timeZone":"America/La_Paz","addressText":"Av. Brasil 1234, La Paz","latitude":1,"longitude":1,"isOwnSite":true,"bankQrFileId":"00000000-0000-4000-8000-000000000001","status":"00000000-0000-4000-8000-000000000001"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la sede. | `00000000-0000-4000-8000-000000000001` |
 | `items[].practiceId` | Sí | `string` | formato `uuid` | Práctica a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro de la práctica. | `CODIGO_EJEMPLO` |
 | `items[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
 | `items[].timeZone` | No | `string` | admite null | Zona horaria IANA de la sede, si la declara. | `America/La_Paz` |
 | `items[].addressText` | No | `string` | admite null | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `Av. Brasil 1234, La Paz` |
+| `items[].latitude` | No | `number` | admite null | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `1` |
+| `items[].longitude` | No | `number` | admite null | Longitud del punto de la sede. Va siempre junto a `latitude`. | `1` |
+| `items[].isOwnSite` | Sí | `boolean` | Sin restricción adicional declarada | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `true` |
+| `items[].bankQrFileId` | No | `string` | formato `uuid`; admite null | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `00000000-0000-4000-8000-000000000001` |
 | `items[].status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
 
@@ -2327,7 +2470,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /practitioners/me/role-assignments
+## 17. GET /practitioners/me/role-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2406,7 +2549,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "isPrimary": true,
     "validFrom": "2026-07-31T12:00:00.000Z",
     "validTo": "2026-07-31T12:00:00.000Z",
-    "createdAt": "2026-07-31T12:00:00.000Z"
+    "createdAt": "2026-07-31T12:00:00.000Z",
+    "avatarUrl": "valor-ejemplo"
   }
 ]
 ```
@@ -2441,7 +2585,574 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /role-assignments/{roleId}/approve
+## 18. POST /practitioners/me/sites
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Registrar un consultorio propio
+- **Operation ID:** `PractitionerSitesController_createOwnSite`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSitesController.createOwnSite](../../src/modules/practice/controllers/practitioner-sites.controller.ts)
+
+### Descripción de negocio
+
+Crea (o reutiliza) la práctica personal del profesional, la sede y la vinculación que la conecta con su agenda.
+
+Contexto declarado en el controlador: ALV-005/006 — autoservicio: el profesional da de alta su propio consultorio, sin depender de que una organización lo afilie primero.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /practitioners/me/sites` en `PractitionerSitesController_createOwnSite`. El controlador delega en `PractitionerSitesService.createOwnSite`. Valida el body como `CreateOwnSiteDto` y consume `application/json`. El tipo de retorno estático es `Promise<PractitionerSiteDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateOwnSiteDto`; los campos opcionales se omiten.
+
+```http
+POST /practitioners/me/sites HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 2; longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
+| `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
+| `address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /practitioners/me/sites HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "timeZone": "America/La_Paz",
+  "address": {
+    "lines": [
+      "valor-ejemplo"
+    ],
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSiteDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "timeZone": "America/La_Paz",
+  "addressText": "Av. Brasil 1234, La Paz",
+  "latitude": 1,
+  "longitude": 1,
+  "isOwnSite": true,
+  "bankQrFileId": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la sede. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | formato `uuid` | Práctica a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro de la práctica. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
+| `timeZone` | No | `string` | admite null | Zona horaria IANA de la sede, si la declara. | `America/La_Paz` |
+| `addressText` | No | `string` | admite null | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `Av. Brasil 1234, La Paz` |
+| `latitude` | No | `number` | admite null | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `1` |
+| `longitude` | No | `number` | admite null | Longitud del punto de la sede. Va siempre junto a `latitude`. | `1` |
+| `isOwnSite` | Sí | `boolean` | Sin restricción adicional declarada | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `true` |
+| `bankQrFileId` | No | `string` | formato `uuid`; admite null | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioners/me/sites"
+}
+```
+
+---
+
+## 19. DELETE /practitioners/me/sites/{siteId}
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Retirar un consultorio propio
+- **Operation ID:** `PractitionerSitesController_deleteOwnSite`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSitesController.deleteOwnSite](../../src/modules/practice/controllers/practitioner-sites.controller.ts)
+
+### Descripción de negocio
+
+Retirar un consultorio propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: ALV-005 — retira un consultorio propio (no lo borra: cierra la vinculación vigente con esa sede).
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /practitioners/me/sites/{siteId}` en `PractitionerSitesController_deleteOwnSite`. El controlador delega en `PractitionerSitesService.deleteOwnSite`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /practitioners/me/sites/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `siteId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /practitioners/me/sites/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 204 | Operación completada sin cuerpo de respuesta. | `Promise<void>` | No |
+| 400 | Operación completada correctamente. | `Promise<void>` | No |
+| 401 | Operación completada correctamente. | `Promise<void>` | No |
+| 403 | Operación completada correctamente. | `Promise<void>` | No |
+| 404 | Operación completada correctamente. | `Promise<void>` | No |
+| 409 | Operación completada correctamente. | `Promise<void>` | No |
+| 422 | Operación completada correctamente. | `Promise<void>` | No |
+| 429 | Operación completada correctamente. | `Promise<void>` | No |
+| 500 | Operación completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | No tiene una vinculación vigente con esa sede | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioners/me/sites/{siteId}"
+}
+```
+
+---
+
+## 20. PATCH /practitioners/me/sites/{siteId}
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Corregir un consultorio propio
+- **Operation ID:** `PractitionerSitesController_updateOwnSite`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSitesController.updateOwnSite](../../src/modules/practice/controllers/practitioner-sites.controller.ts)
+
+### Descripción de negocio
+
+Cambia nombre, huso horario o dirección sin retirar la sede: el id se conserva, y es el que la agenda referencia en cada turno.
+
+Contexto declarado en el controlador: P32-b — corrige el consultorio propio: nombre, huso horario y dirección (con su punto en el mapa). Lo que no viaja en el cuerpo no se toca. Sólo alcanza al consultorio propio: una sede de otra organización es de ella, y lo que el profesional tiene con ella es una vinculación.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /practitioners/me/sites/{siteId}` en `PractitionerSitesController_updateOwnSite`. El controlador delega en `PractitionerSitesService.updateOwnSite`. Valida el body como `UpdateOwnSiteDto` y consume `application/json`. El tipo de retorno estático es `Promise<PractitionerSiteDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateOwnSiteDto`; los campos opcionales se omiten.
+
+```http
+PATCH /practitioners/me/sites/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `siteId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | No | `string` | longitud mínima 2; longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
+| `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
+| `address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /practitioners/me/sites/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "timeZone": "America/La_Paz",
+  "address": {
+    "lines": [
+      "valor-ejemplo"
+    ],
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSiteDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "timeZone": "America/La_Paz",
+  "addressText": "Av. Brasil 1234, La Paz",
+  "latitude": 1,
+  "longitude": 1,
+  "isOwnSite": true,
+  "bankQrFileId": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la sede. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | formato `uuid` | Práctica a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro de la práctica. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
+| `timeZone` | No | `string` | admite null | Zona horaria IANA de la sede, si la declara. | `America/La_Paz` |
+| `addressText` | No | `string` | admite null | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `Av. Brasil 1234, La Paz` |
+| `latitude` | No | `number` | admite null | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `1` |
+| `longitude` | No | `number` | admite null | Longitud del punto de la sede. Va siempre junto a `latitude`. | `1` |
+| `isOwnSite` | Sí | `boolean` | Sin restricción adicional declarada | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `true` |
+| `bankQrFileId` | No | `string` | formato `uuid`; admite null | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Esa sede no es un consultorio propio suyo | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioners/me/sites/{siteId}"
+}
+```
+
+---
+
+## 21. PUT /practitioners/me/sites/{siteId}/bank-qr
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Fijar o quitar el QR bancario de una sede
+- **Operation ID:** `PractitionerSitesController_setSiteBankQr`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSitesController.setSiteBankQr](../../src/modules/practice/controllers/practitioner-sites.controller.ts)
+
+### Descripción de negocio
+
+Asocia un archivo ya subido como QR de cobro de esa sede. `fileId: null` lo quita.
+
+Contexto declarado en el controlador: P33 — el QR bancario con el que el profesional cobra EN ESTA SEDE. A diferencia del `PATCH` de arriba, alcanza también a las sedes ajenas donde tiene vinculación vigente: lo que se guarda no es la sede, es con qué cobra él ahí. El archivo ya entró por `POST /common/files/upload`.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /practitioners/me/sites/{siteId}/bank-qr` en `PractitionerSitesController_setSiteBankQr`. El controlador delega en `PractitionerSitesService.setSiteBankQr`. Valida el body como `SetSiteBankQrDto` y consume `application/json`. El tipo de retorno estático es `Promise<PractitionerSiteDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SetSiteBankQrDto`; los campos opcionales se omiten.
+
+```http
+PUT /practitioners/me/sites/00000000-0000-4000-8000-000000000001/bank-qr HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": {}
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `siteId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fileId` | Sí | `object` | formato `uuid`; admite null | Archivo del QR ya subido, o null para quitarlo | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /practitioners/me/sites/00000000-0000-4000-8000-000000000001/bank-qr HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "fileId": {}
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PractitionerSiteDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerSiteDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "timeZone": "America/La_Paz",
+  "addressText": "Av. Brasil 1234, La Paz",
+  "latitude": 1,
+  "longitude": 1,
+  "isOwnSite": true,
+  "bankQrFileId": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador de la sede. | `00000000-0000-4000-8000-000000000001` |
+| `practiceId` | Sí | `string` | formato `uuid` | Práctica a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código único dentro de la práctica. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible. | `Nombre de ejemplo` |
+| `timeZone` | No | `string` | admite null | Zona horaria IANA de la sede, si la declara. | `America/La_Paz` |
+| `addressText` | No | `string` | admite null | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `Av. Brasil 1234, La Paz` |
+| `latitude` | No | `number` | admite null | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `1` |
+| `longitude` | No | `number` | admite null | Longitud del punto de la sede. Va siempre junto a `latitude`. | `1` |
+| `isOwnSite` | Sí | `boolean` | Sin restricción adicional declarada | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `true` |
+| `bankQrFileId` | No | `string` | formato `uuid`; admite null | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concepto de estado. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Esta cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | No tiene una vinculación vigente con esa sede | Excepción explícita en src/modules/practice/services/practitioner-sites.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioners/me/sites/{siteId}/bank-qr"
+}
+```
+
+---
+
+## 22. POST /role-assignments/{roleId}/approve
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2573,7 +3284,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /role-assignments/{roleId}/end
+## 23. POST /role-assignments/{roleId}/end
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2705,7 +3416,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /role-assignments/{roleId}/reject
+## 24. POST /role-assignments/{roleId}/reject
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2837,7 +3548,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /role-assignments/{roleId}/support-assignments
+## 25. POST /role-assignments/{roleId}/support-assignments
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -2976,7 +3687,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /role-assignments/{roleId}/suspend
+## 26. POST /role-assignments/{roleId}/suspend
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3108,7 +3819,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /sites/{siteId}/care-spaces
+## 27. GET /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3221,7 +3932,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /sites/{siteId}/care-spaces
+## 28. POST /sites/{siteId}/care-spaces
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -3370,7 +4081,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /sites/{siteId}/clinical-units
+## 29. POST /sites/{siteId}/clinical-units
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`

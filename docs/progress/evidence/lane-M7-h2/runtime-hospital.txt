@@ -1,0 +1,1 @@
+201 {"tenantId":"7f1de9e2-d653-4322-88d6-6bf1d432dedb","code":"HOSP_a06d6","ownerUserId":"5c4d5232-83e4-41de-8785-d28368458330","membershipId":"78748e4d-4ebe-4d62-8f5f-1c5f573f6860","status":"862e6ccd-c5f

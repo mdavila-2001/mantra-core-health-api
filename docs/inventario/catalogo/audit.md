@@ -20,9 +20,9 @@
 | [agents_history](#agents_history) | Preserva versiones o estados históricos de agents para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [allergy_intolerances_history](#allergy_intolerances_history) | Preserva versiones o estados históricos de allergy intolerances para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [analytics_governance_log](#analytics_governance_log) | Registra cambios de gobierno analítico para conservar trazabilidad de decisiones que afectan el uso secundario de datos de salud. | 9 | 5 | 4 | COINCIDE |
-| [appointment_bookings_history](#appointment_bookings_history) | Preserva versiones o estados históricos de appointment bookings para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 41 | COINCIDE |
+| [appointment_bookings_history](#appointment_bookings_history) | Preserva versiones o estados históricos de appointment bookings para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 44 | COINCIDE |
 | [assets_history](#assets_history) | Preserva versiones o estados históricos de assets para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [audit_log](#audit_log) | Conserva eventos de auditoría de acciones del sistema para reconstruir quién realizó operaciones y cuándo. | 14 | 8 | 142 | COINCIDE |
+| [audit_log](#audit_log) | Conserva eventos de auditoría de acciones del sistema para reconstruir quién realizó operaciones y cuándo. | 14 | 8 | 186 | COINCIDE |
 | [automated_rules_history](#automated_rules_history) | Preserva versiones o estados históricos de automated rules para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [bills_history](#bills_history) | Preserva versiones o estados históricos de bills para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [booking_policies_history](#booking_policies_history) | Preserva versiones o estados históricos de booking policies para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -37,7 +37,7 @@
 | [clinical_note_headers_history](#clinical_note_headers_history) | Preserva versiones o estados históricos de clinical note headers para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [clinical_units_history](#clinical_units_history) | Preserva versiones o estados históricos de clinical units para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [comments_history](#comments_history) | Preserva versiones o estados históricos de comments para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [conditions_history](#conditions_history) | Preserva versiones o estados históricos de conditions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 9 | COINCIDE |
+| [conditions_history](#conditions_history) | Preserva versiones o estados históricos de conditions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 13 | COINCIDE |
 | [connected_accounts_history](#connected_accounts_history) | Preserva versiones o estados históricos de connected accounts para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [consents_history](#consents_history) | Preserva versiones o estados históricos de consents para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 0 | COINCIDE |
 | [contacts_history](#contacts_history) | Preserva versiones o estados históricos de contacts para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -49,13 +49,13 @@
 | [crm_accounts_history](#crm_accounts_history) | Preserva versiones o estados históricos de crm accounts para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [custom_audiences_history](#custom_audiences_history) | Preserva versiones o estados históricos de custom audiences para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [custom_conversions_history](#custom_conversions_history) | Preserva versiones o estados históricos de custom conversions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [data_access_log](#data_access_log) | Registra accesos a datos para respaldar trazabilidad de consultas y revisiones de privacidad. | 11 | 9 | 5 | COINCIDE |
+| [data_access_log](#data_access_log) | Registra accesos a datos para respaldar trazabilidad de consultas y revisiones de privacidad. | 11 | 9 | 12 | COINCIDE |
 | [delegated_access_audit_log](#delegated_access_audit_log) | Conserva evidencia de acciones realizadas mediante acceso delegado para identificar actor, alcance y contexto. | 10 | 9 | 1 | COINCIDE |
 | [departments_history](#departments_history) | Preserva versiones o estados históricos de departments para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [diagnostic_reports_history](#diagnostic_reports_history) | Preserva versiones o estados históricos de diagnostic reports para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [diagnostic_study_prices_history](#diagnostic_study_prices_history) | Preserva versiones o estados históricos de diagnostic study prices para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 0 | COINCIDE |
 | [document_records_history](#document_records_history) | Preserva versiones o estados históricos de document records para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [dsar_requests](#dsar_requests) | Gestiona solicitudes de derechos de titulares sobre sus datos, incluida su atención y resolución en el sistema médico. | 13 | 7 | 3 | COINCIDE |
+| [dsar_requests](#dsar_requests) | Gestiona solicitudes de derechos de titulares sobre sus datos, incluida su atención y resolución en el sistema médico. | 13 | 7 | 4 | COINCIDE |
 | [employment_records_history](#employment_records_history) | Preserva versiones o estados históricos de employment records para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [enrollments_history](#enrollments_history) | Preserva versiones o estados históricos de enrollments para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [event_subscriptions_history](#event_subscriptions_history) | Preserva versiones o estados históricos de event subscriptions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -74,13 +74,13 @@
 | [invoices_history](#invoices_history) | Preserva versiones o estados históricos de invoices para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [journal_transactions_history](#journal_transactions_history) | Preserva versiones o estados históricos de journal transactions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [journeys_history](#journeys_history) | Preserva versiones o estados históricos de journeys para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [jurisdiction_authorizations_history](#jurisdiction_authorizations_history) | Preserva versiones o estados históricos de jurisdiction authorizations para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 0 | COINCIDE |
+| [jurisdiction_authorizations_history](#jurisdiction_authorizations_history) | Preserva versiones o estados históricos de jurisdiction authorizations para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 1 | COINCIDE |
 | [liabilities_history](#liabilities_history) | Preserva versiones o estados históricos de liabilities para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [loyalty_memberships_history](#loyalty_memberships_history) | Preserva versiones o estados históricos de loyalty memberships para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 0 | COINCIDE |
 | [loyalty_programs_history](#loyalty_programs_history) | Preserva versiones o estados históricos de loyalty programs para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [marketing_campaigns_history](#marketing_campaigns_history) | Preserva versiones o estados históricos de marketing campaigns para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [medical_visitors_history](#medical_visitors_history) | Conserva revisiones de los representantes médicos y sus operaciones auditadas, dando trazabilidad a quién gestiona visitas y materiales ante profesionales de salud. | 10 | 5 | 0 | COINCIDE |
-| [medication_requests_history](#medication_requests_history) | Preserva versiones o estados históricos de medication requests para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 9 | COINCIDE |
+| [medication_requests_history](#medication_requests_history) | Preserva versiones o estados históricos de medication requests para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 21 | COINCIDE |
 | [message_retries_history](#message_retries_history) | Preserva versiones o estados históricos de message retries para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [message_templates_history](#message_templates_history) | Preserva versiones o estados históricos de message templates para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [moderation_decisions_history](#moderation_decisions_history) | Preserva versiones o estados históricos de moderation decisions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 1 | COINCIDE |
@@ -201,7 +201,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -264,7 +264,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -327,7 +327,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -390,7 +390,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -453,7 +453,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -516,7 +516,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -579,7 +579,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -642,7 +642,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -705,7 +705,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -772,7 +772,7 @@ Registra cambios de gobierno analítico para conservar trazabilidad de decisione
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -791,7 +791,7 @@ Preserva versiones o estados históricos de appointment bookings para reconstrui
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: appointment_bookings_history`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `AppointmentBookingsHistory` — `src/modules/audit/entities/appointment_bookings_history.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 41 operaciones
+- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 44 operaciones
 
 #### Columnas
 
@@ -835,6 +835,9 @@ Preserva versiones o estados históricos de appointment bookings para reconstrui
 | POST /scheduling/appointments/direct | ACTUALIZA | POR_REGISTRO |
 | POST /scheduling/appointments/direct | CREA | POR_REGISTRO |
 | POST /scheduling/appointments/direct | LEE | POR_REGISTRO |
+| POST /scheduling/appointments/walk-in | ACTUALIZA | POR_REGISTRO |
+| POST /scheduling/appointments/walk-in | CREA | POR_REGISTRO |
+| POST /scheduling/appointments/walk-in | LEE | POR_REGISTRO |
 | GET /scheduling/bookings | LEE | POR_REGISTRO |
 | GET /scheduling/bookings/{id} | LEE | POR_REGISTRO |
 | POST /scheduling/bookings/{id}/accept | ACTUALIZA | POR_REGISTRO |
@@ -878,7 +881,7 @@ Preserva versiones o estados históricos de appointment bookings para reconstrui
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -941,7 +944,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -960,7 +963,7 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: audit_log`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `AuditLog` — `src/modules/audit/entities/audit_log.entity.ts`
-- **Resumen:** 14 columnas · 8 índices · 6 FK salientes · 0 entrantes · 142 operaciones
+- **Resumen:** 14 columnas · 8 índices · 6 FK salientes · 0 entrantes · 186 operaciones
 
 #### Columnas
 
@@ -1011,10 +1014,16 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 |---|---|---|
 | POST /accounting/journal-transactions | CREA | DIRECTA |
 | POST /accounting/journal-transactions | LEE | DIRECTA |
+| POST /accounting/journal-transactions/{id}/classify | CREA | DIRECTA |
+| POST /accounting/journal-transactions/{id}/classify | LEE | DIRECTA |
 | POST /accounting/journal-transactions/{id}/post | CREA | DIRECTA |
 | POST /accounting/journal-transactions/{id}/post | LEE | DIRECTA |
 | POST /accounting/journal-transactions/{id}/reverse | CREA | DIRECTA |
 | POST /accounting/journal-transactions/{id}/reverse | LEE | DIRECTA |
+| PATCH /accounting/practitioner/assets/{id}/automation | CREA | DIRECTA |
+| PATCH /accounting/practitioner/assets/{id}/automation | LEE | DIRECTA |
+| PATCH /accounting/practitioner/liabilities/{id}/automation | CREA | DIRECTA |
+| PATCH /accounting/practitioner/liabilities/{id}/automation | LEE | DIRECTA |
 | POST /audit/anomaly/scan | CREA | DIRECTA |
 | POST /audit/anomaly/scan | LEE | DIRECTA |
 | POST /audit/data-access | CREA | DIRECTA |
@@ -1037,8 +1046,14 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 | POST /privacy/dsar | LEE | DIRECTA |
 | PATCH /privacy/dsar/{id} | CREA | DIRECTA |
 | PATCH /privacy/dsar/{id} | LEE | DIRECTA |
+| POST /authz/care-relationships/{id}/respond | CREA | DIRECTA |
+| POST /authz/care-relationships/{id}/respond | LEE | DIRECTA |
+| POST /authz/care-relationships/request | CREA | DIRECTA |
+| POST /authz/care-relationships/request | LEE | DIRECTA |
 | DELETE /authz/clinical-access-grants/{grantId} | CREA | DIRECTA |
 | DELETE /authz/clinical-access-grants/{grantId} | LEE | DIRECTA |
+| POST /authz/me/clinical-access-grants/{grantId}/revoke | CREA | DIRECTA |
+| POST /authz/me/clinical-access-grants/{grantId}/revoke | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | CREA | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | LEE | DIRECTA |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | CREA | DIRECTA |
@@ -1047,6 +1062,8 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 | POST /clinical/conditions | LEE | DIRECTA |
 | POST /clinical/conditions/{id}/change-status | CREA | DIRECTA |
 | POST /clinical/conditions/{id}/change-status | LEE | DIRECTA |
+| POST /clinical/conditions/{id}/verification | CREA | DIRECTA |
+| POST /clinical/conditions/{id}/verification | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/invalidate | CREA | DIRECTA |
 | POST /clinical/medication-requests/{id}/invalidate | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/issue | CREA | DIRECTA |
@@ -1059,6 +1076,36 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 | POST /clinical/medication-requests/{id}/sign | LEE | DIRECTA |
 | POST /consent/consents/{id}/withdraw | CREA | DIRECTA |
 | POST /consent/consents/{id}/withdraw | LEE | DIRECTA |
+| POST /consent/me/consents/{id}/withdraw | CREA | DIRECTA |
+| POST /consent/me/consents/{id}/withdraw | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests | CREA | DIRECTA |
+| POST /consent/practitioner-access-requests | LEE | DIRECTA |
+| POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
+| POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
+| GET /['insurance/campaigns', 'insurance-campaigns'] | CREA | DIRECTA |
+| GET /['insurance/campaigns', 'insurance-campaigns'] | LEE | DIRECTA |
+| POST /['insurance/campaigns', 'insurance-campaigns'] | CREA | DIRECTA |
+| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | DIRECTA |
+| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | CREA | DIRECTA |
+| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | DIRECTA |
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | CREA | DIRECTA |
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | DIRECTA |
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | CREA | DIRECTA |
+| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | LEE | DIRECTA |
+| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | CREA | DIRECTA |
+| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | LEE | DIRECTA |
+| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | CREA | DIRECTA |
+| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | LEE | DIRECTA |
+| GET /insurance/portability/certificates/{certificateId}/json | CREA | DIRECTA |
+| GET /insurance/portability/certificates/{certificateId}/json | LEE | DIRECTA |
+| GET /insurance/portability/certificates/{certificateId}/pdf | CREA | DIRECTA |
+| GET /insurance/portability/certificates/{certificateId}/pdf | LEE | DIRECTA |
+| POST /insurance/portability/export | CREA | DIRECTA |
+| POST /insurance/portability/export | LEE | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | CREA | DIRECTA |
+| GET /object-storage/versions/{versionId}/content/{token} | LEE | DIRECTA |
+| POST /object-storage/versions/{versionId}/signed-url | CREA | DIRECTA |
+| POST /object-storage/versions/{versionId}/signed-url | LEE | DIRECTA |
 | POST /pharma-labs | CREA | DIRECTA |
 | POST /pharma-labs | LEE | DIRECTA |
 | PATCH /pharma-labs/{pharmaLabId} | CREA | DIRECTA |
@@ -1156,7 +1203,7 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1219,7 +1266,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1282,7 +1329,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1345,7 +1392,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1408,7 +1455,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1471,7 +1518,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1534,7 +1581,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1597,7 +1644,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1660,7 +1707,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1723,7 +1770,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1786,7 +1833,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1849,7 +1896,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1912,7 +1959,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -1975,7 +2022,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2038,7 +2085,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2057,7 +2104,7 @@ Preserva versiones o estados históricos de conditions para reconstruir cambios,
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: conditions_history`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `ConditionsHistory` — `src/modules/audit/entities/conditions_history.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 9 operaciones
+- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -2103,6 +2150,10 @@ Preserva versiones o estados históricos de conditions para reconstruir cambios,
 | POST /clinical/conditions/{id}/change-status | ACTUALIZA | POR_REGISTRO |
 | POST /clinical/conditions/{id}/change-status | CREA | POR_REGISTRO |
 | POST /clinical/conditions/{id}/change-status | LEE | POR_REGISTRO |
+| POST /clinical/conditions/{id}/verification | ACTUALIZA | POR_REGISTRO |
+| POST /clinical/conditions/{id}/verification | CREA | POR_REGISTRO |
+| POST /clinical/conditions/{id}/verification | LEE | POR_REGISTRO |
+| GET /clinical/patients/{patientProfileId}/summary | LEE | POR_REGISTRO |
 | POST /procedure-cases/{id}/diagnoses | ACTUALIZA | POR_REGISTRO |
 | POST /procedure-cases/{id}/diagnoses | CREA | POR_REGISTRO |
 | POST /procedure-cases/{id}/diagnoses | LEE | POR_REGISTRO |
@@ -2111,7 +2162,7 @@ Preserva versiones o estados históricos de conditions para reconstruir cambios,
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2174,7 +2225,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2238,7 +2289,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2301,7 +2352,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2364,7 +2415,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2427,7 +2478,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2490,7 +2541,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2553,7 +2604,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2616,7 +2667,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2679,7 +2730,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2742,7 +2793,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2805,7 +2856,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2824,7 +2875,7 @@ Registra accesos a datos para respaldar trazabilidad de consultas y revisiones d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: data_access_log`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `DataAccessLog` — `src/modules/audit/entities/data_access_log.entity.ts`
-- **Resumen:** 11 columnas · 9 índices · 6 FK salientes · 0 entrantes · 5 operaciones
+- **Resumen:** 11 columnas · 9 índices · 6 FK salientes · 0 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -2876,12 +2927,19 @@ Registra accesos a datos para respaldar trazabilidad de consultas y revisiones d
 | GET /audit/history/{entity}/{id} | CREA | DIRECTA |
 | POST /audit/retention/apply | BORRA | DIRECTA |
 | POST /authz/patients/{patientProfileId}/break-the-glass | CREA | DIRECTA |
+| GET /charts/me/documents | CREA | DIRECTA |
+| GET /charts/me/documents/{documentId}/files/{fileId}/content | CREA | DIRECTA |
+| GET /charts/me/notes | CREA | DIRECTA |
+| GET /clinical/patients/{patientProfileId}/summary | CREA | DIRECTA |
+| POST /insurance/patients/conversation | CREA | DIRECTA |
+| POST /insurance/patients/search | CREA | DIRECTA |
+| POST /insurance/portability/export | CREA | DIRECTA |
 
 #### Gobierno
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -2953,7 +3011,7 @@ Conserva evidencia de acciones realizadas mediante acceso delegado para identifi
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3016,7 +3074,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3079,7 +3137,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3143,7 +3201,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3206,7 +3264,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3225,7 +3283,7 @@ Gestiona solicitudes de derechos de titulares sobre sus datos, incluida su atenc
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: dsar_requests`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `DsarRequests` — `src/modules/audit/entities/dsar_requests.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 7 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 13 columnas · 7 índices · 7 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -3276,6 +3334,7 @@ Gestiona solicitudes de derechos de titulares sobre sus datos, incluida su atenc
 | POST /privacy/dsar | CREA | DIRECTA |
 | PATCH /privacy/dsar/{id} | ACTUALIZA | POR_TIPO |
 | PATCH /privacy/dsar/{id} | LEE | DIRECTA |
+| POST /insurance/portability/export | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -3344,7 +3403,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3407,7 +3466,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3470,7 +3529,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3533,7 +3592,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3596,7 +3655,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3659,7 +3718,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3722,7 +3781,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3785,7 +3844,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3855,7 +3914,7 @@ Registra accesos a evidencia y resultados de verificación de identidad para pro
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3918,7 +3977,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -3981,7 +4040,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4044,7 +4103,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4107,7 +4166,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4181,7 +4240,7 @@ Traza accesos a decisiones de cobertura y adjudicación para apoyar revisión y 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4244,7 +4303,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4307,7 +4366,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4370,7 +4429,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4433,7 +4492,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4452,7 +4511,7 @@ Preserva versiones o estados históricos de jurisdiction authorizations para rec
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: jurisdiction_authorizations_history`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `JurisdictionAuthorizationsHistory` — `src/modules/audit/entities/jurisdiction_authorizations_history.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 0 operaciones
+- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 1 operaciones
 
 #### Columnas
 
@@ -4482,7 +4541,7 @@ Preserva versiones o estados históricos de jurisdiction authorizations para rec
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_jurisdiction_authorizations_history_jurisdiction_au_831b1b79` | no | jurisdiction_authorization_id | Soporta la clave foránea fk_jurisdiction_authorizations_history_jurisdiction_au_5b12cb5b: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_jurisdiction_authorizations_history_jurisdiction_au_831b1b79` | no | jurisdiction_authorization_id | Soporta la clave foránea fk_jurisdiction_authorizations_history_jurisdiction_au_5b12cb5b: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «jurisdiction_authorization_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_jurisdiction_authorizations_history_operation_concept_id` | no | operation_concept_id | Soporta la clave foránea fk_jurisdiction_authorizations_history_operation_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_jurisdiction_authorizations_history_changed_by_user_id` | no | changed_by_user_id | Soporta la clave foránea fk_jurisdiction_authorizations_history_changed_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_jurisdiction_authorizations_history_change_reason_concept_id` | no | change_reason_concept_id | Soporta la clave foránea fk_jurisdiction_authorizations_history_change_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -4491,13 +4550,15 @@ Preserva versiones o estados históricos de jurisdiction authorizations para rec
 
 #### Operaciones que la tocan
 
-_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+| Operación | Efecto | Confianza |
+|---|---|---|
+| DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
 
 #### Gobierno
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4560,7 +4621,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4624,7 +4685,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4687,7 +4748,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4750,7 +4811,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4813,7 +4874,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4832,7 +4893,7 @@ Preserva versiones o estados históricos de medication requests para reconstruir
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: medication_requests_history`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `MedicationRequestsHistory` — `src/modules/audit/entities/medication_requests_history.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 9 operaciones
+- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 21 operaciones
 
 #### Columnas
 
@@ -4872,21 +4933,33 @@ Preserva versiones o estados históricos de medication requests para reconstruir
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/medication-requests | ACTUALIZA | POR_REGISTRO |
+| POST /clinical/medication-requests | CREA | POR_REGISTRO |
+| POST /clinical/medication-requests | LEE | POR_REGISTRO |
+| POST /clinical/medication-requests/{id}/edit | ACTUALIZA | POR_REGISTRO |
+| POST /clinical/medication-requests/{id}/edit | CREA | POR_REGISTRO |
+| POST /clinical/medication-requests/{id}/edit | LEE | POR_REGISTRO |
 | POST /clinical/medication-requests/{id}/invalidate | ACTUALIZA | POR_REGISTRO |
 | POST /clinical/medication-requests/{id}/invalidate | CREA | POR_REGISTRO |
 | POST /clinical/medication-requests/{id}/invalidate | LEE | POR_REGISTRO |
 | POST /clinical/medication-requests/{id}/issue | ACTUALIZA | POR_REGISTRO |
 | POST /clinical/medication-requests/{id}/issue | CREA | POR_REGISTRO |
 | POST /clinical/medication-requests/{id}/issue | LEE | POR_REGISTRO |
+| POST /clinical/medication-requests/{id}/renew | ACTUALIZA | POR_REGISTRO |
+| POST /clinical/medication-requests/{id}/renew | CREA | POR_REGISTRO |
+| POST /clinical/medication-requests/{id}/renew | LEE | POR_REGISTRO |
 | POST /clinical/medication-requests/{id}/replace | ACTUALIZA | POR_REGISTRO |
 | POST /clinical/medication-requests/{id}/replace | CREA | POR_REGISTRO |
 | POST /clinical/medication-requests/{id}/replace | LEE | POR_REGISTRO |
+| POST /clinical/medication-requests/{id}/sign | ACTUALIZA | POR_REGISTRO |
+| POST /clinical/medication-requests/{id}/sign | CREA | POR_REGISTRO |
+| POST /clinical/medication-requests/{id}/sign | LEE | POR_REGISTRO |
 
 #### Gobierno
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -4949,7 +5022,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5012,7 +5085,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5077,7 +5150,7 @@ Preserva versiones o estados históricos de moderation decisions para reconstrui
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5141,7 +5214,7 @@ Mantiene eventos de moderación de contenido para reconstruir revisiones y accio
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5204,7 +5277,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5267,7 +5340,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5330,7 +5403,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5393,7 +5466,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5457,7 +5530,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5520,7 +5593,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5592,7 +5665,7 @@ Traza accesos al contenido clínico o personal del paciente para apoyar supervis
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5655,7 +5728,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5719,7 +5792,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5782,7 +5855,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5845,7 +5918,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5908,7 +5981,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -5971,7 +6044,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6034,7 +6107,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6097,7 +6170,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6160,7 +6233,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6223,7 +6296,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6286,7 +6359,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6355,7 +6428,7 @@ Registra accesos al inventario de farmacia para auditar consultas y operaciones 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6419,7 +6492,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6482,7 +6555,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6545,7 +6618,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6608,7 +6681,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6672,7 +6745,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6735,7 +6808,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6798,7 +6871,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6861,7 +6934,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6924,7 +6997,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -6987,7 +7060,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7050,7 +7123,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7113,7 +7186,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7176,7 +7249,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7239,7 +7312,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7302,7 +7375,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7365,7 +7438,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7428,7 +7501,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7491,7 +7564,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7554,7 +7627,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7618,7 +7691,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7682,7 +7755,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7745,7 +7818,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7808,7 +7881,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7871,7 +7944,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7934,7 +8007,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -7997,7 +8070,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8060,7 +8133,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8124,7 +8197,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8187,7 +8260,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8250,7 +8323,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8313,7 +8386,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8376,7 +8449,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8439,7 +8512,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8511,7 +8584,7 @@ Preserva versiones o estados históricos de verified badges para reconstruir cam
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8574,7 +8647,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8637,7 +8710,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |
@@ -8700,7 +8773,7 @@ _Ninguna operación HTTP la toca según el análisis estático (puede usarla un 
 
 | Atributo | Valor | Fuente |
 |---|---|---|
-| Append-only | sí (declarado) | `src/modules/audit/README.md:35` |
+| Append-only | sí (declarado) | `src/modules/audit/README.md:66` |
 | Datos personales | sin fuente | — |
 | Financiera | sin fuente | — |
 | Crítica para auditoría | sin fuente | — |

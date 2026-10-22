@@ -1,0 +1,77 @@
+# Trazas de la API (OpenTelemetry) → métricas por endpoint para Prometheus.
+#
+# No guarda trazas: las convierte en contadores e histogramas (spanmetrics) y las
+# descarta. Así el bot puede mostrar qué endpoints se tocan, cuánto tardan y
+# cuántos fallan, sin un backend de trazas que mantener.
+#
+# La API sólo manda trazas con OTEL_ENABLED=true y
+# OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://<OTLP_BIND_ADDRESS>:4318/v1/traces.
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 200
+    spike_limit_mib: 50
+
+  # Sólo los pedidos HTTP que ENTRAN (spans SERVER): las consultas a Postgres,
+  # Redis o Mongo multiplicarían las series sin decir qué endpoint se tocó.
+  # Los healthchecks de Docker se descartan: serían siempre el «más tocado».
+  filter/server:
+    error_mode: ignore
+    traces:
+      span:
+        - kind != SPAN_KIND_SERVER
+        - attributes["http.route"] != nil and IsMatch(attributes["http.route"], "^/(api/)?(v1/)?health")
+
+  # La instrumentación HTTP de Node todavía usa los nombres viejos de la
+  # convención (http.method, http.status_code): se copian a los nuevos para que
+  # las métricas tengan siempre las mismas etiquetas.
+  transform/semconv:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - set(attributes["http.request.method"], attributes["http.method"]) where attributes["http.request.method"] == nil
+          - set(attributes["http.response.status_code"], attributes["http.status_code"]) where attributes["http.response.status_code"] == nil
+
+  batch: {}
+
+connectors:
+  spanmetrics:
+    histogram:
+      unit: s
+      explicit:
+        buckets: [5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s, 10s]
+    dimensions:
+      - name: http.request.method
+      - name: http.route
+      - name: http.response.status_code
+      - name: deployment.environment.name
+    metrics_flush_interval: 30s
+    # Un endpoint que dejó de recibir pedidos deja de publicarse; su historia
+    # queda en Prometheus.
+    metrics_expiration: 30m
+
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, filter/server, transform/semconv, batch]
+      exporters: [spanmetrics]
+    metrics:
+      receivers: [spanmetrics]
+      exporters: [prometheus]

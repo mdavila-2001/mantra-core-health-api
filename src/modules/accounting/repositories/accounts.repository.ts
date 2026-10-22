@@ -141,6 +141,18 @@ export class AccountsRepository {
     );
   }
 
+  /**
+   * Cuentas por lote de ids, sin orden garantizado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param ids - Identificadores a resolver.
+   * @returns Las cuentas encontradas.
+   */
+  findByIds(em: EntityManager, ids: readonly string[]): Promise<Accounts[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(Accounts, { id: { $in: [...ids] } });
+  }
+
   /** UC-16-02: resuelve la regla de mayor prioridad vigente para un escenario. */
   async findActiveRule(
     em: EntityManager,

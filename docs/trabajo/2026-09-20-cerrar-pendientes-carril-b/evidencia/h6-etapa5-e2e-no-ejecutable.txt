@@ -1,0 +1,36 @@
+# H6.S1.M3 - etapa 5 (E2E dirigido): EJECUTADA. Resultado: 3 skipped, exit 0
+# fecha: 2026-09-20T15:23:03-04:00
+
+## 1. Primer intento: el navegador no estaba instalado
+$ npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list
+Error: browserType.launch: Executable doesn't exist at ...chrome-headless-shell.exe
+3 failed - exit=1
+
+## 2. Instalado el navegador, la suite corre y se saltea sola
+$ npx playwright install chromium   -> exit=0
+$ npx playwright test playwright/carril-p8-avisos-agenda.spec.ts --reporter=list
+Running 3 tests using 1 worker
+  -  1 ... el paciente ve la demora de su profesional en el detalle del turno
+  -  2 ... el paciente ve en que lista de espera esta
+  -  3 ... el profesional puede avisar que se demora desde su agenda
+3 skipped
+exit=0
+
+Es el comportamiento que el propio spec documenta: sin P8_PACIENTE_ID / P8_PACIENTE_CLAVE /
+P8_DOCTORA_ID / P8_DOCTORA_CLAVE se saltea en vez de fallar (spec:43-57, 91, 108, 122).
+Sus datos los crea tools/alovida/p8-avisos-agenda.mjs contra la API viva.
+
+## 3. El arbol del front ya no esta sucio, y aun asi la etapa no tiene sujeto
+Los 352 archivos en el indice desaparecieron a las 12:38 por un reset + pull ajenos
+(reflog del repo del front); entraron los PR #552 y #554. Ese bloqueo ya no existe.
+Lo que si sigue: este trabajo no cambio comportamiento de producto.
+$ git diff --stat 4cc5ea1f..HEAD -- src/
+ 4 files changed, 28 insertions(+), 9 deletions(-)
+-> solo reformateo de prettier. No hay flujo de usuario modificado al que dirigir un E2E,
+   y el spec vecino es evidencia visual de OTRO carril (P8).
+
+
+## CIERRE (misma jornada, 16:37)
+Esta lectura quedo superada: la etapa 5 SI tenia como conseguir sus datos. Se corrigieron dos
+derivas de tools/alovida/p8-avisos-agenda.mjs, se corrio el recorrido (27/27, exit 0) y la suite
+paso a 3 passed contra la API viva. Ver h6-etapa5-e2e-ejecutado.txt.

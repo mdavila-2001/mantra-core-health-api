@@ -1,0 +1,38 @@
+├─ eslint
+│  ├─ ID: eslint (deprecation)
+│  ├─ Issue: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+│  ├─ Severity: moderate
+│  ├─ Vulnerable Versions: 9.39.5
+│  │ 
+│  ├─ Tree Versions
+│  │  └─ 9.39.5
+│  │ 
+│  └─ Dependents
+│     └─ mantra-core-health-api@workspace:.
+│
+├─ xlsx
+│  ├─ ID: 1108110
+│  ├─ Issue: Prototype Pollution in sheetJS
+│  ├─ URL: https://github.com/advisories/GHSA-4r6h-8v6p-xvw6
+│  ├─ Severity: high
+│  ├─ Vulnerable Versions: <0.19.3
+│  │ 
+│  ├─ Tree Versions
+│  │  └─ 0.18.5
+│  │ 
+│  └─ Dependents
+│     └─ mantra-core-health-api@workspace:.
+│
+└─ xlsx
+   ├─ ID: 1108111
+   ├─ Issue: SheetJS Regular Expression Denial of Service (ReDoS)
+   ├─ URL: https://github.com/advisories/GHSA-5pgg-2g8v-p4x9
+   ├─ Severity: high
+   ├─ Vulnerable Versions: <0.20.2
+   │ 
+   ├─ Tree Versions
+   │  └─ 0.18.5
+   │ 
+   └─ Dependents
+      └─ mantra-core-health-api@workspace:.
+EXIT:1

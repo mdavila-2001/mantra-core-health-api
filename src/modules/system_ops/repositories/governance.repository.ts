@@ -23,6 +23,13 @@ import { createdBy } from '../../../common';
  */
 @Injectable()
 export class GovernanceRepository {
+  /** Exact field-rule binding for identity lifecycle; no policy fallback. */
+  findAnonymizationRuleById(
+    em: EntityManager,
+    id: string,
+  ): Promise<AnonymizationRules | null> {
+    return em.findOne(AnonymizationRules, { id });
+  }
   // --- Dominios de datos (UPSERT por code) ---
   /**
    * Obtiene find domain by code.

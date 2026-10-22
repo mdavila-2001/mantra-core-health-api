@@ -9,3 +9,5 @@ export * from './patient-statements.service';
 export * from './dunning.service';
 export * from './kpi-snapshots.service';
 export * from './billing-service-catalog.service';
+export * from './procedure-nomenclature.service';
+export * from './billing-simulated.service';

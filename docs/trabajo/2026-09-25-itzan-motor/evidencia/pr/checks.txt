@@ -1,0 +1,57 @@
+H7.S2.M3–M4 — Estado del PR #463
+=================================
+
+$ gh pr view 463 --json ...
+{
+  "number": 463,
+  "state": "OPEN",
+  "isDraft": false,
+  "baseRefName": "dev",
+  "headRefName": "itzan/carga-masiva-motor-2026-09-25",
+  "mergeable": "MERGEABLE",
+  "mergeStateStatus": "BLOCKED",
+  "changedFiles": 46,
+  "additions": 4068,
+  "deletions": 232
+}
+
+`mergeable: MERGEABLE` — el diff no tiene conflictos con la rama de integración.
+
+`mergeStateStatus: BLOCKED` NO es por el diff: es por revisión requerida.
+
+$ gh pr view 463 --json reviewDecision
+"reviewDecision": "REVIEW_REQUIRED"
+
+La única revisión registrada hasta ahora es automática y no llegó a mirar el
+cambio: «Copilot was unable to review this pull request because the user who
+requested the review has reached their quota limit».
+
+
+Checks
+------
+$ gh pr checks 463
+docs          fail        1m30s
+fork-guard    skipping    0
+
+
+Por qué falla `docs`, con su salida literal
+-------------------------------------------
+$ gh run view <id> --log-failed
+
+docs  Levantar MinIO  Run docker rm -f minio 2>/dev/null || true
+docs  Levantar MinIO  docker run -d --name minio -p 9000:9000 \
+docs  Levantar MinIO    -e MINIO_ROOT_USER=… -e MINIO_ROOT_PASSWORD=… \
+docs  Levantar MinIO    quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z server /data
+docs  Levantar MinIO  Unable to find image 'quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z' locally
+docs  Levantar MinIO  docker: Error response from daemon: unauthorized:
+                      access to the requested resource is not authorized
+
+El trabajo muere a los 90 segundos levantando el almacenamiento de objetos, mucho
+antes de compilar nada de este cambio. El registro de imágenes dejó de servir esa
+etiqueta sin credenciales, y pasa igual en las últimas corridas de cuatro
+personas distintas desde la madrugada. No es de este PR: se clasifica EXTERNAL.
+
+Los pasos siguientes del trabajo —compilar, tipos, linter, pruebas, generación y
+comparación del contrato, cobertura de documentación— no llegan a ejecutarse. **No
+están en verde: están sin medir.** Por eso todos ellos se corrieron de forma local
+y su salida está guardada en esta misma carpeta.

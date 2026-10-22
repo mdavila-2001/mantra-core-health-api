@@ -1,0 +1,34 @@
+PASS [válido] aseguradora SA completa (5 PDF + poder + 3 gerencias) · esperado 201 · real 201
+PASS [válido] quedaron 6 documentos de afiliación (5 + poder) en la base · esperado 6 · real 6
+PASS [válido] todos nacen con estado PENDIENTE · esperado PENDIENTE · real PENDIENTE
+PASS [válido] el dueño inicia sesión · esperado 200 · real 200
+PASS [válido] UNIPERSONAL sin escritura de constitución ni poder · esperado 201 · real 201
+PASS [válido] UNIPERSONAL: 4 documentos en la base · esperado 4 · real 4
+PASS [límite] código de organización de 3 caracteres (mínimo) · esperado 201 · real 201
+PASS [límite] código de organización de 100 caracteres (máximo) · esperado 201 · real 201
+PASS [límite] código de organización de 2 caracteres (bajo el mínimo) · esperado 400 · real 400 · Error de validación
+PASS [límite] código de organización de 101 caracteres (sobre el máximo) · esperado 400 · real 400 · Error de validación
+PASS [límite] razón social de 300 caracteres · esperado 201 · real 201
+PASS [límite] razón social de 301 caracteres · esperado 400 · real 400 · Error de validación
+PASS [límite] contraseña de 8 caracteres · esperado 201 · real 201
+PASS [límite] contraseña de 7 caracteres · esperado 400 · real 400 · Error de validación
+PASS [límite] PDF de exactamente 10485760 bytes · esperado 201 · real 201
+PASS [límite] PDF de 1 byte sobre el máximo · esperado 413,422 · real 413
+PASS [error] preparación: la primera alta con ese código · esperado 201 · real 201
+PASS [error] código de organización repetido · esperado 409 · real 409
+PASS [error] correo del dueño repetido · esperado 409 · real 409
+PASS [error] SA sin escritura de constitución · esperado 422 · real 422
+PASS [error] SA sin poder del representante · esperado 422 · real 422
+PASS [error] el mismo archivo en dos documentos · esperado 422 · real 422
+PASS [error] archivo ya vinculado a otra organización · esperado 422 · real 422
+PASS [error] fileId que no existe (en la vía anónima el contrato es 422, attachable-file.service.ts:213) · esperado 422 · real 422
+PASS [error] aseguradora (PAYER) sin el bloque payer · esperado 422 · real 422
+PASS [error] tenantType inexistente · esperado 400 · real 400
+PASS [error] correo del dueño mal formado · esperado 400 · real 400
+PASS [error] cuerpo vacío · esperado 400 · real 400
+PASS [error] archivo de texto que dice ser PDF · esperado 422 · real 422
+PASS [error] archivo vacío · esperado 400,422 · real 422
+PASS [error] imagen subida como documento · esperado 422 · real 422
+PASS [transversal] ninguna respuesta 5xx en toda la matriz · esperado 0 · real 0
+
+== 32 PASS / 0 FAIL == escrito en /Users/josejeremias/Desktop/Mantra Core Technologies/Mantra Core Health/wt-api-catalogo-afiliacion/docs/trabajo/2026-10-03-catalogo-afiliacion/evidencia/h2-matriz-api.resultado.md

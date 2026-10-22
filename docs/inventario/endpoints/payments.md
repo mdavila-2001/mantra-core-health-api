@@ -4,28 +4,28 @@
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 - **Operaciones:** 14 (14 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 1 · MEDIO 13 · BAJO 0
-- **Tablas distintas que tocan:** 18
+- **Riesgo:** ALTO 1 · MEDIO 12 · BAJO 1
+- **Tablas distintas que tocan:** 19
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/payments.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/payments/callbacks/{callbackPath}` | Recibir el callback/webhook del gateway (idempotente) | ALTO | 4 | pública |
+| 1 | POST | `/payments/callbacks/{callbackPath}` | Recibir el callback/webhook del gateway (idempotente) | ALTO | 6 | pública |
 | 2 | POST | `/payments/checkout-sessions` | Abrir una sesión de checkout con contexto de cajero | MEDIO | 4 | PAYMENTS_ADMIN, CASHIER |
 | 3 | POST | `/payments/fee-schedules` | Publicar una versión del tarifario | MEDIO | 3 | PAYMENTS_ADMIN |
 | 4 | POST | `/payments/intents` | Crear una intención de pago idempotente | MEDIO | 2 | PAYMENTS_ADMIN, CASHIER |
 | 5 | POST | `/payments/intents/{id}/fx-lock` | Bloquear el tipo de cambio de la intención | MEDIO | 4 | PAYMENTS_ADMIN |
 | 6 | POST | `/payments/intents/{id}/risk-assessment` | Registrar la evaluación de riesgo y 3-D Secure | MEDIO | 3 | PAYMENTS_ADMIN |
 | 7 | POST | `/payments/intents/{id}/splits` | Repartir el cobro entre cuentas conectadas | MEDIO | 3 | PAYMENTS_ADMIN |
-| 8 | POST | `/payments/intents/{id}/transactions` | Procesar la transacción contra el gateway (authorize/capture) | MEDIO | 4 | PAYMENTS_ADMIN, CASHIER |
+| 8 | POST | `/payments/intents/{id}/transactions` | Procesar la transacción contra el gateway (authorize/capture) | MEDIO | 5 | PAYMENTS_ADMIN, CASHIER |
 | 9 | POST | `/payments/payouts` | Ejecutar un payout a una cuenta conectada | MEDIO | 2 | PAYMENTS_ADMIN |
 | 10 | POST | `/payments/reconciliation-runs` | Conciliar gateway contra ledger y abrir excepciones | MEDIO | 5 | PAYMENTS_ADMIN |
 | 11 | POST | `/payments/settlements/import` | Importar la liquidación del gateway | MEDIO | 5 | PAYMENTS_ADMIN |
-| 12 | POST | `/payments/transactions/{id}/cancellation-requests` | Solicitar la anulación del cobro | MEDIO | 3 | PAYMENTS_ADMIN, CASHIER |
+| 12 | POST | `/payments/transactions/{id}/cancellation-requests` | Solicitar la anulación del cobro | MEDIO | 2 | PAYMENTS_ADMIN, CASHIER |
 | 13 | POST | `/payments/transactions/{id}/refunds` | Emitir un reembolso total o parcial | MEDIO | 3 | PAYMENTS_ADMIN |
-| 14 | POST | `/payments/transactions/{id}/status-inquiry` | Consultar el estado de la transacción en el gateway | MEDIO | 2 | PAYMENTS_ADMIN |
+| 14 | POST | `/payments/transactions/{id}/status-inquiry` | Consultar el estado de la transacción en el gateway | BAJO | 1 | PAYMENTS_ADMIN |
 
 ---
 
@@ -36,35 +36,37 @@
 - **Bloque:** Financiero y ERP
 - **Riesgo:** ALTO — Ruta pública que escribe en la base
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.applyCallback` — `src/modules/payments/controllers/payments-operations.controller.ts:87`
+- **Implementación:** `PaymentsOperationsController.applyCallback` — `src/modules/payments/controllers/payments-operations.controller.ts:94`
 
 ### Qué es y para qué sirve (negocio)
 
 Recibir el callback/webhook del gateway (idempotente). Caso de uso UC-42-06: Recibir callback del gateway (idempotente). Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:16`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/callbacks/{callbackPath}` la atiende `PaymentsOperationsController.applyCallback` (src/modules/payments/controllers/payments-operations.controller.ts:87). Es una ruta pública: no exige token. Valida el cuerpo como `GatewayCallbackDto` (4 campos, 2 obligatorios). Delega en `PaymentsTransactionsService.applyCallback`. Actualiza payments.payment_intents, payments.payment_transactions. Lee payments.payment_intents, payments.payment_transactions.
+`POST /payments/callbacks/{callbackPath}` la atiende `PaymentsOperationsController.applyCallback` (src/modules/payments/controllers/payments-operations.controller.ts:94). Es una ruta pública: no exige token. Valida el cuerpo como `GatewayCallbackDto` (4 campos, 2 obligatorios). Delega en `PaymentsTransactionsService.applyCallback`. Crea filas en payments.payment_webhook_events. Actualiza payments.payment_intents, payments.payment_transactions. Lee payments.payment_intents, payments.payment_transactions, payments.payment_webhook_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/payments/controllers/payments-operations.controller.ts:87` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/payments/controllers/payments-operations.controller.ts:94` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:249` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:389` |
 | `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
-| `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:238` |
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.findByGatewayRef | `src/modules/payments/repositories/payment-transactions.repository.ts:206` |
+| `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:369` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.findByGatewayRef | `src/modules/payments/repositories/payment-transactions.repository.ts:246` |
+| `payments.payment_webhook_events` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.recordWebhookEvent | `src/modules/payments/repositories/payment-transactions.repository.ts:344` |
+| `payments.payment_webhook_events` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.findWebhookEventByRef | `src/modules/payments/repositories/payment-transactions.repository.ts:327` |
 
 ### Parámetros
 
@@ -110,6 +112,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `transactionId` | `string` | Sí | formato uuid | — | Transacción correlacionada | `src/modules/payments/dto/payment-transaction.dto.ts:156` |
 | `duplicate` | `boolean` | Sí | — | — | true si el callback ya se había aplicado antes | `src/modules/payments/dto/payment-transaction.dto.ts:164` |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:170` |
+| `applied` | `boolean` | Sí | — | — | true si el evento cambió el estado local de la transacción | `src/modules/payments/dto/payment-transaction.dto.ts:179` |
+| `decision` | `string` | Sí | valores: aplicar, duplicado, obsoleto, contradiccion | — | Cómo se interpretó el evento frente al estado ya conocido | `src/modules/payments/dto/payment-transaction.dto.ts:188` |
+| `reconciliationRequired` | `boolean` | Sí | — | — | true si el proveedor afirmó algo incompatible con un estado terminal y hace falta conciliar | `src/modules/payments/dto/payment-transaction.dto.ts:197` |
 
 ### Respuestas posibles
 
@@ -127,6 +132,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/hardening/payments-fixture.ts:106` |
 | CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:200` |
 
 ### Flujos
@@ -142,28 +148,28 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.openCheckout` — `src/modules/payments/controllers/payments-operations.controller.ts:58`
+- **Implementación:** `PaymentsOperationsController.openCheckout` — `src/modules/payments/controllers/payments-operations.controller.ts:60`
 
 ### Qué es y para qué sirve (negocio)
 
 Abrir una sesión de checkout con contexto de cajero. Caso de uso UC-42-02: Abrir sesión de checkout con contexto de cajero. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:12`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/checkout-sessions` la atiende `PaymentsOperationsController.openCheckout` (src/modules/payments/controllers/payments-operations.controller.ts:58). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `OpenCheckoutSessionDto` (12 campos, 5 obligatorios). Delega en `PaymentsCheckoutService.openSession`. Crea filas en payments.cashier_payment_contexts, payments.payment_checkout_sessions. Actualiza payments.payment_debts. Lee payments.payment_debts.
+`POST /payments/checkout-sessions` la atiende `PaymentsOperationsController.openCheckout` (src/modules/payments/controllers/payments-operations.controller.ts:60). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `OpenCheckoutSessionDto` (12 campos, 5 obligatorios). Delega en `PaymentsCheckoutService.openSession`. Crea filas en payments.cashier_payment_contexts, payments.payment_checkout_sessions. Actualiza payments.payment_debts. Lee payments.payment_debts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-operations.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-operations.controller.ts:60` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -267,28 +273,28 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.createFeeSchedule` — `src/modules/payments/controllers/payments-operations.controller.ts:103`
+- **Implementación:** `PaymentsOperationsController.createFeeSchedule` — `src/modules/payments/controllers/payments-operations.controller.ts:113`
 
 ### Qué es y para qué sirve (negocio)
 
 Publicar una versión del tarifario. Caso de uso UC-42-10: Publicar versión del tarifario. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:20`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/fee-schedules` la atiende `PaymentsOperationsController.createFeeSchedule` (src/modules/payments/controllers/payments-operations.controller.ts:103). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateFeeScheduleDto` (9 campos, 5 obligatorios). Delega en `PaymentsOperationsService.createFeeSchedule`. Crea filas en payments.fee_schedules. Actualiza payments.fee_schedules. Lee payments.fee_schedules.
+`POST /payments/fee-schedules` la atiende `PaymentsOperationsController.createFeeSchedule` (src/modules/payments/controllers/payments-operations.controller.ts:113). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateFeeScheduleDto` (9 campos, 5 obligatorios). Delega en `PaymentsOperationsService.createFeeSchedule`. Crea filas en payments.fee_schedules. Actualiza payments.fee_schedules. Lee payments.fee_schedules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:113` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -383,28 +389,28 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsIntentsController.createIntent` — `src/modules/payments/controllers/payments-intents.controller.ts:49`
+- **Implementación:** `PaymentsIntentsController.createIntent` — `src/modules/payments/controllers/payments-intents.controller.ts:54`
 
 ### Qué es y para qué sirve (negocio)
 
 Crear una intención de pago idempotente. Caso de uso UC-42-01: Crear intención de pago idempotente. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:11`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/intents` la atiende `PaymentsIntentsController.createIntent` (src/modules/payments/controllers/payments-intents.controller.ts:49). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `CreatePaymentIntentDto` (12 campos, 6 obligatorios). Delega en `PaymentsIntentsService.createIntent`. Crea filas en payments.payment_intents. Lee payments.payment_intents.
+`POST /payments/intents` la atiende `PaymentsIntentsController.createIntent` (src/modules/payments/controllers/payments-intents.controller.ts:54). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `CreatePaymentIntentDto` (12 campos, 6 obligatorios). Delega en `PaymentsIntentsService.createIntent`. Crea filas en payments.payment_intents. Lee payments.payment_intents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-intents.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-intents.controller.ts:54` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -491,6 +497,9 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/hardening/mch-003.int-spec.ts:54` |
+| INTEGRACION | `test/integration/hardening/mch-019.int-spec.ts:65` |
+| INTEGRACION | `test/integration/hardening/payments-fixture.ts:66` |
 | CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:49` |
 
 ### Flujos
@@ -506,29 +515,29 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsIntentsController.lockFxRate` — `src/modules/payments/controllers/payments-intents.controller.ts:65`
+- **Implementación:** `PaymentsIntentsController.lockFxRate` — `src/modules/payments/controllers/payments-intents.controller.ts:75`
 
 ### Qué es y para qué sirve (negocio)
 
 Bloquear el tipo de cambio de la intención. Caso de uso UC-42-03: Bloquear tipo de cambio. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:13`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/intents/{id}/fx-lock` la atiende `PaymentsIntentsController.lockFxRate` (src/modules/payments/controllers/payments-intents.controller.ts:65). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateFxLockDto` (5 campos, 4 obligatorios). Delega en `PaymentsIntentsService.lockFxRate`. Crea filas en payments.fx_rate_locks. Actualiza payments.payment_intents. Lee payments.fx_rate_locks, payments.payment_intents.
+`POST /payments/intents/{id}/fx-lock` la atiende `PaymentsIntentsController.lockFxRate` (src/modules/payments/controllers/payments-intents.controller.ts:75). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateFxLockDto` (5 campos, 4 obligatorios). Delega en `PaymentsIntentsService.lockFxRate`. Crea filas en payments.fx_rate_locks. Actualiza payments.payment_intents. Lee payments.fx_rate_locks, payments.payment_intents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-intents.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:65` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-intents.controller.ts:75` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:75` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -623,29 +632,29 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsIntentsController.assessRisk` — `src/modules/payments/controllers/payments-intents.controller.ts:78`
+- **Implementación:** `PaymentsIntentsController.assessRisk` — `src/modules/payments/controllers/payments-intents.controller.ts:93`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar la evaluación de riesgo y 3-D Secure. Caso de uso UC-42-04: Evaluar riesgo y 3-D Secure. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:14`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/intents/{id}/risk-assessment` la atiende `PaymentsIntentsController.assessRisk` (src/modules/payments/controllers/payments-intents.controller.ts:78). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateRiskAssessmentDto` (5 campos, 2 obligatorios). Delega en `PaymentsIntentsService.assessRisk`. Crea filas en payments.risk_assessments. Actualiza payments.payment_intents. Lee payments.payment_intents.
+`POST /payments/intents/{id}/risk-assessment` la atiende `PaymentsIntentsController.assessRisk` (src/modules/payments/controllers/payments-intents.controller.ts:93). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateRiskAssessmentDto` (5 campos, 2 obligatorios). Delega en `PaymentsIntentsService.assessRisk`. Crea filas en payments.risk_assessments. Actualiza payments.payment_intents. Lee payments.payment_intents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-intents.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:78` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-intents.controller.ts:93` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:93` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -720,6 +729,9 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/hardening/mch-003.int-spec.ts:69` |
+| INTEGRACION | `test/integration/hardening/mch-019.int-spec.ts:80` |
+| INTEGRACION | `test/integration/hardening/payments-fixture.ts:79` |
 | CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:74` |
 
 ### Flujos
@@ -735,29 +747,29 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsIntentsController.addSplit` — `src/modules/payments/controllers/payments-intents.controller.ts:106`
+- **Implementación:** `PaymentsIntentsController.addSplit` — `src/modules/payments/controllers/payments-intents.controller.ts:131`
 
 ### Qué es y para qué sirve (negocio)
 
 Repartir el cobro entre cuentas conectadas. Caso de uso UC-42-11: Reparto multi-party. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/intents/{id}/splits` la atiende `PaymentsIntentsController.addSplit` (src/modules/payments/controllers/payments-intents.controller.ts:106). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateSplitDto` (6 campos, 2 obligatorios). Delega en `PaymentsIntentsService.addSplit`. Crea filas en payments.payment_splits. Lee payments.payment_intents, payments.payment_splits.
+`POST /payments/intents/{id}/splits` la atiende `PaymentsIntentsController.addSplit` (src/modules/payments/controllers/payments-intents.controller.ts:131). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateSplitDto` (6 campos, 2 obligatorios). Delega en `PaymentsIntentsService.addSplit`. Crea filas en payments.payment_splits. Lee payments.payment_intents, payments.payment_splits.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-intents.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:106` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-intents.controller.ts:131` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:131` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -851,37 +863,38 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsIntentsController.processTransaction` — `src/modules/payments/controllers/payments-intents.controller.ts:91`
+- **Implementación:** `PaymentsIntentsController.processTransaction` — `src/modules/payments/controllers/payments-intents.controller.ts:111`
 
 ### Qué es y para qué sirve (negocio)
 
 Procesar la transacción contra el gateway (authorize/capture). Caso de uso UC-42-05: Procesar transacción (authorize/capture/sale). Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:15`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/intents/{id}/transactions` la atiende `PaymentsIntentsController.processTransaction` (src/modules/payments/controllers/payments-intents.controller.ts:91). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `ProcessTransactionDto` (4 campos, 1 obligatorio). Delega en `PaymentsTransactionsService.processTransaction`. Crea filas en payments.payment_transactions. Actualiza payments.payment_intents. Lee payments.payment_intents, payments.risk_assessments.
+`POST /payments/intents/{id}/transactions` la atiende `PaymentsIntentsController.processTransaction` (src/modules/payments/controllers/payments-intents.controller.ts:111). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `ProcessTransactionDto` (4 campos, 1 obligatorio). Delega en `PaymentsTransactionsService.processTransaction`. Crea filas en payments.payment_transactions. Actualiza payments.payment_intents. Lee payments.payment_intents, payments.payment_transactions, payments.risk_assessments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-intents.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:91` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-intents.controller.ts:111` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:111` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction | `src/modules/payments/services/payments-transactions.service.ts:148` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction | `src/modules/payments/services/payments-transactions.service.ts:219` |
 | `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
-| `payments.payment_transactions` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentTransactionsRepository.create | `src/modules/payments/repositories/payment-transactions.repository.ts:156` |
+| `payments.payment_transactions` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentTransactionsRepository.create | `src/modules/payments/repositories/payment-transactions.repository.ts:196` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentTransactionsRepository.findPendingByIntent | `src/modules/payments/repositories/payment-transactions.repository.ts:300` |
 | `payments.risk_assessments` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentFlowRepository.findLatestRiskAssessment | `src/modules/payments/repositories/payment-flow.repository.ts:310` |
 
 ### Parámetros
@@ -939,8 +952,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
-| 409 | `CONFLICT` | ConflictException: La intención ya fue cobrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La intención está cancelada; PreconditionFailedException: La intención requiere evaluación de riesgo antes de cobrar; PreconditionFailedException: El motor de riesgo rechazó la intención |
+| 409 | `CONFLICT` | ConflictException: La intención ya fue cobrada; ConflictException: La intención tiene una operación abierta en el gateway; ConflictException: El importe excede el saldo pendiente de la intención; ConflictException: La captura excede el importe autorizado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La intención está cancelada; PreconditionFailedException: La intención requiere evaluación de riesgo antes de cobrar; PreconditionFailedException: El motor de riesgo rechazó la intención; PreconditionFailedException: El importe a procesar debe ser mayor que cero |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/payments.md).
@@ -949,6 +962,9 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/hardening/mch-003.int-spec.ts:78` |
+| INTEGRACION | `test/integration/hardening/mch-019.int-spec.ts:94` |
+| INTEGRACION | `test/integration/hardening/payments-fixture.ts:93` |
 | CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:88` |
 
 ### Flujos
@@ -964,28 +980,28 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.executePayout` — `src/modules/payments/controllers/payments-operations.controller.ts:127`
+- **Implementación:** `PaymentsOperationsController.executePayout` — `src/modules/payments/controllers/payments-operations.controller.ts:147`
 
 ### Qué es y para qué sirve (negocio)
 
 Ejecutar un payout a una cuenta conectada. Caso de uso UC-42-13: Ejecutar payout a cuenta conectada. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/payouts` la atiende `PaymentsOperationsController.executePayout` (src/modules/payments/controllers/payments-operations.controller.ts:127). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreatePayoutDto` (12 campos, 9 obligatorios). Delega en `PaymentsOperationsService.executePayout`. Crea filas en payments.payout_items, payments.payouts.
+`POST /payments/payouts` la atiende `PaymentsOperationsController.executePayout` (src/modules/payments/controllers/payments-operations.controller.ts:147). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreatePayoutDto` (12 campos, 9 obligatorios). Delega en `PaymentsOperationsService.executePayout`. Crea filas en payments.payout_items, payments.payouts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:127` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:147` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1095,34 +1111,34 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.runReconciliation` — `src/modules/payments/controllers/payments-operations.controller.ts:139`
+- **Implementación:** `PaymentsOperationsController.runReconciliation` — `src/modules/payments/controllers/payments-operations.controller.ts:164`
 
 ### Qué es y para qué sirve (negocio)
 
 Conciliar gateway contra ledger y abrir excepciones. Caso de uso UC-42-14: Conciliar gateway vs ledger. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/reconciliation-runs` la atiende `PaymentsOperationsController.runReconciliation` (src/modules/payments/controllers/payments-operations.controller.ts:139). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateReconciliationRunDto` (11 campos, 10 obligatorios). Delega en `PaymentsOperationsService.runReconciliation`. Crea filas en payments.provider_reconciliation_records, payments.reconciliation_exceptions, payments.reconciliation_runs. Actualiza payments.reconciliation_runs. Lee payments.payment_transactions.
+`POST /payments/reconciliation-runs` la atiende `PaymentsOperationsController.runReconciliation` (src/modules/payments/controllers/payments-operations.controller.ts:164). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateReconciliationRunDto` (11 campos, 10 obligatorios). Delega en `PaymentsOperationsService.runReconciliation`. Crea filas en payments.provider_reconciliation_records, payments.reconciliation_exceptions, payments.reconciliation_runs. Actualiza payments.reconciliation_runs. Lee payments.payment_transactions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:164` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation → PaymentTransactionsRepository.findByGatewayRef | `src/modules/payments/repositories/payment-transactions.repository.ts:206` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation → PaymentTransactionsRepository.findByGatewayRef | `src/modules/payments/repositories/payment-transactions.repository.ts:246` |
 | `payments.provider_reconciliation_records` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation → PaymentOperationsRepository.createReconciliationRecord | `src/modules/payments/repositories/payment-operations.repository.ts:615` |
 | `payments.reconciliation_exceptions` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation → PaymentOperationsRepository.createReconciliationException | `src/modules/payments/repositories/payment-operations.repository.ts:645` |
 | `payments.reconciliation_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation | `src/modules/payments/services/payments-operations.service.ts:372` |
@@ -1230,28 +1246,28 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.importSettlement` — `src/modules/payments/controllers/payments-operations.controller.ts:115`
+- **Implementación:** `PaymentsOperationsController.importSettlement` — `src/modules/payments/controllers/payments-operations.controller.ts:130`
 
 ### Qué es y para qué sirve (negocio)
 
 Importar la liquidación del gateway. Caso de uso UC-42-12: Importar liquidación del gateway. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/settlements/import` la atiende `PaymentsOperationsController.importSettlement` (src/modules/payments/controllers/payments-operations.controller.ts:115). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `ImportSettlementDto` (12 campos, 8 obligatorios). Delega en `PaymentsOperationsService.importSettlement`. Crea filas en payments.gateway_settlements, payments.settlement_lines. Actualiza payments.payment_transactions. Lee payments.gateway_settlements, payments.payment_transactions.
+`POST /payments/settlements/import` la atiende `PaymentsOperationsController.importSettlement` (src/modules/payments/controllers/payments-operations.controller.ts:130). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `ImportSettlementDto` (12 campos, 8 obligatorios). Delega en `PaymentsOperationsService.importSettlement`. Crea filas en payments.gateway_settlements, payments.settlement_lines. Actualiza payments.payment_transactions. Lee payments.gateway_settlements, payments.payment_transactions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:115` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:130` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1260,7 +1276,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | `payments.gateway_settlements` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement → PaymentOperationsRepository.createSettlement | `src/modules/payments/repositories/payment-operations.repository.ts:434` |
 | `payments.gateway_settlements` | LEE | LEE | DIRECTA | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement → PaymentOperationsRepository.findSettlementByRef | `src/modules/payments/repositories/payment-operations.repository.ts:456` |
 | `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement | `src/modules/payments/services/payments-operations.service.ts:195` |
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:190` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:230` |
 | `payments.settlement_lines` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement → PaymentOperationsRepository.createSettlementLine | `src/modules/payments/repositories/payment-operations.repository.ts:470` |
 
 ### Cuerpo — DTO `ImportSettlementDto` · `application/json`
@@ -1363,37 +1379,36 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsTransactionsController.requestCancellation` — `src/modules/payments/controllers/payments-transactions.controller.ts:65`
+- **Implementación:** `PaymentsTransactionsController.requestCancellation` — `src/modules/payments/controllers/payments-transactions.controller.ts:80`
 
 ### Qué es y para qué sirve (negocio)
 
 Solicitar la anulación del cobro. Caso de uso UC-42-09: Solicitar anulación. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:19`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/transactions/{id}/cancellation-requests` la atiende `PaymentsTransactionsController.requestCancellation` (src/modules/payments/controllers/payments-transactions.controller.ts:65). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `CreateCancellationDto` (4 campos, 3 obligatorios). Delega en `PaymentsTransactionsService.requestCancellation`. Crea filas en payments.payment_cancellation_requests. Actualiza payments.payment_transactions. Lee payments.payment_transactions.
+`POST /payments/transactions/{id}/cancellation-requests` la atiende `PaymentsTransactionsController.requestCancellation` (src/modules/payments/controllers/payments-transactions.controller.ts:80). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `CreateCancellationDto` (4 campos, 3 obligatorios). Delega en `PaymentsTransactionsService.requestCancellation`. Crea filas en payments.payment_cancellation_requests. Lee payments.payment_transactions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-transactions.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-transactions.controller.ts:65` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-transactions.controller.ts:80` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-transactions.controller.ts:80` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_cancellation_requests` | ESCRIBE | CREA | DIRECTA | PaymentsTransactionsController.requestCancellation → PaymentsTransactionsService.requestCancellation → PaymentTransactionsRepository.createCancellation | `src/modules/payments/repositories/payment-transactions.repository.ts:266` |
-| `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsTransactionsController.requestCancellation → PaymentsTransactionsService.requestCancellation | `src/modules/payments/services/payments-transactions.service.ts:424` |
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.requestCancellation → PaymentsTransactionsService.requestCancellation → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:190` |
+| `payments.payment_cancellation_requests` | ESCRIBE | CREA | DIRECTA | PaymentsTransactionsController.requestCancellation → PaymentsTransactionsService.requestCancellation → PaymentTransactionsRepository.createCancellation | `src/modules/payments/repositories/payment-transactions.repository.ts:381` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.requestCancellation → PaymentsTransactionsService.requestCancellation → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:230` |
 
 ### Parámetros
 
@@ -1405,10 +1420,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-transaction.dto.ts:243` |
-| `gatewayConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión del gateway sobre la que se pide la anulación | `src/modules/payments/dto/payment-transaction.dto.ts:253` |
-| `requestNumber` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Número de solicitud, único por tenant | `src/modules/payments/dto/payment-transaction.dto.ts:264` |
-| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Detalle del motivo | `src/modules/payments/dto/payment-transaction.dto.ts:273` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-transaction.dto.ts:270` |
+| `gatewayConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión del gateway sobre la que se pide la anulación | `src/modules/payments/dto/payment-transaction.dto.ts:280` |
+| `requestNumber` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Número de solicitud, único por tenant | `src/modules/payments/dto/payment-transaction.dto.ts:291` |
+| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Detalle del motivo | `src/modules/payments/dto/payment-transaction.dto.ts:300` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1437,9 +1452,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:284` |
-| `requestNumber` | `string` | Sí | — | — | Valor de request number mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:290` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:296` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:311` |
+| `requestNumber` | `string` | Sí | — | — | Valor de request number mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:317` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:323` |
 
 ### Respuestas posibles
 
@@ -1474,37 +1489,37 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsTransactionsController.refund` — `src/modules/payments/controllers/payments-transactions.controller.ts:52`
+- **Implementación:** `PaymentsTransactionsController.refund` — `src/modules/payments/controllers/payments-transactions.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
 Emitir un reembolso total o parcial. Caso de uso UC-42-08: Reembolso total o parcial. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:18`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/transactions/{id}/refunds` la atiende `PaymentsTransactionsController.refund` (src/modules/payments/controllers/payments-transactions.controller.ts:52). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateRefundDto` (3 campos, 1 obligatorio). Delega en `PaymentsTransactionsService.refund`. Crea filas en payments.refunds. Lee payments.payment_transactions, payments.refunds.
+`POST /payments/transactions/{id}/refunds` la atiende `PaymentsTransactionsController.refund` (src/modules/payments/controllers/payments-transactions.controller.ts:62). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateRefundDto` (3 campos, 1 obligatorio). Delega en `PaymentsTransactionsService.refund`. Crea filas en payments.refunds. Lee payments.payment_transactions, payments.refunds.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-transactions.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-transactions.controller.ts:52` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-transactions.controller.ts:62` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-transactions.controller.ts:62` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:190` |
-| `payments.refunds` | ESCRIBE | CREA | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.createRefund | `src/modules/payments/repositories/payment-transactions.repository.ts:231` |
-| `payments.refunds` | LEE | LEE | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.findRefundsByTransaction | `src/modules/payments/repositories/payment-transactions.repository.ts:252` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:230` |
+| `payments.refunds` | ESCRIBE | CREA | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.createRefund | `src/modules/payments/repositories/payment-transactions.repository.ts:271` |
+| `payments.refunds` | LEE | LEE | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.findRefundsByTransaction | `src/modules/payments/repositories/payment-transactions.repository.ts:367` |
 
 ### Parámetros
 
@@ -1516,9 +1531,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `amount` | `string` | Sí | patrón runtime POSITIVE_MONEY_REGEX | `@IsNumberString()` `@Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })` | Importe a reembolsar (parcial o total) | `src/modules/payments/dto/payment-transaction.dto.ts:184` |
-| `gatewayRefundRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del reembolso en el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:195` |
-| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo libre del reembolso | `src/modules/payments/dto/payment-transaction.dto.ts:204` |
+| `amount` | `string` | Sí | patrón runtime POSITIVE_MONEY_REGEX | `@IsNumberString()` `@Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })` | Importe a reembolsar (parcial o total) | `src/modules/payments/dto/payment-transaction.dto.ts:211` |
+| `gatewayRefundRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del reembolso en el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:222` |
+| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo libre del reembolso | `src/modules/payments/dto/payment-transaction.dto.ts:231` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1544,10 +1559,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:215` |
-| `paymentTransactionId` | `string` | Sí | formato uuid | — | Identificador asociado a payment transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:221` |
-| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:227` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:233` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:242` |
+| `paymentTransactionId` | `string` | Sí | formato uuid | — | Identificador asociado a payment transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:248` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:254` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:260` |
 
 ### Respuestas posibles
 
@@ -1559,7 +1574,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Transacción no encontrada |
 | 409 | `CONFLICT` | ConflictException: El reembolso excede el importe capturado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede reembolsar una transacción capturada o liquidada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede reembolsar una transacción capturada o liquidada; PreconditionFailedException: El importe del reembolso debe ser mayor que cero |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/payments.md).
@@ -1568,6 +1583,8 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/hardening/mch-003.int-spec.ts:218` |
+| INTEGRACION | `test/integration/hardening/payments-fixture.ts:112` |
 | CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:138` |
 
 ### Flujos
@@ -1581,36 +1598,35 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el estado de la transacción en el gateway
 - **Bloque:** Financiero y ERP
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsTransactionsController.inquireStatus` — `src/modules/payments/controllers/payments-transactions.controller.ts:36`
+- **Implementación:** `PaymentsTransactionsController.inquireStatus` — `src/modules/payments/controllers/payments-transactions.controller.ts:41`
 
 ### Qué es y para qué sirve (negocio)
 
 Consultar el estado de la transacción en el gateway. Caso de uso UC-42-07: Consulta independiente de estado. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:17`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/transactions/{id}/status-inquiry` la atiende `PaymentsTransactionsController.inquireStatus` (src/modules/payments/controllers/payments-transactions.controller.ts:36). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Delega en `PaymentsTransactionsService.inquireStatus`. Actualiza payments.payment_transactions. Lee payments.payment_transactions.
+`POST /payments/transactions/{id}/status-inquiry` la atiende `PaymentsTransactionsController.inquireStatus` (src/modules/payments/controllers/payments-transactions.controller.ts:41). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Delega en `PaymentsTransactionsService.inquireStatus`. Lee payments.payment_transactions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-transactions.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-transactions.controller.ts:36` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-transactions.controller.ts:41` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-transactions.controller.ts:41` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsTransactionsController.inquireStatus → PaymentsTransactionsService.inquireStatus | `src/modules/payments/services/payments-transactions.service.ts:297` |
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.inquireStatus → PaymentsTransactionsService.inquireStatus → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:190` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.inquireStatus → PaymentsTransactionsService.inquireStatus → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:230` |
 
 ### Parámetros
 
@@ -1626,9 +1642,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `transactionId` | `string` | Sí | formato uuid | — | Identificador asociado a transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:305` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:311` |
-| `reconciled` | `boolean` | Sí | — | — | true si la consulta cambió el estado local | `src/modules/payments/dto/payment-transaction.dto.ts:317` |
+| `transactionId` | `string` | Sí | formato uuid | — | Identificador asociado a transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:332` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:338` |
+| `reconciled` | `boolean` | Sí | — | — | true si la consulta cambió el estado local | `src/modules/payments/dto/payment-transaction.dto.ts:344` |
 
 ### Respuestas posibles
 
@@ -1647,6 +1663,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/hardening/mch-003.int-spec.ts:169` |
 | CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:128` |
 
 ### Flujos

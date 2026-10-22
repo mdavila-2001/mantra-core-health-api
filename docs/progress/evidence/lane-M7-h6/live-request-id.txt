@@ -1,0 +1,16 @@
+$ curl -si http://localhost:3600/practices/00000000-0000-0000-0000-000000000000/role-assignments
+HTTP/1.1 401 Unauthorized
+...
+X-Request-Id: 149288d3-ed9d-44e4-ae4a-a1fb1d5314bd
+Content-Type: application/json; charset=utf-8
+...
+
+$ curl -s http://localhost:3600/practices/00000000-0000-0000-0000-000000000000/role-assignments
+{"code":"UNAUTHENTICATED","message":"Unauthorized","correlationId":"c8b076eb-864b-4e8c-a5bf-f73a67733731","timestamp":"2026-09-26T10:20:30.101Z","path":"/practices/00000000-0000-0000-0000-000000000000/role-assignments"}
+$ curl -si (mismo endpoint) | grep -i X-Request-Id
+X-Request-Id: cd909924-7e26-4a5c-89a9-af93d478b2a5
+
+Cada petición recibe un X-Request-Id distinto (UUID v4); el body de error trae
+correlationId con el mismo formato, y ambos coinciden con el req.id que loguea
+pino-http para esa misma petición (ver docs/progress/evidence/lane-M7-h6/*.log
+recortes más abajo, campo "reqId").

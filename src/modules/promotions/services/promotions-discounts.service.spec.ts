@@ -49,6 +49,10 @@ function build() {
     findRedemptionsByRedeemer: mockFn(),
     findAppliedRedemptions: mockFn(),
     findRedemptionByIntent: mockFn(),
+    findCurrentPromotions: mockFn(),
+    findRulesByPromotions: mockFn(),
+    findPersonalCoupons: mockFn(),
+    findConcepts: mockFn(),
   };
   const loyaltyRepo = {
     findLedgerEntryByKey: mockFn(),

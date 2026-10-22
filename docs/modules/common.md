@@ -3,13 +3,13 @@
   Fuente real: src/modules/common/README.md
   Regenerar con: yarn docs:modules:sync (tools/docs/sync-module-docs.mjs)
   Este README es el contrato por dominio mantenido junto al código
-  (ver ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
+  (ver docs/progress/ESTADO-Y-PENDIENTES.md, tabla "Mapa documental").
 -->
 
 # Módulo `common`
 
-**Fuente:** [`src/modules/common/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/common/README.md)
-· 5 controllers · 6 services · 7 repositories · 7 entidades · 4 DTO
+**Fuente:** [`src/modules/common/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/common/README.md)
+· 6 controllers · 6 services · 7 repositories · 7 entidades · 5 DTO
 
 ---
 
@@ -20,6 +20,45 @@ Cross-cutting reference data shared by every clinical/business domain: official
 (versioning, derivatives, links, antimalware scanning, soft-delete and signed
 download URLs). Owners are polymorphic (`owner_type_concept_id` + `owner_id`) and,
 except for `files.tenant_id`, are **not** FK-enforced.
+
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/common -name '*.controller.ts' | wc -l
+  find src/modules/common -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/common -name '*.entity.ts' | wc -l
+  find src/modules/common -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **6 controllers, 19 rutas HTTP, 7 entidades y 6 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`StorageLifecycleModule`).
+
+Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `addresses`, `contact_points`, `file_derivatives`, `file_links`, `file_versions`, `files`, `identifiers`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /common/addresses` | sesión | `common-addresses` |
+| `POST /common/contact-points` | sesión | `common-contact-points` |
+| `POST /common/contact-points/:id/verify` | sesión | `common-contact-points` |
+| `POST /common/files/upload` | sesión | `common-files` |
+| `GET /common/files/links` | sesión | `common-files` |
+| `GET /common/files/:id/content` | sesión | `common-files` |
+| `POST /common/files` | sesión | `common-files` |
+| `POST /common/files/:id/versions` | sesión | `common-files` |
+| `POST /common/files/:id/versions/:vid/derivatives` | sesión | `common-files` |
+| `POST /common/files/:id/links` | sesión | `common-files` |
+| `DELETE /common/files/:id` | sesión | `common-files` |
+| `POST /common/files/:id/download-url` | sesión | `common-files` |
+| `POST /common/identifiers` | sesión | `common-identifiers` |
+| `GET /internal/files/versions/pending-scan` | SYSTEM, SECURITY_ADMIN | `internal-files` |
+| `POST /internal/files/versions/:vid/scan-result` | SYSTEM, SECURITY_ADMIN | `internal-files` |
+| `POST /internal/storage-lifecycle/audio/:assetId/begin` | SYSTEM | `internal-storage-lifecycle` |
+| `POST /internal/storage-lifecycle/audio/:assetId/dispatch` | SYSTEM | `internal-storage-lifecycle` |
+| `POST /internal/storage-lifecycle/audio/:assetId/abort` | SYSTEM | `internal-storage-lifecycle` |
+| `POST /internal/storage-lifecycle/recover` | SYSTEM | `internal-storage-lifecycle` |
 
 ## Endpoints
 
@@ -70,6 +109,39 @@ except for `files.tenant_id`, are **not** FK-enforced.
   `SCAN_CLEAN`; returns an HMAC-signed URL (`node:crypto`, 15-min expiry). A real
   S3 presign would replace the deterministic string.
 
+## Cómo descarga cada contexto (BR-05)
+
+`GET /common/files/:id/content` es **«lo tuyo o revisor»** (`canActorReadOwnFile`):
+quien subió el archivo, `SECURITY_ADMIN` o `SUPERADMIN`. No se afloja. La lectura
+clínica va por la ruta del contexto, que autoriza y recién entonces pide los bytes
+con `FileUploadService.downloadForAuthorizedContext`:
+
+| Contexto | Ruta | Autoriza |
+| --- | --- | --- |
+| Resultado del paciente | `GET /diagnostic-results/me/:reportId/files/:fileId/content` | Titular + versión liberada y visible + `fileId` del informe. Todo lo demás, 404 |
+| Documento del expediente | `GET /charts/documents/:documentId/files/:fileId/content` | Lectura de la historia del paciente |
+| Adjunto de mensaje | `community-messaging-read` | Participación activa |
+
+**URL firmada (TX-09).** `POST /common/files/:id/download-url` sigue emitiendo
+`?versionId&expires&signature`, y ahora `GET :id/content` **valida** la firma cuando
+viene: HMAC inválido, 403; vencida, 410 `details.reason = URL_EXPIRED`. Sigue
+exigiendo sesión (no hay enlaces sueltos y cada lectura queda con su actor), así
+que la URL firmada **no** habilita al paciente a leer lo que no subió: para eso
+está la ruta del contexto.
+
+**Escaneo (TX-33).** La emisión de la URL firmada exige `SCAN_CLEAN`; si no, 422
+con `details.reason = SCAN_PENDING` (o `SCAN_INFECTED`). La lectura por contexto
+sirve versiones `SCAN_PENDING` y deja un aviso en el log. En Coolify el escaneo
+está apagado de forma explícita (`MALWARE_SCAN_ENABLED=false`, sin `worker-files`
+ni clamd): la UI debe decir «sin análisis antimalware». Encenderlo requiere
+`clamav` + `worker-files` como en `docker-compose.yml`.
+
+**Almacenamiento (TX-34).** El prefijo S3 por defecto es `uploads` (antes
+`audio-assets`, del módulo de audio). Con el adaptador `local`, `api_storage` es un
+volumen del contenedor: sobrevive al redespliegue pero **no tiene respaldo** hasta
+que operaciones lo declare; el endpoint interno `http://minio:9000` nunca se entrega
+al navegador.
+
 ## Concepts & defaults
 
 Type/status fields are `*_concept_id` FKs resolved from `CONCEPTS` (see
@@ -90,11 +162,11 @@ logged.
 
 ```
 common/
-├── controllers/   5 controllers (+ unit specs) — thin HTTP layer
+├── controllers/   6 controllers (+ unit specs) — thin HTTP layer
 ├── dto/           request/response DTOs + enums
 ├── entities/      MikroORM entities (schema `common`)
 ├── repositories/  7 stateless repositories (em passed in)
-├── services/      4 services (+ unit specs) — business logic & transactions
+├── services/      6 services (+ unit specs) — business logic & transactions
 └── common.module.ts
 ```
 
@@ -106,4 +178,3 @@ by the root Jest config. Run:
 ```
 NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/common
 ```
-

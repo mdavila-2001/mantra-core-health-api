@@ -43,10 +43,14 @@ decisión coordinada con el front, no el efecto colateral de un despliegue.
 | Variable | Default | Qué hace |
 | --- | --- | --- |
 | `AUTH_REFRESH_COOKIE_ENABLED` | `false` | `true` entrega el refresh token como cookie httpOnly y deja de devolverlo en el cuerpo. |
+| `AUTH_REFRESH_COOKIE_NAME` | `redesa_refresh` | Nombre de la cookie. El default es el nombre que ya tenía (TX-28); declarar `mch_refresh` lo cambia y el refresh la lee con ese nombre. |
+| `AUTH_REFRESH_COOKIE_PATH` | `/iam/auth/token/refresh` | `Path` de la cookie. Detrás de un prefijo de proxy (`/api/...`) hay que declararlo igual. |
+| `AUTH_REFRESH_COOKIE_SAMESITE` | `strict` | `strict`, `lax` o `none`. |
+| `AUTH_MFA_CHALLENGE_ENABLED` | `false` | Con `true`, el login de una cuenta con factor MFA verificado exige `mfaCode`: sin él, `401 details.reason = MFA_REQUIRED`; con uno que no valida, `MFA_INVALID` (TX-29). |
 | `AUTH_REFRESH_COOKIE_SECURE` | sigue a `NODE_ENV` | Fuerza o quita el atributo `Secure`. Sólo hace falta declararlo en pruebas o tras un proxy que termina TLS. |
 
-La cookie se llama `redesa_refresh` y va con `HttpOnly`, `SameSite=Strict`,
-`Path=/iam/auth/token/refresh` y `Max-Age` alineado con `JWT_REFRESH_TTL_DAYS`.
+Por defecto la cookie se llama `redesa_refresh` y va con `HttpOnly`, `SameSite=Strict`,
+`Path=/iam/auth/token/refresh` (los tres se pueden declarar, ver arriba) y `Max-Age` alineado con `JWT_REFRESH_TTL_DAYS`.
 El `Path` acotado es deliberado: la cookie no viaja en ninguna otra petición del
 API.
 
@@ -80,7 +84,38 @@ Cubierto por `test/integration/refresh-cookie.int-spec.ts`.
 4. **El cuerpo del refresco va vacío** (`{}`). Mandar `refreshToken` no rompe
    nada, pero se ignora.
 
-### Lo que hay que ajustar en la API antes de encenderlo
+### Mismo origen (TX-20)
+
+El despliegue previsto sirve el front y la API bajo **el mismo origen** (nginx
+delante, `apiBaseUrl` vacío en el front): la cookie `SameSite=Strict` viaja sin
+CORS. **No se abre CORS** para esto. Si algún día se separan dominios, la
+allowlist con `credentials: true` se declara en la API en un cambio aparte; el
+bloque de abajo describe ese caso y **no aplica** al despliegue de mismo origen.
+
+### Límite de tasa de las rutas de sesión (TX-19)
+
+`AuthThrottlerGuard` (guard global) usa como cubo: `ip + identificador` con hash
+en `login` y `forgot-password`, y el hash del refresh token (cuerpo o cookie) en
+`token/refresh`. Doce cuentas detrás de la misma IP no chocan entre sí; once
+contraseñas malas sobre una cuenta en un minuto dan `429 RATE_LIMITED` con
+`Retry-After`.
+
+### Tenant sin resolver (TX-16)
+
+Cuando no hay tenant resoluble, la API responde con el status de siempre (403 en
+`TenantContextInterceptor`, 422 en `requireTenantId`) y
+`details.reason = TENANT_REQUIRED` (o `TENANT_AMBIGUOUS` si el actor tiene varias
+membresías y no mandó `X-Tenant-Id`). El cliente abre el selector de organización.
+
+### Seguridad de la cuenta (ID-24)
+
+`POST /iam/auth/change-password` (contraseña actual + nueva; revoca las otras
+sesiones en la misma transacción), `GET /iam/me/sessions` y
+`POST /iam/me/sessions/:id/revoke`. Cualquier sesión autenticada; la titularidad
+sale del token. Errores de contraseña: 422 con `details.reason`
+(`CURRENT_PASSWORD_INVALID`, `PASSWORD_UNCHANGED`), nunca 401.
+
+### Lo que hay que ajustar en la API antes de encenderlo (sólo si se separan dominios)
 
 `main.ts` declara hoy `app.enableCors({ origin: false })` —CORS denegado por
 defecto, que es lo correcto mientras no haya un frontend con origen conocido—.

@@ -1,0 +1,12 @@
+import { chromium } from '@playwright/test';
+const BASE = process.env.BASE ?? 'http://localhost:4231';
+const OUT = process.env.OUT ?? '../verif-h1-h2/capturas';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const consola = [];
+page.on('console', (m) => { if (m.type() === 'error') consola.push(m.text()); });
+await page.goto(`${BASE}/auth`, { waitUntil: 'commit' });
+await page.getByTestId('login-form').waitFor({ timeout: 60_000 });
+await page.screenshot({ path: `${OUT}/00-smoke-login.png`, fullPage: true });
+console.log('login-form visible; consola errores:', consola.filter((t) => !/Content Security Policy|inline script/.test(t)).length);
+await browser.close();

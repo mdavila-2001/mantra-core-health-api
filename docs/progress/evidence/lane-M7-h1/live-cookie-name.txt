@@ -1,0 +1,3 @@
+PASS TX-28 AUTH_REFRESH_COOKIE_NAME=mch_refresh: la cookie se llama mch_refresh :: mch_refresh=<masked>; Max-Age=2592000; Path=/iam/auth/token/refresh; Expires=Mon, 26 Oct 2026 07:00:58 GMT; HttpOnly; SameSite=Lax
+PASS TX-28 AUTH_REFRESH_COOKIE_SAMESITE=lax se honra
+PASS TX-28 el refresh lee la cookie con ese nombre (200)

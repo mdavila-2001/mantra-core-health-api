@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ProceduresService } from './procedures.service';
 import { ResourceNotFoundException } from '../../../common';
+import { ForbiddenException } from '@nestjs/common';
 import { CLIN } from '../clinical.concepts';
 
 const actor = { id: 'user-1', roles: [] } as any;
@@ -22,14 +23,26 @@ function build() {
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const proceduresRepo = { findById: mockFn(), create: mockFn() };
   const serviceRequestsRepo = { findById: mockFn() };
+  const filesService = { createLink: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const clinicalRead = {
+    assertCanWriteHistory: mockFn().mockResolvedValue(undefined),
+  };
   const service = new ProceduresService(
     em as any,
     proceduresRepo,
     serviceRequestsRepo as any,
+    filesService as any,
     logger as any,
+    clinicalRead as any,
   );
-  return { service, proceduresRepo, serviceRequestsRepo };
+  return {
+    service,
+    proceduresRepo,
+    serviceRequestsRepo,
+    filesService,
+    clinicalRead,
+  };
 }
 
 describe('ProceduresService (UC-08-12)', () => {
@@ -91,5 +104,64 @@ describe('ProceduresService (UC-08-12)', () => {
         actor,
       ),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+});
+
+describe('ProceduresService · attachFile (ALV-033, odontología)', () => {
+  it('liga el archivo a ESTE procedimiento, con OwnerType.PROCEDURE', async () => {
+    const d = build();
+    d.proceduresRepo.findById.mockResolvedValue({ id: 'proc1' });
+    d.filesService.createLink.mockResolvedValue({
+      id: 'link1',
+      fileId: 'file1',
+      ownerId: 'proc1',
+      ownerType: 'PROCEDURE',
+      createdAt: new Date('2026-01-01'),
+    });
+
+    const result = await d.service.attachFile(
+      'proc1',
+      { fileId: 'file1' },
+      actor,
+    );
+
+    expect(d.filesService.createLink).toHaveBeenCalledWith(
+      'file1',
+      { ownerType: 'PROCEDURE', ownerId: 'proc1' },
+      actor,
+    );
+    expect(result.ownerId).toBe('proc1');
+  });
+
+  it('rechaza adjuntar a un procedimiento que no existe', async () => {
+    const d = build();
+    d.proceduresRepo.findById.mockResolvedValue(null);
+
+    await expect(
+      d.service.attachFile('missing', { fileId: 'file1' }, actor),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.filesService.createLink).not.toHaveBeenCalled();
+  });
+});
+
+describe('ProceduresService · MCH-007, adjuntar por id', () => {
+  it('pregunta por el paciente del procedimiento y, sin permiso, no crea el vínculo', async () => {
+    const d = build();
+    d.proceduresRepo.findById.mockResolvedValue({
+      id: 'proc1',
+      patientProfileId: 'paciente-ajeno',
+    });
+    d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+      new ForbiddenException('sin permiso'),
+    );
+
+    await expect(
+      d.service.attachFile('proc1', { fileId: 'f1' } as any, actor),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+      'paciente-ajeno',
+      actor,
+    );
+    expect(d.filesService.createLink).not.toHaveBeenCalled();
   });
 });

@@ -1,0 +1,75 @@
+== pasada 1: database/SQL/patches/2026-09-26_v4231_appointment_follow_up_of.sql
+BEGIN
+ALTER TABLE
+CREATE INDEX
+DO
+COMMIT
+exit=0
+== pasada 1: database/SQL/patches/2026-09-26_v4232_form_instance_id.sql
+BEGIN
+ALTER TABLE
+CREATE INDEX
+DO
+ALTER TABLE
+CREATE INDEX
+DO
+ALTER TABLE
+CREATE INDEX
+DO
+ALTER TABLE
+CREATE INDEX
+DO
+COMMIT
+exit=0
+== pasada 2: database/SQL/patches/2026-09-26_v4231_appointment_follow_up_of.sql
+BEGIN
+psql:database/SQL/patches/2026-09-26_v4231_appointment_follow_up_of.sql:33: NOTICE:  column "follow_up_of_booking_id" of relation "appointment_bookings" already exists, skipping
+ALTER TABLE
+psql:database/SQL/patches/2026-09-26_v4231_appointment_follow_up_of.sql:36: NOTICE:  relation "ix_appointment_bookings_follow_up_of_booking_id" already exists, skipping
+CREATE INDEX
+DO
+COMMIT
+exit=0
+== pasada 2: database/SQL/patches/2026-09-26_v4232_form_instance_id.sql
+BEGIN
+psql:database/SQL/patches/2026-09-26_v4232_form_instance_id.sql:32: NOTICE:  column "form_instance_id" of relation "medication_requests" already exists, skipping
+ALTER TABLE
+psql:database/SQL/patches/2026-09-26_v4232_form_instance_id.sql:34: NOTICE:  relation "ix_medication_requests_form_instance_id" already exists, skipping
+CREATE INDEX
+DO
+psql:database/SQL/patches/2026-09-26_v4232_form_instance_id.sql:45: NOTICE:  column "form_instance_id" of relation "service_requests" already exists, skipping
+ALTER TABLE
+psql:database/SQL/patches/2026-09-26_v4232_form_instance_id.sql:47: NOTICE:  relation "ix_service_requests_form_instance_id" already exists, skipping
+CREATE INDEX
+DO
+psql:database/SQL/patches/2026-09-26_v4232_form_instance_id.sql:58: NOTICE:  column "form_instance_id" of relation "care_plans" already exists, skipping
+ALTER TABLE
+psql:database/SQL/patches/2026-09-26_v4232_form_instance_id.sql:60: NOTICE:  relation "ix_care_plans_form_instance_id" already exists, skipping
+CREATE INDEX
+DO
+psql:database/SQL/patches/2026-09-26_v4232_form_instance_id.sql:71: NOTICE:  column "form_instance_id" of relation "appointment_bookings" already exists, skipping
+ALTER TABLE
+psql:database/SQL/patches/2026-09-26_v4232_form_instance_id.sql:73: NOTICE:  relation "ix_appointment_bookings_form_instance_id" already exists, skipping
+CREATE INDEX
+DO
+COMMIT
+exit=0
+== columnas
+chart.care_plans.form_instance_id uuid nullable=YES
+clinical.medication_requests.form_instance_id uuid nullable=YES
+clinical.service_requests.form_instance_id uuid nullable=YES
+forms.field_values.form_instance_id uuid nullable=NO
+scheduling.appointment_bookings.follow_up_of_booking_id uuid nullable=YES
+scheduling.appointment_bookings.form_instance_id uuid nullable=YES
+== FKs
+chart.care_plans fk_care_plans_form_instance_id -> forms.form_instances
+clinical.medication_requests fk_medication_requests_form_instance_id -> forms.form_instances
+clinical.service_requests fk_service_requests_form_instance_id -> forms.form_instances
+scheduling.appointment_bookings fk_appointment_bookings_follow_up_of_booking_id -> scheduling.appointment_bookings
+scheduling.appointment_bookings fk_appointment_bookings_form_instance_id -> forms.form_instances
+== índices
+chart.ix_care_plans_form_instance_id
+clinical.ix_medication_requests_form_instance_id
+clinical.ix_service_requests_form_instance_id
+scheduling.ix_appointment_bookings_follow_up_of_booking_id
+scheduling.ix_appointment_bookings_form_instance_id

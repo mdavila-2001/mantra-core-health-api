@@ -1,0 +1,131 @@
+{
+  "code": "GINOBS_CTRL_PUERPERIO",
+  "name": "Control de puerperio",
+  "specialty": {
+    "code": "GINECOLOGIA_OBSTETRICIA",
+    "display": "Ginecología y obstetricia"
+  },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Recomendaciones de la OMS sobre la atención materna y neonatal para una experiencia posnatal positiva (2022)",
+    "organization": "Organización Mundial de la Salud (OMS)",
+    "url": "https://www.who.int/publications/i/item/9789240045989",
+    "license": "CC BY-NC-SA 3.0 IGO",
+    "retrievedAt": "2026-10-02",
+    "note": "Contactos posnatales de la OMS: sangrado, infección, presión, lactancia, ánimo y anticoncepción."
+  },
+  "fields": [
+    {
+      "section": "Consulta",
+      "code": "tipo_de_evaluacion",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": ["Primera vez", "Control"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "tipo_parto",
+      "name": "Tipo de parto",
+      "dataType": "string",
+      "required": true,
+      "options": ["Vaginal", "Cesárea"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "dias_posparto",
+      "name": "Días posparto",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "presion_arterial_sistolica",
+      "name": "Presión arterial sistólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "presion_arterial_diastolica",
+      "name": "Presión arterial diastólica (mmHg)",
+      "dataType": "integer",
+      "required": true
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "temperatura",
+      "name": "Temperatura (°C)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "loquios",
+      "name": "Loquios",
+      "dataType": "string",
+      "required": false,
+      "options": ["Normales", "Abundantes", "Fétidos"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "involucion_uterina",
+      "name": "Involución uterina",
+      "dataType": "string",
+      "required": false,
+      "options": ["Adecuada", "Subinvolución"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "lactancia",
+      "name": "Lactancia",
+      "dataType": "string",
+      "required": false,
+      "options": ["Exclusiva", "Mixta", "Sin lactancia"]
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "animo_puerperio",
+      "name": "Ánimo",
+      "dataType": "json",
+      "required": false,
+      "options": [
+        "Tristeza persistente",
+        "Ansiedad",
+        "Ideas de hacerse daño",
+        "Ninguno"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: puerperio",
+      "code": "anticoncepcion_posparto",
+      "name": "Anticoncepción",
+      "dataType": "string",
+      "required": false,
+      "options": ["Elegida e iniciada", "Elegida, pendiente", "No desea"]
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Conclusión y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

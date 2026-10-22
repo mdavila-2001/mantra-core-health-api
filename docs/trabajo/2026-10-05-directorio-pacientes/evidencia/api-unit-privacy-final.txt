@@ -1,0 +1,14 @@
+yarn.cmd : (node:19348) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+En línea: 2 Carácter: 1
++ yarn.cmd test --runInBand insurer-patients 2>&1 | Tee-Object -FilePat ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:19348) Ex...nge at any time:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 4 passed, 4 total
+Tests:       39 passed, 39 total
+Snapshots:   0 total
+Time:        74.218 s
+Ran all test suites matching insurer-patients.

@@ -10,9 +10,22 @@ import {
 } from '../../../common';
 import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
 import { LedgerService } from './ledger.service';
+import { AssetService } from './asset.service';
+import { LiabilityService } from './liability.service';
+import { buildAmortizationSchedule } from './liability-amortization';
+import { ACCT } from '../accounting.concepts';
+import {
+  AccountsRepository,
+  AssetRepository,
+  LiabilityRepository,
+  FiscalRepository,
+} from '../repositories';
 import { PracticeTenantLookupService } from '../../practice/services';
 import { LedgerService as BillingLedgerService } from '../../billing/services';
 import { NotificationsService } from '../../messaging/services';
+import { Liabilities, type Accounts } from '../entities';
+import { AuditTrailService } from '../../audit/services';
+import { toCents, fromCents } from './money';
 import { Appointments, Encounters } from '../../clinical/entities';
 import { Invoices } from '../../billing/entities';
 import { BILL } from '../../billing/billing.concepts';
@@ -22,7 +35,28 @@ import {
   RegisterConsultationIncomeDto,
   RegisterSimpleEntryDto,
   PractitionerEntryResponseDto,
+  CapitalizeAssetDto,
+  AssetResponseDto,
+  AssetSummaryDto,
+  SetAutomationDto,
+  RegisterAssetProgressDto,
+  CreateOwnLiabilityDto,
+  LiabilityCreatedResponseDto,
+  LiabilitySummaryDto,
+  LiabilityScheduleDto,
+  LiabilityScheduleResponseDto,
+  RegisterLiabilityProgressDto,
+  ProgressRegisteredResponseDto,
 } from '../dto';
+
+/** Recursos sellados en la cadena WORM cuando cambia su interruptor (T26 · AC-26-8). */
+const ASSET_AUDIT_ENTITY = 'asset';
+const LIABILITY_AUDIT_ENTITY = 'liability';
+
+/** `YYYY-MM-DD` de una fecha de la base, o `null` si no la hay. */
+function toIsoDate(value: Date | undefined): string | null {
+  return value ? value.toISOString().slice(0, 10) : null;
+}
 
 /**
  * Carril 18 — auto-servicio contable del doctor. Es una capa fina sobre
@@ -39,6 +73,13 @@ export class PractitionerAccountingService {
     private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly billingLedgerService: BillingLedgerService,
     private readonly notificationsService: NotificationsService,
+    private readonly assetService: AssetService,
+    private readonly liabilityService: LiabilityService,
+    private readonly assetRepo: AssetRepository,
+    private readonly liabilityRepo: LiabilityRepository,
+    private readonly fiscalRepo: FiscalRepository,
+    private readonly accountsRepo: AccountsRepository,
+    private readonly auditTrail: AuditTrailService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PractitionerAccountingService.name);
@@ -236,7 +277,7 @@ export class PractitionerAccountingService {
     const notificationRequestId = await this.notifyAccounting(
       actor,
       created.id,
-      `Registraste el ingreso de la consulta (factura ${invoice.invoiceNumber}) por ${amount}.`,
+      `Registró el ingreso de la consulta (factura ${invoice.invoiceNumber}) por ${amount}.`,
     );
 
     this.logger.info(
@@ -299,7 +340,7 @@ export class PractitionerAccountingService {
     const notificationRequestId = await this.notifyAccounting(
       actor,
       created.id,
-      `Registraste un ${label}: ${dto.description} (${dto.amount}).`,
+      `Registró un ${label}: ${dto.description} (${dto.amount}).`,
     );
 
     return {
@@ -309,6 +350,436 @@ export class PractitionerAccountingService {
       totalAmount: created.totalAmount,
       invoiceId: null,
       notificationRequestId,
+    };
+  }
+
+  /* ============================================================================
+      FT-26 — auto-servicio de activos y pasivos del doctor.
+
+      Misma forma que el resto de este servicio: `assertOwnsPractice` primero,
+      y después delegar en el motor genérico (`AssetService`/`LiabilityService`)
+      en vez de reimplementar la partida doble. Lo nuevo de verdad es la
+      creación de un pasivo con su cronograma —eso no existía para nadie,
+      ni siquiera para `SECURITY_ADMIN`— y el interruptor de automatización.
+      ========================================================================== */
+
+  /** Exige que el activo exista y que su práctica sea del profesional. */
+  private async assertOwnsAsset(
+    actor: AuthenticatedUser,
+    assetId: string,
+  ): Promise<{ practiceId: string }> {
+    const em = this.em.fork();
+    const asset = await this.assetRepo.findById(em, assetId);
+    if (!asset) {
+      throw new ResourceNotFoundException('Activo no encontrado', { assetId });
+    }
+    await this.assertOwnsPractice(actor, asset.practiceId);
+    return { practiceId: asset.practiceId };
+  }
+
+  /** Exige que el pasivo exista y que su práctica sea del profesional. */
+  private async assertOwnsLiability(
+    actor: AuthenticatedUser,
+    liabilityId: string,
+  ): Promise<{ practiceId: string; code: string }> {
+    const em = this.em.fork();
+    const liability = await this.liabilityRepo.findById(em, liabilityId);
+    if (!liability) {
+      throw new ResourceNotFoundException('Pasivo no encontrado', {
+        liabilityId,
+      });
+    }
+    await this.assertOwnsPractice(actor, liability.practiceId);
+    return { practiceId: liability.practiceId, code: liability.code };
+  }
+
+  /**
+   * La moneda de cada cuenta pedida, en una sola consulta (T26 · AC-26-18).
+   * `assets` y `liabilities` no declaran moneda propia en el modelo canónico
+   * (`diagram_16_accounting.puml`, entidades `assets`/`liabilities`); la que
+   * les corresponde es la de su cuenta contable, `accounts.currency_concept_id`.
+   */
+  private async currencyByAccount(
+    em: EntityManager,
+    accountIds: readonly (string | undefined)[],
+  ): Promise<ReadonlyMap<string, string | null>> {
+    const ids = accountIds.filter((id): id is string => Boolean(id));
+    const accounts: Accounts[] = await this.accountsRepo.findByIds(em, ids);
+    return new Map(accounts.map((c) => [c.id, c.currencyConceptId ?? null]));
+  }
+
+  /** Los activos de la práctica, para el listado del auto-servicio. */
+  async listAssets(
+    practiceId: string,
+    actor: AuthenticatedUser,
+  ): Promise<readonly AssetSummaryDto[]> {
+    await this.assertOwnsPractice(actor, practiceId);
+    const em = this.em.fork();
+    const assets = await this.assetRepo.listByPractice(em, practiceId);
+    const currencies = await this.currencyByAccount(
+      em,
+      assets.map((a) => a.accountId),
+    );
+    return assets.map((asset) => ({
+      id: asset.id,
+      code: asset.code,
+      name: asset.name,
+      statusConceptId: asset.statusConceptId,
+      assetTypeConceptId: asset.assetTypeConceptId ?? null,
+      depreciationMethodConceptId: asset.depreciationMethodConceptId ?? null,
+      accountId: asset.accountId ?? null,
+      currencyConceptId: asset.accountId
+        ? (currencies.get(asset.accountId) ?? null)
+        : null,
+      acquisitionDate: toIsoDate(asset.acquisitionDate),
+      acquisitionCost: asset.acquisitionCost ?? null,
+      usefulLifeMonths: asset.usefulLifeMonths ?? null,
+      salvageValue: asset.salvageValue ?? null,
+      accumulatedDepreciation: asset.accumulatedDepreciation ?? null,
+      bookValue: asset.bookValue ?? null,
+      automated: asset.automated,
+    }));
+  }
+
+  /** Da de alta un activo propio. Delega en {@link AssetService.capitalize} tal cual. */
+  async capitalizeOwnAsset(
+    dto: CapitalizeAssetDto,
+    actor: AuthenticatedUser,
+  ): Promise<AssetResponseDto> {
+    await this.assertOwnsPractice(actor, dto.practiceId);
+    return this.assetService.capitalize(dto, actor);
+  }
+
+  /**
+   * Prende o apaga la automatización de un activo propio. Persistente y
+   * auditable (T26 · AC-26-8): la fila guarda quién y cuándo
+   * (`updated_by_user_id`, `updated_at`) y la cadena de auditoría WORM
+   * (CAN-AUDIT-001, la misma que sella cada transición contable en
+   * `LedgerService`) recibe un evento con el valor nuevo en el verbo.
+   */
+  async setAssetAutomation(
+    assetId: string,
+    dto: SetAutomationDto,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.assertOwnsAsset(actor, assetId);
+    await this.em.transactional(async (tx) => {
+      const asset = await this.assetRepo.setAutomated(
+        tx,
+        assetId,
+        dto.automated,
+        actor.id,
+      );
+      if (!asset) {
+        throw new ResourceNotFoundException('Activo no encontrado', {
+          assetId,
+        });
+      }
+      await this.auditTrail.record(tx, actor, {
+        action: dto.automated
+          ? 'ASSET_AUTOMATION_ENABLED'
+          : 'ASSET_AUTOMATION_DISABLED',
+        entity: ASSET_AUDIT_ENTITY,
+        entityId: assetId,
+      });
+    });
+  }
+
+  /**
+   * "Registrar avance" de un activo: una corrida de depreciación acotada a
+   * ESTE activo (`RunDepreciationDto.assetId`), sobre el período fiscal
+   * abierto que cubre hoy — resuelto acá porque el profesional no tiene
+   * cómo listar períodos fiscales (`accounting-fiscal.controller.ts` es
+   * `SECURITY_ADMIN` puro). Corre tanto si `automated` está encendido como
+   * apagado: el interruptor decide si ADEMÁS un proceso automático puede
+   * correrla sola, no si el profesional puede pedirla a mano.
+   */
+  async registerAssetProgress(
+    assetId: string,
+    dto: RegisterAssetProgressDto,
+    actor: AuthenticatedUser,
+  ): Promise<ProgressRegisteredResponseDto> {
+    const { practiceId } = await this.assertOwnsAsset(actor, assetId);
+    const postingDate = dto.postingDate
+      ? new Date(dto.postingDate)
+      : new Date();
+
+    const em = this.em.fork();
+    const period = await this.fiscalRepo.findOpenPeriodForPractice(
+      em,
+      practiceId,
+      postingDate,
+      ACCT.PERIOD_OPEN,
+    );
+    if (!period) {
+      throw new PreconditionFailedException(
+        'No hay un período fiscal abierto para esa fecha',
+        { practiceId, postingDate: postingDate.toISOString().slice(0, 10) },
+      );
+    }
+
+    const result = await this.assetService.runDepreciation(
+      {
+        practiceId,
+        fiscalPeriodId: period.id,
+        postingDate: postingDate.toISOString().slice(0, 10),
+        depreciationExpenseAccountId: dto.depreciationExpenseAccountId,
+        accumulatedDepreciationAccountId: dto.accumulatedDepreciationAccountId,
+        assetId,
+      },
+      actor,
+    );
+    if (result.transactionIds.length === 0) {
+      throw new PreconditionFailedException(
+        'Este activo no tiene depreciación pendiente para el período abierto',
+        { assetId, fiscalPeriodId: period.id },
+      );
+    }
+    // `runDepreciation` no devuelve el importe, sólo el conteo y los ids de
+    // asiento: se relee la fila que acaba de crear (idempotente por
+    // activo/periodo, `AssetRepository.findDepreciation`) para poder
+    // devolver el monto que de verdad se depreció.
+    const depreciation = await this.assetRepo.findDepreciation(
+      em,
+      assetId,
+      period.id,
+    );
+    return {
+      transactionId: result.transactionIds[0],
+      amount: depreciation?.amount ?? '0.00',
+    };
+  }
+
+  /** Los pasivos de la práctica, para el listado del auto-servicio. */
+  async listLiabilities(
+    practiceId: string,
+    actor: AuthenticatedUser,
+  ): Promise<readonly LiabilitySummaryDto[]> {
+    await this.assertOwnsPractice(actor, practiceId);
+    const em = this.em.fork();
+    const liabilities = await this.liabilityRepo.listByPractice(em, practiceId);
+    const currencies = await this.currencyByAccount(
+      em,
+      liabilities.map((l) => l.accountId),
+    );
+    return liabilities.map((liability) => ({
+      id: liability.id,
+      code: liability.code,
+      name: liability.name,
+      creditorName: liability.creditorName ?? null,
+      liabilityTypeConceptId: liability.liabilityTypeConceptId ?? null,
+      accountId: liability.accountId ?? null,
+      currencyConceptId: liability.accountId
+        ? (currencies.get(liability.accountId) ?? null)
+        : null,
+      principalAmount: liability.principalAmount ?? null,
+      outstandingAmount: liability.outstandingAmount ?? null,
+      interestRate: liability.interestRate ?? null,
+      startDate: toIsoDate(liability.startDate),
+      dueDate: toIsoDate(liability.dueDate),
+      statusConceptId: liability.statusConceptId,
+      automated: liability.automated,
+    }));
+  }
+
+  /**
+   * El cronograma cuota por cuota de un pasivo propio (T26 · AC-26-10). La
+   * consulta existía en el repositorio (`listSchedules`) y ninguna ruta la
+   * publicaba: era una falta de contrato, no de modelo.
+   */
+  async readLiabilitySchedule(
+    liabilityId: string,
+    actor: AuthenticatedUser,
+  ): Promise<LiabilityScheduleResponseDto> {
+    await this.assertOwnsLiability(actor, liabilityId);
+    const em = this.em.fork();
+    const liability = await this.liabilityRepo.findById(em, liabilityId);
+    if (!liability) {
+      throw new ResourceNotFoundException('Pasivo no encontrado', {
+        liabilityId,
+      });
+    }
+    const [currencies, rows] = await Promise.all([
+      this.currencyByAccount(em, [liability.accountId]),
+      this.liabilityRepo.listSchedules(em, liabilityId),
+    ]);
+    return {
+      liabilityId: liability.id,
+      code: liability.code,
+      principalAmount: liability.principalAmount ?? null,
+      outstandingAmount: liability.outstandingAmount ?? null,
+      currencyConceptId: liability.accountId
+        ? (currencies.get(liability.accountId) ?? null)
+        : null,
+      schedule: rows.map((row) => ({
+        id: row.id,
+        installmentNumber: row.installmentNumber,
+        dueDate: toIsoDate(row.dueDate) ?? undefined,
+        principalDue: row.principalDue,
+        interestDue: row.interestDue,
+        paidAmount: row.paidAmount ?? '0.00',
+        statusConceptId: row.statusConceptId,
+      })),
+    };
+  }
+
+  /**
+   * Da de alta un pasivo propio con su cronograma de amortización — ver el
+   * porqué del método (cuota de principal fijo, mensual) en
+   * {@link buildAmortizationSchedule}. No existía ningún alta de pasivo
+   * antes de FT-26: `LiabilityService` sólo sabía liquidar cuotas de un
+   * pasivo que ya existiera.
+   */
+  async createOwnLiability(
+    dto: CreateOwnLiabilityDto,
+    actor: AuthenticatedUser,
+  ): Promise<LiabilityCreatedResponseDto> {
+    await this.assertOwnsPractice(actor, dto.practiceId);
+
+    return this.em.transactional(async (tx) => {
+      const clash = await tx.findOne(Liabilities, {
+        practiceId: dto.practiceId,
+        code: dto.code,
+      });
+      if (clash) {
+        throw new ConflictException(
+          'Ya existe un pasivo con ese código en la práctica',
+          { code: dto.code },
+        );
+      }
+
+      const startDate = new Date(dto.startDate);
+      const installments = buildAmortizationSchedule({
+        principalAmount: dto.principalAmount,
+        annualInterestRate: dto.interestRate,
+        installments: dto.installments,
+        startDate,
+      });
+
+      const liability = this.liabilityRepo.createLiability(tx, {
+        practiceId: dto.practiceId,
+        code: dto.code,
+        name: dto.name,
+        accountId: dto.accountId,
+        principalAmount: dto.principalAmount,
+        outstandingAmount: dto.principalAmount,
+        interestRate: dto.interestRate,
+        startDate,
+        dueDate: installments[installments.length - 1]?.dueDate,
+        creditorName: dto.creditorName,
+        statusConceptId: ACCT.LIABILITY_ACTIVE,
+        automated: dto.automated ?? true,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      const rows = installments.map((installment) =>
+        this.liabilityRepo.createSchedule(tx, {
+          liabilityId: liability.id,
+          installmentNumber: installment.installmentNumber,
+          dueDate: installment.dueDate,
+          principalDue: installment.principalDue,
+          interestDue: installment.interestDue,
+          statusConceptId: ACCT.LIAB_SCHEDULE_PENDING,
+          actorUserId: actor.id,
+        }),
+      );
+      await tx.flush();
+
+      const schedule: LiabilityScheduleDto[] = rows.map((row) => ({
+        id: row.id,
+        installmentNumber: row.installmentNumber,
+        dueDate: row.dueDate?.toISOString().slice(0, 10),
+        principalDue: row.principalDue,
+        interestDue: row.interestDue,
+        paidAmount: row.paidAmount ?? '0.00',
+        statusConceptId: row.statusConceptId,
+      }));
+
+      return { id: liability.id, code: liability.code, schedule };
+    });
+  }
+
+  /** Prende o apaga la automatización de un pasivo propio. Auditable como en activos (AC-26-8). */
+  async setLiabilityAutomation(
+    liabilityId: string,
+    dto: SetAutomationDto,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    await this.assertOwnsLiability(actor, liabilityId);
+    await this.em.transactional(async (tx) => {
+      const liability = await this.liabilityRepo.setAutomated(
+        tx,
+        liabilityId,
+        dto.automated,
+        actor.id,
+      );
+      if (!liability) {
+        throw new ResourceNotFoundException('Pasivo no encontrado', {
+          liabilityId,
+        });
+      }
+      await this.auditTrail.record(tx, actor, {
+        action: dto.automated
+          ? 'LIABILITY_AUTOMATION_ENABLED'
+          : 'LIABILITY_AUTOMATION_DISABLED',
+        entity: LIABILITY_AUDIT_ENTITY,
+        entityId: liabilityId,
+      });
+    });
+  }
+
+  /**
+   * "Registrar avance" de un pasivo: liquida la próxima cuota pendiente
+   * (nunca una fuera de orden — ver {@link LiabilityRepository.findNextDueSchedule}).
+   * Corre tanto si `automated` está encendido como apagado, por la misma
+   * razón que en activos.
+   */
+  async registerLiabilityProgress(
+    liabilityId: string,
+    dto: RegisterLiabilityProgressDto,
+    actor: AuthenticatedUser,
+  ): Promise<ProgressRegisteredResponseDto> {
+    const { practiceId } = await this.assertOwnsLiability(actor, liabilityId);
+    const em = this.em.fork();
+    const schedule = await this.liabilityRepo.findNextDueSchedule(
+      em,
+      liabilityId,
+      ACCT.LIAB_SCHEDULE_PENDING,
+    );
+    if (!schedule) {
+      throw new PreconditionFailedException(
+        'Este pasivo no tiene cuotas pendientes',
+        { liabilityId },
+      );
+    }
+
+    const principalComponent = schedule.principalDue ?? '0.00';
+    const interestComponent = schedule.interestDue ?? '0.00';
+    // Centésimas enteras, nunca `float`: es la misma aritmética con la que
+    // `payLiability` valida principal + interés == importe (AC-26-12).
+    const amount = fromCents(
+      toCents(principalComponent) + toCents(interestComponent),
+    );
+
+    const result = await this.liabilityService.payLiability(
+      liabilityId,
+      {
+        practiceId,
+        amount,
+        principalComponent,
+        interestComponent,
+        bankAccountId: dto.bankAccountId,
+        interestExpenseAccountId: dto.interestExpenseAccountId,
+        liabilityScheduleId: schedule.id,
+      },
+      actor,
+    );
+
+    return {
+      transactionId: result.transactionId,
+      installmentNumber: schedule.installmentNumber,
+      amount,
     };
   }
 

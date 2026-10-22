@@ -1,0 +1,21 @@
+=== ESTADO DE LA BASE ANTES DEL CICLO LIMPIO · 2026-09-20T08:17:26-04:00 ===
+ tablas 
+--------
+   1201
+(1 row)
+
+  code  |                  id                  |           state_concept_id           
+--------+--------------------------------------+--------------------------------------
+ EMAIL  | 4c534216-ade0-5c30-ab53-a23c788325f7 | d0f53ea3-7e50-5578-add3-270341b1186c
+ IN_APP | ed1b78a4-4482-5bed-b9f6-5e05c8f1a60f | d0f53ea3-7e50-5578-add3-270341b1186c
+(2 rows)
+
+ codigos_duplicados 
+--------------------
+                 18
+(1 row)
+
+
+Lo que el paquete en disco (revision 2.4.0-v4.0.11) dice que deberia haber:
+  IN_APP  d0240273-f75e-5405-9db2-8dd6769eb263  state=38a1d301-f40d-5b17-a695-5e6d605f8b19
+  EMAIL   96be0595-d496-5457-95ac-e8c77f3da292  state=38a1d301-f40d-5b17-a695-5e6d605f8b19

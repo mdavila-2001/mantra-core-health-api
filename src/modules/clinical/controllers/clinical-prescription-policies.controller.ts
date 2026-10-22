@@ -10,7 +10,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PrescriptionSignaturePoliciesService } from '../services';
 import {
   CreatePrescriptionSignaturePolicyDto,
@@ -18,7 +23,7 @@ import {
 } from '../dto';
 
 /**
- * Administración de la política PARAMETRIZABLE de firma de receta (REDESA D-05 /
+ * Administración de la política PARAMETRIZABLE de firma de receta (ALOVIDA D-05 /
  * CAN-RX). Alta, listado y desactivación (sin borrado duro). La resolución en el
  * flujo de emisión es FAIL-SAFE: sin política vigente aplicable no se exige firma.
  */
@@ -43,6 +48,11 @@ export class ClinicalPrescriptionPoliciesController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create conforme al contrato `Promise<PrescriptionSignaturePolicyResponseDto>`.
    */
+  @Audited({
+    action: 'PRESCRIPTION_SIGNATURE_POLICY_CREATED',
+    entity: 'prescription_signature_policy',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una política de firma de receta' })
@@ -74,6 +84,11 @@ export class ClinicalPrescriptionPoliciesController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de deactivate conforme al contrato `Promise<PrescriptionSignaturePolicyResponseDto>`.
    */
+  @Audited({
+    action: 'PRESCRIPTION_SIGNATURE_POLICY_DEACTIVATED',
+    entity: 'prescription_signature_policy',
+    entityId: 'param:id',
+  })
   @Post(':id/deactivate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

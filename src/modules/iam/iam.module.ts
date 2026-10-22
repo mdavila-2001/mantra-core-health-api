@@ -11,7 +11,17 @@ import { AuthzModule } from '../authz/authz.module';
 // El alta de paciente anota el seguro declarado; `insurance` no importa `iam`,
 // así que la dependencia no cierra ciclo.
 import { InsuranceModule } from '../insurance/insurance.module';
-import { IamUsersController, IamAuthController } from './controllers';
+import { TerminologyModule } from '../terminology/terminology.module';
+// El auto-registro de profesional (P20) da de alta el consultorio propio
+// declarado en el alta con `OwnSiteProvisioningService`, dentro de su propia
+// transacción; `practice` no importa `iam`, así que la dependencia no cierra
+// ciclo.
+import { PracticeModule } from '../practice/practice.module';
+import {
+  IamUsersController,
+  IamAuthController,
+  IamAccountSecurityController,
+} from './presentation/controllers';
 import {
   IamUsersService,
   IamUsersReadService,
@@ -21,11 +31,14 @@ import {
   IamAuthService,
   IamAssistedRegistrationService,
   IamPatientSelfRegistrationService,
+  IamOrganizationRepresentativesService,
   IamOrganizationSelfRegistrationService,
+  IamRegistrationDocumentUploadService,
   IamPractitionerSelfRegistrationService,
   IamPasswordResetService,
   IamEmailVerificationService,
-} from './services';
+  IamAccountSecurityService,
+} from './application/services';
 import {
   UsersRepository,
   CredentialsRepository,
@@ -40,7 +53,7 @@ import {
   EmailVerificationsRepository,
   IamApiKeysRepository,
   PasswordResetsRepository,
-} from './repositories';
+} from './infrastructure/repositories';
 
 /**
  * Módulo IAM: identidad, credenciales, sesiones, MFA, dispositivos, roles
@@ -51,6 +64,9 @@ import {
  * persona y su perfil, su documento de identidad y su correo, y su membresía en
  * el tenant por defecto; el de organizaciones crea la cuenta del owner junto al
  * tenant y su membresía OWNER. Ambos encolan la verificación del correo.
+ * Importa además Practice: el auto-registro de profesional cruza un quinto
+ * módulo cuando declara `ownSite` (ALV-005/006 · P20), dando de alta su
+ * consultorio propio en la misma transacción del alta.
  */
 @Module({
   imports: [
@@ -61,8 +77,14 @@ import {
     DirectoryModule,
     AuthzModule,
     InsuranceModule,
+    TerminologyModule,
+    PracticeModule,
   ],
-  controllers: [IamUsersController, IamAuthController],
+  controllers: [
+    IamUsersController,
+    IamAuthController,
+    IamAccountSecurityController,
+  ],
   providers: [
     // Repositorios
     UsersRepository,
@@ -87,13 +109,23 @@ import {
     IamAuthService,
     IamAssistedRegistrationService,
     IamPatientSelfRegistrationService,
+    IamOrganizationRepresentativesService,
     IamOrganizationSelfRegistrationService,
+    IamRegistrationDocumentUploadService,
     IamPractitionerSelfRegistrationService,
     IamPasswordResetService,
     IamEmailVerificationService,
+    IamAccountSecurityService,
   ],
   // `IamUsersService` se exporta para el seed de arranque (`SeedModule`), que
   // necesita crear el primer `SECURITY_ADMIN` con el mismo hasheo que la API.
-  exports: [IamUsersService],
+  // Los dos de autorregistro se exportan por lo mismo (H2, `PeopleSeedService`):
+  // reusan la alta completa (persona + perfil + licencia en una transacción) en
+  // vez de reimplementarla a mano por segunda vez con MikroORM directo.
+  exports: [
+    IamUsersService,
+    IamPractitionerSelfRegistrationService,
+    IamPatientSelfRegistrationService,
+  ],
 })
 export class IamModule {}

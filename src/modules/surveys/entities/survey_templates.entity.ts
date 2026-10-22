@@ -6,7 +6,7 @@ import { randomUUID } from 'node:crypto';
  *
  * La plantilla es el instrumento tal como lo piensa el profesional («Encuesta
  * de satisfacción post-consulta»). No contiene preguntas: éstas cuelgan de una
- * versión, porque REDESA exige versionado y vigencia (CAN-VERSION-001) y una
+ * versión, porque ALOVIDA exige versionado y vigencia (CAN-VERSION-001) y una
  * pregunta editada después de que alguien respondió invalidaría su respuesta.
  */
 @Entity({ schema: 'surveys', tableName: 'survey_templates' })

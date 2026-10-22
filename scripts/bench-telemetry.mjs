@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // =========================================================================
-// Mantra Core Technologies · REDESA Health Ecosystem
+// Mantra Core Technologies · ALOVIDA Health Ecosystem
 // Mide el coste real de la instrumentación sobre un endpoint que recorre el
 // camino completo (controller -> guard -> servicio -> span de negocio ->
 // PostgreSQL). Sin esto, cualquier afirmación sobre "la sobrecarga es

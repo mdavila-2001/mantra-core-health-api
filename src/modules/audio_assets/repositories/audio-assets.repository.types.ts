@@ -2,6 +2,7 @@ import type {
   AudioGenerationMode,
   AudioSynthesisProfile,
 } from '../domain/audio.types';
+import type { KnownPhysicalObjectIdentity } from '../../../common/storage/physical-object-identity';
 
 export interface CreateAudioAssetInput extends AudioSynthesisProfile {
   assetKey: string;
@@ -30,6 +31,7 @@ export interface GenerationEventInput {
 }
 
 export interface MarkAudioAssetReadyInput {
+  physicalIdentity?: KnownPhysicalObjectIdentity;
   assetId: string;
   storageUri: string;
   checksum: string;

@@ -23,22 +23,29 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+  em.fork = mockFn(() => em);
   const invoicesRepo = {
     findByNumber: mockFn(),
     findById: mockFn(),
     create: mockFn(),
     createLine: mockFn(),
+    findByPracticePage: mockFn().mockResolvedValue([]),
+    findLinesByInvoice: mockFn().mockResolvedValue([]),
   };
   const linksRepo = { create: mockFn() };
+  const practiceTenantLookup = {
+    findTenantOfPractice: mockFn().mockResolvedValue('tenant-1'),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new InvoicesService(
     em as any,
     invoicesRepo as any,
     linksRepo,
+    practiceTenantLookup as any,
     logger as any,
   );
-  return { service, tx, em, invoicesRepo, linksRepo };
+  return { service, tx, em, invoicesRepo, linksRepo, practiceTenantLookup };
 }
 
 describe('InvoicesService', () => {
@@ -218,6 +225,92 @@ describe('InvoicesService', () => {
       expect(res.installmentCount).toBe(2);
       expect(source.statusConceptId).toBe(BILL.INVOICE_PAYMENT_PLAN);
       expect(d.linksRepo.create).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('listByPractice (CV-12)', () => {
+    it('pages by id and returns a cursor when there is more', async () => {
+      const d = build();
+      const row = (id: string) => ({
+        id,
+        invoiceNumber: id,
+        patientProfileId: 'p1',
+        statusConceptId: BILL.INVOICE_ISSUED,
+        issueDate: new Date('2026-01-01'),
+        total: '10.00',
+        balance: '10.00',
+        createdAt: new Date('2026-01-01'),
+      });
+      d.invoicesRepo.findByPracticePage.mockResolvedValue([row('a'), row('b')]);
+
+      const res = await d.service.listByPractice('pr1', 'tenant-1', {
+        limit: 1,
+      });
+
+      expect(d.practiceTenantLookup.findTenantOfPractice).toHaveBeenCalledWith(
+        'pr1',
+      );
+      expect(d.invoicesRepo.findByPracticePage).toHaveBeenCalledWith(
+        d.em,
+        'pr1',
+        undefined,
+        2,
+      );
+      expect(res.items).toHaveLength(1);
+      expect(res.nextCursor).not.toBeNull();
+    });
+
+    it('throws 404 without a query when the practice belongs to another tenant (isolation)', async () => {
+      const d = build();
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('tenant-b');
+      await expect(
+        d.service.listByPractice('pr1', 'tenant-a', {}),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.invoicesRepo.findByPracticePage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getDetail (CV-12)', () => {
+    it('throws 404 without distinguishing another practice from a missing invoice', async () => {
+      const d = build();
+      d.invoicesRepo.findById.mockResolvedValue({
+        id: 'inv1',
+        practiceId: 'other-practice',
+      });
+      await expect(
+        d.service.getDetail('inv1', 'pr1', 'tenant-1'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.invoicesRepo.findLinesByInvoice).not.toHaveBeenCalled();
+    });
+
+    it('throws 404 when the practice belongs to another tenant, before touching the invoice (isolation)', async () => {
+      const d = build();
+      d.practiceTenantLookup.findTenantOfPractice.mockResolvedValue('tenant-b');
+      await expect(
+        d.service.getDetail('inv1', 'pr1', 'tenant-a'),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.invoicesRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('returns the header and its lines', async () => {
+      const d = build();
+      d.invoicesRepo.findById.mockResolvedValue({
+        id: 'inv1',
+        practiceId: 'pr1',
+        invoiceNumber: 'F-1',
+        patientProfileId: 'p1',
+        statusConceptId: BILL.INVOICE_ISSUED,
+      });
+      d.invoicesRepo.findLinesByInvoice.mockResolvedValue([
+        { id: 'l1', quantity: '1', unitPrice: '10.00' },
+      ]);
+
+      const res = await d.service.getDetail('inv1', 'pr1', 'tenant-1');
+
+      expect(res.id).toBe('inv1');
+      expect(res.lines).toEqual([
+        expect.objectContaining({ id: 'l1', quantity: '1' }),
+      ]);
     });
   });
 });

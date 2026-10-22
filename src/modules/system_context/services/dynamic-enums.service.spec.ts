@@ -47,6 +47,7 @@ function build() {
     findPublishedEnumVersion: mockFn(),
     createEnumOption: mockFn(() => ({ id: `option-${++optionSeq}` })),
     findEnumOptions: mockFn(() => Promise.resolve([])),
+    findSpanishDisplays: mockFn(() => Promise.resolve(new Map())),
     countEnabledOptions: mockFn(() => Promise.resolve(1)),
     createEnumBinding: mockFn(() => ({ id: 'binding-1' })),
     findEnumBindingByTarget: mockFn(() => Promise.resolve(null)),
@@ -184,17 +185,17 @@ describe('DynamicEnumsService', () => {
     it('flushes the version before creating its options', async () => {
       const d = build();
       wire(d);
-      const orden: string[] = [];
+      const order: string[] = [];
       d.tx.flush.mockImplementation(() => {
-        orden.push('flush');
+        order.push('flush');
         return Promise.resolve();
       });
-      const crearOpcion =
+      const createOption =
         d.contextRepo.createEnumOption.getMockImplementation();
       d.contextRepo.createEnumOption.mockImplementation(
         (...args: unknown[]) => {
-          orden.push('option');
-          return crearOpcion?.(...args) ?? { id: 'o-1' };
+          order.push('option');
+          return createOption?.(...args) ?? { id: 'o-1' };
         },
       );
 
@@ -208,8 +209,8 @@ describe('DynamicEnumsService', () => {
         actor,
       );
 
-      expect(orden[0]).toBe('flush');
-      expect(orden).toContain('option');
+      expect(order[0]).toBe('flush');
+      expect(order).toContain('option');
     });
 
     it('continues the numbering from the latest version', async () => {
@@ -746,6 +747,42 @@ describe('DynamicEnumsService.readEnum', () => {
     allowCustomValue: false,
     statusConceptId: CONCEPTS.ENUM_DEF_ACTIVE,
   };
+
+  it('offers the Spanish designation as displayEs when the concept has one', async () => {
+    const d = build();
+    d.contextRepo.findEnumBindingByTarget.mockResolvedValue({
+      dynamicEnumDefinitionId: DEFINITION,
+    });
+    d.contextRepo.findEnumDefinitionById.mockResolvedValue(activeDefinition);
+    d.contextRepo.findPublishedEnumVersion.mockResolvedValue(publishedVersion);
+    d.contextRepo.findEnumOptions.mockResolvedValue([
+      {
+        conceptId: CONCEPT_A,
+        code: 'SR_URGENT',
+        display: 'Urgent priority',
+        ordinal: 0,
+        enabled: true,
+      },
+      {
+        conceptId: CONCEPT_B,
+        code: 'SR_OTHER',
+        display: 'Other priority',
+        ordinal: 1,
+        enabled: true,
+      },
+    ]);
+    d.contextRepo.findSpanishDisplays.mockResolvedValue(
+      new Map([[CONCEPT_A, 'Urgente']]),
+    );
+
+    const result = await d.service.readEnum({
+      target: 'clinical.service_requests.priority_concept_id',
+    });
+
+    expect(result.options[0].displayEs).toBe('Urgente');
+    expect(result.options[0].display).toBe('Urgent priority');
+    expect(result.options[1].displayEs).toBeUndefined();
+  });
 
   it('resolves the enumeration from the target field, without any uuid', async () => {
     const d = build();

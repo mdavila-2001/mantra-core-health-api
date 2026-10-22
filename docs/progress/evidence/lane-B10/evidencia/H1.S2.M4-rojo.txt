@@ -1,0 +1,19 @@
+$ corepack yarn test --testPathPatterns="scheduling-catalog.dto"
+FAIL slotIds de cerrar y correr cupos (M4 · H1.S2.M4) cerrar acepta un cupo sembrado con id uuid5
+   Error: expect(received).toBeNull()
+   
+   Received: {"error": "Bad Request", "message": ["each value in slotIds must be a UUID"], "statusCode": 400}
+       at Object.toBeNull (C:\wt\m4-api\src\modules\scheduling\dto\scheduling-catalog.dto.spec.ts:49:63)
+       at processTicksAndRejections (node:internal/process/task_queues:103:5)
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) cerrar sigue aceptando ids uuid4
+FAIL slotIds de cerrar y correr cupos (M4 · H1.S2.M4) correr acepta un cupo sembrado con id uuid5
+   Error: expect(received).toBeNull()
+   
+   Received: {"error": "Bad Request", "message": ["each value in slotIds must be a UUID"], "statusCode": 400}
+       at Object.toBeNull (C:\wt\m4-api\src\modules\scheduling\dto\scheduling-catalog.dto.spec.ts:59:7)
+       at processTicksAndRejections (node:internal/process/task_queues:103:5)
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) un texto que no es UUID sigue dando 400
+PASS slotIds de cerrar y correr cupos (M4 · H1.S2.M4) cerrar sin ningún cupo sigue dando 400
+Suites: 0 passed, 1 failed, 1 total
+Tests:  3 passed, 2 failed, 0 skipped, 5 total
+exit=1

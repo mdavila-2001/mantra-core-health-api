@@ -1526,3 +1526,249 @@ export class QualifyReferralResponseDto {
   })
   refereeLedgerEntryId?: string;
 }
+
+/* ─── Autoservicio del paciente (R-T-E6B1) ──────────────────────────────── */
+
+/**
+ * El nivel de la membresía, tal como lo ve su titular.
+ *
+ * Se publica el nombre y el multiplicador porque son lo que la pantalla dice;
+ * el id del nivel no le sirve a nadie del otro lado.
+ */
+export class MyLoyaltyTierDto {
+  @ApiProperty({ description: 'Código del nivel' })
+  code!: string;
+
+  @ApiProperty({ description: 'Nombre del nivel' })
+  name!: string;
+
+  @ApiPropertyOptional({ description: 'Cuánto multiplica la acumulación' })
+  multiplier?: string;
+
+  @ApiProperty({ description: 'Puntos de por vida desde los que se alcanza' })
+  minPoints!: string;
+}
+
+/** La membresía del titular: lo que hace falta para pintar saldo y nivel. */
+export class MyLoyaltyMembershipDto {
+  @ApiProperty({ format: 'uuid' })
+  membershipId!: string;
+
+  @ApiProperty({ description: 'Nombre del programa' })
+  programName!: string;
+
+  @ApiPropertyOptional({
+    description: 'Cómo se llaman las unidades del programa («puntos»)',
+  })
+  pointsCurrencyName?: string;
+
+  @ApiProperty({ description: 'Saldo disponible, como texto exacto' })
+  pointsBalance!: string;
+
+  @ApiProperty({ description: 'Acumulado de por vida, como texto exacto' })
+  lifetimePoints!: string;
+
+  @ApiPropertyOptional({ type: MyLoyaltyTierDto })
+  tier?: MyLoyaltyTierDto;
+
+  @ApiPropertyOptional({ description: 'Cuándo se inscribió' })
+  enrolledAt?: Date;
+
+  @ApiProperty({
+    description:
+      'Si la membresía está activa. Se publica el hecho y no el concepto: el uuid de terminología es interno.',
+  })
+  active!: boolean;
+}
+
+/**
+ * Respuesta de `GET loyalty/me`.
+ *
+ * No estar inscrito **no es un error**: es un estado normal del portal, así que
+ * se responde 200 con `enrolled: false` en vez de un 404 que la pantalla
+ * tendría que interpretar. Mismo criterio que `alreadyEnrolled` del alta.
+ */
+export class MyLoyaltyResponseDto {
+  @ApiProperty({ description: 'Si el titular tiene membresía en el programa' })
+  enrolled!: boolean;
+
+  @ApiPropertyOptional({ type: MyLoyaltyMembershipDto })
+  membership?: MyLoyaltyMembershipDto;
+}
+
+/** Un movimiento del ledger, ya legible para su titular. */
+export class MyPointsLedgerEntryDto {
+  @ApiProperty({ format: 'uuid' })
+  entryId!: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Hacia dónde mueve los puntos, como código del catálogo (POINTS_EARN, POINTS_REDEEM, POINTS_EXPIRE, POINTS_ADJUST). Se omite si el concepto no pertenece a ese catálogo: antes que publicar un uuid interno, no se dice.',
+  })
+  direction?: string;
+
+  @ApiProperty({
+    description: 'Siempre positivo; el signo lo dice la dirección',
+  })
+  points!: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Por qué se movieron, como código del catálogo (REASON_*). Se omite con el mismo criterio que `direction`.',
+  })
+  reason?: string;
+
+  @ApiPropertyOptional({ description: 'Saldo que quedó después' })
+  balanceAfter?: string;
+
+  @ApiPropertyOptional({ description: 'Cuándo vencen estos puntos' })
+  expiresAt?: Date;
+
+  @ApiProperty({ description: 'Cuándo ocurrió el movimiento' })
+  occurredAt!: Date;
+}
+
+/** Query de `GET loyalty/me/points`: cursor opaco y tope de página. */
+export class MyPointsLedgerQueryDto {
+  @ApiPropertyOptional({
+    description: 'Cursor opaco devuelto por la página anterior',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  cursor?: string;
+
+  @ApiPropertyOptional({
+    description: 'Movimientos por página (1..100, por defecto 20)',
+    minimum: 1,
+    maximum: 100,
+    default: 20,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+}
+
+/**
+ * Una página del ledger del titular.
+ *
+ * Por cursor y nunca por número de página: es la regla del M34 y lo que ya
+ * hacen el resto de los listados del producto.
+ */
+export class MyPointsLedgerPageResponseDto {
+  @ApiProperty({ type: [MyPointsLedgerEntryDto] })
+  entries!: MyPointsLedgerEntryDto[];
+
+  @ApiPropertyOptional({
+    description: 'Cursor de la página siguiente; ausente si no hay más',
+  })
+  nextCursor?: string;
+}
+
+// --- Lectura del paciente: GET /promotions/me ---
+
+/** Un concepto ya resuelto a su forma legible. */
+export class PromotionConceptDto {
+  /** Código canónico del concepto. */
+  @ApiProperty()
+  code!: string;
+
+  /** Etiqueta legible del concepto. */
+  @ApiProperty()
+  display!: string;
+}
+
+/** Una regla de descuento de la promoción, sin uuids crudos. */
+export class MyPromotionDiscountDto {
+  /** `DISC_PERCENT`, `DISC_FIXED` o `DISC_BOGO`, resuelto. */
+  @ApiPropertyOptional({ type: PromotionConceptDto, nullable: true })
+  type!: PromotionConceptDto | null;
+
+  /** Porcentaje, texto exacto (numeric de BD), si la regla es porcentual. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  percentage!: string | null;
+
+  /** Monto fijo, texto exacto, si la regla es de monto fijo. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  fixedAmount!: string | null;
+
+  /** Moneda del monto, resuelta. */
+  @ApiPropertyOptional({ type: PromotionConceptDto, nullable: true })
+  currency!: PromotionConceptDto | null;
+
+  /** Compra mínima para que aplique, texto exacto. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  minPurchaseAmount!: string | null;
+
+  /** Tope del descuento, texto exacto. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  maxDiscountAmount!: string | null;
+
+  /** Sobre qué aplica (`TARGET_ORDER`, `TARGET_ITEM`, `TARGET_CATEGORY`). */
+  @ApiPropertyOptional({ type: PromotionConceptDto, nullable: true })
+  appliesTo!: PromotionConceptDto | null;
+}
+
+/** Un cupón personal del titular. */
+export class MyPromotionCouponDto {
+  /** El código que la persona presenta en caja. */
+  @ApiProperty()
+  code!: string;
+
+  /** Hasta cuándo vale el cupón, si declara fin. */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  validTo!: string | null;
+}
+
+/** Una promoción vigente para el paciente autenticado. */
+export class MyPromotionDto {
+  /** Identificador de la promoción. */
+  @ApiProperty({ format: 'uuid' })
+  id!: string;
+
+  /** Código de la promoción. */
+  @ApiProperty()
+  code!: string;
+
+  /** Nombre visible. */
+  @ApiProperty()
+  name!: string;
+
+  /** Descripción, si la tiene. */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  description!: string | null;
+
+  /** `PROMO_AUTO` o `PROMO_COUPON`, resuelto. */
+  @ApiPropertyOptional({ type: PromotionConceptDto, nullable: true })
+  type!: PromotionConceptDto | null;
+
+  /** Desde cuándo rige, si declara inicio. */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  validFrom!: string | null;
+
+  /** Hasta cuándo rige, si declara fin. */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  validTo!: string | null;
+
+  /** Reglas de descuento. */
+  @ApiProperty({ type: [MyPromotionDiscountDto] })
+  discounts!: MyPromotionDiscountDto[];
+
+  /** Los cupones personales del titular para esta promoción. */
+  @ApiProperty({ type: [MyPromotionCouponDto] })
+  coupons!: MyPromotionCouponDto[];
+}
+
+/** Las promociones vigentes para el paciente autenticado. */
+export class MyPromotionsResponseDto {
+  /** Promociones vigentes. */
+  @ApiProperty({ type: [MyPromotionDto] })
+  items!: MyPromotionDto[];
+
+  /** Cantidad servida. */
+  @ApiProperty()
+  count!: number;
+}

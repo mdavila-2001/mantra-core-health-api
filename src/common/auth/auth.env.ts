@@ -43,7 +43,16 @@ export const authEnvSchema = Joi.object({
     .falsy('false')
     .empty('')
     .default(false),
-  AUTH_REFRESH_COOKIE_NAME: Joi.string().default('mch_refresh'),
+  // El default es el nombre que la cookie ya tenía en la API (`redesa_refresh`):
+  // honrar la variable no cambia el nombre efectivo de quien no la declara.
+  // Desafío MFA en el login para cuentas con factor verificado (TX-29).
+  // Apagado por defecto: encenderlo exige que el cliente pida el código.
+  AUTH_MFA_CHALLENGE_ENABLED: Joi.boolean()
+    .truthy('true')
+    .falsy('false')
+    .empty('')
+    .default(false),
+  AUTH_REFRESH_COOKIE_NAME: Joi.string().default('redesa_refresh'),
   AUTH_REFRESH_COOKIE_PATH: Joi.string().default('/iam/auth/token/refresh'),
   AUTH_REFRESH_COOKIE_SAMESITE: Joi.string()
     .valid('strict', 'lax', 'none')

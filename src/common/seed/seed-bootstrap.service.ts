@@ -3,21 +3,31 @@ import { PinoLogger } from 'nestjs-pino';
 import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.service';
 import { AuthzPlatformPermissionsSeedService } from './authz-platform-permissions-seed.service';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { QaFlowsSeedService } from './qa-flows-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
+import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
+import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
+import { LegalEntityTypesSeedService } from './legal-entity-types-seed.service';
+import { AffiliationCatalogsSeedService } from './affiliation-catalogs-seed.service';
 import { BoEmployersSeedService } from './bo-employers-seed.service';
 import { BoOccupationsSeedService } from './bo-occupations-seed.service';
+import { BoProfessionsSeedService } from './bo-professions-seed.service';
 import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service';
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { IdentityVerificationSeedService } from './identity-verification-seed.service';
 import { MessagingSeedService } from './messaging-seed.service';
 import { AudioAssetsSeedService } from './audio-assets-seed.service';
+import { StickerPackSeedService } from './sticker-pack-seed.service';
 import { VademecumSeedService } from './vademecum-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
+import { PeopleSeedService } from './people-seed.service';
+import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { loadSeedBootEnv } from './seed-boot.env';
 
 /** Resultado de un paso de la cadena, ya medido. */
@@ -85,19 +95,23 @@ interface SeedStepDescriptor {
  * @param result - Lo que devolvió el seed.
  * @returns El total, o `null` si el seed no devolvió contadores.
  */
-export function contarInsertados(result: unknown): number | null {
+export function countInserted(result: unknown): number | null {
   if (typeof result !== 'object' || result === null) return null;
-  const numeros = Object.entries(result as Record<string, unknown>)
+  const numbers = Object.entries(result as Record<string, unknown>)
     // No todo contador numérico cuenta filas escritas: el glosario devuelve
     // `orphanRelationships`, que son relaciones declaradas cuyo destino no
     // existe y por eso NO se insertan. Sumarlas hacía que una corrida sin
     // trabajo informara «1 filas», que es justo la clase de mentira que este
-    // resumen vino a eliminar.
-    .filter(([nombre]) => !nombre.startsWith('orphan'))
-    .map(([, valor]) => valor)
-    .filter((valor): valor is number => typeof valor === 'number');
-  if (numeros.length === 0) return null;
-  return numeros.reduce((total, valor) => total + valor, 0);
+    // resumen vino a eliminar. Por el mismo motivo, `people-seed.service.ts`
+    // reporta `...Existing` — filas que ya estaban, no filas nuevas de esta
+    // pasada — y tampoco cuentan.
+    .filter(
+      ([name]) => !name.startsWith('orphan') && !name.endsWith('Existing'),
+    )
+    .map(([, value]) => value)
+    .filter((value): value is number => typeof value === 'number');
+  if (numbers.length === 0) return null;
+  return numbers.reduce((total, value) => total + value, 0);
 }
 
 /** Ejecuta los seeds estructurales en un orden explícito y determinista. */
@@ -114,9 +128,15 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *
    * @param terminology - Catálogo padre de todos los conceptos.
    * @param dynamicEnums - Conjuntos de valores y amarres campo -> enumeración.
+   * @param patientPortalProxy - Alcance y base legal del apoderamiento de portal.
    * @param glossary - Taxonomía y catálogo curado del glosario médico.
    * @param boGeography - Departamentos de Bolivia (`VS_BO_DEPARTMENT`).
+   * @param legalEntityTypes - País y categoría canónica de cada forma societaria
+   *   del diccionario internacional (subtarea 1.1).
+   * @param affiliationCatalogs - Documentos de afiliación, autoridad emisora,
+   *   estado de verificación y rol del representante legal del alta de organización.
    * @param boOccupations - Ocupaciones de Bolivia (`VS_BO_OCCUPATION`).
+   * @param boProfessions - Profesiones COB-2023 (`VS_BO_PROFESSION`).
    * @param boEmployers - Empresas y empleadores de Bolivia (`VS_BO_EMPLOYER`).
    * @param boliviaFacilities - Directorio de establecimientos de salud de
    *   Santa Cruz (`VS_BO_HEALTH_FACILITY`).
@@ -126,26 +146,41 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    *   referencia (`VS_BO_MEDICAL_PROCEDURE`).
    * @param messaging - Datos estructurales de mensajería.
    * @param audioAssets - Colas y plantillas de audio.
+   * @param stickerPack - Los 24 stickers del producto (AG-17).
    * @param vademecum - Catálogo de medicamentos para prescribir.
    * @param identityVerification - Datos estructurales de identidad.
    * @param clinicalRoles - Roles asistenciales de sistema en `authz.roles`.
    * @param platformPermissions - Permisos de sistema en `authz.permissions`.
    * @param bootstrapAdmin - Primer `SECURITY_ADMIN`, si el entorno lo pide.
    * @param clinicalForms - Catálogo de formularios clínicos estándar.
+   * @param practiceDefaultServices - «Cita médica» en las prácticas que nacieron
+   *   sin catálogo.
+   * @param people - Cuentas del padrón (H2, carril M2 · MacBook), sintéticas y
+   *   opt-in por `SEED_PEOPLE_ENABLED`.
+   * @param directoryNetworks - Médicos de las redes de Alianza y Nacional, con
+   *   sus sedes y membresías (H3), opt-in por `SEED_DIRECTORY_NETWORKS_ENABLED`.
+   * @param qaFlows - Suites de `qa_lab` generadas desde el catálogo de flujos,
+   *   opt-in por `SEED_QA_FLOWS`.
    * @param logger - Logger estructurado del arranque.
    */
   constructor(
     private readonly terminology: TerminologySeedService,
     private readonly dynamicEnums: DynamicEnumSeedService,
+    private readonly patientPortalProxy: PatientPortalProxySeedService,
+    private readonly telemetryUxHeatmap: TelemetryUxHeatmapSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
+    private readonly legalEntityTypes: LegalEntityTypesSeedService,
+    private readonly affiliationCatalogs: AffiliationCatalogsSeedService,
     private readonly boOccupations: BoOccupationsSeedService,
+    private readonly boProfessions: BoProfessionsSeedService,
     private readonly boEmployers: BoEmployersSeedService,
     private readonly boliviaFacilities: BoliviaFacilitiesSeedService,
     private readonly boliviaInsurance: BoliviaInsuranceSeedService,
     private readonly boliviaFeeSchedule: BoliviaFeeScheduleSeedService,
     private readonly messaging: MessagingSeedService,
     private readonly audioAssets: AudioAssetsSeedService,
+    private readonly stickerPack: StickerPackSeedService,
     private readonly vademecum: VademecumSeedService,
     private readonly identityVerification: IdentityVerificationSeedService,
     private readonly clinicalRoles: AuthzClinicalRolesSeedService,
@@ -153,12 +188,16 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
     private readonly providerAccounts: ProviderAccountsSeedService,
     private readonly clinicalForms: ClinicalFormsSeedService,
+    private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
+    private readonly people: PeopleSeedService,
+    private readonly directoryNetworks: DirectoryNetworksSeedService,
+    private readonly qaFlows: QaFlowsSeedService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
-    const entorno = loadSeedBootEnv();
-    this.seedOnBoot = entorno.enabled;
-    this.contentOnBoot = entorno.contentEnabled;
+    const environment = loadSeedBootEnv();
+    this.seedOnBoot = environment.enabled;
+    this.contentOnBoot = environment.contentEnabled;
   }
 
   /**
@@ -193,42 +232,42 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @returns El resumen de la corrida, con un detalle por paso.
    */
   async run(): Promise<SeedRunSummary> {
-    const arranque = Date.now();
+    const startup = Date.now();
     const steps: SeedStepResult[] = [];
 
     // El catálogo de conceptos no es un paso más: es la precondición de todos
     // los demás. Si falla, seguir sería sembrar contra FKs que no existen —y el
     // error real quedaría sepultado bajo una cascada de fallos derivados.
-    const catalogo = await this.runStep('catálogo de conceptos', () =>
+    const catalog = await this.runStep('catálogo de conceptos', () =>
       this.terminology.run(),
     );
-    steps.push(catalogo);
+    steps.push(catalog);
 
-    if (catalogo.failed) {
-      const resumen = this.resumir(steps, arranque);
+    if (catalog.failed) {
+      const summary = this.summarize(steps, startup);
       this.logger.error(
-        { event: 'seed.aborted', ...resumen },
+        { event: 'seed.aborted', ...summary },
         'Seeds estructurales omitidos: el catálogo de terminología no quedó ' +
           'disponible, así que los seeds dependientes ni se intentaron.',
       );
-      return resumen;
+      return summary;
     }
 
     let skippedContent = 0;
-    for (const paso of this.pasosDependientes()) {
-      if (paso.kind === 'content' && !this.contentOnBoot) {
+    for (const step of this.dependentsSteps()) {
+      if (step.kind === 'content' && !this.contentOnBoot) {
         skippedContent += 1;
         this.logger.info(
-          { event: 'seed.step.skipped', name: paso.name },
+          { event: 'seed.step.skipped', name: step.name },
           'Seed de contenido salteado (SEED_CONTENT_ON_BOOT=false): ' +
-            paso.name,
+            step.name,
         );
         continue;
       }
-      steps.push(await this.runStep(paso.name, paso.run));
+      steps.push(await this.runStep(step.name, step.run));
     }
 
-    return this.resumir(steps, arranque, skippedContent);
+    return this.summarize(steps, startup, skippedContent);
   }
 
   /**
@@ -239,7 +278,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * clasificación es una decisión del orquestador y no de cada servicio,
    * porque «esto es núcleo» solo tiene sentido mirando la cadena entera.
    */
-  private pasosDependientes(): readonly SeedStepDescriptor[] {
+  private dependentsSteps(): readonly SeedStepDescriptor[] {
     return [
       // Va inmediatamente después del catálogo porque sus miembros y opciones son
       // FK a los conceptos que aquél acaba de materializar, y porque sin él ningún
@@ -248,6 +287,24 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'enumeraciones dinámicas',
         kind: 'core',
         run: () => this.dynamicEnums.run(),
+      },
+      // Las dos filas sin las que no se puede escribir un apoderamiento de
+      // portal. Es `core` porque sin ellas el alta de un dependiente viola dos
+      // FK NOT NULL, y va acá porque depende del tenant y del propósito de
+      // procesamiento que el catálogo acaba de materializar.
+      {
+        name: 'apoderamiento de portal',
+        kind: 'core',
+        run: () => this.patientPortalProxy.run(),
+      },
+      // El propósito y el esquema de evento con los que el portal manda las
+      // interacciones de los mapas de calor. Es `core` porque sin el esquema
+      // cada lote de `POST /telemetry/activity-events` vuelve 404, y va acá
+      // porque sólo depende de los conceptos de telemetría del catálogo.
+      {
+        name: 'mapas de calor del portal',
+        kind: 'core',
+        run: () => this.telemetryUxHeatmap.run(),
       },
       // Depende de `SEED.codeSystemVersionId`, ya materializado por el catálogo
       // de conceptos. No depende de las enumeraciones dinámicas ni al revés,
@@ -269,6 +326,29 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'core',
         run: () => this.boGeography.run(),
       },
+      // Va justo después del catálogo de conceptos: sólo depende de que los 21
+      // conceptos de `LEGAL_ENTITY_TYPES` ya existan (los materializa el paso
+      // 'catálogo de conceptos'), y sin sus propiedades el registro sigue
+      // funcionando -- sólo faltan país y categoría canónica en `$expand`. Es
+      // núcleo, no contenido, porque las 8 formas bolivianas son las que el
+      // registro de procesos exige poder contar desde el primer arranque.
+      {
+        name: 'país y categoría canónica de formas societarias',
+        kind: 'core',
+        run: () => this.legalEntityTypes.run(),
+      },
+      // Los cuatro conjuntos que el alta de organización resuelve por código
+      // (documentos de afiliación, autoridad emisora, estado de verificación y
+      // rol del representante). Es núcleo y no contenido: sin ellos
+      // `register-organization` responde 422 «El catálogo de documentos de
+      // afiliación no está disponible» — el defecto D6 del 26/09/2026. Va
+      // después de terminología porque sus conceptos cuelgan del sistema de
+      // códigos interno.
+      {
+        name: 'catálogos de afiliación y representación legal',
+        kind: 'core',
+        run: () => this.affiliationCatalogs.run(),
+      },
       // Y con ellos, por lo mismo: el alta de paciente resuelve
       // `VS_BO_OCCUPATION` por su código para el desplegable de ocupación.
       // Es núcleo y no contenido porque sin el conjunto el campo se queda en el
@@ -277,6 +357,14 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'ocupaciones de Bolivia',
         kind: 'core',
         run: () => this.boOccupations.run(),
+      },
+      // La profesión que acredita un título (COB-2023, grandes grupos 2 y 3):
+      // «Otra profesión» del alta del médico. Núcleo por lo mismo que las
+      // ocupaciones: sin el conjunto el alta vuelve al texto libre.
+      {
+        name: 'profesiones de Bolivia (COB-2023)',
+        kind: 'core',
+        run: () => this.boProfessions.run(),
       },
       // Y con ellas, por lo mismo: el alta pregunta la empresa donde se
       // trabaja —antes preguntaba dónde queda, que eran tres campos— y
@@ -331,6 +419,15 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'core',
         run: () => this.audioAssets.run(),
       },
+      // Contenido, no núcleo: sin el pack la mensajería sigue funcionando
+      // entera, sólo el botón de stickers no tiene qué ofrecer. Depende del
+      // tenant DEFAULT y del `SEED.systemWorkerUserId` que ya materializó el
+      // catálogo de conceptos.
+      {
+        name: 'pack de stickers',
+        kind: 'content',
+        run: () => this.stickerPack.run(),
+      },
       {
         name: 'verificación de identidad',
         kind: 'core',
@@ -372,6 +469,41 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         kind: 'content',
         run: () => this.providerAccounts.run(),
       },
+      // H2 (carril M2 · MacBook, 2026-09-26): después de los roles de sistema
+      // y del administrador de arranque, porque el alta de médico/paciente
+      // necesita `authz.roles` materializado y un actor con el que auditar.
+      // Opt-in con `SEED_PEOPLE_ENABLED`: sin la variable, no toca nada.
+      {
+        name: 'padrón de personas',
+        kind: 'content',
+        run: () => this.people.run(),
+      },
+      // H3: después de `people` sólo por orden de lectura; depende de las
+      // aseguradoras (`boliviaInsurance`) y del actor de arranque.
+      {
+        name: 'directorio de redes de aseguradoras',
+        kind: 'content',
+        run: () => this.directoryNetworks.run(),
+      },
+      // El último, y no por importancia: es el único paso que siembra **sobre
+      // filas de negocio que ya existen** —una por práctica— en vez de
+      // materializar un catálogo. Corre después de todo lo demás para que, si
+      // el arranque acaba de crear la primera organización, encuentre su
+      // práctica. No es núcleo: una práctica sin el servicio por defecto
+      // funciona, sólo abre su catálogo vacío.
+      {
+        name: 'servicio por defecto de cada práctica',
+        kind: 'content',
+        run: () => this.practiceDefaultServices.run(),
+      },
+      // Opt-in (`SEED_QA_FLOWS=true`): sin la variable no hace nada. Va al final
+      // porque sólo necesita el catálogo de conceptos (estados, tipos de caso y
+      // métodos HTTP de `qa_lab`) y el tenant de plataforma, y no la alimenta nadie.
+      {
+        name: 'flujos del catálogo de QA',
+        kind: 'content',
+        run: () => this.qaFlows.run(),
+      },
     ];
   }
 
@@ -391,35 +523,35 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     name: string,
     run: () => Promise<unknown>,
   ): Promise<SeedStepResult> {
-    const desde = Date.now();
+    const from = Date.now();
     try {
-      const resultado = await run();
-      const paso: SeedStepResult = {
+      const result = await run();
+      const step: SeedStepResult = {
         name,
-        inserted: contarInsertados(resultado),
-        tookMs: Date.now() - desde,
+        inserted: countInserted(result),
+        tookMs: Date.now() - from,
         failed: false,
       };
       // `detail` lleva los contadores tal como los devolvió el seed, incluidos
       // los que `inserted` deja afuera: el agregado es para leer de un vistazo,
       // el detalle es para no perder nada.
       this.logger.info(
-        { event: 'seed.step', ...paso, detail: resultado },
+        { event: 'seed.step', ...step, detail: result },
         'Seed: ' + name,
       );
-      return paso;
+      return step;
     } catch (error) {
-      const paso: SeedStepResult = {
+      const step: SeedStepResult = {
         name,
         inserted: null,
-        tookMs: Date.now() - desde,
+        tookMs: Date.now() - from,
         failed: true,
       };
       this.logger.warn(
-        { err: error, event: 'seed.step.failed', ...paso },
+        { err: error, event: 'seed.step.failed', ...step },
         'Seed omitido: ' + name,
       );
-      return paso;
+      return step;
     }
   }
 
@@ -427,28 +559,28 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * Cierra la corrida con una línea que se lee de un vistazo.
    *
    * @param steps - Los pasos ya medidos.
-   * @param arranque - Marca de tiempo del inicio de la cadena.
+   * @param startup - Marca de tiempo del inicio de la cadena.
    * @param skippedContent - Pasos de contenido que el entorno salteó.
    * @returns El resumen agregado.
    */
-  private resumir(
+  private summarize(
     steps: SeedStepResult[],
-    arranque: number,
+    startup: number,
     skippedContent = 0,
   ): SeedRunSummary {
-    const failed = steps.filter((paso) => paso.failed).length;
+    const failed = steps.filter((step) => step.failed).length;
     const summary: SeedRunSummary = {
       ok: steps.length - failed,
       failed,
-      inserted: steps.reduce((total, paso) => total + (paso.inserted ?? 0), 0),
-      tookMs: Date.now() - arranque,
+      inserted: steps.reduce((total, step) => total + (step.inserted ?? 0), 0),
+      tookMs: Date.now() - startup,
       steps,
       // Solo cuando hubo salteados: con el contenido encendido el resumen
       // conserva exactamente la forma que tenía antes de que el flag existiera.
       ...(skippedContent > 0 ? { skippedContent } : {}),
     };
 
-    const linea =
+    const line =
       'Seeds: ' +
       summary.ok +
       '/' +
@@ -465,9 +597,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       ' ms';
 
     if (failed > 0) {
-      this.logger.error({ event: 'seed.summary', ...summary }, linea);
+      this.logger.error({ event: 'seed.summary', ...summary }, line);
     } else {
-      this.logger.info({ event: 'seed.summary', ...summary }, linea);
+      this.logger.info({ event: 'seed.summary', ...summary }, line);
     }
 
     return summary;

@@ -270,6 +270,46 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       code: 'RELATIONSHIP_GUARDIAN',
       display: 'Legal guardian relationship',
     },
+    // El parentesco que declara quien se registra, para su contacto de
+    // emergencia. `RELATIONSHIP_GUARDIAN` era el único, así que todo contacto
+    // quedaba anotado como representante legal —un vínculo que nadie verificó—
+    // por falta de opciones, no por decisión de nadie. Sigue siendo el valor por
+    // defecto cuando el alta no declara parentesco, por compatibilidad.
+    RELATIONSHIP_MOTHER: {
+      code: 'RELATIONSHIP_MOTHER',
+      display: 'Mother relationship',
+    },
+    RELATIONSHIP_FATHER: {
+      code: 'RELATIONSHIP_FATHER',
+      display: 'Father relationship',
+    },
+    RELATIONSHIP_SPOUSE: {
+      code: 'RELATIONSHIP_SPOUSE',
+      display: 'Spouse or partner relationship',
+    },
+    RELATIONSHIP_CHILD: {
+      code: 'RELATIONSHIP_CHILD',
+      display: 'Child relationship',
+    },
+    RELATIONSHIP_SIBLING: {
+      code: 'RELATIONSHIP_SIBLING',
+      display: 'Sibling relationship',
+    },
+    RELATIONSHIP_OTHER_RELATIVE: {
+      code: 'RELATIONSHIP_OTHER_RELATIVE',
+      display: 'Other relative relationship',
+    },
+    RELATIONSHIP_FRIEND: {
+      code: 'RELATIONSHIP_FRIEND',
+      display: 'Friend relationship',
+    },
+    // La salida del catálogo: quien no es familia, pareja ni amistad —un vecino,
+    // el encargado del edificio— sigue siendo a quien hay que llamar. Sin ella,
+    // el desplegable obligaría a elegir un parentesco falso.
+    RELATIONSHIP_OTHER: {
+      code: 'RELATIONSHIP_OTHER',
+      display: 'Other relationship',
+    },
     RELATED_ACTIVE: {
       code: 'RELATED_ACTIVE',
       display: 'Related person active',
@@ -278,6 +318,15 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
     // Proxies de portal
     PROXY_ACTIVE: { code: 'PROXY_ACTIVE', display: 'Portal proxy active' },
     PROXY_REVOKED: { code: 'PROXY_REVOKED', display: 'Portal proxy revoked' },
+    // La solicitud de representar a quien ya tiene cuenta: el apoderamiento
+    // existe desde que se pide, pero no habilita nada hasta que la persona lo
+    // acepta. Todas las lecturas de permiso filtran por `PROXY_ACTIVE`, así que
+    // una fila pendiente o rechazada no abre ninguna historia.
+    PROXY_PENDING: { code: 'PROXY_PENDING', display: 'Portal proxy pending' },
+    PROXY_REJECTED: {
+      code: 'PROXY_REJECTED',
+      display: 'Portal proxy rejected',
+    },
 
     // Género administrativo de la persona (`persons.administrative_gender_concept_id`).
     // Valores de HL7 FHIR AdministrativeGender: es el género con el que la persona

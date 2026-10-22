@@ -71,23 +71,48 @@ describe('TenantContextInterceptor', () => {
       );
     });
 
+    it('con varias membresías y sin cabecera, 403 con details.reason TENANT_AMBIGUOUS (TX-16)', () => {
+      const ctx = httpContext(
+        {},
+        { id: 'u1', roles: [], tenantIds: ['tenant-A', 'tenant-B'] },
+      );
+      try {
+        build().intercept(ctx, handler('ok'));
+        throw new Error('debía lanzar');
+      } catch (error) {
+        const body = (error as ForbiddenException).getResponse() as {
+          details?: { reason?: string };
+        };
+        expect((error as ForbiddenException).getStatus()).toBe(403);
+        expect(body.details?.reason).toBe('TENANT_AMBIGUOUS');
+      }
+    });
+
     it('rechaza si el actor no pertenece a ningún tenant', () => {
       const ctx = httpContext({}, { id: 'u1', roles: [], tenantIds: [] });
       expect(() => build().intercept(ctx, handler('ok'))).toThrow(
         ForbiddenException,
       );
+      try {
+        build().intercept(ctx, handler('ok'));
+      } catch (error) {
+        const body = (error as ForbiddenException).getResponse() as {
+          details?: { reason?: string };
+        };
+        expect(body.details?.reason).toBe('TENANT_REQUIRED');
+      }
     });
 
     it('SUPERADMIN sin cabecera opera en modo sistema, sin acotar a un tenant', async () => {
       const ctx = httpContext({}, { id: 'admin', roles: ['SUPERADMIN'] });
-      let visto: string | undefined = 'sin-fijar';
-      const spy = { handle: () => of((visto = getCurrentTenantId())) };
+      let seen: string | undefined = 'sin-fijar';
+      const spy = { handle: () => of((seen = getCurrentTenantId())) };
 
       const res = await lastValueFrom(
         build().intercept(ctx, spy as any) as any,
       );
       expect(res).toBeUndefined();
-      expect(visto).toBeUndefined();
+      expect(seen).toBeUndefined();
     });
 
     it('SUPERADMIN en modo sistema puede declarar cualquier tenant en el cuerpo', async () => {

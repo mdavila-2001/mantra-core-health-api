@@ -23,7 +23,7 @@ import { CONCEPTS } from '../../common';
  */
 export const GLOSSARY_ALL_TERMS_CODE = 'glossary-all-terms';
 
-/** Prefijo de los 11 value sets de categoría (`glossary-category-<key>`). */
+/** Prefijo de los 12 value sets de categoría (`glossary-category-<key>`). */
 export const GLOSSARY_CATEGORY_PREFIX = 'glossary-category-';
 
 /** Prefijo de los 15 value sets de etiqueta (`glossary-tag-<key>`). */
@@ -59,6 +59,9 @@ export const GLOSSARY_CLINICAL_DEFINITION_PROPERTY_CODE =
 /** Resumen en lenguaje llano: jsonb `{ es: string, en?: string }`. */
 export const GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE = 'glossary-plain-summary';
 
+/** Fuentes editoriales con procedencia, licencia, idioma y fecha de consulta. */
+export const GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE = 'glossary-sources';
+
 /**
  * Imagen del término: jsonb `{ source, license, attribution, alt, status }`.
  *
@@ -71,6 +74,36 @@ export const GLOSSARY_PLAIN_SUMMARY_PROPERTY_CODE = 'glossary-plain-summary';
  */
 export const GLOSSARY_IMAGE_PROPERTY_CODE = 'glossary-image';
 
+/** Documento enciclopédico completo serializado en `concept_properties.value_json`. */
+export const GLOSSARY_ARTICLE_PROPERTY_CODE = 'glossary-article';
+
+// --- Ficha de medicamento (FND-25-02) ---------------------------------------
+//
+// Los cuatro códigos de acá abajo son EXACTAMENTE los que ya escribe
+// `tools/terminology-import/import-ndc.mjs` sobre los conceptos reales del
+// FDA National Drug Code (NDC) Directory (`code_system=ndc`) — no una
+// convención nueva del glosario. Reusarlos para los términos curados que
+// declaran `drugFacts` (`glossary-terms.catalog.ts`) es lo que hace que
+// `GlossaryDrugFacts.drugFactsFrom()` (frontend) los lea sin ningún cambio: ya
+// sabe leer `active_ingredients`/`dosage_form`/`route`/`manufacturer` de
+// `properties`, sea el concepto un producto NDC crudo o un término curado con
+// estos cuatro datos copiados verbatim de un producto NDC real que lo
+// representa (ver la nota de selección determinista en
+// `glossary-terms.catalog.ts`).
+
+/** Principios activos: jsonb `string[]` (p. ej. `["ACETAMINOPHEN 500 mg/1"]`). */
+export const GLOSSARY_DRUG_ACTIVE_INGREDIENTS_PROPERTY_CODE =
+  'active_ingredients';
+
+/** Forma farmacéutica: jsonb `string` (p. ej. `"TABLET"`), verbatim de NDC. */
+export const GLOSSARY_DRUG_DOSAGE_FORM_PROPERTY_CODE = 'dosage_form';
+
+/** Vía de administración: jsonb `string[]` (p. ej. `["ORAL"]`), verbatim de NDC. */
+export const GLOSSARY_DRUG_ROUTE_PROPERTY_CODE = 'route';
+
+/** Fabricante: jsonb `string` (`labeler_name`), verbatim de NDC. */
+export const GLOSSARY_DRUG_MANUFACTURER_PROPERTY_CODE = 'manufacturer';
+
 /** Contenido bilingüe `{ es, en? }` tal como se guarda en `value_json`. */
 export interface GlossaryBilingualText {
   readonly es: string;
@@ -80,8 +113,9 @@ export interface GlossaryBilingualText {
 // --- Relaciones tipadas -----------------------------------------------------
 
 /**
- * Los seis tipos de relación del glosario, aditivos a `REL_IS_A`/`REL_PART_OF`
- * (que siguen sirviendo a la jerarquía genérica del catálogo).
+ * Los ocho tipos de relación del glosario, aditivos a `REL_IS_A`/`REL_PART_OF`
+ * (que siguen sirviendo a la jerarquía genérica del catálogo). `SYMPTOM` y
+ * `SPECIALTY` se sumaron el 2026-10-01 con las relaciones de Wikidata.
  */
 export type GlossaryRelationType =
   | 'RELATED_TERM'
@@ -89,7 +123,9 @@ export type GlossaryRelationType =
   | 'PROCEDURE'
   | 'TREATMENT'
   | 'ANATOMY'
-  | 'DIAGNOSTIC_TEST';
+  | 'DIAGNOSTIC_TEST'
+  | 'SYMPTOM'
+  | 'SPECIALTY';
 
 /** Todos los tipos de relación del glosario, para `enum` de Swagger y validación. */
 export const GLOSSARY_RELATION_TYPES: readonly GlossaryRelationType[] = [
@@ -99,7 +135,20 @@ export const GLOSSARY_RELATION_TYPES: readonly GlossaryRelationType[] = [
   'TREATMENT',
   'ANATOMY',
   'DIAGNOSTIC_TEST',
+  'SYMPTOM',
+  'SPECIALTY',
 ];
+
+/**
+ * De qué lado de la relación está el término consultado: `outgoing` si es el
+ * origen de la arista (la enfermedad que apunta al síntoma) e `incoming` si es
+ * el destino (el síntoma al que apuntan las enfermedades).
+ */
+export type GlossaryRelationDirection = 'outgoing' | 'incoming';
+
+/** Los dos sentidos, en el orden en que se publican los grupos de un vecindario. */
+export const GLOSSARY_RELATION_DIRECTIONS: readonly GlossaryRelationDirection[] =
+  ['outgoing', 'incoming'];
 
 /** Tipo de relación (API) -> concepto `terminology:relationship:*`. */
 const GLOSSARY_RELATION_TYPE_CONCEPT_ID: Readonly<
@@ -111,6 +160,8 @@ const GLOSSARY_RELATION_TYPE_CONCEPT_ID: Readonly<
   TREATMENT: CONCEPTS.REL_TREATMENT,
   ANATOMY: CONCEPTS.REL_ANATOMY,
   DIAGNOSTIC_TEST: CONCEPTS.REL_DIAGNOSTIC_TEST,
+  SYMPTOM: CONCEPTS.REL_SYMPTOM,
+  SPECIALTY: CONCEPTS.REL_SPECIALTY,
 };
 
 /** El concepto `relationship_type_concept_id` de un tipo de relación del glosario. */

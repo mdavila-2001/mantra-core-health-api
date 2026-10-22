@@ -1,0 +1,11 @@
+$ corepack yarn test --testPathPatterns="scheduling-catalog.service" -t "retireTemplate"
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) con citas comprometidas retira igual: conserva sus cupos y dice cuáles citas siguen vivas
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) la respuesta trae el total y los ids de las vivas, no los nombres de los pacientes
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) sin citas comprometidas retira, y dice qué soltó
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) el historial NO frena el retiro: sólo las citas vivas
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) pide los estados vivos correctos para distinguir los dos casos
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) retirar una agenda ajena es 403, aunque esté vacía
+PASS SchedulingCatalogService vinculo con la organizacion — MAC-VINCULO retireTemplate (TAREA-10, punto 6) una plantilla que no existe es 404, no un retiro silencioso
+Suites: 1 passed, 0 failed, 1 total
+Tests:  7 passed, 0 failed, 113 skipped, 120 total
+exit=0

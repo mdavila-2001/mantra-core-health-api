@@ -38,7 +38,7 @@ fuente (active, gobernada) ── definición (draft) ── versión ──> de
 tablero (active) ── widgets ──> apuntan a definiciones no deprecadas
 ```
 
-_Fuente: `src/modules/reporting/README.md:29`_
+_Fuente: `src/modules/reporting/README.md:61`_
 
 ### Etapas y operaciones
 

@@ -18,7 +18,7 @@ import {
 const TENANT = 'tenant-1';
 
 /** Una sesión con perfil de paciente, para el autoservicio. */
-const PACIENTE = { id: 'u-1', patientProfileId: 'pp-1' } as any;
+const PATIENT = { id: 'u-1', patientProfileId: 'pp-1' } as any;
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -272,7 +272,7 @@ describe('FormsReadService', () => {
 
   describe('getInstance', () => {
     /** Instancia anclable: su recurso resuelve a un encuentro del tenant. */
-    function conInstanciaPropia(d: ReturnType<typeof build>) {
+    function withOwnInstance(d: ReturnType<typeof build>) {
       d.instancesRepo.findById.mockResolvedValue({
         id: 'i1',
         resourceId: 'enc-1',
@@ -321,7 +321,7 @@ describe('FormsReadService', () => {
 
     it('resolves each value from the column its data type determines', async () => {
       const d = build();
-      conInstanciaPropia(d);
+      withOwnInstance(d);
       d.valuesRepo.findCurrentByInstance.mockResolvedValue([
         { id: 'v1', fieldId: 'f-str', ordinal: 0, valueString: 'Penicilina' },
         { id: 'v2', fieldId: 'f-bool', ordinal: 1, valueBoolean: true },
@@ -352,7 +352,7 @@ describe('FormsReadService', () => {
 
     it('falls back to the populated column when the field definition is gone', async () => {
       const d = build();
-      conInstanciaPropia(d);
+      withOwnInstance(d);
       d.valuesRepo.findCurrentByInstance.mockResolvedValue([
         { id: 'v1', fieldId: 'f-borrado', ordinal: 0, valueText: 'Nota larga' },
       ]);
@@ -367,7 +367,7 @@ describe('FormsReadService', () => {
 
     it('masks and omits the value of a field with an active access rule', async () => {
       const d = build();
-      conInstanciaPropia(d);
+      withOwnInstance(d);
       d.valuesRepo.findCurrentByInstance.mockResolvedValue([
         { id: 'v1', fieldId: 'f-sensible', ordinal: 0, valueString: 'VIH+' },
         { id: 'v2', fieldId: 'f-libre', ordinal: 1, valueString: 'ok' },
@@ -390,11 +390,11 @@ describe('FormsReadService', () => {
         FORMS.ACCESS_RULE_ACTIVE,
       );
       const sensible = res.values.find((v) => v.fieldId === 'f-sensible')!;
-      const libre = res.values.find((v) => v.fieldId === 'f-libre')!;
+      const free = res.values.find((v) => v.fieldId === 'f-libre')!;
       expect(sensible.masked).toBe(true);
       expect(sensible.value).toBeNull();
-      expect(libre.masked).toBe(false);
-      expect(libre.value).toBe('ok');
+      expect(free.masked).toBe(false);
+      expect(free.value).toBe('ok');
     });
   });
 
@@ -411,7 +411,7 @@ describe('FormsReadService', () => {
     it('requires a tenant in the context', async () => {
       const d = build();
       await expect(
-        d.service.listMyInstances(PACIENTE, 50),
+        d.service.listMyInstances(PATIENT, 50),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -429,7 +429,7 @@ describe('FormsReadService', () => {
       ]);
 
       const res = await runWithTenant(TENANT, () =>
-        d.service.listMyInstances(PACIENTE, 50),
+        d.service.listMyInstances(PATIENT, 50),
       );
 
       // Los encuentros se buscan por el claim de la sesión y el tenant activo:
@@ -457,7 +457,7 @@ describe('FormsReadService', () => {
         { id: 'i2', resourceId: 'enc-1', createdAt: new Date() },
       ]);
       const res = await runWithTenant(TENANT, () =>
-        d.service.listMyInstances(PACIENTE, 1),
+        d.service.listMyInstances(PATIENT, 1),
       );
       expect(res.items).toHaveLength(1);
       expect(res.truncated).toBe(true);
@@ -466,7 +466,7 @@ describe('FormsReadService', () => {
     it('a patient without encounters gets an empty list, not an error', async () => {
       const d = build();
       const res = await runWithTenant(TENANT, () =>
-        d.service.listMyInstances(PACIENTE, 50),
+        d.service.listMyInstances(PATIENT, 50),
       );
       expect(res.items).toEqual([]);
       expect(res.truncated).toBe(false);
@@ -475,7 +475,7 @@ describe('FormsReadService', () => {
 
   describe('getMyInstance', () => {
     /** Instancia cuyo encuentro es del paciente de la sesión y del tenant. */
-    function conInstanciaDelPaciente(d: ReturnType<typeof build>) {
+    function withPatientInstance(d: ReturnType<typeof build>) {
       d.instancesRepo.findById.mockResolvedValue({
         id: 'i1',
         resourceId: 'enc-1',
@@ -505,7 +505,7 @@ describe('FormsReadService', () => {
       d.instancesRepo.findById.mockResolvedValue(null);
       await expect(
         runWithTenant(TENANT, () =>
-          d.service.getMyInstance('missing', PACIENTE),
+          d.service.getMyInstance('missing', PATIENT),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -518,7 +518,7 @@ describe('FormsReadService', () => {
       });
       d.emFork.findOne.mockResolvedValue(null);
       await expect(
-        runWithTenant(TENANT, () => d.service.getMyInstance('i1', PACIENTE)),
+        runWithTenant(TENANT, () => d.service.getMyInstance('i1', PATIENT)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -534,7 +534,7 @@ describe('FormsReadService', () => {
         patientProfileId: 'pp-otra-persona',
       });
       await expect(
-        runWithTenant(TENANT, () => d.service.getMyInstance('i1', PACIENTE)),
+        runWithTenant(TENANT, () => d.service.getMyInstance('i1', PATIENT)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -550,13 +550,13 @@ describe('FormsReadService', () => {
         patientProfileId: 'pp-1',
       });
       await expect(
-        runWithTenant(TENANT, () => d.service.getMyInstance('i1', PACIENTE)),
+        runWithTenant(TENANT, () => d.service.getMyInstance('i1', PATIENT)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('serves the own instance with its values, names and masking applied', async () => {
       const d = build();
-      conInstanciaDelPaciente(d);
+      withPatientInstance(d);
       d.valuesRepo.findCurrentByInstance.mockResolvedValue([
         { id: 'v1', fieldId: 'f-sensible', ordinal: 0, valueString: 'VIH+' },
         { id: 'v2', fieldId: 'f-libre', ordinal: 1, valueString: 'ok' },
@@ -570,19 +570,19 @@ describe('FormsReadService', () => {
       ]);
 
       const res = await runWithTenant(TENANT, () =>
-        d.service.getMyInstance('i1', PACIENTE),
+        d.service.getMyInstance('i1', PATIENT),
       );
 
       const sensible = res.values.find((v) => v.fieldId === 'f-sensible')!;
-      const libre = res.values.find((v) => v.fieldId === 'f-libre')!;
+      const free = res.values.find((v) => v.fieldId === 'f-libre')!;
       // El enmascarado no cede en el autoservicio: valor omitido, jamás 'VIH+'.
       expect(sensible.masked).toBe(true);
       expect(sensible.value).toBeNull();
       // La etiqueta sí viaja: lo protegido es el contenido, no el campo.
       expect(sensible.fieldName).toBe('Serología');
-      expect(libre.masked).toBe(false);
-      expect(libre.value).toBe('ok');
-      expect(libre.fieldName).toBe('Tolerancia');
+      expect(free.masked).toBe(false);
+      expect(free.value).toBe('ok');
+      expect(free.fieldName).toBe('Tolerancia');
     });
   });
 

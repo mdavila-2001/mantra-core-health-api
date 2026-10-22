@@ -540,7 +540,7 @@ describe('PeriopCasesService', () => {
     /* -- Spec 227-230: la aceptación vale para la versión aceptada ---------- */
 
     /** Caso confirmado, con un integrante que ya había aceptado. */
-    function confirmadoConAceptacion() {
+    function confirmedWithAcceptance() {
       const d = build();
       const surgicalCase = draftCase({
         statusConceptId: CONCEPTS.CASE_READY_FOR_SURGERY,
@@ -563,7 +563,7 @@ describe('PeriopCasesService', () => {
     it('mover la fecha invalida las aceptaciones y devuelve el caso a pendiente', async () => {
       // Nadie aceptó operar otro día: mantener la aceptación afirmaría algo
       // que el integrante nunca dijo.
-      const { d, surgicalCase, member } = confirmadoConAceptacion();
+      const { d, surgicalCase, member } = confirmedWithAcceptance();
 
       const res = await d.service.updateCase(
         CASE,
@@ -597,7 +597,7 @@ describe('PeriopCasesService', () => {
     it('reenviar la misma fecha no invalida nada', async () => {
       // Una modificación que no cambia nada no es una modificación: pedir la
       // re-aceptación por un PATCH idempotente sería ruido puro.
-      const { d, member } = confirmadoConAceptacion();
+      const { d, member } = confirmedWithAcceptance();
 
       const res = await d.service.updateCase(
         CASE,
@@ -614,7 +614,7 @@ describe('PeriopCasesService', () => {
     it('cambiar sólo la prioridad no invalida aceptaciones', async () => {
       // Spec 228: la lista de cambios que invalidan no incluye la prioridad —
       // no altera responsabilidades ni condiciones de participación.
-      const { d, member } = confirmadoConAceptacion();
+      const { d, member } = confirmedWithAcceptance();
 
       const res = await d.service.updateCase(
         CASE,
@@ -756,7 +756,7 @@ describe('PeriopCasesService', () => {
 
   describe('acceptTeamMember (C-14 · CAN-INT-002)', () => {
     /** Caso y equipo con un único integrante asignado. */
-    function conEquipo(statusConceptId = CONCEPTS.TEAM_ASSIGNED) {
+    function withTeam(statusConceptId = CONCEPTS.TEAM_ASSIGNED) {
       const d = build();
       d.casesRepo.findCaseForUpdate.mockResolvedValue({
         id: CASE,
@@ -775,7 +775,7 @@ describe('PeriopCasesService', () => {
     it('deja aceptado al propio integrante con credencial vigente', async () => {
       // Sin este acto, `confirmCase` no podía cumplirse nunca: todo miembro
       // nace ASSIGNED y nada escribía ACCEPTED.
-      const { d, member } = conEquipo();
+      const { d, member } = withTeam();
       const titular = {
         id: 'user-9',
         roles: ['SURGEON'],
@@ -789,21 +789,21 @@ describe('PeriopCasesService', () => {
     });
 
     it('rechaza que otro profesional acepte en su nombre', async () => {
-      const { d, member } = conEquipo();
-      const otro = {
+      const { d, member } = withTeam();
+      const other = {
         id: 'user-8',
         roles: ['SURGEON'],
         practitionerProfileId: 'prac-2',
       };
 
       await expect(
-        d.service.acceptTeamMember(CASE, 'm-1', otro as any),
+        d.service.acceptTeamMember(CASE, 'm-1', other as any),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ASSIGNED);
     });
 
     it('rechaza al integrante sin credencial profesional vigente', async () => {
-      const { d, member } = conEquipo();
+      const { d, member } = withTeam();
       d.credentialsRepo.hasCurrentCredential.mockResolvedValue(false);
       const titular = {
         id: 'user-9',
@@ -818,7 +818,7 @@ describe('PeriopCasesService', () => {
     });
 
     it('aceptar dos veces no es un error', async () => {
-      const { d } = conEquipo(CONCEPTS.TEAM_ACCEPTED);
+      const { d } = withTeam(CONCEPTS.TEAM_ACCEPTED);
       const titular = {
         id: 'user-9',
         roles: ['SURGEON'],
@@ -831,7 +831,7 @@ describe('PeriopCasesService', () => {
     });
 
     it('la administración perioperatoria puede aceptar por el integrante', async () => {
-      const { d, member } = conEquipo();
+      const { d, member } = withTeam();
 
       await d.service.acceptTeamMember(CASE, 'm-1', actor as any);
 
@@ -839,7 +839,7 @@ describe('PeriopCasesService', () => {
     });
 
     it('rechaza al integrante que no pertenece al caso', async () => {
-      const { d } = conEquipo();
+      const { d } = withTeam();
 
       await expect(
         d.service.acceptTeamMember(CASE, 'otro-id', actor as any),
@@ -847,7 +847,7 @@ describe('PeriopCasesService', () => {
     });
 
     it('sella la fecha y hora de la aceptación (spec 163)', async () => {
-      const { d, member } = conEquipo();
+      const { d, member } = withTeam();
       const titular = {
         id: 'user-9',
         roles: ['SURGEON'],
@@ -862,7 +862,7 @@ describe('PeriopCasesService', () => {
 
   describe('respondTeamMember (spec 164 · 166 · 168)', () => {
     /** Caso y equipo con un único integrante aceptado. */
-    function conEquipo(statusConceptId = CONCEPTS.TEAM_ACCEPTED) {
+    function withTeam(statusConceptId = CONCEPTS.TEAM_ACCEPTED) {
       const d = build();
       d.casesRepo.findCaseForUpdate.mockResolvedValue({
         id: CASE,
@@ -892,10 +892,10 @@ describe('PeriopCasesService', () => {
       ['UNAVAILABLE', PERIOP.TEAM_UNAVAILABLE],
     ])(
       'la respuesta %s deja al integrante en su propio estado',
-      async (response, esperado) => {
+      async (response, expected) => {
         // Las tres son distinguibles a propósito: pedir un cambio no es
         // rechazar, y al responsable le cambia qué hacer a continuación.
-        const { d, member, titular } = conEquipo();
+        const { d, member, titular } = withTeam();
 
         const res = await d.service.respondTeamMember(
           CASE,
@@ -904,13 +904,13 @@ describe('PeriopCasesService', () => {
           titular as any,
         );
 
-        expect(res.statusConceptId).toBe(esperado);
-        expect(member.statusConceptId).toBe(esperado);
+        expect(res.statusConceptId).toBe(expected);
+        expect(member.statusConceptId).toBe(expected);
       },
     );
 
     it('borra la aceptación previa: el integrante ya no está dentro', async () => {
-      const { d, member, titular } = conEquipo();
+      const { d, member, titular } = withTeam();
 
       await d.service.respondTeamMember(
         CASE,
@@ -923,7 +923,7 @@ describe('PeriopCasesService', () => {
     });
 
     it('notifica al responsable y a la organización (spec 166)', async () => {
-      const { d, titular } = conEquipo();
+      const { d, titular } = withTeam();
 
       await d.service.respondTeamMember(
         CASE,
@@ -948,8 +948,8 @@ describe('PeriopCasesService', () => {
     });
 
     it('rechaza que otro profesional responda en su nombre (spec 168)', async () => {
-      const { d, member } = conEquipo();
-      const otro = {
+      const { d, member } = withTeam();
+      const other = {
         id: 'user-8',
         roles: ['SURGEON'],
         practitionerProfileId: 'prac-2',
@@ -960,14 +960,14 @@ describe('PeriopCasesService', () => {
           CASE,
           'm-1',
           { response: 'DECLINE', reasonText: 'Motivo' } as any,
-          otro as any,
+          other as any,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
     });
 
     it('rechaza responder sobre un caso cancelado', async () => {
-      const { d, titular } = conEquipo();
+      const { d, titular } = withTeam();
       d.casesRepo.findCaseForUpdate.mockResolvedValue({
         id: CASE,
         custodianTenantId: TENANT,
@@ -985,7 +985,7 @@ describe('PeriopCasesService', () => {
     });
 
     it('rechaza al integrante que no pertenece al caso', async () => {
-      const { d, titular } = conEquipo();
+      const { d, titular } = withTeam();
 
       await expect(
         d.service.respondTeamMember(
@@ -1196,7 +1196,7 @@ describe('PeriopCasesService', () => {
    */
   describe('getCaseDetail', () => {
     /** El caso mínimo que la lectura necesita para no abortar. */
-    const casoLeido = {
+    const readCase = {
       id: CASE,
       caseNumber: 'CX-1',
       patientProfileId: PATIENT,
@@ -1205,7 +1205,7 @@ describe('PeriopCasesService', () => {
 
     it('devuelve pasos, hallazgos e implantes del caso', async () => {
       const d = build();
-      d.casesRepo.findCaseById.mockResolvedValue(casoLeido);
+      d.casesRepo.findCaseById.mockResolvedValue(readCase);
       d.intraopRepo.findStepsByCase.mockResolvedValue([
         {
           id: 'step-1',
@@ -1233,12 +1233,12 @@ describe('PeriopCasesService', () => {
         },
       ]);
 
-      const detalle = await d.service.getCaseDetail(CASE);
+      const detail = await d.service.getCaseDetail(CASE);
 
-      expect(detalle.operativeSteps).toHaveLength(1);
-      expect(detalle.operativeSteps[0].description).toBe('Abordaje');
-      expect(detalle.findings[0].findingText).toBe('Adherencias');
-      expect(detalle.implants[0].implantDeviceId).toBe('dev-1');
+      expect(detail.operativeSteps).toHaveLength(1);
+      expect(detail.operativeSteps[0].description).toBe('Abordaje');
+      expect(detail.findings[0].findingText).toBe('Adherencias');
+      expect(detail.implants[0].implantDeviceId).toBe('dev-1');
     });
 
     /**
@@ -1248,7 +1248,7 @@ describe('PeriopCasesService', () => {
      */
     it('anida los identificadores dentro de su implante', async () => {
       const d = build();
-      d.casesRepo.findCaseById.mockResolvedValue(casoLeido);
+      d.casesRepo.findCaseById.mockResolvedValue(readCase);
       d.intraopRepo.findImplantsByCase.mockResolvedValue([
         {
           id: 'imp-1',
@@ -1281,33 +1281,33 @@ describe('PeriopCasesService', () => {
         },
       ]);
 
-      const detalle = await d.service.getCaseDetail(CASE);
+      const detail = await d.service.getCaseDetail(CASE);
 
       expect(d.intraopRepo.findIdentifiersByImplants).toHaveBeenCalledWith(
         expect.anything(),
         ['imp-1', 'imp-2'],
       );
-      expect(detalle.implants[0].identifiers).toHaveLength(2);
-      expect(detalle.implants[0].identifiers[0].lotNumber).toBe('L-42');
+      expect(detail.implants[0].identifiers).toHaveLength(2);
+      expect(detail.implants[0].identifiers[0].lotNumber).toBe('L-42');
       // El implante sin identificadores trae un arreglo vacío, no `undefined`:
       // el cliente no debería tener que distinguir «sin lote» de «sin dato».
-      expect(detalle.implants[1].identifiers).toEqual([]);
+      expect(detail.implants[1].identifiers).toEqual([]);
     });
 
     it('un caso sin registro intraoperatorio devuelve listas vacías', async () => {
       const d = build();
-      d.casesRepo.findCaseById.mockResolvedValue(casoLeido);
+      d.casesRepo.findCaseById.mockResolvedValue(readCase);
 
-      const detalle = await d.service.getCaseDetail(CASE);
+      const detail = await d.service.getCaseDetail(CASE);
 
-      expect(detalle.operativeSteps).toEqual([]);
-      expect(detalle.findings).toEqual([]);
-      expect(detalle.implants).toEqual([]);
+      expect(detail.operativeSteps).toEqual([]);
+      expect(detail.findings).toEqual([]);
+      expect(detail.implants).toEqual([]);
     });
 
     it('sin implantes no se consulta la tabla de identificadores', async () => {
       const d = build();
-      d.casesRepo.findCaseById.mockResolvedValue(casoLeido);
+      d.casesRepo.findCaseById.mockResolvedValue(readCase);
 
       await d.service.getCaseDetail(CASE);
 

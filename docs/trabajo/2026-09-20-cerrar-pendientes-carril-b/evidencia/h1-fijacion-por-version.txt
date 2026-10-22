@@ -1,0 +1,13 @@
+﻿
+    [ficha:consumidor] scheduling-module@v0.1.0-transitional · sha256=6d4e53d2d0bf12f7… · origen=5d5007fb · 
+entrega=TRANSITIONAL_ISOLATION
+    [ficha:proveedor] agenda-notice-capability.lab@cd1889bfee085b3aef6052e58c83844bfd80597f · sha256=81b641f52dc4c46f… 
+· origen=cd1889bf · entrega=LAB_VERIFIED_CONTRA_POSTGRES
+    [matriz] scheduling-module@v0.1.0-transitional × agenda-notice-capability.lab@cd1889bf → PASA: Ambos salen de 
+commits alcanzables desde el corte 4cc5ea1f; el adaptador real compone contra el puerto que los dos declaran.
+    [matriz] scheduling-module@v0.1.0-transitional × contrato-del-piloto@(sin publicar) → NO_APLICA: El contrato 
+versionado de Ender no existe: su daily del 2026-09-19 está en 0/50. No hay artefacto contra el cual combinar.
+Test Suites: 1 passed, 1 total
+Tests:       26 passed, 26 total
+
+

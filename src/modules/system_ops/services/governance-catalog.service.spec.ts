@@ -35,6 +35,7 @@ function build() {
     findRetentionPolicyById: mockFn(),
     createRetentionPolicy: mockFn(),
     findAnonymizationRuleByCode: mockFn(),
+    findAnonymizationRuleById: mockFn(),
     createAnonymizationRule: mockFn(),
     recordChange: mockFn(),
   };

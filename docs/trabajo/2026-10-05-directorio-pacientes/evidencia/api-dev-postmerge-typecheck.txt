@@ -1,0 +1,3 @@
+COMMAND: yarn typecheck
+
+EXIT_CODE=0

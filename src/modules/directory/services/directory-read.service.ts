@@ -13,10 +13,24 @@ import {
   BranchesRepository,
   TenantMembershipsRepository,
   TenantsRepository,
+  DirectoryTenantLegalRepository,
 } from '../repositories';
 import { TenantAdministrationService } from './tenant-administration.service';
-import { CatalogRepository } from '../../insurance/repositories';
+import {
+  AddressesRepository,
+  ContactPointsRepository,
+  IdentifiersRepository,
+} from '../../common/repositories';
+import { CatalogRepository } from '../../insurance/infrastructure/repositories';
 import { DIR, TENANT_TYPE_CONCEPT_BY_CODE } from '../directory.concepts';
+import {
+  EXECUTIVE_DTO_KEYS,
+  EXECUTIVE_ROLE_BY_DTO_KEY,
+  REPRESENTATIVE_ROLE_BY_CODE,
+  type RepresentativeRole,
+} from '../legal-representatives';
+import { AffiliationDocumentConceptsService } from './affiliation-document-concepts.service';
+
 import type {
   ListBranchAssignmentsResponseDto,
   ListBranchesResponseDto,
@@ -35,7 +49,7 @@ import type {
  * Son dos preguntas distintas sobre el mismo hecho, y la que autoriza sigue
  * siendo la de allá.
  */
-const ROLES_QUE_ADMINISTRAN = new Set<string>([DIR.ROLE_OWNER, DIR.ROLE_ADMIN]);
+const ROLES_THAT_MANAGE = new Set<string>([DIR.ROLE_OWNER, DIR.ROLE_ADMIN]);
 
 /**
  * Cara de lectura de `directory`: organizaciones, sus sub-organizaciones, sus
@@ -63,6 +77,11 @@ export class DirectoryReadService {
    * @param branchMembershipsRepo - Acceso a `directory.branch_memberships`.
    * @param tenantAdmin - Comprobación de alcance por organización.
    * @param catalogRepo - Acceso a `insurance.insurance_carriers`, para el bloque `payer`.
+   * @param addressesRepo - Acceso a `common.addresses`, para la casa matriz del `payer` (subtarea 1.3).
+   * @param legalRepo - Acceso a los vínculos de representación (subtarea 1.4).
+   * @param identifiersRepo - Acceso a `common.identifiers`, para el documento del representante.
+   * @param contactPointsRepo - Acceso a `common.contact_points`, para correos y teléfonos.
+   * @param concepts - Resuelve los conceptos de rol para traducirlos a su código canónico.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -73,6 +92,11 @@ export class DirectoryReadService {
     private readonly branchMembershipsRepo: BranchMembershipsRepository,
     private readonly tenantAdmin: TenantAdministrationService,
     private readonly catalogRepo: CatalogRepository,
+    private readonly addressesRepo: AddressesRepository,
+    private readonly legalRepo: DirectoryTenantLegalRepository,
+    private readonly identifiersRepo: IdentifiersRepository,
+    private readonly contactPointsRepo: ContactPointsRepository,
+    private readonly concepts: AffiliationDocumentConceptsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DirectoryReadService.name);
@@ -228,14 +252,34 @@ export class DirectoryReadService {
           tenant.id,
         );
         if (carrier) {
+          // La casa matriz georreferenciada (subtarea 1.3) vive en
+          // `common.addresses`, no en el carrier: `owner_id` es el tenant y
+          // `findCurrentByOwnerAndUse` no distingue por `owner_type`, pero
+          // un uuid de tenant no colisiona con uno de persona o de usuario.
+          const parentHome = await this.addressesRepo.findCurrentByOwnerAndUse(
+            em,
+            tenant.id,
+            CONCEPTS.ADDR_USE_WORK,
+          );
           payer = {
             carrierCode: carrier.carrierCode,
             regulatorIdentifier: carrier.regulatorIdentifier ?? '',
             sigla: carrier.sigla ?? '',
             address: carrier.address ?? '',
+            ...(parentHome?.latitude !== undefined &&
+            parentHome?.latitude !== null &&
+            parentHome?.longitude !== undefined &&
+            parentHome?.longitude !== null
+              ? {
+                  latitude: Number(parentHome.latitude),
+                  longitude: Number(parentHome.longitude),
+                }
+              : {}),
           };
         }
       }
+
+      const representation = await this.loadRepresentation(em, tenant.id);
 
       items.push({
         id: tenant.id,
@@ -255,12 +299,11 @@ export class DirectoryReadService {
         timeZone: tenant.timeZone,
         updatedAt: tenant.updatedAt,
         myRoleConceptId: membership.tenantRoleConceptId,
-        canAdminister: ROLES_QUE_ADMINISTRAN.has(
-          membership.tenantRoleConceptId,
-        ),
+        canAdminister: ROLES_THAT_MANAGE.has(membership.tenantRoleConceptId),
         isVerified:
           tenant.verificationStatusConceptId === CONCEPTS.TENANT_VERIFIED,
         ...(payer ? { payer } : {}),
+        ...representation,
       });
     }
 
@@ -354,6 +397,11 @@ export class DirectoryReadService {
       branchTypeConceptId: branch.branchTypeConceptId,
       statusConceptId: branch.statusConceptId,
       timeZone: branch.timeZone,
+      description: branch.description ?? undefined,
+      locationUrl: branch.locationUrl ?? undefined,
+      latitude: branch.latitude == null ? undefined : Number(branch.latitude),
+      longitude:
+        branch.longitude == null ? undefined : Number(branch.longitude),
       createdAt: branch.createdAt,
     }));
     return { items, count: items.length };
@@ -484,5 +532,140 @@ export class DirectoryReadService {
     }
     await this.tenantAdmin.assertCanRead(em, tenantId, actor);
     return em;
+  }
+
+  /**
+   * El representante legal y las gerencias de una organización, para otra
+   * cara de lectura que ya decidió que el actor puede verlos (la ficha de la
+   * farmacia, `GET /pharmacy/pharmacies/:id/contacts`).
+   *
+   * **No autoriza**: quien lo llama responde por el alcance. Existe para que
+   * «quién representa a la organización» se lea en un solo lugar — el mismo
+   * que sirve `GET /tenants/me` — y no en una copia que se separe con el
+   * tiempo.
+   *
+   * @param tenantId - La organización.
+   * @returns Representante y gerencias; claves ausentes si no hay vínculos.
+   */
+  async readRepresentation(
+    tenantId: string,
+  ): Promise<Pick<MyOrganizationDto, 'legalRepresentative' | 'executives'>> {
+    return this.loadRepresentation(this.em.fork(), tenantId);
+  }
+
+  /**
+   * Quién representa a la organización y quiénes son sus gerencias de
+   * contacto (subtarea 1.4).
+   *
+   * Tres consultas por organización con fila de representación —personas,
+   * documentos y contactos— en vez de una por persona: la ficha nombra hasta
+   * cuatro, y el bucle de arriba ya recorre una membresía por vuelta.
+   *
+   * El orden **no** lo decide Postgres: `listLegalRepsByTenant` no ordena, así
+   * que el representante se identifica por su rol y las gerencias se devuelven
+   * en el orden canónico de `EXECUTIVE_DTO_KEYS`. Una fila con un rol que el
+   * diccionario no conoce —un `apoderado` cargado a mano, por ejemplo— se
+   * omite en vez de romper la ficha.
+   *
+   * @param em - Contexto de persistencia de esta lectura.
+   * @param tenantId - La organización.
+   * @returns Las claves a mezclar en la ficha; vacío si no hay vínculos.
+   */
+  private async loadRepresentation(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<
+    Pick<MyOrganizationDto, 'legalRepresentative' | 'executives'> | object
+  > {
+    const links = await this.legalRepo.listLegalRepsByTenant(em, tenantId);
+    if (links.length === 0) return {};
+
+    const concepts = await this.concepts.resolve(em);
+    // Concepto → código del catálogo → rol canónico. El mapa viene al revés
+    // (código → concepto), así que se invierte una vez por lectura.
+    const roleByConcept = new Map<string, RepresentativeRole>();
+    for (const [code, conceptId] of concepts.representativeRole) {
+      const role = REPRESENTATIVE_ROLE_BY_CODE[code];
+      if (role) roleByConcept.set(conceptId, role);
+    }
+
+    const personIds = links.map((v) => v.personId);
+    const ciIds = links
+      .map((v) => v.ciIdentifierId)
+      .filter((id): id is string => Boolean(id));
+
+    const persons = await this.legalRepo.findPersonsByIds(em, personIds);
+    const documents = await this.identifiersRepo.findByIds(em, ciIds);
+    const contacts = await this.contactPointsRepo.findAllCurrentByOwners(
+      em,
+      personIds,
+    );
+
+    // `findAllCurrentByOwners` ya viene ordenado por preferencia: el primero de
+    // cada sistema es el que la organización quiere que se use.
+    const contact = (personId: string, systemConceptIds: string[]) =>
+      contacts.find(
+        (c) =>
+          c.ownerId === personId &&
+          systemConceptIds.includes(c.systemConceptId),
+      )?.value;
+
+    const record = (link: (typeof links)[number], role: RepresentativeRole) => {
+      const persona = persons.get(link.personId);
+      if (!persona) return undefined;
+      return {
+        role: role,
+        fullName: persona.displayName ?? '',
+        // Las partes sólo se declaran si `persons` las tiene: un contacto
+        // registrado con la forma legada (`fullName`), o antes de esta
+        // subtarea, sólo tiene `display_name` — no hay de dónde sacarlas.
+        // MikroORM hidrata una columna nullable sin valor como `null`, nunca
+        // `undefined` — comparar contra `undefined` acá dejaba pasar un
+        // `name: null` explícito al JSON de respuesta.
+        ...(persona.name == null ? {} : { name: persona.name }),
+        ...(persona.middleName == null
+          ? {}
+          : { middleName: persona.middleName }),
+        ...(persona.lastName == null ? {} : { lastName: persona.lastName }),
+        ...(persona.motherLastName == null
+          ? {}
+          : { motherLastName: persona.motherLastName }),
+        email: contact(link.personId, [CONCEPTS.CONTACT_EMAIL]),
+        phone: contact(link.personId, [
+          CONCEPTS.CONTACT_MOBILE,
+          CONCEPTS.CONTACT_PHONE,
+        ]),
+        idNumber: link.ciIdentifierId
+          ? documents.get(link.ciIdentifierId)?.value
+          : undefined,
+      };
+    };
+
+    const byRole = new Map<RepresentativeRole, (typeof links)[number]>();
+    for (const link of links) {
+      const role = roleByConcept.get(link.representativeRoleConceptId);
+      if (!role) continue;
+      // Ante dos filas del mismo rol —datos viejos, o una corrección a mano—
+      // gana la marcada como principal; si ninguna lo está, la primera.
+      const previous = byRole.get(role);
+      if (previous && !(link.isPrimary === true)) continue;
+      byRole.set(role, link);
+    }
+
+    const representative = byRole.get('LEGAL_REPRESENTATIVE');
+    const legalRepresentative = representative
+      ? record(representative, 'LEGAL_REPRESENTATIVE')
+      : undefined;
+
+    const executives = EXECUTIVE_DTO_KEYS.map((key) => {
+      const role = EXECUTIVE_ROLE_BY_DTO_KEY[key];
+      const link = byRole.get(role);
+      return link ? record(link, role) : undefined;
+    }).filter((sheet): sheet is NonNullable<typeof sheet> => Boolean(sheet));
+
+    return {
+      ...(legalRepresentative ? { legalRepresentative } : {}),
+      ...(executives.length > 0 ? { executives } : {}),
+    };
   }
 }

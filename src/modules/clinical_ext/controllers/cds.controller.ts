@@ -6,9 +6,21 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
+// BR-14 (CL-09): `cds/evaluate` y `cds/check-interactions` traen
+// `patientProfileId` en el cuerpo y son POST, así que el guard evalúa
+// `assertPuedeEscribirHistoria` — "acceso al paciente", como pide el prompt.
+// `ClinicalModule` ya exporta el guard resuelto contra `ClinicalReadService`;
+// no se reimplementa la pregunta de autorización acá.
+import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import { CdsService } from '../services';
 import {
   CreateCdsRuleDto,
@@ -38,6 +50,11 @@ export class CdsController {
   constructor(private readonly cdsService: CdsService) {}
 
   /** Crea una regla CDS en borrador (precondición de UC-18-13). */
+  @Audited({
+    action: 'CDS_RULE_CREATED',
+    entity: 'cds_rule',
+    entityId: 'result.id',
+  })
   @Post('cds-rules')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -50,6 +67,11 @@ export class CdsController {
   }
 
   /** UC-18-13 (publish). */
+  @Audited({
+    action: 'CDS_RULE_PUBLISHED',
+    entity: 'cds_rule',
+    entityId: 'param:id',
+  })
   @Post('cds-rules/:id/versions/publish')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -63,6 +85,11 @@ export class CdsController {
   }
 
   /** UC-18-13 (rollback). */
+  @Audited({
+    action: 'CDS_RULE_ROLLED_BACK',
+    entity: 'cds_rule',
+    entityId: 'param:id',
+  })
   @Post('cds-rules/:id/versions/rollback')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -74,8 +101,23 @@ export class CdsController {
     return this.cdsService.rollbackVersion(id, actor);
   }
 
-  /** UC-18-03. */
+  /**
+   * UC-18-03.
+   *
+   * BR-14 (CL-09): antes, cualquier sesión autenticada —incluido un
+   * `PATIENT`— podía evaluar reglas CDS sobre cualquier paciente. Ahora exige
+   * rol clínico y acceso a ESE paciente (turno de hoy, relación asistencial
+   * vigente, o titularidad para leer/escribir su propia historia — la misma
+   * base que ya usa el resto del expediente, MCH-007).
+   */
+  @Audited({
+    action: 'CDS_RULES_EVALUATED',
+    entity: 'cds_rule',
+    entityId: 'result.id',
+  })
   @Post('cds/evaluate')
+  @Roles('CLINICIAN', 'PRACTITIONER')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Evaluar reglas CDS y generar alertas' })
   evaluate(
@@ -85,8 +127,21 @@ export class CdsController {
     return this.cdsService.evaluate(dto, actor);
   }
 
-  /** UC-18-04. */
+  /**
+   * UC-18-04.
+   *
+   * BR-14 (CL-09): mismo cierre que `cds/evaluate` — rol clínico y acceso al
+   * paciente. Antes cualquier sesión autenticada podía chequear interacciones
+   * de cualquier paciente.
+   */
+  @Audited({
+    action: 'DRUG_INTERACTIONS_CHECKED',
+    entity: 'drug_interaction',
+    entityId: 'result.id',
+  })
   @Post('cds/check-interactions')
+  @Roles('CLINICIAN', 'PRACTITIONER')
+  @UseGuards(ClinicalRecordAccessGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Detectar interacciones medicamentosas al prescribir',
@@ -99,6 +154,11 @@ export class CdsController {
   }
 
   /** Alta de dato de referencia de interacción (alimenta UC-18-04). */
+  @Audited({
+    action: 'DRUG_INTERACTION_CREATED',
+    entity: 'drug_interaction',
+    entityId: 'result.id',
+  })
   @Post('drug-interactions')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

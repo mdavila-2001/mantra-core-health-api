@@ -3,6 +3,45 @@
 Programas de lealtad con niveles y ledger de puntos, promociones con reglas de descuento, cupones,
 redenciones sobre el checkout y programa de referidos.
 
+## Rutas HTTP y alcance (medido)
+
+<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+  find src/modules/promotions -name '*.controller.ts' | wc -l
+  find src/modules/promotions -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
+  find src/modules/promotions -name '*.entity.ts' | wc -l
+  find src/modules/promotions -name '*.service.ts' | wc -l
+La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
+
+El módulo tiene **2 controllers, 19 rutas HTTP, 11 entidad y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+
+Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
+
+Importa (`PaymentsModule`).
+
+Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `coupons`, `discount_rules`, `earning_rules`, `loyalty_memberships`, `loyalty_programs`, `loyalty_tiers`, `member_referrals`, `points_ledger_entries`, `promotions`, `redemptions`, `referral_programs`.
+
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /loyalty/programs` | SYSTEM, PROMOTIONS_ADMIN, MARKETING_MANAGER | `loyalty` |
+| `GET /loyalty/me` | PATIENT | `loyalty` |
+| `GET /loyalty/me/points` | PATIENT | `loyalty` |
+| `POST /loyalty/me/points/redeem` | PATIENT | `loyalty` |
+| `POST /loyalty/programs` | PROMOTIONS_ADMIN, MARKETING_MANAGER | `loyalty` |
+| `POST /loyalty/programs/:id/memberships` | PROMOTIONS_ADMIN, MEMBER | `loyalty` |
+| `POST /loyalty/memberships/:id/points/earn` | SYSTEM, PROMOTIONS_ADMIN | `loyalty` |
+| `POST /loyalty/memberships/:id/points/redeem` | MEMBER, PROMOTIONS_ADMIN | `loyalty` |
+| `POST /loyalty/memberships/:id/recompute` | SYSTEM, PROMOTIONS_ADMIN | `loyalty` |
+| `POST /loyalty/jobs/expire-points` | SYSTEM | `loyalty` |
+| `POST /referral-programs/:id/referrals` | MEMBER, PROMOTIONS_ADMIN | `loyalty` |
+| `POST /referrals/:id/qualify` | SYSTEM, PROMOTIONS_ADMIN | `loyalty` |
+| `GET /promotions/me` | PATIENT | `promotions` |
+| `POST /promotions` | PROMOTIONS_ADMIN, MARKETING_MANAGER | `promotions` |
+| `POST /promotions/:id/coupons/batch` | PROMOTIONS_ADMIN, MARKETING_MANAGER | `promotions` |
+| `POST /coupons/validate` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
+| `POST /redemptions` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
+| `POST /checkout/:orderId/apply-discount` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
+| `POST /redemptions/:id/reverse` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
+
 ## Casos de uso cubiertos (13)
 
 | UC | Endpoint | Descripción |
@@ -95,8 +134,8 @@ que procesa por lotes y no debe esperar a otra pasada. `row_version` aporta bloq
 
 ## Pruebas
 
-`yarn test --testPathPatterns=promotions` — 71 pruebas de servicio + delegación de los dos
-controladores.
+`corepack yarn test src/modules/promotions --runInBand --silent` — 4 suites y 118 pruebas
+aprobadas durante la revisión.
 
 ## Pendiente
 
@@ -111,3 +150,8 @@ controladores.
   criterio.
 - **Outbox**: `PointsEarned`, `CouponRedeemed`, `DiscountApplied`, `ReferralQualified`… se emitirán
   cuando exista el módulo 35.
+
+## Revisión ALOVIDA
+
+Las operaciones administrativas por UUID todavía no comparan la pertenencia de tenant; ver
+[el informe](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/promotions.md).

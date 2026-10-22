@@ -1,0 +1,168 @@
+{
+  "code": "URO_CTRL_HPB",
+  "name": "Control de hiperplasia prostática",
+  "specialty": { "code": "UROLOGIA", "display": "Urología" },
+  "version": 1,
+  "provenance": {
+    "sourceTitle": "Norma Técnica de Salud para la Gestión de la Historia Clínica — NT N.º 022-MINSA/DGSP-V.02",
+    "organization": "Ministerio de Salud del Perú (MINSA)",
+    "url": "https://bvs.minsa.gob.pe/local/dgsp/NT022hist.pdf",
+    "license": "Norma técnica estatal de acceso público",
+    "retrievedAt": "2026-10-02",
+    "note": "Síntomas del tracto urinario inferior, residuo, PSA y tacto rectal."
+  },
+  "fields": [
+    {
+      "section": "Seguimiento",
+      "code": "tipo_de_control",
+      "name": "Tipo de consulta",
+      "dataType": "string",
+      "required": true,
+      "options": [
+        "Primera evaluación de la condición",
+        "Control programado",
+        "Descompensación o consulta no programada",
+        "Control posterior a internación"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "fecha_del_diagnostico",
+      "name": "Fecha del diagnóstico de hiperplasia prostática",
+      "dataType": "date",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "tratamiento_actual",
+      "name": "Tratamiento actual (fármaco, dosis y frecuencia)",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "adherencia",
+      "name": "Adherencia al tratamiento",
+      "dataType": "string",
+      "required": false,
+      "options": [
+        "Toma el tratamiento como está indicado",
+        "Olvida dosis algunas veces",
+        "Abandonó el tratamiento",
+        "Todavía sin tratamiento"
+      ]
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos",
+      "name": "¿Tuvo efectos adversos del tratamiento?",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Seguimiento",
+      "code": "efectos_adversos_cuales",
+      "name": "¿Cuáles y con qué fármaco?",
+      "dataType": "text",
+      "required": true,
+      "showWhen": { "field": "efectos_adversos", "equals": true }
+    },
+    {
+      "section": "Seguimiento",
+      "code": "evolucion_desde_ultimo_control",
+      "name": "Evolución desde el último control",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hiperplasia prostática",
+      "code": "stui",
+      "name": "Síntomas urinarios",
+      "dataType": "json",
+      "required": true,
+      "options": [
+        "Chorro débil",
+        "Esfuerzo",
+        "Goteo terminal",
+        "Vaciado incompleto",
+        "Polaquiuria",
+        "Urgencia"
+      ],
+      "multiple": true
+    },
+    {
+      "section": "Evaluación: hiperplasia prostática",
+      "code": "nicturia",
+      "name": "Nicturia (veces por noche)",
+      "dataType": "integer",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hiperplasia prostática",
+      "code": "molestia_global",
+      "name": "Si tuviera que vivir así el resto de su vida, se sentiría",
+      "dataType": "string",
+      "required": false,
+      "options": ["Bien", "Más o menos", "Mal"]
+    },
+    {
+      "section": "Evaluación: hiperplasia prostática",
+      "code": "psa",
+      "name": "PSA total (ng/mL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hiperplasia prostática",
+      "code": "residuo",
+      "name": "Residuo posmiccional (mL)",
+      "dataType": "decimal",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hiperplasia prostática",
+      "code": "volumen_prostatico",
+      "name": "Volumen prostático (mL)",
+      "dataType": "string",
+      "required": false
+    },
+    {
+      "section": "Evaluación: hiperplasia prostática",
+      "code": "retencion",
+      "name": "Retención urinaria desde el último control",
+      "dataType": "boolean",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "educacion_brindada",
+      "name": "Educación brindada en esta consulta",
+      "dataType": "json",
+      "required": false,
+      "options": ["Reducir líquidos de noche", "Evitar descongestionantes"],
+      "multiple": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "diagnostico",
+      "name": "Diagnóstico (con código CIE-10 si se conoce)",
+      "dataType": "text",
+      "required": true
+    },
+    {
+      "section": "Metas y plan",
+      "code": "plan",
+      "name": "Plan: tratamiento, estudios, interconsultas y destino",
+      "dataType": "text",
+      "required": false
+    },
+    {
+      "section": "Metas y plan",
+      "code": "proximo_control",
+      "name": "Próximo control",
+      "dataType": "date",
+      "required": false
+    }
+  ],
+  "kind": "SPECIFIC"
+}

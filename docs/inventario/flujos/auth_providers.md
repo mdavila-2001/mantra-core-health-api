@@ -42,7 +42,7 @@ account-link-requests ──> token (una sola vez) ──> complete ──> iden
 federated-identities/:id/unlink ──> identidad revocada + intento `unlinked`
 ```
 
-_Fuente: `src/modules/auth_providers/README.md:34`_
+_Fuente: `src/modules/auth_providers/README.md:66`_
 
 ### Etapas y operaciones
 
@@ -295,33 +295,36 @@ flowchart TD
   n9 -->|"no"| n11
   n12[("ACTUALIZA auth_providers.account_link_requests")]:::efecto
   n11 -->|"sí"| n12
-  n13(["422 PRECONDITION_FAILED La solicitud de vinculación caducó"]):::error
+  n13["Llama a AuthProvidersRepository.findIdentityBySubjectForUpdate"]:::llamada
   n12 --> n13
-  n14["Llama a AuthProvidersRepository.findIdentityBySubjectForUpdate"]:::llamada
-  n11 -->|"no"| n14
-  n15[("LEE auth_providers.federated_identities")]:::efecto
+  n11 -->|"no"| n13
+  n14[("LEE auth_providers.federated_identities")]:::efecto
+  n13 --> n14
+  n15{"existing && existing.stateConceptId === CONCEPTS.FEDERATED_IDENTITY_ACTIVE"}:::decision
   n14 --> n15
-  n16{"existing && existing.stateConceptId === CONCEPTS.FEDERATED_IDENTITY_ACTIVE"}:::decision
-  n15 --> n16
-  n17(["409 CONFLICT El sujeto externo ya está vinculado"]):::error
-  n16 -->|"sí"| n17
-  n18{"identity"}:::decision
-  n16 -->|"no"| n18
-  n19[("ACTUALIZA auth_providers.federated_identities · ACTUALIZA auth_providers.federated_identities · ACTUALIZA aut…")]:::efecto
-  n18 -->|"sí"| n19
-  n20["Llama a AuthProvidersRepository.createFederatedIdentity"]:::llamada
-  n18 -->|"no"| n20
-  n21[("CREA auth_providers.federated_identities")]:::efecto
+  n16(["409 CONFLICT El sujeto externo ya está vinculado"]):::error
+  n15 -->|"sí"| n16
+  n17{"identity"}:::decision
+  n15 -->|"no"| n17
+  n18[("ACTUALIZA auth_providers.federated_identities · ACTUALIZA auth_providers.federated_identities · ACTUALIZA aut…")]:::efecto
+  n17 -->|"sí"| n18
+  n19["Llama a AuthProvidersRepository.createFederatedIdentity"]:::llamada
+  n17 -->|"no"| n19
+  n20[("CREA auth_providers.federated_identities")]:::efecto
+  n19 --> n20
+  n21[("ACTUALIZA auth_providers.account_link_requests · ACTUALIZA auth_providers.account_link_requests · ACTUALIZA a…")]:::efecto
+  n18 --> n21
   n20 --> n21
-  n22[("ACTUALIZA auth_providers.account_link_requests · ACTUALIZA auth_providers.account_link_requests · ACTUALIZA a…")]:::efecto
-  n19 --> n22
+  n22["Llama a AuthProvidersRepository.createLoginAttempt"]:::llamada
   n21 --> n22
-  n23["Llama a AuthProvidersRepository.createLoginAttempt"]:::llamada
+  n23[("CREA auth_providers.federated_login_attempts")]:::efecto
   n22 --> n23
-  n24[("CREA auth_providers.federated_login_attempts")]:::efecto
+  n24{"'expiredRequestId' in outcome"}:::decision
   n23 --> n24
-  n25(("200 Responde con éxito")):::ok
-  n24 --> n25
+  n25(["422 PRECONDITION_FAILED La solicitud de vinculación caducó"]):::error
+  n24 -->|"sí"| n25
+  n26(("200 Responde con éxito")):::ok
+  n24 -->|"no"| n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

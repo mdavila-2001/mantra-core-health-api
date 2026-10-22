@@ -1,14 +1,19 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   CurrentUser,
@@ -28,6 +33,16 @@ import {
   ReadReceiptResponseDto,
   ConversationPageDto,
   DirectMessagePageDto,
+  UpdateParticipantDto,
+  EditMessageDto,
+  PinMessageDto,
+  ParticipantPreferencesDto,
+  DirectMessageDto,
+  DeletedMessageResponseDto,
+  PinnedMessageResponseDto,
+  ConversationPresenceDto,
+  ChatContactPageDto,
+  SearchChatContactsRequestDto,
 } from '../dto';
 
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
@@ -72,6 +87,37 @@ export class CommunityMessagingController {
     return this.service.sendMessage(conversationId, dto, actor);
   }
 
+  /** F4.5 · Editar el texto de un mensaje propio. */
+  @Patch(':conversationId/messages/:messageId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Editar el texto de un mensaje propio' })
+  editMessage(
+    @Param('conversationId', ParseUUIDPipe) conversationId: string,
+    @Param('messageId', ParseUUIDPipe) messageId: string,
+    @Body() dto: EditMessageDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DirectMessageDto> {
+    return this.service.editMessage(conversationId, messageId, dto, actor);
+  }
+
+  /** F4.5 · Eliminar un mensaje propio (lógico: queda «Se eliminó este mensaje»). */
+  @Delete(':conversationId/messages/:messageId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Eliminar un mensaje propio' })
+  deleteMessage(
+    @Param('conversationId', ParseUUIDPipe) conversationId: string,
+    @Param('messageId', ParseUUIDPipe) messageId: string,
+    @Query('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<DeletedMessageResponseDto> {
+    return this.service.deleteMessage(
+      conversationId,
+      messageId,
+      profileId,
+      actor,
+    );
+  }
+
   /** UC-19-07. */
   @Post(':conversationId/read')
   @HttpCode(HttpStatus.OK)
@@ -84,21 +130,124 @@ export class CommunityMessagingController {
     return this.service.markRead(conversationId, dto, actor);
   }
 
+  /** F4.4 · Favorita, fijada o archivada, de mi lado. */
+  @Patch(':conversationId/participant')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Marcar la conversación como favorita, fijada o archivada',
+  })
+  updateParticipant(
+    @Param('conversationId', ParseUUIDPipe) conversationId: string,
+    @Body() dto: UpdateParticipantDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ParticipantPreferencesDto> {
+    return this.service.updateParticipant(conversationId, dto, actor);
+  }
+
+  /** F4.6 · Fijar un mensaje en la barra superior del hilo. */
+  @Post(':conversationId/pin')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Fijar un mensaje de la conversación' })
+  pinMessage(
+    @Param('conversationId', ParseUUIDPipe) conversationId: string,
+    @Body() dto: PinMessageDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PinnedMessageResponseDto> {
+    return this.service.pinMessage(conversationId, dto, actor);
+  }
+
+  /** F4.6 · Soltar el mensaje fijado. */
+  @Delete(':conversationId/pin')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Soltar el mensaje fijado de la conversación' })
+  unpinMessage(
+    @Param('conversationId', ParseUUIDPipe) conversationId: string,
+    @Query('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PinnedMessageResponseDto> {
+    return this.service.unpinMessage(conversationId, profileId, actor);
+  }
+
   // --- Lecturas (UC-19-14, cara de lectura) ---
 
-  /** Bandeja del propio perfil, con vista previa y no leídos. */
+  /** Personas activas —pacientes y profesionales— con quienes iniciar un chat. */
+  @Post('contacts/search')
+  @HttpCode(HttpStatus.OK)
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({ summary: 'Buscar personas para iniciar una conversación' })
+  searchContacts(
+    @Body() request: SearchChatContactsRequestDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ChatContactPageDto> {
+    return this.readService.searchContacts(
+      request.profileId,
+      actor,
+      request.q,
+      request.limit,
+    );
+  }
+
+  /**
+   * 5.1 · FT-32-R02: el contenido de un adjunto de la conversación, para quien
+   * participa en ella — no sólo para quien lo subió.
+   *
+   * La conversación forma parte de la ruta: ni conocer el archivo ni conocer
+   * una conversación por separado permite mezclar ambos contextos.
+   *
+   * `no-store` como en toda descarga autenticada: la caché del navegador no
+   * debe conservar un adjunto clínico después de cerrar sesión.
+   */
+  @Get(':conversationId/attachments/:fileId/content')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar el adjunto de una conversación (participante activo)',
+  })
+  async getAttachmentContent(
+    @Param('conversationId', ParseUUIDPipe) conversationId: string,
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @Query('profileId', ParseUUIDPipe) profileId: string,
+    @Res() res: Response,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<void> {
+    res.setHeader('Cache-Control', 'private, no-store');
+    const content = await this.readService.getAttachmentContent(
+      conversationId,
+      fileId,
+      profileId,
+      actor,
+    );
+    res.setHeader('Content-Type', content.mimeType);
+    if (content.originalName) {
+      // Codificado, igual que en `CommonFilesController`: un nombre de archivo
+      // con comillas o saltos de línea podría inyectar cabeceras.
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
+      );
+    }
+    res.send(content.buffer);
+  }
+
+  /**
+   * Bandeja del propio perfil, con vista previa y no leídos.
+   *
+   * F4.3: acepta `cursor` (el `nextCursor` de la página anterior) y `q`
+   * (nombre del otro lado o texto del último mensaje).
+   */
   @Get()
   @ApiOperation({ summary: 'Conversaciones activas de un perfil' })
   listConversations(
     @Query('profileId', ParseUUIDPipe) profileId: string,
     @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('cursor') cursor?: string,
+    @Query('q') q?: string,
   ): Promise<ConversationPageDto> {
-    return this.readService.listConversations(
-      profileId,
-      actor,
-      limit ?? DEFAULT_PAGE_LIMIT,
-    );
+    return this.readService.listConversations(profileId, actor, {
+      limit: limit ?? DEFAULT_PAGE_LIMIT,
+      cursor,
+      q,
+    });
   }
 
   /** Mensajes de una conversación en la que se participa. */
@@ -115,5 +264,20 @@ export class CommunityMessagingController {
       cursor,
       limit: limit ?? DEFAULT_PAGE_LIMIT,
     });
+  }
+
+  /** F4.2 · Quién de los otros está en línea, y si no, cuándo se lo vio. */
+  @Get(':conversationId/presence')
+  @ApiOperation({ summary: 'Presencia de los demás participantes' })
+  conversationPresence(
+    @Param('conversationId', ParseUUIDPipe) conversationId: string,
+    @Query('profileId', ParseUUIDPipe) profileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ConversationPresenceDto> {
+    return this.readService.conversationPresence(
+      conversationId,
+      profileId,
+      actor,
+    );
   }
 }

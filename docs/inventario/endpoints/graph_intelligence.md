@@ -43,7 +43,7 @@
 
 Definir un alcance de acceso al grafo. Caso de uso UC-61-04: Alcance de acceso. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:68`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -55,10 +55,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_GOVERNANCE_ADMIN, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -174,7 +174,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Ajustar o suspender el alcance de acceso. Caso de uso UC-61-04: Alcance de acceso. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:24`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:68`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -186,11 +186,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_GOVERNANCE_ADMIN, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:69` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -297,7 +297,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar las comunidades detectadas. Caso de uso UC-61-06: Comunidades. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:26`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:70`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -309,10 +309,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_ANALYTICS_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:128` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -424,7 +424,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar puntajes de riesgo por nodo. Caso de uso UC-61-07: Puntajes de riesgo. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:27`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:71`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -436,10 +436,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_ANALYTICS_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:144` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -555,7 +555,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Propagar el borrado al grafo (derecho al olvido). Caso de uso UC-61-11: Derecho al olvido. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:31`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:75`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -567,10 +567,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:199` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -679,7 +679,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Expirar la arista y decaer su confianza. Caso de uso UC-61-10: Expirar arista y decaer confianza. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:30`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:74`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -691,11 +691,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:126` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:126` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -799,7 +799,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Buscar el camino entre dos nodos. Caso de uso UC-61-05: Recorrido y rutas con scoping. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:25`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -811,10 +811,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GRAPH_ANALYST, API_CONSUMER, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -919,7 +919,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Arrancar una corrida de proyección. Caso de uso UC-61-03: Corrida incremental. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:67`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -931,11 +931,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_ANALYST, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:93` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1021,7 +1021,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Avanzar el checkpoint de la corrida. Caso de uso UC-61-03: Corrida incremental. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:23`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:67`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1033,11 +1033,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:110` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1142,7 +1142,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Proyectar una arista con su evidencia. Caso de uso UC-61-02: Proyectar arista con evidencia. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:22`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:66`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1154,10 +1154,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1285,7 +1285,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Proyectar un nodo y sus identificadores. Caso de uso UC-61-01: Proyectar nodo + identificadores. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:21`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:65`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1297,10 +1297,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1416,7 +1416,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reconciliar la versión canónica del nodo. Caso de uso UC-61-12: Reconciliar versión fuente. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:32`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:76`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1428,10 +1428,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1533,7 +1533,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Mover el hallazgo por su triage. Caso de uso UC-61-09: Triage del hallazgo. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:29`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:73`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1545,11 +1545,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: COMPLIANCE_OFFICER, GRAPH_ANALYST, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:182` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:182` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1645,7 +1645,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar los hallazgos de una regla. Caso de uso UC-61-08: Hallazgos de regla. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:28`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:72`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1657,11 +1657,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, GRAPH_ANALYTICS_WORKER, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:160` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:160` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
@@ -1781,7 +1781,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Recorrer el grafo desde un nodo. Caso de uso UC-61-05: Recorrido y rutas con scoping. Dentro del módulo (descripción del modelo, en inglés): «Supports multi-hop relationship analysis for referrals, organizational networks, counterparties, fraud, delegated access and lineage.» Dominio: Datos y NoSQL.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:25`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_intelligence/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_61_graph_intelligence.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 
 ### Cómo se atiende (sistema)
 
@@ -1793,10 +1793,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/graph_i
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: GRAPH_ANALYST, API_CONSUMER, COMPLIANCE_OFFICER, PLATFORM_ADMIN | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:253` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:140` |
-| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/main.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:135` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
