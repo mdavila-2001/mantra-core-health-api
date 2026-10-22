@@ -11208,7 +11208,7 @@
         "ruta": "/admin/catalog/annotations/{id}/review",
         "modulo": "data_catalog",
         "detalle": "DomainException: {403} (src/modules/data_catalog/services/catalog-governance.service.ts:182) | DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:188)",
-        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:201"
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:212"
       },
       {
         "operacion": "AdminCatalogController_saveAnnotation",
@@ -11216,7 +11216,7 @@
         "ruta": "/admin/catalog/objects/{id}/annotation",
         "modulo": "data_catalog",
         "detalle": "DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:77)",
-        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:178"
+        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:184"
       },
       {
         "operacion": "DiagnosticsPatientResultsController_getOwnResultFileContent",

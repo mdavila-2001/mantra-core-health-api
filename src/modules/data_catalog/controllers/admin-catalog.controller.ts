@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import { Audited } from '../../../common/audit-trail/audit-trail.decorators';
 import { ValidationFailedHttp } from './admin-catalog.errors';
 import { iso } from '../catalog/timestamps';
 import { TenantAgnostic } from '../../../common/tenant/tenant-agnostic.decorator';
@@ -129,6 +130,11 @@ export class AdminCatalogController {
     return this.read.evidence(p.id);
   }
 
+  @Audited({
+    action: 'CATALOG_EVIDENCE_ADDED',
+    entity: 'catalog_evidence_item',
+    entityId: 'result.id',
+  })
   @Post('objects/:id/evidence')
   @Roles(...CATALOG_WRITE_ROLES)
   @HttpCode(HttpStatus.CREATED)
@@ -175,6 +181,11 @@ export class AdminCatalogController {
     return this.read.impact(p.id, q);
   }
 
+  @Audited({
+    action: 'CATALOG_ANNOTATION_SAVED',
+    entity: 'catalog_annotation',
+    entityId: 'result.id',
+  })
   @Put('objects/:id/annotation')
   @Roles(...CATALOG_WRITE_ROLES)
   @ApiOperation({
@@ -198,6 +209,11 @@ export class AdminCatalogController {
     return this.governance.saveAnnotation(actor.id, p.id, dto);
   }
 
+  @Audited({
+    action: 'CATALOG_ANNOTATION_REVIEWED',
+    entity: 'catalog_annotation',
+    entityId: 'param:id',
+  })
   @Post('annotations/:id/review')
   @Roles(...CATALOG_WRITE_ROLES)
   @HttpCode(HttpStatus.OK)
