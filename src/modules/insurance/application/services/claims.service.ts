@@ -39,6 +39,7 @@ import {
   ResourceStatusDto,
 } from '../../presentation/dto';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
+import { ClaimCoveragePolicy } from './claim-coverage-policy';
 import {
   LinkedClaimAccessService,
   assertLegacyClaimRoles,
@@ -69,6 +70,7 @@ export class ClaimsService {
     private readonly logger: PinoLogger,
     private readonly linkedOrders: LinkedClaimOrderService,
     private readonly linkedAccess: LinkedClaimAccessService,
+    private readonly coveragePolicy: ClaimCoveragePolicy,
   ) {
     this.logger.setContext(ClaimsService.name);
   }
@@ -162,6 +164,26 @@ export class ClaimsService {
           (await this.repo.findByIdempotency(tx, dto.idempotencyKey))
         )
           throw new ConflictException('Reclamo duplicado');
+        // Cobro directo del consultorio: el servidor contrasta cada línea con el
+        // plan (cobertura, copago, aprobación previa) y calcula él la parte del
+        // paciente. La del cliente nunca se guarda (carril 16, REQ-16-023 a 025).
+        await this.validatePriorAuthorization(tx, dto);
+        const evaluated = await this.coveragePolicy.evaluate(tx, {
+          planId: plan.id,
+          patientCoverageId: dto.patientCoverageId,
+          priorAuthorizationRequestId: dto.priorAuthorizationRequestId,
+          lines: dto.lines,
+          at: new Date(),
+        });
+        const patientShareBySequence = new Map(
+          evaluated.map((line) => [line.lineSequence, line.patientAmount]),
+        );
+        lines = dto.lines.map((line) => ({
+          ...line,
+          patientResponsibilityAmount: patientShareBySequence.get(
+            line.lineSequence,
+          ),
+        }));
       }
       const claim = this.repo.createClaim(tx, {
         insuranceCarrierId: dto.insuranceCarrierId,

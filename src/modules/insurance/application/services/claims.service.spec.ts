@@ -71,6 +71,7 @@ function serviceWith(
     logger,
     {} as never,
     {} as never,
+    {} as never,
   );
 }
 
