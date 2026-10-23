@@ -17,8 +17,8 @@ import {
 } from '../../../presentation/dto';
 import { SCHED } from '../../../domain/scheduling.concepts';
 import { SchedulingBookingsRepository } from '../../../infrastructure/repositories';
+import { ServiceSlotLifecycle } from '../support/service-slot-lifecycle';
 import { requireReason } from '../support/require-reason';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** CARRIL 11: el centro propone otro horario para la solicitud. */
 @Injectable()
@@ -27,6 +27,7 @@ export class ProposeScheduleUseCase {
     private readonly em: EntityManager,
     private readonly bookingsRepo: SchedulingBookingsRepository,
     private readonly access: BookingAccess,
+    private readonly serviceSlots: ServiceSlotLifecycle,
     private readonly transitions: BookingTransitionRecorder,
     private readonly logger: PinoLogger,
   ) {
@@ -71,11 +72,15 @@ export class ProposeScheduleUseCase {
       this.transitions.assertPending(fromState, bookingId);
 
       const originId = booking.bookableSlotId;
+      await this.serviceSlots.assertNotAService(
+        tx,
+        originId,
+        'proponer otro horario para',
+      );
       if (dto.proposedSlotId === originId) {
         throw new PreconditionFailedException(
           'El horario propuesto es el que ya tiene la solicitud',
           { bookingId },
-          SchedulingErrorReason.PROPOSED_SLOT_SAME_AS_CURRENT,
         );
       }
 
@@ -84,22 +89,14 @@ export class ProposeScheduleUseCase {
         dto.proposedSlotId,
       );
       if (!target) {
-        throw new ResourceNotFoundException(
-          'Cupo propuesto no encontrado',
-          {
-            slotId: dto.proposedSlotId,
-          },
-          SchedulingErrorReason.PROPOSED_SLOT_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Cupo propuesto no encontrado', {
+          slotId: dto.proposedSlotId,
+        });
       }
       if (target.remainingCapacity <= 0) {
-        throw new ConflictException(
-          'El cupo propuesto no tiene lugar',
-          {
-            slotId: dto.proposedSlotId,
-          },
-          SchedulingErrorReason.PROPOSED_SLOT_NO_CAPACITY,
-        );
+        throw new ConflictException('El cupo propuesto no tiene lugar', {
+          slotId: dto.proposedSlotId,
+        });
       }
 
       const originBooking = await this.bookingsRepo.findSlotForUpdate(

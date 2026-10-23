@@ -32,7 +32,6 @@ import {
   isPatientActor,
   operatesAnyAgenda,
 } from '../../../domain/booking/agenda-actors';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** UC-41-15: una cita concreta. */
 @Injectable()
@@ -65,11 +64,7 @@ export class GetBookingUseCase {
     const em = this.em.fork();
     const booking = await this.bookingsRepo.findBookingById(em, bookingId);
     if (!booking) {
-      throw new ResourceNotFoundException(
-        'Cita no encontrada',
-        { bookingId },
-        SchedulingErrorReason.BOOKING_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
     }
     const slot = booking.bookableSlotId
       ? await this.bookingsRepo.findSlotById(em, booking.bookableSlotId)

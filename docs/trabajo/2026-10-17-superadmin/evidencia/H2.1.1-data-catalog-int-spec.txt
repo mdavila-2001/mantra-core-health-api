@@ -1,0 +1,6 @@
+$ DATA_CATALOG_IT_DB_URL=postgres://postgres@localhost:54329/dcat_it yarn test:integration test/integration/data-catalog.int-spec.ts
+Test Suites: 1 passed, 1 total
+Tests:       28 passed, 28 total
+Snapshots:   0 total
+Time:        4.025 s
+Ran all test suites matching test/integration/data-catalog.int-spec.ts.

@@ -19,7 +19,6 @@ import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practition
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** UC-41-04: registra una excepción de disponibilidad. */
 @Injectable()
@@ -47,7 +46,6 @@ export class CreateExceptionUseCase {
       throw new PreconditionFailedException(
         'Eligió «Otro» como motivo: escriba cuál es',
         { resourceId, exceptionType: dto.exceptionType },
-        SchedulingErrorReason.EXCEPTION_REASON_REQUIRED,
       );
     }
 
@@ -59,7 +57,6 @@ export class CreateExceptionUseCase {
         {
           resourceId,
         },
-        SchedulingErrorReason.EXCEPTION_WINDOW_INVERTED,
       );
     }
 
@@ -75,13 +72,9 @@ export class CreateExceptionUseCase {
     return this.em.transactional(async (tx) => {
       const resource = await this.catalogRepo.findResourceById(tx, resourceId);
       if (!resource) {
-        throw new ResourceNotFoundException(
-          'Recurso no encontrado',
-          {
-            resourceId,
-          },
-          SchedulingErrorReason.RESOURCE_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Recurso no encontrado', {
+          resourceId,
+        });
       }
 
       const isAvailable = dto.isAvailable ?? false;
@@ -114,7 +107,6 @@ export class CreateExceptionUseCase {
               startAt: first.startAt,
               endAt: first.endAt,
             },
-            SchedulingErrorReason.PRACTITIONER_HAS_CONFIRMED_APPOINTMENT,
           );
         }
       }

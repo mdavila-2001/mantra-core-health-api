@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { VerificationEvidenceDto } from './request-verification.dto';
 
 /**
  * Un caso de verificación esperando la decisión de un revisor.
@@ -63,4 +64,10 @@ export class CaseQueueResponseDto {
    */
   @ApiProperty({ type: [QueuedCaseDto] })
   cases!: QueuedCaseDto[];
+}
+
+/** Expediente visible sólo al equipo de seguridad; no incluye bytes del archivo. */
+export class VerificationCaseDetailDto extends QueuedCaseDto {
+  @ApiProperty({ type: [VerificationEvidenceDto] })
+  evidence!: VerificationEvidenceDto[];
 }

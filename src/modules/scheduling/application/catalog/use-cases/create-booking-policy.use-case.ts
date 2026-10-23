@@ -12,7 +12,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** UC-41-01: define una política de reserva. */
 @Injectable()
@@ -48,14 +47,10 @@ export class CreateBookingPolicyUseCase {
       dto.code,
     );
     if (duplicate) {
-      throw new ConflictException(
-        'Ya existe una política con ese código',
-        {
-          tenantId: dto.tenantId,
-          code: dto.code,
-        },
-        SchedulingErrorReason.POLICY_CODE_ALREADY_EXISTS,
-      );
+      throw new ConflictException('Ya existe una política con ese código', {
+        tenantId: dto.tenantId,
+        code: dto.code,
+      });
     }
 
     return this.em.transactional(async (tx) => {

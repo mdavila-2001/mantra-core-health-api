@@ -6,6 +6,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PENDING_BOOKING_STATES } from '../../../domain/booking/booking-states';
 import { SchedulingBookingsRepository } from '../../../infrastructure/repositories';
+import { ServiceSlotLifecycle } from './service-slot-lifecycle';
 
 /**
  * REGLA 2: aceptar una solicitud desplaza las del mismo paciente que chocan
@@ -17,6 +18,7 @@ export class DisplacedRequestsCanceller {
   constructor(
     private readonly bookingsRepo: SchedulingBookingsRepository,
     private readonly transitions: BookingTransitionRecorder,
+    private readonly serviceSlots: ServiceSlotLifecycle,
   ) {}
 
   /**
@@ -105,10 +107,14 @@ export class DisplacedRequestsCanceller {
       );
       if (ownSlot) {
         ownSlot.remainingCapacity += 1;
-        if (ownSlot.statusConceptId === CONCEPTS.SLOT_HELD) {
-          ownSlot.statusConceptId = CONCEPTS.SLOT_OPEN;
+        if (ownSlot.practitionerServiceOfferingId) {
+          await this.serviceSlots.discardOneOffSlot(tx, ownSlot, actor.id);
+        } else {
+          if (ownSlot.statusConceptId === CONCEPTS.SLOT_HELD) {
+            ownSlot.statusConceptId = CONCEPTS.SLOT_OPEN;
+          }
+          touch(ownSlot, actor.id);
         }
-        touch(ownSlot, actor.id);
       }
 
       cancelled.push(booking.id);

@@ -14,6 +14,9 @@ import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 import type { Server, ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
+import { loadHttpSliEnv } from './observability/http-sli/http-sli.env';
+import { createHttpSliMiddleware } from './observability/http-sli/http-sli.middleware';
+import { httpSliAggregator } from './observability/http-sli/http-sli.tokens';
 import {
   buildCorsOptions,
   createGlobalValidationPipe,
@@ -157,6 +160,15 @@ async function bootstrap() {
   // Cabeceras de seguridad HTTP (HSTS, X-Content-Type-Options, X-Frame-Options,
   // Referrer-Policy, etc.). Imprescindible en un backend de salud expuesto.
   app.use(helmet());
+
+  // Medición de peticiones HTTP para el portal de superadministración. Va acá, antes
+  // de las rutas y de cualquier parseo de cuerpo, y no como interceptor: un
+  // interceptor no ve lo que se rechaza antes del handler (cuerpo inválido, ruta
+  // inexistente) y esos 4xx son justo lo que se quiere contar. Sólo lee verbo,
+  // plantilla de ruta, estado y duración; nunca la URL, el cuerpo ni al usuario.
+  if (loadHttpSliEnv().enabled) {
+    app.use(createHttpSliMiddleware(httpSliAggregator));
+  }
 
   // Límite explícito de tamaño de payload. El default de Express (100 kb) queda
   // documentado aquí de forma intencional; las cargas grandes (imágenes, DICOM)

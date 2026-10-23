@@ -10,7 +10,6 @@ import { CreateResourceDto } from '../../../presentation/dto';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practitioner-profile-tables';
 import { PractitionerAffiliationGateService } from '../../affiliation/practitioner-affiliation-gate.service';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /**
  * Quién puede administrar qué en el catálogo de agenda: crear recursos, tocar un
@@ -81,7 +80,6 @@ export class CatalogAccess {
         : 'Su vínculo con esta organización no está vigente, así que no puede ' +
             'publicar agenda acá. Hable con ellos para reactivarlo.',
       { tenantId, vinculo: verdict },
-      SchedulingErrorReason.AFFILIATION_NOT_ACTIVE,
     );
   }
 

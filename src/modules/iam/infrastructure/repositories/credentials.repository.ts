@@ -1,7 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { AuthenticationCredentials } from '../../entities';
+import { ContactPoints } from '../../../common/entities';
+import { PersonAccountLinks } from '../../../profiles/entities';
+import { PROF } from '../../../profiles/profiles.concepts';
 import { CONCEPTS, createdBy } from '../../../../common';
+
+/** Un `%` o `_` del correo se busca literal, no como comodín de `ILIKE`. */
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, (char) => `\\${char}`);
+}
 
 /** Alta de una credencial de contraseña (identidad de login del usuario). */
 export interface CreatePasswordCredentialData {
@@ -59,6 +67,59 @@ export class CredentialsRepository {
     return em.findOne(AuthenticationCredentials, {
       methodConceptId: CONCEPTS.CRED_PASSWORD,
       externalSubject,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
+  /**
+   * La credencial de contraseña activa para un identificador de **login**: el
+   * sujeto exacto (documento o correo de alta) o, si es un correo, el mismo
+   * correo con otras mayúsculas o el correo de contacto de un paciente.
+   *
+   * El paciente se da de alta con su **documento** como sujeto y el correo queda
+   * sólo como dato de contacto; sin este rodeo, la pantalla de ingreso —que
+   * acepta «documento o correo»— lo rechazaba con «Credenciales inválidas».
+   *
+   * El correo se compara sin distinguir mayúsculas: el alta guarda el sujeto tal
+   * como se escribió («Juan@…», el teclado del móvil pone la mayúscula) y quien
+   * entra después escribe «juan@…». `_` y `%` se buscan literales, no como
+   * comodines de `ILIKE`.
+   *
+   * Ante un correo que pertenece a **más de una** cuenta no se adivina: sin
+   * credencial, y el ingreso falla igual que con una clave errónea.
+   */
+  async findActivePasswordByLoginIdentifier(
+    em: EntityManager,
+    identifier: string,
+  ): Promise<AuthenticationCredentials | null> {
+    const exact = await this.findActivePasswordBySubject(em, identifier);
+    if (exact || !identifier.includes('@')) return exact;
+
+    const email = escapeLike(identifier.trim());
+
+    const bySubject = await em.find(AuthenticationCredentials, {
+      methodConceptId: CONCEPTS.CRED_PASSWORD,
+      externalSubject: { $ilike: email },
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+    if (bySubject.length === 1) return bySubject[0];
+    if (bySubject.length > 1) return null;
+
+    const contacts = await em.find(ContactPoints, {
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      systemConceptId: CONCEPTS.CONTACT_EMAIL,
+      value: { $ilike: email },
+    });
+    if (contacts.length === 0) return null;
+    const links = await em.find(PersonAccountLinks, {
+      personId: { $in: contacts.map((contact) => contact.ownerId) },
+      statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+    });
+    const userIds = [...new Set(links.map((link) => link.userId))];
+    if (userIds.length !== 1) return null;
+    return em.findOne(AuthenticationCredentials, {
+      userId: userIds[0],
+      methodConceptId: CONCEPTS.CRED_PASSWORD,
       stateConceptId: CONCEPTS.STATE_ACTIVE,
     });
   }

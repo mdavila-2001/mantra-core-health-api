@@ -356,6 +356,9 @@ export class PractitionerSiteDto {
   /** Longitud del punto de la sede. Va siempre junto a `latitude`. */
   @ApiPropertyOptional({ nullable: true })
   longitude!: number | null;
+  /** Teléfono de este profesional en esta sede, si lo declaró. */
+  @ApiPropertyOptional({ nullable: true, example: '+591 72123456' })
+  contactPhone!: string | null;
   /**
    * Si la sede es el consultorio **propio** del profesional —su práctica
    * personal— y no la de otra organización donde atiende (P32-a).

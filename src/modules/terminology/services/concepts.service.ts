@@ -36,7 +36,9 @@ import {
   type ConceptRelationDto,
   type ConceptImageDto,
   type ConceptSearchItemDto,
+  type GlossaryGraphDto,
   type GlossaryGraphNodeDto,
+  type GlossaryGraphEdgeDto,
   type GlossaryNeighborDto,
   type GlossaryNeighborGroupDto,
   type GlossaryNeighborhoodDto,
@@ -980,6 +982,65 @@ export class ConceptsService {
           : {}),
       };
     });
+  }
+
+  /** Lee todos los nodos publicados y sus aristas tipadas en una sola llamada. */
+  async readGlossaryGraph(
+    language: DesignationLanguage = DEFAULT_GLOSSARY_LANGUAGE,
+    limit = 500,
+  ): Promise<GlossaryGraphDto> {
+    const page = await this.searchConcepts(
+      undefined,
+      undefined,
+      limit,
+      undefined,
+      {
+        language,
+        includeValueSets: true,
+      },
+    );
+    const nodes: GlossaryGraphNodeDto[] = page.items
+      .filter(
+        (item): item is typeof item & { slug: string } =>
+          typeof item.slug === 'string' && item.slug !== '',
+      )
+      .map((item) => ({
+        conceptId: item.conceptId,
+        slug: item.slug,
+        display: item.display,
+        category: item.category ?? null,
+        shortDefinition: item.shortDefinition ?? '',
+      }));
+    const nodeIds = new Set(nodes.map((node) => node.conceptId));
+    const relationsBySource = await this.resolveGlossaryRelations([...nodeIds]);
+    const edges: GlossaryGraphEdgeDto[] = [];
+    const seenEdges = new Set<string>();
+
+    for (const [sourceConceptId, relations] of relationsBySource) {
+      for (const relation of relations) {
+        if (!nodeIds.has(relation.conceptId)) continue;
+        const key = `${sourceConceptId}:${relation.type}:${relation.conceptId}`;
+        if (seenEdges.has(key)) continue;
+        seenEdges.add(key);
+        edges.push({
+          sourceConceptId,
+          targetConceptId: relation.conceptId,
+          type: relation.type,
+        });
+      }
+    }
+
+    return {
+      nodes,
+      edges,
+      count: nodes.length,
+      limit,
+      // `searchConcepts` devuelve el total al leer el paraguas del glosario.
+      // Compararlo con el total evita marcar como truncado un catálogo que
+      // tenga exactamente `limit` nodos, y detecta la truncación real aunque
+      // algún registro de la página no tenga slug y no pueda dibujarse.
+      possiblyTruncated: (page.total ?? page.items.length) > page.items.length,
+    };
   }
 
   /**

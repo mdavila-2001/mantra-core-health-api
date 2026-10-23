@@ -18,7 +18,6 @@ import {
   UpdateExceptionDto,
   UpdateExceptionResponseDto,
 } from '../../../presentation/dto';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** Edita una excepción de disponibilidad. */
 @Injectable()
@@ -123,13 +122,9 @@ export class UpdateExceptionUseCase {
         exceptionId,
       );
       if (!exception) {
-        throw new ResourceNotFoundException(
-          'Excepción no encontrada',
-          {
-            exceptionId,
-          },
-          SchedulingErrorReason.EXCEPTION_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Excepción no encontrada', {
+          exceptionId,
+        });
       }
       const resource = await this.catalogRepo.findResourceById(
         tx,
@@ -145,7 +140,6 @@ export class UpdateExceptionUseCase {
         throw new PreconditionFailedException(
           'El bloqueo termina antes de empezar',
           { startAt: startAt.toISOString(), endAt: endAt.toISOString() },
-          SchedulingErrorReason.EXCEPTION_WINDOW_INVERTED,
         );
       }
 
@@ -161,7 +155,6 @@ export class UpdateExceptionUseCase {
         throw new PreconditionFailedException(
           'Eligió «Otro» como motivo: escriba cuál es',
           { exceptionType: finalType },
-          SchedulingErrorReason.EXCEPTION_REASON_REQUIRED,
         );
       }
 

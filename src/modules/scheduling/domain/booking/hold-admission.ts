@@ -1,15 +1,19 @@
 import { CONCEPTS } from '../../../../common/constants/concepts';
+import { SCHED } from '../scheduling.concepts';
 
 const MS_PER_MINUTE = 60_000;
 
 /** Por qué un cupo no se puede retener, en el orden en que se comprueba. */
-export type SlotHoldRefusal = 'BLOCKED' | 'NO_CAPACITY';
+export type SlotHoldRefusal = 'BLOCKED' | 'RETRACTED' | 'NO_CAPACITY';
 
 /** Por qué un horario no se puede pedir, aunque el cupo tenga lugar. */
 export type SlotTimingRefusal = 'ALREADY_PASSED' | 'TOO_CLOSE';
 
 /**
  * ¿El cupo admite una retención?
+ *
+ * Un cupo retraído lo pisa un servicio que el profesional ya comprometió: se
+ * dejó de ofrecer, pero un id leído hace rato todavía puede llegar acá.
  *
  * @returns El motivo del rechazo, o `null` si se puede retener.
  */
@@ -18,6 +22,7 @@ export function slotHoldRefusal(slot: {
   remainingCapacity: number;
 }): SlotHoldRefusal | null {
   if (slot.statusConceptId === CONCEPTS.SLOT_BLOCKED) return 'BLOCKED';
+  if (slot.statusConceptId === SCHED.SLOT_RETRACTED) return 'RETRACTED';
   if (slot.remainingCapacity <= 0) return 'NO_CAPACITY';
   return null;
 }

@@ -18,6 +18,7 @@ import {
 import { Injectable } from '@nestjs/common';
 import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practitioner-profile-tables';
 import { PinoLogger } from 'nestjs-pino';
+import { SCHED } from '../../../domain/scheduling.concepts';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
 import {
@@ -25,7 +26,6 @@ import {
   matchingLocalDays,
 } from '../../../domain/time/scheduling-time';
 import { nextBandStart } from '../../../domain/catalog/week-bands';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** UC-41-03: materializa los cupos de una plantilla. */
 @Injectable()
@@ -54,7 +54,6 @@ export class GenerateSlotsUseCase {
           from: dto.from,
           to: dto.to,
         },
-        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
 
@@ -71,13 +70,9 @@ export class GenerateSlotsUseCase {
     return this.em.transactional(async (tx) => {
       const template = await this.catalogRepo.findTemplateById(tx, templateId);
       if (!template) {
-        throw new ResourceNotFoundException(
-          'Plantilla no encontrada',
-          {
-            templateId,
-          },
-          SchedulingErrorReason.TEMPLATE_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Plantilla no encontrada', {
+          templateId,
+        });
       }
 
       // La zona de la sede, que es en la que están escritas las reglas. Sin
@@ -120,6 +115,10 @@ export class GenerateSlotsUseCase {
       let omittedByCommitments = 0;
 
       for (const rule of rules) {
+        // Una franja sólo de servicios no genera cupos de consulta: sus turnos nacen
+        // al retener, con la duración de cada servicio, y una grilla fija encima
+        // ofrecería horarios que la agenda de servicios no respeta.
+        if (rule.bookingModeConceptId === SCHED.RULE_MODE_SERVICES) continue;
         const slotMinutes =
           rule.slotMinutes ?? template.slotMinutes ?? DEFAULT_SLOT_MINUTES;
         const capacity = rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY;

@@ -51,7 +51,7 @@
 
 ## Evidencia
 
-En [`evidencia/`](evidencia/):
+En [`evidencia/`](evidencia/index.md):
 - `00-partida/`: estado de partida (git log de los 4 repos, PRs mergeados, Neon sin tablas de campaña).
 - `01-neon/`: patch aplicado dos veces, conteos antes/después, log de fidelidad post-reinicio.
 - `01-catalogo/`: `orm-catalog.txt`, `audit-fidelity.txt` (+ `fidelity-audit.json`), `test-seed.txt`

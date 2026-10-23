@@ -1,6 +1,7 @@
 import { AppointmentPaymentStates } from '../../../entities';
 import {
   BookingDelayNoticeDto,
+  BookingServiceDto,
   BookingStatusReasonDto,
   PaymentStateDto,
 } from '../../../presentation/dto';
@@ -12,6 +13,36 @@ import {
 import { readSnapshot } from '../../../domain/booking/booking-history-reading';
 
 /** Proyecciones puras de lo guardado a lo que ve el cliente. */
+/**
+ * La copia congelada de un servicio reservado, a lo que ve el cliente.
+ *
+ * El snapshot es `jsonb` libre: se proyecta campo a campo y nunca se devuelve
+ * tal cual, para que una clave que mañana se agregue al snapshot no salga por
+ * la API sin que nadie lo haya decidido.
+ */
+export function projectBookedService(snapshot: unknown): BookingServiceDto {
+  const s = snapshot as Partial<{
+    offeringId: string;
+    serviceName: string;
+    price: string;
+    currencyConceptId: string;
+    minDurationMinutes: number;
+    maxDurationMinutes: number;
+    requiresApproval: boolean;
+  }>;
+  return {
+    offeringId: s.offeringId ?? '',
+    name: s.serviceName ?? '',
+    price: s.price ?? '0.00',
+    ...(s.currencyConceptId === undefined
+      ? {}
+      : { currencyConceptId: s.currencyConceptId }),
+    minDurationMinutes: s.minDurationMinutes ?? 0,
+    maxDurationMinutes: s.maxDurationMinutes ?? 0,
+    requiresApproval: s.requiresApproval === true,
+  };
+}
+
 /**
  * De la fila guardada a lo que ve el cliente.
  *

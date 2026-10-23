@@ -3817,6 +3817,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se detectó ningún estudio duplicado para justificar | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |

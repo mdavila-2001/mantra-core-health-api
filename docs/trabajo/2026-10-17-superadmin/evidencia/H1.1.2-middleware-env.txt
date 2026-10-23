@@ -1,0 +1,10 @@
+(node:1956) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1955) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 3 passed, 3 total
+Tests:       40 passed, 40 total
+Snapshots:   0 total
+Time:        0.729 s, estimated 1 s
+Ran all test suites matching src/observability/http-sli.

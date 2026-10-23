@@ -6,7 +6,9 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   type AuthenticatedUser,
+  CONCEPTS,
 } from '../../../common';
+import { FilesRepository } from '../../common/repositories';
 import {
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
@@ -44,6 +46,7 @@ import type {
   VerificationStatusResponseDto,
   VerificationTypeDto,
   VerificationTypesResponseDto,
+  VerificationEvidenceDto,
 } from '../dto';
 
 /**
@@ -120,6 +123,7 @@ export class IdentitySelfServiceService {
     private readonly membershipsRepo: TenantMembershipsRepository,
     private readonly manualReviewRepo: IdentityManualReviewCasesRepository,
     private readonly checkResultsRepo: IdentityCheckResultsRepository,
+    private readonly filesRepo: FilesRepository,
     private readonly notificationsService: NotificationsService,
     private readonly logger: PinoLogger,
   ) {
@@ -137,7 +141,7 @@ export class IdentitySelfServiceService {
         tx,
         IDENTITY_CARD_VERTICAL,
         personId,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -155,7 +159,7 @@ export class IdentitySelfServiceService {
         tx,
         PRACTITIONER_IDENTITY_VERTICAL,
         personId,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -201,7 +205,7 @@ export class IdentitySelfServiceService {
         tx,
         MEDICAL_LICENSE_VERTICAL,
         authorization.id,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -241,7 +245,7 @@ export class IdentitySelfServiceService {
         tx,
         INSTITUTION_DOCUMENT_VERTICAL,
         tenantId,
-        dto.evidenceFileId,
+        dto,
         actor,
       );
     });
@@ -396,7 +400,18 @@ export class IdentitySelfServiceService {
     kase: IdentityVerificationCases,
     detailed: boolean,
   ): Promise<VerificationStatusResponseDto> {
-    const evidence = await this.evidenceRepo.findLatestByCase(em, kase.id);
+    const records = await this.evidenceRepo.findByCase(em, kase.id);
+    const evidence: VerificationEvidenceDto[] = records.map(
+      (record, index) => ({
+        id: record.id,
+        evidenceTypeConceptId: record.evidenceTypeConceptId,
+        ...(record.evidenceFileId
+          ? { evidenceFileId: record.evidenceFileId }
+          : {}),
+        createdAt: record.createdAt,
+        sequence: index + 1,
+      }),
+    );
 
     const base: VerificationStatusResponseDto = {
       id: kase.id,
@@ -404,8 +419,9 @@ export class IdentitySelfServiceService {
       type: typeCodeForSubject(kase.subjectTypeConceptId),
       ...(kase.openedAt ? { openedAt: kase.openedAt } : {}),
       ...(kase.completedAt ? { completedAt: kase.completedAt } : {}),
-      ...(evidence?.evidenceFileId
-        ? { evidenceFileId: evidence.evidenceFileId }
+      ...(evidence.length ? { evidence } : {}),
+      ...(evidence.at(-1)?.evidenceFileId
+        ? { evidenceFileId: evidence.at(-1)!.evidenceFileId }
         : {}),
     };
     if (!detailed) return base;
@@ -457,9 +473,28 @@ export class IdentitySelfServiceService {
     tx: EntityManager,
     vertical: IdentityVerificationVertical,
     subjectEntityId: string,
-    evidenceFileId: string,
+    dto: RequestVerificationDto,
     actor: AuthenticatedUser,
   ): Promise<VerificationRequestResponseDto> {
+    const evidence = this.resolveEvidence(dto, vertical.evidenceTypeConceptId);
+    if (!evidence.length) {
+      throw new PreconditionFailedException(
+        'Adjunta el frente, el reverso y las tres capturas de prueba de vida',
+      );
+    }
+    for (const item of evidence) {
+      const file = await this.filesRepo.findById(tx, item.fileId);
+      if (
+        !file ||
+        file.createdByUserId !== actor.id ||
+        file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI ||
+        file.deletedAt
+      ) {
+        throw new PreconditionFailedException(
+          'Una evidencia no existe, no pertenece a esta cuenta o no está protegida',
+        );
+      }
+    }
     const live = await this.casesRepo.countLiveForSubject(
       tx,
       vertical.subjectTypeConceptId,
@@ -488,13 +523,15 @@ export class IdentitySelfServiceService {
     // Las FK son columnas uuid planas: persistir el caso antes de sus hijos.
     await tx.flush();
 
-    await this.evidenceRepo.create(tx, {
-      identityVerificationCaseId: kase.id,
-      evidenceTypeConceptId: vertical.evidenceTypeConceptId,
-      evidenceFileId,
-      verificationStatusConceptId: IDA.EVIDENCE_PENDING,
-      actorUserId: actor.id,
-    });
+    for (const item of evidence) {
+      await this.evidenceRepo.create(tx, {
+        identityVerificationCaseId: kase.id,
+        evidenceTypeConceptId: item.typeId,
+        evidenceFileId: item.fileId,
+        verificationStatusConceptId: IDA.EVIDENCE_PENDING,
+        actorUserId: actor.id,
+      });
+    }
 
     const check = this.checksRepo.create(tx, {
       identityVerificationCaseId: kase.id,
@@ -603,6 +640,42 @@ export class IdentitySelfServiceService {
       DIR.MEMBERSHIP_ACTIVE,
     );
     return membership !== null;
+  }
+
+  /** Convierte el contrato nuevo de cinco evidencias o el contrato histórico. */
+  private resolveEvidence(
+    dto: RequestVerificationDto,
+    legacyTypeId: string,
+  ): Array<{ fileId: string; typeId: string }> {
+    const values = [
+      dto.documentFrontFileId,
+      dto.documentBackFileId,
+      dto.livenessCenterFileId,
+      dto.livenessTurnLeftFileId,
+      dto.livenessTurnRightFileId,
+    ];
+    const supplied = values.filter((value): value is string => Boolean(value));
+    if (dto.evidenceFileId && supplied.length) {
+      throw new PreconditionFailedException(
+        'Envía el archivo histórico o las cinco evidencias nuevas, no ambos',
+      );
+    }
+    if (dto.evidenceFileId) {
+      return [{ fileId: dto.evidenceFileId, typeId: legacyTypeId }];
+    }
+    if (supplied.length === 0) return [];
+    if (supplied.length !== values.length) {
+      throw new PreconditionFailedException(
+        'La verificación requiere las cinco evidencias en el orden solicitado',
+      );
+    }
+    return [
+      { fileId: values[0]!, typeId: IDA.EVIDENCE_TYPE_IDENTITY_DOCUMENT_FRONT },
+      { fileId: values[1]!, typeId: IDA.EVIDENCE_TYPE_IDENTITY_DOCUMENT_BACK },
+      { fileId: values[2]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_CENTER },
+      { fileId: values[3]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_TURN_LEFT },
+      { fileId: values[4]!, typeId: IDA.EVIDENCE_TYPE_LIVENESS_TURN_RIGHT },
+    ];
   }
 
   /**

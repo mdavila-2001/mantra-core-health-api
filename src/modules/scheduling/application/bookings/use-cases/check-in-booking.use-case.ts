@@ -10,7 +10,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingBookingsRepository } from '../../../infrastructure/repositories';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** UC-41-10: registra la llegada del paciente. */
 @Injectable()
@@ -40,13 +39,9 @@ export class CheckInBookingUseCase {
         bookingId,
       );
       if (!booking) {
-        throw new ResourceNotFoundException(
-          'Cita no encontrada',
-          {
-            bookingId,
-          },
-          SchedulingErrorReason.BOOKING_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Cita no encontrada', {
+          bookingId,
+        });
       }
       // C-10: la máquina de estados sólo admite check-in desde CONFIRMED.
       const fromState = booking.statusConceptId;

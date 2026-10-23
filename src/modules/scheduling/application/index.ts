@@ -15,3 +15,8 @@ export * from './agenda/scheduling-tenant-agenda.service';
 export * from './affiliation/practitioner-affiliation-gate.service';
 export * from './professional-time/scheduling-professional-time.service';
 export { SchedulingWalkInService } from './walk-in/scheduling-walk-in.service';
+
+/* v4.2.40 · servicios con duración dinámica */
+export { SchedulingServiceOfferingsService } from './service-offerings/scheduling-service-offerings.service';
+export { SchedulingServiceAgendaService } from './service-offerings/scheduling-service-agenda.service';
+export { SchedulingServiceBookingService } from './service-offerings/scheduling-service-booking.service';

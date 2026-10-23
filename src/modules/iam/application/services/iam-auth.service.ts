@@ -408,7 +408,7 @@ export class IamAuthService {
     );
     const readEm = this.em.fork();
 
-    const cred = await this.credentialsRepo.findActivePasswordBySubject(
+    const cred = await this.credentialsRepo.findActivePasswordByLoginIdentifier(
       readEm,
       subject,
     );

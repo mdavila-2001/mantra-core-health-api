@@ -26,3 +26,13 @@ Agrupa los componentes relacionados con **seed** y mantiene cohesionada esta res
 - Mantener las reglas de negocio fuera de los adaptadores de transporte.
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
+
+## Ejecución y límite operativo
+
+La cadena se ejecuta en bootstrap con `SEED_ON_BOOT=true`, o una sola vez con
+`corepack yarn seed:boot`; `SEED_CONTENT_ON_BOOT=false` omite sólo contenido
+curado. Los IDs deterministas permiten repeticiones sin duplicados. Ejecutar
+`corepack yarn test --runInBand --silent src/common/seed` para los tests
+dirigidos. Un fallo de paso core hoy se registra y resume sin bloquear por sí
+solo el bootstrap; la corrección propuesta está en el
+[informe de revisión](../../../docs/revision-backend-2026-10-04/nucleo/common-seed.md).

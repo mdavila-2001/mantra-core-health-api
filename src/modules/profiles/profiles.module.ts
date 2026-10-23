@@ -1,3 +1,5 @@
+import { PractitionerSignatureAssetsController } from './presentation/controllers/practitioner-signature-assets.controller';
+import { PractitionerSignatureAssetsService } from './application/services/practitioner-signature-assets.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 // Verificar una matrícula concede el rol asistencial: la autoridad sobre los
@@ -69,6 +71,8 @@ import { PERSON_RECORDS_PORT } from './application/ports/person-records.port';
 import { PersonRecordsAdapter } from './infrastructure/adapters/person-records.adapter';
 import { PATIENT_COVERAGES_PORT } from './application/ports/patient-coverages.port';
 import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-coverages.adapter';
+import { ClinicalPatientHistoryAdapter } from './infrastructure/adapters/clinical-patient-history.adapter';
+import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-patient-history.port';
 
 /**
  * Módulo Profiles (05): personas, pacientes y fuerza laboral de salud. Cubre alta
@@ -93,12 +97,14 @@ import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-cover
     InsuranceModule,
   ],
   controllers: [
+    PractitionerSignatureAssetsController,
     ProfilesPatientsController,
     ProfilesDependentRequestsController,
     ProfilesPractitionersController,
     TenantPractitionerRequestsController,
   ],
   providers: [
+    PractitionerSignatureAssetsService,
     PractitionerContextAdapter,
     {
       provide: PRACTITIONER_CONTEXT_PORT,
@@ -136,6 +142,11 @@ import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-cover
     },
     PersonRecordsAdapter,
     PatientCoveragesAdapter,
+    ClinicalPatientHistoryAdapter,
+    {
+      provide: CLINICAL_PATIENT_HISTORY_PORT,
+      useExisting: ClinicalPatientHistoryAdapter,
+    },
     {
       provide: PERSON_RECORDS_PORT,
       useExisting: PersonRecordsAdapter,

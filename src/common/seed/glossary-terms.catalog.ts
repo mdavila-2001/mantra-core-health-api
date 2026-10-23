@@ -1,8 +1,8 @@
 import type { GlossaryRelationType } from '../../modules/terminology/glossary.constants';
 
 /**
- * El catálogo curado del glosario médico (v1) — 69 términos (64 + 5 de
- * FND-25-01, categoría `other`).
+ * El catálogo curado del glosario médico (v1) — 80 términos (77 existentes
+ * más tres subdivisiones anatómicas del encéfalo).
  *
  * > Este es un catálogo inicial, curado y revisado médicamente a mano, no una
  * > importación de una nomenclatura externa (no hubo para este carril una carga
@@ -46,15 +46,9 @@ import type { GlossaryRelationType } from '../../modules/terminology/glossary.co
  *
  * ## Nota de transcripción — una relación huérfana en la fuente
  *
- * El término 13 (`hipertension-arterial`) declara en la fuente curada la
- * relación `PROCEDURE->control-de-signos-vitales`, pero ningún término de los
- * 64 tiene ese slug (el más cercano es `signos-vitales`, un concepto distinto:
- * el valor del signo vital, no el procedimiento de tomarlo). Se transcribió la
- * fuente verbatim en vez de inventar el término faltante o redirigir a un slug
- * parecido; `GlossarySeedService` valida cada relación contra el conjunto de
- * slugs conocido y **omite** —con advertencia en el log— cualquiera cuyo
- * destino no resuelva, en vez de fallar el seed completo o fabricar contenido.
- * Ver `CARRIL_REPORT.md` para el seguimiento de esta discrepancia de la fuente.
+ * La referencia `PROCEDURE->control-de-signos-vitales` de hipertensión ahora
+ * resuelve a una ficha propia. Se conserva separada de `signos-vitales`, que
+ * nombra los parámetros medidos y no el procedimiento de medirlos.
  *
  * ## Nota de transcripción — conteo de contenido en inglés
  *
@@ -152,9 +146,27 @@ export interface GlossaryTermSeed {
   };
 }
 
-/** Los 64 términos curados, en el orden del catálogo fuente. */
+/** Los términos curados, en el orden del catálogo fuente. */
 export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
   // --- Anatomía (glossary-category-anatomy) ---------------------------------
+  // Referencias editoriales para la revisión de estas definiciones (redacción
+  // propia; no importar ni copiar el texto de las páginas fuente):
+  // Corazón: https://www.ncbi.nlm.nih.gov/books/NBK279249/
+  // Pulmones: https://www.ncbi.nlm.nih.gov/books/NBK470197/
+  // Hígado: https://www.ncbi.nlm.nih.gov/books/NBK500014/
+  // Riñones: https://www.ncbi.nlm.nih.gov/books/NBK482385/
+  // Encéfalo: https://www.ncbi.nlm.nih.gov/books/NBK542179/
+  // Columna: https://www.ncbi.nlm.nih.gov/books/NBK279468/
+  // Estómago: https://www.ncbi.nlm.nih.gov/books/NBK482334/
+  // Páncreas: https://www.ncbi.nlm.nih.gov/books/NBK532912/
+  // Piel: https://www.ncbi.nlm.nih.gov/books/NBK441980/
+  // Médula espinal: https://www.ncbi.nlm.nih.gov/books/NBK544267/
+  // Intestino: https://www.ncbi.nlm.nih.gov/books/NBK279303/
+  // Vasos sanguíneos: https://www.ncbi.nlm.nih.gov/books/NBK470401/
+  // Hueso: https://www.ncbi.nlm.nih.gov/books/NBK279149/
+  // Cerebro: https://www.ncbi.nlm.nih.gov/books/NBK549789/
+  // Cerebelo: https://www.ncbi.nlm.nih.gov/books/NBK538167/
+  // Tronco encefálico: https://www.ncbi.nlm.nih.gov/books/NBK544297/
   {
     key: 'corazon',
     slug: 'corazon',
@@ -163,11 +175,11 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     enDisplay: 'Heart',
     esName: 'Corazón',
     clinicalDefinitionEs:
-      'Órgano muscular hueco de cuatro cámaras (dos aurículas, dos ventrículos) que impulsa la sangre a través del sistema circulatorio mediante contracciones rítmicas coordinadas por el sistema de conducción eléctrico intrínseco.',
+      'Órgano muscular situado en el mediastino, entre los pulmones, organizado en dos aurículas y dos ventrículos. Las válvulas dirigen el flujo entre sus cámaras; el lado derecho envía sangre a la circulación pulmonar y el izquierdo a la circulación sistémica. El miocardio se contrae siguiendo impulsos del sistema eléctrico de conducción para mantener un flujo sanguíneo continuo.',
     clinicalDefinitionEn:
       'Four-chambered hollow muscular organ that pumps blood through the circulatory system via rhythmic contractions coordinated by its intrinsic electrical conduction system.',
     plainSummaryEs:
-      'Es el músculo que bombea la sangre por todo el cuerpo, como una bomba que nunca deja de trabajar.',
+      'Es el órgano muscular del pecho que recibe y bombea la sangre: la envía a los pulmones para intercambiar gases y luego al resto del cuerpo.',
     plainSummaryEn:
       'The muscle that pumps blood around your whole body, like a pump that never stops working.',
     relations: [
@@ -183,9 +195,9 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     enDisplay: 'Lung',
     esName: 'Pulmón',
     clinicalDefinitionEs:
-      'Órgano par esponjoso del sistema respiratorio donde ocurre el intercambio gaseoso entre el aire inspirado y la sangre capilar, a través de los alvéolos.',
+      'Órganos pares y esponjosos ubicados en la cavidad torácica, recubiertos por pleura y conectados a las vías respiratorias. Sus bronquios se ramifican hasta bronquiolos y alvéolos; en la membrana alveolocapilar el oxígeno pasa a la sangre y el dióxido de carbono sale de ella para ser exhalado. El pulmón derecho suele tener tres lóbulos y el izquierdo dos, dejando espacio para el corazón.',
     plainSummaryEs:
-      'Los pulmones son los órganos con los que respiramos; toman el oxígeno del aire y lo pasan a la sangre.',
+      'Son los dos órganos del tórax que reciben el aire. En sus pequeños alvéolos, el oxígeno entra en la sangre y el dióxido de carbono sale para ser expulsado al respirar.',
     relations: [
       { type: 'RELATED_TERM', targetSlug: 'asma-bronquial' },
       { type: 'RELATED_TERM', targetSlug: 'neumonia' },
@@ -200,9 +212,9 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     enDisplay: 'Liver',
     esName: 'Hígado',
     clinicalDefinitionEs:
-      'Víscera abdominal de mayor tamaño en el cuerpo humano, responsable de la síntesis proteica, la metabolización de fármacos y toxinas, la producción de bilis y el almacenamiento de glucógeno.',
+      'Órgano glandular sólido de mayor tamaño, situado principalmente en el cuadrante superior derecho del abdomen, bajo el diafragma. Recibe sangre de la vena porta y de la arteria hepática; procesa nutrientes, metaboliza numerosos fármacos, produce bilis y sintetiza proteínas plasmáticas. También almacena glucógeno y participa en el metabolismo de grasas y bilirrubina.',
     plainSummaryEs:
-      'Es el órgano que filtra las sustancias dañinas de la sangre y ayuda a digerir los alimentos.',
+      'Es un órgano del abdomen que procesa nutrientes, produce bilis y fabrica proteínas importantes para la sangre. También almacena energía y transforma muchas sustancias, incluidos algunos medicamentos.',
     relations: [],
   },
   {
@@ -213,9 +225,9 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     enDisplay: 'Kidney',
     esName: 'Riñón',
     clinicalDefinitionEs:
-      'Órgano par retroperitoneal cuya unidad funcional es la nefrona; filtra la sangre para regular el balance hidroelectrolítico, el equilibrio ácido-base y excretar productos de desecho nitrogenados en forma de orina.',
+      'Órganos pares retroperitoneales cuya unidad funcional es la nefrona, formada por un glomérulo y un sistema tubular. Filtran el plasma y ajustan la reabsorción y secreción de agua y solutos para formar orina, eliminar productos de desecho y regular el volumen, los electrolitos y el equilibrio ácido-base. También contribuyen a regular la presión arterial y producen eritropoyetina y renina; activan además la vitamina D.',
     plainSummaryEs:
-      'Los riñones limpian la sangre y producen la orina para eliminar lo que el cuerpo no necesita.',
+      'Los riñones filtran la sangre y producen orina. Al hacerlo, ayudan a controlar el agua, las sales y otras sustancias que el cuerpo necesita mantener en equilibrio.',
     relations: [
       { type: 'RELATED_TERM', targetSlug: 'enfermedad-renal-cronica' },
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'creatinina-serica' },
@@ -226,13 +238,12 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     slug: 'encefalo',
     categoryKey: 'anatomy',
     tagKeys: ['neurologic'],
-    enDisplay: 'Brain',
-    esName: 'Encéfalo (cerebro)',
-    esSynonyms: ['Cerebro'],
+    enDisplay: 'Encephalon',
+    esName: 'Encéfalo',
     clinicalDefinitionEs:
-      'Porción del sistema nervioso central contenida en la cavidad craneal, compuesta por cerebro, cerebelo y tronco encefálico, responsable del procesamiento sensorial, motor y cognitivo.',
+      'Conjunto de estructuras del sistema nervioso central alojadas dentro del cráneo: cerebro, diencéfalo, cerebelo y tronco encefálico. Integra información sensorial, planifica y coordina movimientos, sustenta funciones cognitivas y participa en la regulación de funciones autónomas esenciales. Se continúa con la médula espinal a través del foramen magno; cerebro es una parte del encéfalo y no un sinónimo anatómico de todo el conjunto.',
     plainSummaryEs:
-      'Es el órgano que controla el pensamiento, el movimiento y las funciones del cuerpo desde la cabeza.',
+      'Es el conjunto de órganos nerviosos dentro del cráneo. Procesa información, participa en el pensamiento y el movimiento, y ayuda a regular funciones automáticas del cuerpo.',
     relations: [{ type: 'RELATED_TERM', targetSlug: 'cefalea' }],
   },
   {
@@ -244,10 +255,159 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     esName: 'Columna vertebral',
     esSynonyms: ['Raquis'],
     clinicalDefinitionEs:
-      'Estructura ósea axial formada por 33 vértebras articuladas que aloja y protege la médula espinal, y provee soporte estructural al tronco.',
+      'Eje osteoarticular del tronco formado habitualmente por 33 segmentos vertebrales: siete cervicales, doce torácicos, cinco lumbares, cinco sacros fusionados y cuatro coccígeos fusionados, con variación anatómica individual. Sus vértebras, discos intervertebrales y ligamentos sostienen el tronco, permiten movilidad y forman el conducto vertebral que protege la médula espinal y las raíces nerviosas.',
     plainSummaryEs:
-      'Es la fila de huesos en la espalda que sostiene el cuerpo y protege los nervios que bajan desde el cerebro.',
+      'Es la estructura de huesos y discos que recorre la espalda. Sostiene el tronco, permite inclinarse y girar, y rodea y protege la médula espinal.',
     relations: [],
+  },
+  {
+    key: 'estomago',
+    slug: 'estomago',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive'],
+    enDisplay: 'Stomach',
+    esName: 'Estómago',
+    esSynonyms: ['Víscera gástrica'],
+    clinicalDefinitionEs:
+      'Órgano muscular hueco del tubo digestivo, situado entre el esófago y el duodeno. Sus regiones anatómicas incluyen cardias, fondo, cuerpo y porción pilórica; almacena temporalmente los alimentos, los mezcla con secreciones gástricas y regula su paso al intestino delgado.',
+    plainSummaryEs:
+      'Es una bolsa muscular del abdomen que recibe los alimentos, los mezcla con jugos digestivos y los libera poco a poco hacia el intestino.',
+    relations: [{ type: 'PROCEDURE', targetSlug: 'endoscopia-digestiva-alta' }],
+  },
+  {
+    key: 'pancreas',
+    slug: 'pancreas',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive', 'endocrine'],
+    enDisplay: 'Pancreas',
+    esName: 'Páncreas',
+    clinicalDefinitionEs:
+      'Glándula alargada situada detrás del estómago, con funciones exocrinas y endocrinas. El tejido acinar libera enzimas digestivas al duodeno; los islotes pancreáticos secretan hormonas, entre ellas insulina y glucagón, que participan en la regulación de la glucosa.',
+    plainSummaryEs:
+      'Es una glándula del abdomen que ayuda a digerir los alimentos y produce hormonas que regulan el azúcar en la sangre.',
+    relations: [{ type: 'DISEASE', targetSlug: 'diabetes-mellitus-tipo-2' }],
+  },
+  {
+    key: 'piel',
+    slug: 'piel',
+    categoryKey: 'anatomy',
+    tagKeys: ['dermatologic'],
+    enDisplay: 'Skin',
+    esName: 'Piel',
+    clinicalDefinitionEs:
+      'Órgano que cubre la superficie externa del cuerpo y está formado por epidermis y dermis, sobre el tejido subcutáneo. Actúa como barrera, participa en la percepción sensorial y contribuye a la regulación térmica y al equilibrio de agua.',
+    plainSummaryEs:
+      'Es la cubierta del cuerpo: protege frente al entorno, permite sentir y ayuda a regular la temperatura.',
+    relations: [],
+  },
+  {
+    key: 'medula-espinal',
+    slug: 'medula-espinal',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Spinal cord',
+    esName: 'Médula espinal',
+    clinicalDefinitionEs:
+      'Estructura del sistema nervioso central contenida en el conducto vertebral, continua con el tronco encefálico y organizada en segmentos cervicales, torácicos, lumbares y sacros. Conduce señales entre el encéfalo y el cuerpo e integra circuitos reflejos; los nervios espinales emergen de sus segmentos.',
+    plainSummaryEs:
+      'Es un cordón de tejido nervioso dentro de la columna que comunica el encéfalo con el cuerpo y participa en algunos reflejos.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'columna-vertebral' },
+      { type: 'RELATED_TERM', targetSlug: 'encefalo' },
+    ],
+  },
+  {
+    key: 'intestino',
+    slug: 'intestino',
+    categoryKey: 'anatomy',
+    tagKeys: ['digestive'],
+    enDisplay: 'Intestine',
+    esName: 'Intestino',
+    clinicalDefinitionEs:
+      'Porción del tubo digestivo que comprende el intestino delgado —duodeno, yeyuno e íleon— y el intestino grueso —ciego, colon y recto—. El intestino delgado completa gran parte de la digestión y absorbe nutrientes; el grueso absorbe agua y electrolitos y conduce las heces hacia su eliminación.',
+    plainSummaryEs:
+      'Es la parte del aparato digestivo que continúa después del estómago. Absorbe nutrientes y agua, y conduce los residuos para su eliminación.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'estomago' },
+      { type: 'ANATOMY', targetSlug: 'pancreas' },
+      { type: 'PROCEDURE', targetSlug: 'endoscopia-digestiva-alta' },
+    ],
+  },
+  {
+    key: 'vasos-sanguineos',
+    slug: 'vasos-sanguineos',
+    categoryKey: 'anatomy',
+    tagKeys: ['cardiovascular'],
+    enDisplay: 'Blood vessels',
+    esName: 'Vasos sanguíneos',
+    esSynonyms: ['Sistema vascular sanguíneo'],
+    clinicalDefinitionEs:
+      'Conductos del sistema circulatorio que incluyen arterias, arteriolas, capilares, vénulas y venas. Las arterias distribuyen la sangre desde el corazón; en los capilares ocurre el intercambio de gases, nutrientes y productos de desecho con los tejidos, y las venas la devuelven al corazón.',
+    plainSummaryEs:
+      'Son los conductos por los que circula la sangre: las arterias la llevan desde el corazón, los capilares permiten intercambios con los tejidos y las venas la devuelven.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'corazon' },
+      { type: 'DISEASE', targetSlug: 'hipertension-arterial' },
+    ],
+  },
+  {
+    key: 'huesos',
+    slug: 'huesos',
+    categoryKey: 'anatomy',
+    tagKeys: ['musculoskeletal'],
+    enDisplay: 'Bones',
+    esName: 'Huesos',
+    esSynonyms: ['Tejido óseo'],
+    clinicalDefinitionEs:
+      'Estructuras de tejido conjuntivo mineralizado que, junto con el cartílago, forman el esqueleto. Proporcionan soporte y puntos de inserción muscular, protegen órganos, alojan médula ósea y participan en el almacenamiento y regulación de minerales como calcio y fosfato.',
+    plainSummaryEs:
+      'Son las estructuras rígidas del esqueleto: sostienen el cuerpo, protegen órganos, ayudan al movimiento y contienen médula ósea.',
+    relations: [{ type: 'ANATOMY', targetSlug: 'columna-vertebral' }],
+  },
+  {
+    key: 'cerebro',
+    slug: 'cerebro',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Cerebrum',
+    esName: 'Cerebro (hemisferios cerebrales)',
+    esSynonyms: ['Hemisferios cerebrales'],
+    clinicalDefinitionEs:
+      'Parte principal y de mayor volumen del encéfalo, formada por dos hemisferios unidos por comisuras. La corteza cerebral y las estructuras subcorticales participan en la percepción consciente, el pensamiento, la memoria, el lenguaje y el control del movimiento voluntario; el cerebro es una parte del encéfalo, que también comprende diencéfalo, cerebelo y tronco encefálico.',
+    plainSummaryEs:
+      'Es la parte más grande del encéfalo, formada por dos hemisferios. Participa en el pensamiento, la memoria, el lenguaje, la percepción y los movimientos voluntarios.',
+    relations: [{ type: 'ANATOMY', targetSlug: 'encefalo' }],
+  },
+  {
+    key: 'cerebelo',
+    slug: 'cerebelo',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Cerebellum',
+    esName: 'Cerebelo',
+    clinicalDefinitionEs:
+      'Estructura del encéfalo situada en la fosa craneal posterior, detrás del tronco encefálico. Sus circuitos integran información sensorial y señales de otras regiones para ajustar la coordinación, precisión y aprendizaje de movimientos; también participa en algunas funciones cognitivas.',
+    plainSummaryEs:
+      'Es una parte del encéfalo que ayuda a coordinar y ajustar los movimientos y participa en el aprendizaje motor.',
+    relations: [{ type: 'ANATOMY', targetSlug: 'encefalo' }],
+  },
+  {
+    key: 'tronco-encefalico',
+    slug: 'tronco-encefalico',
+    categoryKey: 'anatomy',
+    tagKeys: ['neurologic'],
+    enDisplay: 'Brainstem',
+    esName: 'Tronco encefálico',
+    esSynonyms: ['Tallo cerebral'],
+    clinicalDefinitionEs:
+      'Parte del encéfalo que conecta los hemisferios cerebrales y el cerebelo con la médula espinal. Está formado por mesencéfalo, puente y bulbo raquídeo; contiene vías nerviosas y núcleos que participan, entre otras funciones, en la respiración, el estado de alerta y el control cardiovascular.',
+    plainSummaryEs:
+      'Es la estructura que conecta el encéfalo con la médula espinal y contiene centros nerviosos importantes para funciones automáticas, como respirar.',
+    relations: [
+      { type: 'ANATOMY', targetSlug: 'encefalo' },
+      { type: 'ANATOMY', targetSlug: 'cerebelo' },
+      { type: 'ANATOMY', targetSlug: 'medula-espinal' },
+    ],
   },
 
   // --- Signos y síntomas (glossary-category-signs-symptoms) ----------------
@@ -373,10 +533,6 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       'When your blood pressure stays higher than normal all the time.',
     relations: [
       { type: 'TREATMENT', targetSlug: 'terapia-antihipertensiva' },
-      // Referencia huérfana de la fuente curada: ningún término tiene el slug
-      // `control-de-signos-vitales` (ver nota de cabecera). Se deja declarada
-      // tal como está en la fuente; el seed la omite y advierte en vez de
-      // fallar o inventar el destino.
       { type: 'PROCEDURE', targetSlug: 'control-de-signos-vitales' },
     ],
   },
@@ -419,7 +575,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'espirometria' },
       { type: 'TREATMENT', targetSlug: 'oxigenoterapia' },
       { type: 'ANATOMY', targetSlug: 'pulmon' },
-      { type: 'RELATED_TERM', targetSlug: 'disnea' },
+      { type: 'SYMPTOM', targetSlug: 'disnea' },
     ],
   },
   {
@@ -436,7 +592,7 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
     relations: [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'radiografia-de-torax' },
       { type: 'ANATOMY', targetSlug: 'pulmon' },
-      { type: 'RELATED_TERM', targetSlug: 'fiebre' },
+      { type: 'SYMPTOM', targetSlug: 'fiebre' },
     ],
   },
   {
@@ -459,8 +615,8 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'ecocardiograma' },
       { type: 'DIAGNOSTIC_TEST', targetSlug: 'electrocardiograma' },
       { type: 'TREATMENT', targetSlug: 'terapia-antihipertensiva' },
-      { type: 'RELATED_TERM', targetSlug: 'disnea' },
-      { type: 'RELATED_TERM', targetSlug: 'edema' },
+      { type: 'SYMPTOM', targetSlug: 'disnea' },
+      { type: 'SYMPTOM', targetSlug: 'edema' },
     ],
   },
   {
@@ -692,6 +848,20 @@ export const GLOSSARY_TERMS: readonly GlossaryTermSeed[] = [
       { type: 'ANATOMY', targetSlug: 'corazon' },
       { type: 'DISEASE', targetSlug: 'insuficiencia-cardiaca' },
     ],
+  },
+  {
+    key: 'control-de-signos-vitales',
+    slug: 'control-de-signos-vitales',
+    categoryKey: 'procedure',
+    tagKeys: [],
+    enDisplay: 'Vital signs measurement',
+    esName: 'Control de signos vitales',
+    esSynonyms: ['Toma de signos vitales', 'Medición de signos vitales'],
+    clinicalDefinitionEs:
+      'Procedimiento de valoración que obtiene y registra parámetros fisiológicos —como presión arterial, frecuencia cardiaca, frecuencia respiratoria, temperatura y, cuando corresponde, saturación de oxígeno— mediante técnicas e instrumentos adecuados para cada medida.',
+    plainSummaryEs:
+      'Es medir y anotar parámetros básicos del cuerpo, como el pulso, la respiración, la presión y la temperatura.',
+    relations: [{ type: 'RELATED_TERM', targetSlug: 'signos-vitales' }],
   },
   {
     key: 'endoscopia-digestiva-alta',

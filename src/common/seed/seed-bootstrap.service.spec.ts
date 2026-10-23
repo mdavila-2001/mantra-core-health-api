@@ -38,6 +38,7 @@ const STEPS = [
   'people',
   'directoryNetworks',
   'practiceDefaultServices',
+  'qaFlows',
 ] as const;
 
 type Step = (typeof STEPS)[number];
@@ -102,6 +103,7 @@ function build(fail: Step[] = []) {
     double.practiceDefaultServices as never,
     double.people as never,
     double.directoryNetworks as never,
+    double.qaFlows as never,
     logger as never,
   );
 
@@ -121,6 +123,7 @@ const CONTENT: readonly Step[] = [
   'people',
   'directoryNetworks',
   'practiceDefaultServices',
+  'qaFlows',
 ];
 
 /** Los pasos de núcleo, que corren siempre que la cadena corra. */

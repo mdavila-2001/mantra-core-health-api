@@ -29,7 +29,10 @@ import {
   PROF,
 } from '../../profiles.concepts';
 import { composePersonDisplayName } from '../../domain/person-name';
-import { describeDependentRelationship } from '../../domain/dependent-relationship';
+import {
+  describeDependentRelationship,
+  describeRelatedPersonRelationship,
+} from '../../domain/dependent-relationship';
 import type { Persons, PatientProfiles } from '../../entities';
 import {
   PersonsRepository,
@@ -67,6 +70,7 @@ import {
   OwnPatientProfileResponseDto,
   OwnAddressDto,
   OwnCoverageDto,
+  OwnEmergencyContactDto,
   OwnGuardianDto,
   UpdateOwnPatientProfileDto,
   SetOwnPatientPhotoDto,
@@ -501,6 +505,7 @@ export class ProfilesPatientsService {
       mail,
       identifiers,
       coverages,
+      emergencyContacts,
       guardians,
     ] = await Promise.all([
       this.personRecords.hasCurrentIdentityAssertion(em, person.id),
@@ -526,7 +531,8 @@ export class ProfilesPatientsService {
       ),
       this.readIdentifiers(em, person.id),
       this.readCoverages(em, patient.profileId),
-      this.readGuardians(em, patient.profileId),
+      this.emergencyReadContacts(em, patient.profileId),
+      this.readGuardians(em, patient.profileId, new Date()),
     ]);
     const identityVerified = Boolean(assertion);
 
@@ -571,6 +577,7 @@ export class ProfilesPatientsService {
       // Listas siempre presentes, aunque vengan vacías: quien las pinta
       // distingue «no declaró ninguna» de «esta respuesta no las trae».
       coverages: coverages,
+      emergencyContacts: emergencyContacts,
       guardians: guardians,
     });
   }
@@ -1213,41 +1220,48 @@ export class ProfilesPatientsService {
   ): Promise<OwnCoverageDto[]> {
     return this.patientCoverages.read<OwnCoverageDto>(em, patientProfileId);
   }
-  /** Tutores y personas autorizadas, con su nombre y su teléfono. */
+  /** Contactos de emergencia activos, con su nombre y su teléfono. */
+  private async emergencyReadContacts(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<OwnEmergencyContactDto[]> {
+    const rows =
+      await this.relatedPersonsRepo.listActiveEmergencyContactsOfPatient(
+        em,
+        patientProfileId,
+      );
+    return rows.map((f) => ({
+      ...(f.display_name === null ? {} : { displayName: f.display_name }),
+      ...(f.relationship_concept_id === null
+        ? {}
+        : { relationshipConceptId: f.relationship_concept_id }),
+      relationshipDisplay: describeRelatedPersonRelationship(
+        f.relationship_concept_id,
+      ),
+      ...(f.phone === null ? {} : { phone: f.phone }),
+    }));
+  }
+
+  /** Representantes con apoderamiento activo, con su nombre y teléfono. */
   private async readGuardians(
     em: EntityManager,
     patientProfileId: string,
+    now: Date,
   ): Promise<OwnGuardianDto[]> {
-    const rows = await em.getConnection().execute<
-      {
-        display_name: string | null;
-        relationship_concept_id: string | null;
-        is_emergency_contact: boolean;
-        is_legal_guardian: boolean;
-        phone: string | null;
-      }[]
-    >(
-      `select p.display_name,
-              r.relationship_concept_id,
-              r.is_emergency_contact,
-              r.is_legal_guardian,
-              (select cp.value from common.contact_points cp
-                where cp.owner_id = r.person_id
-                  and cp.system_concept_id = ?
-                  and cp.valid_to is null
-                order by cp.rank nulls last limit 1) as phone
-         from profiles.related_persons r
-         join profiles.persons p on p.id = r.person_id
-        where r.patient_profile_id = ?`,
-      [CONCEPTS.CONTACT_PHONE, patientProfileId],
+    const rows = await this.portalProxiesRepo.listActiveGuardiansOfPatient(
+      em,
+      patientProfileId,
+      now,
     );
     return rows.map((f) => ({
       ...(f.display_name === null ? {} : { displayName: f.display_name }),
       ...(f.relationship_concept_id === null
         ? {}
         : { relationshipConceptId: f.relationship_concept_id }),
-      isEmergencyContact: f.is_emergency_contact,
-      isLegalGuardian: f.is_legal_guardian,
+      relationshipDisplay: describeRelatedPersonRelationship(
+        f.relationship_concept_id,
+      ),
+      isLegalGuardian: f.is_legal_guardian ?? false,
       ...(f.phone === null ? {} : { phone: f.phone }),
     }));
   }

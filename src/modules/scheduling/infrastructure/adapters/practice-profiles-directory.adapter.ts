@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PractitionerSitesService } from '../../../practice/services';
+import {
+  PracticeTenantLookupService,
+  PractitionerSitesService,
+} from '../../../practice/services';
 import { findPractitionerNames } from '../../../profiles/infrastructure/read-models/practitioner-names';
 import type {
   PractitionerDirectoryPort,
@@ -11,7 +14,10 @@ import type { ResourceSiteDto } from '../../presentation/dto';
 /** Implementa el directorio de profesionales sobre `profiles` y `practice`. */
 @Injectable()
 export class PracticeProfilesDirectoryAdapter implements PractitionerDirectoryPort {
-  constructor(private readonly sites: PractitionerSitesService) {}
+  constructor(
+    private readonly sites: PractitionerSitesService,
+    private readonly practices: PracticeTenantLookupService,
+  ) {}
 
   findPractitionerNames(
     uow: UnitOfWork,
@@ -25,5 +31,13 @@ export class PracticeProfilesDirectoryAdapter implements PractitionerDirectoryPo
     tenantId: string,
   ): Promise<Map<string, ResourceSiteDto>> {
     return this.sites.resolveSitesForResources(refs, tenantId);
+  }
+
+  findActivePracticeIdsForPractitioner(
+    practitionerProfileId: string,
+  ): Promise<string[]> {
+    return this.practices.findActivePracticeIdsForPractitioner(
+      practitionerProfileId,
+    );
   }
 }

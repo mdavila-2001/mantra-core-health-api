@@ -82,6 +82,7 @@ describe('Reproducciones de defectos de producción (sin persistencia real)', ()
       claimReadRepo: {},
       representation: { findActiveProxiedPatientIds: async () => new Set(), assertMayActForPatient: ownership },
       formOrigin: {},
+      serviceAgenda: {},
     });
     const user = { ...actor('PATIENT'), patientProfileId: P1 };
     const result: any = await guarded(SchedulingBookingsController, 'searchBookings',

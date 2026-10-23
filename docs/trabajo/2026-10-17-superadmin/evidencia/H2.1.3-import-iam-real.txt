@@ -1,0 +1,25 @@
+$ node tools/catalog/import-vault-annotations.mjs --apply --schema iam --api http://localhost:3000   (1.ª corrida)
+  "fichasCreadas": 14,
+  "fichasActualizadas": 0,
+  "fichasSinCambios": 0,
+  "fichasRespetaLoHumano": 0,
+  "evidenciasDeNota": 14,
+  "evidenciasDeFk": 62,
+  "fkSinColumna": 0,
+  "notasSinObjeto": 0,
+  "errores": 0,
+  "primerosErrores": []
+}
+
+$ ... 2.ª corrida (idempotencia)
+  "fichasCreadas": 0,
+  "fichasActualizadas": 0,
+  "fichasSinCambios": 14,
+  "fichasRespetaLoHumano": 0,
+  "evidenciasDeNota": 14,
+  "evidenciasDeFk": 62,
+  "fkSinColumna": 0,
+  "notasSinObjeto": 0,
+  "errores": 0,
+  "primerosErrores": []
+}

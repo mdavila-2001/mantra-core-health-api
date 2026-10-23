@@ -8,6 +8,7 @@ import { CatalogAccess } from '../support/catalog-access';
 import {
   DEFAULT_SLOT_CAPACITY,
   DEFAULT_SLOT_MINUTES,
+  bandMode,
 } from '../../../domain/catalog/catalog-concepts';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
@@ -18,7 +19,6 @@ import {
   UpdateTemplateDto,
 } from '../../../presentation/dto';
 import { assertFirstSlotFits } from '../support/assert-first-slot-fits';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** Edita las franjas de una plantilla. */
 @Injectable()
@@ -79,26 +79,18 @@ export class UpdateTemplateUseCase {
     return this.em.transactional(async (tx) => {
       const template = await this.catalogRepo.findTemplateById(tx, templateId);
       if (!template) {
-        throw new ResourceNotFoundException(
-          'Plantilla no encontrada',
-          {
-            templateId,
-          },
-          SchedulingErrorReason.TEMPLATE_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Plantilla no encontrada', {
+          templateId,
+        });
       }
       const resource = await this.catalogRepo.findResourceById(
         tx,
         template.resourceId,
       );
       if (!resource) {
-        throw new ResourceNotFoundException(
-          'Recurso no encontrado',
-          {
-            resourceId: template.resourceId,
-          },
-          SchedulingErrorReason.RESOURCE_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Recurso no encontrado', {
+          resourceId: template.resourceId,
+        });
       }
       this.access.assertActorResource(resource, actor);
 
@@ -127,7 +119,6 @@ export class UpdateTemplateUseCase {
             throw new PreconditionFailedException(
               'La franja debe empezar antes de terminar',
               { dayOfWeek: rule.dayOfWeek },
-              SchedulingErrorReason.TEMPLATE_RULE_TIME_INVERTED,
             );
           }
           assertFirstSlotFits(
@@ -147,6 +138,7 @@ export class UpdateTemplateUseCase {
             slotMinutes: rule.slotMinutes ?? effectiveSlotMinutes,
             capacityPerSlot: rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY,
             gapMinutes: rule.gapMinutes,
+            bookingModeConceptId: bandMode(rule.bookingMode),
             actorUserId: actor.id,
           });
         }

@@ -25,7 +25,7 @@ function resolveGithubBase() {
       .toString()
       .trim();
     const m = url.match(/github\.com[:/]([^/]+)\/([^/.]+)(\.git)?$/);
-    if (m) return `https://github.com/${m[1]}/${m[2]}/blob/master`;
+    if (m) return `https://github.com/${m[1]}/${m[2]}/blob/dev`;
   } catch {
     /* sin remoto configurado */
   }
@@ -94,7 +94,7 @@ for (const name of modules) {
       (_m, rel) => `](${GITHUB_BASE}/src/modules/${name}/${rel})`,
     );
   };
-  readme = rewriteRelativeLinks(readme);
+  readme = rewriteRelativeLinks(readme).trimEnd();
 
   const mirrored = `<!--
   ESPEJO AUTOGENERADO — no editar este archivo directamente.

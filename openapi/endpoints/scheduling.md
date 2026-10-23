@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `scheduling`
 
-Referencia exhaustiva de 53 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 58 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda`
-- **Controladores:** `SchedulingAgendaController`, `SchedulingBookingsController`, `SchedulingConfirmationController`, `SchedulingController`, `SchedulingInternalController`, `TenantAgendaController`
+- **Controladores:** `SchedulingAgendaController`, `SchedulingBookingsController`, `SchedulingConfirmationController`, `SchedulingController`, `SchedulingInternalController`, `SchedulingServiceOfferingsController`, `TenantAgendaController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -55,15 +55,20 @@ Referencia exhaustiva de 53 operación(es) del módulo `scheduling`, derivada de
 42. [GET /scheduling/resources/{id}/templates](#42-get-scheduling-resources-id-templates) — Listar las plantillas de agenda de un recurso
 43. [POST /scheduling/resources/{id}/templates](#43-post-scheduling-resources-id-templates) — Publicar una plantilla de agenda con sus franjas
 44. [GET /scheduling/resources/{resourceId}/waitlist](#44-get-scheduling-resources-resourceid-waitlist) — Listar quiénes esperan turno en una agenda
-45. [GET /scheduling/slots](#45-get-scheduling-slots) — Consultar los cupos de una ventana
-46. [POST /scheduling/slots/{id}/holds](#46-post-scheduling-slots-id-holds) — Reservar temporalmente un cupo del slot
-47. [DELETE /scheduling/templates/{id}](#47-delete-scheduling-templates-id) — Retirar una plantilla de agenda y soltar sus cupos libres
-48. [PATCH /scheduling/templates/{id}](#48-patch-scheduling-templates-id) — Editar una plantilla de agenda ya publicada
-49. [POST /scheduling/templates/{id}/generate-slots](#49-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
-50. [POST /scheduling/templates/{id}/reactivate](#50-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
-51. [GET /scheduling/waitlist](#51-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
-52. [POST /scheduling/waitlist](#52-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
-53. [GET /tenants/{tenantId}/agenda](#53-get-tenants-tenantid-agenda) — La agenda de la organización
+45. [GET /scheduling/service-availability](#45-get-scheduling-service-availability) — Horarios donde cabe un servicio
+46. [GET /scheduling/service-offerings](#46-get-scheduling-service-offerings) — Los servicios que ofrece un profesional
+47. [POST /scheduling/service-offerings](#47-post-scheduling-service-offerings) — Declarar cómo ofrezco un servicio
+48. [PATCH /scheduling/service-offerings/{id}](#48-patch-scheduling-service-offerings-id) — Editar o apagar la oferta de un servicio
+49. [POST /scheduling/service-offerings/{id}/holds](#49-post-scheduling-service-offerings-id-holds) — Retener el turno de un servicio
+50. [GET /scheduling/slots](#50-get-scheduling-slots) — Consultar los cupos de una ventana
+51. [POST /scheduling/slots/{id}/holds](#51-post-scheduling-slots-id-holds) — Reservar temporalmente un cupo del slot
+52. [DELETE /scheduling/templates/{id}](#52-delete-scheduling-templates-id) — Retirar una plantilla de agenda y soltar sus cupos libres
+53. [PATCH /scheduling/templates/{id}](#53-patch-scheduling-templates-id) — Editar una plantilla de agenda ya publicada
+54. [POST /scheduling/templates/{id}/generate-slots](#54-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
+55. [POST /scheduling/templates/{id}/reactivate](#55-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
+56. [GET /scheduling/waitlist](#56-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
+57. [POST /scheduling/waitlist](#57-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
+58. [GET /tenants/{tenantId}/agenda](#58-get-tenants-tenantid-agenda) — La agenda de la organización
 
 ---
 
@@ -794,6 +799,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "formInstanceId": "00000000-0000-4000-8000-000000000001"
       },
       "followUpBookingId": "00000000-0000-4000-8000-000000000001",
+      "service": {
+        "offeringId": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo",
+        "price": "valor-ejemplo",
+        "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+        "minDurationMinutes": 1,
+        "maxDurationMinutes": 1,
+        "requiresApproval": true
+      },
       "rescheduledFrom": "2026-07-31T12:00:00.000Z",
       "statusReason": {
         "reasonText": "Texto descriptivo de ejemplo",
@@ -819,7 +833,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<BookingItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"paymentState":{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"},"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","bookableSlotId":"00000000-0000-4000-8000-000000000001","appointmentId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","bookingChannelConceptId":"00000000-0000-4000-8000-000000000001","typeConceptId":"00000000-0000-4000-8000-000000000001","confirmedAt":"2026-07-31T12:00:00.000Z","checkedInAt":"2026-07-31T12:00:00.000Z","reasonText":"Texto descriptivo de ejemplo","patientName":"Nombre de ejemplo","insuranceCarrierName":"Nombre de ejemplo","insuranceClaim":{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","statusCode":"CLAIM_SUBMITTED","statusDisplay":"Reclamo enviado","submittedAt":"2026-07-31T12:00:00.000Z"},"followUpOf":{"bookingId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","formInstanceId":"00000000-0000-4000-8000-000000000001"},"followUpBookingId":"00000000-0000-4000-8000-000000000001","rescheduledFrom":"2026-07-31T12:00:00.000Z","statusReason":{"reasonText":"Texto descriptivo de ejemplo","actorKind":"PATIENT","toStateConceptId":"00000000-0000-4000-8000-000000000001","changedAt":"2026-07-31T12:00:00.000Z"},"delayNotice":{"delayMinutes":1,"message":"valor-ejemplo","announcedAt":"2026-07-31T12:00:00.000Z"},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<BookingItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"paymentState":{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"},"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","bookableSlotId":"00000000-0000-4000-8000-000000000001","appointmentId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","bookingChannelConceptId":"00000000-0000-4000-8000-000000000001","typeConceptId":"00000000-0000-4000-8000-000000000001","confirmedAt":"2026-07-31T12:00:00.000Z","checkedInAt":"2026-07-31T12:00:00.000Z","reasonText":"Texto descriptivo de ejemplo","patientName":"Nombre de ejemplo","insuranceCarrierName":"Nombre de ejemplo","insuranceClaim":{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","statusCode":"CLAIM_SUBMITTED","statusDisplay":"Reclamo enviado","submittedAt":"2026-07-31T12:00:00.000Z"},"followUpOf":{"bookingId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","formInstanceId":"00000000-0000-4000-8000-000000000001"},"followUpBookingId":"00000000-0000-4000-8000-000000000001","service":{"offeringId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","price":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","minDurationMinutes":1,"maxDurationMinutes":1,"requiresApproval":true},"rescheduledFrom":"2026-07-31T12:00:00.000Z","statusReason":{"reasonText":"Texto descriptivo de ejemplo","actorKind":"PATIENT","toStateConceptId":"00000000-0000-4000-8000-000000000001","changedAt":"2026-07-31T12:00:00.000Z"},"delayNotice":{"delayMinutes":1,"message":"valor-ejemplo","announcedAt":"2026-07-31T12:00:00.000Z"},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].paymentState` | No | `PaymentStateDto` | Sin restricción adicional declarada | El estado de pago, si alguien lo marcó (TAREA-13 punto 5). **Se omite cuando no hay marca**, y no viaja como «pendiente de pago»: pendiente es una afirmación que alguien firmó, la ausencia es que del pago todavía no se dijo nada. Comprobalo con `if (item.paymentState)`. Viene en la misma consulta que la página, no una por fila. | `{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"}` |
 | `items[].paymentState.state` | No | `string` | valores: `PENDING`, `PARTIALLY_PAID`, `PAID` | Clave estable del estado. | `PENDING` |
 | `items[].paymentState.label` | No | `string` | Sin restricción adicional declarada | Cómo se llama en pantalla, en castellano. | `Parcialmente pagada` |
@@ -856,6 +870,14 @@ Campos de la respuesta:
 | `items[].followUpOf.startAt` | No | `string` | formato `date-time`; admite null | Cuándo fue la consulta de origen; `null` si su cupo no se encontró. | `2026-07-31T12:00:00.000Z` |
 | `items[].followUpOf.formInstanceId` | No | `string` | formato `uuid` | P43: la instancia del formulario médico de esa consulta de la que sale la reconsulta. Se omite si no se declaró. | `00000000-0000-4000-8000-000000000001` |
 | `items[].followUpBookingId` | No | `string` | formato `uuid`; admite null | P42: la reconsulta viva (no cancelada ni ausente) que salió de esta cita, derivada al leer —el vínculo se guarda sólo en la reconsulta—. Misma compuerta y mismo trato del `null` que `followUpOf`. | `00000000-0000-4000-8000-000000000001` |
+| `items[].service` | No | `BookingServiceDto` | Sin restricción adicional declarada | El servicio que se reservó, si la cita no es una consulta (v4.2.40). Sale de la copia congelada al reservar —nombre, precio y duración que el paciente aceptó—, no de la oferta de hoy. **Misma compuerta que `reasonText`**: el nombre de un servicio puede revelar un dato de salud. Ausente es «es una consulta» o «no te corresponde verlo». | `{"offeringId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","price":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","minDurationMinutes":1,"maxDurationMinutes":1,"requiresApproval":true}` |
+| `items[].service.offeringId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].service.name` | No | `string` | Sin restricción adicional declarada | Nombre del servicio cuando se reservó | `Nombre de ejemplo` |
+| `items[].service.price` | No | `string` | Sin restricción adicional declarada | Precio cuando se reservó, con dos decimales | `valor-ejemplo` |
+| `items[].service.currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].service.minDurationMinutes` | No | `number` | Sin restricción adicional declarada | Lo mínimo que podía tardar, en minutos | `1` |
+| `items[].service.maxDurationMinutes` | No | `number` | Sin restricción adicional declarada | Lo que se reservó en la agenda, en minutos | `1` |
+| `items[].service.requiresApproval` | No | `boolean` | Sin restricción adicional declarada | Si la reserva esperaba la aceptación del profesional | `true` |
 | `items[].rescheduledFrom` | No | `string` | formato `date-time` | De cuándo se movió, si la cita se reprogramó. Ausente cuando nunca se movió — que es distinto de «se movió y no sé desde cuándo». Es el instante ORIGINAL, no el id del cupo: la tarjeta dice «reprogramada desde el 20/08 a las 15:30», y resolverlo en la pantalla costaría una petición por cita para pintar una línea. | `2026-07-31T12:00:00.000Z` |
 | `items[].statusReason` | No | `BookingStatusReasonDto` | Sin restricción adicional declarada | Motivo del último cambio que lo exigía (cancelación, rechazo o reprogramación), con quién lo hizo y cuándo. | `{"reasonText":"Texto descriptivo de ejemplo","actorKind":"PATIENT","toStateConceptId":"00000000-0000-4000-8000-000000000001","changedAt":"2026-07-31T12:00:00.000Z"}` |
 | `items[].statusReason.reasonText` | No | `string` | Sin restricción adicional declarada | Lo que escribió quien hizo el cambio | `Texto descriptivo de ejemplo` |
@@ -1009,6 +1031,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "formInstanceId": "00000000-0000-4000-8000-000000000001"
   },
   "followUpBookingId": "00000000-0000-4000-8000-000000000001",
+  "service": {
+    "offeringId": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo",
+    "price": "valor-ejemplo",
+    "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+    "minDurationMinutes": 1,
+    "maxDurationMinutes": 1,
+    "requiresApproval": true
+  },
   "rescheduledFrom": "2026-07-31T12:00:00.000Z",
   "statusReason": {
     "reasonText": "Texto descriptivo de ejemplo",
@@ -1065,6 +1096,14 @@ Campos de la respuesta:
 | `followUpOf.startAt` | No | `string` | formato `date-time`; admite null | Cuándo fue la consulta de origen; `null` si su cupo no se encontró. | `2026-07-31T12:00:00.000Z` |
 | `followUpOf.formInstanceId` | No | `string` | formato `uuid` | P43: la instancia del formulario médico de esa consulta de la que sale la reconsulta. Se omite si no se declaró. | `00000000-0000-4000-8000-000000000001` |
 | `followUpBookingId` | No | `string` | formato `uuid`; admite null | P42: la reconsulta viva (no cancelada ni ausente) que salió de esta cita, derivada al leer —el vínculo se guarda sólo en la reconsulta—. Misma compuerta y mismo trato del `null` que `followUpOf`. | `00000000-0000-4000-8000-000000000001` |
+| `service` | No | `BookingServiceDto` | Sin restricción adicional declarada | El servicio que se reservó, si la cita no es una consulta (v4.2.40). Sale de la copia congelada al reservar —nombre, precio y duración que el paciente aceptó—, no de la oferta de hoy. **Misma compuerta que `reasonText`**: el nombre de un servicio puede revelar un dato de salud. Ausente es «es una consulta» o «no te corresponde verlo». | `{"offeringId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","price":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","minDurationMinutes":1,"maxDurationMinutes":1,"requiresApproval":true}` |
+| `service.offeringId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `service.name` | No | `string` | Sin restricción adicional declarada | Nombre del servicio cuando se reservó | `Nombre de ejemplo` |
+| `service.price` | No | `string` | Sin restricción adicional declarada | Precio cuando se reservó, con dos decimales | `valor-ejemplo` |
+| `service.currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `service.minDurationMinutes` | No | `number` | Sin restricción adicional declarada | Lo mínimo que podía tardar, en minutos | `1` |
+| `service.maxDurationMinutes` | No | `number` | Sin restricción adicional declarada | Lo que se reservó en la agenda, en minutos | `1` |
+| `service.requiresApproval` | No | `boolean` | Sin restricción adicional declarada | Si la reserva esperaba la aceptación del profesional | `true` |
 | `rescheduledFrom` | No | `string` | formato `date-time` | De cuándo se movió, si la cita se reprogramó. Ausente cuando nunca se movió — que es distinto de «se movió y no sé desde cuándo». Es el instante ORIGINAL, no el id del cupo: la tarjeta dice «reprogramada desde el 20/08 a las 15:30», y resolverlo en la pantalla costaría una petición por cita para pintar una línea. | `2026-07-31T12:00:00.000Z` |
 | `statusReason` | No | `BookingStatusReasonDto` | Sin restricción adicional declarada | Motivo del último cambio que lo exigía (cancelación, rechazo o reprogramación), con quién lo hizo y cuándo. | `{"reasonText":"Texto descriptivo de ejemplo","actorKind":"PATIENT","toStateConceptId":"00000000-0000-4000-8000-000000000001","changedAt":"2026-07-31T12:00:00.000Z"}` |
 | `statusReason.reasonText` | No | `string` | Sin restricción adicional declarada | Lo que escribió quien hizo el cambio | `Texto descriptivo de ejemplo` |
@@ -2129,6 +2168,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El horario propuesto es el que ya tiene la solicitud | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/propose-schedule.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | Sólo se opera así sobre una solicitud pendiente | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
+| 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un servicio: cancele la reserva y pida otro horario. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
 | 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2672,6 +2712,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Solo se reprograma una cita vigente | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | El slot destino es el mismo que el actual | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada a esa hora${             clash.resourceName ? ` en «${clash.resourceName}»` : ''           }. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un servicio: cancele la reserva y pida otro horario. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${who} de ${localTime(         first.startAt,         first.timeZone,       )} a ${localTime(         first.endAt,         first.timeZone,       )}${first.resourceName ? ` en «${first.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/application/professional-time/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -5925,13 +5966,14 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
-| `rules` | Sí | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1}]` |
+| `rules` | Sí | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS"}]` |
 | `rules[].dayOfWeek` | Sí | `number` | mínimo 0; máximo 6 | 0 = domingo … 6 = sábado | `1` |
 | `rules[].startTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de inicio HH:MM:SS | `08:00:00` |
 | `rules[].endTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de fin HH:MM:SS | `12:00:00` |
 | `rules[].slotMinutes` | No | `number` | mínimo 5 | Duración del slot en minutos | `5` |
 | `rules[].capacityPerSlot` | No | `number` | mínimo 1 | Cupos por slot | `1` |
 | `rules[].gapMinutes` | No | `number` | mínimo 0 | Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0 | `1` |
+| `rules[].bookingMode` | No | `string` | valores: `CONSULTATIONS`, `SERVICES`, `MIXED` | Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS | `CONSULTATIONS` |
 | `slotMinutes` | No | `number` | Sin restricción adicional declarada | Duración por defecto del slot, en minutos | `30` |
 | `bookingPolicyId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
@@ -5956,7 +5998,8 @@ Content-Type: application/json
       "endTime": "12:00:00",
       "slotMinutes": 5,
       "capacityPerSlot": 1,
-      "gapMinutes": 1
+      "gapMinutes": 1,
+      "bookingMode": "CONSULTATIONS"
     }
   ],
   "slotMinutes": 30,
@@ -6166,7 +6209,752 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /scheduling/slots
+## 45. GET /scheduling/service-availability
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling`
+- **Nombre:** Horarios donde cabe un servicio
+- **Operation ID:** `SchedulingServiceOfferingsController_availability`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingServiceOfferingsController.availability](../../src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts)
+
+### Descripción de negocio
+
+Se calculan en lectura a partir de las franjas que admiten servicios y del tiempo ocupado del profesional en todas sus sedes. No reserva nada.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/service-availability` en `SchedulingServiceOfferingsController_availability`. El controlador delega en `SchedulingServiceBookingService.availability`. No recibe body. El tipo de retorno estático es `Promise<ServiceAvailabilityResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `offeringId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `resourceId` | query | No | `string` | formato `uuid` | Una sede en particular; sin ella se buscan en todas las del profesional | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | Sí | `string` | formato `date-time` | Sin descripción específica en OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `to` | query | Sí | `string` | formato `date-time` | Sin descripción específica en OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/service-availability?offeringId=00000000-0000-4000-8000-000000000001&from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `PRACTITIONER`, `CLINICIAN`, `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/service-availability?offeringId=00000000-0000-4000-8000-000000000001&resourceId=00000000-0000-4000-8000-000000000001&from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ServiceAvailabilityResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ServiceAvailabilityResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ServiceAvailabilityResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ServiceAvailabilityResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ServiceAvailabilityResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ServiceAvailabilityResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceAvailabilityResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "offeringId": "00000000-0000-4000-8000-000000000001",
+  "minDurationMinutes": 1,
+  "maxDurationMinutes": 1,
+  "items": [
+    {
+      "resourceId": "00000000-0000-4000-8000-000000000001",
+      "startAt": "2026-07-31T12:00:00.000Z",
+      "endAtMax": "2026-07-31T12:00:00.000Z",
+      "endAtMin": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `offeringId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `minDurationMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `maxDurationMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items` | Sí | `array<ServiceStartDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"resourceId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAtMax":"2026-07-31T12:00:00.000Z","endAtMin":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].resourceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].startAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].endAtMax` | Sí | `string` | formato `date-time` | Hasta cuándo se reserva: inicio más la duración máxima | `2026-07-31T12:00:00.000Z` |
+| `items[].endAtMin` | Sí | `string` | formato `date-time` | Cuándo podría terminar como pronto: inicio más la duración mínima | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Se pueden mirar hasta ${MAX_QUERY_DAYS} días de una vez. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/service-availability"
+}
+```
+
+---
+
+## 46. GET /scheduling/service-offerings
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling`
+- **Nombre:** Los servicios que ofrece un profesional
+- **Operation ID:** `SchedulingServiceOfferingsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingServiceOfferingsController.list](../../src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts)
+
+### Descripción de negocio
+
+Un paciente ve sólo lo activo y reservable. El profesional dueño ve todo lo suyo.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/service-offerings` en `SchedulingServiceOfferingsController_list`. El controlador delega en `SchedulingServiceOfferingsService.list`. No recibe body. El tipo de retorno estático es `Promise<ServiceOfferingListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `practitionerProfileId` | query | No | `string` | formato `uuid` | Profesional cuyas ofertas se listan. Un profesional que no la manda ve las suyas. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/service-offerings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `PRACTITIONER`, `CLINICIAN`, `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/service-offerings?practitionerProfileId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ServiceOfferingListDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ServiceOfferingListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ServiceOfferingListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ServiceOfferingListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ServiceOfferingListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ServiceOfferingListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceOfferingListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+      "serviceCode": "CODIGO_EJEMPLO",
+      "serviceName": "Nombre de ejemplo",
+      "price": "valor-ejemplo",
+      "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "minDurationMinutes": 1,
+      "maxDurationMinutes": 1,
+      "prepMinutes": 1,
+      "cleanupMinutes": 1,
+      "isPatientBookable": true,
+      "requiresApproval": true,
+      "channel": "PRESENCIAL",
+      "isActive": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ServiceOfferingDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","serviceCatalogId":"00000000-0000-4000-8000-000000000001","serviceCode":"CODIGO_EJEMPLO","serviceName":"Nombre de ejemplo","price":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","minDurationMinutes":1,"maxDurationMinutes":1,"prepMinutes":1,"cleanupMinutes":1,"isPatientBookable":true,"requiresApproval":true,"channel":"PRESENCIAL","isActive":true}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].serviceCode` | Sí | `string` | Sin restricción adicional declarada | Código del servicio en el catálogo | `CODIGO_EJEMPLO` |
+| `items[].serviceName` | Sí | `string` | Sin restricción adicional declarada | Nombre del servicio en el catálogo | `Nombre de ejemplo` |
+| `items[].price` | Sí | `string` | Sin restricción adicional declarada | Precio de catálogo, con dos decimales | `valor-ejemplo` |
+| `items[].currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].minDurationMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].maxDurationMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].prepMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].cleanupMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].isPatientBookable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].requiresApproval` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].channel` | No | `string` | valores: `PRESENCIAL`, `TELECONSULTA`, `DOMICILIO` | Sin descripción específica en el contrato OpenAPI. | `PRESENCIAL` |
+| `items[].isActive` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | Indique de qué profesional quiere ver los servicios. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/service-offerings"
+}
+```
+
+---
+
+## 47. POST /scheduling/service-offerings
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling`
+- **Nombre:** Declarar cómo ofrezco un servicio
+- **Operation ID:** `SchedulingServiceOfferingsController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingServiceOfferingsController.create](../../src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts)
+
+### Descripción de negocio
+
+Duración mínima y máxima, preparación, limpieza, si el paciente puede pedirlo y si requiere aprobación.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /scheduling/service-offerings` en `SchedulingServiceOfferingsController_create`. El controlador delega en `SchedulingServiceOfferingsService.create`. Valida el body como `CreateServiceOfferingDto` y consume `application/json`. El tipo de retorno estático es `Promise<ServiceOfferingDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateServiceOfferingDto`; los campos opcionales se omiten.
+
+```http
+POST /scheduling/service-offerings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "minDurationMinutes": 1,
+  "maxDurationMinutes": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`, `SCHEDULING_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `serviceCatalogId` | Sí | `string` | formato `uuid` | Servicio del catálogo de la práctica que se ofrece | `00000000-0000-4000-8000-000000000001` |
+| `minDurationMinutes` | Sí | `number` | mínimo 1; máximo 720 | Lo mínimo que puede tardar, en minutos | `1` |
+| `maxDurationMinutes` | Sí | `number` | mínimo 1; máximo 720 | Lo máximo que puede tardar. Es el tiempo que se reserva en la agenda | `1` |
+| `prepMinutes` | No | `number` | mínimo 0; máximo 240 | Preparación antes de atender; el paciente no la ve | `1` |
+| `cleanupMinutes` | No | `number` | mínimo 0; máximo 240 | Limpieza o cierre después de atender; el paciente no la ve | `1` |
+| `isPatientBookable` | No | `boolean` | Sin restricción adicional declarada | Si el paciente puede pedirlo por su cuenta desde el portal | `true` |
+| `requiresApproval` | No | `boolean` | Sin restricción adicional declarada | Si cada pedido espera la aceptación del profesional en vez de confirmarse solo | `false` |
+| `channel` | No | `string` | valores: `PRESENCIAL`, `TELECONSULTA`, `DOMICILIO` | Sin descripción específica en el contrato OpenAPI. | `PRESENCIAL` |
+| `practitionerProfileId` | No | `string` | formato `uuid` | Sólo para quien administra agendas: el profesional dueño de la oferta. Un profesional siempre la crea para sí mismo. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /scheduling/service-offerings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "minDurationMinutes": 1,
+  "maxDurationMinutes": 1,
+  "prepMinutes": 1,
+  "cleanupMinutes": 1,
+  "isPatientBookable": true,
+  "requiresApproval": false,
+  "channel": "PRESENCIAL",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceOfferingDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceCode": "CODIGO_EJEMPLO",
+  "serviceName": "Nombre de ejemplo",
+  "price": "valor-ejemplo",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "minDurationMinutes": 1,
+  "maxDurationMinutes": 1,
+  "prepMinutes": 1,
+  "cleanupMinutes": 1,
+  "isPatientBookable": true,
+  "requiresApproval": true,
+  "channel": "PRESENCIAL",
+  "isActive": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceCode` | Sí | `string` | Sin restricción adicional declarada | Código del servicio en el catálogo | `CODIGO_EJEMPLO` |
+| `serviceName` | Sí | `string` | Sin restricción adicional declarada | Nombre del servicio en el catálogo | `Nombre de ejemplo` |
+| `price` | Sí | `string` | Sin restricción adicional declarada | Precio de catálogo, con dos decimales | `valor-ejemplo` |
+| `currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `minDurationMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `maxDurationMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `prepMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `cleanupMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `isPatientBookable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requiresApproval` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `channel` | No | `string` | valores: `PRESENCIAL`, `TELECONSULTA`, `DOMICILIO` | Sin descripción específica en el contrato OpenAPI. | `PRESENCIAL` |
+| `isActive` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo puede crear ofertas para usted. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
+| 403 | `FORBIDDEN` | Sólo un profesional ofrece servicios. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
+| 409 | `CONFLICT` | Ya ofrece ese servicio. Edite la oferta que ya tiene. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Ese servicio está inactivo en el catálogo. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
+| 422 | `PRECONDITION_FAILED` | Indique de qué profesional es la oferta. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/service-offerings"
+}
+```
+
+---
+
+## 48. PATCH /scheduling/service-offerings/{id}
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling`
+- **Nombre:** Editar o apagar la oferta de un servicio
+- **Operation ID:** `SchedulingServiceOfferingsController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingServiceOfferingsController.update](../../src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts)
+
+### Descripción de negocio
+
+Editar o apagar la oferta de un servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /scheduling/service-offerings/{id}` en `SchedulingServiceOfferingsController_update`. El controlador delega en `SchedulingServiceOfferingsService.update`. Valida el body como `UpdateServiceOfferingDto` y consume `application/json`. El tipo de retorno estático es `Promise<ServiceOfferingDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateServiceOfferingDto`; los campos opcionales se omiten.
+
+```http
+PATCH /scheduling/service-offerings/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`, `SCHEDULING_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `minDurationMinutes` | No | `number` | mínimo 1; máximo 720 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `maxDurationMinutes` | No | `number` | mínimo 1; máximo 720 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `prepMinutes` | No | `number` | mínimo 0; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `cleanupMinutes` | No | `number` | mínimo 0; máximo 240 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `isPatientBookable` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requiresApproval` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `channel` | No | `string` | valores: `PRESENCIAL`, `TELECONSULTA`, `DOMICILIO` | Sin descripción específica en el contrato OpenAPI. | `PRESENCIAL` |
+| `isActive` | No | `boolean` | Sin restricción adicional declarada | Falso para dejar de ofrecerlo sin borrarlo | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /scheduling/service-offerings/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "minDurationMinutes": 1,
+  "maxDurationMinutes": 1,
+  "prepMinutes": 1,
+  "cleanupMinutes": 1,
+  "isPatientBookable": true,
+  "requiresApproval": true,
+  "channel": "PRESENCIAL",
+  "isActive": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ServiceOfferingDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceOfferingDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceCode": "CODIGO_EJEMPLO",
+  "serviceName": "Nombre de ejemplo",
+  "price": "valor-ejemplo",
+  "currencyConceptId": "00000000-0000-4000-8000-000000000001",
+  "minDurationMinutes": 1,
+  "maxDurationMinutes": 1,
+  "prepMinutes": 1,
+  "cleanupMinutes": 1,
+  "isPatientBookable": true,
+  "requiresApproval": true,
+  "channel": "PRESENCIAL",
+  "isActive": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceCode` | Sí | `string` | Sin restricción adicional declarada | Código del servicio en el catálogo | `CODIGO_EJEMPLO` |
+| `serviceName` | Sí | `string` | Sin restricción adicional declarada | Nombre del servicio en el catálogo | `Nombre de ejemplo` |
+| `price` | Sí | `string` | Sin restricción adicional declarada | Precio de catálogo, con dos decimales | `valor-ejemplo` |
+| `currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `minDurationMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `maxDurationMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `prepMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `cleanupMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `isPatientBookable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `requiresApproval` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `channel` | No | `string` | valores: `PRESENCIAL`, `TELECONSULTA`, `DOMICILIO` | Sin descripción específica en el contrato OpenAPI. | `PRESENCIAL` |
+| `isActive` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Oferta no encontrada | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-offerings.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/service-offerings/{id}"
+}
+```
+
+---
+
+## 49. POST /scheduling/service-offerings/{id}/holds
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling`
+- **Nombre:** Retener el turno de un servicio
+- **Operation ID:** `SchedulingServiceOfferingsController_placeHold`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingServiceOfferingsController.placeHold](../../src/modules/scheduling/presentation/controllers/scheduling-service-offerings.controller.ts)
+
+### Descripción de negocio
+
+Crea el cupo del turno con la duración máxima de la oferta y lo retiene bajo el candado del profesional. Se confirma con POST /scheduling/holds/{token}/confirm o /request.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /scheduling/service-offerings/{id}/holds` en `SchedulingServiceOfferingsController_placeHold`. El controlador delega en `SchedulingServiceBookingService.placeHold`. Valida el body como `CreateServiceHoldDto` y consume `application/json`. El tipo de retorno estático es `Promise<ServiceHoldResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateServiceHoldDto`; los campos opcionales se omiten.
+
+```http
+POST /scheduling/service-offerings/00000000-0000-4000-8000-000000000001/holds HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "resourceId": "00000000-0000-4000-8000-000000000001",
+  "startAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `resourceId` | Sí | `string` | formato `uuid` | Sede donde se atiende | `00000000-0000-4000-8000-000000000001` |
+| `startAt` | Sí | `string` | formato `date-time` | Cuándo empieza la atención | `2026-07-31T12:00:00.000Z` |
+| `patientProfileId` | No | `string` | formato `uuid` | Paciente para el que se reserva | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /scheduling/service-offerings/00000000-0000-4000-8000-000000000001/holds HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "resourceId": "00000000-0000-4000-8000-000000000001",
+  "startAt": "2026-07-31T12:00:00.000Z",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ServiceHoldResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceHoldResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "holdToken": "valor-ejemplo",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "bookableSlotId": "00000000-0000-4000-8000-000000000001",
+  "startAt": "2026-07-31T12:00:00.000Z",
+  "endAt": "2026-07-31T12:00:00.000Z",
+  "retractedSlots": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `holdToken` | Sí | `string` | Sin restricción adicional declarada | Token con el que se confirma o solicita la reserva. Se entrega una sola vez. | `valor-ejemplo` |
+| `expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `bookableSlotId` | Sí | `string` | formato `uuid` | El cupo que nació para este turno | `00000000-0000-4000-8000-000000000001` |
+| `startAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `endAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `retractedSlots` | Sí | `number` | Sin restricción adicional declarada | Cupos de consulta que este turno retiró de la agenda del profesional | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 404 | `NOT_FOUND` | Agenda no encontrada | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 409 | `CONFLICT` | Ese horario ya no está disponible para este servicio. Elija otro. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Ese horario ya pasó. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | verdict === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de aprobación.'         : 'Su vínculo con esta organización ya no está vigente.' | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa cita empieza demasiado pronto: hay que pedirla con al menos ${group.minNoticeMinutes} minutos de anticipación. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo se puede pedir con hasta ${group.maxAdvanceDays} días de anticipación. | Excepción explícita en src/modules/scheduling/application/service-offerings/scheduling-service-booking.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/service-offerings/{id}/holds"
+}
+```
+
+---
+
+## 50. GET /scheduling/slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-agenda`
@@ -6305,7 +7093,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. POST /scheduling/slots/{id}/holds
+## 51. POST /scheduling/slots/{id}/holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6419,6 +7207,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El paciente alcanzó el máximo de citas activas | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El slot está bloqueado | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Ese horario ya no está disponible. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | timing === 'ALREADY_PASSED'             ? 'Ese horario ya pasó.'             : `Esa cita empieza demasiado pronto: hay que pedirla con al menos ${noticeMinutes} minutos de anticipación.` | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/place-hold.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6437,7 +7226,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. DELETE /scheduling/templates/{id}
+## 52. DELETE /scheduling/templates/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6563,7 +7352,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. PATCH /scheduling/templates/{id}
+## 53. PATCH /scheduling/templates/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6613,13 +7402,14 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `name` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
-| `rules` | No | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla. Si viene, reemplaza TODAS las existentes. | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1}]` |
+| `rules` | No | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla. Si viene, reemplaza TODAS las existentes. | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS"}]` |
 | `rules[].dayOfWeek` | No | `number` | mínimo 0; máximo 6 | 0 = domingo … 6 = sábado | `1` |
 | `rules[].startTime` | No | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de inicio HH:MM:SS | `08:00:00` |
 | `rules[].endTime` | No | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de fin HH:MM:SS | `12:00:00` |
 | `rules[].slotMinutes` | No | `number` | mínimo 5 | Duración del slot en minutos | `5` |
 | `rules[].capacityPerSlot` | No | `number` | mínimo 1 | Cupos por slot | `1` |
 | `rules[].gapMinutes` | No | `number` | mínimo 0 | Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0 | `1` |
+| `rules[].bookingMode` | No | `string` | valores: `CONSULTATIONS`, `SERVICES`, `MIXED` | Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS | `CONSULTATIONS` |
 | `slotMinutes` | No | `number` | Sin restricción adicional declarada | Duración por defecto del slot, en minutos | `1` |
 | `bookingPolicyId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
@@ -6644,7 +7434,8 @@ Content-Type: application/json
       "endTime": "12:00:00",
       "slotMinutes": 5,
       "capacityPerSlot": 1,
-      "gapMinutes": 1
+      "gapMinutes": 1,
+      "bookingMode": "CONSULTATIONS"
     }
   ],
   "slotMinutes": 1,
@@ -6720,7 +7511,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. POST /scheduling/templates/{id}/generate-slots
+## 54. POST /scheduling/templates/{id}/generate-slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6855,7 +7646,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. POST /scheduling/templates/{id}/reactivate
+## 55. POST /scheduling/templates/{id}/reactivate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6971,7 +7762,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. GET /scheduling/waitlist
+## 56. GET /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7102,7 +7893,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. POST /scheduling/waitlist
+## 57. POST /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7237,7 +8028,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. GET /tenants/{tenantId}/agenda
+## 58. GET /tenants/{tenantId}/agenda
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-tenant-agenda`

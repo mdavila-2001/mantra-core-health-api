@@ -20,7 +20,6 @@ import {
   slotHoldRefusal,
   slotTimingRefusal,
 } from '../../../domain/booking/hold-admission';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /**
  * UC-41-05: reserva temporalmente un cupo del slot (hold anti-double-booking).
@@ -65,30 +64,26 @@ export class PlaceHoldUseCase {
     return this.em.transactional(async (tx) => {
       const slot = await this.bookingsRepo.findSlotForUpdate(tx, slotId);
       if (!slot) {
-        throw new ResourceNotFoundException(
-          'Slot no encontrado',
-          { slotId },
-          SchedulingErrorReason.SLOT_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Slot no encontrado', { slotId });
       }
+      // Un cupo retraído lo pisa un servicio que el profesional ya comprometió: se
+      // dejó de ofrecer, pero un id leído hace rato todavía puede llegar acá.
       const refusal = slotHoldRefusal(slot);
       if (refusal === 'BLOCKED') {
+        throw new PreconditionFailedException('El slot está bloqueado', {
+          slotId,
+        });
+      }
+      if (refusal === 'RETRACTED') {
         throw new PreconditionFailedException(
-          'El slot está bloqueado',
-          {
-            slotId,
-          },
-          SchedulingErrorReason.SLOT_BLOCKED,
+          'Ese horario ya no está disponible.',
+          { slotId },
         );
       }
       if (refusal === 'NO_CAPACITY') {
-        throw new ConflictException(
-          'El slot no tiene cupos disponibles',
-          {
-            slotId,
-          },
-          SchedulingErrorReason.SLOT_NO_CAPACITY,
-        );
+        throw new ConflictException('El slot no tiene cupos disponibles', {
+          slotId,
+        });
       }
 
       const policy = slot.scheduleTemplateId
@@ -116,9 +111,6 @@ export class PlaceHoldUseCase {
             startAt: slot.startAt.toISOString(),
             minutosDeAviso: noticeMinutes,
           },
-          timing === 'ALREADY_PASSED'
-            ? SchedulingErrorReason.APPOINTMENT_SLOT_PAST
-            : SchedulingErrorReason.APPOINTMENT_MIN_NOTICE_NOT_MET,
         );
       }
 
@@ -135,7 +127,6 @@ export class PlaceHoldUseCase {
               patientProfileId: dto.patientProfileId,
               maxActivePerPatient: policy.maxActivePerPatient,
             },
-            SchedulingErrorReason.PATIENT_MAX_ACTIVE_BOOKINGS,
           );
         }
       }

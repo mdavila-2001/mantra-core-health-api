@@ -13,6 +13,7 @@ import {
   type BookingChannel,
 } from '../../../domain/booking/booking-channels';
 import { BookingResponseDto } from '../../../presentation/dto';
+import { CLIN } from '../../../../clinical/clinical.concepts';
 import type { CancellationPolicySnapshot } from '../../../entities';
 import { ClinicalAppointmentSync } from './clinical-appointment-sync';
 import { DEFAULT_CANCELLATION_WINDOW_MINUTES } from '../../../domain/booking/booking-defaults';
@@ -24,8 +25,12 @@ import {
   SchedulingCatalogRepository,
 } from '../../../infrastructure/repositories';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
+import { SchedulingServiceAgendaService } from '../../service-offerings/scheduling-service-agenda.service';
 import { SlotPolicyResolver } from './slot-policy-resolver';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
+import {
+  freezeService,
+  planForService,
+} from '../../../domain/booking/service-booking-plan';
 
 /**
  * Convierte una retención viva en reserva. Es el cuerpo común de confirmar y de
@@ -40,6 +45,7 @@ export class BookingMaterializer {
     private readonly bookingsRepo: SchedulingBookingsRepository,
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly professionalTime: SchedulingProfessionalTimeService,
+    private readonly serviceAgenda: SchedulingServiceAgendaService,
     private readonly access: BookingAccess,
     private readonly clinicalSync: ClinicalAppointmentSync,
     private readonly slotPolicy: SlotPolicyResolver,
@@ -90,7 +96,6 @@ export class BookingMaterializer {
         throw new ResourceNotFoundException(
           'Reserva temporal no encontrada',
           {},
-          SchedulingErrorReason.HOLD_NOT_FOUND,
         );
       }
       if (hold.statusConceptId !== CONCEPTS.HOLD_ACTIVE) {
@@ -99,17 +104,12 @@ export class BookingMaterializer {
           {
             holdId: hold.id,
           },
-          SchedulingErrorReason.HOLD_ALREADY_CONSUMED,
         );
       }
       if (hold.expiresAt.getTime() <= Date.now()) {
-        throw new ConflictException(
-          'La reserva temporal expiró',
-          {
-            holdId: hold.id,
-          },
-          SchedulingErrorReason.HOLD_EXPIRED,
-        );
+        throw new ConflictException('La reserva temporal expiró', {
+          holdId: hold.id,
+        });
       }
 
       const slot = await this.bookingsRepo.findSlotForUpdate(
@@ -117,27 +117,19 @@ export class BookingMaterializer {
         hold.bookableSlotId,
       );
       if (!slot) {
-        throw new ResourceNotFoundException(
-          'Slot no encontrado',
-          {
-            slotId: hold.bookableSlotId,
-          },
-          SchedulingErrorReason.SLOT_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Slot no encontrado', {
+          slotId: hold.bookableSlotId,
+        });
       }
       // Segundo cinturón de A-02: el hold ya no se puede tomar sobre un turno
       // vencido, pero uno tomado hace rato puede llegar acá con el horario
       // recién pasado. Cubre a la vez confirmar y solicitar, que es por lo que
       // vive acá y no en cada una.
       if (slot.startAt.getTime() <= Date.now()) {
-        throw new PreconditionFailedException(
-          'Ese horario ya pasó.',
-          {
-            slotId: slot.id,
-            startAt: slot.startAt.toISOString(),
-          },
-          SchedulingErrorReason.APPOINTMENT_SLOT_PAST,
-        );
+        throw new PreconditionFailedException('Ese horario ya pasó.', {
+          slotId: slot.id,
+          startAt: slot.startAt.toISOString(),
+        });
       }
 
       // REGLA 1: no se puede pedir un turno encima de uno YA ACEPTADO.
@@ -165,7 +157,6 @@ export class BookingMaterializer {
             bookingId: clash.id,
             startAt: clash.startAt,
           },
-          SchedulingErrorReason.PATIENT_ALREADY_BOOKED_OVERLAPPING,
         );
       }
 
@@ -199,6 +190,19 @@ export class BookingMaterializer {
         );
       }
 
+      // v4.2.40 — si el cupo es de un servicio, la oferta manda: de ella salen la
+      // modalidad, lo que el paciente aceptó y si la reserva espera aprobación. Se
+      // lee del CUPO y no del pedido del cliente: el navegador no decide el precio.
+      const ofService = slot.practitionerServiceOfferingId
+        ? await this.serviceAgenda.offeringOfSlot(
+            tx,
+            slot.practitionerServiceOfferingId,
+          )
+        : null;
+      const effective = ofService
+        ? planForService(plan, ofService.offering.requiresApproval)
+        : plan;
+
       const cancellationPolicySnapshot: CancellationPolicySnapshot = {
         policyId: policy?.id,
         policyRowVersion: policy?.rowVersion,
@@ -222,7 +226,15 @@ export class BookingMaterializer {
         startAt: slot.startAt,
         endAt: slot.endAt,
         reasonText: plan.reasonText,
-        statusConceptId: plan.appointmentStatusConceptId,
+        statusConceptId: effective.appointmentStatusConceptId,
+        ...(ofService
+          ? {
+              typeConceptId: CLIN.ACTIVITY_PROCEDURE,
+              ...(ofService.offering.channelConceptId === undefined
+                ? {}
+                : { channelConceptId: ofService.offering.channelConceptId }),
+            }
+          : {}),
         actorUserId: actor.id,
       });
       // **Persistir la cita antes de crear la reserva.** `appointment_id` es una
@@ -241,10 +253,16 @@ export class BookingMaterializer {
         serviceConceptId: slot.serviceConceptId,
         bookingChannelConceptId: CHANNEL_CONCEPT[plan.channel],
         bookedByUserId: actor.id,
-        statusConceptId: plan.statusConceptId,
-        confirmedAt: plan.confirmedAt,
+        statusConceptId: effective.statusConceptId,
+        confirmedAt: effective.confirmedAt,
         bookingPolicyId: policy?.id,
         cancellationPolicySnapshot,
+        ...(ofService
+          ? {
+              practitionerServiceOfferingId: ofService.offering.id,
+              serviceSnapshot: freezeService(ofService, slot),
+            }
+          : {}),
         reasonText: plan.reasonText,
         actorUserId: actor.id,
       });
@@ -263,7 +281,7 @@ export class BookingMaterializer {
       touch(slot, actor.id);
 
       // Los recordatorios se programan junto con la cita (UC-41-13 va incluido aquí).
-      const offsets = plan.reminderOffsetsMinutes;
+      const offsets = effective.reminderOffsetsMinutes;
       for (const offset of offsets) {
         this.bookingsRepo.createReminder(tx, {
           bookingId: booking.id,
@@ -278,7 +296,7 @@ export class BookingMaterializer {
       return {
         id: booking.id,
         bookableSlotId: hold.bookableSlotId,
-        statusConceptId: plan.statusConceptId,
+        statusConceptId: effective.statusConceptId,
         remindersScheduled: offsets.length,
       };
     });

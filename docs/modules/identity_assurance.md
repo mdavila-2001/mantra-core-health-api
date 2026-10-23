@@ -8,7 +8,7 @@
 
 # Módulo `identity_assurance`
 
-**Fuente:** [`src/modules/identity_assurance/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/identity_assurance/README.md)
+**Fuente:** [`src/modules/identity_assurance/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/identity_assurance/README.md)
 · 8 controllers · 11 services · 10 repositories · 11 entidades · 17 DTO
 
 ---
@@ -68,11 +68,11 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `identity_assertions`,
 
 ### Subcarpetas
 
-- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/identity_assurance/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
-- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/identity_assurance/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
-- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/identity_assurance/entities/README.md): Entidades y relaciones que representan el modelo persistente.
-- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/identity_assurance/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
-- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/master/src/modules/identity_assurance/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
+- [`controllers/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/identity_assurance/controllers/README.md): Adaptadores HTTP que validan solicitudes, aplican autorización y delegan la lógica en servicios.
+- [`dto/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/identity_assurance/dto/README.md): Contratos de entrada y salida, validación y documentación de la API.
+- [`entities/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/identity_assurance/entities/README.md): Entidades y relaciones que representan el modelo persistente.
+- [`repositories/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/identity_assurance/repositories/README.md): Consultas y operaciones de persistencia aisladas de la lógica de negocio.
+- [`services/`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/identity_assurance/services/README.md): Casos de uso, reglas de negocio y coordinación transaccional.
 
 ### Archivos
 
@@ -87,3 +87,9 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `identity_assertions`,
 - Documentar con TSDoc las decisiones, precondiciones, parámetros, retornos y errores relevantes.
 - Actualizar este índice cuando se agregue, elimine o cambie la responsabilidad de un componente.
 
+## Revisión backend 2026-10-05
+
+La [revisión estricta](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/revision-backend-2026-10-04/modulos/identity_assurance.md)
+identifica que los comandos administrativos de casos y evidencia no atan el UUID
+al tenant ni al sujeto autorizado. La corrida dirigida pasó 17 suites y 139 tests,
+sin cobertura de RLS, archivos o dos tenants reales.

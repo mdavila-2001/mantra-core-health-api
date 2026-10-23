@@ -11,7 +11,6 @@ import { MAX_BOOKINGS_IN_NOTICE } from '../../../domain/catalog/catalog-concepts
 import { PinoLogger } from 'nestjs-pino';
 import { RetireTemplateResponseDto } from '../../../presentation/dto';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** Retira una plantilla (retiro lógico). */
 @Injectable()
@@ -37,13 +36,9 @@ export class RetireTemplateUseCase {
     return this.em.transactional(async (tx) => {
       const template = await this.catalogRepo.findTemplateById(tx, templateId);
       if (!template) {
-        throw new ResourceNotFoundException(
-          'Plantilla no encontrada',
-          {
-            templateId,
-          },
-          SchedulingErrorReason.TEMPLATE_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Plantilla no encontrada', {
+          templateId,
+        });
       }
 
       const resource = await this.catalogRepo.findResourceById(
@@ -56,7 +51,6 @@ export class RetireTemplateUseCase {
           {
             resourceId: template.resourceId,
           },
-          SchedulingErrorReason.TEMPLATE_RESOURCE_NOT_FOUND,
         );
       }
       this.access.assertActorResource(resource, actor);

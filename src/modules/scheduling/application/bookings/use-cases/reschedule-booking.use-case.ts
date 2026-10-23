@@ -28,9 +28,9 @@ import {
   SchedulingCatalogRepository,
 } from '../../../infrastructure/repositories';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
+import { ServiceSlotLifecycle } from '../support/service-slot-lifecycle';
 import { actorKindOf } from '../../../domain/booking/agenda-actors';
 import { requireReason } from '../support/require-reason';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** UC-41-08: mueve la cita a otro slot, liberando el cupo del original. */
 @Injectable()
@@ -41,6 +41,7 @@ export class RescheduleBookingUseCase {
     private readonly catalogRepo: SchedulingCatalogRepository,
     private readonly professionalTime: SchedulingProfessionalTimeService,
     private readonly access: BookingAccess,
+    private readonly serviceSlots: ServiceSlotLifecycle,
     @Inject(BOOKING_HISTORY_PORT)
     private readonly history: BookingHistoryPort,
     private readonly notifier: BookingChangeNotifier,
@@ -79,13 +80,9 @@ export class RescheduleBookingUseCase {
         bookingId,
       );
       if (!booking) {
-        throw new ResourceNotFoundException(
-          'Cita no encontrada',
-          {
-            bookingId,
-          },
-          SchedulingErrorReason.BOOKING_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Cita no encontrada', {
+          bookingId,
+        });
       }
 
       // H3.S1.M2 (BOLA/IDOR de escritura): mismo hueco que `cancelAndNotify` —
@@ -102,18 +99,17 @@ export class RescheduleBookingUseCase {
           {
             bookingId,
           },
-          SchedulingErrorReason.BOOKING_NOT_ACTIVE_FOR_RESCHEDULE,
         );
       }
 
       const fromSlotId = booking.bookableSlotId;
+      await this.serviceSlots.assertNotAService(tx, fromSlotId, 'reprogramar');
       if (fromSlotId === dto.toSlotId) {
         throw new PreconditionFailedException(
           'El slot destino es el mismo que el actual',
           {
             bookingId,
           },
-          SchedulingErrorReason.RESCHEDULE_SAME_SLOT,
         );
       }
 
@@ -122,22 +118,14 @@ export class RescheduleBookingUseCase {
         dto.toSlotId,
       );
       if (!target) {
-        throw new ResourceNotFoundException(
-          'Slot destino no encontrado',
-          {
-            slotId: dto.toSlotId,
-          },
-          SchedulingErrorReason.TARGET_SLOT_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Slot destino no encontrado', {
+          slotId: dto.toSlotId,
+        });
       }
       if (target.remainingCapacity <= 0) {
-        throw new ConflictException(
-          'El slot destino no tiene cupos',
-          {
-            slotId: dto.toSlotId,
-          },
-          SchedulingErrorReason.TARGET_SLOT_NO_CAPACITY,
-        );
+        throw new ConflictException('El slot destino no tiene cupos', {
+          slotId: dto.toSlotId,
+        });
       }
 
       // M4 · H1.S1: reprogramar es ocupar un rango nuevo, y era el único

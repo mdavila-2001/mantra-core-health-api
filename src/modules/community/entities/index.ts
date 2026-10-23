@@ -20,6 +20,7 @@ export * from './moderation_appeals.entity';
 export * from './moderation_decisions.entity';
 export * from './moderation_queue.entity';
 export * from './moderation_strikes.entity';
+export * from './party_ratings.entity';
 export * from './poll_options.entity';
 export * from './poll_votes.entity';
 export * from './polls.entity';

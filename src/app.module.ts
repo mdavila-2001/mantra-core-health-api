@@ -14,6 +14,7 @@ import {
   TraceResponseInterceptor,
   telemetryEnvSchema,
 } from './observability';
+import { HttpSliModule } from './observability/http-sli/http-sli.module';
 import {
   AllExceptionsFilter,
   AuthModule,
@@ -53,6 +54,7 @@ import { CrossStoreConsistencyModule } from './modules/cross_store_consistency/c
 import { DelegatedAccessModule } from './modules/delegated_access/delegated_access.module';
 import { DiagnosticUnitsModule } from './modules/diagnostic_units/diagnostic_units.module';
 import { DiagnosticsModule } from './modules/diagnostics/diagnostics.module';
+import { DataCatalogModule } from './modules/data_catalog/data_catalog.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
 import { EducationModule } from './modules/education/education.module';
 import { ErpModule } from './modules/erp/erp.module';
@@ -88,7 +90,6 @@ import { ReportingModule } from './modules/reporting/reporting.module';
 import { SchedulingModule } from './modules/scheduling/scheduling.module';
 import { SystemContextModule } from './modules/system_context/system_context.module';
 import { SystemOpsModule } from './modules/system_ops/system_ops.module';
-import { DataCatalogModule } from './modules/data_catalog/data_catalog.module';
 import { QaExecutionModule } from './modules/qa_execution/qa_execution.module';
 import { OpsConsoleModule } from './modules/ops_console/ops_console.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
@@ -154,6 +155,10 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     // `TracingService` sin reimportar nada. No arranca el SDK -eso ocurre en la
     // primera línea de `main.ts`-, solo expone la API que lo consume.
     ObservabilityModule,
+    // Medición de peticiones HTTP (portal de superadministración): vuelca cada
+    // minuto lo que el middleware de `main.ts` agregó. Apagado por defecto
+    // (`OBSERVABILITY_HTTP_SLI_ENABLED`).
+    HttpSliModule,
     // Autenticación/autorización transversal: estrategia JWT, guards globales y
     // emisión de tokens. Global, se aplica a todos los dominios.
     AuthModule,
@@ -234,9 +239,9 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     ReportingModule,
     SchedulingModule,
     SurveysModule,
+    DataCatalogModule,
     SystemContextModule,
     SystemOpsModule,
-    DataCatalogModule,
     QaExecutionModule,
     OpsConsoleModule,
     TelemetryModule,

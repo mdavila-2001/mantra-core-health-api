@@ -13,7 +13,6 @@ import {
   EXCEPTION_TYPE_CONCEPT,
   EXCEPTION_TYPE_LABEL,
 } from '../../../domain/catalog/catalog-concepts';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** Lista las excepciones de un recurso. */
 @Injectable()
@@ -49,20 +48,15 @@ export class ListExceptionsUseCase {
       throw new PreconditionFailedException(
         'La ventana debe empezar antes de terminar',
         { from: from.toISOString(), to: to.toISOString() },
-        SchedulingErrorReason.AGENDA_WINDOW_INVERTED,
       );
     }
 
     const em = this.em.fork();
     const resource = await this.catalogRepo.findResourceById(em, resourceId);
     if (!resource) {
-      throw new ResourceNotFoundException(
-        'Recurso no encontrado',
-        {
-          resourceId,
-        },
-        SchedulingErrorReason.RESOURCE_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Recurso no encontrado', {
+        resourceId,
+      });
     }
     // Quién puede leer, y CUÁNTO ve, son dos preguntas distintas.
     //

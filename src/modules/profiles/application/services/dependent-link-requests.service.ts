@@ -20,6 +20,7 @@ import {
   type DependentLinkNotificationsPort,
 } from '../ports/dependent-link-notifications.port';
 import type {
+  AcceptDependentLinkRequestDto,
   DependentCandidateDto,
   DependentLinkRequestDecisionDto,
   DependentLinkRequestSentDto,
@@ -285,6 +286,7 @@ export class DependentLinkRequestsService {
    */
   async accept(
     requestId: string,
+    dto: AcceptDependentLinkRequestDto,
     actor: AuthenticatedUser,
   ): Promise<DependentLinkRequestDecisionDto> {
     const { solicitante: requester, yo } = await this.em.transactional(
@@ -324,7 +326,8 @@ export class DependentLinkRequestsService {
         const kinship = this.relatedPersonsRepo.create(tx, {
           patientProfileId: yo.patientProfileId,
           personId: link.personId,
-          relationshipConceptId: PROF.RELATIONSHIP_OTHER,
+          relationshipConceptId:
+            dto.relationshipConceptId ?? PROF.RELATIONSHIP_OTHER,
           isEmergencyContact: false,
           isLegalGuardian: false,
           statusConceptId: PROF.RELATED_ACTIVE,

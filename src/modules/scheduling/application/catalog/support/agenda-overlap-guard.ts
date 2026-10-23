@@ -12,7 +12,6 @@ import {
   overlap,
   referenceWeek,
 } from '../../../domain/catalog/week-bands';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** Un profesional no puede publicar franjas que se pisen con las de sus otras sedes. */
 @Injectable()
@@ -103,7 +102,6 @@ export class AgendaOverlapGuard {
           throw new PreconditionFailedException(
             'Dos franjas de esta agenda se solapan entre sí',
             { nueva: newOnes[i].label, existente: newOnes[j].label },
-            SchedulingErrorReason.TEMPLATE_RULE_OVERLAP_SELF,
           );
         }
       }
@@ -151,7 +149,6 @@ export class AgendaOverlapGuard {
             existente: existing.label,
             agenda: other.resourceName,
           },
-          SchedulingErrorReason.TEMPLATE_RULE_OVERLAP_OTHER_AGENDA,
         );
       }
     }

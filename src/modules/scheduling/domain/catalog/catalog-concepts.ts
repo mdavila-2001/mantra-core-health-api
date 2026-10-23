@@ -2,9 +2,11 @@ import type {
   ActivityType,
   ExceptionType,
   ResourceType,
+  RuleBookingMode,
 } from './catalog-types';
 import { CLIN } from '../../../clinical/clinical.concepts';
 import { CONCEPTS } from '../../../../common/constants/concepts';
+import { SCHED } from '../scheduling.concepts';
 
 /** Constantes y mapas de terminología del catálogo de agenda. */
 /**
@@ -29,6 +31,28 @@ export const CATALOG_ADMIN_ROLES: readonly string[] = [
   'SCHEDULING_ADMIN',
   'SUPERADMIN',
 ];
+
+/** El modo de una franja a su concepto. Ausente ≡ sin concepto (sólo consultas). */
+export function bandMode(
+  mode: RuleBookingMode | undefined,
+): string | undefined {
+  if (mode === undefined) return undefined;
+  return {
+    CONSULTATIONS: SCHED.RULE_MODE_CONSULTATIONS,
+    SERVICES: SCHED.RULE_MODE_SERVICES,
+    MIXED: SCHED.RULE_MODE_MIXED,
+  }[mode];
+}
+
+/** Y de vuelta: el concepto guardado, a lo que entiende el cliente. */
+export function modeOfConcept(conceptId: string): RuleBookingMode | undefined {
+  const byConcept: Record<string, RuleBookingMode> = {
+    [SCHED.RULE_MODE_CONSULTATIONS]: 'CONSULTATIONS',
+    [SCHED.RULE_MODE_SERVICES]: 'SERVICES',
+    [SCHED.RULE_MODE_MIXED]: 'MIXED',
+  };
+  return byConcept[conceptId];
+}
 
 export const RESOURCE_TYPE_CONCEPT: Readonly<Record<ResourceType, string>> = {
   PRACTITIONER: CONCEPTS.RESOURCE_PRACTITIONER,

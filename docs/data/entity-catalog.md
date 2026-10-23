@@ -1,18 +1,18 @@
 # Catálogo de entidades
 
 > Generado por `yarn docs:data:sync` (`tools/docs/generate-data-catalog.mjs`) cruzando las
-> **1261 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
+> **1263 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > `../Mantra Core Health Vault/SALUD/Entidades` vía `vault.mjs`, la misma fuente que usa
 > `yarn orm:catalog`; `SALUD_VAULT` la sobreescribe) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1197/1261** entidades tienen descripción de negocio
+> repositorio. **1198/1263** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
 > Este es el catálogo de lo **implementado**. La bóveda describe 1356 entidades en total
-> — la diferencia (95) son entidades diseñadas pero no materializadas aún en
+> — la diferencia (93) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
-## Por schema (63 schemas · 1261 entidades)
+## Por schema (63 schemas · 1263 entidades)
 
 ### `accounting` (42 entidades, módulo `accounting`)
 
@@ -440,7 +440,7 @@
 | `files` | `Files` | 15 | `id` | ✅ | files es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 | `identifiers` | `Identifiers` | 19 | `id` | ✅ | identifiers es un registro central de negocio del módulo 02 · common (identificadores, contactos, direcciones y archivos compartidos), dominio Núcleo y Terminología. |
 
-### `community` (40 entidades, módulo `community`)
+### `community` (41 entidades, módulo `community`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -466,6 +466,7 @@
 | `moderation_decisions` | `ModerationDecisions` | 13 | `id` | ✅ | moderation_decisions es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `moderation_queue` | `ModerationQueue` | 16 | `id` | ✅ | moderation_queue es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `moderation_strikes` | `ModerationStrikes` | 12 | `id` | ✅ | moderation_strikes es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
+| `party_ratings` | `PartyRatings` | 17 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `poll_options` | `PollOptions` | 10 | `id` | ✅ | poll_options es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `poll_votes` | `PollVotes` | 9 | `id` | ✅ | poll_votes es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
 | `polls` | `Polls` | 12 | `id` | ✅ | polls es un registro central de negocio del módulo 19 · community (perfiles públicos, grafo social, mensajería y moderación), dominio Marketing y Crecimiento. |
@@ -648,7 +649,7 @@
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
 | `branch_memberships` | `BranchMemberships` | 10 | `id` | ✅ | branch_memberships es una tabla de asociación del módulo 04 · directory (dominio Núcleo y Terminología): conecta entidades (`tenant_memberships`, `branches`) para representar relaciones muchos-a-muchos. |
-| `branches` | `Branches` | 14 | `id` | ✅ | branches es un registro central de negocio del módulo 04 · directory (tenants, organizaciones, sedes y directorio), dominio Núcleo y Terminología. |
+| `branches` | `Branches` | 16 | `id` | ✅ | branches es un registro central de negocio del módulo 04 · directory (tenants, organizaciones, sedes y directorio), dominio Núcleo y Terminología. |
 | `tenant_affiliation_documents` | `TenantAffiliationDocuments` | 23 | `id` | ✅ | tenant_affiliation_documents es un wrap gobernado sobre el archivo (`common.files`) del módulo 04 · directory (dominio Núcleo y Terminología): envuelve cada documento legal de afiliación de la empresa y le agrega tipo de… |
 | `tenant_legal_representatives` | `TenantLegalRepresentatives` | 16 | `id` | ✅ | tenant_legal_representatives es un registro central de negocio del módulo 04 · directory (tenants, organizaciones, sedes y directorio), dominio Núcleo y Terminología. |
 | `tenant_memberships` | `TenantMemberships` | 15 | `id` | ✅ | tenant_memberships es una tabla de asociación del módulo 04 · directory (dominio Núcleo y Terminología): conecta entidades (`branch_memberships`, `tenants`) para representar relaciones muchos-a-muchos. |
@@ -1259,7 +1260,7 @@
 | `practice_settings` | `PracticeSettings` | 10 | `id` | ✅ | practice_settings guarda reglas y configuración de gobierno del módulo 14 · practice (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `practice_sites` | `PracticeSites` | 18 | `id` | ✅ | practice_sites es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
 | `practices` | `Practices` | 15 | `id` | ✅ | practices es un registro central de negocio del módulo 14 · practice (organizaciones de cuidado, sedes, unidades, espacios y fuerza laboral), dominio Práctica y Agenda. |
-| `practitioner_role_assignments` | `PractitionerRoleAssignments` | 19 | `id` | ✅ | practitioner_role_assignments es una tabla de asociación del módulo 14 · practice (dominio Práctica y Agenda): conecta entidades (`practitioner_support_assignments`, `practices`, `healthcare_services`) para representar r… |
+| `practitioner_role_assignments` | `PractitionerRoleAssignments` | 20 | `id` | ✅ | practitioner_role_assignments es una tabla de asociación del módulo 14 · practice (dominio Práctica y Agenda): conecta entidades (`practitioner_support_assignments`, `practices`, `healthcare_services`) para representar r… |
 | `practitioner_support_assignments` | `PractitionerSupportAssignments` | 13 | `id` | ✅ | practitioner_support_assignments es una tabla de asociación del módulo 14 · practice (dominio Práctica y Agenda): conecta entidades (`practitioner_role_assignments`) para representar relaciones muchos-a-muchos. |
 
 ### `procedures_perioperative` (37 entidades, módulo `procedures_perioperative`)
@@ -1310,7 +1311,7 @@
 |---|---|---:|---|:---:|---|
 | `administrator_profiles` | `AdministratorProfiles` | 8 | `profile_id` | ✅ | administrator_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `emergency_staff_profiles` | `EmergencyStaffProfiles` | 8 | `profile_id` | ✅ | emergency_staff_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
-| `health_practitioner_profiles` | `HealthPractitionerProfiles` | 15 | `profile_id` | ✅ | health_practitioner_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
+| `health_practitioner_profiles` | `HealthPractitionerProfiles` | 17 | `profile_id` | ✅ | health_practitioner_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `insurance_representative_profiles` | `InsuranceRepresentativeProfiles` | 8 | `profile_id` | ✅ | insurance_representative_profiles es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `jurisdiction_authorizations` | `JurisdictionAuthorizations` | 15 | `id` | ✅ | jurisdiction_authorizations es un registro central de negocio del módulo 05 · profiles (personas, pacientes y fuerza laboral de salud), dominio Núcleo y Terminología. |
 | `patient_identity_links` | `PatientIdentityLinks` | 15 | `id` | ✅ | patient_identity_links es una tabla de asociación del módulo 05 · profiles (dominio Núcleo y Terminología): conecta entidades (`patient_profiles`) para representar relaciones muchos-a-muchos. |
@@ -1406,24 +1407,25 @@
 | `report_subscriptions` | `ReportSubscriptions` | 10 | `id` | ✅ | report_subscriptions es un registro central de negocio del módulo 39 · reporting (reporting, dashboards y distribución programada), dominio Auditoría y Reporting. |
 | `report_versions` | `ReportVersions` | 12 | `id` | ✅ | report_versions es un registro central de negocio del módulo 39 · reporting (reporting, dashboards y distribución programada), dominio Auditoría y Reporting. |
 
-### `scheduling` (17 entidades, módulo `scheduling`)
+### `scheduling` (18 entidades, módulo `scheduling`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
-| `appointment_bookings` | `AppointmentBookings` | 22 | `id` | ✅ | appointment_bookings registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 41 · scheduling (dominio Práctica y Agenda): responde a '¿qué está pasando ahora mismo?'. |
+| `appointment_bookings` | `AppointmentBookings` | 24 | `id` | ✅ | appointment_bookings registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 41 · scheduling (dominio Práctica y Agenda): responde a '¿qué está pasando ahora mismo?'. |
 | `appointment_payment_states` | `AppointmentPaymentStates` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `appointment_reminders` | `AppointmentReminders` | 13 | `id` | ✅ | appointment_reminders es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `availability_exceptions` | `AvailabilityExceptions` | 12 | `id` | ✅ | availability_exceptions es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `availability_slots` | `AvailabilitySlots` | 13 | `id` | ✅ | availability_slots es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
-| `bookable_slots` | `BookableSlots` | 14 | `id` | ✅ | bookable_slots es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
+| `bookable_slots` | `BookableSlots` | 15 | `id` | ✅ | bookable_slots es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `booking_cancellations` | `BookingCancellations` | 15 | `id` | ✅ | booking_cancellations es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `booking_confirmation_rules` | `BookingConfirmationRules` | 16 | `id` | ✅ | booking_confirmation_rules registra las reglas que deciden si una reserva se confirma sola. |
 | `booking_policies` | `BookingPolicies` | 19 | `id` | ✅ | booking_policies guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `booking_reschedules` | `BookingReschedules` | 9 | `id` | — | booking_reschedules es un ledger inmutable (append-only) del módulo 41 · scheduling (dominio Práctica y Agenda): anexa eventos en orden cronológico sin sobrescribir nunca lo anterior. |
 | `calendar_absences` | `CalendarAbsences` | 24 | `id` | ✅ | calendar_absences es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
 | `practitioner_schedules` | `PractitionerSchedules` | 16 | `id` | ✅ | practitioner_schedules es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
+| `practitioner_service_offerings` | `PractitionerServiceOfferings` | 16 | `id` | ✅ | declara cómo ofrece un profesional un servicio del catálogo de su práctica: cuánto tarda como mínimo y como máximo, cuánto necesita antes y después, si el paciente puede reservarlo por su cuenta y si cada reserva requier… |
 | `schedulable_resources` | `SchedulableResources` | 15 | `id` | ✅ | schedulable_resources es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
-| `schedule_rules` | `ScheduleRules` | 15 | `id` | ✅ | schedule_rules guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
+| `schedule_rules` | `ScheduleRules` | 16 | `id` | ✅ | schedule_rules guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `schedule_templates` | `ScheduleTemplates` | 15 | `id` | ✅ | schedule_templates guarda reglas y configuración de gobierno del módulo 41 · scheduling (dominio Práctica y Agenda): parametriza el comportamiento del negocio sin tocar código. |
 | `slot_holds` | `SlotHolds` | 13 | `id` | ✅ | slot_holds registra un proceso operativo en curso (una solicitud, intento, evento o entrega) del módulo 41 · scheduling (dominio Práctica y Agenda): responde a '¿qué está pasando ahora mismo?'. |
 | `waitlist_entries` | `WaitlistEntries` | 15 | `id` | ✅ | waitlist_entries es un registro central de negocio del módulo 41 · scheduling (citas, disponibilidad, holds y listas de espera), dominio Práctica y Agenda. |
@@ -1592,7 +1594,7 @@
 
 ## Entidades diseñadas, no implementadas
 
-149 entidades existen en la bóveda de diseño pero no tienen entidad MikroORM real en `src/modules/**/entities` al momento de esta generación. No se documentan como catálogo activo — es trabajo de modelo pendiente de materializar, no una entidad utilizable hoy.
+148 entidades existen en la bóveda de diseño pero no tienen entidad MikroORM real en `src/modules/**/entities` al momento de esta generación. No se documentan como catálogo activo — es trabajo de modelo pendiente de materializar, no una entidad utilizable hoy.
 
 <details><summary>Ver lista completa</summary>
 
@@ -1722,7 +1724,6 @@
 - `redis_runtime.refresh_family_cache_entries`
 - `redis_runtime.session_cache_entries`
 - `scheduling.appointments`
-- `scheduling.practitioner_service_offerings`
 - `search_platform.ads_insight_search_docs`
 - `search_platform.audit_event_search_docs`
 - `search_platform.authorized_patient_record_search_docs`

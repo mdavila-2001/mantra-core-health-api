@@ -120,4 +120,16 @@ export class IdentityEvidenceRecordsRepository {
       { orderBy: { createdAt: 'DESC' } },
     );
   }
+
+  /** Todas las evidencias de un caso, en el orden en que se recibieron. */
+  findByCase(
+    em: EntityManager,
+    caseId: string,
+  ): Promise<IdentityEvidenceRecords[]> {
+    return em.find(
+      IdentityEvidenceRecords,
+      { identityVerificationCaseId: caseId },
+      { orderBy: { createdAt: 'ASC', id: 'ASC' } },
+    );
+  }
 }

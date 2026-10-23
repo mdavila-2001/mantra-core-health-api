@@ -7,7 +7,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** Quita una excepción de disponibilidad. */
 @Injectable()
@@ -28,13 +27,9 @@ export class RemoveExceptionUseCase {
         exceptionId,
       );
       if (!exception) {
-        throw new ResourceNotFoundException(
-          'Excepción no encontrada',
-          {
-            exceptionId,
-          },
-          SchedulingErrorReason.EXCEPTION_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Excepción no encontrada', {
+          exceptionId,
+        });
       }
       const resource = await this.catalogRepo.findResourceById(
         tx,

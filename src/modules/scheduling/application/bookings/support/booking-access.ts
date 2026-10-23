@@ -21,7 +21,6 @@ import {
   isPatientActor,
   operatesAnyAgenda,
 } from '../../../domain/booking/agenda-actors';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /**
  * Quién puede actuar sobre una cita, y sobre cuál.
@@ -95,11 +94,7 @@ export class BookingAccess {
       bookingId,
     );
     if (!booking) {
-      throw new ResourceNotFoundException(
-        'Cita no encontrada',
-        { bookingId },
-        SchedulingErrorReason.BOOKING_NOT_FOUND,
-      );
+      throw new ResourceNotFoundException('Cita no encontrada', { bookingId });
     }
 
     if (operatesAnyAgenda(actor)) {
@@ -170,7 +165,6 @@ export class BookingAccess {
             'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +
             'en pie: hable con la organización para reactivarlo.',
       { tenantId, vinculo: verdict },
-      SchedulingErrorReason.AFFILIATION_NOT_ACTIVE,
     );
   }
 

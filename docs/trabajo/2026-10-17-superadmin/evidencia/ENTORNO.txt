@@ -1,0 +1,1 @@
+ENTORNO: copia de trabajo sin 'xlsx' (cdn.sheetjs.com denegado por el proxy) + stub vacío en node_modules de la copia; Yarn 4.14.1 vía @yarnpkg/cli-dist; install --mode=skip-build. El repo real no se modificó (package.json/yarn.lock intactos).

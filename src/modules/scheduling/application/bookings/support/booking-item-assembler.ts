@@ -23,6 +23,7 @@ import { SchedulingBookingsRepository } from '../../../infrastructure/repositori
 import { VISIBLE_BOOKING_STATES } from '../../../domain/booking/booking-states';
 import { canSeeBookingReason } from '../../../domain/booking/booking-reason-visibility.policy';
 import {
+  projectBookedService,
   projectPaymentState,
   toDelayNotice,
   toStatusReason,
@@ -312,6 +313,17 @@ export class BookingItemAssembler {
             followUpOf: followUps.followUpOf(booking),
             followUpBookingId: followUps.followUpBookingId(booking),
           }
+        : {}),
+      // v4.2.40: el servicio que se reservó, de la copia congelada. Misma compuerta
+      // que el motivo: el nombre de un servicio puede revelar un dato de salud.
+      ...(booking.serviceSnapshot != null &&
+      canSeeBookingReason(
+        booking,
+        actor,
+        agendaPractitioner,
+        representedPatients,
+      )
+        ? { service: projectBookedService(booking.serviceSnapshot) }
         : {}),
       ...(appointmentType === undefined
         ? {}

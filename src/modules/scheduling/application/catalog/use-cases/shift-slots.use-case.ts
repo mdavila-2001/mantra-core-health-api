@@ -14,7 +14,6 @@ import {
   ShiftSlotsResponseDto,
 } from '../../../presentation/dto';
 import { SlotMoveNotifier } from '../support/slot-move-notifier';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** Corre la agenda (adelanta o atrasa sus cupos libres). */
 @Injectable()
@@ -40,14 +39,12 @@ export class ShiftSlotsUseCase {
       throw new PreconditionFailedException(
         'La ventana termina antes de empezar',
         { from: dto.from, to: dto.to },
-        SchedulingErrorReason.SHIFT_WINDOW_INVERTED,
       );
     }
     if (dto.shiftMinutes === 0) {
       throw new PreconditionFailedException(
         'Mover cero minutos no cambia nada: elija cuánto correr la agenda',
         { shiftMinutes: 0 },
-        SchedulingErrorReason.SHIFT_MINUTES_ZERO,
       );
     }
 
@@ -63,13 +60,9 @@ export class ShiftSlotsUseCase {
     const moved = await this.em.transactional(async (tx) => {
       const resource = await this.catalogRepo.findResourceById(tx, resourceId);
       if (!resource) {
-        throw new ResourceNotFoundException(
-          'Recurso no encontrado',
-          {
-            resourceId,
-          },
-          SchedulingErrorReason.RESOURCE_NOT_FOUND,
-        );
+        throw new ResourceNotFoundException('Recurso no encontrado', {
+          resourceId,
+        });
       }
       this.access.assertActorResource(resource, actor);
 

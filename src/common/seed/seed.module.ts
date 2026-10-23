@@ -52,6 +52,7 @@ import { VademecumSeedService } from './vademecum-seed.service';
 import { MessageQueues } from '../../modules/messaging/entities';
 import { AudioTemplates } from '../../modules/audio_assets/entities';
 import { BootstrapAdminSeedService } from './bootstrap-admin-seed.service';
+import { QaFlowsSeedService } from './qa-flows-seed.service';
 import { ProviderAccountsSeedService } from './provider-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
@@ -174,6 +175,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    QaFlowsSeedService,
     ProviderAccountsSeedService,
     SeedBootstrapService,
     ClinicalFormsSeedService,
@@ -205,6 +207,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     AuthzClinicalRolesSeedService,
     AuthzPlatformPermissionsSeedService,
     BootstrapAdminSeedService,
+    QaFlowsSeedService,
     ProviderAccountsSeedService,
     ClinicalFormsSeedService,
     PracticeDefaultServicesSeedService,

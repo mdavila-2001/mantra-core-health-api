@@ -4,7 +4,6 @@ import {
   nextBandStart,
   type DayBand,
 } from '../../../domain/catalog/week-bands';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /**
  * Corta si ni el primer turno de la franja puede darse (REQ-10-026).
@@ -24,7 +23,6 @@ export function assertFirstSlotFits(
     throw new PreconditionFailedException(
       `La cita de ${slotMinutes} min que empieza a las ${band.startTime} pisaría la franja de las ${next}`,
       { dayOfWeek: band.dayOfWeek, slotMinutes, siguiente: next },
-      SchedulingErrorReason.TEMPLATE_RULE_SLOT_TOO_LONG,
     );
   }
 }

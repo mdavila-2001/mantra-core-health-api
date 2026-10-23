@@ -20,7 +20,6 @@ import { STATES_WITHOUT_PAYMENT } from '../../../domain/booking/booking-states';
 import { SchedulingBookingsRepository } from '../../../infrastructure/repositories';
 import { projectPaymentState } from '../support/booking-projections';
 import { randomUUID } from 'node:crypto';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** TAREA-13 punto 5: marca el estado de pago de una cita. */
 @Injectable()
@@ -97,7 +96,6 @@ export class SetPaymentStateUseCase {
         throw new PreconditionFailedException(
           'Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar.',
           { bookingId, statusConceptId: booking.statusConceptId },
-          SchedulingErrorReason.PAYMENT_STATE_NOT_APPLICABLE,
         );
       }
 

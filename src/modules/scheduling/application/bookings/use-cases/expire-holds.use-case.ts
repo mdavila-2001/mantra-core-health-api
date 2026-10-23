@@ -4,6 +4,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingBookingsRepository } from '../../../infrastructure/repositories';
+import { ServiceSlotLifecycle } from '../support/service-slot-lifecycle';
 import { WorkerBatchResultDto } from '../../../presentation/dto';
 
 /** UC-41-07 (worker): recicla los holds vencidos y devuelve el cupo. */
@@ -12,6 +13,7 @@ export class ExpireHoldsUseCase {
   constructor(
     private readonly em: EntityManager,
     private readonly bookingsRepo: SchedulingBookingsRepository,
+    private readonly serviceSlots: ServiceSlotLifecycle,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ExpireHoldsUseCase.name);
@@ -43,6 +45,12 @@ export class ExpireHoldsUseCase {
         );
         if (!slot) continue;
         slot.remainingCapacity += 1;
+        if (slot.practitionerServiceOfferingId) {
+          // El cupo de un servicio nació para esta retención: no se reofrece, muere
+          // con ella y devuelve las consultas que había retraído.
+          await this.serviceSlots.discardOneOffSlot(tx, slot, undefined);
+          continue;
+        }
         if (slot.statusConceptId === CONCEPTS.SLOT_HELD) {
           slot.statusConceptId = CONCEPTS.SLOT_OPEN;
         }

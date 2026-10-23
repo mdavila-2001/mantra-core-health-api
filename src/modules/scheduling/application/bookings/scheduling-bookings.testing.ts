@@ -12,6 +12,7 @@ import {
   BookingTransitionRecorder,
   ClinicalAppointmentSync,
   DisplacedRequestsCanceller,
+  ServiceSlotLifecycle,
   SlotPolicyResolver,
 } from './support';
 import { AcceptBookingUseCase } from './use-cases/accept-booking.use-case';
@@ -54,6 +55,7 @@ export interface BookingsServiceDoubles {
   claimReadRepo: any;
   representation: any;
   formOrigin: any;
+  serviceAgenda: any;
 }
 
 /**
@@ -90,6 +92,10 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     { announceAcceptance: async () => false },
     d.logger,
   );
+  const serviceSlots = new ServiceSlotLifecycle(
+    d.bookingsRepo,
+    d.serviceAgenda,
+  );
   const clinicalSync = new ClinicalAppointmentSync(clinical);
   const slotPolicy = new SlotPolicyResolver(d.catalogRepo);
   const materializer = new BookingMaterializer(
@@ -97,11 +103,16 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     d.bookingsRepo,
     d.catalogRepo,
     d.professionalTime,
+    d.serviceAgenda,
     access,
     clinicalSync,
     slotPolicy,
   );
-  const displaced = new DisplacedRequestsCanceller(d.bookingsRepo, transitions);
+  const displaced = new DisplacedRequestsCanceller(
+    d.bookingsRepo,
+    transitions,
+    serviceSlots,
+  );
   const assembler = new BookingItemAssembler(
     d.bookingsRepo,
     clinical,
@@ -114,6 +125,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
     access,
     representation,
     transitions,
+    serviceSlots,
     notifier,
     d.waitlist,
     d.logger,
@@ -136,13 +148,14 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       formOrigin,
       d.logger,
     ),
-    new ExpireHoldsUseCase(d.em, d.bookingsRepo, d.logger),
+    new ExpireHoldsUseCase(d.em, d.bookingsRepo, serviceSlots, d.logger),
     new RescheduleBookingUseCase(
       d.em,
       d.bookingsRepo,
       d.catalogRepo,
       d.professionalTime,
       access,
+      serviceSlots,
       history,
       notifier,
       d.logger,
@@ -168,6 +181,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       d.em,
       d.bookingsRepo,
       access,
+      serviceSlots,
       transitions,
       d.logger,
     ),
@@ -182,6 +196,7 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       d.em,
       access,
       transitions,
+      serviceSlots,
       clinicalSync,
       d.logger,
     ),

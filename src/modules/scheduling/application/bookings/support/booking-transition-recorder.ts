@@ -13,7 +13,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PENDING_DECISION_STATES } from '../../../domain/booking/booking-states';
 import { SCHED } from '../../../domain/scheduling.concepts';
 import { isValidBookingTransition } from '../../../domain/booking/booking-state-machine';
-import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /**
  * La máquina de estados de la cita aplicada a la unidad de trabajo: valida que
@@ -42,7 +41,6 @@ export class BookingTransitionRecorder {
           fromStateConceptId: from,
           toStateConceptId: to,
         },
-        SchedulingErrorReason.INVALID_STATE_TRANSITION,
       );
     }
   }
@@ -86,7 +84,6 @@ export class BookingTransitionRecorder {
       throw new PreconditionFailedException(
         'Sólo se opera así sobre una solicitud pendiente',
         { bookingId, statusConceptId: fromState },
-        SchedulingErrorReason.BOOKING_NOT_PENDING,
       );
     }
   }

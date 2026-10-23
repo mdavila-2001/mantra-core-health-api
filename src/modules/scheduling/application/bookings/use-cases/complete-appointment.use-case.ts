@@ -8,6 +8,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SCHED } from '../../../domain/scheduling.concepts';
+import { ServiceSlotLifecycle } from '../support/service-slot-lifecycle';
 
 /** El profesional completa la atención (corrección #15). */
 @Injectable()
@@ -16,6 +17,7 @@ export class CompleteAppointmentUseCase {
     private readonly em: EntityManager,
     private readonly access: BookingAccess,
     private readonly transitions: BookingTransitionRecorder,
+    private readonly serviceSlots: ServiceSlotLifecycle,
     private readonly clinicalSync: ClinicalAppointmentSync,
     private readonly logger: PinoLogger,
   ) {
@@ -46,6 +48,7 @@ export class CompleteAppointmentUseCase {
 
       booking.statusConceptId = SCHED.BOOKING_COMPLETED;
       touch(booking, actor.id);
+      await this.serviceSlots.releaseServiceLeftover(tx, booking, actor.id);
       await this.clinicalSync.syncClinicalAppointment(
         tx,
         booking,

@@ -41,7 +41,7 @@ function build() {
   const service = new SchedulingAgendaService(
     em as any,
     agendaRepo as any,
-    new PracticeProfilesDirectoryAdapter(sitesService as any),
+    new PracticeProfilesDirectoryAdapter(sitesService as any, {} as any),
     logger as any,
   );
   return { service, em, agendaRepo, sitesService, logger };

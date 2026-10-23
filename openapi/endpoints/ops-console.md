@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `ops_console`
 
-Referencia exhaustiva de 7 operación(es) del módulo `ops_console`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 9 operación(es) del módulo `ops_console`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `ops-console`
 - **Controladores:** `OpsConsoleController`
@@ -18,6 +18,8 @@ Referencia exhaustiva de 7 operación(es) del módulo `ops_console`, derivada de
 5. [GET /admin/ops/incidents/{id}](#5-get-admin-ops-incidents-id) — Incidente con su timeline
 6. [GET /admin/ops/readiness](#6-get-admin-ops-readiness) — Preparación para producción: controles PASS/FAIL/UNKNOWN/N_A con evidencia
 7. [GET /admin/ops/slos](#7-get-admin-ops-slos) — SLO activos con su última medición (numerador y denominador)
+8. [GET /admin/ops/traffic](#8-get-admin-ops-traffic) — Tráfico HTTP de la API: solicitudes, éxito, fallos, latencia y usuarios activos
+9. [GET /admin/ops/traffic/endpoints](#9-get-admin-ops-traffic-endpoints) — Endpoints tocados en la ventana, por plantilla de ruta
 
 ---
 
@@ -56,7 +58,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...OPS_READ_ROLES`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -92,7 +94,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...OPS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -147,7 +149,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...OPS_READ_ROLES`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -184,7 +186,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...OPS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -239,7 +241,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...OPS_READ_ROLES`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -276,7 +278,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...OPS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -332,7 +334,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...OPS_READ_ROLES`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -369,7 +371,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...OPS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -424,7 +426,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...OPS_READ_ROLES`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`.
 - Deben ser UUID válidos: `id`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -463,7 +465,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...OPS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Incidente no encontrado | Excepción explícita en src/modules/ops_console/ops-console.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -517,7 +519,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...OPS_READ_ROLES`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -553,7 +555,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...OPS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -606,7 +608,7 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `...OPS_READ_ROLES`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -642,7 +644,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: ...OPS_READ_ROLES. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -655,6 +657,195 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/admin/ops/slos"
+}
+```
+
+---
+
+## 8. GET /admin/ops/traffic
+
+- **Módulo:** `ops_console`
+- **Etiqueta OpenAPI:** `ops-console`
+- **Nombre:** Tráfico HTTP de la API: solicitudes, éxito, fallos, latencia y usuarios activos
+- **Operation ID:** `OpsConsoleController_trafficOverview`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OpsConsoleController.trafficOverview](../../src/modules/ops_console/ops-console.controller.ts)
+
+### Descripción de negocio
+
+Agregado por minuto desde la medición en proceso. Sin usuarios ni direcciones reales; `notMeasured` dice lo que no se mide.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/ops/traffic` en `OpsConsoleController_trafficOverview`. El controlador delega en `OpsTrafficService.traffic`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | formato `date-time` | Por defecto: 00:00 UTC del día de `to` | `2026-07-31T12:00:00.000Z` |
+| `to` | query | No | `string` | formato `date-time` | Por defecto: ahora | `2026-07-31T12:00:00.000Z` |
+| `interval` | query | No | `string` | valores: `hour`, `day` | Sin descripción específica en OpenAPI. | `hour` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/ops/traffic HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/ops/traffic?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z&interval=hour HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/ops/traffic"
+}
+```
+
+---
+
+## 9. GET /admin/ops/traffic/endpoints
+
+- **Módulo:** `ops_console`
+- **Etiqueta OpenAPI:** `ops-console`
+- **Nombre:** Endpoints tocados en la ventana, por plantilla de ruta
+- **Operation ID:** `OpsConsoleController_trafficEndpoints`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [OpsConsoleController.trafficEndpoints](../../src/modules/ops_console/ops-console.controller.ts)
+
+### Descripción de negocio
+
+Endpoints tocados en la ventana, por plantilla de ruta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /admin/ops/traffic/endpoints` en `OpsConsoleController_trafficEndpoints`. El controlador delega en `OpsTrafficService.endpoints`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | No | `string` | formato `date-time` | Por defecto: 00:00 UTC del día de `to` | `2026-07-31T12:00:00.000Z` |
+| `to` | query | No | `string` | formato `date-time` | Por defecto: ahora | `2026-07-31T12:00:00.000Z` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `sort` | query | No | `string` | valores: `requests`, `failed`, `p95` | Sin descripción específica en OpenAPI. | `requests` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /admin/ops/traffic/endpoints HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PLATFORM_ADMIN`, `SRE`, `SECURITY_ADMIN`, `RELEASE_MANAGER`, `GOVERNANCE_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /admin/ops/traffic/endpoints?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z&limit=50&sort=requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | No |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PLATFORM_ADMIN, SRE, SECURITY_ADMIN, RELEASE_MANAGER, GOVERNANCE_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/admin/ops/traffic/endpoints"
 }
 ```
 
