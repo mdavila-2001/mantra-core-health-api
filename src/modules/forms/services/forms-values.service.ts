@@ -7,6 +7,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { choiceOptionsOf } from '../entities';
 import type { DynamicFieldDefinitions } from '../entities';
 import {
   FieldDefinitionsRepository,
@@ -67,7 +68,7 @@ export class FormsValuesService {
   ): void {
     if (field.valueSetId !== undefined) return;
 
-    const opciones = field.options ?? [];
+    const opciones = choiceOptionsOf(field.options) ?? [];
     if (opciones.length === 0) {
       throw new PreconditionFailedException(
         'El campo no tiene opciones declaradas',

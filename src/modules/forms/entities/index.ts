@@ -1,4 +1,5 @@
 export * from './dynamic_field_definitions.entity';
+export * from './dynamic_field_definitions.types';
 export * from './dynamic_field_sections.entity';
 export * from './extension_target_policies.entity';
 export * from './field_assignments.entity';

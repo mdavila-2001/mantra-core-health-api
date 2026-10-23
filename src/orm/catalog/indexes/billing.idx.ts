@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `billing`.
- * 169 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 174 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const billingIndexes: readonly IndexTuple[] = [
@@ -160,6 +160,11 @@ export const billingIndexes: readonly IndexTuple[] = [
   ['service_catalog', 'ix_service_catalog_income_account_id', ['income_account_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['service_catalog', 'ix_service_catalog_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['siat_simulated_invoices', 'ix_siat_simulated_invoices_invoice_id', ['invoice_id'], false, 'btree'],
+  ['siat_simulated_invoices', 'ix_siat_simulated_invoices_encounter_id', ['encounter_id'], false, 'btree'],
+  ['siat_simulated_invoices', 'ix_siat_simulated_invoices_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['siat_simulated_invoices', 'uk_siat_simulated_invoices_practice_number', ['practice_id', 'invoice_number'], true, 'btree', '"status" <> \'REJECTED\''],
+  ['siat_simulated_outbox', 'ix_siat_simulated_outbox_siat_invoice_id', ['siat_invoice_id'], false, 'btree'],
   ['tax_codes', 'ix_tax_codes_practice_id', ['practice_id'], false, 'btree'],
   ['tax_codes', 'ix_tax_codes_tax_type_concept_id', ['tax_type_concept_id'], false, 'btree'],
   ['tax_codes', 'ix_tax_codes_jurisdiction_concept_id', ['jurisdiction_concept_id'], false, 'btree'],
